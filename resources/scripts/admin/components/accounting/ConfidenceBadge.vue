@@ -39,7 +39,7 @@ const props = defineProps({
     type: String,
     default: null,
     validator: (value) => {
-      return value === null || ['learned', 'pattern', 'default'].includes(value)
+      return value === null || ['learned', 'pattern', 'default', 'special', 'category'].includes(value)
     },
   },
   showReason: {
@@ -121,6 +121,10 @@ const reasonText = computed(() => {
       return t('partner.accounting.learned_mapping')
     case 'pattern':
       return t('partner.accounting.pattern_match')
+    case 'special':
+      return t('partner.accounting.special_account')
+    case 'category':
+      return t('partner.accounting.category_match')
     case 'default':
       return t('partner.accounting.default_account')
     default:
@@ -136,6 +140,10 @@ const reasonTooltip = computed(() => {
       return t('partner.accounting.learned_mapping_help')
     case 'pattern':
       return t('partner.accounting.pattern_match_help')
+    case 'special':
+      return t('partner.accounting.special_account_help')
+    case 'category':
+      return t('partner.accounting.category_match_help')
     case 'default':
       return t('partner.accounting.default_account_help')
     default:

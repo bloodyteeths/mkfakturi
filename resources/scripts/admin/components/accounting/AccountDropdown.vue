@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative min-w-[220px]">
     <BaseMultiselect
       :model-value="modelValue"
       :options="groupedAccounts"
@@ -16,24 +16,15 @@
       @update:model-value="onAccountChange"
     >
       <template #singleLabel="{ value }">
-        <div class="flex items-center justify-between">
-          <span class="font-mono text-sm">
-            {{ getAccountDisplay(value.value) }}
-          </span>
-          <ConfidenceBadge
-            v-if="confidence !== null && confidence !== undefined"
-            :confidence="confidence"
-            :reason="reason"
-            class="ml-2"
-            size="sm"
-          />
-        </div>
+        <span class="font-mono text-sm truncate block" :title="getAccountDisplay(value.value)">
+          {{ getAccountDisplay(value.value) }}
+        </span>
       </template>
 
       <template #option="{ option }">
         <div class="flex items-center">
-          <span class="font-mono text-sm text-gray-700">{{ option.code }}</span>
-          <span class="ml-2 text-sm text-gray-600">{{ option.name }}</span>
+          <span class="font-mono text-sm text-gray-700 shrink-0">{{ option.code }}</span>
+          <span class="ml-2 text-sm text-gray-600 truncate">{{ option.name }}</span>
         </div>
       </template>
     </BaseMultiselect>
@@ -43,7 +34,6 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ConfidenceBadge from './ConfidenceBadge.vue'
 
 const { t } = useI18n()
 

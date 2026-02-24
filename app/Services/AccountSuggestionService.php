@@ -585,7 +585,7 @@ class AccountSuggestionService
                         'account_code' => $account->code,
                         'account_name' => $account->name,
                         'confidence' => $classification['confidence'],
-                        'reason' => 'learned',
+                        'reason' => 'pattern',
                         'alternatives' => [],
                     ];
                 }
@@ -607,7 +607,7 @@ class AccountSuggestionService
                         'account_code' => $account->code,
                         'account_name' => $account->name,
                         'confidence' => $expenseType['confidence'],
-                        'reason' => 'learned',
+                        'reason' => 'pattern',
                         'alternatives' => [],
                     ];
                 }

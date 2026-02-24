@@ -99,22 +99,22 @@
     <!-- Entries Table -->
     <div v-else-if="selectedCompanyId && entries.length > 0" class="mt-6">
       <div class="relative overflow-hidden rounded-lg border border-gray-200 bg-white shadow">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="min-w-full table-fixed divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="w-[110px] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('partner.accounting.journal.date') }}
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="w-[140px] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('partner.accounting.journal.document') }}
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('partner.accounting.journal.description') }}
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="w-[260px] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('partner.accounting.mappings.select_account') }}
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th scope="col" class="w-[180px] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {{ $t('partner.accounting.mappings.confidence') }}
               </th>
             </tr>
@@ -128,7 +128,7 @@
                 entry.confirmed ? 'bg-green-50' : ''
               ]"
             >
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+              <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-900">
                 <div class="flex items-center gap-2">
                   {{ formatDate(entry.date) }}
                   <span
@@ -140,20 +140,20 @@
                   </span>
                 </div>
               </td>
-              <td class="px-6 py-4">
+              <td class="px-4 py-4">
                 <div class="flex flex-col">
-                  <span class="text-sm font-medium text-gray-900">
+                  <span class="text-sm font-medium text-gray-900 truncate">
                     {{ entry.document_number }}
                   </span>
-                  <span class="text-xs text-gray-500">
+                  <span class="text-xs text-gray-500 truncate">
                     {{ entry.document_type }}
                   </span>
                 </div>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-700">
-                {{ entry.description }}
+              <td class="px-4 py-4 text-sm text-gray-700">
+                <span class="line-clamp-2">{{ entry.description }}</span>
               </td>
-              <td class="px-6 py-4">
+              <td class="px-4 py-4">
                 <AccountDropdown
                   :model-value="entry.account_id"
                   :accounts="accounts"
@@ -162,7 +162,7 @@
                   @update:model-value="(value) => handleAccountUpdate(entry, value)"
                 />
               </td>
-              <td class="whitespace-nowrap px-6 py-4">
+              <td class="whitespace-nowrap px-4 py-4">
                 <ConfidenceBadge
                   :confidence="entry.confidence"
                   :reason="entry.suggestion_reason"
