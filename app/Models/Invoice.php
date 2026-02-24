@@ -888,7 +888,8 @@ class Invoice extends Model implements HasMedia
             ];
         }
 
-        if ($amount == 0) {
+        // Treat amounts <= 100 subunits (1.00 MKD) as fully paid to handle rounding
+        if ($amount <= 100) {
             $data = [
                 'status' => Invoice::STATUS_COMPLETED,
                 'paid_status' => Invoice::STATUS_PAID,

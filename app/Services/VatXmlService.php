@@ -375,7 +375,7 @@ class VatXmlService
         if (isset($this->company->id) && class_exists('App\Models\Invoice') && $hasDatabase) {
             try {
                 $invoices = Invoice::where('company_id', $this->company->id)
-                    ->where('paid_status', Invoice::STATUS_PAID)
+                    ->whereIn('paid_status', [Invoice::STATUS_PAID, Invoice::STATUS_PARTIALLY_PAID])
                     ->whereBetween('invoice_date', [
                         $this->periodStart->format('Y-m-d'),
                         $this->periodEnd->format('Y-m-d'),
@@ -387,7 +387,7 @@ class VatXmlService
                 if ($invoices->isEmpty()) {
                     throw new Exception(
                         sprintf(
-                            'No paid invoices found for period %s to %s. Please ensure you have invoices marked as PAID within this period.',
+                            'No invoices found for period %s to %s. Please ensure you have invoices with payments within this period.',
                             $this->periodStart->format('Y-m-d'),
                             $this->periodEnd->format('Y-m-d')
                         )
