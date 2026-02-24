@@ -1817,48 +1817,84 @@ class IfrsAdapter
             $endDate = "{$year}-12-31";
             $prevYearEnd = ($year - 1) . '-12-31';
 
-            // Get opening equity (balance sheet at previous year end)
+            // Get raw balance sheet sections (not the flattened version which loses account codes)
             $bsOpening = $this->getBalanceSheet($company, $prevYearEnd);
-            // Get closing equity (balance sheet at year end)
             $bsClosing = $this->getBalanceSheet($company, $endDate);
 
             // Get net income for the year
             $incomeStatement = $this->getIncomeStatement($company, $startDate, $endDate);
             $netIncome = ($incomeStatement['totals']['revenue'] ?? 0) - ($incomeStatement['totals']['expenses'] ?? 0);
 
-            // Helper to extract equity components by code prefix
-            $extractEquity = function (array $equityAccounts) {
+            // Extract equity components from raw IFRS sections using actual account codes.
+            // The raw structure is: sections.accounts.EQUITY.{TYPE}.{Category}.accounts[].code
+            // flattenIfrsAccounts loses account codes (sets code = account_type), so we parse raw data.
+            $extractEquity = function (array $balanceSheetResult) {
                 $components = [
                     'share_capital' => 0,     // 30 - Основен капитал
                     'reserves' => 0,          // 31, 32 - Резерви
-                    'retained_earnings' => 0, // 34, 35 - Нераспределена добивка
+                    'retained_earnings' => 0, // 34, 35, 94, 95 - Нераспределена добивка
                     'revaluation' => 0,       // 33 - Ревалоризациски резерви
                     'other' => 0,
                 ];
 
-                foreach ($equityAccounts as $account) {
-                    $code = $account['code'] ?? '';
-                    $balance = $account['balance'] ?? 0;
+                $rawEquity = $balanceSheetResult['sections']['accounts']['EQUITY'] ?? [];
 
-                    if (str_starts_with($code, '30')) {
-                        $components['share_capital'] += $balance;
-                    } elseif (str_starts_with($code, '31') || str_starts_with($code, '32')) {
-                        $components['reserves'] += $balance;
-                    } elseif (str_starts_with($code, '34') || str_starts_with($code, '35')) {
-                        $components['retained_earnings'] += $balance;
-                    } elseif (str_starts_with($code, '33')) {
-                        $components['revaluation'] += $balance;
-                    } else {
-                        $components['other'] += $balance;
+                foreach ($rawEquity as $accountType => $categories) {
+                    if (! is_array($categories)) {
+                        continue;
+                    }
+
+                    // NET_PROFIT is a virtual entry, skip it (handled separately via income statement)
+                    if ($accountType === 'NET_PROFIT') {
+                        continue;
+                    }
+
+                    foreach ($categories as $categoryName => $categoryData) {
+                        if (! is_array($categoryData)) {
+                            continue;
+                        }
+
+                        $accounts = $categoryData['accounts'] ?? [];
+                        if (! is_array($accounts)) {
+                            // No individual accounts, use category total
+                            $balance = abs($categoryData['total'] ?? 0);
+                            $components['other'] += $balance;
+
+                            continue;
+                        }
+
+                        foreach ($accounts as $account) {
+                            $code = (string) ($account['code'] ?? '');
+                            // closingBalance is negative for credit accounts (equity), take absolute value
+                            $balance = abs($account['closingBalance'] ?? 0);
+
+                            if ($balance == 0) {
+                                continue;
+                            }
+
+                            if (str_starts_with($code, '30')) {
+                                $components['share_capital'] += $balance;
+                            } elseif (str_starts_with($code, '31') || str_starts_with($code, '32')) {
+                                $components['reserves'] += $balance;
+                            } elseif (str_starts_with($code, '34') || str_starts_with($code, '35')
+                                || str_starts_with($code, '94') || str_starts_with($code, '95')) {
+                                $components['retained_earnings'] += $balance;
+                            } elseif (str_starts_with($code, '33')) {
+                                $components['revaluation'] += $balance;
+                            } else {
+                                $components['other'] += $balance;
+                            }
+                        }
                     }
                 }
 
                 $components['total'] = array_sum($components);
+
                 return $components;
             };
 
-            $opening = $extractEquity($bsOpening['equity'] ?? []);
-            $closing = $extractEquity($bsClosing['equity'] ?? []);
+            $opening = $extractEquity($bsOpening);
+            $closing = $extractEquity($bsClosing);
 
             // Calculate changes
             $changes = [
