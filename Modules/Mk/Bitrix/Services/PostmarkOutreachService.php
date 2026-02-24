@@ -133,7 +133,9 @@ class PostmarkOutreachService
                 );
             });
 
-            $sentMessage = Mail::to($email)->send($mailable);
+            // Use sendNow() to avoid Closure serialization errors if Mailable
+            // implements ShouldQueue — withSymfonyMessage() Closures can't be serialized
+            $sentMessage = Mail::to($email)->sendNow($mailable);
 
             // Extract real Postmark MessageID from the SentMessage
             $messageId = $this->extractMessageId($sentMessage);
@@ -181,7 +183,7 @@ class PostmarkOutreachService
                 );
             });
 
-            $sentMessage = Mail::to($email)->send($mailable);
+            $sentMessage = Mail::to($email)->sendNow($mailable);
 
             $messageId = $this->extractMessageId($sentMessage);
 
