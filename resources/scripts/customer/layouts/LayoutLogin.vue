@@ -2,6 +2,8 @@
   <div
     class="
       min-h-screen
+      h-screen
+      overflow-y-auto
       bg-gray-200
       flex flex-col
       justify-center

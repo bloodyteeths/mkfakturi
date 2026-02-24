@@ -1,5 +1,5 @@
 <template>
-  <div class="grid min-h-screen grid-cols-12 bg-gray-100">
+  <div class="grid min-h-screen grid-cols-12 bg-gray-100 h-screen overflow-y-auto">
     <NotificationRoot />
 
     <div
