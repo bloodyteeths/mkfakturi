@@ -22,8 +22,8 @@
                 font-base
               "
             >
-              <MainLogo v-if="!customerLogo" class="h-6" />
-              <img v-else :src="customerLogo" class="h-6" />
+              <MainLogo v-if="!customerLogo" class="h-10" />
+              <img v-else :src="customerLogo" class="h-10" />
             </a>
           </div>
           <div class="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">

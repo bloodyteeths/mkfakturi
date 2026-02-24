@@ -33,8 +33,8 @@
         md:block
       "
     >
-      <img v-if="adminLogo" :src="adminLogo" class="h-10" @error="onLogoError" />
-      <MainLogo v-else class="block h-10 w-auto" variant="clear" />
+      <img v-if="adminLogo" :src="adminLogo" class="h-12" @error="onLogoError" />
+      <MainLogo v-else class="block h-12 w-auto" variant="clear" />
       <!-- CLAUDE-CHECKPOINT -->
     </router-link>
 

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import LanguageSwitcher from './LanguageSwitcher'
 import { Dictionary } from '@/i18n/dictionaries'
 import { Locale } from '@/i18n/locales'
@@ -84,7 +85,8 @@ export default function Footer({ t, locale }: { t: Dictionary; locale: Locale })
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand / Company info */}
           <div className="lg:col-span-2">
-            <Link href={`/${locale}`} className="inline-block">
+            <Link href={`/${locale}`} className="inline-flex items-center gap-2">
+              <Image src="/brand/facturino_logo.png" alt="Facturino" width={80} height={80} className="w-10 h-10" />
               <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
                 Facturino
               </span>

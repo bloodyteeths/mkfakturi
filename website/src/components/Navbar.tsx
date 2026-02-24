@@ -12,7 +12,7 @@ export default function Navbar({ t, locale }: { t: Dictionary; locale: Locale })
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
         <Link href={`/${locale}`} className="flex items-center gap-2.5 flex-shrink-0">
-          <Image src="/brand/facturino_logo.png" alt="Facturino" width={80} height={80} priority sizes="80px" className="w-9 h-9" />
+          <Image src="/brand/facturino_logo.png" alt="Facturino" width={120} height={120} priority sizes="120px" className="w-12 h-12" />
           <span className="text-xl font-bold text-[color:var(--color-primary)]">Facturino</span>
         </Link>
 
