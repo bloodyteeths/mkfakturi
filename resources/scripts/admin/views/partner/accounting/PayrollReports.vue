@@ -363,12 +363,14 @@ function statusClass(status) {
 }
 
 function formatMoney(amount) {
-  if (!amount && amount !== 0) return '0.00'
+  if (!amount && amount !== 0) return '0.00 ден.'
+  // DB stores amounts in subunits (стотинки), divide by 100 for MKD
+  const mkd = amount / 100
   return new Intl.NumberFormat('mk-MK', {
     style: 'currency',
     currency: 'MKD',
     minimumFractionDigits: 2,
-  }).format(amount)
+  }).format(mkd)
 }
 
 // Lifecycle
