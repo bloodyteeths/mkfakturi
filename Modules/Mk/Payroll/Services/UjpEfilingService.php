@@ -366,13 +366,13 @@ class UjpEfilingService
      */
     private function aggregateEmployeeAnnualData(Collection $payrollRuns): Collection
     {
-        $employeeData = collect();
+        $employeeData = [];
 
         foreach ($payrollRuns as $run) {
             foreach ($run->lines()->with('employee')->where('status', 'included')->get() as $line) {
                 $employeeId = $line->employee_id;
 
-                if (! $employeeData->has($employeeId)) {
+                if (!isset($employeeData[$employeeId])) {
                     $employeeData[$employeeId] = [
                         'employee' => $line->employee,
                         'total_gross' => 0,
@@ -401,7 +401,7 @@ class UjpEfilingService
             }
         }
 
-        return $employeeData;
+        return collect($employeeData);
     }
 
     /**
