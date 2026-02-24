@@ -64,7 +64,24 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin -
 RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/custom.ini && \
     echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/custom.ini && \
     echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/custom.ini && \
-    echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini
+    echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/custom.ini && \
+    echo "display_errors = Off" >> /usr/local/etc/php/conf.d/custom.ini && \
+    echo "error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT" >> /usr/local/etc/php/conf.d/custom.ini && \
+    echo "log_errors = On" >> /usr/local/etc/php/conf.d/custom.ini && \
+    echo "error_log = /var/www/html/storage/logs/php-errors.log" >> /usr/local/etc/php/conf.d/custom.ini
+
+# Configure OPcache for production performance
+RUN echo "[opcache]" > /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.enable_cli=0" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.memory_consumption=256" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.interned_strings_buffer=32" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.max_accelerated_files=20000" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.validate_timestamps=0" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.save_comments=1" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.enable_file_override=1" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.jit_buffer_size=128M" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.jit=1255" >> /usr/local/etc/php/conf.d/opcache-prod.ini
 
 WORKDIR /var/www/html
 

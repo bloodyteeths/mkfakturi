@@ -13,6 +13,36 @@ export default defineConfig({
         },
         extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.vue', '.mjs']
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor-vue': ['vue', 'vue-router', 'pinia', 'vue-i18n'],
+                    'vendor-charts': ['chart.js', 'd3'],
+                    'vendor-editor': [
+                        '@tiptap/core',
+                        '@tiptap/starter-kit',
+                        '@tiptap/vue-3',
+                        '@tiptap/extension-link',
+                        '@tiptap/extension-text-align',
+                    ],
+                    'vendor-utils': ['lodash', 'moment', 'axios'],
+                    'vendor-ui': [
+                        '@headlessui/vue',
+                        '@heroicons/vue',
+                        'v-tooltip',
+                        'v-money3',
+                        'vue-flatpickr-component',
+                    ],
+                    'vendor-validation': [
+                        '@vuelidate/core',
+                        '@vuelidate/components',
+                        '@vuelidate/validators',
+                    ],
+                },
+            },
+        },
+    },
     plugins: [
         vue({
             template: {

@@ -82,12 +82,13 @@ echo "✅ Permissions set for www user"
 # Nginx is configured to listen on both 80 and 8080 in nginx.conf.
 echo "Nginx configured to listen on ports 80 and 8080"
 
-# Clear caches
-echo "Clearing caches..."
-php artisan config:clear || true
-php artisan cache:clear || true
-php artisan route:clear || true
-php artisan view:clear || true
+# Build optimization caches
+# NOTE: config:cache is intentionally OMITTED — Railway injects env vars at runtime
+# NOTE: cache:clear is intentionally OMITTED — Redis/database cache should persist across deploys
+echo "Building optimization caches..."
+php artisan route:cache || echo "Warning: route:cache failed, falling back to uncached routes"
+php artisan view:cache || echo "Warning: view:cache failed"
+php artisan event:cache || echo "Warning: event:cache failed"
 
 # Show feature flags status (for debugging)
 echo "=== Feature Flags ==="
@@ -184,12 +185,8 @@ php artisan route:list | head -5 || echo "Warning: Route list failed"
 echo "Testing database connection..."
 php artisan tinker --execute="try { DB::connection()->getPdo(); echo 'DB OK'; } catch (\Exception \$e) { echo 'DB FAILED: ' . \$e->getMessage(); }" 2>&1 | tail -3
 
-# Enable verbose PHP error logging
-echo "Enabling verbose PHP errors for debugging..."
-echo "display_errors = On" >> /usr/local/etc/php/conf.d/custom.ini
-echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/custom.ini
-echo "log_errors = On" >> /usr/local/etc/php/conf.d/custom.ini
-echo "error_log = /var/www/html/storage/logs/php-errors.log" >> /usr/local/etc/php/conf.d/custom.ini
+# PHP error logging is configured in Dockerfile (custom.ini)
+# display_errors=Off, log_errors=On, error_log set to storage/logs/
 
 # Test the home route directly to catch the error
 echo "Testing home route..."
