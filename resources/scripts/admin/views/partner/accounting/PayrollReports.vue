@@ -372,7 +372,8 @@ function formatMoney(amount) {
 }
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
+  await consoleStore.fetchCompanies()
   if (companies.value.length === 1) {
     selectedCompanyId.value = companies.value[0].id
     onCompanyChange()
