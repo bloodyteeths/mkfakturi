@@ -1272,14 +1272,6 @@ export default [
         component: TicketAdminIndex,
       },
 
-      // Corporate Income Tax (CIT / DB)
-      {
-        path: 'tax/corporate-income-tax',
-        name: 'tax.cit',
-        meta: { requiresAuth: true },
-        component: () => import('@/scripts/admin/views/tax/CorporateIncomeTax.vue'),
-      },
-
       // Payroll Module (Business+ tier)
       {
         path: 'payroll',
