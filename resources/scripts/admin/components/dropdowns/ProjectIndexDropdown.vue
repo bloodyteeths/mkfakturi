@@ -98,7 +98,7 @@ function removeProject(id) {
     })
     .then((res) => {
       if (res) {
-        projectStore.deleteProjects({ ids: [id] }).then((response) => {
+        projectStore.deleteProjects([id]).then((response) => {
           if (response.data.success) {
             props.loadData && props.loadData()
             if (route.name === 'projects.view') {

@@ -116,7 +116,7 @@
                     hasActiveUrl(item.link)
                       ? 'text-primary-500 border-primary-500 bg-gray-100'
                       : 'text-black',
-                    'cursor-pointer px-0 pl-4 py-3 border-transparent flex items-center border-l-4 border-solid text-sm not-italic font-medium',
+                    'cursor-pointer px-0 pl-4 py-3 border-transparent flex items-start border-l-4 border-solid text-sm not-italic font-medium',
                   ]"
                   @click="close"
                 >
@@ -126,10 +126,18 @@
                       hasActiveUrl(item.link)
                         ? 'text-primary-500'
                         : 'text-gray-400',
-                      'mr-4 shrink-0 h-5 w-5',
+                      'mr-4 shrink-0 h-5 w-5 mt-0.5',
                     ]"
                   />
-                  {{ $t(item.title) }}
+                  <div>
+                    <div>{{ $t(item.title) }}</div>
+                    <div
+                      v-if="getHint(item.title)"
+                      class="text-xs font-normal text-gray-400 mt-0.5 leading-tight"
+                    >
+                      {{ getHint(item.title) }}
+                    </div>
+                  </div>
                 </router-link>
               </nav>
             </div>
@@ -146,6 +154,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
@@ -160,8 +169,15 @@ import MainLogo from '@/scripts/components/icons/MainLogo.vue'
 
 const route = useRoute()
 const globalStore = useGlobalStore()
+const { t } = useI18n()
 
 const isOpen = ref(false)
+
+function getHint(titleKey) {
+  const hintKey = titleKey.replace('navigation.', 'navigation_hints.')
+  const hint = t(hintKey)
+  return hint !== hintKey ? hint : ''
+}
 
 function open() {
   isOpen.value = true

@@ -5,11 +5,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * P0-03: Import Logging & Analytics
+ * P0-03: Bank Import Logging & Analytics
  *
- * Creates the import_logs table to track CSV bank import operations.
- * Stores per-import statistics: rows parsed/imported/duplicated/failed,
- * parse time, errors, and status for KPI dashboards.
+ * Creates dedicated bank_import_logs table for CSV bank import tracking.
+ * Fixes table name collision with the Migration Wizard's import_logs table
+ * (2025_07_26_001700_create_import_logs_table).
  *
  * Idempotent: safe to re-run on every Railway deploy.
  */
@@ -20,11 +20,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasTable('import_logs')) {
+        if (Schema::hasTable('bank_import_logs')) {
             return;
         }
 
-        Schema::create('import_logs', function (Blueprint $table) {
+        Schema::create('bank_import_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->onDelete('restrict');
             $table->foreignId('user_id')->constrained()->onDelete('restrict');
@@ -48,7 +48,7 @@ return new class extends Migration
         // Ensure InnoDB + utf8mb4 (avoid errno 150 on foreign keys)
         if (config('database.default') === 'mysql') {
             \Illuminate\Support\Facades\DB::statement(
-                'ALTER TABLE `import_logs` ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+                'ALTER TABLE `bank_import_logs` ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
             );
         }
     }
@@ -58,7 +58,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('import_logs');
+        Schema::dropIfExists('bank_import_logs');
     }
 };
-

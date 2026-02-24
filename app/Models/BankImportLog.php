@@ -27,7 +27,7 @@ class BankImportLog extends Model
      *
      * @var string
      */
-    protected $table = 'import_logs';
+    protected $table = 'bank_import_logs';
 
     /**
      * The attributes that are mass assignable.

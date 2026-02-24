@@ -303,11 +303,13 @@ const submitSplit = async () => {
       ? `/banking/reconciliation/${props.reconciliationId}/split`
       : '/banking/reconciliation/confirm-match'
 
+    const splitItems = splits.value.map(s => ({ invoice_id: s.invoice_id, amount: s.amount }))
+
     const payload = props.reconciliationId
-      ? { splits: splits.value.map(s => ({ invoice_id: s.invoice_id, amount: s.amount })) }
+      ? { splits: splitItems }
       : {
-          reconciliation_id: props.reconciliationId,
-          splits: splits.value.map(s => ({ invoice_id: s.invoice_id, amount: s.amount })),
+          transaction_id: props.transaction?.id,
+          splits: splitItems,
         }
 
     const response = await axios.post(endpoint, payload)

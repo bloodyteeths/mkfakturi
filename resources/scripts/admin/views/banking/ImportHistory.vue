@@ -336,7 +336,7 @@ const isLoading = ref(true)
 const logs = ref([])
 const stats = ref(null)
 const showFilters = ref(false)
-const currentPage = ref(1)
+let filterDebounceTimer = null
 
 const pagination = ref({
   current_page: 1,
@@ -431,7 +431,6 @@ const fetchStats = async () => {
 }
 
 const goToPage = (page) => {
-  currentPage.value = page
   fetchHistory(page)
 }
 
@@ -495,11 +494,13 @@ const formatParseTime = (ms) => {
   return `${(ms / 1000).toFixed(1)}s`
 }
 
-// Watch filters and re-fetch
+// Watch filters and re-fetch (debounced to avoid race conditions)
 watch(filters, () => {
-  currentPage.value = 1
-  fetchHistory(1)
-  fetchStats()
+  clearTimeout(filterDebounceTimer)
+  filterDebounceTimer = setTimeout(() => {
+    fetchHistory(1)
+    fetchStats()
+  }, 300)
 }, { deep: true })
 
 // Initialize

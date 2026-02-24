@@ -97,7 +97,7 @@
       </BaseContentPlaceholders>
     </div>
 
-    <template v-else-if="analytics">
+    <template v-else-if="hasData">
       <!-- Summary Cards Row -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <!-- Total Transactions -->
@@ -327,7 +327,61 @@
       </div>
     </template>
 
-    <!-- Empty State -->
+    <!-- Error State -->
+    <div v-else-if="loadError" class="mt-6 text-center py-12">
+      <BaseIcon name="ExclamationTriangleIcon" class="h-12 w-12 mx-auto text-yellow-400 mb-4" />
+      <p class="text-gray-500 mb-2">
+        {{ $t('banking.analytics_load_error') || 'Could not load analytics data.' }}
+      </p>
+      <p class="text-sm text-gray-400 mb-4">
+        {{ $t('banking.analytics_check_banks') || 'Make sure you have bank accounts connected and transactions imported.' }}
+      </p>
+      <div class="flex justify-center space-x-3">
+        <BaseButton
+          variant="primary-outline"
+          size="sm"
+          @click="fetchAnalytics"
+        >
+          {{ $t('general.retry') || 'Retry' }}
+        </BaseButton>
+        <BaseButton
+          variant="primary"
+          size="sm"
+          @click="router.push({ name: 'banking.dashboard' })"
+        >
+          {{ $t('banking.go_to_banking') || 'Go to Banking' }}
+        </BaseButton>
+      </div>
+    </div>
+
+    <!-- Empty State (no transactions in period) -->
+    <div v-else-if="analytics && analytics.total_transactions === 0" class="mt-6 text-center py-12">
+      <BaseIcon name="ChartBarIcon" class="h-12 w-12 mx-auto text-gray-300 mb-4" />
+      <p class="text-gray-500 mb-2">
+        {{ $t('banking.no_transactions_in_period') || 'No transactions found for this period.' }}
+      </p>
+      <p class="text-sm text-gray-400 mb-4">
+        {{ $t('banking.try_different_period') || 'Try selecting a different date range or import bank transactions first.' }}
+      </p>
+      <div class="flex justify-center space-x-3">
+        <BaseButton
+          variant="primary-outline"
+          size="sm"
+          @click="setQuickPeriod('last_30_days')"
+        >
+          {{ $t('banking.last_30_days') || 'Last 30 Days' }}
+        </BaseButton>
+        <BaseButton
+          variant="primary"
+          size="sm"
+          @click="router.push({ name: 'banking.import' })"
+        >
+          {{ $t('banking.import_csv') || 'Import CSV' }}
+        </BaseButton>
+      </div>
+    </div>
+
+    <!-- No Data State -->
     <div v-else class="mt-6 text-center py-12 text-gray-400">
       <BaseIcon name="ChartBarIcon" class="h-12 w-12 mx-auto text-gray-300 mb-4" />
       <p>{{ $t('banking.no_analytics_data') || 'No analytics data available. Select a period and click Apply.' }}</p>
@@ -349,6 +403,7 @@ const notificationStore = useNotificationStore()
 // State
 const isLoading = ref(false)
 const analytics = ref(null)
+const loadError = ref(false)
 
 const filters = ref({
   from: null,
@@ -416,8 +471,13 @@ const matchMethodItems = computed(() => {
 })
 
 // Methods
+const hasData = computed(() => {
+  return analytics.value && analytics.value.total_transactions > 0
+})
+
 const fetchAnalytics = async () => {
   isLoading.value = true
+  loadError.value = false
   try {
     const params = {}
     if (filters.value.from) params.from = formatDateParam(filters.value.from)
@@ -427,10 +487,8 @@ const fetchAnalytics = async () => {
     analytics.value = response.data.data
   } catch (error) {
     console.error('Failed to fetch analytics:', error)
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('banking.failed_to_load_analytics') || 'Failed to load analytics data',
-    })
+    loadError.value = true
+    analytics.value = null
   } finally {
     isLoading.value = false
   }

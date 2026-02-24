@@ -31,39 +31,77 @@ class ReconciliationAnalyticsService
         $from = $fromDate ? Carbon::parse($fromDate)->startOfDay() : Carbon::now()->startOfMonth();
         $to = $toDate ? Carbon::parse($toDate)->endOfDay() : Carbon::now()->endOfDay();
 
-        $transactions = $this->getTransactionStats($companyId, $from, $to);
-        $reconciliations = $this->getReconciliationStats($companyId, $from, $to);
-        $amounts = $this->getAmountStats($companyId, $from, $to);
-        $avgTimeToReconcile = $this->getAvgTimeToReconcile($companyId, $from, $to);
-        $parseAccuracy = $this->getParseAccuracy($companyId, $from, $to);
-        $matchByMethod = $this->getMatchByMethod($companyId, $from, $to);
-        $dailyTrend = $this->getDailyTrend($companyId, $from, $to);
-
-        $totalTransactions = $transactions['total'];
-        $autoMatched = $reconciliations['auto_matched'];
-        $manualMatched = $reconciliations['manual_matched'];
-        $pending = $totalTransactions - ($autoMatched + $manualMatched);
-
-        return [
+        $emptyResult = [
             'period' => [
                 'from' => $from->toDateString(),
                 'to' => $to->toDateString(),
             ],
-            'total_transactions' => $totalTransactions,
-            'auto_matched' => $autoMatched,
-            'manual_matched' => $manualMatched,
-            'auto_match_rate' => $totalTransactions > 0
-                ? round($autoMatched / $totalTransactions, 4)
-                : 0.0,
-            'pending' => max(0, $pending),
-            'avg_confidence' => $reconciliations['avg_confidence'],
-            'total_amount_matched' => $amounts['matched'],
-            'total_amount_pending' => $amounts['pending'],
-            'avg_time_to_reconcile_seconds' => $avgTimeToReconcile,
-            'parse_accuracy' => $parseAccuracy,
-            'match_by_method' => $matchByMethod,
-            'daily_trend' => $dailyTrend,
+            'total_transactions' => 0,
+            'auto_matched' => 0,
+            'manual_matched' => 0,
+            'auto_match_rate' => 0.0,
+            'pending' => 0,
+            'avg_confidence' => 0.0,
+            'total_amount_matched' => 0.0,
+            'total_amount_pending' => 0.0,
+            'avg_time_to_reconcile_seconds' => 0,
+            'parse_accuracy' => [],
+            'match_by_method' => ['amount' => 0, 'reference' => 0, 'customer' => 0, 'rule' => 0],
+            'daily_trend' => [],
         ];
+
+        try {
+            $transactions = $this->getTransactionStats($companyId, $from, $to);
+            $totalTransactions = $transactions['total'];
+
+            // Return empty analytics early if no transactions exist
+            if ($totalTransactions === 0) {
+                $emptyResult['period'] = [
+                    'from' => $from->toDateString(),
+                    'to' => $to->toDateString(),
+                ];
+                return $emptyResult;
+            }
+
+            $reconciliations = $this->getReconciliationStats($companyId, $from, $to);
+            $amounts = $this->getAmountStats($companyId, $from, $to);
+            $avgTimeToReconcile = $this->getAvgTimeToReconcile($companyId, $from, $to);
+            $parseAccuracy = $this->getParseAccuracy($companyId, $from, $to);
+            $matchByMethod = $this->getMatchByMethod($companyId, $from, $to);
+            $dailyTrend = $this->getDailyTrend($companyId, $from, $to);
+
+            $autoMatched = $reconciliations['auto_matched'];
+            $manualMatched = $reconciliations['manual_matched'];
+            $pending = $totalTransactions - ($autoMatched + $manualMatched);
+
+            return [
+                'period' => [
+                    'from' => $from->toDateString(),
+                    'to' => $to->toDateString(),
+                ],
+                'total_transactions' => $totalTransactions,
+                'auto_matched' => $autoMatched,
+                'manual_matched' => $manualMatched,
+                'auto_match_rate' => $totalTransactions > 0
+                    ? round($autoMatched / $totalTransactions, 4)
+                    : 0.0,
+                'pending' => max(0, $pending),
+                'avg_confidence' => $reconciliations['avg_confidence'],
+                'total_amount_matched' => $amounts['matched'],
+                'total_amount_pending' => $amounts['pending'],
+                'avg_time_to_reconcile_seconds' => $avgTimeToReconcile,
+                'parse_accuracy' => $parseAccuracy,
+                'match_by_method' => $matchByMethod,
+                'daily_trend' => $dailyTrend,
+            ];
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Analytics query failed, returning empty data', [
+                'company_id' => $companyId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $emptyResult;
+        }
     }
 
     /**

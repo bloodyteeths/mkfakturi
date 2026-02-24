@@ -9,43 +9,169 @@
     <!-- Scrollable Menu Items -->
     <div class="flex-1 overflow-y-auto pb-32">
       <div
-        v-for="menu in globalStore.menuGroups"
-        :key="menu"
+        v-for="(menu, groupIndex) in globalStore.menuGroups"
+        :key="groupIndex"
         class="p-0 m-0 mt-6 list-none"
       >
-        <router-link
-          v-for="item in menu"
-          :key="item.link"
-          :to="item.link"
-          class="sidebar-item relative flex items-center py-3 border-l-4 border-solid text-sm font-medium cursor-pointer transition-colors duration-150"
-          :class="[
-            hasActiveUrl(item.link)
-              ? 'text-primary-500 border-primary-500 bg-gray-100'
-              : 'text-gray-700 border-transparent hover:bg-gray-50 hover:text-gray-900',
-            globalStore.isSidebarCollapsed ? 'justify-center px-0' : 'pl-6 pr-4'
-          ]"
-          @mouseenter="showTooltip($event, item)"
-          @mouseleave="hideTooltip"
-        >
-          <BaseIcon
-            :name="item.icon"
+        <!-- Groups with submenus (accounting section) -->
+        <template v-if="hasSubmenus(menu)">
+          <template v-for="group in getOrganizedMenu(menu)" :key="group.key || group.item?.link">
+
+            <!-- Submenu group header -->
+            <template v-if="group.type === 'submenu'">
+              <button
+                @click="handleSubmenuClick(group.key)"
+                class="w-full sidebar-item relative flex items-center py-3 border-l-4 border-solid text-sm font-medium cursor-pointer transition-colors duration-150"
+                :class="[
+                  isSubmenuActive(group.items)
+                    ? 'text-primary-500 border-primary-500 bg-gray-100'
+                    : 'text-gray-700 border-transparent hover:bg-gray-50 hover:text-gray-900',
+                  globalStore.isSidebarCollapsed ? 'justify-center px-0' : 'pl-6 pr-4'
+                ]"
+                @mouseenter="showTooltip($event, { title: group.title })"
+                @mouseleave="hideTooltip"
+              >
+                <BaseIcon
+                  :name="group.icon"
+                  :class="[
+                    isSubmenuActive(group.items)
+                      ? 'text-primary-500'
+                      : 'text-gray-400 hover:text-gray-600',
+                    'shrink-0 h-5 w-5 transition-colors duration-150',
+                    globalStore.isSidebarCollapsed ? '' : 'mr-3'
+                  ]"
+                />
+                <span
+                  v-if="!globalStore.isSidebarCollapsed"
+                  class="truncate flex-1 text-left"
+                >
+                  {{ $t(group.title) }}
+                </span>
+                <BaseIcon
+                  v-if="!globalStore.isSidebarCollapsed"
+                  name="ChevronRightIcon"
+                  :class="[
+                    'h-4 w-4 text-gray-400 transition-transform duration-200',
+                    expandedSubmenus[group.key] ? 'rotate-90' : ''
+                  ]"
+                />
+              </button>
+
+              <!-- Submenu children -->
+              <div v-show="expandedSubmenus[group.key] && !globalStore.isSidebarCollapsed">
+                <router-link
+                  v-for="item in group.items"
+                  :key="item.link"
+                  :to="item.link"
+                  class="sidebar-item group relative flex items-center py-2.5 border-l-4 border-solid text-sm cursor-pointer transition-colors duration-150 pl-12 pr-4"
+                  :class="[
+                    hasActiveUrl(item.link)
+                      ? 'text-primary-500 border-primary-500 bg-gray-50'
+                      : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900'
+                  ]"
+                  @mouseenter="showTooltip($event, item)"
+                  @mouseleave="hideTooltip"
+                >
+                  <BaseIcon
+                    :name="item.icon"
+                    :class="[
+                      hasActiveUrl(item.link)
+                        ? 'text-primary-500'
+                        : 'text-gray-400',
+                      'shrink-0 h-4 w-4 mr-3 transition-colors duration-150'
+                    ]"
+                  />
+                  <span class="truncate flex-1">{{ $t(item.title) }}</span>
+                  <BaseIcon
+                    name="InformationCircleIcon"
+                    class="shrink-0 h-4 w-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                  />
+                </router-link>
+              </div>
+            </template>
+
+            <!-- Regular item in a submenu group (e.g., back to dashboard) -->
+            <router-link
+              v-else
+              :to="group.item.link"
+              class="sidebar-item group relative flex items-center py-3 border-l-4 border-solid text-sm font-medium cursor-pointer transition-colors duration-150"
+              :class="[
+                hasActiveUrl(group.item.link)
+                  ? 'text-primary-500 border-primary-500 bg-gray-100'
+                  : 'text-gray-700 border-transparent hover:bg-gray-50 hover:text-gray-900',
+                globalStore.isSidebarCollapsed ? 'justify-center px-0' : 'pl-6 pr-4'
+              ]"
+              @mouseenter="showTooltip($event, group.item)"
+              @mouseleave="hideTooltip"
+            >
+              <BaseIcon
+                :name="group.item.icon"
+                :class="[
+                  hasActiveUrl(group.item.link)
+                    ? 'text-primary-500'
+                    : 'text-gray-400 hover:text-gray-600',
+                  'shrink-0 h-5 w-5 transition-colors duration-150',
+                  globalStore.isSidebarCollapsed ? '' : 'mr-3'
+                ]"
+              />
+              <span
+                v-if="!globalStore.isSidebarCollapsed"
+                class="truncate flex-1"
+              >
+                {{ $t(group.item.title) }}
+              </span>
+              <BaseIcon
+                v-if="!globalStore.isSidebarCollapsed"
+                name="InformationCircleIcon"
+                class="shrink-0 h-4 w-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+              />
+            </router-link>
+          </template>
+        </template>
+
+        <!-- Regular groups (non-accounting) -->
+        <template v-else>
+          <router-link
+            v-for="item in menu"
+            :key="item.link"
+            :to="item.link"
+            class="sidebar-item group relative flex items-center py-3 border-l-4 border-solid text-sm font-medium cursor-pointer transition-colors duration-150"
             :class="[
               hasActiveUrl(item.link)
-                ? 'text-primary-500'
-                : 'text-gray-400 hover:text-gray-600',
-              'shrink-0 h-5 w-5 transition-colors duration-150',
-              globalStore.isSidebarCollapsed ? '' : 'mr-3'
+                ? 'text-primary-500 border-primary-500 bg-gray-100'
+                : 'text-gray-700 border-transparent hover:bg-gray-50 hover:text-gray-900',
+              globalStore.isSidebarCollapsed ? 'justify-center px-0' : 'pl-6 pr-4'
             ]"
-          />
-
-          <!-- Menu text - only shown when expanded -->
-          <span
-            v-if="!globalStore.isSidebarCollapsed"
-            class="truncate"
+            @mouseenter="showTooltip($event, item)"
+            @mouseleave="hideTooltip"
           >
-            {{ $t(item.title) }}
-          </span>
-        </router-link>
+            <BaseIcon
+              :name="item.icon"
+              :class="[
+                hasActiveUrl(item.link)
+                  ? 'text-primary-500'
+                  : 'text-gray-400 hover:text-gray-600',
+                'shrink-0 h-5 w-5 transition-colors duration-150',
+                globalStore.isSidebarCollapsed ? '' : 'mr-3'
+              ]"
+            />
+
+            <!-- Menu text - only shown when expanded -->
+            <span
+              v-if="!globalStore.isSidebarCollapsed"
+              class="truncate flex-1"
+            >
+              {{ $t(item.title) }}
+            </span>
+
+            <!-- Info icon - only shown when expanded, visible on hover -->
+            <BaseIcon
+              v-if="!globalStore.isSidebarCollapsed"
+              name="InformationCircleIcon"
+              class="shrink-0 h-4 w-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+            />
+          </router-link>
+        </template>
       </div>
     </div>
 
@@ -87,11 +213,12 @@
       leave-to-class="opacity-0"
     >
       <div
-        v-if="tooltip.visible && globalStore.isSidebarCollapsed"
-        class="fixed px-3 py-2 bg-gray-900 text-white text-sm rounded-md shadow-lg whitespace-nowrap pointer-events-none"
+        v-if="tooltip.visible"
+        class="fixed px-3 py-2 bg-gray-900 text-white text-sm rounded-md shadow-lg pointer-events-none max-w-xs"
         :style="{ top: tooltip.top + 'px', left: tooltip.left + 'px', zIndex: 9999 }"
       >
-        {{ tooltip.text }}
+        <div v-if="globalStore.isSidebarCollapsed" class="font-semibold mb-1">{{ tooltip.name }}</div>
+        <div class="text-gray-300 text-xs leading-relaxed">{{ tooltip.description }}</div>
         <!-- Tooltip arrow -->
         <div class="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
       </div>
@@ -100,7 +227,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
@@ -109,10 +236,25 @@ const route = useRoute()
 const globalStore = useGlobalStore()
 const { t } = useI18n()
 
+// Submenu group definitions (title i18n key + icon)
+const submenuConfig = {
+  journals: { title: 'partner.accounting.submenu.journals', icon: 'BookOpenIcon' },
+  closings: { title: 'partner.accounting.submenu.closings', icon: 'LockClosedIcon' },
+  reports: { title: 'partner.accounting.submenu.reports', icon: 'ChartBarIcon' },
+  compliance: { title: 'partner.accounting.submenu.compliance', icon: 'ClipboardDocumentListIcon' },
+}
+
+// Order in which submenu groups appear in the sidebar
+const submenuOrder = ['journals', 'closings', 'reports', 'compliance']
+
+// Track which submenus are expanded
+const expandedSubmenus = reactive({})
+
 // Tooltip state
 const tooltip = reactive({
   visible: false,
-  text: '',
+  name: '',
+  description: '',
   top: 0,
   left: 0
 })
@@ -123,28 +265,109 @@ function hasActiveUrl(url) {
   return route.path.indexOf(url) > -1
 }
 
-function showTooltip(event, item) {
-  if (!globalStore.isSidebarCollapsed) return
+function getHintKey(titleKey) {
+  return titleKey.replace('navigation.', 'navigation_hints.')
+}
 
-  // Clear any existing timeout
+// Check if any menu group has submenu items
+function hasSubmenus(menu) {
+  return menu.some(item => item.submenu)
+}
+
+// Check if any item in a submenu is currently active
+function isSubmenuActive(items) {
+  return items.some(item => hasActiveUrl(item.link))
+}
+
+// Organize a menu group into submenu sections + loose items
+function getOrganizedMenu(menu) {
+  const result = []
+  const groups = {}
+
+  menu.forEach(item => {
+    if (item.submenu && submenuConfig[item.submenu]) {
+      if (!groups[item.submenu]) {
+        groups[item.submenu] = []
+      }
+      groups[item.submenu].push(item)
+    }
+  })
+
+  // Add submenu groups in defined order
+  submenuOrder.forEach(key => {
+    if (groups[key] && groups[key].length > 0) {
+      result.push({
+        type: 'submenu',
+        key,
+        title: submenuConfig[key].title,
+        icon: submenuConfig[key].icon,
+        items: groups[key],
+      })
+    }
+  })
+
+  // Add non-submenu items at the end (e.g., "Back to Partner Portal")
+  menu.filter(item => !item.submenu).forEach(item => {
+    result.push({ type: 'item', key: item.link, item })
+  })
+
+  return result
+}
+
+// Handle submenu header click
+function handleSubmenuClick(key) {
+  if (globalStore.isSidebarCollapsed) {
+    globalStore.setSidebarCollapsed(false)
+    expandedSubmenus[key] = true
+  } else {
+    expandedSubmenus[key] = !expandedSubmenus[key]
+  }
+}
+
+// Auto-expand submenu that contains the active route
+function autoExpandActiveSubmenus() {
+  for (const menu of globalStore.menuGroups) {
+    if (!hasSubmenus(menu)) continue
+    const organized = getOrganizedMenu(menu)
+    for (const group of organized) {
+      if (group.type === 'submenu' && isSubmenuActive(group.items)) {
+        expandedSubmenus[group.key] = true
+      }
+    }
+  }
+}
+
+// Auto-expand on route change
+watch(() => route.path, autoExpandActiveSubmenus, { immediate: true })
+
+// Also auto-expand once menu data is loaded from bootstrap
+watch(() => globalStore.mainMenu.length, (len) => {
+  if (len > 0) autoExpandActiveSubmenus()
+})
+
+function showTooltip(event, item) {
   if (tooltipTimeout) {
     clearTimeout(tooltipTimeout)
   }
 
-  // Capture element reference before setTimeout (event.currentTarget becomes null after event processing)
   const element = event.currentTarget
 
-  // Small delay before showing tooltip
   tooltipTimeout = setTimeout(() => {
-    // Check if element still exists in DOM
     if (!element || !document.body.contains(element)) return
 
     const rect = element.getBoundingClientRect()
-    tooltip.text = t(item.title)
-    tooltip.top = rect.top + (rect.height / 2) - 16 // Center vertically
-    tooltip.left = rect.right + 12 // Position to the right of sidebar
+    const hintKey = getHintKey(item.title)
+    const description = t(hintKey)
+
+    // Only show if we have a real description (not the raw key)
+    if (description === hintKey) return
+
+    tooltip.name = t(item.title)
+    tooltip.description = description
+    tooltip.top = rect.top + (rect.height / 2) - 16
+    tooltip.left = rect.right + 12
     tooltip.visible = true
-  }, 100)
+  }, 300)
 }
 
 function hideTooltip() {

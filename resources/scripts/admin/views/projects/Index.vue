@@ -53,7 +53,6 @@
           label="label"
           value-prop="value"
           :placeholder="$t('projects.select_status')"
-          @update:modelValue="fetchData"
         />
       </BaseInputGroup>
 
@@ -63,13 +62,12 @@
           :placeholder="$t('customers.type_or_click')"
           value-prop="id"
           label="name"
-          @update:modelValue="fetchData"
         />
       </BaseInputGroup>
     </BaseFilterWrapper>
 
     <BaseEmptyPlaceholder
-      v-if="!projectStore.totalProjects && !projectStore.isFetching"
+      v-show="showEmptyScreen"
       :title="$t('projects.no_projects')"
       :description="$t('projects.empty_description')"
     >
@@ -89,14 +87,11 @@
       </template>
     </BaseEmptyPlaceholder>
 
-    <div v-else class="relative table-container">
+    <div v-show="!showEmptyScreen" class="relative table-container">
       <BaseTable
         ref="tableComponent"
-        :data="projectStore.projects"
+        :data="fetchData"
         :columns="columns"
-        :meta="{ total: projectStore.totalProjects }"
-        :loading="projectStore.isFetching"
-        @get-data="fetchData"
       >
         <template #cell-name="{ row }">
           <router-link
@@ -152,7 +147,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import { debouncedWatch } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import abilities from '@/scripts/admin/stub/abilities'
 import { useProjectStore } from '@/scripts/admin/stores/project'
@@ -165,16 +161,17 @@ const userStore = useUserStore()
 
 const showFilters = ref(false)
 const tableComponent = ref(null)
+const isFetchingInitialData = ref(true)
 
 const filters = reactive({
   search: '',
   status: null,
   customer_id: null,
-  page: 1,
-  limit: 10,
-  orderByField: undefined,
-  orderBy: undefined,
 })
+
+const showEmptyScreen = computed(
+  () => !projectStore.totalProjects && !isFetchingInitialData.value
+)
 
 const statusOptions = computed(() => [
   { value: 'open', label: t('projects.statuses.open') },
@@ -186,10 +183,10 @@ const statusOptions = computed(() => [
 
 const columns = computed(() => {
   return [
-    { key: 'name', label: t('projects.name'), sortable: true },
+    { key: 'name', label: t('projects.name'), thClass: 'extra' },
     { key: 'customer', label: t('projects.customer'), sortable: false },
-    { key: 'status', label: t('projects.status'), sortable: true },
-    { key: 'budget_amount', label: t('projects.budget'), sortable: true },
+    { key: 'status', label: t('projects.status') },
+    { key: 'budget_amount', label: t('projects.budget') },
     { key: 'dates', label: t('projects.dates'), sortable: false },
     {
       key: 'actions',
@@ -203,41 +200,56 @@ const columns = computed(() => {
 
 function getStatusColor(status) {
   const colors = {
-    open: '#3B82F6', // blue
-    in_progress: '#F59E0B', // amber
-    completed: '#10B981', // green
-    on_hold: '#6B7280', // gray
-    cancelled: '#EF4444', // red
+    open: '#3B82F6',
+    in_progress: '#F59E0B',
+    completed: '#10B981',
+    on_hold: '#6B7280',
+    cancelled: '#EF4444',
   }
   return colors[status] || '#6B7280'
 }
 
-function fetchData(params) {
-  filters.page = params?.page ?? filters.page
-  filters.limit = params?.limit ?? filters.limit
+debouncedWatch(
+  filters,
+  () => {
+    refreshTable()
+  },
+  { debounce: 500 }
+)
 
-  if (params?.orderByField) {
-    filters.orderByField = params.orderByField
-    filters.orderBy = params.orderBy
-  }
-
-  const query = {
+async function fetchData({ page, filter, sort }) {
+  let data = {
     search: filters.search,
-    status: filters.status?.value || filters.status,
+    status: filters.status,
     customer_id: filters.customer_id,
-    page: filters.page,
-    limit: filters.limit,
-    orderByField: filters.orderByField,
-    orderBy: filters.orderBy,
+    orderByField: sort.fieldName || 'created_at',
+    orderBy: sort.order || 'desc',
+    page,
   }
-  projectStore.fetchProjects(query)
+
+  isFetchingInitialData.value = true
+  let response = await projectStore.fetchProjects(data)
+  isFetchingInitialData.value = false
+
+  return {
+    data: response.data.data,
+    pagination: {
+      totalPages: response.data.meta.last_page,
+      currentPage: page,
+      totalCount: response.data.meta.total,
+      limit: 10,
+    },
+  }
+}
+
+function refreshTable() {
+  tableComponent.value && tableComponent.value.refresh()
 }
 
 function clearFilter() {
   filters.search = ''
   filters.status = null
   filters.customer_id = null
-  fetchData()
 }
 
 function toggleFilter() {
@@ -248,10 +260,6 @@ function toggleFilter() {
   showFilters.value = !showFilters.value
 }
 
-function refreshTable() {
-  fetchData()
-}
-
 function hasAtLeastOneAbility() {
   return userStore.hasAbilities([
     abilities.DELETE_PROJECT,
@@ -259,8 +267,4 @@ function hasAtLeastOneAbility() {
     abilities.VIEW_PROJECT,
   ])
 }
-
-onMounted(() => {
-  fetchData()
-})
 </script>

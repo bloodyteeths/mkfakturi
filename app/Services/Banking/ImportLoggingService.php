@@ -176,7 +176,7 @@ class ImportLoggingService
                 DB::raw('SUM(duplicate_rows) as total_duplicates'),
                 DB::raw('SUM(failed_rows) as total_failed'),
                 DB::raw('AVG(parse_time_ms) as avg_parse_time_ms'),
-                DB::raw('SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as success_count')
+                DB::raw('SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as success_count')
             )
             ->groupBy('bank_code')
             ->get()

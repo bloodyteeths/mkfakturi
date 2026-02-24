@@ -86,13 +86,19 @@ trait GeneratesMenuTrait
                 }
 
                 if ($user->checkAccess($data)) {
-                    $new_items[] = [
+                    $item = [
                         'title' => $data->title,
                         'link' => $data->link->path['url'],
                         'icon' => $data->data['icon'],
                         'name' => $data->data['name'],
                         'group' => $data->data['group'],
                     ];
+
+                    if (!empty($data->data['submenu'])) {
+                        $item['submenu'] = $data->data['submenu'];
+                    }
+
+                    $new_items[] = $item;
                 }
             }
 

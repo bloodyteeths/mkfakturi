@@ -277,15 +277,42 @@ class ReconciliationController extends Controller
         // If splits are provided, delegate to split payment
         if ($request->has('splits') && is_array($request->splits) && count($request->splits) > 0) {
             $request->validate([
-                'reconciliation_id' => 'required|integer',
+                'reconciliation_id' => 'nullable|integer',
+                'transaction_id' => 'nullable|integer|exists:bank_transactions,id',
                 'splits' => 'required|array|min:1',
                 'splits.*.invoice_id' => 'required|integer|exists:invoices,id',
                 'splits.*.amount' => 'required|numeric|min:0.01',
             ]);
 
-            $recon = Reconciliation::forCompany($company->id)
-                ->where('id', $request->reconciliation_id)
-                ->firstOrFail();
+            // Find existing reconciliation or create one from transaction_id
+            if ($request->reconciliation_id) {
+                $recon = Reconciliation::forCompany($company->id)
+                    ->where('id', $request->reconciliation_id)
+                    ->firstOrFail();
+            } elseif ($request->transaction_id) {
+                $transaction = BankTransaction::forCompany($company->id)
+                    ->where('id', $request->transaction_id)
+                    ->firstOrFail();
+
+                $recon = Reconciliation::firstOrCreate(
+                    [
+                        'company_id' => $company->id,
+                        'bank_transaction_id' => $transaction->id,
+                    ],
+                    [
+                        'status' => Reconciliation::STATUS_PENDING,
+                        'match_type' => Reconciliation::MATCH_TYPE_MANUAL,
+                        'confidence' => 100.0,
+                        'matched_by' => $request->user()->id,
+                        'matched_at' => now(),
+                    ]
+                );
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Either reconciliation_id or transaction_id is required',
+                ], 422);
+            }
 
             $service = new ReconciliationPostingService();
             $results = $service->postSplit($recon, $request->splits);

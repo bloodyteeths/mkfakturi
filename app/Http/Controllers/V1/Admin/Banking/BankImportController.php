@@ -143,20 +143,15 @@ class BankImportController extends Controller
                 'import_log_id' => $importLog->id,
             ], now()->addMinutes(15));
 
-            // P0-03: Update log with preview results
+            // P0-03: Update log with preview results (keep as pending — not yet confirmed)
             $parseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
-            $this->loggingService->completeImport(
-                $importLog,
-                count($newTransactions),
-                count($newTransactions),
-                0, // No rows imported yet (preview stage)
-                $duplicateCount,
-                0,
-                null,
-                $parseTimeMs
-            );
-            // Mark as pending since we're only at preview stage
-            $importLog->update(['status' => BankImportLog::STATUS_PENDING]);
+            $importLog->update([
+                'total_rows' => count($newTransactions),
+                'parsed_rows' => count($newTransactions),
+                'duplicate_rows' => $duplicateCount,
+                'parse_time_ms' => $parseTimeMs,
+                'status' => BankImportLog::STATUS_PENDING,
+            ]);
 
             Log::info('CSV import preview generated', [
                 'company_id' => $company->id,
