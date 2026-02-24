@@ -107,7 +107,7 @@ class DepreciationGLService
         }
 
         // Skip if asset is fully depreciated (useful life exceeded)
-        $monthsElapsed = $asset->acquisition_date->diffInMonths($month->copy()->endOfMonth());
+        $monthsElapsed = (int) $asset->acquisition_date->diffInMonths($month->copy()->endOfMonth());
         if ($monthsElapsed >= $asset->useful_life_months) {
             return null;
         }

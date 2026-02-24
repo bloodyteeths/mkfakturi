@@ -88,7 +88,7 @@ class FixedAsset extends Model
         }
 
         $endDate = $this->disposal_date && $this->disposal_date->lt($asOfDate) ? $this->disposal_date : $asOfDate;
-        $months = $this->acquisition_date->diffInMonths($endDate);
+        $months = (int) $this->acquisition_date->diffInMonths($endDate);
         $maxMonths = $this->useful_life_months;
 
         if ($months > $maxMonths) {
