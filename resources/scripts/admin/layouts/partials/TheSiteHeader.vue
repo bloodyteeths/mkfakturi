@@ -21,7 +21,6 @@
       to="/admin/dashboard"
       class="
         float-none
-        text-lg
         not-italic
         font-black
         tracking-wider
@@ -30,11 +29,16 @@
         md:float-left
         font-base
         hidden
-        md:block
+        md:flex
+        items-center
+        gap-2
       "
     >
-      <img v-if="adminLogo" :src="adminLogo" class="h-12" @error="onLogoError" />
-      <MainLogo v-else class="block h-12 w-auto" variant="clear" />
+      <img v-if="adminLogo" :src="adminLogo" class="h-10" @error="onLogoError" />
+      <template v-else>
+        <MainLogo class="block h-10 w-10" variant="icon" />
+        <span class="text-lg font-bold text-white">Facturino</span>
+      </template>
       <!-- CLAUDE-CHECKPOINT -->
     </router-link>
 

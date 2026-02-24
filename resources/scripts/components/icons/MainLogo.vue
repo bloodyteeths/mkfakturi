@@ -6,6 +6,7 @@
 import { computed } from 'vue'
 import clearLogo from '$images/facturino_logo_clear.png'
 import standardLogo from '$images/facturino_logo.png'
+import iconLogo from '$images/facturino_icon.png'
 
 const props = defineProps({
   darkColor: {
@@ -18,7 +19,7 @@ const props = defineProps({
   },
   variant: {
     type: String,
-    default: 'clear', // 'clear' or 'standard'
+    default: 'clear', // 'clear', 'standard', or 'icon'
   },
   altText: {
     type: String,
@@ -27,6 +28,7 @@ const props = defineProps({
 })
 
 const logoUrl = computed(() => {
+  if (props.variant === 'icon') return iconLogo
   return props.variant === 'clear' ? clearLogo : standardLogo
 })
 </script>

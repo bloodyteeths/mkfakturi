@@ -95,12 +95,13 @@
 
             <!-- Menu content -->
             <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-              <div class="flex items-center shrink-0 px-4 mb-6">
+              <div class="flex items-center gap-3 shrink-0 px-4 mb-6">
                 <MainLogo
-                  class="block h-16 w-auto"
-                  variant="clear"
+                  class="block h-12 w-12"
+                  variant="icon"
                   alt="Facturino Logo"
                 />
+                <span class="text-xl font-bold text-primary-500">Facturino</span>
               </div>
 
               <nav

@@ -12,18 +12,22 @@
               :href="`/${globalStore.companySlug}/customer/dashboard`"
               class="
                 float-none
-                text-lg
                 not-italic
                 font-black
                 tracking-wider
-                text-white
                 brand-main
                 md:float-left
                 font-base
+                flex
+                items-center
+                gap-2
               "
             >
-              <MainLogo v-if="!customerLogo" class="h-10" />
-              <img v-else :src="customerLogo" class="h-10" />
+              <template v-if="!customerLogo">
+                <MainLogo class="h-9 w-9" variant="icon" />
+                <span class="text-base font-bold text-primary-600">Facturino</span>
+              </template>
+              <img v-else :src="customerLogo" class="h-9" />
             </a>
           </div>
           <div class="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
