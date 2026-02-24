@@ -231,7 +231,7 @@ class EInvoiceController extends Controller
             $ublXml = $ublMapper->mapInvoiceToUbl($invoice);
 
             // Get or create e-invoice record
-            $eInvoice = EInvoice::whereInvoice($invoiceId)->first();
+            $eInvoice = EInvoice::whereCompany()->whereInvoice($invoiceId)->first();
 
             if (! $eInvoice) {
                 $eInvoice = EInvoice::create([
@@ -404,7 +404,7 @@ class EInvoiceController extends Controller
             $eInvoice = EInvoice::whereCompany()->findOrFail($id);
 
             // Authorize after loading the model
-            $this->authorize('update', $eInvoice);
+            $this->authorize('submit', $eInvoice);
 
             // Validate e-invoice is signed
             if (! $eInvoice->isSigned()) {
@@ -570,12 +570,13 @@ class EInvoiceController extends Controller
      */
     public function resubmit(int $submissionId): JsonResponse
     {
-        $this->authorize('update', EInvoice::class);
-
         try {
             $submission = EInvoiceSubmission::whereCompany()
                 ->with('eInvoice')
                 ->findOrFail($submissionId);
+
+            // Authorize after loading the model
+            $this->authorize('submit', $submission->eInvoice);
 
             // Check if can retry
             if (! $submission->canRetry()) {
@@ -589,7 +590,7 @@ class EInvoiceController extends Controller
             $submission->retry();
 
             // Dispatch job again
-            dispatch(new \App\Jobs\SubmitEInvoiceJob($eInvoice->id));
+            dispatch(new \App\Jobs\SubmitEInvoiceJob($submission->eInvoice->id));
 
             // Reload e-invoice with relationships
             $eInvoice = $submission->eInvoice->fresh([
