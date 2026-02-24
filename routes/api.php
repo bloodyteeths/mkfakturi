@@ -659,26 +659,29 @@ Route::prefix('/v1')->group(function () {
 
             // FG-01-11: E-Invoice operations (usage-limited, see UsageLimitService)
             Route::prefix('e-invoices')->middleware(['throttle:60,1'])->group(function () {
+                // Static routes first (before wildcard {id} routes)
                 Route::get('/', [EInvoiceController::class, 'index']);
                 Route::get('/portal-status', [EInvoiceController::class, 'checkPortalStatus']);
                 Route::get('/submission-queue', [EInvoiceController::class, 'getSubmissionQueue']);
                 Route::get('/by-invoice/{invoiceId}', [EInvoiceController::class, 'showByInvoice']);
-                Route::get('/{id}', [EInvoiceController::class, 'show']);
                 Route::post('/generate/{invoiceId}', [EInvoiceController::class, 'generate']);
-                Route::post('/{id}/sign', [EInvoiceController::class, 'sign']); // QES signing
-                Route::post('/{id}/submit', [EInvoiceController::class, 'submit']);
-                Route::post('/{id}/simulate', [EInvoiceController::class, 'simulate']);
-                Route::get('/{id}/download-xml', [EInvoiceController::class, 'downloadXml']);
-                Route::post('/{submissionId}/resubmit', [EInvoiceController::class, 'resubmit']);
 
-                // P7-02: Incoming e-invoice endpoints
+                // P7-02: Incoming e-invoice endpoints (must be before /{id} wildcard)
                 Route::prefix('incoming')->group(function () {
                     Route::get('/', [EInvoiceController::class, 'listIncoming']);
                     Route::post('/poll', [EInvoiceController::class, 'pollPortalInbox']);
-                    Route::get('/{id}', [EInvoiceController::class, 'showIncoming']);
-                    Route::post('/{id}/accept', [EInvoiceController::class, 'acceptIncoming']);
-                    Route::post('/{id}/reject', [EInvoiceController::class, 'rejectIncoming']);
+                    Route::get('/{id}', [EInvoiceController::class, 'showIncoming'])->where('id', '[0-9]+');
+                    Route::post('/{id}/accept', [EInvoiceController::class, 'acceptIncoming'])->where('id', '[0-9]+');
+                    Route::post('/{id}/reject', [EInvoiceController::class, 'rejectIncoming'])->where('id', '[0-9]+');
                 });
+
+                // Wildcard {id} routes last
+                Route::get('/{id}', [EInvoiceController::class, 'show'])->where('id', '[0-9]+');
+                Route::post('/{id}/sign', [EInvoiceController::class, 'sign'])->where('id', '[0-9]+');
+                Route::post('/{id}/submit', [EInvoiceController::class, 'submit'])->where('id', '[0-9]+');
+                Route::post('/{id}/simulate', [EInvoiceController::class, 'simulate'])->where('id', '[0-9]+');
+                Route::get('/{id}/download-xml', [EInvoiceController::class, 'downloadXml'])->where('id', '[0-9]+');
+                Route::post('/{submissionId}/resubmit', [EInvoiceController::class, 'resubmit'])->where('submissionId', '[0-9]+');
             });
 
             // VAT Returns
