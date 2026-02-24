@@ -34,10 +34,10 @@
         gap-2
       "
     >
-      <img v-if="adminLogo" :src="adminLogo" class="h-10" @error="onLogoError" />
+      <img v-if="adminLogo" :src="adminLogo" class="h-12" @error="onLogoError" />
       <template v-else>
-        <MainLogo class="block h-10 w-10" variant="icon" />
-        <span class="text-lg font-bold text-white">Facturino</span>
+        <MainLogo class="block h-[52px] w-[52px]" variant="icon" />
+        <span class="text-xl font-bold text-white">Facturino</span>
       </template>
       <!-- CLAUDE-CHECKPOINT -->
     </router-link>
