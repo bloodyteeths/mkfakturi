@@ -1855,7 +1855,11 @@ class IfrsAdapter
                         }
 
                         $accounts = $categoryData['accounts'] ?? [];
-                        if (! is_array($accounts)) {
+                        // IFRS returns accounts as Eloquent Collection, not plain array
+                        if ($accounts instanceof \Illuminate\Support\Collection) {
+                            $accounts = $accounts->toArray();
+                        }
+                        if (! is_array($accounts) || empty($accounts)) {
                             // No individual accounts, use category total
                             $balance = abs($categoryData['total'] ?? 0);
                             $components['other'] += $balance;
