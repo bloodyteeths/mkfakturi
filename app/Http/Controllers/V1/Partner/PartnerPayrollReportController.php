@@ -43,6 +43,7 @@ class PartnerPayrollReportController extends Controller
         $query = PayrollRun::forCompany($company)
             ->where('period_year', $year)
             ->whereIn('status', [
+                PayrollRun::STATUS_CALCULATED,
                 PayrollRun::STATUS_APPROVED,
                 PayrollRun::STATUS_POSTED,
                 PayrollRun::STATUS_PAID,
@@ -123,11 +124,18 @@ class PartnerPayrollReportController extends Controller
 
         $currentMonthRun = PayrollRun::forCompany($company)
             ->forPeriod($currentYear, $currentMonth)
+            ->whereIn('status', [
+                PayrollRun::STATUS_CALCULATED,
+                PayrollRun::STATUS_APPROVED,
+                PayrollRun::STATUS_POSTED,
+                PayrollRun::STATUS_PAID,
+            ])
             ->first();
 
         $ytdRuns = PayrollRun::forCompany($company)
             ->where('period_year', $currentYear)
             ->whereIn('status', [
+                PayrollRun::STATUS_CALCULATED,
                 PayrollRun::STATUS_APPROVED,
                 PayrollRun::STATUS_POSTED,
                 PayrollRun::STATUS_PAID,
@@ -181,6 +189,7 @@ class PartnerPayrollReportController extends Controller
         $runs = PayrollRun::forCompany($company)
             ->where('period_year', $year)
             ->whereIn('status', [
+                PayrollRun::STATUS_CALCULATED,
                 PayrollRun::STATUS_APPROVED,
                 PayrollRun::STATUS_POSTED,
                 PayrollRun::STATUS_PAID,

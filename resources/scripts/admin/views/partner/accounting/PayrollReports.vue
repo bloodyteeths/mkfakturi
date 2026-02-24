@@ -214,7 +214,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { useNotificationStore } from '@/scripts/stores/notification'
-import axios from 'axios'
+// Use window.axios (configured with baseURL + company header interceptor)
 
 const { t } = useI18n()
 const consoleStore = useConsoleStore()
@@ -274,11 +274,11 @@ async function loadData() {
 
   try {
     const [statsRes, summaryRes, comparisonRes] = await Promise.all([
-      axios.get(`/partner/companies/${selectedCompanyId.value}/payroll-reports/statistics`),
-      axios.get(`/partner/companies/${selectedCompanyId.value}/payroll-reports/tax-summary`, {
+      window.axios.get(`/partner/companies/${selectedCompanyId.value}/payroll-reports/statistics`),
+      window.axios.get(`/partner/companies/${selectedCompanyId.value}/payroll-reports/tax-summary`, {
         params: { year: selectedYear.value, month: selectedMonth.value },
       }),
-      axios.get(`/partner/companies/${selectedCompanyId.value}/payroll-reports/monthly-comparison`, {
+      window.axios.get(`/partner/companies/${selectedCompanyId.value}/payroll-reports/monthly-comparison`, {
         params: { year: selectedYear.value },
       }),
     ])
