@@ -78,6 +78,7 @@
             <tr>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('general.name') }}</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('accounting.fixed_assets.category_col', 'Category') }}</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('accounting.fixed_assets.acquisition_date', 'Acq. Date') }}</th>
               <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('accounting.fixed_assets.cost', 'Cost') }}</th>
               <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('accounting.fixed_assets.accum_depr', 'Accum. Depr.') }}</th>
               <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('accounting.fixed_assets.net_value', 'Net Value') }}</th>
@@ -92,6 +93,7 @@
                 <div v-if="asset.asset_code" class="text-xs text-gray-500">{{ asset.asset_code }}</div>
               </td>
               <td class="px-4 py-3 text-sm text-gray-600">{{ categoryLabel(asset.category) }}</td>
+              <td class="px-4 py-3 text-sm text-gray-600">{{ asset.acquisition_date }}</td>
               <td class="px-4 py-3 text-sm text-right">{{ formatMoney(asset.acquisition_cost) }}</td>
               <td class="px-4 py-3 text-sm text-right text-red-600">{{ formatMoney(asset.accumulated_depreciation) }}</td>
               <td class="px-4 py-3 text-sm text-right font-medium">{{ formatMoney(asset.net_book_value) }}</td>
@@ -117,7 +119,7 @@
           </tbody>
           <tfoot class="bg-gray-50">
             <tr class="font-semibold">
-              <td colspan="2" class="px-4 py-3 text-sm">{{ $t('general.total') }} ({{ assets.length }})</td>
+              <td colspan="3" class="px-4 py-3 text-sm">{{ $t('general.total') }} ({{ assets.length }})</td>
               <td class="px-4 py-3 text-sm text-right">{{ formatMoney(totalCost) }}</td>
               <td class="px-4 py-3 text-sm text-right text-red-600">{{ formatMoney(totalDepreciation) }}</td>
               <td class="px-4 py-3 text-sm text-right">{{ formatMoney(totalNetValue) }}</td>
