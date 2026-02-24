@@ -13,6 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -144,8 +145,8 @@ class ExportUserDataJob implements ShouldQueue
             'email' => $user->email,
             'role' => $user->role,
             'phone' => $user->phone ?? '',
-            'created_at' => $user->created_at?->toDateTimeString(),
-            'updated_at' => $user->updated_at?->toDateTimeString(),
+            'created_at' => $this->formatDate($user->created_at, true),
+            'updated_at' => $this->formatDate($user->updated_at, true),
         ];
 
         $jsonPath = $tempDir.'/profile.json';
@@ -172,7 +173,7 @@ class ExportUserDataJob implements ShouldQueue
                 'country' => $company->address->country->name ?? '',
                 'phone' => $company->address->phone ?? '',
                 'website' => $company->website ?? '',
-                'created_at' => $company->created_at?->toDateTimeString(),
+                'created_at' => $this->formatDate($company->created_at, true),
             ];
         })->toArray();
 
@@ -209,12 +210,12 @@ class ExportUserDataJob implements ShouldQueue
             $csv->insertOne([
                 $invoice->invoice_number ?? '',
                 $invoice->customer->name ?? '',
-                $invoice->invoice_date?->toDateString() ?? '',
-                $invoice->due_date?->toDateString() ?? '',
+                $this->formatDate($invoice->invoice_date),
+                $this->formatDate($invoice->due_date),
                 $invoice->status ?? '',
                 $invoice->total ?? 0,
                 $invoice->currency->code ?? '',
-                $invoice->created_at?->toDateTimeString() ?? '',
+                $this->formatDate($invoice->created_at, true),
             ]);
         }
     }
@@ -284,11 +285,11 @@ class ExportUserDataJob implements ShouldQueue
                 $expense->expense_number ?? '',
                 $expense->category->name ?? '',
                 $expense->customer->name ?? '',
-                $expense->expense_date?->toDateString() ?? '',
+                $this->formatDate($expense->expense_date),
                 $expense->amount ?? 0,
                 $expense->currency->code ?? '',
                 $expense->notes ?? '',
-                $expense->created_at?->toDateTimeString() ?? '',
+                $this->formatDate($expense->created_at, true),
             ]);
         }
     }
@@ -324,12 +325,12 @@ class ExportUserDataJob implements ShouldQueue
                 $payment->payment_number ?? '',
                 $payment->customer->name ?? '',
                 $payment->invoice->invoice_number ?? '',
-                $payment->payment_date?->toDateString() ?? '',
+                $this->formatDate($payment->payment_date),
                 $payment->amount ?? 0,
                 $payment->currency->code ?? '',
                 $payment->paymentMethod->name ?? '',
                 $payment->notes ?? '',
-                $payment->created_at?->toDateTimeString() ?? '',
+                $this->formatDate($payment->created_at, true),
             ]);
         }
     }
@@ -401,6 +402,24 @@ Export Date: {date}
 If you have any questions about this data export, please contact our support team.
 
 README;
+    }
+
+    /**
+     * Safely format a date value that may be a Carbon instance or string.
+     */
+    protected function formatDate($value, bool $includeTime = false): string
+    {
+        if (! $value) {
+            return '';
+        }
+
+        try {
+            $date = $value instanceof Carbon ? $value : Carbon::parse($value);
+
+            return $includeTime ? $date->toDateTimeString() : $date->toDateString();
+        } catch (\Exception $e) {
+            return (string) $value;
+        }
     }
 
     /**
