@@ -253,14 +253,7 @@ const filters = reactive({
   from_date: '',
   to_date: '',
   customer_id: '',
-  project_id: '',
-})
-
-// Initialize filters from query params
-onMounted(() => {
-  if (route.query.project_id) {
-    filters.project_id = route.query.project_id
-  }
+  project_id: route.query.project_id || '',
 })
 
 const { t } = useI18n()
@@ -381,6 +374,7 @@ function clearFilter() {
   filters.from_date = ''
   filters.to_date = ''
   filters.customer_id = ''
+  filters.project_id = ''
 }
 
 function toggleFilter() {

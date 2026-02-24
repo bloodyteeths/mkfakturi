@@ -209,7 +209,7 @@
 <script setup>
 import { debouncedWatch } from '@vueuse/core'
 
-import { ref, reactive, computed, onUnmounted, onMounted } from 'vue'
+import { ref, reactive, computed, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDialogStore } from '@/scripts/stores/dialog'
@@ -232,14 +232,7 @@ const filters = reactive({
   customer_id: '',
   payment_mode: '',
   payment_number: '',
-  project_id: '',
-})
-
-// Initialize filters from query params
-onMounted(() => {
-  if (route.query.project_id) {
-    filters.project_id = route.query.project_id
-  }
+  project_id: route.query.project_id || '',
 })
 
 const paymentStore = usePaymentStore()
@@ -364,6 +357,7 @@ function clearFilter() {
   filters.customer_id = ''
   filters.payment_mode = ''
   filters.payment_number = ''
+  filters.project_id = ''
 }
 
 function toggleFilter() {

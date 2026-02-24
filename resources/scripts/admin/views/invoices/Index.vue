@@ -347,7 +347,7 @@
 </template>
 
 <script setup>
-import { computed, onUnmounted, onMounted, reactive, ref, watch, inject } from 'vue'
+import { computed, onUnmounted, reactive, ref, watch, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useInvoiceStore } from '@/scripts/admin/stores/invoice'
@@ -411,14 +411,7 @@ let filters = reactive({
   from_date: '',
   to_date: '',
   invoice_number: '',
-  project_id: '',
-})
-
-// Initialize filters from query params
-onMounted(() => {
-  if (route.query.project_id) {
-    filters.project_id = route.query.project_id
-  }
+  project_id: route.query.project_id || '',
 })
 
 const invoiceListData = ref([])
@@ -587,6 +580,7 @@ function clearFilter() {
   filters.from_date = ''
   filters.to_date = ''
   filters.invoice_number = ''
+  filters.project_id = ''
 
   activeTab.value = t('general.all')
 }
