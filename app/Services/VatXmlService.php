@@ -196,9 +196,9 @@ class VatXmlService
         $taxPayer = $dom->createElement('TaxPayer');
         $root->appendChild($taxPayer);
 
-        // VAT number - ensure Macedonia format (MK + 11 digits)
-        $vatNumber = $this->formatMacedoniaVatNumber($this->company->vat_number);
-        $taxPayer->appendChild($dom->createElement('VATNumber', $vatNumber));
+        // ЕДБ (Единствен Даночен Број) - 13 digits, no prefix
+        $edb = $this->formatMacedoniaVatNumber($this->company->vat_number);
+        $taxPayer->appendChild($dom->createElement('EDB', $edb));
         $taxPayer->appendChild($dom->createElement('CompanyName', htmlspecialchars($this->company->name)));
 
         // Address
@@ -330,10 +330,12 @@ class VatXmlService
         $declaration = $dom->createElement('Declaration');
         $root->appendChild($declaration);
 
+        $this->company->loadMissing('owner');
         $ownerName = $this->company->owner ? $this->company->owner->name : $this->company->name;
+        $position = 'Управител';
 
         $declaration->appendChild($dom->createElement('DeclarantName', htmlspecialchars($ownerName)));
-        $declaration->appendChild($dom->createElement('DeclarantPosition', 'Управник / Director'));
+        $declaration->appendChild($dom->createElement('DeclarantPosition', htmlspecialchars($position)));
         $declaration->appendChild($dom->createElement('DeclarationDate', now()->format('Y-m-d')));
 
         // Responsible person
@@ -341,7 +343,7 @@ class VatXmlService
         $declaration->appendChild($responsiblePerson);
 
         $responsiblePerson->appendChild($dom->createElement('Name', htmlspecialchars($ownerName)));
-        $responsiblePerson->appendChild($dom->createElement('Position', 'Управник / Director'));
+        $responsiblePerson->appendChild($dom->createElement('Position', htmlspecialchars($position)));
 
         if ($this->company->owner && $this->company->owner->email) {
             $responsiblePerson->appendChild($dom->createElement('Email', htmlspecialchars($this->company->owner->email)));
@@ -510,21 +512,22 @@ class VatXmlService
     }
 
     /**
-     * Format VAT number to Macedonia standard (MK + 11 digits)
+     * Format VAT number to Macedonia ЕДБ standard (13 digits, no prefix).
+     * UJP uses plain 13-digit ЕДБ numbers (e.g. 4004026525934), not EU "MK" format.
      */
     protected function formatMacedoniaVatNumber(?string $vatNumber): string
     {
         if (! $vatNumber) {
-            return 'MK00000000000'; // Default placeholder
+            return '0000000000000';
         }
 
-        // Remove any existing country prefix
-        $cleanNumber = preg_replace('/^MK/i', '', $vatNumber);
+        // Remove any existing country prefix (MK, МК)
+        $cleanNumber = preg_replace('/^(MK|МК)/i', '', $vatNumber);
         $cleanNumber = preg_replace('/[^0-9]/', '', $cleanNumber);
 
-        // Pad or truncate to 11 digits
-        $cleanNumber = str_pad(substr($cleanNumber, 0, 11), 11, '0', STR_PAD_LEFT);
+        // ЕДБ is 13 digits
+        $cleanNumber = str_pad(substr($cleanNumber, 0, 13), 13, '0', STR_PAD_LEFT);
 
-        return 'MK'.$cleanNumber;
+        return $cleanNumber;
     }
 }
