@@ -253,7 +253,14 @@ class OutreachSendBatchCommand extends Command
             // Skip leads who already registered as users
             ->whereNotIn('email', function ($subQuery) {
                 $subQuery->select('email')->from('users');
-            });
+            })
+            // Skip leads on domains with >50% bounce rate (10+ historical sends)
+            ->whereRaw("SUBSTRING_INDEX(email, '@', -1) NOT IN (
+                SELECT SUBSTRING_INDEX(email, '@', -1)
+                FROM outreach_sends
+                GROUP BY SUBSTRING_INDEX(email, '@', -1)
+                HAVING COUNT(*) >= 10 AND SUM(status = 'bounced') / COUNT(*) > 0.5
+            )");
 
         // Apply lead type filter
         if ($leadType === OutreachLead::TYPE_ACCOUNTANT) {
@@ -523,7 +530,13 @@ class OutreachSendBatchCommand extends Command
                 );
 
                 if (!$messageId) {
-                    $this->error("  Failed to send to {$lead->email}");
+                    // Check if email was auto-suppressed (e.g., Postmark 406 inactive)
+                    if (Suppression::isSuppressed($lead->email)) {
+                        $lead->update(['status' => OutreachLead::STATUS_LOST]);
+                        $this->warn("  Suppressed & marked lost: {$lead->email}");
+                    } else {
+                        $this->error("  Failed to send to {$lead->email}");
+                    }
                     $stats['errors']++;
                     $bar->advance();
                     continue;

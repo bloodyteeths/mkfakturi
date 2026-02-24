@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Modules\Mk\Bitrix\Models\OutreachSend;
+use Modules\Mk\Bitrix\Models\Suppression;
 use Modules\Mk\Bitrix\Mail\OutreachInitialMail;
 use Modules\Mk\Bitrix\Mail\OutreachFollowUp1Mail;
 use Modules\Mk\Bitrix\Mail\OutreachFollowUp2Mail;
@@ -149,10 +150,24 @@ class PostmarkOutreachService
             return $messageId;
 
         } catch (\Exception $e) {
+            $errorMsg = $e->getMessage();
+
+            // Postmark 406: Inactive recipient (previously bounced/complained)
+            // Auto-suppress to prevent infinite retries
+            if (str_contains(strtolower($errorMsg), 'not allowed to send')
+                || str_contains(strtolower($errorMsg), 'inactive recipient')
+                || str_contains($errorMsg, '406')) {
+                Suppression::fromBounce($email, "Postmark inactive: {$errorMsg}");
+                Log::warning('Auto-suppressed inactive Postmark recipient', [
+                    'email' => $email,
+                    'template' => $templateKey,
+                ]);
+            }
+
             Log::error('Failed to send outreach email', [
                 'email' => $email,
                 'template' => $templateKey,
-                'error' => $e->getMessage(),
+                'error' => $errorMsg,
             ]);
 
             return null;
