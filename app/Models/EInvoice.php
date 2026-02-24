@@ -305,6 +305,15 @@ class EInvoice extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
+    public function scopePaginateData($query, $limit)
+    {
+        if ($limit == 'all') {
+            return $query->get();
+        }
+
+        return $query->paginate($limit);
+    }
+
     public function scopeWhereStatus($query, string $status)
     {
         return $query->where('status', $status);
