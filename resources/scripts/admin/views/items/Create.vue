@@ -500,6 +500,31 @@ const showInitialStock = computed(() => {
     itemStore.currentItem.track_quantity
 })
 
+// Auto-populate initial stock unit_cost from cost price when user hasn't manually set it
+let syncingFromCost = false
+const userEditedUnitCost = ref(false)
+watch(
+  () => itemStore.currentItem.cost,
+  (newCost) => {
+    if (!userEditedUnitCost.value && showInitialStock.value && newCost) {
+      // cost is stored in cents, BaseMoney expects display value
+      syncingFromCost = true
+      initialStock.value.unit_cost = newCost / 100
+      syncingFromCost = false
+    }
+  }
+)
+watch(
+  () => initialStock.value.unit_cost,
+  () => {
+    // Only mark user-edited if the change didn't come from the cost sync
+    if (!syncingFromCost) {
+      userEditedUnitCost.value = true
+    }
+  },
+  { flush: 'sync' }
+)
+
 // Load data after all refs and computeds are defined
 loadData()
 

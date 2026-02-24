@@ -260,7 +260,7 @@ class AppServiceProvider extends ServiceProvider
             // Phase 2: Proforma Invoice observer
             \App\Models\ProformaInvoice::observe(\App\Observers\ProformaInvoiceObserver::class);
 
-            \Illuminate\Support\Facades\Log::debug('IFRS observers registered');
+            // Observers registered at boot — no per-request logging needed
         }
 
         // Audit trail observers (always enabled)
