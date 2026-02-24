@@ -45,12 +45,31 @@
     </BasePageHeader>
 
     <BaseFilterWrapper v-show="showFilters" @clear="clearFilter">
-      <BaseInputGroup :label="$t('suppliers.name')">
-        <BaseInput v-model="filters.search">
-          <template #left="slotProps">
-            <BaseIcon name="MagnifyingGlassIcon" :class="slotProps.class" />
-          </template>
-        </BaseInput>
+      <BaseInputGroup :label="$t('suppliers.name')" class="text-left">
+        <BaseInput
+          v-model="filters.name"
+          type="text"
+          name="name"
+          autocomplete="off"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('suppliers.contact_name')" class="text-left">
+        <BaseInput
+          v-model="filters.contact_name"
+          type="text"
+          name="contact_name"
+          autocomplete="off"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('suppliers.phone')" class="text-left">
+        <BaseInput
+          v-model="filters.phone"
+          type="text"
+          name="phone"
+          autocomplete="off"
+        />
       </BaseInputGroup>
     </BaseFilterWrapper>
 
@@ -114,6 +133,7 @@
 </template>
 
 <script setup>
+import { debouncedWatch } from '@vueuse/core'
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import abilities from '@/scripts/admin/stub/abilities'
@@ -130,7 +150,9 @@ const showFilters = ref(false)
 const tableComponent = ref(null)
 
 const filters = reactive({
-  search: '',
+  name: '',
+  contact_name: '',
+  phone: '',
   page: 1,
   limit: 10,
   orderByField: undefined,
@@ -162,7 +184,9 @@ function fetchData(params) {
   }
 
   const query = {
-    search: filters.search,
+    name: filters.name,
+    contact_name: filters.contact_name,
+    phone: filters.phone,
     page: filters.page,
     limit: filters.limit,
     orderByField: filters.orderByField,
@@ -171,9 +195,19 @@ function fetchData(params) {
   suppliersStore.fetchSuppliers(query)
 }
 
+debouncedWatch(
+  filters,
+  () => {
+    filters.page = 1
+    fetchData()
+  },
+  { debounce: 500 }
+)
+
 function clearFilter() {
-  filters.search = ''
-  fetchData()
+  filters.name = ''
+  filters.contact_name = ''
+  filters.phone = ''
 }
 
 function toggleFilter() {

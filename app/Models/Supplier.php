@@ -171,6 +171,14 @@ class Supplier extends Model
     }
 
     /**
+     * Scope: Filter by phone
+     */
+    public function scopeWherePhone($query, $phone)
+    {
+        return $query->where('phone', 'LIKE', '%'.$phone.'%');
+    }
+
+    /**
      * Scope: Search across multiple fields
      */
     public function scopeWhereSearch($query, $search)
@@ -210,6 +218,10 @@ class Supplier extends Model
 
         if ($filters->get('contact_name')) {
             $query->whereContactName($filters->get('contact_name'));
+        }
+
+        if ($filters->get('phone')) {
+            $query->wherePhone($filters->get('phone'));
         }
 
         if ($filters->get('orderByField') || $filters->get('orderBy')) {
