@@ -106,6 +106,29 @@
         </BaseDropdown>
       </li>
 
+      <!-- Documents shortcut -->
+      <li class="relative float-left ml-2">
+        <router-link
+          to="/admin/documents"
+          class="
+            flex
+            items-center
+            justify-center
+            w-8
+            h-8
+            text-sm text-black
+            bg-white
+            rounded
+            md:h-9 md:w-9
+            cursor-pointer
+            hover:bg-gray-100
+          "
+          :title="$t('navigation.documents')"
+        >
+          <BaseIcon name="DocumentArrowUpIcon" class="w-5 h-5 text-gray-600" />
+        </router-link>
+      </li>
+
       <li class="ml-2">
         <GlobalSearchBar
           v-if="
