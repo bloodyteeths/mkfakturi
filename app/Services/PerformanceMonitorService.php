@@ -51,8 +51,8 @@ class PerformanceMonitorService
             'memory_used_mb' => round($memoryUsed / 1024 / 1024, 2),
         ];
 
-        // Log slow operations
-        if ($executionTime > 300) { // Operations slower than 300ms
+        // Log slow operations (1s+ threshold — middleware handles request-level logging)
+        if ($executionTime > 1000) {
             Log::warning('Slow operation detected', $result);
         }
 

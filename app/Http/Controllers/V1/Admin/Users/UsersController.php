@@ -24,15 +24,17 @@ class UsersController extends Controller
 
         $user = $request->user();
 
-        $users = User::applyFilters($request->all())
-            ->where('id', '<>', $user->id)
-            ->latest()
-            ->paginate($limit);
+        $query = User::applyFilters($request->all())
+            ->where('id', '<>', $user->id);
+
+        $totalCount = (clone $query)->count();
+
+        $users = $query->latest()->paginate($limit);
 
         return UserResource::collection($users)
             ->additional([
                 'meta' => [
-                    'user_total_count' => User::count(),
+                    'user_total_count' => $totalCount,
                 ],
             ]);
     }
@@ -47,28 +49,9 @@ class UsersController extends Controller
         $this->authorize('create', User::class);
 
         if ($request->is_existing_user) {
-            \Log::info('Looking for existing user', [
-                'email' => $request->email,
-                'email_length' => strlen($request->email),
-                'email_trimmed' => trim($request->email),
-            ]);
-
-            // Try direct DB query first to bypass any model scopes
-            $userExists = \DB::table('users')->where('email', $request->email)->first();
-            \Log::info('Direct DB query result', [
-                'found' => $userExists ? 'yes' : 'no',
-                'user_id' => $userExists->id ?? null,
-            ]);
-
             $user = User::where('email', $request->email)->first();
 
             if (! $user) {
-                \Log::warning('User not found', [
-                    'searched_email' => $request->email,
-                    'all_emails_eloquent' => User::pluck('email')->toArray(),
-                    'all_emails_db' => \DB::table('users')->pluck('email')->toArray(),
-                ]);
-
                 return response()->json([
                     'error' => 'user_not_found',
                     'message' => 'No user found with the provided email address.',

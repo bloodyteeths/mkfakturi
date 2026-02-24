@@ -63,13 +63,13 @@ class PerformanceMonitoringMiddleware
             $response->headers->set('X-Request-ID', $this->requestId);
         }
 
-        // Log slow requests
-        if ($metrics['execution_time_ms'] > 300) {
+        // Log slow requests (1s+ is genuinely slow, 300ms was too noisy)
+        if ($metrics['execution_time_ms'] > 1000) {
             Log::warning('Slow request detected', $fullMetrics);
-        }
 
-        // Store metrics asynchronously to avoid blocking the response
-        $this->storeMetricsAsync($fullMetrics);
+            // Only store metrics for slow requests to avoid DB overhead on every request
+            $this->storeMetricsAsync($fullMetrics);
+        }
 
         return $response;
     }

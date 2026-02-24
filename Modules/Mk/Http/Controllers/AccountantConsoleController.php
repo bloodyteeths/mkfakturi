@@ -17,20 +17,13 @@ class AccountantConsoleController extends Controller
     public function index(): JsonResponse
     {
         $user = Auth::user();
-        \Log::info('AccountantConsoleController::index START', [
-            'user_id' => $user->id ?? 'null',
-            'user_email' => $user->email ?? 'null',
-        ]);
 
         if (! $user) {
-            \Log::error('AccountantConsoleController::index - No authenticated user');
-
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         // Super admin can see all companies
         if ($user->role === 'super admin') {
-            \Log::info('AccountantConsoleController::index - Super admin access, returning all companies');
 
             $allCompanies = Company::with('address')
                 ->orderBy('name')
@@ -75,8 +68,6 @@ class AccountantConsoleController extends Controller
         $partner = Partner::where('user_id', $user->id)->first();
 
         if (! $partner) {
-            \Log::warning('AccountantConsoleController::index - No partner found', ['user_id' => $user->id]);
-
             return response()->json([
                 'error' => 'User is not registered as a partner',
                 'partner' => null,
@@ -89,13 +80,7 @@ class AccountantConsoleController extends Controller
             ], 403);
         }
 
-        \Log::info('AccountantConsoleController::index - Partner found', [
-            'partner_id' => $partner->id,
-            'partner_email' => $partner->email,
-        ]);
-
         // 1. Get managed companies (active access with accepted invitation)
-        \Log::info('AccountantConsoleController::index - Fetching managed companies');
         $managedCompanies = \DB::table('partner_company_links')
             ->join('companies', 'companies.id', '=', 'partner_company_links.company_id')
             ->leftJoin('addresses', function ($join) {
@@ -140,12 +125,7 @@ class AccountantConsoleController extends Controller
                 ];
             });
 
-        \Log::info('AccountantConsoleController::index - Managed companies fetched', [
-            'count' => $managedCompanies->count(),
-        ]);
-
         // 2. Get referred companies (from affiliate_events)
-        \Log::info('AccountantConsoleController::index - Fetching referred companies');
         $referredCompanies = \DB::table('affiliate_events')
             ->join('companies', 'companies.id', '=', 'affiliate_events.company_id')
             ->where('affiliate_events.affiliate_partner_id', $partner->id)
@@ -181,12 +161,7 @@ class AccountantConsoleController extends Controller
                 ];
             });
 
-        \Log::info('AccountantConsoleController::index - Referred companies fetched', [
-            'count' => $referredCompanies->count(),
-        ]);
-
         // 3. Get pending invitations
-        \Log::info('AccountantConsoleController::index - Fetching pending invitations');
         $pendingInvitations = \DB::table('partner_company_links')
             ->join('companies', 'companies.id', '=', 'partner_company_links.company_id')
             ->leftJoin('users', 'users.id', '=', 'partner_company_links.created_by')
@@ -224,18 +199,6 @@ class AccountantConsoleController extends Controller
                     'override_commission_rate' => $invitation->override_commission_rate,
                 ];
             });
-
-        \Log::info('AccountantConsoleController::index - Pending invitations fetched', [
-            'count' => $pendingInvitations->count(),
-            'data' => $pendingInvitations->toArray(),
-        ]);
-
-        \Log::info('AccountantConsoleController::index response', [
-            'partner_id' => $partner->id,
-            'managed_count' => $managedCompanies->count(),
-            'referred_count' => $referredCompanies->count(),
-            'pending_count' => $pendingInvitations->count(),
-        ]);
 
         return response()->json([
             'partner' => [
