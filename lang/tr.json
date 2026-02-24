@@ -228,7 +228,8 @@
     "expand_sidebar": "Kenar çubuğunu genişlet",
     "refresh": "Yenile",
     "accept": "Kabul Et",
-    "type": "Tür"
+    "type": "Tür",
+    "year": "Yıl"
   },
   "dashboard": {
     "select_year": "Yılı seçin",
@@ -6655,7 +6656,19 @@
     "select_employee": "Çalışan Seçin",
     "select_leave_type": "İzin Türü Seçin",
     "start_date": "Başlangıç Tarihi",
-    "submit_leave_request": "İzin Talebini Gönder"
+    "submit_leave_request": "İzin Talebini Gönder",
+    "current_month_gross": "Cari Ay Brüt",
+    "current_month_net": "Cari Ay Net",
+    "employer_tax": "İşveren Vergisi",
+    "failed_to_load": "Bordro raporları yüklenemedi",
+    "gross": "Brüt",
+    "monthly_comparison": "Aylık Karşılaştırma",
+    "net": "Net",
+    "runs": "bordro hesaplamaları",
+    "total_employee_contributions": "Toplam Çalışan Katkıları",
+    "total_employer_cost": "Toplam İşveren Maliyeti",
+    "total_income_tax": "Gelir Vergisi",
+    "ytd_gross": "Yıl Başından Beri Brüt"
   },
   "months": {
     "january": "Ocak",

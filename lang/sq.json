@@ -228,7 +228,8 @@
     "collapse_sidebar": "Mbyll shiritin anësor",
     "expand_sidebar": "Zgjero shiritin anësor",
     "refresh": "Rifresko",
-    "accept": "Prano"
+    "accept": "Prano",
+    "year": "Viti"
   },
   "accounting": {
     "journal_entries": {
@@ -6030,7 +6031,19 @@
     "select_employee": "Zgjidhni punonjësin",
     "select_leave_type": "Zgjidhni llojin e pushimit",
     "start_date": "Data e fillimit",
-    "submit_leave_request": "Dorëzo kërkesën për pushim"
+    "submit_leave_request": "Dorëzo kërkesën për pushim",
+    "current_month_gross": "Bruto e muajit aktual",
+    "current_month_net": "Neto e muajit aktual",
+    "employer_tax": "Tatimi i punëdhënësit",
+    "failed_to_load": "Dështoi ngarkimi i raporteve të pagave",
+    "gross": "Bruto",
+    "monthly_comparison": "Krahasimi mujor",
+    "net": "Neto",
+    "runs": "llogaritje pagash",
+    "total_employee_contributions": "Kontributet totale të punonjësit",
+    "total_employer_cost": "Kostoja totale e punëdhënësit",
+    "total_income_tax": "Tatimi mbi të ardhurat (TAP)",
+    "ytd_gross": "Bruto nga fillimi i vitit"
   },
   "months": {
     "january": "Janar",

@@ -233,7 +233,8 @@
     "expand_sidebar": "Прошири странична лента",
     "refresh": "Освежи",
     "accept": "Прифати",
-    "type": "Тип"
+    "type": "Тип",
+    "year": "Година"
   },
   "accounting": {
     "journal_entries": {
@@ -6057,7 +6058,19 @@
     "select_employee": "Изберете вработен",
     "select_leave_type": "Изберете тип на отсуство",
     "start_date": "Почетен датум",
-    "submit_leave_request": "Поднеси барање за отсуство"
+    "submit_leave_request": "Поднеси барање за отсуство",
+    "current_month_gross": "Бруто за тековен месец",
+    "current_month_net": "Нето за тековен месец",
+    "employer_tax": "Давачки на работодавач",
+    "failed_to_load": "Неуспешно вчитување на извештаи за плати",
+    "gross": "Бруто",
+    "monthly_comparison": "Месечен преглед",
+    "net": "Нето",
+    "runs": "пресметки на плати",
+    "total_employee_contributions": "Вкупни придонеси на вработен",
+    "total_employer_cost": "Вкупен трошок на работодавач",
+    "total_income_tax": "Данок на доход (ДЛД)",
+    "ytd_gross": "Бруто од почеток на година"
   },
   "months": {
     "january": "Јануари",

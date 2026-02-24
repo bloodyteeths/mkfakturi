@@ -1452,7 +1452,8 @@
     "yes": "Yes",
     "you_got_lost": "Whoops! You got Lost!",
     "refresh": "Refresh",
-    "accept": "Accept"
+    "accept": "Accept",
+    "year": "Year"
   },
   "global_search": {
     "customers": "Customers",
@@ -3642,6 +3643,18 @@
     "view_reports": "View tax and payroll reports",
     "worked_days": "Worked Days",
     "working_days": "Working Days",
+    "current_month_gross": "Current Month Gross",
+    "current_month_net": "Current Month Net",
+    "employer_tax": "Employer Tax",
+    "failed_to_load": "Failed to load payroll reports",
+    "gross": "Gross",
+    "monthly_comparison": "Monthly Comparison",
+    "net": "Net",
+    "runs": "payroll runs",
+    "total_employee_contributions": "Total Employee Contributions",
+    "total_employer_cost": "Total Employer Cost",
+    "total_income_tax": "Income Tax (PIT)",
+    "ytd_gross": "YTD Gross",
     "year": "Year"
   },
   "pdf_account_name_label": "Account Name",
