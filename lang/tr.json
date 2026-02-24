@@ -1417,6 +1417,22 @@
     "select_companies": "Seçin компанveve"
   },
   "reports": {
+    "equity": {
+      "title": "Özkaynak Değişim Tablosu",
+      "fiscal_year": "Mali Yıl",
+      "share_capital": "Sermaye",
+      "reserves": "Yedekler",
+      "retained_earnings": "Geçmiş Yıl Karları",
+      "revaluation": "Yeniden Değerleme Rezervleri",
+      "other": "Diğer",
+      "opening": "Açılış Bakiyesi",
+      "net_income": "Net Kar/Zarar",
+      "capital_change": "Sermaye Değişimi",
+      "reserves_change": "Yedek Değişimi",
+      "total_changes": "Toplam Değişimler",
+      "closing": "Kapanış Bakiyesi",
+      "no_data": "Bu yıl için özkaynak verisi bulunamadı."
+    },
     "title": "Bildir",
     "from_date": "Başlangıç tarihi",
     "to_date": "Bitiş tarihi",
@@ -4869,6 +4885,7 @@
       "vat_returns_tab": "KDV Beyannameleri (DDV-04)",
       "payroll_reports": "Bordro Raporları",
       "fixed_assets": "Sabit Kıymetler",
+      "equity_changes": "Özkaynak Değişimleri",
       "select_export_scope": "Seç kapsam için dışa aktarma",
       "review_entries": "Görüntüle kayıtlar",
       "choose_format": "Seç biçim",

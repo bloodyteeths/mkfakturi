@@ -2089,6 +2089,22 @@
     "select_companies": "Dheзберете компанdhedhe"
   },
   "reports": {
+    "equity": {
+      "title": "Pasqyra e Ndryshimeve në Kapital",
+      "fiscal_year": "Viti Fiskal",
+      "share_capital": "Kapitali Themeltar",
+      "reserves": "Rezervat",
+      "retained_earnings": "Fitimi i Mbajtur",
+      "revaluation": "Rezervat e Rivlerësimit",
+      "other": "Tjera",
+      "opening": "Bilanci Fillestar",
+      "net_income": "Fitimi/Humbja Neto",
+      "capital_change": "Ndryshimi në Kapital",
+      "reserves_change": "Ndryshimi në Rezerva",
+      "total_changes": "Ndryshimet Totale",
+      "closing": "Bilanci Përfundimtar",
+      "no_data": "Nuk ka të dhëna kapitali për këtë vit."
+    },
     "title": "Raportet",
     "reports": "Raportet",
     "from_date": "Nga Data",
@@ -5249,6 +5265,7 @@
       "vat_returns_tab": "Deklaratat e TVSH-së (DDV-04)",
       "payroll_reports": "Raportet e Pagave",
       "fixed_assets": "Asetet Fikse",
+      "equity_changes": "Ndryshimet në Kapital",
       "select_export_scope": "Zgjidh опсег për dheзвоз",
       "review_entries": "Shiko кнdheжења",
       "choose_format": "Zgjidh formati",

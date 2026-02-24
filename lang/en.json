@@ -3010,6 +3010,7 @@
       "vat_returns_tab": "VAT Returns (DDV-04)",
       "payroll_reports": "Payroll Reports",
       "fixed_assets": "Fixed Assets",
+      "equity_changes": "Equity Changes",
       "select_csv_file": "Select CSV file",
       "select_export_scope": "Select Export Scope",
       "select_scope": "Select Scope",
@@ -4230,6 +4231,22 @@
     "years": "{years} Year"
   },
   "reports": {
+    "equity": {
+      "title": "Statement of Changes in Equity",
+      "fiscal_year": "Fiscal Year",
+      "share_capital": "Share Capital",
+      "reserves": "Reserves",
+      "retained_earnings": "Retained Earnings",
+      "revaluation": "Revaluation Reserves",
+      "other": "Other",
+      "opening": "Opening Balance",
+      "net_income": "Net Profit/Loss",
+      "capital_change": "Change in Capital",
+      "reserves_change": "Change in Reserves",
+      "total_changes": "Total Changes",
+      "closing": "Closing Balance",
+      "no_data": "No equity data for this year."
+    },
     "accounting": {
       "account_name": "Account Name",
       "accounting": "Accounting",

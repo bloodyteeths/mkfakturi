@@ -2098,6 +2098,22 @@
     "select_companies": "Изберете компании"
   },
   "reports": {
+    "equity": {
+      "title": "Извештај за промени во капиталот",
+      "fiscal_year": "Фискална година",
+      "share_capital": "Основен капитал",
+      "reserves": "Резерви",
+      "retained_earnings": "Задржана добивка",
+      "revaluation": "Ревалор. резерви",
+      "other": "Останато",
+      "opening": "Почетно салдо",
+      "net_income": "Нето добивка/загуба",
+      "capital_change": "Промена во капитал",
+      "reserves_change": "Промена во резерви",
+      "total_changes": "Вкупно промени",
+      "closing": "Крајно салдо",
+      "no_data": "Нема податоци за капитал за оваа година."
+    },
     "title": "Извештаи",
     "reports": "Извештаи",
     "from_date": "Од датум",
@@ -5424,6 +5440,7 @@
       "vat_returns_tab": "ДДВ пријави (ДДВ-04)",
       "payroll_reports": "Извештаи за плати",
       "fixed_assets": "Основни средства",
+      "equity_changes": "Промени во капитал",
       "select_export_scope": "Избери опсег за извоз",
       "review_entries": "Прегледај книжења",
       "choose_format": "Избери формат",
