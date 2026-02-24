@@ -985,9 +985,13 @@ export default [
 
       // Imports
       {
+        path: 'imports',
+        redirect: { name: 'imports.wizard' },
+      },
+      {
         path: 'imports/wizard',
         name: 'imports.wizard',
-        meta: { ability: abilities.CREATE_CUSTOMER }, // Use appropriate ability
+        meta: { ability: abilities.CREATE_CUSTOMER },
         component: ImportWizard,
       },
 
