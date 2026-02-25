@@ -232,7 +232,7 @@ async function linkSupplier(supplierId) {
   } catch (e) {
     notificationStore.showNotification({
       type: 'error',
-      message: e.response?.data?.error || 'Error linking supplier',
+      message: e.response?.data?.error || t('general.something_went_wrong'),
     })
   }
 }
@@ -248,7 +248,7 @@ async function unlinkSupplier() {
   } catch (e) {
     notificationStore.showNotification({
       type: 'error',
-      message: 'Error unlinking supplier',
+      message: t('general.something_went_wrong'),
     })
   }
 }

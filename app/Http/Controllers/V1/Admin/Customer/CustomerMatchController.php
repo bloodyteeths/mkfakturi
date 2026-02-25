@@ -18,26 +18,15 @@ class CustomerMatchController extends Controller
         $companyId = $request->header('company');
 
         if (! $taxId || strlen($taxId) < 7) {
-            return response()->json(['data' => null]);
+            return response()->json(['data' => []]);
         }
 
-        $supplier = Supplier::where('company_id', $companyId)
+        $suppliers = Supplier::where('company_id', $companyId)
             ->where('tax_id', $taxId)
             ->whereDoesntHave('linkedCustomer')
-            ->first();
+            ->get(['id', 'name', 'tax_id', 'email']);
 
-        if (! $supplier) {
-            return response()->json(['data' => null]);
-        }
-
-        return response()->json([
-            'data' => [
-                'id' => $supplier->id,
-                'name' => $supplier->name,
-                'tax_id' => $supplier->tax_id,
-                'email' => $supplier->email,
-            ],
-        ]);
+        return response()->json(['data' => $suppliers]);
     }
 
     /**
@@ -49,25 +38,14 @@ class CustomerMatchController extends Controller
         $companyId = $request->header('company');
 
         if (! $taxId || strlen($taxId) < 7) {
-            return response()->json(['data' => null]);
+            return response()->json(['data' => []]);
         }
 
-        $customer = Customer::where('company_id', $companyId)
+        $customers = Customer::where('company_id', $companyId)
             ->where('tax_id', $taxId)
             ->whereNull('linked_supplier_id')
-            ->first();
+            ->get(['id', 'name', 'tax_id', 'email']);
 
-        if (! $customer) {
-            return response()->json(['data' => null]);
-        }
-
-        return response()->json([
-            'data' => [
-                'id' => $customer->id,
-                'name' => $customer->name,
-                'tax_id' => $customer->tax_id,
-                'email' => $customer->email,
-            ],
-        ]);
+        return response()->json(['data' => $customers]);
     }
 }

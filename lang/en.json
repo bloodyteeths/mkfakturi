@@ -1425,6 +1425,7 @@
     "list_is_empty": "List is empty.",
     "load": "Load",
     "loading": "Loading...",
+    "no_records_found": "No records found",
     "logged_out_successfully": "Logged out successfully",
     "login": "Login",
     "login_successfully": "Logged in successfully!",
@@ -6303,7 +6304,8 @@
     "unlinked_successfully": "Link removed",
     "ledger_card": "Partner Ledger Card",
     "cannot_delete_linked": "Cannot delete a linked supplier. Unlink first.",
-    "search_customer": "Search customer..."
+    "search_customer": "Search customer...",
+    "no_matching_suppliers": "No suppliers match the search criteria"
   },
   "tax_types": {
     "add_tax_type": "Add Tax Type",
@@ -6528,6 +6530,9 @@
     "email_already_taken": "The email has already been taken.",
     "email_does_not_exist": "User with given email doesn't exist",
     "email_incorrect": "Incorrect Email.",
+    "tax_id_required_mk": "Tax ID (ЕМБС) is required for Macedonian companies.",
+    "tax_id_format_mk": "Tax ID (ЕМБС) must be exactly 7 digits.",
+    "vat_number_format_mk": "VAT Number (ЕДБ) must be exactly 13 digits.",
     "ends_with": "Ends With",
     "enter_valid_tax_rate": "Enter valid tax rate",
     "exists": "Exists",

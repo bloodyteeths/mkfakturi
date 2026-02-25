@@ -195,7 +195,8 @@
     "filters": "Filtrat",
     "month": "Muaji",
     "loading": "Duke ngarkuar...",
-    "export_to_csv": "Dheзвезdhe во CSV",
+    "no_records_found": "Nuk u gjetën regjistrime",
+    "export_to_csv": "Eksporto në CSV",
     "export": "Eksporto",
     "reference": "Референца",
     "description": "Përshkrimi",
@@ -777,7 +778,8 @@
     "unlinked_successfully": "Lidhja u shkëput",
     "ledger_card": "Kartela e partnerit",
     "cannot_delete_linked": "Nuk mund të fshihet furnitori i lidhur. Shkëputni lidhjen së pari.",
-    "search_customer": "Kërko klient..."
+    "search_customer": "Kërko klient...",
+    "no_matching_suppliers": "Nuk ka furnitorë që përputhen me kërkimin"
   },
   "bills": {
     "title": "Faturat Hyrëse",
@@ -3819,8 +3821,11 @@
     "invalid_url": "Invalid url (ex: http://www.Facturino.com)",
     "invalid_domain_url": "Invalid url (ex: Facturino.com)",
     "required": "Kjo fushë është e detyrueshme",
-    "email_incorrect": "Incorrect Email.",
-    "email_already_taken": "The email has already been taken.",
+    "email_incorrect": "Email i pasaktë.",
+    "tax_id_required_mk": "NIPT (ЕМБС) është i detyrueshëm për kompanitë maqedonase.",
+    "tax_id_format_mk": "NIPT (ЕМБС) duhet të ketë saktësisht 7 shifra.",
+    "vat_number_format_mk": "Numri i TVSH-së (ЕДБ) duhet të ketë saktësisht 13 shifra.",
+    "email_already_taken": "Ky email është tashmë i zënë.",
     "email_does_not_exist": "User with given email doesn't exist",
     "item_unit_already_taken": "This item unit name has already been taken",
     "payment_mode_already_taken": "This payment mode name has already been taken",

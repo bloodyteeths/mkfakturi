@@ -257,8 +257,12 @@ class Supplier extends Model
         foreach ($ids as $id) {
             $supplier = self::find($id);
 
+            if (! $supplier) {
+                continue;
+            }
+
             if (Customer::where('linked_supplier_id', $supplier->id)->exists()) {
-                throw new \Exception("Cannot delete supplier '{$supplier->name}' because it is linked to a customer. Unlink first.");
+                throw new \Exception(__('suppliers.cannot_delete_linked'));
             }
 
             if ($supplier->bills()->exists()) {

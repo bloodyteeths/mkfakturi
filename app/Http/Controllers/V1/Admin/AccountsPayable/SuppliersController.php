@@ -85,7 +85,14 @@ class SuppliersController extends Controller
     {
         $this->authorize('deleteMultiple', Supplier::class);
 
-        Supplier::deleteSuppliers($request->ids);
+        try {
+            Supplier::deleteSuppliers($request->ids);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 422);
+        }
 
         return response()->json([
             'success' => true,

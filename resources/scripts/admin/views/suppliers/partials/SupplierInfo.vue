@@ -221,7 +221,7 @@ async function linkCustomer(customerId) {
   } catch (e) {
     notificationStore.showNotification({
       type: 'error',
-      message: e.response?.data?.error || 'Error linking customer',
+      message: e.response?.data?.error || t('general.something_went_wrong'),
     })
   }
 }
@@ -238,7 +238,7 @@ async function unlinkCustomer() {
   } catch (e) {
     notificationStore.showNotification({
       type: 'error',
-      message: 'Error unlinking customer',
+      message: t('general.something_went_wrong'),
     })
   }
 }

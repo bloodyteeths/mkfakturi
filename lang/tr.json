@@ -196,6 +196,7 @@
     "filters": "Filtreler",
     "month": "Ay",
     "loading": "Yükleniyor...",
+    "no_records_found": "Kayıt bulunamadı",
     "export_to_csv": "CSV'ye Aktar",
     "export": "Dışa Aktar",
     "reference": "Referans",
@@ -3357,6 +3358,9 @@
     "invalid_domain_url": "Geçersiz url (örn: Facturino.com)",
     "required": "Bu alan zorunludur",
     "email_incorrect": "Yanlış E-posta.",
+    "tax_id_required_mk": "Vergi No (ЕМБС) Makedon şirketleri için zorunludur.",
+    "tax_id_format_mk": "Vergi No (ЕМБС) tam olarak 7 rakam olmalıdır.",
+    "vat_number_format_mk": "KDV No (ЕДБ) tam olarak 13 rakam olmalıdır.",
     "email_already_taken": "Bu e-posta zaten alınmış.",
     "email_does_not_exist": "Verilen e-posta ile kullanıcı bulunamadı",
     "item_unit_already_taken": "Bu öğe birimi adı zaten alınmış",
@@ -4047,7 +4051,8 @@
     "unlinked_successfully": "Bağlantı kaldırıldı",
     "ledger_card": "Cari Kart",
     "cannot_delete_linked": "Bağlı tedarikçi silinemez. Önce bağlantıyı kaldırın.",
-    "search_customer": "Müşteri ara..."
+    "search_customer": "Müşteri ara...",
+    "no_matching_suppliers": "Aramayla eşleşen tedarikçi bulunamadı"
   },
   "projects": {
     "title": "Projeler",

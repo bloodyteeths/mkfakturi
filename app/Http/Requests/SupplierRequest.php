@@ -12,8 +12,20 @@ class SupplierRequest extends FormRequest
         return true;
     }
 
+    private const MACEDONIA_COUNTRY_ID = 129;
+
     public function rules(): array
     {
+        $isMacedonian = (int) $this->input('country_id') === self::MACEDONIA_COUNTRY_ID;
+
+        $taxIdRules = $isMacedonian
+            ? ['required', 'string', 'regex:/^\d{7}$/']
+            : ['nullable', 'string', 'max:255'];
+
+        $vatRules = $isMacedonian
+            ? ['nullable', 'string', 'regex:/^\d{13}$/']
+            : ['nullable', 'string', 'max:255'];
+
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -23,8 +35,8 @@ class SupplierRequest extends FormRequest
             ],
             'phone' => ['nullable', 'string', 'max:255'],
             'contact_name' => ['nullable', 'string', 'max:255'],
-            'tax_id' => ['nullable', 'string', 'max:255'],
-            'vat_number' => ['nullable', 'string', 'max:255'],
+            'tax_id' => $taxIdRules,
+            'vat_number' => $vatRules,
             'company_registration_number' => ['nullable', 'string', 'max:255'],
             'website' => ['nullable', 'string', 'max:255'],
             'contact_email' => ['nullable', 'email', 'max:255'],
@@ -50,6 +62,15 @@ class SupplierRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    public function messages(): array
+    {
+        return [
+            'tax_id.required' => __('validation.tax_id_required_mk'),
+            'tax_id.regex' => __('validation.tax_id_format_mk'),
+            'vat_number.regex' => __('validation.vat_number_format_mk'),
+        ];
     }
 
     public function getSupplierPayload(): array

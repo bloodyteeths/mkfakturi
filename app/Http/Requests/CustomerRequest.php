@@ -20,8 +20,16 @@ class CustomerRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      */
+    private const MACEDONIA_COUNTRY_ID = 129;
+
     public function rules(): array
     {
+        $isMacedonian = (int) $this->input('billing.country_id') === self::MACEDONIA_COUNTRY_ID;
+
+        $taxIdRules = $isMacedonian
+            ? ['required', 'string', 'regex:/^\d{7}$/']
+            : ['nullable', 'string', 'max:255'];
+
         $rules = [
             'name' => [
                 'required',
@@ -54,9 +62,7 @@ class CustomerRequest extends FormRequest
             'prefix' => [
                 'nullable',
             ],
-            'tax_id' => [
-                'nullable',
-            ],
+            'tax_id' => $taxIdRules,
             'enable_portal' => [
                 'boolean',
             ],
@@ -128,6 +134,14 @@ class CustomerRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    public function messages(): array
+    {
+        return [
+            'tax_id.required' => __('validation.tax_id_required_mk'),
+            'tax_id.regex' => __('validation.tax_id_format_mk'),
+        ];
     }
 
     public function getCustomerPayload()
