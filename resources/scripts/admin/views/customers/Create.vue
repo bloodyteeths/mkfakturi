@@ -190,6 +190,29 @@
               />
             </BaseInputGroup>
 
+            <!-- Tax ID match suggestion -->
+            <div v-if="matchedSupplier" class="col-span-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p class="text-sm text-blue-800">
+                {{ $t('customers.link_suggestion', { name: matchedSupplier.name }) }}
+              </p>
+              <div class="flex items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded"
+                  @click="linkAfterCreate = true; matchedSupplierId = matchedSupplier.id"
+                >
+                  {{ $t('customers.link_to_supplier') }}
+                </button>
+                <button
+                  type="button"
+                  class="text-xs font-medium text-gray-500 hover:text-gray-700"
+                  @click="matchedSupplier = null"
+                >
+                  {{ $t('general.dismiss') }}
+                </button>
+              </div>
+            </div>
+
           </BaseInputGrid>
         </div>
 
@@ -515,7 +538,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
@@ -532,6 +555,7 @@ import { useCustomFieldStore } from '@/scripts/admin/stores/custom-field'
 import CustomerCustomFields from '@/scripts/admin/components/custom-fields/CreateCustomFields.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import axios from 'axios'
 
 const customerStore = useCustomerStore()
 const customFieldStore = useCustomFieldStore()
@@ -549,8 +573,32 @@ let isFetchingInitialData = ref(false)
 
 let active = ref(false)
 const isSaving = ref(false)
+const matchedSupplier = ref(null)
+const linkAfterCreate = ref(false)
+const matchedSupplierId = ref(null)
 
 const isEdit = computed(() => route.name === 'customers.edit')
+
+// Watch tax_id for matching supplier suggestion
+let taxIdTimeout = null
+watch(() => customerStore.currentCustomer.tax_id, (val) => {
+  clearTimeout(taxIdTimeout)
+  matchedSupplier.value = null
+  linkAfterCreate.value = false
+  if (!val || val.length < 7 || isEdit.value) return
+  taxIdTimeout = setTimeout(async () => {
+    try {
+      const res = await axios.get('/suppliers/match-by-tax-id', {
+        params: { tax_id: val },
+      })
+      if (res.data.data && res.data.data.length > 0) {
+        matchedSupplier.value = res.data.data[0]
+      }
+    } catch (e) {
+      // silently ignore
+    }
+  }, 500)
+})
 
 let isLoadingContent = computed(() => customerStore.isFetchingInitialSettings)
 
@@ -656,6 +704,17 @@ async function submitCustomerData() {
   } catch (err) {
     isSaving.value = false
     return
+  }
+
+  // Link to matched supplier after successful create
+  if (!isEdit.value && linkAfterCreate.value && matchedSupplierId.value && response?.data?.data?.id) {
+    try {
+      await axios.post(`/customers/${response.data.data.id}/link-supplier`, {
+        supplier_id: matchedSupplierId.value,
+      })
+    } catch (e) {
+      // linking failed silently, customer was still created
+    }
   }
 
   router.push(`/admin/customers/${response.data.data.id}/view`)

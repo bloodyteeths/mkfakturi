@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
@@ -144,6 +145,11 @@ class Supplier extends Model
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    public function linkedCustomer(): HasOne
+    {
+        return $this->hasOne(Customer::class, 'linked_supplier_id');
+    }
+
     /**
      * Scope: Filter by company
      */
@@ -250,6 +256,10 @@ class Supplier extends Model
     {
         foreach ($ids as $id) {
             $supplier = self::find($id);
+
+            if (Customer::where('linked_supplier_id', $supplier->id)->exists()) {
+                throw new \Exception("Cannot delete supplier '{$supplier->name}' because it is linked to a customer. Unlink first.");
+            }
 
             if ($supplier->bills()->exists()) {
                 $supplier->bills->map(function ($bill) {

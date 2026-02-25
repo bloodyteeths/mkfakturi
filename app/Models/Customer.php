@@ -120,6 +120,23 @@ class Customer extends Authenticatable implements HasMedia
         return $this->belongsTo(Company::class);
     }
 
+    public function linkedSupplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class, 'linked_supplier_id');
+    }
+
+    public function getNetBalanceAttribute(): ?int
+    {
+        if (! $this->linked_supplier_id) {
+            return null;
+        }
+
+        $receivable = $this->invoices()->sum('due_amount');
+        $payable = $this->linkedSupplier ? $this->linkedSupplier->due_amount : 0;
+
+        return $receivable - $payable;
+    }
+
     public function billingAddress(): HasOne
     {
         return $this->hasOne(Address::class)->where('type', Address::BILLING_TYPE);

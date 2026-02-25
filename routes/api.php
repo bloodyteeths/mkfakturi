@@ -14,6 +14,9 @@ use App\Http\Controllers\V1\Admin\Company\CompaniesController;
 use App\Http\Controllers\V1\Admin\Company\CompanyController as AdminCompanyController;
 use App\Http\Controllers\V1\Admin\CreditNotes\CreditNoteController;
 use App\Http\Controllers\V1\Admin\Customer\CustomersController;
+use App\Http\Controllers\V1\Admin\Customer\CustomerLedgerController;
+use App\Http\Controllers\V1\Admin\Customer\CustomerLinkController;
+use App\Http\Controllers\V1\Admin\Customer\CustomerMatchController;
 use App\Http\Controllers\V1\Admin\Customer\CustomerStatsController;
 use App\Http\Controllers\V1\Admin\CustomField\CustomFieldsController;
 use App\Http\Controllers\V1\Admin\Dashboard\DashboardController;
@@ -308,6 +311,10 @@ Route::prefix('/v1')->group(function () {
             Route::post('/customers/delete', [CustomersController::class, 'delete'])->middleware('throttle:strict');
 
             Route::get('customers/{customer}/stats', CustomerStatsController::class);
+            Route::post('customers/{customer}/link-supplier', [CustomerLinkController::class, 'link']);
+            Route::delete('customers/{customer}/link-supplier', [CustomerLinkController::class, 'unlink']);
+            Route::get('customers/{customer}/ledger', [CustomerLedgerController::class, 'forCustomer']);
+            Route::get('customers/match-by-tax-id', [CustomerMatchController::class, 'matchSupplier']);
 
             Route::resource('customers', CustomersController::class);
 
@@ -711,6 +718,8 @@ Route::prefix('/v1')->group(function () {
             // ----------------------------------
             Route::post('/suppliers/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class, 'delete']);
             Route::get('suppliers/{supplier}/stats', \App\Http\Controllers\V1\Admin\AccountsPayable\SupplierStatsController::class);
+            Route::get('suppliers/{supplier}/ledger', [CustomerLedgerController::class, 'forSupplier']);
+            Route::get('suppliers/match-by-tax-id', [CustomerMatchController::class, 'matchCustomer']);
             Route::apiResource('suppliers', \App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class);
 
             Route::post('/bills/{bill}/send', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'send']);

@@ -15,7 +15,12 @@ class SupplierResource extends JsonResource
             'phone' => $this->phone,
             'contact_name' => $this->contact_name,
             'tax_id' => $this->tax_id,
+            'vat_number' => $this->vat_number,
+            'company_registration_number' => $this->company_registration_number,
             'website' => $this->website,
+            'contact_email' => $this->contact_email,
+            'contact_phone' => $this->contact_phone,
+            'notes' => $this->notes,
             'address_street_1' => $this->address_street_1,
             'address_street_2' => $this->address_street_2,
             'city' => $this->city,
@@ -30,6 +35,13 @@ class SupplierResource extends JsonResource
             'currency' => $this->whenLoaded('currency'),
             'bills' => $this->whenLoaded('bills', function () {
                 return BillResource::collection($this->bills);
+            }),
+            'linked_customer' => $this->whenLoaded('linkedCustomer', function () {
+                return [
+                    'id' => $this->linkedCustomer->id,
+                    'name' => $this->linkedCustomer->name,
+                    'tax_id' => $this->linkedCustomer->tax_id,
+                ];
             }),
         ];
     }

@@ -78,6 +78,71 @@
       </BaseDescriptionListItem>
     </BaseDescriptionList>
 
+    <!-- Linked Supplier -->
+    <BaseHeading class="mt-8">
+      {{ $t('customers.linked_supplier') }}
+    </BaseHeading>
+
+    <div class="mt-3">
+      <div v-if="selectedViewCustomer.linked_supplier" class="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <div>
+          <router-link
+            :to="`/admin/suppliers/${selectedViewCustomer.linked_supplier.id}/view`"
+            class="text-sm font-semibold text-primary-600 hover:underline"
+          >
+            {{ selectedViewCustomer.linked_supplier.name }}
+          </router-link>
+          <p v-if="selectedViewCustomer.linked_supplier.tax_id" class="text-xs text-gray-500 mt-0.5">
+            ЕМБС: {{ selectedViewCustomer.linked_supplier.tax_id }}
+          </p>
+        </div>
+        <button
+          class="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50"
+          @click="unlinkSupplier"
+        >
+          {{ $t('customers.unlink_supplier') }}
+        </button>
+      </div>
+
+      <div v-else>
+        <div v-if="!showLinkSearch" class="flex items-center gap-2">
+          <button
+            class="text-sm text-primary-600 hover:text-primary-800 font-medium"
+            @click="showLinkSearch = true"
+          >
+            + {{ $t('customers.link_to_supplier') }}
+          </button>
+        </div>
+
+        <div v-else class="space-y-2">
+          <input
+            v-model="supplierSearchQuery"
+            type="text"
+            :placeholder="$t('customers.search_supplier')"
+            class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
+            @input="searchSuppliers"
+          />
+          <div v-if="supplierResults.length > 0" class="border border-gray-200 rounded-lg max-h-40 overflow-y-auto">
+            <button
+              v-for="s in supplierResults"
+              :key="s.id"
+              class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 border-b last:border-b-0"
+              @click="linkSupplier(s.id)"
+            >
+              <span class="font-medium">{{ s.name }}</span>
+              <span v-if="s.tax_id" class="text-gray-400 ml-2">{{ s.tax_id }}</span>
+            </button>
+          </div>
+          <button
+            class="text-xs text-gray-400 hover:text-gray-600"
+            @click="showLinkSearch = false; supplierSearchQuery = ''; supplierResults = []"
+          >
+            {{ $t('general.cancel') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Custom Fields -->
     <BaseHeading v-if="customerCustomFields.length > 0" class="mt-8">
       {{ $t('settings.custom_fields.title') }}
@@ -106,14 +171,24 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useCustomerStore } from '@/scripts/admin/stores/customer'
+import { useNotificationStore } from '@/scripts/stores/notification'
+import { useI18n } from 'vue-i18n'
+import axios from 'axios'
 
+const { t } = useI18n()
+const route = useRoute()
 const customerStore = useCustomerStore()
+const notificationStore = useNotificationStore()
 
 const selectedViewCustomer = computed(() => customerStore.selectedViewCustomer)
-
 const contentLoading = computed(() => customerStore.isFetchingViewData)
+
+const showLinkSearch = ref(false)
+const supplierSearchQuery = ref('')
+const supplierResults = ref([])
 
 const customerCustomFields = computed(() => {
   if (selectedViewCustomer?.value?.fields) {
@@ -121,4 +196,60 @@ const customerCustomFields = computed(() => {
   }
   return []
 })
+
+let searchTimeout = null
+function searchSuppliers() {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(async () => {
+    if (supplierSearchQuery.value.length < 2) {
+      supplierResults.value = []
+      return
+    }
+    try {
+      const response = await axios.get('/suppliers', {
+        params: { search: supplierSearchQuery.value, limit: 10 },
+      })
+      supplierResults.value = response.data.data || []
+    } catch (e) {
+      supplierResults.value = []
+    }
+  }, 300)
+}
+
+async function linkSupplier(supplierId) {
+  try {
+    await axios.post(`/customers/${route.params.id}/link-supplier`, {
+      supplier_id: supplierId,
+    })
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('customers.linked_successfully'),
+    })
+    showLinkSearch.value = false
+    supplierSearchQuery.value = ''
+    supplierResults.value = []
+    customerStore.fetchViewCustomer({ id: route.params.id })
+  } catch (e) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: e.response?.data?.error || 'Error linking supplier',
+    })
+  }
+}
+
+async function unlinkSupplier() {
+  try {
+    await axios.delete(`/customers/${route.params.id}/link-supplier`)
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('customers.unlinked_successfully'),
+    })
+    customerStore.fetchViewCustomer({ id: route.params.id })
+  } catch (e) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: 'Error unlinking supplier',
+    })
+  }
+}
 </script>

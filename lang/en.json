@@ -836,7 +836,26 @@
     "view_customer": "View Customer",
     "website": "Website",
     "zip": "ZIP",
-    "zip_code": "Zip Code"
+    "zip_code": "Zip Code",
+    "linked_supplier": "Linked Supplier",
+    "link_to_supplier": "Link to Supplier",
+    "unlink_supplier": "Unlink",
+    "link_suggestion": "Supplier \"{name}\" has the same Tax ID. Would you like to link them?",
+    "linked_successfully": "Supplier linked successfully",
+    "unlinked_successfully": "Link removed",
+    "ledger_card": "Partner Ledger Card",
+    "net_balance": "Net Balance",
+    "receivable": "Receivable",
+    "payable": "Payable",
+    "opening_balance": "Opening Balance",
+    "closing_balance": "Closing Balance",
+    "debit": "Debit",
+    "credit": "Credit",
+    "document_type": "Document Type",
+    "reference": "Reference",
+    "no_linked_supplier": "No linked supplier",
+    "already_linked": "This supplier is already linked to another customer",
+    "search_supplier": "Search supplier..."
   },
   "dashboard": {
     "cards": {
@@ -1353,6 +1372,7 @@
     "delete": "Delete",
     "deleting": "Deleting",
     "descending": "Descending",
+    "dismiss": "Dismiss",
     "description": "Description",
     "deselect": "Deselect",
     "deselect_all": "Deselect All",
@@ -6274,7 +6294,16 @@
     "updated_message": "Supplier updated successfully",
     "view_supplier": "View Supplier",
     "website": "Website",
-    "zip_code": "Zip Code"
+    "zip_code": "Zip Code",
+    "linked_customer": "Linked Customer",
+    "link_to_customer": "Link to Customer",
+    "unlink_customer": "Unlink",
+    "link_suggestion": "Customer \"{name}\" has the same Tax ID. Would you like to link them?",
+    "linked_successfully": "Customer linked successfully",
+    "unlinked_successfully": "Link removed",
+    "ledger_card": "Partner Ledger Card",
+    "cannot_delete_linked": "Cannot delete a linked supplier. Unlink first.",
+    "search_customer": "Search customer..."
   },
   "tax_types": {
     "add_tax_type": "Add Tax Type",

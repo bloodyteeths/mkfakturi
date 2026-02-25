@@ -132,7 +132,7 @@ class CustomerStatsController extends Controller
             'totalExpenses' => $totalExpenses,
         ];
 
-        $customer = Customer::find($customer->id);
+        $customer = Customer::with('linkedSupplier')->find($customer->id);
 
         return (new CustomerResource($customer))
             ->additional(['meta' => [

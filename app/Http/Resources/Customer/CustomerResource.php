@@ -31,6 +31,18 @@ class CustomerResource extends JsonResource
             'avatar' => $this->avatar,
             'prefix' => $this->prefix,
             'tax_id' => $this->tax_id,
+            'linked_supplier_id' => $this->linked_supplier_id,
+            'linked_supplier' => $this->whenLoaded('linkedSupplier', function () {
+                return [
+                    'id' => $this->linkedSupplier->id,
+                    'name' => $this->linkedSupplier->name,
+                    'tax_id' => $this->linkedSupplier->tax_id,
+                    'due_amount' => $this->linkedSupplier->due_amount,
+                ];
+            }),
+            'net_balance' => $this->when($this->linked_supplier_id !== null, function () {
+                return $this->net_balance;
+            }),
             'billing' => $this->whenLoaded('billingAddress', function () {
                 return new AddressResource($this->billingAddress);
             }),

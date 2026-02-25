@@ -87,12 +87,16 @@
 
     <!-- Chart -->
     <CustomerChart />
+
+    <!-- Ledger Card (only if linked to a supplier) -->
+    <CustomerLedgerCard v-if="hasLinkedSupplier" />
   </BasePage>
 </template>
 
 <script setup>
 import CustomerViewSidebar from './partials/CustomerViewSidebar.vue'
 import CustomerChart from './partials/CustomerChart.vue'
+import CustomerLedgerCard from './partials/CustomerLedgerCard.vue'
 import { ref, computed, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -111,6 +115,10 @@ const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const customer = ref(null)
+
+const hasLinkedSupplier = computed(() => {
+  return !!customerStore.selectedViewCustomer?.linked_supplier_id
+})
 
 const pageTitle = computed(() => {
   return customerStore.selectedViewCustomer.customer

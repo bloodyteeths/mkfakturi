@@ -77,6 +77,7 @@ class CustomersController extends Controller
             'fields.customField',
             'company',
             'media',
+            'linkedSupplier',
         ]);
 
         return new CustomerResource($customer);

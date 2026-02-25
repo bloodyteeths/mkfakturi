@@ -127,7 +127,7 @@ class SupplierStatsController extends Controller
             'totalExpenses' => $totalExpenses,
         ];
 
-        $supplier = Supplier::with(['currency'])->find($supplier->id);
+        $supplier = Supplier::with(['currency', 'linkedCustomer'])->find($supplier->id);
 
         return (new SupplierResource($supplier))
             ->additional(['meta' => [

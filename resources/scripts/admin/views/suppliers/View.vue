@@ -41,6 +41,9 @@
 
     <!-- Chart -->
     <SupplierChart />
+
+    <!-- Ledger Card (only if linked to a customer) -->
+    <SupplierLedgerCard v-if="hasLinkedCustomer" />
   </BasePage>
 </template>
 
@@ -52,6 +55,7 @@ import { useUserStore } from '@/scripts/admin/stores/user'
 import SupplierDropdown from '@/scripts/admin/components/dropdowns/SupplierIndexDropdown.vue'
 import SupplierViewSidebar from './partials/SupplierViewSidebar.vue'
 import SupplierChart from './partials/SupplierChart.vue'
+import SupplierLedgerCard from './partials/SupplierLedgerCard.vue'
 import abilities from '@/scripts/admin/stub/abilities'
 
 const route = useRoute()
@@ -60,6 +64,10 @@ const suppliersStore = useSuppliersStore()
 const userStore = useUserStore()
 
 const supplier = computed(() => suppliersStore.selectedSupplier)
+
+const hasLinkedCustomer = computed(() => {
+  return !!supplier.value?.linked_customer
+})
 
 const pageTitle = computed(() => {
   return supplier.value ? supplier.value.name : ''

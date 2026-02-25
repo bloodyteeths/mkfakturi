@@ -73,6 +73,29 @@
               <BaseInput v-model="form.tax_id" type="text" :placeholder="$t('suppliers.tax_id_placeholder')" />
             </BaseInputGroup>
 
+            <!-- Tax ID match suggestion -->
+            <div v-if="matchedCustomer" class="col-span-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p class="text-sm text-blue-800">
+                {{ $t('suppliers.link_suggestion', { name: matchedCustomer.name }) }}
+              </p>
+              <div class="flex items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded"
+                  @click="linkAfterCreate = true; matchedCustomerId = matchedCustomer.id"
+                >
+                  {{ $t('suppliers.link_to_customer') }}
+                </button>
+                <button
+                  type="button"
+                  class="text-xs font-medium text-gray-500 hover:text-gray-700"
+                  @click="matchedCustomer = null"
+                >
+                  {{ $t('general.dismiss') }}
+                </button>
+              </div>
+            </div>
+
             <BaseInputGroup :label="$t('suppliers.company_registration_number')">
               <BaseInput v-model="form.company_registration_number" type="text" />
             </BaseInputGroup>
@@ -178,13 +201,14 @@
 </template>
 
 <script setup>
-import { reactive, computed, ref, onMounted } from 'vue'
+import { reactive, computed, ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useVuelidate } from '@vuelidate/core'
 import { required, email, helpers } from '@vuelidate/validators'
+import axios from 'axios'
 
 const { t } = useI18n()
 const suppliersStore = useSuppliersStore()
@@ -193,6 +217,9 @@ const route = useRoute()
 const router = useRouter()
 
 const isSaving = ref(false)
+const matchedCustomer = ref(null)
+const linkAfterCreate = ref(false)
+const matchedCustomerId = ref(null)
 
 const form = reactive({
   id: null,
@@ -230,6 +257,27 @@ const v$ = useVuelidate(rules, { form })
 
 const isEdit = computed(() => !!route.params.id)
 
+// Watch tax_id for matching customer suggestion
+let taxIdTimeout = null
+watch(() => form.tax_id, (val) => {
+  clearTimeout(taxIdTimeout)
+  matchedCustomer.value = null
+  linkAfterCreate.value = false
+  if (!val || val.length < 7 || isEdit.value) return
+  taxIdTimeout = setTimeout(async () => {
+    try {
+      const res = await axios.get('/customers/match-by-tax-id', {
+        params: { tax_id: val },
+      })
+      if (res.data.data && res.data.data.length > 0) {
+        matchedCustomer.value = res.data.data[0]
+      }
+    } catch (e) {
+      // silently ignore
+    }
+  }, 500)
+})
+
 const pageTitle = computed(() =>
   isEdit.value ? t('suppliers.edit_supplier') : t('suppliers.new_supplier')
 )
@@ -266,11 +314,24 @@ async function handleSubmit() {
   const payload = { ...form }
 
   try {
+    let response
     if (isEdit.value) {
-      await suppliersStore.updateSupplier(payload)
+      response = await suppliersStore.updateSupplier(payload)
     } else {
-      await suppliersStore.createSupplier(payload)
+      response = await suppliersStore.createSupplier(payload)
     }
+
+    // Link to matched customer after successful create
+    if (!isEdit.value && linkAfterCreate.value && matchedCustomerId.value && response?.data?.data?.id) {
+      try {
+        await axios.post(`/customers/${matchedCustomerId.value}/link-supplier`, {
+          supplier_id: response.data.data.id,
+        })
+      } catch (e) {
+        // linking failed silently, supplier was still created
+      }
+    }
+
     router.push('/admin/suppliers')
   } catch (err) {
     // Error handled by store

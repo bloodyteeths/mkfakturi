@@ -59,7 +59,7 @@ class SuppliersController extends Controller
     {
         $this->authorize('view', $supplier);
 
-        $supplier->load(['bills', 'currency']);
+        $supplier->load(['bills', 'currency', 'linkedCustomer']);
 
         return (new SupplierResource($supplier))
             ->response();
