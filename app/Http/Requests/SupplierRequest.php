@@ -29,7 +29,7 @@ class SupplierRequest extends FormRequest
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
-                'nullable',
+                'required',
                 'email',
                 Rule::unique('suppliers')->where('company_id', $this->header('company')),
             ],
@@ -43,8 +43,8 @@ class SupplierRequest extends FormRequest
             'contact_phone' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'currency_id' => ['nullable', 'integer'],
-            'address_street_1' => ['nullable', 'string', 'max:255'],
-            'address_street_2' => ['nullable', 'string', 'max:255'],
+            'address_line_1' => ['nullable', 'string', 'max:255'],
+            'address_line_2' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
             'state' => ['nullable', 'string', 'max:255'],
             'country_id' => ['nullable', 'integer'],
@@ -53,7 +53,7 @@ class SupplierRequest extends FormRequest
 
         if ($this->isMethod('PUT') && $this->route('supplier')) {
             $rules['email'] = [
-                'nullable',
+                'required',
                 'email',
                 Rule::unique('suppliers')
                     ->where('company_id', $this->header('company'))

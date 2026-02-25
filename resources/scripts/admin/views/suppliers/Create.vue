@@ -41,12 +41,9 @@
               />
             </BaseInputGroup>
 
-            <BaseInputGroup :label="$t('suppliers.contact_name')">
-              <BaseInput v-model="form.contact_name" type="text" />
-            </BaseInputGroup>
-
             <BaseInputGroup
               :label="$t('suppliers.email')"
+              required
               :error="v$.form.email.$error && v$.form.email.$errors[0].$message"
             >
               <BaseInput
@@ -248,6 +245,7 @@ const rules = {
       required: helpers.withMessage(t('validation.required'), required),
     },
     email: {
+      required: helpers.withMessage(t('validation.required'), required),
       email: helpers.withMessage(t('validation.email_incorrect'), email),
     },
   },

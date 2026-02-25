@@ -139,9 +139,9 @@
         :content-loading="contentLoading"
         :label="$t('customers.billing_address')"
       >
-        <div v-if="selectedSupplier.address_street_1">
-          <p>{{ selectedSupplier.address_street_1 }}</p>
-          <p v-if="selectedSupplier.address_street_2">{{ selectedSupplier.address_street_2 }}</p>
+        <div v-if="selectedSupplier.address_line_1">
+          <p>{{ selectedSupplier.address_line_1 }}</p>
+          <p v-if="selectedSupplier.address_line_2">{{ selectedSupplier.address_line_2 }}</p>
           <p>
             <span v-if="selectedSupplier.city">{{ selectedSupplier.city }}</span>
             <span v-if="selectedSupplier.state">, {{ selectedSupplier.state }}</span>
@@ -177,8 +177,8 @@ const customerResults = ref([])
 const hasAddress = computed(() => {
   if (!selectedSupplier.value) return false
   return !!(
-    selectedSupplier.value.address_street_1 ||
-    selectedSupplier.value.address_street_2 ||
+    selectedSupplier.value.address_line_1 ||
+    selectedSupplier.value.address_line_2 ||
     selectedSupplier.value.city ||
     selectedSupplier.value.state ||
     selectedSupplier.value.zip ||
