@@ -9,8 +9,7 @@
 
 <p>@lang('outreach.company_followup1.extra')</p>
 
-<p>@lang('outreach.company_followup1.cta'):<br>
-<a href="{{ $signupUrl }}">{{ $signupUrl }}</a></p>
+<p><a href="{{ $signupUrl }}" style="color: #1a73e8; font-weight: bold; font-size: 16px; text-decoration: underline;">@lang('outreach.company_followup1.cta') &rarr;</a></p>
 
 <p><em>@lang('outreach.company_followup1.fomo')</em></p>
 

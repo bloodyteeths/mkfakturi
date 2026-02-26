@@ -15,8 +15,7 @@
 
 <p>@lang('outreach.initial.revenue')</p>
 
-<p>@lang('outreach.initial.cta'):<br>
-<a href="{{ $signupUrl }}">{{ $signupUrl }}</a></p>
+<p><a href="{{ $signupUrl }}" style="color: #1a73e8; font-weight: bold; font-size: 16px; text-decoration: underline;">@lang('outreach.initial.cta') &rarr;</a></p>
 
 <p><em>@lang('outreach.initial.fomo')</em></p>
 

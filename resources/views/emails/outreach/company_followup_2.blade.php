@@ -13,8 +13,7 @@
 
 <p>@lang('outreach.company_followup2.tagline')</p>
 
-<p>@lang('outreach.company_followup2.cta'):<br>
-<a href="{{ $signupUrl }}">{{ $signupUrl }}</a></p>
+<p><a href="{{ $signupUrl }}" style="color: #1a73e8; font-weight: bold; font-size: 16px; text-decoration: underline;">@lang('outreach.company_followup2.cta') &rarr;</a></p>
 
 <p><em>@lang('outreach.company_followup2.fomo')</em></p>
 

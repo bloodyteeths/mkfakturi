@@ -7,8 +7,7 @@
 
 <p>@lang('outreach.company_initial.solution')</p>
 
-<p>@lang('outreach.company_initial.cta'):<br>
-<a href="{{ $signupUrl }}">{{ $signupUrl }}</a></p>
+<p><a href="{{ $signupUrl }}" style="color: #1a73e8; font-weight: bold; font-size: 16px; text-decoration: underline;">@lang('outreach.company_initial.cta') &rarr;</a></p>
 
 <p><em>@lang('outreach.company_initial.fomo')</em></p>
 
