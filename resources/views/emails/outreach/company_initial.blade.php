@@ -1,21 +1,16 @@
-@component('mail::message')
+@extends('emails.outreach._plain_layout')
+
+@section('content')
 <p>@lang('outreach.company_initial.greeting', ['companyName' => $companyName])</p>
 
 <p>@lang('outreach.company_initial.hook')</p>
 
-<p>@lang('outreach.company_initial.solution')<br>
-&bull; @lang('outreach.company_initial.feature_inventory')<br>
-&bull; @lang('outreach.company_initial.feature_payroll')<br>
-&bull; @lang('outreach.company_initial.feature_fiscal')<br>
-&bull; @lang('outreach.company_initial.feature_bank')<br>
-&bull; @lang('outreach.company_initial.feature_ai')<br>
-&bull; @lang('outreach.company_initial.feature_ecommerce')</p>
+<p>@lang('outreach.company_initial.solution')</p>
 
-<p>@lang('outreach.company_initial.pricing')</p>
+<p>@lang('outreach.company_initial.cta'):<br>
+<a href="{{ $signupUrl }}">{{ $signupUrl }}</a></p>
 
-@component('mail::button', ['url' => $signupUrl])
-@lang('outreach.company_initial.cta')
-@endcomponent
+<p><em>@lang('outreach.company_initial.fomo')</em></p>
 
 <p>
 @lang('outreach.signature_closing')<br>
@@ -24,6 +19,5 @@
 <a href="https://{{ __('outreach.signature_url') }}">{{ __('outreach.signature_url') }}</a> | @lang('outreach.signature_phone')
 </p>
 
----
-<small><a href="{{ $unsubscribeUrl }}" style="color: #999;">@lang('outreach.unsubscribe')</a></small>
-@endcomponent
+<p style="font-size: 12px; color: #999;"><a href="{{ $unsubscribeUrl }}" style="color: #999;">@lang('outreach.unsubscribe')</a></p>
+@endsection

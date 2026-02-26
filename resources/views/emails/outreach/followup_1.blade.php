@@ -1,20 +1,24 @@
-@component('mail::message')
+@extends('emails.outreach._plain_layout')
+
+@section('content')
 <p>@lang('outreach.followup1.greeting', ['companyName' => $companyName])</p>
 
-<p>@lang('outreach.followup1.direct_pitch')</p>
+<p>@lang('outreach.followup1.intro')</p>
 
-<p>@lang('outreach.followup1.offer_title')<br>
-&bull; @lang('outreach.followup1.offer_commission')<br>
-&bull; @lang('outreach.followup1.offer_recurring')<br>
-&bull; @lang('outreach.followup1.offer_free')<br>
-&bull; @lang('outreach.followup1.offer_feedback')</p>
+<p>
+@lang('outreach.followup1.math_1')<br>
+@lang('outreach.followup1.math_2')<br>
+@lang('outreach.followup1.math_3')
+</p>
 
-<p><strong>@lang('outreach.followup1.april_title')</strong><br>
-@lang('outreach.followup1.april_desc')</p>
+<p>@lang('outreach.followup1.recurring')</p>
 
-<p>@lang('outreach.followup1.response_ask')<br>
-1. @lang('outreach.followup1.response_1')<br>
-2. @lang('outreach.followup1.response_2')</p>
+<p>@lang('outreach.followup1.easy')</p>
+
+<p>@lang('outreach.followup1.cta'):<br>
+<a href="{{ $signupUrl }}">{{ $signupUrl }}</a></p>
+
+<p><em>@lang('outreach.followup1.fomo')</em></p>
 
 <p>
 @lang('outreach.signature_closing')<br>
@@ -23,6 +27,5 @@
 <a href="https://{{ __('outreach.signature_url') }}">{{ __('outreach.signature_url') }}</a> | @lang('outreach.signature_phone')
 </p>
 
----
-<small><a href="{{ $unsubscribeUrl }}" style="color: #999;">@lang('outreach.unsubscribe')</a></small>
-@endcomponent
+<p style="font-size: 12px; color: #999;"><a href="{{ $unsubscribeUrl }}" style="color: #999;">@lang('outreach.unsubscribe')</a></p>
+@endsection

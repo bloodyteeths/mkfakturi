@@ -1,20 +1,22 @@
-@component('mail::message')
+@extends('emails.outreach._plain_layout')
+
+@section('content')
 <p>@lang('outreach.followup3.greeting', ['companyName' => $companyName])</p>
 
-<p>@lang('outreach.followup3.social_proof')<br>
-&bull; @lang('outreach.followup3.impression_dashboard')<br>
-&bull; @lang('outreach.followup3.impression_deadlines')<br>
-&bull; @lang('outreach.followup3.impression_bank')<br>
-&bull; @lang('outreach.followup3.impression_efaktura')<br>
-&bull; @lang('outreach.followup3.impression_revenue')</p>
+<p>@lang('outreach.followup3.pain')</p>
 
-<p>@lang('outreach.followup3.still_invited')</p>
+<p>
+&mdash; @lang('outreach.followup3.feature_1')<br>
+&mdash; @lang('outreach.followup3.feature_2')<br>
+&mdash; @lang('outreach.followup3.feature_3')<br>
+&mdash; @lang('outreach.followup3.feature_4')<br>
+&mdash; @lang('outreach.followup3.feature_5')
+</p>
 
-<p>@lang('outreach.followup3.conference')</p>
+<p>@lang('outreach.followup3.cta'):<br>
+<a href="{{ $signupUrl }}">{{ $signupUrl }}</a></p>
 
-@component('mail::button', ['url' => $signupUrl])
-@lang('outreach.followup3.cta')
-@endcomponent
+<p><em>@lang('outreach.followup3.fomo')</em></p>
 
 <p>
 @lang('outreach.signature_closing')<br>
@@ -23,6 +25,5 @@
 <a href="https://{{ __('outreach.signature_url') }}">{{ __('outreach.signature_url') }}</a> | @lang('outreach.signature_phone')
 </p>
 
----
-<small><a href="{{ $unsubscribeUrl }}" style="color: #999;">@lang('outreach.unsubscribe')</a></small>
-@endcomponent
+<p style="font-size: 12px; color: #999;"><a href="{{ $unsubscribeUrl }}" style="color: #999;">@lang('outreach.unsubscribe')</a></p>
+@endsection

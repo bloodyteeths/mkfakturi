@@ -36,7 +36,7 @@ class CompanyFollowUp4Mail extends Mailable implements ShouldQueue
     {
         return $this->from(config('mail.from.address'), 'Facturino')
             ->subject(__('outreach.company_followup4.subject'))
-            ->markdown('emails.outreach.company_followup_4', [
+            ->view('emails.outreach.company_followup_4', [
                 'companyName' => $this->companyName,
                 'signupUrl' => $this->signupUrl,
                 'unsubscribeUrl' => $this->unsubscribeUrl,
