@@ -18,6 +18,7 @@ class CsvParserFactory
     protected static array $parsers = [
         NlbCsvParser::class,
         StopanskaСsvParser::class,
+        KomercijalnaStatementParser::class,
         KomercijalnaCsvParser::class,
         SparkasseCsvParser::class,
         HalkCsvParser::class,
