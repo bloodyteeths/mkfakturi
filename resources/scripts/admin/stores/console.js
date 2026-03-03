@@ -142,7 +142,10 @@ export const useConsoleStore = defineStore('console', {
 
         // Update current company
         this.currentCompany = this.companies.find(company => company.id === companyId)
-        
+
+        // Set selectedCompany so the axios interceptor sends the correct company header
+        localStorage.setItem('selectedCompany', companyId)
+
         // Store context in local storage for persistence
         const context = response.data.context
         localStorage.setItem('partner_context', JSON.stringify({
