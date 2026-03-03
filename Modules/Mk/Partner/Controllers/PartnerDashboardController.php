@@ -25,8 +25,17 @@ class PartnerDashboardController extends Controller
             return null;
         }
 
-        // Super admin gets a fake partner to pass validation
+        // Super admin can impersonate a partner via ?partner_id=X
         if ($user->role === 'super admin') {
+            $partnerId = request()->query('partner_id');
+            if ($partnerId) {
+                $partner = Partner::find($partnerId);
+                if ($partner) {
+                    return $partner;
+                }
+            }
+
+            // Fallback: fake partner for generic super admin access
             $fakePartner = new Partner();
             $fakePartner->id = 0;
             $fakePartner->user_id = $user->id;
@@ -63,26 +72,33 @@ class PartnerDashboardController extends Controller
         ]);
 
         $user = Auth::user();
+        $partner = null;
 
-        // Super admin gets a simplified dashboard response
         if ($user->role === 'super admin') {
-            return response()->json([
-                'data' => [
-                    'active_clients' => \App\Models\Company::count(),
-                    'monthly_commissions' => 0,
-                    'processed_invoices' => 0,
-                    'total_earnings' => 0,
-                    'pending_payout' => 0,
-                ],
-                'earningsHistory' => [],
-                'recentCommissions' => [],
-                'nextPayout' => null,
-                'is_super_admin' => true,
-            ]);
-        }
+            // Super admin can impersonate a partner via ?partner_id=X
+            $partnerId = $request->query('partner_id');
+            if ($partnerId) {
+                $partner = Partner::find($partnerId);
+            }
 
-        // Get partner record for the authenticated user
-        $partner = Partner::where('user_id', $user->id)->first();
+            if (! $partner) {
+                return response()->json([
+                    'data' => [
+                        'active_clients' => \App\Models\Company::count(),
+                        'monthly_commissions' => 0,
+                        'processed_invoices' => 0,
+                        'total_earnings' => 0,
+                        'pending_payout' => 0,
+                    ],
+                    'earningsHistory' => [],
+                    'recentCommissions' => [],
+                    'nextPayout' => null,
+                    'is_super_admin' => true,
+                ]);
+            }
+        } else {
+            $partner = Partner::where('user_id', $user->id)->first();
+        }
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
@@ -447,16 +463,23 @@ class PartnerDashboardController extends Controller
         ]);
 
         $user = Auth::user();
+        $partner = null;
 
-        // Super admin gets empty commissions
         if ($user->role === 'super admin') {
-            return response()->json([
-                'data' => [],
-                'is_super_admin' => true,
-            ]);
-        }
+            $partnerId = $request->query('partner_id');
+            if ($partnerId) {
+                $partner = Partner::find($partnerId);
+            }
 
-        $partner = Partner::where('user_id', $user->id)->first();
+            if (! $partner) {
+                return response()->json([
+                    'data' => [],
+                    'is_super_admin' => true,
+                ]);
+            }
+        } else {
+            $partner = Partner::where('user_id', $user->id)->first();
+        }
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);
@@ -623,17 +646,26 @@ class PartnerDashboardController extends Controller
     public function generateReferralLink(Request $request)
     {
         $user = Auth::user();
+        $partner = null;
 
-        // Super admin doesn't have referral links
         if ($user->role === 'super admin') {
-            return response()->json([
-                'success' => false,
-                'error' => 'Super admin cannot generate referral links',
-                'is_super_admin' => true,
-            ], 400);
-        }
+            $partnerId = $request->query('partner_id');
+            if ($partnerId) {
+                $partner = Partner::find($partnerId);
+                // Use the partner's user for ref_code
+                $user = $partner ? \App\Models\User::find($partner->user_id) : $user;
+            }
 
-        $partner = Partner::where('user_id', $user->id)->first();
+            if (! $partner) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Super admin cannot generate referral links',
+                    'is_super_admin' => true,
+                ], 400);
+            }
+        } else {
+            $partner = Partner::where('user_id', $user->id)->first();
+        }
 
         if (! $partner) {
             return response()->json(['error' => 'Partner account not found'], 403);

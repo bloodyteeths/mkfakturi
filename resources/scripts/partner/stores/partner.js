@@ -16,6 +16,20 @@ export const usePartnerStore = defineStore('partner', () => {
   const clients = ref([])
   const isLoading = ref(false)
 
+  // Impersonation support for super admin
+  const impersonatedPartnerId = ref(null)
+
+  const setImpersonatedPartnerId = (id) => {
+    impersonatedPartnerId.value = id
+  }
+
+  const apiParams = () => {
+    if (impersonatedPartnerId.value) {
+      return { params: { partner_id: impersonatedPartnerId.value } }
+    }
+    return {}
+  }
+
   // Stripe Connect State
   const stripeConnect = ref({
     connected: false,
@@ -36,7 +50,7 @@ export const usePartnerStore = defineStore('partner', () => {
   const loadDashboardStats = async () => {
     isLoading.value = true
     try {
-      const { data } = await axios.get('/partner/dashboard')
+      const { data } = await axios.get('/partner/dashboard', apiParams())
 
       // Update stats - API returns EUR amounts
       dashboardStats.value = {
@@ -61,7 +75,7 @@ export const usePartnerStore = defineStore('partner', () => {
 
   const loadRecentCommissions = async () => {
     try {
-      const { data } = await axios.get('/partner/commissions')
+      const { data } = await axios.get('/partner/commissions', apiParams())
       recentCommissions.value = data.data || []
     } catch (error) {
       console.error('Error loading recent commissions:', error)
@@ -71,7 +85,7 @@ export const usePartnerStore = defineStore('partner', () => {
 
   const loadClients = async () => {
     try {
-      const { data } = await axios.get('/partner/clients')
+      const { data } = await axios.get('/partner/clients', apiParams())
       clients.value = data.data || []
     } catch (error) {
       console.error('Error loading clients:', error)
@@ -182,6 +196,10 @@ export const usePartnerStore = defineStore('partner', () => {
     // Stripe Connect State
     stripeConnect,
     stripeConnectLoading,
+
+    // Impersonation
+    impersonatedPartnerId,
+    setImpersonatedPartnerId,
 
     // Actions
     loadDashboardStats,

@@ -15,7 +15,7 @@
             <!-- Navigation Links -->
             <div class="hidden md:ml-6 md:flex md:space-x-8">
               <router-link
-                :to="{ name: 'partner.dashboard' }"
+                :to="{ name: 'partner.dashboard', query: partnerQuery }"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
                 :class="$route.name === 'partner.dashboard'
                   ? 'border-blue-500 text-gray-900'
@@ -24,7 +24,7 @@
                 {{ t('partner.navigation.dashboard') }}
               </router-link>
               <router-link
-                :to="{ name: 'partner.clients' }"
+                :to="{ name: 'partner.clients', query: partnerQuery }"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
                 :class="$route.name === 'partner.clients'
                   ? 'border-blue-500 text-gray-900'
@@ -34,7 +34,7 @@
                 {{ t('partner.navigation.clients') }}
               </router-link>
               <router-link
-                :to="{ name: 'partner.commissions' }"
+                :to="{ name: 'partner.commissions', query: partnerQuery }"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
                 :class="$route.name === 'partner.commissions'
                   ? 'border-blue-500 text-gray-900'
@@ -43,7 +43,7 @@
                 {{ t('partner.navigation.commissions') }}
               </router-link>
               <router-link
-                :to="{ name: 'partner.referrals' }"
+                :to="{ name: 'partner.referrals', query: partnerQuery }"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
                 :class="$route.name === 'partner.referrals'
                   ? 'border-blue-500 text-gray-900'
@@ -52,7 +52,7 @@
                 {{ t('partner.navigation.referrals') }}
               </router-link>
               <router-link
-                :to="{ name: 'partner.invitations' }"
+                :to="{ name: 'partner.invitations', query: partnerQuery }"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
                 :class="$route.name === 'partner.invitations'
                   ? 'border-blue-500 text-gray-900'
@@ -61,7 +61,7 @@
                 {{ t('partner.navigation.invitations') }}
               </router-link>
               <router-link
-                :to="{ name: 'partner.payouts' }"
+                :to="{ name: 'partner.payouts', query: partnerQuery }"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
                 :class="$route.name === 'partner.payouts'
                   ? 'border-blue-500 text-gray-900'
@@ -159,6 +159,14 @@
       </div>
     </nav>
 
+    <!-- Impersonation Banner -->
+    <div v-if="route.query.partner_id" class="bg-yellow-500 text-yellow-900 text-center py-2 text-sm font-medium">
+      Super Admin: Viewing partner portal as Partner #{{ route.query.partner_id }}
+      <router-link :to="{ name: 'dashboard' }" class="ml-4 underline hover:no-underline">
+        Exit
+      </router-link>
+    </div>
+
     <!-- Main Content -->
     <main class="flex-1 overflow-auto">
       <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -174,7 +182,7 @@ import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useAuthStore } from '@/scripts/admin/stores/auth'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 // i18n
 const { t, locale } = useI18n()
@@ -184,6 +192,12 @@ const userStore = useUserStore()
 const authStore = useAuthStore()
 const globalStore = useGlobalStore()
 const router = useRouter()
+const route = useRoute()
+
+// Preserve partner_id query param for super admin impersonation
+const partnerQuery = computed(() => {
+  return route.query.partner_id ? { partner_id: route.query.partner_id } : {}
+})
 
 // Current locale for highlighting the active language
 const currentLocale = computed(() => locale.value)

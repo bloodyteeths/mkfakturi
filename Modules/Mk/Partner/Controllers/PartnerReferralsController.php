@@ -30,8 +30,16 @@ class PartnerReferralsController extends Controller
             return null;
         }
 
-        // Super admin gets a fake partner to pass validation
+        // Super admin can impersonate a partner via ?partner_id=X
         if ($user->role === 'super admin') {
+            $partnerId = $request->query('partner_id');
+            if ($partnerId) {
+                $partner = Partner::find($partnerId);
+                if ($partner) {
+                    return $partner;
+                }
+            }
+
             $fakePartner = new Partner();
             $fakePartner->id = 0;
             $fakePartner->user_id = $user->id;

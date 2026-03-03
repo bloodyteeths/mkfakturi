@@ -32,6 +32,15 @@ axios.interceptors.request.use(function (config) {
     config.headers['company'] = companyId
   }
 
+  // Auto-append partner_id for super admin impersonation on partner API routes
+  if (config.url && config.url.startsWith('/partner/')) {
+    const urlParams = new URLSearchParams(window.location.search)
+    const partnerId = urlParams.get('partner_id')
+    if (partnerId) {
+      config.params = { ...config.params, partner_id: partnerId }
+    }
+  }
+
   return config
 })
 
