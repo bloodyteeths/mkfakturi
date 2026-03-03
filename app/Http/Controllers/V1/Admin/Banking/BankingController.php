@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\Company;
+use App\Models\Currency;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Services\AiProvider\AiProviderInterface;
@@ -705,13 +706,21 @@ class BankingController extends Controller
                 'opening_balance' => 'nullable|numeric',
             ]);
 
+            $currencyCode = $validated['currency'] ?? 'MKD';
+            $currency = Currency::where('code', $currencyCode)->first();
+
+            if (! $currency) {
+                return response()->json(['error' => "Currency '{$currencyCode}' not found"], 422);
+            }
+
             $account = BankAccount::create([
                 'company_id' => $company->id,
                 'bank_name' => $validated['bank_name'],
                 'account_name' => $validated['bank_name'] . ' - ' . $validated['account_number'],
                 'account_number' => $validated['account_number'],
                 'iban' => $validated['iban'] ?? null,
-                'currency' => $validated['currency'] ?? 'MKD',
+                'currency_id' => $currency->id,
+                'currency' => $currencyCode,
                 'account_type' => BankAccount::TYPE_BUSINESS,
                 'opening_balance' => $validated['opening_balance'] ?? 0,
                 'current_balance' => $validated['opening_balance'] ?? 0,
