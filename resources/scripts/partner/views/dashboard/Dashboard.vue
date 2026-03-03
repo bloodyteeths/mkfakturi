@@ -180,20 +180,9 @@ const loadStripeStatus = async () => {
 }
 
 onMounted(async () => {
-  // Partner-specific authorization logic
-  const currentUser = userStore.currentUser
-  const isSuperAdmin = currentUser?.role === 'super admin'
-  const isPartner = currentUser?.role === 'partner' ||
-                    currentUser?.is_partner ||
-                    currentUser?.account_type === 'accountant'
-
-  if (route.meta.isPartner && !isPartner && !isSuperAdmin) {
-    router.push({ name: 'login' })
-    return
-  }
-
   // Set impersonation partner_id from URL query for super admin
-  if (isSuperAdmin && route.query.partner_id) {
+  const currentUser = userStore.currentUser
+  if (currentUser?.role === 'super admin' && route.query.partner_id) {
     partnerStore.setImpersonatedPartnerId(route.query.partner_id)
   }
 
