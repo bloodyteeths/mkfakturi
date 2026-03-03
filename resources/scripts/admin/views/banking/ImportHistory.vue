@@ -147,7 +147,7 @@
 
     <BaseFilterWrapper :show="showFilters" class="mt-3 mb-4" @clear="clearFilters">
       <BaseInputGroup :label="$t('banking.bank') || 'Bank'" class="text-left">
-        <BaseSelect
+        <BaseMultiselect
           v-model="filters.bank_code"
           :options="bankFilterOptions"
           :searchable="true"
@@ -159,7 +159,7 @@
       </BaseInputGroup>
 
       <BaseInputGroup :label="$t('banking.status') || 'Status'" class="text-left">
-        <BaseSelect
+        <BaseMultiselect
           v-model="filters.status"
           :options="statusOptions"
           :show-labels="false"

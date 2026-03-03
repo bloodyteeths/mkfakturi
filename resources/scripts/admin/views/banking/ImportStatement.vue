@@ -65,7 +65,7 @@
         <!-- Bank Selection -->
         <div class="mb-6">
           <BaseInputGroup :label="$t('banking.select_bank')" required>
-            <BaseSelect
+            <BaseMultiselect
               v-model="selectedBank"
               :options="bankOptions"
               :searchable="true"
@@ -82,7 +82,7 @@
         <!-- Account Selection -->
         <div class="mb-6">
           <BaseInputGroup :label="$t('banking.select_account')" required>
-            <BaseSelect
+            <BaseMultiselect
               v-model="selectedAccount"
               :options="accountOptions"
               :searchable="true"

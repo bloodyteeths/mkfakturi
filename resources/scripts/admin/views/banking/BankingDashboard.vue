@@ -215,7 +215,7 @@
       <!-- Filters -->
       <BaseFilterWrapper :show="showFilters" class="mb-4" @clear="clearFilters">
         <BaseInputGroup :label="$t('banking.account')" class="text-left">
-          <BaseSelect
+          <BaseMultiselect
             v-model="filters.account_id"
             :options="accountOptions"
             :searchable="true"
