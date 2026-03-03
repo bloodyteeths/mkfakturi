@@ -1003,6 +1003,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/sync/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'syncAccount']);
                 Route::patch('/transactions/{transaction}/categorize', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'categorize']);
                 Route::post('/transactions/suggest-category', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'suggestCategory']);
+                Route::post('/accounts', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'storeManualAccount']);
                 Route::delete('/accounts/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'disconnect']);
                 Route::post('/transactions/manual', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'storeManualTransaction']);
 

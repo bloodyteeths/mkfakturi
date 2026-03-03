@@ -97,7 +97,7 @@
         <!-- File Upload -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            {{ $t('banking.upload_csv') }} <span class="text-red-500">*</span>
+            {{ $t('banking.upload_csv_excel') }} <span class="text-red-500">*</span>
           </label>
           <div
             class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors"
@@ -123,13 +123,13 @@
                       ref="fileInput"
                       type="file"
                       class="sr-only"
-                      accept=".csv,.txt"
+                      accept=".csv,.txt,.xls,.xlsx"
                       @change="handleFileSelect"
                     />
                   </label>
                   <p class="pl-1">{{ $t('banking.or_drag_drop') }}</p>
                 </div>
-                <p class="text-xs text-gray-500">CSV {{ $t('banking.up_to_10mb') }}</p>
+                <p class="text-xs text-gray-500">CSV, XLS, XLSX {{ $t('banking.up_to_10mb') }}</p>
               </template>
               <template v-else>
                 <DocumentCheckIcon class="mx-auto h-12 w-12 text-green-500" />
@@ -412,8 +412,8 @@ const handleFileDrop = (event) => {
 
 const validateAndSetFile = (file) => {
   // Check file type
-  const validTypes = ['text/csv', 'text/plain', 'application/vnd.ms-excel']
-  const validExtensions = ['.csv', '.txt']
+  const validTypes = ['text/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+  const validExtensions = ['.csv', '.txt', '.xls', '.xlsx']
   const hasValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
 
   if (!validTypes.includes(file.type) && !hasValidExtension) {

@@ -685,6 +685,74 @@ class BankingController extends Controller
         }
     }
 
+    /**
+     * Create a manual bank account (no PSD2/OAuth required)
+     */
+    public function storeManualAccount(Request $request): JsonResponse
+    {
+        try {
+            $company = $this->resolveCompany($request);
+
+            if (! $company) {
+                return response()->json(['error' => 'No company found'], 404);
+            }
+
+            $validated = $request->validate([
+                'bank_name' => 'required|string|max:255',
+                'account_number' => 'required|string|max:50',
+                'iban' => 'nullable|string|max:34',
+                'currency' => 'nullable|string|max:3',
+                'opening_balance' => 'nullable|numeric',
+            ]);
+
+            $account = BankAccount::create([
+                'company_id' => $company->id,
+                'bank_name' => $validated['bank_name'],
+                'account_name' => $validated['bank_name'] . ' - ' . $validated['account_number'],
+                'account_number' => $validated['account_number'],
+                'iban' => $validated['iban'] ?? null,
+                'currency' => $validated['currency'] ?? 'MKD',
+                'account_type' => BankAccount::TYPE_BUSINESS,
+                'opening_balance' => $validated['opening_balance'] ?? 0,
+                'current_balance' => $validated['opening_balance'] ?? 0,
+                'is_active' => true,
+                'is_primary' => BankAccount::forCompany($company->id)->count() === 0,
+                'status' => BankAccount::STATUS_ACTIVE,
+            ]);
+
+            Log::info('Manual bank account created', [
+                'company_id' => $company->id,
+                'account_id' => $account->id,
+                'bank_name' => $account->bank_name,
+            ]);
+
+            return response()->json([
+                'message' => 'Bank account created successfully',
+                'data' => [
+                    'id' => $account->id,
+                    'bank_name' => $account->bank_name,
+                    'account_number' => $account->account_number,
+                    'iban' => $account->iban,
+                    'currency' => $account->currency,
+                ],
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error('Failed to create manual bank account', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to create bank account',
+                'message' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], 500);
+        }
+    }
+
     // CLAUDE-CHECKPOINT
 
     /**

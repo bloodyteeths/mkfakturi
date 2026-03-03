@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 /**
  * Bank Import Controller
@@ -50,7 +51,7 @@ class BankImportController extends Controller
 
         try {
             $request->validate([
-                'file' => 'required|file|mimes:csv,txt|max:10240', // 10MB max
+                'file' => 'required|file|mimes:csv,txt,xls,xlsx|max:10240', // 10MB max
                 'bank_code' => 'required|string',
                 'account_id' => 'required|integer',
             ]);
@@ -77,8 +78,8 @@ class BankImportController extends Controller
 
             $file = $request->file('file');
 
-            // Read file content
-            $content = file_get_contents($file->getRealPath());
+            // Read file content (convert Excel to CSV if needed)
+            $content = $this->readFileContent($file);
 
             // Get parser (auto-detect or specific bank)
             $bankCode = $request->bank_code;
@@ -404,6 +405,32 @@ class BankImportController extends Controller
         return response()->json([
             'data' => $stats,
         ]);
+    }
+
+    /**
+     * Read file content, converting Excel (xls/xlsx) to CSV if needed.
+     */
+    private function readFileContent(\Illuminate\Http\UploadedFile $file): string
+    {
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        if (in_array($extension, ['xls', 'xlsx'])) {
+            $spreadsheet = IOFactory::load($file->getRealPath());
+
+            $tmpFile = tempnam(sys_get_temp_dir(), 'bank_import_') . '.csv';
+            $writer = IOFactory::createWriter($spreadsheet, 'Csv');
+            $writer->setDelimiter(',');
+            $writer->setEnclosure('"');
+            $writer->setSheetIndex(0);
+            $writer->save($tmpFile);
+
+            $content = file_get_contents($tmpFile);
+            unlink($tmpFile);
+
+            return $content;
+        }
+
+        return file_get_contents($file->getRealPath());
     }
 
     /**
