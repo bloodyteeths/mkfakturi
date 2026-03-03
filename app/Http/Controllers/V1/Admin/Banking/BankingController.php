@@ -1087,16 +1087,18 @@ PROMPT;
         $companyId = $companyIdHeader !== null ? (int) $companyIdHeader : null;
         $company = null;
 
-        if ($companyId && $user->hasCompany($companyId)) {
-            $company = $user->companies()->where('companies.id', $companyId)->first();
+        if ($companyId) {
+            // Super admins can access any company (matches pattern in other controllers)
+            if ($user->role === 'super admin') {
+                $company = Company::find($companyId);
+            } elseif ($user->hasCompany($companyId)) {
+                $company = $user->companies()->where('companies.id', $companyId)->first();
+            }
         }
 
         if (! $company) {
             $company = $user->companies()->first();
         }
-
-        // Don't try to load currency relationship - Company model doesn't have it
-        // Currency is accessed via $company->currency() method if needed
 
         return $this->currentCompany = $company;
     }

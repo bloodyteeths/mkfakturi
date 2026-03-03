@@ -529,9 +529,13 @@ class BankImportController extends Controller
         $companyId = $companyIdHeader !== null ? (int) $companyIdHeader : null;
         $company = null;
 
-        // P0-13: Always verify user has access to the requested company
-        if ($companyId && $user->hasCompany($companyId)) {
-            $company = $user->companies()->where('companies.id', $companyId)->first();
+        if ($companyId) {
+            // Super admins can access any company
+            if ($user->role === 'super admin') {
+                $company = Company::find($companyId);
+            } elseif ($user->hasCompany($companyId)) {
+                $company = $user->companies()->where('companies.id', $companyId)->first();
+            }
         }
 
         if (! $company) {
