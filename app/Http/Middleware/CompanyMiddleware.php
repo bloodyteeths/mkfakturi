@@ -32,23 +32,30 @@ class CompanyMiddleware
                 return $next($request);
             }
 
-            // Super Admin Support Mode: Override company context if in support mode
+            // Super Admin: can access any company
             if ($user->role === 'super admin') {
+                // Support mode override
                 $supportMode = session('support_mode');
                 if ($supportMode && isset($supportMode['company_id'])) {
-                    $supportCompanyId = $supportMode['company_id'];
+                    $request->headers->set('company', $supportMode['company_id']);
+                }
 
-                    // Set the company header to the support mode company
-                    $request->headers->set('company', $supportCompanyId);
+                // Partner console switch override
+                $partnerContext = session('partner_context');
+                if (! $request->header('company') && $partnerContext && isset($partnerContext['company_id'])) {
+                    $request->headers->set('company', $partnerContext['company_id']);
+                }
 
-                    // Load the support company with its IFRS entity
-                    $company = Company::with('ifrsEntity')->find($supportCompanyId);
+                $companyId = $request->header('company');
+                if ($companyId) {
+                    // Super admin can access any company - trust the header
+                    $company = Company::with('ifrsEntity')->find($companyId);
                     if ($company && $company->ifrsEntity) {
                         $user->setRelation('entity', $company->ifrsEntity);
                     }
-
-                    return $next($request);
                 }
+
+                return $next($request);
             }
 
             // Handle partner users - they access client companies via partner_company_links
