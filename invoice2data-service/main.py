@@ -536,8 +536,19 @@ def _extract_table_from_tsv(
             transactions.append(tx)
 
         logger.info(f"Header-based extraction: {len(transactions)} transactions")
+
+        # Quality check: reject if transactions look like noise
         if transactions:
-            return transactions, line_texts
+            has_account = any(tx.get("counterparty_account") for tx in transactions)
+            max_amount = max(
+                max(tx.get("debit", 0), tx.get("credit", 0))
+                for tx in transactions
+            )
+            if has_account or max_amount >= 100:
+                return transactions, line_texts
+            logger.info(
+                f"Rejecting header-based results: no accounts, max_amount={max_amount}"
+            )
 
     # --- Header-free fallback: find rows with account numbers + amounts ---
     logger.info("Header not found or header extraction empty; trying header-free")
@@ -1470,8 +1481,10 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
         )
 
         # Step 2: Try multiple PSM modes with TSV extraction
-        debug_tsv_lines: List[str] = []
+        debug_tsv_lines: Dict[str, List[str]] = {}
         transactions: List[Dict[str, Any]] = []
+        extraction_method = "none"
+        avg_confidence = 0.0
 
         for psm, img_label, img in [
             (6, "preprocessed", processed_image),
@@ -1481,30 +1494,43 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
         ]:
             if transactions:
                 break
-            logger.info(f"TSV attempt: PSM {psm} on {img_label} image")
+            attempt_key = f"psm{psm}_{img_label}"
+            logger.info(f"TSV attempt: {attempt_key}")
             tsv_data = pytesseract.image_to_data(
                 img, lang=langs, config=f"--oem 3 --psm {psm}",
                 output_type=pytesseract.Output.DICT,
             )
-            transactions, tsv_lines = _extract_table_from_tsv(
+            txs, tsv_lines = _extract_table_from_tsv(
                 tsv_data, width, own_account=account_number
             )
-            if not debug_tsv_lines and tsv_lines:
-                debug_tsv_lines = tsv_lines  # keep first non-empty for debug
+            if tsv_lines:
+                debug_tsv_lines[attempt_key] = tsv_lines[:40]
+            if txs:
+                transactions = txs
+                extraction_method = f"tsv_{attempt_key}"
+                # Calculate confidence from this TSV data
+                all_confs = [
+                    int(c) for c in tsv_data.get("conf", []) if int(c) > 0
+                ]
+                avg_confidence = (
+                    sum(all_confs) / len(all_confs) if all_confs else 0
+                )
 
         if not transactions:
             # Final fallback: parse from plain text using regex patterns
             logger.info("All TSV extraction failed, falling back to plain-text")
             transactions = _extract_transactions_from_text(plain_text)
-
-        # Calculate average confidence
-        all_confs = [
-            int(c) for c in tsv_data.get("conf", []) if int(c) > 0
-        ]
-        avg_confidence = sum(all_confs) / len(all_confs) if all_confs else 0
+            extraction_method = "text_fallback" if transactions else "none"
+            # Use last TSV confidence
+            all_confs = [
+                int(c) for c in tsv_data.get("conf", []) if int(c) > 0
+            ]
+            avg_confidence = (
+                sum(all_confs) / len(all_confs) if all_confs else 0
+            )
 
         logger.info(
-            f"Result: {len(transactions)} transactions, "
+            f"Result: {len(transactions)} transactions via {extraction_method}, "
             f"confidence={avg_confidence:.1f}%"
         )
 
@@ -1517,14 +1543,16 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             "transactions": transactions,
             "transaction_count": len(transactions),
             "confidence": round(avg_confidence / 100, 2),
+            "extraction_method": extraction_method,
             "raw_text": plain_text[:2000],
             "image_width": width,
             "image_height": height,
         }
 
-        # Include TSV diagnostic lines when no transactions found
-        if not transactions and debug_tsv_lines:
-            response["debug_tsv_lines"] = debug_tsv_lines[:40]
+        # Always include first TSV line set for debugging
+        if debug_tsv_lines:
+            first_key = next(iter(debug_tsv_lines))
+            response["debug_tsv_lines"] = debug_tsv_lines[first_key]
 
         return JSONResponse(content=response)
 
