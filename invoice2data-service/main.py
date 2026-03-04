@@ -640,6 +640,178 @@ def _map_words_to_columns(
     }
 
 
+def _extract_transactions_from_text(plain_text: str) -> List[Dict[str, Any]]:
+    """
+    Fallback: extract transactions from plain OCR text using regex patterns.
+
+    Looks for lines containing account numbers (15-16 digit) near amounts
+    (numbers with format like 10,000.00 or 6,000.00).
+
+    This works when TSV-based table extraction fails (e.g., phone photos
+    where word positions are unreliable).
+    """
+    logger = logging.getLogger(__name__)
+    logger.info("Attempting plain-text transaction extraction (fallback)")
+
+    transactions: List[Dict[str, Any]] = []
+
+    # Macedonian bank account pattern: 15-16 consecutive digits,
+    # or digits with a single space from OCR errors (e.g., "30000000467 7182")
+    account_re = re.compile(r"\b(\d{15,16})\b|\b(\d{8,12}\s\d{3,6})\b")
+    # Amount pattern: 10,000.00 or 6,000.00 or 12,100.00 or 0.00
+    amount_re = re.compile(r"(\d{1,3}(?:,\d{3})*\.\d{2})")
+    # Reference number (6-7 digit)
+    ref_re = re.compile(r"\b(\d{6,7})\b")
+
+    # Detect company's own account from header (Сметка XXXXX)
+    own_account = None
+    own_match = re.search(r"[Сс]метка\s*[:.]?\s*(\d[\d ]{12,})", plain_text)
+    if own_match:
+        own_account = re.sub(r"\s+", "", own_match.group(1))
+        logger.info(f"Company's own account: {own_account}")
+
+    lines = plain_text.splitlines()
+    i = 0
+    tx_num = 0
+
+    while i < len(lines):
+        line = lines[i].strip()
+        if not line:
+            i += 1
+            continue
+
+        # Look for lines with both account numbers AND amounts
+        account_match = account_re.search(line)
+        amounts_on_line = amount_re.findall(line)
+        if not account_match or not amounts_on_line:
+            i += 1
+            continue
+
+        # Extract account from whichever group matched
+        raw_account = account_match.group(1) or account_match.group(2)
+        account = re.sub(r"\s+", "", raw_account)
+
+        # Skip if fewer than 15 digits after removing spaces
+        if len(account) < 15:
+            i += 1
+            continue
+
+        # Skip the company's own account (appears in header with balances)
+        if own_account and account == own_account:
+            i += 1
+            continue
+
+        # Gather context: this line + next few lines belong to one transaction
+        context_lines = [line]
+        j = i + 1
+        while j < min(i + 8, len(lines)):
+            next_line = lines[j].strip()
+            if not next_line:
+                j += 1
+                continue
+            # Stop if we hit another account number (next transaction)
+            if account_re.search(next_line) and j > i + 1:
+                break
+            context_lines.append(next_line)
+            j += 1
+
+        context = " ".join(context_lines)
+
+        # Extract amounts from context
+        amounts = amount_re.findall(context)
+        amounts_float = [_parse_amount(a) for a in amounts]
+        amounts_float = [a for a in amounts_float if a > 0]
+
+        if not amounts_float:
+            i = j
+            continue
+
+        # Extract reference
+        ref_match = ref_re.search(context)
+        reference = ref_match.group(1) if ref_match else None
+
+        # Extract counterparty name: text before the account number
+        # Usually the company name appears before or around the account
+        name_part = line[:account_match.start()].strip()
+        # Also check previous non-empty line for name
+        if not name_part and i > 0:
+            for k in range(i - 1, max(i - 3, -1), -1):
+                prev = lines[k].strip()
+                if prev and not amount_re.search(prev) and len(prev) > 3:
+                    name_part = prev
+                    break
+
+        # Clean up name - remove row numbers at start
+        name_part = re.sub(r"^\d+\s+", "", name_part).strip()
+        # Remove common noise
+        name_part = re.sub(r"\|", "", name_part).strip()
+
+        # Extract description from context (Macedonian keywords)
+        description = ""
+        desc_keywords = [
+            "промет", "основ", "услуг", "плаќање", "СМЕТКОВОДСТВЕНА",
+            "УСЛУГА", "извр", "произ", "стоки", "месец",
+        ]
+        for cl in context_lines[1:]:
+            cl_clean = cl.strip()
+            if any(kw.lower() in cl_clean.lower() for kw in desc_keywords):
+                description = (description + " " + cl_clean).strip()
+
+        if not description:
+            # Use all context except account/amount lines as description
+            for cl in context_lines[1:]:
+                cl_clean = cl.strip()
+                if cl_clean and not account_re.search(cl_clean):
+                    description = (description + " " + cl_clean).strip()
+                    break
+
+        # Determine debit vs credit
+        # For Komercijalna statements: first amount = debit, second = credit
+        # If debit is 0.00 and credit > 0, it's incoming
+        debit = 0.0
+        credit = 0.0
+
+        if len(amounts_float) >= 2:
+            # Pattern: 0.00 followed by amount = credit; amount followed by 0.00 = debit
+            if amounts_float[0] == 0 and amounts_float[1] > 0:
+                credit = amounts_float[1]
+            elif amounts_float[0] > 0:
+                debit = amounts_float[0]
+                if len(amounts_float) > 1 and amounts_float[1] > 0:
+                    credit = amounts_float[1]
+        elif len(amounts_float) == 1:
+            # Single amount - check context for clues
+            credit = amounts_float[0]
+
+        # Extract payment code (3-digit near amounts)
+        code_match = re.search(r"\b(\d{3})\b", context)
+        payment_code = None
+        if code_match:
+            code_val = int(code_match.group(1))
+            if 100 <= code_val <= 999:
+                payment_code = code_val
+
+        tx_num += 1
+        tx = {
+            "row_number": tx_num,
+            "counterparty_name": name_part or None,
+            "counterparty_account": account,
+            "debit": debit,
+            "credit": credit,
+            "payment_code": payment_code,
+            "description": description.strip() or None,
+            "reference": reference,
+            "pbo": None,
+        }
+        transactions.append(tx)
+        logger.info(f"  TX {tx_num}: {name_part} | debit={debit} credit={credit} | {description[:50]}")
+
+        i = j
+
+    logger.info(f"Plain-text extraction found {len(transactions)} transactions")
+    return transactions
+
+
 @app.get("/health")
 def health() -> Dict[str, Any]:
     """Health check endpoint."""
@@ -903,6 +1075,11 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
                 output_type=pytesseract.Output.DICT,
             )
             transactions = _extract_table_from_tsv(tsv_data, width)
+
+        if not transactions:
+            # Final fallback: parse from plain text using regex patterns
+            logger.info("TSV extraction failed, falling back to plain-text parsing")
+            transactions = _extract_transactions_from_text(plain_text)
 
         # Calculate average confidence
         all_confs = [
