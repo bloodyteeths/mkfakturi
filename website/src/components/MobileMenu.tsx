@@ -38,6 +38,15 @@ export default function MobileMenu({ t, locale }: { t: Dictionary; locale: Local
                             >
                                 {t.nav.features}
                             </Link>
+                            {t.nav.showcase && (
+                                <Link
+                                    href={`/${locale}/pregled`}
+                                    className="text-gray-700 hover:text-indigo-600 font-medium py-3 px-4"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    {t.nav.showcase}
+                                </Link>
+                            )}
                             {t.nav.forAccountants && (
                                 <Link
                                     href={`/${locale}/for-accountants`}

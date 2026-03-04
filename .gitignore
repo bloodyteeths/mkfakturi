@@ -94,6 +94,7 @@ UBL-2.1.zip
 
 # Screenshots
 screenshots/
+!website/public/assets/screenshots/
 
 # Lead/contact CSV files (private data)
 storage/leads/

@@ -21,6 +21,7 @@ const footerCopy = {
     agpl: 'AGPL Лиценца',
     contact: 'Контакт',
     followUs: 'Следете не',
+    showcase: 'Преглед',
   },
   sq: {
     companyInfo: 'Facturino by Facturino DOOEL, Shkup, Maqedonia e Veriut',
@@ -38,6 +39,7 @@ const footerCopy = {
     agpl: 'Licenca AGPL',
     contact: 'Kontakti',
     followUs: 'Na ndiqni',
+    showcase: 'Permbledhje',
   },
   tr: {
     companyInfo: 'Facturino by Facturino DOOEL, Üsküp, Kuzey Makedonya',
@@ -55,6 +57,7 @@ const footerCopy = {
     agpl: 'AGPL Lisansı',
     contact: 'İletişim',
     followUs: 'Bizi Takip Edin',
+    showcase: 'Onizleme',
   },
   en: {
     companyInfo: 'Facturino by Facturino DOOEL, Skopje, North Macedonia',
@@ -72,6 +75,7 @@ const footerCopy = {
     agpl: 'AGPL License',
     contact: 'Contact',
     followUs: 'Follow Us',
+    showcase: 'Preview',
   },
 } as const
 
@@ -116,6 +120,14 @@ export default function Footer({ t, locale }: { t: Dictionary; locale: Locale })
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {f.features}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/pregled`}
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {f.showcase}
                 </Link>
               </li>
               <li>

@@ -1658,4 +1658,50 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Pregled (Feature Showcase) -->
+  <url>
+    <loc>https://www.facturino.mk/mk/pregled</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/pregled" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/pregled" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/pregled" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/pregled" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/pregled" />
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/pregled</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/pregled" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/pregled" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/pregled" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/pregled" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/pregled" />
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/pregled</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/pregled" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/pregled" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/pregled" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/pregled" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/pregled" />
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/pregled</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/pregled" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/pregled" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/pregled" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/pregled" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/pregled" />
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
 </urlset>
