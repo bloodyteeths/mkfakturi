@@ -1551,10 +1551,19 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             if tsv_lines:
                 debug_tsv_lines[attempt_key] = tsv_lines[:60]
             if txs:
-                # Filter out zero-amount transactions (OCR noise)
+                # Filter noise: remove transactions with zero amounts AND
+                # no valid account. Keep zero-amount txs that have a real
+                # account (15+ digits) — user can fill amounts manually.
                 txs = [
                     tx for tx in txs
-                    if tx.get("debit", 0) > 0 or tx.get("credit", 0) > 0
+                    if (
+                        tx.get("debit", 0) > 0
+                        or tx.get("credit", 0) > 0
+                        or (
+                            tx.get("counterparty_account")
+                            and len(str(tx["counterparty_account"])) >= 15
+                        )
+                    )
                 ]
             if txs:
                 transactions = txs
