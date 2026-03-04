@@ -15,10 +15,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       en: 'For Accountants — Facturino',
     },
     description: {
-      mk: 'Мулти-клиент платформа за сметководители. Партнерска програма со 20% провизија. Управувајте со десетици клиенти од едно место.',
-      sq: 'Platforme shume-klientesh per kontabiliste. Program partneriteti me 20% komision. Menaxhoni dhjetera kliente nga nje vend.',
-      tr: 'Muhasebeciler icin coklu musteri platformu. %20 komisyonlu partner programi. Onlarca musteriyi tek yerden yonetin.',
-      en: 'Multi-client platform for accountants. Partner program with 20% commission. Manage dozens of clients from one place.',
+      mk: 'Бесплатна мулти-клиент платформа за сметководители. Додајте ги сите компании бесплатно. Управувајте со десетици клиенти од едно место.',
+      sq: 'Platforme falas shume-klientesh per kontabiliste. Shtoni te gjitha kompanite falas. Menaxhoni dhjetera kliente nga nje vend.',
+      tr: 'Muhasebeciler icin ucretsiz coklu musteri platformu. Tum sirketleri ucretsiz ekleyin. Onlarca musteriyi tek yerden yonetin.',
+      en: 'Free multi-client platform for accountants. Add all companies for free. Manage dozens of clients from one place.',
     },
   })
 }
@@ -121,18 +121,18 @@ const copy = {
       othersLabel: 'PANTHEON / MiniMax',
     },
     partner: {
-      title: 'Партнерска програма',
-      sub: 'Заработете додека им помагате на клиентите да преминат на модерно сметководство.',
+      title: 'Бесплатно за сметководители',
+      sub: 'Додајте ги сите ваши компании бесплатно. Еден систем за сите клиенти — без трошоци за вас.',
       benefits: [
-        '20% рекурентна провизија од секоја претплата',
-        'Партнерски контролен панел со статистики',
-        'Персонализирани линкови за препорака',
+        'Портфолио: додајте неограничено компании бесплатно',
+        '3 месеци Standard за сите компании при старт',
+        'Партнер контролен панел со статистики',
         'Приоритетна техничка поддршка',
       ],
       cta: 'Стани партнер',
-      visualRecurring: 'рекурентна провизија',
-      visualDashboard: 'Контролен панел',
-      visualAnalytics: 'статистики и препораки',
+      visualRecurring: 'бесплатен пристап',
+      visualDashboard: 'Портфолио панел',
+      visualAnalytics: 'статистики и покриеност',
       visualSupport: 'Приоритетна поддршка',
     },
     bottomCta: {
@@ -238,18 +238,18 @@ const copy = {
       othersLabel: 'PANTHEON / MiniMax',
     },
     partner: {
-      title: 'Programi i partneritetit',
-      sub: 'Fitoni ndërsa ndihmoni klientët të kalojnë në kontabilitet modern.',
+      title: 'Falas për kontabilistët',
+      sub: 'Shtoni të gjitha kompanitë tuaja falas. Një sistem për të gjithë klientët — pa kosto për ju.',
       benefits: [
-        '20% komision periodik nga çdo abonim',
+        'Portofol: shtoni kompani të pakufizuara falas',
+        '3 muaj Standard për të gjitha kompanitë në fillim',
         'Panel kontrolli partneri me statistika',
-        'Lidhje personalizuara referimi',
         'Mbështetje teknike me prioritet',
       ],
       cta: 'Bëhu partner',
-      visualRecurring: 'komision periodik',
-      visualDashboard: 'Paneli i kontrollit',
-      visualAnalytics: 'statistika dhe referime',
+      visualRecurring: 'qasje falas',
+      visualDashboard: 'Paneli i portofolit',
+      visualAnalytics: 'statistika dhe mbulim',
       visualSupport: 'Mbështetje me prioritet',
     },
     bottomCta: {
@@ -355,18 +355,18 @@ const copy = {
       othersLabel: 'PANTHEON / MiniMax',
     },
     partner: {
-      title: 'Partner programı',
-      sub: 'Müşterilerinizin modern muhasebeye geçmesine yardım ederken kazanın.',
+      title: 'Muhasebeciler için ücretsiz',
+      sub: 'Tüm şirketlerinizi ücretsiz ekleyin. Tüm müşteriler için tek sistem — size maliyeti yok.',
       benefits: [
-        'Her abonelikten %20 tekrarlayan komisyon',
+        'Portföy: sınırsız şirketi ücretsiz ekleyin',
+        'Başlangıçta tüm şirketler için 3 ay Standard',
         'İstatistikli partner kontrol paneli',
-        'Kişiselleştirilmiş referans linkleri',
         'Öncelikli teknik destek',
       ],
       cta: 'Partner ol',
-      visualRecurring: 'tekrarlayan komisyon',
-      visualDashboard: 'Kontrol paneli',
-      visualAnalytics: 'istatistikler ve referanslar',
+      visualRecurring: 'ücretsiz erişim',
+      visualDashboard: 'Portföy paneli',
+      visualAnalytics: 'istatistikler ve kapsama',
       visualSupport: 'Öncelikli destek',
     },
     bottomCta: {
@@ -472,18 +472,18 @@ const copy = {
       othersLabel: 'PANTHEON / MiniMax',
     },
     partner: {
-      title: 'Partner Program',
-      sub: 'Earn while helping your clients transition to modern accounting.',
+      title: 'Free for accountants',
+      sub: 'Add all your companies for free. One system for all clients — no cost to you.',
       benefits: [
-        '20% recurring commission on every subscription',
+        'Portfolio: add unlimited companies for free',
+        '3 months Standard for all companies at start',
         'Partner dashboard with analytics',
-        'Personalized referral links',
         'Priority technical support',
       ],
       cta: 'Become a partner',
-      visualRecurring: 'recurring commission',
-      visualDashboard: 'Dashboard',
-      visualAnalytics: 'analytics & referrals',
+      visualRecurring: 'free access',
+      visualDashboard: 'Portfolio dashboard',
+      visualAnalytics: 'analytics & coverage',
       visualSupport: 'Priority support',
     },
     bottomCta: {
@@ -813,9 +813,13 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-3xl blur-2xl transform scale-95"></div>
                 <div className="relative glass-panel rounded-2xl p-8 space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl">%</div>
+                    <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600 font-bold text-xl">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
                     <div>
-                      <p className="text-2xl font-extrabold text-gray-900">20%</p>
+                      <p className="text-2xl font-extrabold text-gray-900">0 ден</p>
                       <p className="text-sm text-gray-500">{t.partner.visualRecurring}</p>
                     </div>
                   </div>

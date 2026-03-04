@@ -240,8 +240,7 @@ const mk: Dictionary = {
       { name: 'Max', price: '9,170 ден', period: '/месец', bullets: ['Неограничено фактури', 'Неограничено корисници', 'API пристап', 'Мулти-локации', 'IFRS извештаи'], popular: false }
     ],
     partnerPlans: [
-      { name: 'Partner', price: 'Бесплатно', period: '', bullets: ['Неограничено клиенти', 'Партнер портал', '20% рекурентна провизија', 'Следење на заработка'], popular: true },
-      { name: 'Partner Plus', price: '2,400 ден', period: '/месец', bullets: ['Сè од Partner', 'Фактурирање за канцеларија', 'Напредни извештаи', '22% провизија', 'Приоритетна поддршка'], popular: false }
+      { name: 'Partner', price: 'Бесплатно', period: '', bullets: ['Неограничено клиенти', 'Портфолио: додајте ги сите компании бесплатно', 'Партнер контролен панел', '3 месеци Standard за сите компании', 'Приоритетна поддршка'], popular: true },
     ],
     partnerSubtitle: 'За сметководствени канцеларии',
     cta: 'Започни сега',
@@ -445,8 +444,7 @@ const sq: Dictionary = {
       { name: 'Max', price: '9,170 den', period: '/muaj', bullets: ['Fatura pa limit', 'Përdorues pa limit', 'Qasje API', 'Multi-lokacione', 'Raporte IFRS'], popular: false }
     ],
     partnerPlans: [
-      { name: 'Partner', price: 'Falas', period: '', bullets: ['Klientë të pakufizuar', 'Portal partneri', 'Komision 20% rekurent', 'Ndjekje fitimesh'], popular: true },
-      { name: 'Partner Plus', price: '2,400 den', period: '/muaj', bullets: ['Gjithçka nga Partner', 'Faturim për zyrë', 'Raporte të avancuara', 'Komision 22%', 'Suport prioritar'], popular: false }
+      { name: 'Partner', price: 'Falas', period: '', bullets: ['Klientë të pakufizuar', 'Portofol: shtoni të gjitha kompanitë falas', 'Paneli i kontrollit të partnerit', '3 muaj Standard për të gjitha kompanitë', 'Mbështetje me prioritet'], popular: true },
     ],
     partnerSubtitle: 'Për zyrat e kontabilitetit',
     cta: 'Fillo tani',
@@ -650,8 +648,7 @@ const tr: Dictionary = {
       { name: 'Max', price: '9,170 den', period: '/ay', bullets: ['Sınırsız fatura', 'Sınırsız kullanıcı', 'API erişimi', 'Çoklu lokasyon', 'IFRS raporları'], popular: false }
     ],
     partnerPlans: [
-      { name: 'Partner', price: 'Ücretsiz', period: '', bullets: ['Sınırsız müşteri', 'Partner portalı', '%20 tekrarlayan komisyon', 'Kazanç takibi'], popular: true },
-      { name: 'Partner Plus', price: '2,400 den', period: '/ay', bullets: ['Partner\'ın tümü', 'Ofis için faturalama', 'Gelişmiş raporlar', '%22 komisyon', 'Öncelikli destek'], popular: false }
+      { name: 'Partner', price: 'Ücretsiz', period: '', bullets: ['Sınırsız müşteri', 'Portföy: tüm şirketleri ücretsiz ekleyin', 'Partner kontrol paneli', 'Tüm şirketler için 3 ay Standard', 'Öncelikli destek'], popular: true },
     ],
     partnerSubtitle: 'Muhasebe ofisleri için',
     cta: 'Şimdi başla',
@@ -855,8 +852,7 @@ const en: Dictionary = {
       { name: 'Max', price: '9,170 MKD', period: '/month', bullets: ['Unlimited invoices', 'Unlimited users', 'API access', 'Multi-locations', 'IFRS reports'], popular: false }
     ],
     partnerPlans: [
-      { name: 'Partner', price: 'Free', period: '', bullets: ['Unlimited clients', 'Partner portal', '20% recurring commission', 'Earnings tracking'], popular: true },
-      { name: 'Partner Plus', price: '2,400 MKD', period: '/month', bullets: ['Everything from Partner', 'Office invoicing', 'Advanced reports', '22% commission', 'Priority support'], popular: false }
+      { name: 'Partner', price: 'Free', period: '', bullets: ['Unlimited clients', 'Portfolio: add all companies for free', 'Partner dashboard', '3 months Standard for all companies', 'Priority support'], popular: true },
     ],
     partnerSubtitle: 'For accounting firms',
     cta: 'Start Now',

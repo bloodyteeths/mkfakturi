@@ -152,7 +152,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
             <div className="h-px w-12 bg-gray-200"></div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <div className="max-w-lg mx-auto">
             {partnerPlans.map((p, i) => {
               const previousPlanName = i > 0 ? partnerPlans[i - 1].name : null
               const bullets = previousPlanName
