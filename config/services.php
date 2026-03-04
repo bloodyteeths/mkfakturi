@@ -136,7 +136,7 @@ return [
         // Subscription price IDs for company tiers (B-31 series)
         'prices' => [
             'starter' => env('PADDLE_PRICE_STARTER', 'pri_starter_12eur'),
-            'standard' => env('PADDLE_PRICE_STANDARD', 'pri_standard_29eur'),
+            'standard' => env('PADDLE_PRICE_STANDARD', 'pri_standard_39eur'),
             'business' => env('PADDLE_PRICE_BUSINESS', 'pri_business_59eur'),
             'max' => env('PADDLE_PRICE_MAX', 'pri_max_149eur'),
             'partner_plus' => env('PADDLE_PRICE_PARTNER_PLUS', 'pri_partner_plus_29eur'),

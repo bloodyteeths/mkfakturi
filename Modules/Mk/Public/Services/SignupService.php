@@ -62,17 +62,17 @@ class SignupService
         // Pricing in MKD (monthly prices)
         $pricing = [
             'free' => 0,
-            'starter' => 590,
-            'standard' => 1490,
-            'business' => 2990,
-            'max' => 7490,
+            'starter' => 740,
+            'standard' => 2400,
+            'business' => 3630,
+            'max' => 9170,
         ];
 
         // EUR pricing for SEPA bank transfer payments
         $pricingEur = [
             'free' => 0,
             'starter' => 12,
-            'standard' => 29,
+            'standard' => 39,
             'business' => 59,
             'max' => 149,
         ];
@@ -122,10 +122,9 @@ class SignupService
                 'stripe_price_id' => $stripePrices['standard']['monthly'] ?? null,
                 'currency' => strtoupper($currency),
                 'features' => [
-                    'До 200 фактури месечно',
+                    'До 60 фактури месечно',
                     '3 корисници',
                     'Е-Фактура + QES (неограничено)',
-                    'Банкарски изводи (PSD2)',
                     '25 AI прашања/месец',
                 ],
             ],
@@ -140,8 +139,10 @@ class SignupService
                 'stripe_price_id' => $stripePrices['business']['monthly'] ?? null,
                 'currency' => strtoupper($currency),
                 'features' => [
-                    'До 1000 фактури месечно',
+                    'До 150 фактури месечно',
                     '5 корисници',
+                    'Банкарски поврзувања (PSD2)',
+                    'Авто-рекончилијација',
                     'Повеќе валути',
                     'API пристап',
                     '50 AI прашања/месец',

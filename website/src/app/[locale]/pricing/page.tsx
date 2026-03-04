@@ -18,10 +18,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       en: 'Pricing & Plans — Facturino',
     },
     description: {
-      mk: 'Бесплатен план, Standard од 1,490 ден/месец, без кредитна картичка. Споредете ги сите пакети на Facturino и започнете бесплатно 14 дена.',
-      sq: 'Plan falas, Standard nga 1,490 den/muaj, pa kartë krediti. Krahasoni të gjitha paketat e Facturino dhe filloni falas për 14 ditë.',
-      tr: 'Ücretsiz plan, Standard 1,490 den/ay\'dan başlayan fiyatlar, kredi kartı gerekmez. Facturino paketlerini karşılaştırın, 14 gün ücretsiz deneyin.',
-      en: 'Free plan, Standard from 1,490 MKD/month, no credit card required. Compare all Facturino plans and start your free 14-day trial today.',
+      mk: 'Бесплатен план, Standard од 2,400 ден/месец, без кредитна картичка. Споредете ги сите пакети на Facturino и започнете бесплатно 14 дена.',
+      sq: 'Plan falas, Standard nga 2,400 den/muaj, pa kartë krediti. Krahasoni të gjitha paketat e Facturino dhe filloni falas për 14 ditë.',
+      tr: 'Ücretsiz plan, Standard 2,400 den/ay\'dan başlayan fiyatlar, kredi kartı gerekmez. Facturino paketlerini karşılaştırın, 14 gün ücretsiz deneyin.',
+      en: 'Free plan, Standard from 2,400 MKD/month, no credit card required. Compare all Facturino plans and start your free 14-day trial today.',
     },
   })
 }

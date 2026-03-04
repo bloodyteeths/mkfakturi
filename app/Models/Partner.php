@@ -32,12 +32,19 @@ class Partner extends Model
         'stripe_account_status',
         'stripe_payouts_enabled_at',
         'payment_method',
+        // Portfolio fields
+        'portfolio_enabled',
+        'portfolio_activated_at',
+        'portfolio_grace_ends_at',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'portfolio_enabled' => 'boolean',
         'commission_rate' => 'decimal:2',
         'stripe_payouts_enabled_at' => 'datetime',
+        'portfolio_activated_at' => 'datetime',
+        'portfolio_grace_ends_at' => 'datetime',
     ];
 
     /**
@@ -289,5 +296,75 @@ class Partner extends Model
 
         return true;
     }
+
+    // ─── Portfolio Methods ───────────────────────────────────────────
+
+    /**
+     * Get companies managed via the accountant portfolio.
+     */
+    public function portfolioCompanies(): BelongsToMany
+    {
+        return $this->companies()
+            ->wherePivot('is_portfolio_managed', true)
+            ->wherePivot('is_active', true);
+    }
+
+    /**
+     * Check if portfolio is in the grace period (all companies get Standard).
+     */
+    public function isInGracePeriod(): bool
+    {
+        return $this->portfolio_enabled
+            && $this->portfolio_grace_ends_at
+            && $this->portfolio_grace_ends_at->isFuture();
+    }
+
+    /**
+     * Count paying portfolio companies (active subscription, plan != 'free').
+     */
+    public function getPayingCompanyCount(): int
+    {
+        return $this->portfolioCompanies()
+            ->whereHas('subscription', function ($q) {
+                $q->whereIn('status', ['trial', 'active'])
+                    ->where('plan', '!=', 'free');
+            })
+            ->count();
+    }
+
+    /**
+     * Get number of non-paying companies that can be "covered" for Standard features.
+     */
+    public function getCoveredSlots(): int
+    {
+        $ratio = config('subscriptions.portfolio.coverage_ratio', 1);
+
+        return (int) ($this->getPayingCompanyCount() * $ratio);
+    }
+
+    /**
+     * Get portfolio statistics.
+     *
+     * @return array{total: int, paying: int, non_paying: int, covered: int, uncovered: int, in_grace: bool}
+     */
+    public function getPortfolioStats(): array
+    {
+        $total = $this->portfolioCompanies()->count();
+        $paying = $this->getPayingCompanyCount();
+        $nonPaying = $total - $paying;
+        $coveredSlots = $this->getCoveredSlots();
+        $inGrace = $this->isInGracePeriod();
+
+        return [
+            'total' => $total,
+            'paying' => $paying,
+            'non_paying' => $nonPaying,
+            'covered' => $inGrace ? $nonPaying : min($nonPaying, $coveredSlots),
+            'uncovered' => $inGrace ? 0 : max(0, $nonPaying - $coveredSlots),
+            'in_grace' => $inGrace,
+            'grace_ends_at' => $this->portfolio_grace_ends_at?->toISOString(),
+        ];
+    }
 }
+// CLAUDE-CHECKPOINT
 

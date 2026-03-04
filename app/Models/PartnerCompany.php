@@ -32,6 +32,8 @@ class PartnerCompany extends Pivot
         'override_commission_rate',
         'permissions',
         'is_active',
+        'is_portfolio_managed',
+        'portfolio_tier_override',
         'invitation_status',
         'created_by',
         'invited_at',
@@ -44,6 +46,7 @@ class PartnerCompany extends Pivot
     protected $casts = [
         'is_primary' => 'boolean',
         'is_active' => 'boolean',
+        'is_portfolio_managed' => 'boolean',
         'override_commission_rate' => 'decimal:2',
         'permissions' => 'array',
         'invited_at' => 'datetime',

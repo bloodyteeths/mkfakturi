@@ -85,7 +85,7 @@
           <div class="mb-4">
             <h3 class="text-2xl font-bold text-gray-900">Standard</h3>
             <div class="mt-2 flex items-baseline">
-              <span class="text-4xl font-extrabold text-gray-900">€29</span>
+              <span class="text-4xl font-extrabold text-gray-900">€39</span>
               <span class="ml-1 text-xl text-gray-500">/month</span>
             </div>
           </div>
@@ -97,7 +97,7 @@
           <ul class="space-y-3 mb-6">
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Up to 200 invoices/month</span>
+              <span class="text-sm text-gray-700">Up to 60 invoices/month</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
@@ -106,10 +106,6 @@
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
               <span class="text-sm text-gray-700">Unlimited e-Invoice + QES signing</span>
-            </li>
-            <li class="flex items-start">
-              <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Bank feed integration (PSD2)</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
@@ -149,11 +145,19 @@
           <ul class="space-y-3 mb-6">
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Up to 1,000 invoices/month</span>
+              <span class="text-sm text-gray-700">Up to 150 invoices/month</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
               <span class="text-sm text-gray-700">5 users</span>
+            </li>
+            <li class="flex items-start">
+              <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
+              <span class="text-sm text-gray-700">Bank connections (PSD2)</span>
+            </li>
+            <li class="flex items-start">
+              <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
+              <span class="text-sm text-gray-700">Auto-reconciliation</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />

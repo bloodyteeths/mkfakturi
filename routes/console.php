@@ -213,6 +213,15 @@ if (InstallUtils::isDbCreated()) {
         ->runInBackground()
         ->withoutOverlapping();
 
+    // Recalculate portfolio tier overrides for all accountant portfolios
+    // Handles grace period expirations and sliding scale recalculation
+    Schedule::command('portfolio:recalculate')
+        ->dailyAt('06:00')
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->name('portfolio-recalculate');
+
     // Post monthly depreciation GL entries on 1st of each month at 00:30
     Schedule::command('depreciation:post-monthly')
         ->monthlyOn(1, '00:30')

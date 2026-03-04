@@ -291,7 +291,7 @@ class CpayWebhookController extends Controller
         $prices = [
             'free' => 0,
             'starter' => 12,
-            'standard' => 29,
+            'standard' => 39,
             'business' => 59,
             'max' => 149,
         ];

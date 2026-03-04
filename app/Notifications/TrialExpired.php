@@ -52,8 +52,8 @@ class TrialExpired extends Notification
             ->line('**All your data is safe!** Your invoices, customers, and settings remain intact.')
             ->line('')
             ->line('Upgrade anytime to regain full access:')
-            ->line('- **Standard** (€29/month): E-Faktura, 3 users, 200 invoices')
-            ->line('- **Business** (€59/month): Bank feeds, 5 users, 1,000 invoices')
+            ->line('- **Standard** (€39/month): E-Faktura + QES, 3 users, 60 invoices')
+            ->line('- **Business** (€59/month): Bank feeds, 5 users, 150 invoices')
             ->line('- **Max** (€149/month): Unlimited everything')
             ->action('Upgrade Now', $paddleCheckoutUrl)
             ->line('Thank you for trying Facturino!');

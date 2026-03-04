@@ -43,6 +43,15 @@
                 {{ t('partner.navigation.commissions') }}
               </router-link>
               <router-link
+                :to="{ name: 'partner.portfolio', query: partnerQuery }"
+                class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
+                :class="$route.name?.startsWith('partner.portfolio')
+                  ? 'border-blue-500 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              >
+                {{ t('partner.navigation.portfolio') }}
+              </router-link>
+              <router-link
                 :to="{ name: 'partner.referrals', query: partnerQuery }"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2"
                 :class="$route.name === 'partner.referrals'

@@ -39,7 +39,9 @@ class Company extends Model implements HasMedia
         'stripe_id',
         'subscription_tier',
         'trial_ends_at',
-    ]; // CLAUDE-CHECKPOINT: Added Stripe and Paddle subscription fields
+        'is_portfolio_managed',
+        'managing_partner_id',
+    ]; // CLAUDE-CHECKPOINT: Added portfolio fields
 
     public const COMPANY_LEVEL = 'company_level';
 
@@ -205,6 +207,22 @@ class Company extends Model implements HasMedia
         return $this->partners()->wherePivot('is_active', true);
     }
 
+    /**
+     * Get the partner managing this company via portfolio.
+     */
+    public function managingPartner(): BelongsTo
+    {
+        return $this->belongsTo(Partner::class, 'managing_partner_id');
+    }
+
+    /**
+     * Check if this company is managed via an accountant's portfolio.
+     */
+    public function isPortfolioManaged(): bool
+    {
+        return (bool) $this->is_portfolio_managed;
+    }
+
     public function partnerLinks(): HasMany
     {
         return $this->hasMany(PartnerCompany::class);
@@ -267,20 +285,9 @@ class Company extends Model implements HasMedia
      */
     public function canAccessFeature(string $feature): bool
     {
-        // Plan hierarchy
-        $planHierarchy = ['free' => 0, 'starter' => 1, 'standard' => 2, 'business' => 3, 'max' => 4];
+        $planHierarchy = config('subscriptions.plan_hierarchy', ['free' => 0, 'accountant_basic' => 1, 'starter' => 2, 'standard' => 3, 'business' => 4, 'max' => 5]);
 
-        // Feature to minimum plan mapping (can be moved to config later)
-        $featureRequirements = [
-            'basic_invoicing' => 'free',
-            'estimates' => 'starter',
-            'recurring_invoices' => 'starter',
-            'expenses' => 'standard',
-            'reports' => 'standard',
-            'multi_currency' => 'business',
-            'custom_fields' => 'business',
-            'api_access' => 'max',
-        ];
+        $featureRequirements = config('subscriptions.feature_requirements', []);
 
         $requiredPlan = $featureRequirements[$feature] ?? 'free';
 
@@ -294,7 +301,7 @@ class Company extends Model implements HasMedia
 
         $currentPlan = $this->subscription->plan;
 
-        return $planHierarchy[$currentPlan] >= $planHierarchy[$requiredPlan];
+        return ($planHierarchy[$currentPlan] ?? 0) >= ($planHierarchy[$requiredPlan] ?? 0);
     }
 
     /**
@@ -302,7 +309,7 @@ class Company extends Model implements HasMedia
      */
     public function upgradeRequired(string $minPlan): bool
     {
-        $planHierarchy = ['free' => 0, 'starter' => 1, 'standard' => 2, 'business' => 3, 'max' => 4];
+        $planHierarchy = config('subscriptions.plan_hierarchy', ['free' => 0, 'accountant_basic' => 1, 'starter' => 2, 'standard' => 3, 'business' => 4, 'max' => 5]);
 
         if (! $this->relationLoaded('subscription')) {
             $this->load('subscription');
@@ -314,7 +321,7 @@ class Company extends Model implements HasMedia
 
         $currentPlan = $this->subscription->plan;
 
-        return $planHierarchy[$currentPlan] < $planHierarchy[$minPlan];
+        return ($planHierarchy[$currentPlan] ?? 0) < ($planHierarchy[$minPlan] ?? 0);
     }
 
     /**

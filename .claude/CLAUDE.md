@@ -56,7 +56,8 @@ Macedonian-localised fork of InvoiceShelf: bank-feed, QES e-Invoice, Paddle bill
 - Paddle: webhooks need CSRF exemption
 
 ## Subscriptions
-5 tiers: Free/Starter(€12)/Standard(€29)/Business(€59)/Max(€149). Config: `config/subscriptions.php`.
+6 tiers: Free/Starter(€12)/Standard(€39)/Business(€59)/Max(€149) + Accountant Basic (internal, portfolio-only). Config: `config/subscriptions.php`.
+Bank connections and auto-reconciliation require Business tier. Portfolio program: accountants free, 1:1 sliding scale, 3-month grace.
 Three-layer enforcement: middleware (`CheckInvoiceLimit`, `CheckUserLimit`, `CheckSubscriptionTier`), services (`InvoiceCountService`, `UsageLimitService`), controller-level `canUse()`.
 Bypasses: super admins, partners, verified accountants. Trial: 14 days Standard.
 

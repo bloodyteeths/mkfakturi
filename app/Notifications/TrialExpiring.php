@@ -51,17 +51,17 @@ class TrialExpiring extends Notification
                 ->line('Upgrade now to keep your premium features including:')
                 ->line('- E-Faktura sending with QES signatures')
                 ->line('- Up to 3 users')
-                ->line('- 200 invoices per month')
+                ->line('- 60 invoices per month')
                 ->line("If you don't upgrade, your account will be downgraded to the Free plan, and you'll lose access to these features.")
-                ->action('Upgrade to Standard - €29/month', $paddleCheckoutUrl)
+                ->action('Upgrade to Standard - €39/month', $paddleCheckoutUrl)
                 ->line('All your data will remain safe and accessible.');
         } else {
             $message->line("Your {$planName} trial for {$companyName} will expire in **{$this->daysRemaining} ".($this->daysRemaining == 1 ? 'day' : 'days').'**.')
                 ->line('Upgrade now to continue enjoying:')
                 ->line('- E-Faktura sending with QES signatures')
                 ->line('- Up to 3 users')
-                ->line('- 200 invoices per month')
-                ->action('Upgrade to Standard - €29/month', $paddleCheckoutUrl)
+                ->line('- 60 invoices per month')
+                ->action('Upgrade to Standard - €39/month', $paddleCheckoutUrl)
                 ->line('Questions? Contact our support team.');
         }
 

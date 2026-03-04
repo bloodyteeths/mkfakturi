@@ -635,7 +635,7 @@ class ProcessWebhookEvent implements ShouldQueue
     {
         return match ($tier) {
             'starter' => 12,
-            'standard' => 29,
+            'standard' => 39,
             'business' => 59,
             'max' => 149,
             default => 0,

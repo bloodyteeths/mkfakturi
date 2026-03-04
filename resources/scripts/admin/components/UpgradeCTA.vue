@@ -144,7 +144,7 @@ const tiers = {
   },
   standard: {
     name: 'Standard',
-    price: 29.0,
+    price: 39.0,
     paddle_price_id: import.meta.env.VITE_PADDLE_STANDARD_PRICE_ID,
   },
   business: {

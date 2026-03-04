@@ -19,7 +19,7 @@ use Stripe\Subscription as StripeSubscription;
  * Subscription Controller for Company Billing
  *
  * Handles company subscription management with Stripe
- * Supports 5 tiers: Free (€0), Starter (€12), Standard (€29), Business (€59), Max (€149)
+ * Supports 5 tiers: Free (€0), Starter (€12), Standard (€39), Business (€59), Max (€149)
  */
 class SubscriptionController extends Controller
 {
@@ -29,7 +29,7 @@ class SubscriptionController extends Controller
     private const TIERS = [
         'free' => ['price' => 0, 'name' => 'Free'],
         'starter' => ['price' => 12, 'name' => 'Starter'],
-        'standard' => ['price' => 29, 'name' => 'Standard'],
+        'standard' => ['price' => 39, 'name' => 'Standard'],
         'business' => ['price' => 59, 'name' => 'Business'],
         'max' => ['price' => 149, 'name' => 'Max'],
     ];

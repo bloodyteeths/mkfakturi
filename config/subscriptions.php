@@ -12,10 +12,13 @@ return [
     |
     | Tiers:
     | - Free: €0/month - Basic invoicing
-    | - Starter: €12/month - More invoices + recurring invoices
-    | - Standard: €29/month - E-Faktura + QES signing + more users
-    | - Business: €59/month - Bank feeds + auto-reconciliation
-    | - Max: €149/month - Unlimited everything
+    | - Starter: €12/month (740 ден) - More invoices + recurring invoices
+    | - Standard: €39/month (2,400 ден) - E-Faktura unlimited + QES signing + more users
+    | - Business: €59/month (3,630 ден) - Bank feeds + auto-reconciliation + multi-currency
+    | - Max: €149/month (9,170 ден) - Unlimited everything
+    |
+    | Internal-only tiers (not shown on pricing page):
+    | - Accountant Basic: €0 - Full bookkeeping without premium features (portfolio-managed companies)
     |
     */
 
@@ -23,6 +26,7 @@ return [
         'free' => [
             'name' => 'Free',
             'price_monthly' => 0.00,
+            'price_monthly_mkd' => 0,
             'invoice_limit' => 3,
             'users' => 1,
             'features' => [
@@ -71,6 +75,7 @@ return [
         'starter' => [
             'name' => 'Starter',
             'price_monthly' => 12.00,
+            'price_monthly_mkd' => 740,
             'invoice_limit' => 30,
             'users' => 1,
             'features' => [
@@ -115,8 +120,9 @@ return [
 
         'standard' => [
             'name' => 'Standard',
-            'price_monthly' => 29.00,
-            'invoice_limit' => 200,
+            'price_monthly' => 39.00,
+            'price_monthly_mkd' => 2400,
+            'invoice_limit' => 60,
             'users' => 3,
             'features' => [
                 'basic_invoicing' => true,
@@ -131,8 +137,8 @@ return [
                 'expenses' => true,
                 'reports' => true,
                 'custom_fields' => true,
-                'bank_connections' => true,   // PSD2 available in Standard (matches landing page)
-                'auto_reconciliation' => true,
+                'bank_connections' => false,   // Moved to Business tier
+                'auto_reconciliation' => false, // Moved to Business tier
                 'ai_suggestions' => 'standard', // Standard AI
 
                 // Locked features
@@ -144,7 +150,6 @@ return [
                 'custom_fields' => 15,
                 'recurring_invoices_active' => 20,
                 'estimates_per_month' => null,
-                'bank_accounts' => 2,
                 'ai_queries_per_month' => 25,
                 'payroll_employees' => 0,     // Payroll not available on standard
                 'bills_per_month' => 100,
@@ -162,7 +167,8 @@ return [
         'business' => [
             'name' => 'Business',
             'price_monthly' => 59.00,
-            'invoice_limit' => 1000,
+            'price_monthly_mkd' => 3630,
+            'invoice_limit' => 150,
             'users' => 5,
             'features' => [
                 'basic_invoicing' => true,
@@ -207,6 +213,7 @@ return [
         'max' => [
             'name' => 'Max',
             'price_monthly' => 149.00,
+            'price_monthly_mkd' => 9170,
             'invoice_limit' => null, // Unlimited
             'users' => null, // Unlimited
             'features' => [
@@ -252,6 +259,62 @@ return [
                 'efaktura_per_month' => null,
             ],
         ],
+        /*
+        |----------------------------------------------------------------------
+        | Accountant Basic (internal-only, not shown on pricing page)
+        |----------------------------------------------------------------------
+        |
+        | Used for portfolio-managed companies that are not "covered" by paying
+        | companies. Provides full bookkeeping (invoicing, expenses, bills,
+        | reports) but locks premium features (e-Faktura, QES, bank).
+        |
+        */
+        'accountant_basic' => [
+            'name' => 'Accountant Basic',
+            'price_monthly' => 0.00,
+            'price_monthly_mkd' => 0,
+            'invoice_limit' => 15,
+            'users' => 1,
+            'internal_only' => true, // Not shown on pricing page
+            'features' => [
+                'basic_invoicing' => true,
+                'customers' => true,
+                'items' => true,
+                'pdf_export' => true,
+                'csv_import' => true,
+                'expenses' => true,
+                'estimates' => true,
+                'reports' => true,
+                'recurring_invoices' => true,
+                'custom_fields' => true,
+
+                // Locked premium features
+                'efaktura_sending' => false,
+                'qes_signing' => false,
+                'bank_connections' => false,
+                'auto_reconciliation' => false,
+                'multi_currency' => false,
+                'api_access' => false,
+                'ai_suggestions' => 'basic',
+            ],
+            'limits' => [
+                'expenses_per_month' => null,  // Unlimited expenses for bookkeeping
+                'custom_fields' => 3,
+                'recurring_invoices_active' => 3,
+                'estimates_per_month' => 5,
+                'ai_queries_per_month' => 5,
+                'payroll_employees' => 0,
+                'bills_per_month' => 20,
+                'suppliers_total' => 30,
+                'credit_notes_per_month' => 5,
+                'proformas_per_month' => 5,
+                'projects_total' => 0,
+                'warehouses_total' => 0,
+                'deadlines_custom' => 5,
+                'client_documents_per_month' => 10,
+                'efaktura_per_month' => 0,
+            ],
+        ],
     ],
 
     /*
@@ -265,10 +328,11 @@ return [
     */
     'plan_hierarchy' => [
         'free' => 0,
-        'starter' => 1,
-        'standard' => 2,
-        'business' => 3,
-        'max' => 4,
+        'accountant_basic' => 1, // Internal: between free and starter
+        'starter' => 2,
+        'standard' => 3,
+        'business' => 4,
+        'max' => 5,
     ],
 
     /*
@@ -297,14 +361,14 @@ return [
         'recurring_invoices' => 'free', // Limited to 1 on free
         'estimates' => 'free',          // Limited on free
 
-        // Standard tier features (PSD2 + QES)
+        // Standard tier features (QES signing)
         'qes_signing' => 'standard',
-        'bank_connections' => 'standard',     // PSD2 in Standard (matches landing page)
-        'auto_reconciliation' => 'standard',
 
-        // Business tier features
+        // Business tier features (PSD2 + reconciliation + multi-currency + API)
+        'bank_connections' => 'business',     // PSD2 moved to Business tier
+        'auto_reconciliation' => 'business',  // Auto-reconciliation moved to Business tier
         'multi_currency' => 'business',
-        'api_access' => 'business',           // API in Business (matches landing page)
+        'api_access' => 'business',           // API in Business
 
         // Max tier features
         'priority_support' => 'max',
@@ -397,9 +461,9 @@ return [
     'upgrade_messages' => [
         'invoice_limit' => [
             'free' => 'You\'ve reached your invoice limit (3/month). Upgrade to Starter for 30 invoices per month.',
-            'starter' => 'You\'ve reached your invoice limit (30/month). Upgrade to Standard for 200 invoices per month.',
-            'standard' => 'You\'ve reached your invoice limit (200/month). Upgrade to Business for 1,000 invoices per month.',
-            'business' => 'You\'ve reached your invoice limit (1,000/month). Upgrade to Max for unlimited invoices.',
+            'starter' => 'You\'ve reached your invoice limit (30/month). Upgrade to Standard for 60 invoices per month.',
+            'standard' => 'You\'ve reached your invoice limit (60/month). Upgrade to Business for 150 invoices per month.',
+            'business' => 'You\'ve reached your invoice limit (150/month). Upgrade to Max for unlimited invoices.',
         ],
         'expenses' => [
             'free' => 'You\'ve reached your expense limit (2/month). Upgrade to Starter for 20 expenses per month.',
@@ -502,5 +566,32 @@ return [
             'starter' => 'You\'ve reached your e-Faktura limit (5/month). Upgrade to Standard for unlimited e-Faktura sending.',
         ],
     ],
+    /*
+    |--------------------------------------------------------------------------
+    | Accountant Portfolio Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Accountant portfolio program: accountants manage companies for free.
+    | Companies get a 14-day Standard trial, then must pay or drop to
+    | Accountant Basic. Each paying company "covers" 1 non-paying company
+    | for Standard features (1:1 sliding scale).
+    |
+    | Grace period: 3 months after portfolio activation, all companies
+    | keep Standard features regardless of paying status.
+    |
+    */
+    'portfolio' => [
+        'enabled' => true,
+        'grace_period_days' => 90,                    // 3 months
+        'coverage_ratio' => 1,                        // 1 paying covers 1 non-paying
+        'covered_tier' => 'standard',                 // Tier for covered non-paying companies
+        'uncovered_tier' => 'accountant_basic',       // Tier for uncovered non-paying companies
+        'company_trial_days' => 14,                   // Each new portfolio company gets this trial
+        'company_trial_plan' => 'standard',           // Trial plan for new portfolio companies
+        'grace_reminders' => [
+            7, // 7 days before grace ends
+            1, // 1 day before grace ends
+        ],
+    ],
 ];
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT

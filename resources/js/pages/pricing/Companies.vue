@@ -159,19 +159,19 @@
               <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              200 фактури месечно
+              60 фактури месечно
             </li>
             <li class="flex items-center text-gray-700">
               <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              е-Фактура интеграција
+              Е-Фактура + QES (неограничено)
             </li>
             <li class="flex items-center text-gray-700">
               <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              Следење на трошоци
+              3 корисници
             </li>
             <li class="flex items-center text-gray-700">
               <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,25 +229,25 @@
               <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              1,000 фактури месечно
+              150 фактури месечно
             </li>
             <li class="flex items-center text-gray-700">
               <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              Банкарски поврзувања
+              Банкарски поврзувања (PSD2)
+            </li>
+            <li class="flex items-center text-gray-700">
+              <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Авто-рекончилијација
             </li>
             <li class="flex items-center text-gray-700">
               <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
               До 5 корисници
-            </li>
-            <li class="flex items-center text-gray-700">
-              <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Напредни AI функции
             </li>
           </ul>
 
@@ -382,26 +382,26 @@ export default {
       billingInterval: 'monthly',
       paymentCurrency: 'mkd',
       monthlyPrices: {
-        starter: 590,
-        standard: 1490,
-        business: 2990,
-        max: 7490
+        starter: 740,
+        standard: 2400,
+        business: 3630,
+        max: 9170
       },
       yearlyPrices: {
-        starter: 5900,
-        standard: 14900,
-        business: 29900,
-        max: 74900
+        starter: 7400,
+        standard: 24000,
+        business: 36300,
+        max: 91700
       },
       monthlyPricesEur: {
         starter: 12,
-        standard: 29,
+        standard: 39,
         business: 59,
         max: 149
       },
       yearlyPricesEur: {
         starter: 120,
-        standard: 290,
+        standard: 390,
         business: 590,
         max: 1490
       }

@@ -109,12 +109,12 @@ class UsageLimitService
      * Get the company's current subscription tier
      *
      * @param  Company  $company
-     * @return string Tier name ('free', 'starter', 'standard', 'business', 'max')
+     * @return string Tier name ('free', 'starter', 'standard', 'business', 'max', 'accountant_basic')
      */
     public function getCompanyTier(Company $company): string
     {
         // First check company's subscription_tier column (set by Stripe webhooks)
-        if ($company->subscription_tier && in_array($company->subscription_tier, ['free', 'starter', 'standard', 'business', 'max'])) {
+        if ($company->subscription_tier && in_array($company->subscription_tier, ['free', 'starter', 'standard', 'business', 'max', 'accountant_basic'])) {
             return $company->subscription_tier;
         }
 
@@ -125,12 +125,36 @@ class UsageLimitService
 
         $subscription = $company->subscription;
 
-        // If no subscription or inactive, return 'free'
+        // If no subscription or inactive, check portfolio management
         if (! $subscription || ! in_array($subscription->status ?? '', ['trial', 'active'])) {
+            // Portfolio-managed companies: resolve tier from partner_company_links
+            if ($company->is_portfolio_managed && $company->managing_partner_id) {
+                return $this->getPortfolioTier($company);
+            }
+
             return 'free';
         }
 
         return $subscription->plan ?? 'free';
+    }
+
+    /**
+     * Resolve the effective tier for a portfolio-managed company.
+     * Checks portfolio_tier_override in partner_company_links.
+     */
+    protected function getPortfolioTier(Company $company): string
+    {
+        $tierOverride = DB::table('partner_company_links')
+            ->where('company_id', $company->id)
+            ->where('partner_id', $company->managing_partner_id)
+            ->where('is_portfolio_managed', true)
+            ->value('portfolio_tier_override');
+
+        if ($tierOverride) {
+            return $tierOverride;
+        }
+
+        return config('subscriptions.portfolio.uncovered_tier', 'accountant_basic');
     }
 
     /**

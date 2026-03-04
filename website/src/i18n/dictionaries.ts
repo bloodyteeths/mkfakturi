@@ -234,14 +234,14 @@ const mk: Dictionary = {
     includesPrevious: 'Вклучува сè од {plan}',
     companyPlans: [
       { name: 'Free', price: '0 ден', period: '/засекогаш', bullets: ['3 фактури/месец', '1 корисник', 'PDF извоз', '2 AI прашања/месец'], popular: false },
-      { name: 'Starter', price: '590 ден', period: '/месец', bullets: ['30 фактури/месец', '1 корисник', 'Е‑Фактура (5/месец)', '5 AI прашања/месец'], popular: false },
-      { name: 'Standard', price: '1,490 ден', period: '/месец', bullets: ['200 фактури/месец', '3 корисници', 'Е‑Фактура + QES', '25 AI прашања/месец', 'Материјално сметководство'], popular: true },
-      { name: 'Business', price: '2,990 ден', period: '/месец', bullets: ['1000 фактури/месец', '5 корисници', 'Банкарски изводи', '50 AI прашања/месец', 'Материјално сметководство'], popular: false },
-      { name: 'Max', price: '7,490 ден', period: '/месец', bullets: ['Неограничено фактури', 'API пристап', 'Мулти-локации', '100 AI прашања/месец', 'Материјално сметководство'], popular: false }
+      { name: 'Starter', price: '740 ден', period: '/месец', bullets: ['30 фактури/месец', '1 корисник', 'Е‑Фактура (5/месец)', '5 AI прашања/месец'], popular: false },
+      { name: 'Standard', price: '2,400 ден', period: '/месец', bullets: ['60 фактури/месец', '3 корисници', 'Е‑Фактура + QES (неограничено)', '25 AI прашања/месец'], popular: true },
+      { name: 'Business', price: '3,630 ден', period: '/месец', bullets: ['150 фактури/месец', '5 корисници', 'Банкарски поврзувања (PSD2)', 'Авто-рекончилијација', 'Повеќе валути'], popular: false },
+      { name: 'Max', price: '9,170 ден', period: '/месец', bullets: ['Неограничено фактури', 'Неограничено корисници', 'API пристап', 'Мулти-локации', 'IFRS извештаи'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Бесплатно', period: '', bullets: ['Неограничено клиенти', 'Партнер портал', '20% рекурентна провизија', 'Следење на заработка'], popular: true },
-      { name: 'Partner Plus', price: '1,490 ден', period: '/месец', bullets: ['Сè од Partner', 'Фактурирање за канцеларија', 'Напредни извештаи', '22% провизија', 'Приоритетна поддршка'], popular: false }
+      { name: 'Partner Plus', price: '2,400 ден', period: '/месец', bullets: ['Сè од Partner', 'Фактурирање за канцеларија', 'Напредни извештаи', '22% провизија', 'Приоритетна поддршка'], popular: false }
     ],
     partnerSubtitle: 'За сметководствени канцеларии',
     cta: 'Започни сега',
@@ -251,15 +251,16 @@ const mk: Dictionary = {
       title: 'Споредете ги пакетите',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
       rows: [
-        { feature: 'Фактури месечно', values: ['3', '30', '200', '1000', 'Неограничено'] },
+        { feature: 'Фактури месечно', values: ['3', '30', '60', '150', 'Неограничено'] },
         { feature: 'Корисници', values: ['1', '1', '3', '5', 'Неограничено'] },
         { feature: 'Клиенти', values: ['Неограничено', 'Неограничено', 'Неограничено', 'Неограничено', 'Неограничено'] },
-        { feature: 'Е-Фактура (UJP)', values: [false, '5/месец', true, true, true] },
+        { feature: 'Е-Фактура (UJP)', values: [false, '5/месец', 'Неограничено', 'Неограничено', 'Неограничено'] },
+        { feature: 'QES потпис', values: [false, false, true, true, true] },
         { feature: 'AI Прашања/месец', values: ['2', '5', '25', '50', '100'] },
-        { feature: 'Банкарски изводи (PSD2)', values: [false, false, true, true, true] },
+        { feature: 'Банкарски поврзувања (PSD2)', values: [false, false, false, true, true] },
+        { feature: 'Авто-рекончилијација', values: [false, false, false, true, true] },
         { feature: 'API Пристап', values: [false, false, false, true, true] },
-        { feature: 'Поддршка', values: ['Email', 'Email', 'Email/Chat', 'Prioritetna', 'WhatsApp'] },
-        { feature: 'Материјално сметководство', values: [false, false, true, true, true] }
+        { feature: 'Поддршка', values: ['Email', 'Email', 'Email/Chat', 'Приоритетна', 'WhatsApp'] }
       ]
     }
   }
@@ -438,14 +439,14 @@ const sq: Dictionary = {
     includesPrevious: 'Përfshin gjithçka në {plan}',
     companyPlans: [
       { name: 'Free', price: '0 den', period: '/përgjithmonë', bullets: ['3 fatura/muaj', '1 përdorues', 'Eksport PDF', '2 pyetje AI/muaj'], popular: false },
-      { name: 'Starter', price: '590 den', period: '/muaj', bullets: ['30 fatura/muaj', '1 përdorues', 'e‑Faturë (5/muaj)', '5 pyetje AI/muaj'], popular: false },
-      { name: 'Standard', price: '1,490 den', period: '/muaj', bullets: ['200 fatura/muaj', '3 përdorues', 'e‑Faturë + QES', '25 pyetje AI/muaj', 'Kontabilitet material'], popular: true },
-      { name: 'Business', price: '2,990 den', period: '/muaj', bullets: ['1000 fatura/muaj', '5 përdorues', 'Ekstrakte bankare', '50 pyetje AI/muaj', 'Kontabilitet material'], popular: false },
-      { name: 'Max', price: '7,490 den', period: '/muaj', bullets: ['Fatura pa limit', 'Qasje API', 'Multi-lokacione', '100 pyetje AI/muaj', 'Kontabilitet material'], popular: false }
+      { name: 'Starter', price: '740 den', period: '/muaj', bullets: ['30 fatura/muaj', '1 përdorues', 'e‑Faturë (5/muaj)', '5 pyetje AI/muaj'], popular: false },
+      { name: 'Standard', price: '2,400 den', period: '/muaj', bullets: ['60 fatura/muaj', '3 përdorues', 'e‑Faturë + QES (pa limit)', '25 pyetje AI/muaj'], popular: true },
+      { name: 'Business', price: '3,630 den', period: '/muaj', bullets: ['150 fatura/muaj', '5 përdorues', 'Lidhje bankare (PSD2)', 'Auto-rekonçilim', 'Shumë monedha'], popular: false },
+      { name: 'Max', price: '9,170 den', period: '/muaj', bullets: ['Fatura pa limit', 'Përdorues pa limit', 'Qasje API', 'Multi-lokacione', 'Raporte IFRS'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Falas', period: '', bullets: ['Klientë të pakufizuar', 'Portal partneri', 'Komision 20% rekurent', 'Ndjekje fitimesh'], popular: true },
-      { name: 'Partner Plus', price: '1,490 den', period: '/muaj', bullets: ['Gjithçka nga Partner', 'Faturim për zyrë', 'Raporte të avancuara', 'Komision 22%', 'Suport prioritar'], popular: false }
+      { name: 'Partner Plus', price: '2,400 den', period: '/muaj', bullets: ['Gjithçka nga Partner', 'Faturim për zyrë', 'Raporte të avancuara', 'Komision 22%', 'Suport prioritar'], popular: false }
     ],
     partnerSubtitle: 'Për zyrat e kontabilitetit',
     cta: 'Fillo tani',
@@ -455,15 +456,16 @@ const sq: Dictionary = {
       title: 'Krahasoni paketat',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
       rows: [
-        { feature: 'Fatura në muaj', values: ['3', '30', '200', '1000', 'Pa limit'] },
+        { feature: 'Fatura në muaj', values: ['3', '30', '60', '150', 'Pa limit'] },
         { feature: 'Përdorues', values: ['1', '1', '3', '5', 'Pa limit'] },
         { feature: 'Klientë', values: ['Pa limit', 'Pa limit', 'Pa limit', 'Pa limit', 'Pa limit'] },
-        { feature: 'e-Faturë (UJP)', values: [false, '5/muaj', true, true, true] },
+        { feature: 'e-Faturë (UJP)', values: [false, '5/muaj', 'Pa limit', 'Pa limit', 'Pa limit'] },
+        { feature: 'QES nënshkrim', values: [false, false, true, true, true] },
         { feature: 'Pyetje AI/muaj', values: ['2', '5', '25', '50', '100'] },
-        { feature: 'Ekstrakte bankare (PSD2)', values: [false, false, true, true, true] },
+        { feature: 'Lidhje bankare (PSD2)', values: [false, false, false, true, true] },
+        { feature: 'Auto-rekonçilim', values: [false, false, false, true, true] },
         { feature: 'Qasje API', values: [false, false, false, true, true] },
-        { feature: 'Mbështetje', values: ['Email', 'Email', 'Email/Chat', 'Prioritet', 'WhatsApp'] },
-        { feature: 'Kontabilitet material', values: [false, false, true, true, true] }
+        { feature: 'Mbështetje', values: ['Email', 'Email', 'Email/Chat', 'Prioritet', 'WhatsApp'] }
       ]
     }
   }
@@ -642,14 +644,14 @@ const tr: Dictionary = {
     includesPrevious: '{plan} paketindeki her şey dahil',
     companyPlans: [
       { name: 'Free', price: '0 den', period: '/süresiz', bullets: ['3 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', '2 AI soru/ay'], popular: false },
-      { name: 'Starter', price: '590 den', period: '/ay', bullets: ['30 fatura/ay', '1 kullanıcı', 'e‑Fatura (5/ay)', '5 AI soru/ay'], popular: false },
-      { name: 'Standard', price: '1,490 den', period: '/ay', bullets: ['200 fatura/ay', '3 kullanıcı', 'e‑Fatura + QES', '25 AI soru/ay', 'Malzeme muhasebesi'], popular: true },
-      { name: 'Business', price: '2,990 den', period: '/ay', bullets: ['1000 fatura/ay', '5 kullanıcı', 'Banka ekstreleri', '50 AI soru/ay', 'Malzeme muhasebesi'], popular: false },
-      { name: 'Max', price: '7,490 den', period: '/ay', bullets: ['Sınırsız fatura', 'API erişimi', 'Çoklu lokasyon', '100 AI soru/ay', 'Malzeme muhasebesi'], popular: false }
+      { name: 'Starter', price: '740 den', period: '/ay', bullets: ['30 fatura/ay', '1 kullanıcı', 'e‑Fatura (5/ay)', '5 AI soru/ay'], popular: false },
+      { name: 'Standard', price: '2,400 den', period: '/ay', bullets: ['60 fatura/ay', '3 kullanıcı', 'e‑Fatura + QES (sınırsız)', '25 AI soru/ay'], popular: true },
+      { name: 'Business', price: '3,630 den', period: '/ay', bullets: ['150 fatura/ay', '5 kullanıcı', 'Banka bağlantıları (PSD2)', 'Otomatik eşleştirme', 'Çoklu para birimi'], popular: false },
+      { name: 'Max', price: '9,170 den', period: '/ay', bullets: ['Sınırsız fatura', 'Sınırsız kullanıcı', 'API erişimi', 'Çoklu lokasyon', 'IFRS raporları'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Ücretsiz', period: '', bullets: ['Sınırsız müşteri', 'Partner portalı', '%20 tekrarlayan komisyon', 'Kazanç takibi'], popular: true },
-      { name: 'Partner Plus', price: '1,490 den', period: '/ay', bullets: ['Partner\'ın tümü', 'Ofis için faturalama', 'Gelişmiş raporlar', '%22 komisyon', 'Öncelikli destek'], popular: false }
+      { name: 'Partner Plus', price: '2,400 den', period: '/ay', bullets: ['Partner\'ın tümü', 'Ofis için faturalama', 'Gelişmiş raporlar', '%22 komisyon', 'Öncelikli destek'], popular: false }
     ],
     partnerSubtitle: 'Muhasebe ofisleri için',
     cta: 'Şimdi başla',
@@ -659,15 +661,16 @@ const tr: Dictionary = {
       title: 'Paketleri karşılaştırın',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
       rows: [
-        { feature: 'Aylık Fatura', values: ['3', '30', '200', '1000', 'Sınırsız'] },
+        { feature: 'Aylık Fatura', values: ['3', '30', '60', '150', 'Sınırsız'] },
         { feature: 'Kullanıcı', values: ['1', '1', '3', '5', 'Sınırsız'] },
         { feature: 'Müşteri', values: ['Sınırsız', 'Sınırsız', 'Sınırsız', 'Sınırsız', 'Sınırsız'] },
-        { feature: 'e-Fatura (UJP)', values: [false, '5/ay', true, true, true] },
+        { feature: 'e-Fatura (UJP)', values: [false, '5/ay', 'Sınırsız', 'Sınırsız', 'Sınırsız'] },
+        { feature: 'QES imza', values: [false, false, true, true, true] },
         { feature: 'AI Soru/ay', values: ['2', '5', '25', '50', '100'] },
-        { feature: 'Banka Ekstreleri (PSD2)', values: [false, false, true, true, true] },
+        { feature: 'Banka bağlantıları (PSD2)', values: [false, false, false, true, true] },
+        { feature: 'Otomatik eşleştirme', values: [false, false, false, true, true] },
         { feature: 'API Erişimi', values: [false, false, false, true, true] },
-        { feature: 'Destek', values: ['Email', 'Email', 'Email/Chat', 'Öncelikli', 'WhatsApp'] },
-        { feature: 'Malzeme muhasebesi', values: [false, false, true, true, true] }
+        { feature: 'Destek', values: ['Email', 'Email', 'Email/Chat', 'Öncelikli', 'WhatsApp'] }
       ]
     }
   }
@@ -846,14 +849,14 @@ const en: Dictionary = {
     includesPrevious: 'Includes everything in {plan}',
     companyPlans: [
       { name: 'Free', price: '0 MKD', period: '/forever', bullets: ['3 invoices/month', '1 user', 'PDF export', '2 AI questions/month'], popular: false },
-      { name: 'Starter', price: '590 MKD', period: '/month', bullets: ['30 invoices/month', '1 user', 'e-Invoice (5/month)', '5 AI questions/month'], popular: false },
-      { name: 'Standard', price: '1,490 MKD', period: '/month', bullets: ['200 invoices/month', '3 users', 'e-Invoice + QES', '25 AI questions/month', 'Material Accounting'], popular: true },
-      { name: 'Business', price: '2,990 MKD', period: '/month', bullets: ['1000 invoices/month', '5 users', 'Bank statements', '50 AI questions/month', 'Material Accounting'], popular: false },
-      { name: 'Max', price: '7,490 MKD', period: '/month', bullets: ['Unlimited invoices', 'API access', 'Multi-locations', '100 AI questions/month', 'Material Accounting'], popular: false }
+      { name: 'Starter', price: '740 MKD', period: '/month', bullets: ['30 invoices/month', '1 user', 'e-Invoice (5/month)', '5 AI questions/month'], popular: false },
+      { name: 'Standard', price: '2,400 MKD', period: '/month', bullets: ['60 invoices/month', '3 users', 'Unlimited e-Invoice + QES', '25 AI questions/month'], popular: true },
+      { name: 'Business', price: '3,630 MKD', period: '/month', bullets: ['150 invoices/month', '5 users', 'Bank connections (PSD2)', 'Auto-reconciliation', 'Multi-currency'], popular: false },
+      { name: 'Max', price: '9,170 MKD', period: '/month', bullets: ['Unlimited invoices', 'Unlimited users', 'API access', 'Multi-locations', 'IFRS reports'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Free', period: '', bullets: ['Unlimited clients', 'Partner portal', '20% recurring commission', 'Earnings tracking'], popular: true },
-      { name: 'Partner Plus', price: '1,490 MKD', period: '/month', bullets: ['Everything from Partner', 'Office invoicing', 'Advanced reports', '22% commission', 'Priority support'], popular: false }
+      { name: 'Partner Plus', price: '2,400 MKD', period: '/month', bullets: ['Everything from Partner', 'Office invoicing', 'Advanced reports', '22% commission', 'Priority support'], popular: false }
     ],
     partnerSubtitle: 'For accounting firms',
     cta: 'Start Now',
@@ -863,15 +866,16 @@ const en: Dictionary = {
       title: 'Compare Plans',
       plans: ['Free', 'Starter', 'Standard', 'Business', 'Max'],
       rows: [
-        { feature: 'Invoices per Month', values: ['3', '30', '200', '1000', 'Unlimited'] },
+        { feature: 'Invoices per Month', values: ['3', '30', '60', '150', 'Unlimited'] },
         { feature: 'Users', values: ['1', '1', '3', '5', 'Unlimited'] },
         { feature: 'Clients', values: ['Unlimited', 'Unlimited', 'Unlimited', 'Unlimited', 'Unlimited'] },
-        { feature: 'e-Invoice (UJP)', values: [false, '5/month', true, true, true] },
+        { feature: 'e-Invoice (UJP)', values: [false, '5/month', 'Unlimited', 'Unlimited', 'Unlimited'] },
+        { feature: 'QES Signing', values: [false, false, true, true, true] },
         { feature: 'AI Questions/month', values: ['2', '5', '25', '50', '100'] },
-        { feature: 'Bank Statements (PSD2)', values: [false, false, true, true, true] },
+        { feature: 'Bank Connections (PSD2)', values: [false, false, false, true, true] },
+        { feature: 'Auto-Reconciliation', values: [false, false, false, true, true] },
         { feature: 'API Access', values: [false, false, false, true, true] },
-        { feature: 'Support', values: ['Email', 'Email', 'Email/Chat', 'Priority', 'WhatsApp'] },
-        { feature: 'Material Accounting', values: [false, false, true, true, true] }
+        { feature: 'Support', values: ['Email', 'Email', 'Email/Chat', 'Priority', 'WhatsApp'] }
       ]
     }
   }

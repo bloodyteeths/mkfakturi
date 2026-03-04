@@ -992,8 +992,8 @@ Route::prefix('/v1')->group(function () {
             // Feature flag: FEATURE_PSD2_BANKING
             // ----------------------------------
 
-            // PSD2 Bank connections available in Standard+ tier (matches landing page)
-            Route::prefix('banking')->middleware('tier:standard')->group(function () {
+            // PSD2 Bank connections available in Business+ tier
+            Route::prefix('banking')->middleware('tier:business')->group(function () {
                 // Dashboard widget status endpoint
                 Route::get('/status', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'status']);
 
@@ -1048,8 +1048,8 @@ Route::prefix('/v1')->group(function () {
             // Bank Connections (Phase 3)
             // ----------------------------------
 
-            // Bank connections available in Standard+ tier (matches landing page)
-            Route::prefix('bank')->middleware('tier:standard')->group(function () {
+            // Bank connections available in Business+ tier
+            Route::prefix('bank')->middleware('tier:business')->group(function () {
                 // OAuth flow
                 Route::post('/oauth/start', [\App\Http\Controllers\V1\Admin\Banking\BankConnectionController::class, 'start']);
 
@@ -1064,8 +1064,8 @@ Route::prefix('/v1')->group(function () {
             // Reconciliation (Phase 3)
             // ----------------------------------
 
-            // Auto-reconciliation available in Standard+ tier (matches landing page)
-            Route::prefix('reconciliation')->middleware('tier:standard')->group(function () {
+            // Auto-reconciliation available in Business+ tier
+            Route::prefix('reconciliation')->middleware('tier:business')->group(function () {
                 Route::get('/auto-matched', [\App\Http\Controllers\ReconciliationController::class, 'autoMatched']);
                 Route::get('/suggested', [\App\Http\Controllers\ReconciliationController::class, 'suggested']);
                 Route::get('/manual', [\App\Http\Controllers\ReconciliationController::class, 'manual']);
@@ -1498,6 +1498,19 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
     Route::post('/referrals', [\Modules\Mk\Partner\Controllers\PartnerReferralsController::class, 'store'])->middleware('throttle:strict');
     Route::get('/clients', [\Modules\Mk\Partner\Controllers\PartnerClientsController::class, 'index']);
     Route::get('/clients/{companyId}', [\Modules\Mk\Partner\Controllers\PartnerClientsController::class, 'show']);
+
+    // Portfolio management
+    Route::prefix('/portfolio')->group(function () {
+        Route::post('/activate', [\Modules\Mk\Partner\Controllers\PortfolioController::class, 'activate'])->middleware('throttle:strict');
+        Route::get('/stats', [\Modules\Mk\Partner\Controllers\PortfolioController::class, 'stats']);
+    });
+    Route::prefix('/portfolio-companies')->group(function () {
+        Route::get('/', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'index']);
+        Route::post('/', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'store'])->middleware('throttle:strict');
+        Route::get('/{companyId}', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'show']);
+        Route::delete('/{companyId}', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'destroy'])->middleware('throttle:strict');
+    });
+
     Route::get('/payouts', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'index']);
     Route::get('/bank-details', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'getBankDetails']);
     Route::post('/bank-details', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'updateBankDetails'])->middleware('throttle:strict');

@@ -2876,6 +2876,7 @@
       "invitations": "Invitations",
       "logout": "Logout",
       "payouts": "Payouts",
+      "portfolio": "Portfolio",
       "referrals": "Referrals",
       "console": "Console"
     },
@@ -6333,8 +6334,8 @@
     "continue_premium_features": "Continue with Premium Features",
     "feature_requires_plan": "{feature} requires {plan} plan or higher.",
     "features": {
-      "1000_invoices": "1,000 invoices per month",
-      "200_invoices": "200 invoices per month",
+      "1000_invoices": "150 invoices per month",
+      "200_invoices": "60 invoices per month",
       "5_users": "Up to 5 users",
       "api_access": "API access for integrations",
       "auto_reconciliation": "Automatic payment reconciliation",

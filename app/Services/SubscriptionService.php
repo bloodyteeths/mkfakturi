@@ -32,7 +32,7 @@ class SubscriptionService
     private const TIER_PRICING = [
         'free' => 0,
         'starter' => 12,
-        'standard' => 29,
+        'standard' => 39,
         'business' => 59,
         'max' => 149,
         'partner_plus' => 29,
@@ -442,7 +442,7 @@ class SubscriptionService
         return [
             'free' => ['price' => 0, 'name' => 'Free'],
             'starter' => ['price' => 12, 'name' => 'Starter'],
-            'standard' => ['price' => 29, 'name' => 'Standard'],
+            'standard' => ['price' => 39, 'name' => 'Standard'],
             'business' => ['price' => 59, 'name' => 'Business'],
             'max' => ['price' => 149, 'name' => 'Max'],
         ];

@@ -59,8 +59,21 @@ class InvoiceCountService
             $company->load('subscription');
         }
 
-        // No subscription or inactive = default to free tier
+        // No subscription or inactive
         if (! $company->subscription || ! $company->subscription->isActive()) {
+            // Portfolio-managed companies: resolve tier from portfolio
+            if ($company->is_portfolio_managed && $company->managing_partner_id) {
+                $tierOverride = \Illuminate\Support\Facades\DB::table('partner_company_links')
+                    ->where('company_id', $company->id)
+                    ->where('partner_id', $company->managing_partner_id)
+                    ->where('is_portfolio_managed', true)
+                    ->value('portfolio_tier_override');
+
+                $plan = $tierOverride ?: config('subscriptions.portfolio.uncovered_tier', 'accountant_basic');
+
+                return config("subscriptions.tiers.{$plan}.invoice_limit", 15);
+            }
+
             return config('subscriptions.tiers.free.invoice_limit', 5);
         }
 

@@ -139,6 +139,21 @@ class CheckSubscriptionTier
             $currentPlan = $trialPlan;
         }
 
+        // Portfolio-managed company: resolve tier from portfolio
+        if ($currentPlan === 'free' && $company->is_portfolio_managed && $company->managing_partner_id) {
+            $tierOverride = \Illuminate\Support\Facades\DB::table('partner_company_links')
+                ->where('company_id', $company->id)
+                ->where('partner_id', $company->managing_partner_id)
+                ->where('is_portfolio_managed', true)
+                ->value('portfolio_tier_override');
+
+            if ($tierOverride) {
+                $currentPlan = $tierOverride;
+            } else {
+                $currentPlan = config('subscriptions.portfolio.uncovered_tier', 'accountant_basic');
+            }
+        }
+
         $currentLevel = $planHierarchy[$currentPlan] ?? 0;
         $requiredLevel = $planHierarchy[$requiredPlan] ?? 0;
 

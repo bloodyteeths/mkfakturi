@@ -53,6 +53,18 @@ export default [
         meta: { isPartner: true }
       },
       {
+        path: 'portfolio',
+        name: 'partner.portfolio',
+        component: () => import('@/scripts/partner/views/portfolio/PortfolioDashboard.vue'),
+        meta: { isPartner: true }
+      },
+      {
+        path: 'portfolio/companies/create',
+        name: 'partner.portfolio.companies.create',
+        component: () => import('@/scripts/partner/views/portfolio/PortfolioCompanyCreate.vue'),
+        meta: { isPartner: true }
+      },
+      {
         path: 'deadlines',
         name: 'partner.deadlines',
         component: () => import('@/scripts/partner/views/deadlines/DeadlinesDashboard.vue'),
