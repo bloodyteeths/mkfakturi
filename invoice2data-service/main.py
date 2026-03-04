@@ -430,7 +430,10 @@ def _extract_table_from_tsv(tsv_data: Dict[str, List], image_width: int) -> List
         return []
 
     # Group words into visual lines by clustering Y coordinates
-    # Words within 15px vertical distance are on the same line
+    # Use proportional tolerance: ~1% of image height (handles phone photos)
+    max_top = max(w["top"] for w in words)
+    line_tolerance = max(20, int(max_top * 0.012))
+
     words.sort(key=lambda w: (w["top"], w["left"]))
 
     lines: List[List[Dict]] = []
@@ -438,7 +441,7 @@ def _extract_table_from_tsv(tsv_data: Dict[str, List], image_width: int) -> List
     current_y = words[0]["top"]
 
     for w in words[1:]:
-        if abs(w["top"] - current_y) < 15:
+        if abs(w["top"] - current_y) < line_tolerance:
             current_line.append(w)
         else:
             lines.append(sorted(current_line, key=lambda x: x["left"]))
@@ -671,119 +674,125 @@ def _extract_transactions_from_text(plain_text: str) -> List[Dict[str, Any]]:
         logger.info(f"Company's own account: {own_account}")
 
     lines = plain_text.splitlines()
-    i = 0
+
+    # First pass: find all account-number positions
+    account_positions: List[Tuple[int, str]] = []  # (line_index, account)
+    for idx, line in enumerate(lines):
+        m = account_re.search(line)
+        if not m:
+            continue
+        raw_acct = m.group(1) or m.group(2)
+        acct = re.sub(r"\s+", "", raw_acct)
+        if len(acct) < 15:
+            continue
+        if own_account and acct == own_account:
+            continue
+        account_positions.append((idx, acct))
+
+    logger.info(f"Found {len(account_positions)} account numbers (excl own)")
+
+    # Second pass: for each account, gather context and extract data
     tx_num = 0
+    for pos_idx, (line_idx, account) in enumerate(account_positions):
+        # Context window: 3 lines before, and until next account or +8 lines
+        start = max(0, line_idx - 3)
+        if pos_idx + 1 < len(account_positions):
+            end = account_positions[pos_idx + 1][0]
+        else:
+            end = min(line_idx + 8, len(lines))
 
-    while i < len(lines):
-        line = lines[i].strip()
-        if not line:
-            i += 1
-            continue
-
-        # Look for lines with both account numbers AND amounts
-        account_match = account_re.search(line)
-        amounts_on_line = amount_re.findall(line)
-        if not account_match or not amounts_on_line:
-            i += 1
-            continue
-
-        # Extract account from whichever group matched
-        raw_account = account_match.group(1) or account_match.group(2)
-        account = re.sub(r"\s+", "", raw_account)
-
-        # Skip if fewer than 15 digits after removing spaces
-        if len(account) < 15:
-            i += 1
-            continue
-
-        # Skip the company's own account (appears in header with balances)
-        if own_account and account == own_account:
-            i += 1
-            continue
-
-        # Gather context: this line + next few lines belong to one transaction
-        context_lines = [line]
-        j = i + 1
-        while j < min(i + 8, len(lines)):
-            next_line = lines[j].strip()
-            if not next_line:
-                j += 1
-                continue
-            # Stop if we hit another account number (next transaction)
-            if account_re.search(next_line) and j > i + 1:
-                break
-            context_lines.append(next_line)
-            j += 1
-
+        context_lines = [l.strip() for l in lines[start:end] if l.strip()]
         context = " ".join(context_lines)
 
-        # Extract amounts from context
-        amounts = amount_re.findall(context)
-        amounts_float = [_parse_amount(a) for a in amounts]
-        amounts_float = [a for a in amounts_float if a > 0]
+        # Extract amounts from the entire context window
+        all_amounts_str = amount_re.findall(context)
+        all_amounts = [_parse_amount(a) for a in all_amounts_str]
 
-        if not amounts_float:
-            i = j
-            continue
+        # Filter: keep only reasonable transaction amounts (not dates like 02.03)
+        amounts_float = [a for a in all_amounts if a >= 0]
 
-        # Extract reference
+        # Extract reference (6-7 digit numbers)
         ref_match = ref_re.search(context)
         reference = ref_match.group(1) if ref_match else None
 
-        # Extract counterparty name: text before the account number
-        # Usually the company name appears before or around the account
-        name_part = line[:account_match.start()].strip()
-        # Also check previous non-empty line for name
-        if not name_part and i > 0:
-            for k in range(i - 1, max(i - 3, -1), -1):
-                prev = lines[k].strip()
-                if prev and not amount_re.search(prev) and len(prev) > 3:
-                    name_part = prev
-                    break
+        # Extract counterparty name from lines before/around the account
+        name_parts = []
+        line_text = lines[line_idx].strip()
+        acct_match = account_re.search(line_text)
+        if acct_match:
+            before = line_text[:acct_match.start()].strip()
+            before = re.sub(r"^\d+\s+", "", before).strip()
+            before = re.sub(r"[|]", "", before).strip()
+            if before and len(before) > 2:
+                name_parts.append(before)
 
-        # Clean up name - remove row numbers at start
-        name_part = re.sub(r"^\d+\s+", "", name_part).strip()
-        # Remove common noise
-        name_part = re.sub(r"\|", "", name_part).strip()
+        # Check previous lines for name continuation
+        for k in range(line_idx - 1, max(line_idx - 4, -1), -1):
+            prev = lines[k].strip()
+            if not prev:
+                continue
+            # Stop at another account or amounts
+            if account_re.search(prev):
+                break
+            # Name-like lines: short, no amounts, has Cyrillic
+            cleaned = re.sub(r"[|>]", "", prev).strip()
+            cleaned = re.sub(r"^\d+\s+", "", cleaned).strip()
+            if cleaned and len(cleaned) > 2 and not re.match(r"^[\d.,\s]+$", cleaned):
+                name_parts.insert(0, cleaned)
 
-        # Extract description from context (Macedonian keywords)
-        description = ""
+        counterparty = " ".join(name_parts).strip()
+        # Remove noise words
+        for noise in ["ДООЕЛ", "ДООЕЛ Скопје", "Скопје", "с.Батинци", "Студеничани"]:
+            counterparty = counterparty.replace(noise, "").strip()
+        counterparty = re.sub(r"\s+", " ", counterparty).strip()
+
+        # Description: lines after account that contain descriptive keywords
+        description_parts = []
         desc_keywords = [
-            "промет", "основ", "услуг", "плаќање", "СМЕТКОВОДСТВЕНА",
-            "УСЛУГА", "извр", "произ", "стоки", "месец",
+            "промет", "основ", "услуг", "плаќање", "СМЕТКОВОДСТВЕН",
+            "УСЛУГА", "извр", "произ", "стоки", "месец", "правни",
         ]
-        for cl in context_lines[1:]:
-            cl_clean = cl.strip()
-            if any(kw.lower() in cl_clean.lower() for kw in desc_keywords):
-                description = (description + " " + cl_clean).strip()
+        for cl in context_lines:
+            if any(kw.lower() in cl.lower() for kw in desc_keywords):
+                # Clean the line
+                clean = re.sub(r"\d{15,}", "", cl)  # remove account nums
+                clean = re.sub(r"\d{1,3}(?:,\d{3})*\.\d{2}", "", clean)  # remove amounts
+                clean = re.sub(r"[|>]", "", clean).strip()
+                if clean and len(clean) > 3:
+                    description_parts.append(clean)
 
-        if not description:
-            # Use all context except account/amount lines as description
-            for cl in context_lines[1:]:
-                cl_clean = cl.strip()
-                if cl_clean and not account_re.search(cl_clean):
-                    description = (description + " " + cl_clean).strip()
-                    break
+        description = " ".join(description_parts).strip()
 
-        # Determine debit vs credit
-        # For Komercijalna statements: first amount = debit, second = credit
-        # If debit is 0.00 and credit > 0, it's incoming
+        # Determine debit vs credit from amounts
+        # Pattern: look for 0.00 paired with a positive amount
+        # or the first two non-zero-looking amounts
         debit = 0.0
         credit = 0.0
 
-        if len(amounts_float) >= 2:
-            # Pattern: 0.00 followed by amount = credit; amount followed by 0.00 = debit
-            if amounts_float[0] == 0 and amounts_float[1] > 0:
-                credit = amounts_float[1]
-            elif amounts_float[0] > 0:
-                debit = amounts_float[0]
-                if len(amounts_float) > 1 and amounts_float[1] > 0:
-                    credit = amounts_float[1]
-        elif len(amounts_float) == 1:
-            # Single amount - check context for clues
-            credit = amounts_float[0]
+        # Find the two amounts closest to the account number on its line
+        line_amounts = amount_re.findall(line_text)
+        line_amounts_f = [_parse_amount(a) for a in line_amounts]
 
-        # Extract payment code (3-digit near amounts)
+        if len(line_amounts_f) >= 2:
+            if line_amounts_f[0] > 0 and line_amounts_f[1] == 0:
+                debit = line_amounts_f[0]
+            elif line_amounts_f[1] > 0:
+                credit = line_amounts_f[1]
+                if line_amounts_f[0] > 0:
+                    debit = line_amounts_f[0]
+        elif len(line_amounts_f) == 1 and line_amounts_f[0] > 0:
+            credit = line_amounts_f[0]
+        elif amounts_float:
+            # Fallback: use largest non-zero from context
+            non_zero = [a for a in amounts_float if a > 0]
+            if non_zero:
+                credit = max(non_zero)
+
+        # Skip if no monetary activity
+        if debit == 0 and credit == 0:
+            continue
+
+        # Payment code (3-digit)
         code_match = re.search(r"\b(\d{3})\b", context)
         payment_code = None
         if code_match:
@@ -794,7 +803,7 @@ def _extract_transactions_from_text(plain_text: str) -> List[Dict[str, Any]]:
         tx_num += 1
         tx = {
             "row_number": tx_num,
-            "counterparty_name": name_part or None,
+            "counterparty_name": counterparty or None,
             "counterparty_account": account,
             "debit": debit,
             "credit": credit,
@@ -804,9 +813,10 @@ def _extract_transactions_from_text(plain_text: str) -> List[Dict[str, Any]]:
             "pbo": None,
         }
         transactions.append(tx)
-        logger.info(f"  TX {tx_num}: {name_part} | debit={debit} credit={credit} | {description[:50]}")
-
-        i = j
+        logger.info(
+            f"  TX {tx_num}: {counterparty} | debit={debit} credit={credit} | "
+            f"{(description or '')[:50]}"
+        )
 
     logger.info(f"Plain-text extraction found {len(transactions)} transactions")
     return transactions
