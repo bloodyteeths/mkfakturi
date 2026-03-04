@@ -123,13 +123,13 @@
                       ref="fileInput"
                       type="file"
                       class="sr-only"
-                      accept=".csv,.txt,.xls,.xlsx,.jpg,.jpeg,.png"
+                      accept=".csv,.txt,.xls,.xlsx,.jpg,.jpeg,.png,.pdf"
                       @change="handleFileSelect"
                     />
                   </label>
                   <p class="pl-1">{{ $t('banking.or_drag_drop') }}</p>
                 </div>
-                <p class="text-xs text-gray-500">CSV, XLS, XLSX, JPG, PNG {{ $t('banking.up_to_10mb') }}</p>
+                <p class="text-xs text-gray-500">CSV, XLS, XLSX, JPG, PNG, PDF {{ $t('banking.up_to_10mb') }}</p>
               </template>
               <template v-else>
                 <DocumentCheckIcon class="mx-auto h-12 w-12 text-green-500" />
@@ -413,7 +413,7 @@ const canProceedToPreview = computed(() => {
 const isImageUpload = computed(() => {
   if (!uploadedFile.value) return false
   const name = uploadedFile.value.name.toLowerCase()
-  return name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png')
+  return name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.pdf')
 })
 
 // Methods
@@ -434,8 +434,8 @@ const handleFileDrop = (event) => {
 
 const validateAndSetFile = (file) => {
   // Check file type
-  const validTypes = ['text/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'image/jpeg', 'image/png']
-  const validExtensions = ['.csv', '.txt', '.xls', '.xlsx', '.jpg', '.jpeg', '.png']
+  const validTypes = ['text/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'image/jpeg', 'image/png', 'application/pdf']
+  const validExtensions = ['.csv', '.txt', '.xls', '.xlsx', '.jpg', '.jpeg', '.png', '.pdf']
   const hasValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
 
   if (!validTypes.includes(file.type) && !hasValidExtension) {
