@@ -24,6 +24,8 @@ class AccountantConsoleController extends Controller
 
         // Super admin can see all companies
         if ($user->role === 'super admin') {
+            // Clear console company context when returning to console home
+            session()->forget(['partner_selected_company_id', 'partner_selected_company_slug', 'partner_context']);
 
             $allCompanies = Company::with('address')
                 ->orderBy('name')

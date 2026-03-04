@@ -34,16 +34,21 @@ class CompanyMiddleware
 
             // Super Admin: can access any company
             if ($user->role === 'super admin') {
-                // Support mode override
+                // Support mode override (highest priority)
                 $supportMode = session('support_mode');
                 if ($supportMode && isset($supportMode['company_id'])) {
                     $request->headers->set('company', $supportMode['company_id']);
                 }
 
                 // Partner console switch override
-                $partnerContext = session('partner_context');
-                if (! $request->header('company') && $partnerContext && isset($partnerContext['company_id'])) {
-                    $request->headers->set('company', $partnerContext['company_id']);
+                // The /console/switch endpoint stores the target company in session.
+                // The frontend always sends a company header from localStorage, but
+                // it may be stale (e.g. if frontend JS hasn't redeployed yet).
+                // Session value is authoritative - always override the header.
+                // Session is cleared when super admin visits /console (fresh start).
+                $partnerCompanyId = session('partner_selected_company_id');
+                if (! $supportMode && $partnerCompanyId) {
+                    $request->headers->set('company', $partnerCompanyId);
                 }
 
                 $companyId = $request->header('company');
