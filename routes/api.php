@@ -1507,6 +1507,9 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
     Route::prefix('/portfolio-companies')->group(function () {
         Route::get('/', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'index']);
         Route::post('/', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'store'])->middleware('throttle:strict');
+        Route::get('/template', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'template']);
+        Route::post('/import-preview', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'importPreview'])->middleware('throttle:strict');
+        Route::post('/import-confirm', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'importConfirm'])->middleware('throttle:strict');
         Route::get('/{companyId}', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'show']);
         Route::delete('/{companyId}', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'destroy'])->middleware('throttle:strict');
     });

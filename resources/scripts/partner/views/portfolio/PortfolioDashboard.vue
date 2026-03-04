@@ -9,16 +9,35 @@
             Manage all your client companies in one place.
           </p>
         </div>
-        <router-link
-          v-if="stats"
-          :to="{ name: 'partner.portfolio.companies.create' }"
-          class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
-        >
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Add Company
-        </router-link>
+        <div v-if="stats" class="flex gap-2">
+          <a
+            href="/api/v1/partner/portfolio-companies/template"
+            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Template
+          </a>
+          <router-link
+            :to="{ name: 'partner.portfolio.companies.import' }"
+            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Import
+          </router-link>
+          <router-link
+            :to="{ name: 'partner.portfolio.companies.create' }"
+            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Company
+          </router-link>
+        </div>
       </div>
 
       <!-- Onboarding (if not activated) -->
@@ -30,10 +49,10 @@
         </div>
         <h2 class="text-xl font-bold text-gray-900 mb-2">Accountant Portfolio</h2>
         <p class="text-gray-600 mb-2 max-w-lg mx-auto">
-          Add all your companies to Facturino for free. Convert your clients to paid subscribers and earn 20% monthly commission.
+          Add all your companies to Facturino for free. One system for all your clients — no cost to you.
         </p>
         <p class="text-sm text-gray-500 mb-6 max-w-lg mx-auto">
-          You get a 3-month grace period with full Standard features for all companies. After that, each paying company covers 1 non-paying company for premium features.
+          All companies get Standard features for 45 days. After that, each paying company covers 1 non-paying company for premium features.
         </p>
         <button
           :disabled="activating"
@@ -42,6 +61,39 @@
         >
           {{ activating ? 'Activating...' : 'Activate Portfolio' }}
         </button>
+      </div>
+
+      <!-- Grace Period Countdown -->
+      <div v-if="stats && stats.in_grace && stats.grace_ends_at" class="mb-6 rounded-lg border p-5 shadow-sm"
+        :class="daysRemaining <= 7 ? 'bg-red-50 border-red-200' : daysRemaining <= 20 ? 'bg-yellow-50 border-yellow-200' : 'bg-blue-50 border-blue-200'"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="text-4xl font-extrabold" :class="daysRemaining <= 7 ? 'text-red-600' : daysRemaining <= 20 ? 'text-yellow-600' : 'text-blue-600'">
+              {{ daysRemaining }}
+            </div>
+            <div>
+              <p class="font-bold text-gray-900">{{ daysRemaining === 1 ? 'day left' : 'days left' }} to bring your companies on board</p>
+              <p class="text-sm text-gray-600">
+                All companies have Standard features until {{ formatDate(stats.grace_ends_at) }}.
+                After that, each paying company covers 1 non-paying.
+              </p>
+            </div>
+          </div>
+          <div class="text-right hidden sm:block">
+            <p class="text-2xl font-bold" :class="daysRemaining <= 7 ? 'text-red-600' : daysRemaining <= 20 ? 'text-yellow-600' : 'text-blue-600'">
+              {{ stats.paying }} / {{ stats.total }}
+            </p>
+            <p class="text-xs text-gray-500">companies paying</p>
+          </div>
+        </div>
+        <div class="mt-3 w-full bg-white/60 rounded-full h-2.5">
+          <div
+            class="h-2.5 rounded-full transition-all duration-300"
+            :class="stats.total > 0 && stats.paying >= Math.ceil(stats.total / 2) ? 'bg-green-500' : 'bg-blue-500'"
+            :style="{ width: (stats.total > 0 ? Math.min((stats.paying / stats.total) * 100, 100) : 0) + '%' }"
+          ></div>
+        </div>
       </div>
 
       <!-- Stats Cards -->
@@ -229,6 +281,14 @@ let searchTimeout = null
 const coveragePercentage = computed(() => {
   if (!stats.value || stats.value.non_paying === 0) return 100
   return Math.round((stats.value.covered / stats.value.non_paying) * 100)
+})
+
+const daysRemaining = computed(() => {
+  if (!stats.value?.grace_ends_at) return 0
+  const end = new Date(stats.value.grace_ends_at)
+  const now = new Date()
+  const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24))
+  return diff >= 0 ? diff : 0
 })
 
 const debouncedSearch = () => {
