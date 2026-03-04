@@ -528,7 +528,7 @@ def _extract_table_from_tsv(
                 if transactions:
                     prev = transactions[-1]
                     prev["description"] = (
-                        prev.get("description", "") + " " + text
+                        (prev.get("description") or "") + " " + text
                     ).strip()
                 continue
             tx = _map_words_to_columns(lines[i], col_positions, image_width)
