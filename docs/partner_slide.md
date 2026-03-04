@@ -151,9 +151,10 @@ Files:
 - [x] Company bulk import (CSV/Excel with preview + confirm)
 - [x] Template download for accountants
 - [x] Partner portal stats visualization (paying vs covered vs uncovered)
-- [ ] Credit wallet system (commission → coverage → payout logic)
-- [ ] View-only mode enforcement (middleware/gate for uncovered companies)
-- [ ] Wallet forecast on partner portal (projected coverage + payout after grace)
+- [x] Credit wallet system (PartnerCreditWalletService: commission → coverage → payout)
+- [x] View-only mode enforcement (CheckViewOnlyMode middleware blocks writes for accountant_basic)
+- [x] Wallet forecast on partner portal (projected coverage + payout after grace)
+- [x] PartnerPayoutService deducts coverage costs before payout (net = gross - coverage)
 - [ ] Email notifications (grace ending soon, companies degraded, payout ready)
 
 ## History

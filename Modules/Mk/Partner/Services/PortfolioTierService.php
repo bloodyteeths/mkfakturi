@@ -11,10 +11,13 @@ use Illuminate\Support\Facades\Log;
  * Portfolio Tier Recalculation Service
  *
  * Recalculates which non-paying portfolio companies get Standard vs Accountant Basic
- * features based on the 1:1 sliding scale (each paying company covers 1 non-paying).
+ * features based on the 1:1 sliding scale + credit wallet coverage.
  *
- * During grace period: all companies get Standard features.
- * After grace: paying companies keep their tier, non-paying get coverage based on ratio.
+ * Coverage order:
+ * 1. During grace period: all companies get Standard features
+ * 2. After grace: 1:1 ratio (each paying covers 1 non-paying)
+ * 3. Credit wallet: commission covers additional uncovered companies
+ * 4. Remaining: accountant_basic (view-only)
  */
 class PortfolioTierService
 {
@@ -55,12 +58,25 @@ class PortfolioTierService
         $coveredSlots = (int) ($payingCount * $coverageRatio);
         $inGrace = $partner->isInGracePeriod();
 
+        // Credit wallet: calculate additional coverage from commission
+        $walletCoveredSlots = 0;
+        if (! $inGrace && $nonPaying->count() > $coveredSlots) {
+            $walletService = app(PartnerCreditWalletService::class);
+            $wallet = $walletService->calculateWallet($partner);
+            $walletCoveredSlots = $wallet['wallet_covered_companies'];
+        }
+
+        $totalCoveredSlots = $coveredSlots + $walletCoveredSlots;
+
         $stats = [
             'status' => 'recalculated',
             'total' => $portfolioCompanies->count(),
             'paying' => $payingCount,
             'non_paying' => $nonPaying->count(),
-            'covered_slots' => $coveredSlots,
+            'covered_by_1to1' => min($nonPaying->count(), $coveredSlots),
+            'covered_by_wallet' => $walletCoveredSlots,
+            'total_covered_slots' => $totalCoveredSlots,
+            'uncovered' => max(0, $nonPaying->count() - $totalCoveredSlots),
             'in_grace' => $inGrace,
         ];
 
@@ -79,8 +95,8 @@ class PortfolioTierService
                     // During grace: all non-paying get covered tier
                     $tier = $coveredTier;
                 } else {
-                    // After grace: first N get covered, rest get uncovered
-                    $tier = $index < $coveredSlots ? $coveredTier : $uncoveredTier;
+                    // After grace: first N covered by 1:1 + wallet, rest uncovered
+                    $tier = $index < $totalCoveredSlots ? $coveredTier : $uncoveredTier;
                 }
 
                 $this->updateCompanyTierOverride($partner, $company, $tier);

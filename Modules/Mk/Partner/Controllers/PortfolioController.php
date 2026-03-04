@@ -7,6 +7,7 @@ use App\Models\Partner;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Modules\Mk\Partner\Services\PartnerCreditWalletService;
 use Modules\Mk\Partner\Services\PortfolioTierService;
 
 class PortfolioController extends Controller
@@ -67,7 +68,7 @@ class PortfolioController extends Controller
     }
 
     /**
-     * Get portfolio statistics.
+     * Get portfolio statistics including credit wallet data.
      */
     public function stats(): JsonResponse
     {
@@ -99,6 +100,11 @@ class PortfolioController extends Controller
         $commissionRate = $partner->getEffectiveCommissionRate();
         $monthlyCommission = $monthlyRevenue * $commissionRate;
 
+        // Credit wallet data
+        $walletService = app(PartnerCreditWalletService::class);
+        $wallet = $walletService->calculateWallet($partner);
+        $forecast = $walletService->getWalletForecast($partner);
+
         return response()->json([
             'portfolio_enabled' => true,
             'stats' => $stats,
@@ -107,6 +113,8 @@ class PortfolioController extends Controller
                 'monthly_revenue' => round($monthlyRevenue, 2),
                 'monthly_commission' => round($monthlyCommission, 2),
             ],
+            'wallet' => $wallet,
+            'forecast' => $forecast,
         ]);
     }
 

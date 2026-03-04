@@ -146,10 +146,10 @@
         </div>
       </div>
 
-      <!-- Commission Summary -->
+      <!-- Commission & Wallet Summary -->
       <div v-if="commission" class="bg-white shadow rounded-lg p-4 mb-6">
-        <h3 class="text-sm font-medium text-gray-700 mb-3">Commission Earnings</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h3 class="text-sm font-medium text-gray-700 mb-3">Commission &amp; Credit Wallet</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
             <p class="text-xs text-gray-500">Commission Rate</p>
             <p class="text-lg font-semibold">{{ (commission.rate * 100).toFixed(0) }}%</p>
@@ -161,6 +161,41 @@
           <div>
             <p class="text-xs text-gray-500">Your Monthly Commission</p>
             <p class="text-lg font-semibold text-green-600">&euro;{{ commission.monthly_commission }}</p>
+          </div>
+        </div>
+
+        <!-- Wallet Breakdown -->
+        <div v-if="forecast" class="border-t pt-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <p class="text-xs text-gray-500">Covered by 1:1 ratio</p>
+              <p class="text-lg font-semibold text-blue-600">{{ forecast.covered_by_1to1 }} companies</p>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500">Covered by wallet</p>
+              <p class="text-lg font-semibold text-purple-600">{{ forecast.wallet_covers }} companies</p>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500">Still uncovered (view-only)</p>
+              <p class="text-lg font-semibold" :class="forecast.still_uncovered > 0 ? 'text-orange-500' : 'text-gray-400'">
+                {{ forecast.still_uncovered }} companies
+              </p>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500">Your Payout</p>
+              <p class="text-lg font-bold" :class="forecast.projected_payout > 0 ? 'text-green-600' : 'text-gray-400'">
+                &euro;{{ forecast.projected_payout }}
+              </p>
+              <p v-if="stats && stats.in_grace" class="text-xs text-gray-400">(projected after grace)</p>
+            </div>
+          </div>
+
+          <!-- Wallet explanation -->
+          <div v-if="forecast.still_uncovered > 0 && !stats?.in_grace" class="mt-3 p-3 bg-orange-50 border border-orange-200 rounded text-sm text-orange-800">
+            {{ forecast.still_uncovered }} companies are in view-only mode. Get more companies to subscribe to cover them or increase your commission payout.
+          </div>
+          <div v-else-if="forecast.projected_payout > 0 && !stats?.in_grace" class="mt-3 p-3 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+            All companies are covered! Your surplus commission of &euro;{{ forecast.projected_payout }}/month is paid out to you.
           </div>
         </div>
       </div>
@@ -271,6 +306,8 @@ const companiesLoading = ref(false)
 const portfolioEnabled = ref(false)
 const stats = ref(null)
 const commission = ref(null)
+const wallet = ref(null)
+const forecast = ref(null)
 const companies = ref([])
 const searchQuery = ref('')
 const statusFilter = ref('')
@@ -308,6 +345,8 @@ const loadStats = async () => {
     portfolioEnabled.value = data.portfolio_enabled
     stats.value = data.stats || null
     commission.value = data.commission || null
+    wallet.value = data.wallet || null
+    forecast.value = data.forecast || null
   } catch (e) {
     console.error('Failed to load portfolio stats', e)
   }

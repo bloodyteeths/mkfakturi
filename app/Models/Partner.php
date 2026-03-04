@@ -343,7 +343,7 @@ class Partner extends Model
     }
 
     /**
-     * Get portfolio statistics.
+     * Get portfolio statistics including credit wallet coverage.
      *
      * @return array{total: int, paying: int, non_paying: int, covered: int, uncovered: int, in_grace: bool}
      */
@@ -355,12 +355,26 @@ class Partner extends Model
         $coveredSlots = $this->getCoveredSlots();
         $inGrace = $this->isInGracePeriod();
 
+        // Credit wallet extends coverage beyond 1:1
+        $walletCoveredSlots = 0;
+        if (! $inGrace && $nonPaying > $coveredSlots) {
+            try {
+                $walletService = app(\Modules\Mk\Partner\Services\PartnerCreditWalletService::class);
+                $wallet = $walletService->calculateWallet($this);
+                $walletCoveredSlots = $wallet['wallet_covered_companies'];
+            } catch (\Throwable $e) {
+                // Graceful fallback if wallet service fails
+            }
+        }
+
+        $totalCovered = min($nonPaying, $coveredSlots + $walletCoveredSlots);
+
         return [
             'total' => $total,
             'paying' => $paying,
             'non_paying' => $nonPaying,
-            'covered' => $inGrace ? $nonPaying : min($nonPaying, $coveredSlots),
-            'uncovered' => $inGrace ? 0 : max(0, $nonPaying - $coveredSlots),
+            'covered' => $inGrace ? $nonPaying : $totalCovered,
+            'uncovered' => $inGrace ? 0 : max(0, $nonPaying - $totalCovered),
             'in_grace' => $inGrace,
             'grace_ends_at' => $this->portfolio_grace_ends_at?->toISOString(),
         ];

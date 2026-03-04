@@ -8,6 +8,7 @@ use App\Models\Payout;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Modules\Mk\Partner\Services\PartnerCreditWalletService;
 use Stripe\StripeClient;
 
 class PartnerPayoutService
@@ -48,15 +49,16 @@ class PartnerPayoutService
     }
 
     /**
-     * Process payout for a single partner
-     * Creates a pending payout record - uses Stripe Connect if partner has connected account
+     * Process payout for a single partner.
+     * Commission is first used to cover uncovered portfolio companies (credit wallet).
+     * Only the surplus after coverage is paid out.
      */
     public function processPartnerPayout(Partner $partner, Carbon $cutoffDate)
     {
         DB::beginTransaction();
 
         try {
-            // Get unpaid events older than 30 days
+            // Get unpaid events older than 30 days (only direct commissions)
             $events = AffiliateEvent::where('affiliate_partner_id', $partner->id)
                 ->where('created_at', '<=', $cutoffDate)
                 ->whereNull('payout_id')
@@ -69,28 +71,40 @@ class PartnerPayoutService
                 return null;
             }
 
-            $totalAmount = $events->sum('amount');
+            $grossCommission = $events->sum('amount');
             $monthRef = Carbon::now()->subMonth()->format('Y-m');
+
+            // Credit Wallet: deduct coverage costs for uncovered portfolio companies
+            $walletService = app(PartnerCreditWalletService::class);
+            $netPayout = $walletService->calculateNetPayout($partner, $grossCommission);
+
+            $payoutAmount = $netPayout['net_payout'];
+
+            // Link all events to payout regardless of deduction (they're "used")
+            // Even if net payout is 0, we mark events as processed
 
             // Determine payout method based on partner setup
             $payoutMethod = $partner->stripe_account_id ? 'stripe_connect' : 'bank_transfer';
 
-            // Create payout record
+            // Create payout record (even if amount is 0, for tracking)
             $payout = Payout::create([
                 'partner_id' => $partner->id,
-                'amount' => $totalAmount,
-                'currency' => 'MKD', // MKD is the required currency for MK country
-                'status' => 'pending',
-                'payout_date' => Carbon::now()->addDays(5), // 5th of next month
+                'amount' => $payoutAmount,
+                'currency' => 'MKD',
+                'status' => $payoutAmount > 0 ? 'pending' : 'completed',
+                'payout_date' => $payoutAmount > 0 ? Carbon::now()->addDays(5) : Carbon::now(),
                 'payout_method' => $payoutMethod,
                 'payment_method' => $partner->payment_method ?? $payoutMethod,
-                'payment_reference' => null,
+                'payment_reference' => $payoutAmount > 0 ? null : 'wallet_coverage_only',
                 'details' => [
                     'month_ref' => $monthRef,
                     'event_count' => $events->count(),
                     'commission_rate' => $partner->commission_rate,
                     'original_currency' => 'MKD',
-                    'original_amount' => $totalAmount,
+                    'gross_commission' => round($grossCommission, 2),
+                    'coverage_deduction' => $netPayout['coverage_deduction'],
+                    'companies_covered_by_wallet' => $netPayout['companies_covered'],
+                    'net_payout' => $payoutAmount,
                 ],
             ]);
 
@@ -102,13 +116,15 @@ class PartnerPayoutService
             Log::info('Partner payout created', [
                 'payout_id' => $payout->id,
                 'partner_id' => $partner->id,
-                'amount' => $totalAmount,
+                'gross_commission' => $grossCommission,
+                'coverage_deduction' => $netPayout['coverage_deduction'],
+                'net_payout' => $payoutAmount,
                 'month_ref' => $monthRef,
                 'method' => $payoutMethod,
             ]);
 
-            // Auto-process via Stripe Connect if partner has connected account
-            if ($payoutMethod === 'stripe_connect' && $this->stripe) {
+            // Auto-process via Stripe Connect if partner has connected account and amount > 0
+            if ($payoutAmount > 0 && $payoutMethod === 'stripe_connect' && $this->stripe) {
                 $this->processStripeConnectPayout($payout, $partner);
             }
 

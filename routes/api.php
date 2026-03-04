@@ -222,7 +222,7 @@ Route::prefix('/v1')->group(function () {
 
     // Use auth:sanctum for SPA authentication - works with statefulApi() in bootstrap/app.php
     // Sanctum automatically handles sessions for same-domain requests (SANCTUM_STATEFUL_DOMAINS)
-    Route::middleware(['auth:sanctum', 'company'])->group(function () {
+    Route::middleware(['auth:sanctum', 'company', 'view-only'])->group(function () {
 
         // TEMPORARY: Sync abilities for all companies (OUTSIDE bouncer middleware to avoid chicken-egg)
         // This endpoint bypasses bouncer since users need abilities to access anything
