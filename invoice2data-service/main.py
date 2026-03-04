@@ -372,26 +372,46 @@ def _preprocess_for_table(contents: bytes) -> "Image":
 
 
 def _parse_amount(raw: str) -> float:
-    """Parse amount string handling European/US formats."""
+    """Parse amount string handling European/US formats and OCR artifacts.
+
+    Handles garbled OCR like 10:000;00 (colon/semicolon instead of comma/period),
+    trailing parentheses, and European dot-thousands (6.000.00).
+    """
     s = raw.strip()
     if not s or s in ("0", "0.00", "0,00"):
         return 0.0
+    # Normalize OCR-garbled separators: : → , and ; → .
+    s = s.replace(":", ",").replace(";", ".")
+    # Remove anything that's not digit, comma, period, minus
     s = re.sub(r"[^\d,.\-]", "", s)
-    last_comma = s.rfind(",")
-    last_period = s.rfind(".")
-    if last_comma != -1 and last_period != -1:
-        if last_period > last_comma:
+    if not s:
+        return 0.0
+
+    periods = s.count(".")
+    commas = s.count(",")
+
+    # Handle multiple periods (European dot-thousands: 6.000.00)
+    if periods >= 2 and commas == 0:
+        parts = s.rsplit(".", 1)
+        s = parts[0].replace(".", "") + "." + parts[1]
+    elif commas >= 2 and periods == 0:
+        parts = s.rsplit(",", 1)
+        s = parts[0].replace(",", "") + "." + parts[1]
+    elif commas == 1 and periods == 1:
+        if s.rfind(".") > s.rfind(","):
             s = s.replace(",", "")
         else:
             s = s.replace(".", "").replace(",", ".")
-    elif last_comma != -1:
-        after = s[last_comma + 1:]
+    elif commas == 1 and periods == 0:
+        after = s.split(",")[1]
         if len(after) <= 2:
             s = s.replace(",", ".")
         else:
             s = s.replace(",", "")
+    # periods == 1 and commas == 0 → standard float
+
     try:
-        return float(s)
+        return abs(float(s))
     except ValueError:
         return 0.0
 
@@ -572,7 +592,8 @@ def _extract_table_without_header(
 
     account_re = re.compile(r"^\d{15,16}$")
     # Words that look like amounts: digits with comma/period thousands/decimals
-    amount_word_re = re.compile(r"^\d{1,3}(?:[,.]\d{3})*[,.]\d{2}$")
+    # Match amount-like words: 10,000.00, 0.00, 6.000,00, 10:000;00 (OCR garbled)
+    amount_word_re = re.compile(r"^\d{1,3}(?:[,.:;]\d{3})*[,.:;]\d{2}\)?$")
 
     # Identify transaction-bearing lines: lines with a 15-16 digit number
     tx_line_indices: List[int] = []
@@ -1485,10 +1506,11 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
         transactions: List[Dict[str, Any]] = []
         extraction_method = "none"
         avg_confidence = 0.0
+        winning_key = ""
 
         for psm, img_label, img in [
-            (6, "preprocessed", processed_image),
             (6, "original", original_image),
+            (6, "preprocessed", processed_image),
             (4, "original", original_image),
             (3, "original", original_image),
         ]:
@@ -1506,9 +1528,15 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             if tsv_lines:
                 debug_tsv_lines[attempt_key] = tsv_lines[:40]
             if txs:
+                # Filter out zero-amount transactions (OCR noise)
+                txs = [
+                    tx for tx in txs
+                    if tx.get("debit", 0) > 0 or tx.get("credit", 0) > 0
+                ]
+            if txs:
                 transactions = txs
                 extraction_method = f"tsv_{attempt_key}"
-                # Calculate confidence from this TSV data
+                winning_key = attempt_key
                 all_confs = [
                     int(c) for c in tsv_data.get("conf", []) if int(c) > 0
                 ]
@@ -1521,13 +1549,16 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             logger.info("All TSV extraction failed, falling back to plain-text")
             transactions = _extract_transactions_from_text(plain_text)
             extraction_method = "text_fallback" if transactions else "none"
-            # Use last TSV confidence
             all_confs = [
                 int(c) for c in tsv_data.get("conf", []) if int(c) > 0
             ]
             avg_confidence = (
                 sum(all_confs) / len(all_confs) if all_confs else 0
             )
+
+        # Re-number transactions sequentially after filtering
+        for i, tx in enumerate(transactions):
+            tx["row_number"] = i + 1
 
         logger.info(
             f"Result: {len(transactions)} transactions via {extraction_method}, "
@@ -1549,10 +1580,10 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             "image_height": height,
         }
 
-        # Always include first TSV line set for debugging
+        # Include TSV lines from winning attempt (or first available)
         if debug_tsv_lines:
-            first_key = next(iter(debug_tsv_lines))
-            response["debug_tsv_lines"] = debug_tsv_lines[first_key]
+            key = winning_key if winning_key in debug_tsv_lines else next(iter(debug_tsv_lines))
+            response["debug_tsv_lines"] = debug_tsv_lines[key]
 
         return JSONResponse(content=response)
 
