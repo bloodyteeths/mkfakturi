@@ -17,7 +17,7 @@
             <template #left="slotProps">
               <BaseIcon name="ArrowUpTrayIcon" :class="slotProps.class" />
             </template>
-            {{ $t('banking.import_csv') || 'Import CSV' }}
+            {{ $t('banking.import_statement') || 'Import Statement' }}
           </BaseButton>
         </div>
       </template>
@@ -205,7 +205,7 @@
           class="mt-4"
           @click="router.push({ name: 'banking.import' })"
         >
-          {{ $t('banking.import_csv') || 'Import CSV' }}
+          {{ $t('banking.import_statement') || 'Import Statement' }}
         </BaseButton>
       </div>
 

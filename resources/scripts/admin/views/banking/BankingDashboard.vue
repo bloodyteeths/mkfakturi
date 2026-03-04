@@ -20,7 +20,7 @@
             <template #left="slotProps">
               <BaseIcon name="ArrowUpTrayIcon" :class="slotProps.class" />
             </template>
-            {{ $t('banking.import_csv') || 'Import CSV' }}
+            {{ $t('banking.import_statement') || 'Import Statement' }}
           </BaseButton>
           <BaseButton
             variant="primary-outline"

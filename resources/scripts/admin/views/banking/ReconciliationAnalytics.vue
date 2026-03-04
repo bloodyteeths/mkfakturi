@@ -376,7 +376,7 @@
           size="sm"
           @click="router.push({ name: 'banking.import' })"
         >
-          {{ $t('banking.import_csv') || 'Import CSV' }}
+          {{ $t('banking.import_statement') || 'Import Statement' }}
         </BaseButton>
       </div>
     </div>
