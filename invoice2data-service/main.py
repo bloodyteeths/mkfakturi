@@ -643,179 +643,386 @@ def _map_words_to_columns(
     }
 
 
+def _parse_amount_flexible(raw: str) -> float:
+    """Parse amount handling European formats and OCR artifacts.
+
+    Handles: 10,000.00 | 6.000,00 | 6.000.00 | 12,100.00 | 0.00
+    Also strips OCR noise like trailing parentheses or letters.
+    """
+    s = raw.strip()
+    if not s:
+        return 0.0
+    # Remove anything that's not digit, comma, period, minus
+    s = re.sub(r"[^\d,.\-]", "", s)
+    if not s or s in ("0", "0.00", "0,00"):
+        return 0.0
+
+    periods = s.count(".")
+    commas = s.count(",")
+
+    if periods >= 2 and commas == 0:
+        # European dot-thousands: 6.000.00 → last period is decimal
+        parts = s.rsplit(".", 1)
+        s = parts[0].replace(".", "") + "." + parts[1]
+    elif commas >= 2 and periods == 0:
+        # 6,000,00 format
+        parts = s.rsplit(",", 1)
+        s = parts[0].replace(",", "") + "." + parts[1]
+    elif commas == 1 and periods == 1:
+        if s.rfind(".") > s.rfind(","):
+            s = s.replace(",", "")  # 10,000.00
+        else:
+            s = s.replace(".", "").replace(",", ".")  # 10.000,00
+    elif commas == 1 and periods == 0:
+        after = s.split(",")[1]
+        if len(after) <= 2:
+            s = s.replace(",", ".")  # 6,00 → 6.00
+        else:
+            s = s.replace(",", "")  # 6,000 → 6000
+    # periods == 1 and commas == 0 → standard float
+
+    try:
+        return abs(float(s))
+    except ValueError:
+        return 0.0
+
+
 def _extract_transactions_from_text(plain_text: str) -> List[Dict[str, Any]]:
     """
-    Fallback: extract transactions from plain OCR text using regex patterns.
+    Extract transactions from plain OCR text of a Macedonian bank statement.
 
-    Looks for lines containing account numbers (15-16 digit) near amounts
-    (numbers with format like 10,000.00 or 6,000.00).
-
-    This works when TSV-based table extraction fails (e.g., phone photos
-    where word positions are unreliable).
+    Uses multiple signals instead of relying only on account numbers:
+    - Row numbers at line starts (primary transaction delimiter)
+    - Amount patterns (most reliably OCR'd feature)
+    - Account numbers when available (optional)
+    - Cyrillic zero indicators (Ој, О = OCR'd 0)
     """
     logger = logging.getLogger(__name__)
-    logger.info("Attempting plain-text transaction extraction (fallback)")
+    logger.info("Attempting plain-text transaction extraction (multi-signal)")
 
-    transactions: List[Dict[str, Any]] = []
+    lines = plain_text.splitlines()
 
-    # Macedonian bank account pattern: 15-16 consecutive digits,
-    # or digits with a single space from OCR errors (e.g., "30000000467 7182")
-    account_re = re.compile(r"\b(\d{15,16})\b|\b(\d{8,12}\s\d{3,6})\b")
-    # Amount pattern: 10,000.00 or 6,000.00 or 12,100.00 or 0.00
-    amount_re = re.compile(r"(\d{1,3}(?:,\d{3})*\.\d{2})")
-    # Reference number (6-7 digit)
-    ref_re = re.compile(r"\b(\d{6,7})\b")
-
-    # Detect company's own account from header (Сметка XXXXX)
+    # Detect company's own account from header
     own_account = None
     own_match = re.search(r"[Сс]метка\s*[:.]?\s*(\d[\d ]{12,})", plain_text)
     if own_match:
         own_account = re.sub(r"\s+", "", own_match.group(1))
         logger.info(f"Company's own account: {own_account}")
 
-    lines = plain_text.splitlines()
+    # Find transaction area boundaries
+    header_idx = -1
+    totals_idx = len(lines)
+    for i, line in enumerate(lines):
+        lower = line.lower().strip()
+        if "р.бр" in lower or "р. бр" in lower:
+            header_idx = i
+        if header_idx >= 0 and ("вкупно" in lower or "салдо" in lower):
+            totals_idx = i
+            break
 
-    # First pass: find all account-number positions
-    account_positions: List[Tuple[int, str]] = []  # (line_index, account)
-    for idx, line in enumerate(lines):
-        m = account_re.search(line)
-        if not m:
-            continue
-        raw_acct = m.group(1) or m.group(2)
-        acct = re.sub(r"\s+", "", raw_acct)
-        if len(acct) < 15:
-            continue
-        if own_account and acct == own_account:
-            continue
-        account_positions.append((idx, acct))
-
-    logger.info(f"Found {len(account_positions)} account numbers (excl own)")
-
-    # Second pass: for each account, gather context and extract data
-    tx_num = 0
-    for pos_idx, (line_idx, account) in enumerate(account_positions):
-        # Context window: 3 lines before, and until next account or +8 lines
-        start = max(0, line_idx - 3)
-        if pos_idx + 1 < len(account_positions):
-            end = account_positions[pos_idx + 1][0]
-        else:
-            end = min(line_idx + 8, len(lines))
-
-        context_lines = [l.strip() for l in lines[start:end] if l.strip()]
-        context = " ".join(context_lines)
-
-        # Extract amounts from the entire context window
-        all_amounts_str = amount_re.findall(context)
-        all_amounts = [_parse_amount(a) for a in all_amounts_str]
-
-        # Filter: keep only reasonable transaction amounts (not dates like 02.03)
-        amounts_float = [a for a in all_amounts if a >= 0]
-
-        # Extract reference (6-7 digit numbers)
-        ref_match = ref_re.search(context)
-        reference = ref_match.group(1) if ref_match else None
-
-        # Extract counterparty name from lines before/around the account
-        name_parts = []
-        line_text = lines[line_idx].strip()
-        acct_match = account_re.search(line_text)
-        if acct_match:
-            before = line_text[:acct_match.start()].strip()
-            before = re.sub(r"^\d+\s+", "", before).strip()
-            before = re.sub(r"[|]", "", before).strip()
-            if before and len(before) > 2:
-                name_parts.append(before)
-
-        # Check previous lines for name continuation
-        for k in range(line_idx - 1, max(line_idx - 4, -1), -1):
-            prev = lines[k].strip()
-            if not prev:
-                continue
-            # Stop at another account or amounts
-            if account_re.search(prev):
+    # If no explicit header found, detect first transaction-like line
+    if header_idx < 0:
+        for i, line in enumerate(lines):
+            if re.match(r"^\s*1\s+\S", line) and re.search(
+                r"\d{1,3}(?:,\d{3})*\.\d{2}", line
+            ):
+                header_idx = i - 1
                 break
-            # Name-like lines: short, no amounts, has Cyrillic
-            cleaned = re.sub(r"[|>]", "", prev).strip()
-            cleaned = re.sub(r"^\d+\s+", "", cleaned).strip()
-            if cleaned and len(cleaned) > 2 and not re.match(r"^[\d.,\s]+$", cleaned):
-                name_parts.insert(0, cleaned)
 
-        counterparty = " ".join(name_parts).strip()
-        # Remove noise words
-        for noise in ["ДООЕЛ", "ДООЕЛ Скопје", "Скопје", "с.Батинци", "Студеничани"]:
-            counterparty = counterparty.replace(noise, "").strip()
-        counterparty = re.sub(r"\s+", " ", counterparty).strip()
+    if header_idx < 0:
+        logger.warning("Could not find transaction area in OCR text")
+        return []
 
-        # Description: lines after account that contain descriptive keywords
-        description_parts = []
-        desc_keywords = [
-            "промет", "основ", "услуг", "плаќање", "СМЕТКОВОДСТВЕН",
-            "УСЛУГА", "извр", "произ", "стоки", "месец", "правни",
-        ]
-        for cl in context_lines:
-            if any(kw.lower() in cl.lower() for kw in desc_keywords):
-                # Clean the line
-                clean = re.sub(r"\d{15,}", "", cl)  # remove account nums
-                clean = re.sub(r"\d{1,3}(?:,\d{3})*\.\d{2}", "", clean)  # remove amounts
-                clean = re.sub(r"[|>]", "", clean).strip()
-                if clean and len(clean) > 3:
-                    description_parts.append(clean)
+    # Skip sub-header rows (должи/побарува column labels)
+    start_idx = header_idx + 1
+    for i in range(header_idx + 1, min(header_idx + 5, totals_idx)):
+        if i < len(lines):
+            lower = lines[i].lower().strip()
+            if any(
+                kw in lower
+                for kw in ["должи", "побарува", "износ", "нач.пл", "нач. пл"]
+            ):
+                start_idx = i + 1
 
-        description = " ".join(description_parts).strip()
+    tx_lines = lines[start_idx:totals_idx]
+    logger.info(
+        f"Transaction area: lines {start_idx}-{totals_idx} ({len(tx_lines)} lines)"
+    )
+    for i, l in enumerate(tx_lines):
+        logger.info(f"  TX area [{i}]: {l.rstrip()[:120]}")
 
-        # Determine debit vs credit from amounts
-        # Pattern: look for 0.00 paired with a positive amount
-        # or the first two non-zero-looking amounts
+    # --- Patterns ---
+    # Standard amounts: 10,000.00 or 0.00
+    # European dot-thousands: 6.000.00 or 6.000,00
+    amount_re = re.compile(
+        r"(\d{1,3}(?:,\d{3})*\.\d{2})"  # 10,000.00
+        r"|(\d{1,3}(?:\.\d{3})+[.,]\d{2})"  # 6.000.00 or 6.000,00
+    )
+    # Account: 10+ digit sequences (relaxed from 15)
+    account_re = re.compile(r"\b(\d{15,16})\b|\b(\d{8,12})\s(\d{3,6})\b")
+    # Cyrillic zero indicators (OCR reads 0 as О, 0.00 as ој)
+    zero_re = re.compile(r"\bОј\b|\bОј\b|\b[Оо]j\b|\b0[.,]00\b|\b0\b")
+
+    # --- Segment lines into transaction blocks ---
+    # A new transaction starts when a line begins with a row number (single digit)
+    # or a garbled row number (>, |) followed by content with amounts.
+    segments: List[List[str]] = []
+    current: List[str] = []
+
+    for line in tx_lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+
+        is_new = False
+
+        # Line starts with single digit 1-9 followed by space + content
+        row_match = re.match(r"^\s*(\d)\s+\S", stripped)
+        if row_match:
+            digit = int(row_match.group(1))
+            rest = stripped[row_match.end(1) :].strip()
+            if 1 <= digit <= 9 and len(rest) > 5:
+                is_new = True
+
+        # OCR-garbled row numbers: > (for 2), | (for 1)
+        if not is_new and re.match(r"^\s*[>|]\s+\S", stripped):
+            if amount_re.search(stripped) or account_re.search(stripped):
+                is_new = True
+
+        # Line with account + amount that doesn't look like header
+        if not is_new and account_re.search(stripped) and amount_re.search(stripped):
+            for m in account_re.finditer(stripped):
+                acct = re.sub(
+                    r"\s+",
+                    "",
+                    m.group(1) or (m.group(2) + m.group(3)),
+                )
+                if acct != own_account and len(acct) >= 10:
+                    is_new = True
+                    break
+
+        if is_new and current:
+            segments.append(current)
+            current = [stripped]
+        else:
+            current.append(stripped)
+
+    if current:
+        segments.append(current)
+
+    logger.info(f"Segmented into {len(segments)} transaction blocks")
+    for i, seg in enumerate(segments):
+        logger.info(f"  Seg[{i}]: {' | '.join(s[:80] for s in seg)}")
+
+    # --- Merge amount-less trailing segments into previous segment ---
+    # e.g. "5 ДООЕЛ Скопје основ на инве" has no amount → merge with prev
+    merged: List[List[str]] = []
+    for seg in segments:
+        block_text = " ".join(seg)
+        has_amount = bool(amount_re.search(block_text))
+        # Also count Cyrillic zero + any amount as having amounts
+        has_zero_and_amount = bool(zero_re.search(block_text)) and has_amount
+
+        if not has_amount and merged:
+            # Merge with previous segment
+            merged[-1].extend(seg)
+        else:
+            merged.append(seg)
+
+    if len(merged) != len(segments):
+        logger.info(
+            f"After merging amount-less segments: {len(merged)} blocks"
+        )
+    segments = merged
+
+    # --- Parse each segment into a transaction ---
+    transactions: List[Dict[str, Any]] = []
+
+    for seg_idx, segment in enumerate(segments):
+        block_text = " ".join(segment)
+        first_line = segment[0]
+
+        # Extract all amounts from the entire block
+        all_amounts: List[float] = []
+        for m in amount_re.finditer(block_text):
+            raw = m.group(1) or m.group(2)
+            val = _parse_amount_flexible(raw)
+            all_amounts.append(val)
+
+        # Extract amounts from first line only (for debit/credit column order)
+        first_amounts: List[float] = []
+        for m in amount_re.finditer(first_line):
+            raw = m.group(1) or m.group(2)
+            first_amounts.append(_parse_amount_flexible(raw))
+
+        # Check for zero indicators on first line
+        has_zero_first = bool(zero_re.search(first_line))
+
+        if not all_amounts and not has_zero_first:
+            logger.info(f"  Seg[{seg_idx}]: no amounts or zeros, skipping")
+            continue
+
+        # Extract account number (optional - don't require it)
+        account = None
+        for m in account_re.finditer(block_text):
+            acct = re.sub(
+                r"\s+",
+                "",
+                m.group(1) or (m.group(2) + m.group(3)),
+            )
+            if acct != own_account:
+                account = acct
+                break
+
+        # --- Determine debit / credit ---
         debit = 0.0
         credit = 0.0
 
-        # Find the two amounts closest to the account number on its line
-        line_amounts = amount_re.findall(line_text)
-        line_amounts_f = [_parse_amount(a) for a in line_amounts]
-
-        if len(line_amounts_f) >= 2:
-            if line_amounts_f[0] > 0 and line_amounts_f[1] == 0:
-                debit = line_amounts_f[0]
-            elif line_amounts_f[1] > 0:
-                credit = line_amounts_f[1]
-                if line_amounts_f[0] > 0:
-                    debit = line_amounts_f[0]
-        elif len(line_amounts_f) == 1 and line_amounts_f[0] > 0:
-            credit = line_amounts_f[0]
-        elif amounts_float:
-            # Fallback: use largest non-zero from context
-            non_zero = [a for a in amounts_float if a > 0]
+        if len(first_amounts) >= 2:
+            # Two amounts on first line → debit column, then credit column
+            debit = first_amounts[0]
+            credit = first_amounts[1]
+        elif len(first_amounts) == 1:
+            amt = first_amounts[0]
+            if amt > 0:
+                # Check relative position of amount vs zero indicator
+                amt_match = amount_re.search(first_line)
+                if amt_match:
+                    after_amt = first_line[amt_match.end() :].strip()
+                    before_amt = first_line[: amt_match.start()].strip()
+                    if zero_re.search(after_amt):
+                        # amount then zero → debit
+                        debit = amt
+                    elif zero_re.search(before_amt) or has_zero_first:
+                        # zero then amount → credit
+                        credit = amt
+                    else:
+                        # No clear indicator; check continuation lines
+                        rest_text = " ".join(segment[1:])
+                        rest_amounts = [
+                            _parse_amount_flexible(m.group(1) or m.group(2))
+                            for m in amount_re.finditer(rest_text)
+                        ]
+                        if rest_amounts and rest_amounts[0] == 0:
+                            debit = amt
+                        elif rest_amounts and amt == 0:
+                            credit = rest_amounts[0]
+                        else:
+                            credit = amt  # default
+            elif has_zero_first:
+                # First amount is 0, look for non-zero in block
+                non_zero = [a for a in all_amounts if a > 0]
+                if non_zero:
+                    credit = non_zero[0]
+        elif has_zero_first and all_amounts:
+            # First line has zero indicator, amounts in continuation lines
+            non_zero = [a for a in all_amounts if a > 0]
             if non_zero:
-                credit = max(non_zero)
+                credit = non_zero[0]
+        elif all_amounts:
+            # Amounts only in continuation lines
+            if len(all_amounts) >= 2:
+                debit = all_amounts[0]
+                credit = all_amounts[1]
+            else:
+                credit = all_amounts[0]
 
-        # Skip if no monetary activity
         if debit == 0 and credit == 0:
+            logger.info(f"  Seg[{seg_idx}]: zero amounts, skipping")
             continue
 
-        # Payment code (3-digit)
-        code_match = re.search(r"\b(\d{3})\b", context)
-        payment_code = None
-        if code_match:
-            code_val = int(code_match.group(1))
-            if 100 <= code_val <= 999:
-                payment_code = code_val
+        # --- Counterparty name ---
+        name_line = first_line
+        # Strip leading row number or garbled row number
+        name_line = re.sub(r"^\s*\d\s+", "", name_line)
+        name_line = re.sub(r"^\s*[>|]\s+", "", name_line)
+        # Take text before first account or amount
+        name_end = len(name_line)
+        for pat in [account_re, amount_re]:
+            m = pat.search(name_line)
+            if m and m.start() < name_end:
+                name_end = m.start()
+        # Also stop at zero indicator
+        zm = zero_re.search(name_line)
+        if zm and zm.start() < name_end:
+            name_end = zm.start()
+        name = name_line[:name_end].strip()
+        name = re.sub(r"[|>~]", "", name).strip()
 
-        tx_num += 1
+        # Gather continuation name fragments
+        for seg_line in segment[1:]:
+            # Only take name-like lines: no amounts, has Cyrillic/Latin text
+            if not amount_re.search(seg_line):
+                clean = re.sub(r"[|>~]", "", seg_line).strip()
+                clean = re.sub(r"^\d+\s+", "", clean).strip()
+                if clean and len(clean) > 2 and not re.match(
+                    r"^[\d.,\s]+$", clean
+                ):
+                    name = (name + " " + clean).strip()
+            else:
+                # Lines with amounts may have name at start
+                m = amount_re.search(seg_line)
+                if m:
+                    before = seg_line[: m.start()].strip()
+                    before = re.sub(r"^\d+\s+", "", before).strip()
+                    before = re.sub(r"[|>~]", "", before).strip()
+                    if before and len(before) > 2:
+                        name = (name + " " + before).strip()
+
+        name = re.sub(r"\s+", " ", name).strip()
+
+        # --- Payment code (3-digit, 100-999) ---
+        payment_code = None
+        for cm in re.finditer(r"\b(\d{3})\b", block_text):
+            val = int(cm.group(1))
+            if 100 <= val <= 999:
+                payment_code = val
+                break
+
+        # --- Reference number (6-7 digits) ---
+        reference = None
+        for rm in re.finditer(r"\b(\d{6,7})\b", block_text):
+            ref_val = rm.group(1)
+            # Skip if it's part of an account number
+            if account and ref_val in account:
+                continue
+            if own_account and ref_val in own_account:
+                continue
+            reference = ref_val
+            break
+
+        # --- Description ---
+        desc_keywords = [
+            "промет", "основ", "услуг", "плаќање", "месец",
+            "правни", "извр", "произ", "стоки", "инве", "сметководствен",
+        ]
+        description_parts = []
+        for seg_line in segment:
+            if any(kw in seg_line.lower() for kw in desc_keywords):
+                clean = seg_line.strip()
+                clean = re.sub(r"\d{15,}", "", clean)
+                clean = re.sub(r"\d{1,3}(?:,\d{3})*\.\d{2}", "", clean)
+                clean = re.sub(r"[|>~]", "", clean).strip()
+                if clean and len(clean) > 3:
+                    description_parts.append(clean)
+        description = " ".join(description_parts).strip()
+
         tx = {
-            "row_number": tx_num,
-            "counterparty_name": counterparty or None,
+            "row_number": len(transactions) + 1,
+            "counterparty_name": name or None,
             "counterparty_account": account,
             "debit": debit,
             "credit": credit,
             "payment_code": payment_code,
-            "description": description.strip() or None,
+            "description": description or None,
             "reference": reference,
             "pbo": None,
         }
         transactions.append(tx)
         logger.info(
-            f"  TX {tx_num}: {counterparty} | debit={debit} credit={credit} | "
-            f"{(description or '')[:50]}"
+            f"  TX {tx['row_number']}: acct={account} "
+            f"debit={debit} credit={credit} "
+            f"name={name[:40]} ref={reference}"
         )
 
     logger.info(f"Plain-text extraction found {len(transactions)} transactions")
