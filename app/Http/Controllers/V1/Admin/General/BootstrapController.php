@@ -244,6 +244,28 @@ class BootstrapController extends Controller
             $payload = $bootstrapLogic();
         }
 
+        // Super Admin Console Switch: Override company context for partner company management
+        $partnerCompanyId = session('partner_selected_company_id');
+        if ($current_user->role === 'super admin' && $partnerCompanyId && ! session('support_mode')) {
+            $consoleCompany = \App\Models\Company::with('address')->find($partnerCompanyId);
+            if ($consoleCompany) {
+                $consoleCompanySettings = CompanySetting::getAllSettings($consoleCompany->id)->toArray();
+                $currencyId = $consoleCompanySettings['currency'] ?? null;
+                $currencyModel = $currencyId ? Currency::find($currencyId) : Currency::first();
+
+                $payload['current_company'] = (new CompanyResource($consoleCompany))->toArray($request);
+                $payload['current_company_settings'] = $consoleCompanySettings;
+                $payload['current_company_currency'] = $currencyModel ? $currencyModel->toArray() : null;
+
+                // Add console company to companies list if not present
+                $companiesArray = $payload['companies'];
+                $hasCompany = collect($companiesArray)->contains('id', $consoleCompany->id);
+                if (! $hasCompany) {
+                    $payload['companies'][] = (new CompanyResource($consoleCompany))->toArray($request);
+                }
+            }
+        }
+
         // Super Admin Support Mode: Override company context if in support mode
         $supportMode = session('support_mode');
         if ($current_user->role === 'super admin' && $supportMode) {
