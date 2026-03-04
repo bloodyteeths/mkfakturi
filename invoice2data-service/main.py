@@ -337,9 +337,17 @@ def _extract_account_number(text: str) -> Optional[str]:
     return None
 
 
+def _open_image_with_exif(contents: bytes) -> "Image":
+    """Open image and auto-rotate based on EXIF orientation (phone photos)."""
+    from PIL import ImageOps
+    image = Image.open(io.BytesIO(contents))
+    image = ImageOps.exif_transpose(image)
+    return image.convert("RGB")
+
+
 def _preprocess_for_table(contents: bytes) -> "Image":
     """Preprocess image for better table OCR."""
-    image = Image.open(io.BytesIO(contents)).convert("RGB")
+    image = _open_image_with_exif(contents)
 
     if np is not None:
         import cv2
@@ -667,8 +675,8 @@ async def extract_text(file: UploadFile = File(...), format: str = "text") -> JS
                 detail="OCR not available on service (pytesseract/Pillow missing)",
             )
 
-        # Open image
-        original_image = Image.open(io.BytesIO(contents)).convert("RGB")
+        # Open image (auto-rotate based on EXIF for phone photos)
+        original_image = _open_image_with_exif(contents)
 
         # Get image dimensions for frontend
         width, height = original_image.size
@@ -847,7 +855,7 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
 
         # Preprocess image for better table extraction
         processed_image = _preprocess_for_table(contents)
-        original_image = Image.open(io.BytesIO(contents)).convert("RGB")
+        original_image = _open_image_with_exif(contents)
         width, height = original_image.size
 
         langs = os.getenv("OCR_LANGS", "mkd+eng+srp")
