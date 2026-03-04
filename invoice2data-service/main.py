@@ -396,18 +396,18 @@ def _parse_amount(raw: str) -> float:
         return 0.0
 
 
-def _extract_table_from_tsv(tsv_data: Dict[str, List], image_width: int) -> List[Dict[str, Any]]:
+def _group_tsv_into_lines(
+    tsv_data: Dict[str, List],
+) -> Tuple[List[List[Dict]], List[str]]:
     """
-    Extract table rows from Tesseract TSV output (image_to_data).
-    Groups words by line, then maps to columns using X-position heuristics.
+    Build word list from TSV data and group into visual lines.
+    Returns (lines, line_texts) where each line is a list of word dicts
+    sorted by X, and line_texts are the joined text per line.
     """
-    logger = logging.getLogger(__name__)
-
     n_words = len(tsv_data.get("text", []))
     if n_words == 0:
-        return []
+        return [], []
 
-    # Build word list with positions
     words = []
     for i in range(n_words):
         text = str(tsv_data["text"][i]).strip()
@@ -421,16 +421,12 @@ def _extract_table_from_tsv(tsv_data: Dict[str, List], image_width: int) -> List
             "width": int(tsv_data["width"][i]),
             "height": int(tsv_data["height"][i]),
             "conf": conf,
-            "line_num": int(tsv_data["line_num"][i]),
-            "block_num": int(tsv_data["block_num"][i]),
-            "par_num": int(tsv_data["par_num"][i]),
         })
 
     if not words:
-        return []
+        return [], []
 
-    # Group words into visual lines by clustering Y coordinates
-    # Use proportional tolerance: ~1% of image height (handles phone photos)
+    # Group by Y-coordinate clustering (proportional tolerance)
     max_top = max(w["top"] for w in words)
     line_tolerance = max(20, int(max_top * 0.012))
 
@@ -450,85 +446,293 @@ def _extract_table_from_tsv(tsv_data: Dict[str, List], image_width: int) -> List
     if current_line:
         lines.append(sorted(current_line, key=lambda x: x["left"]))
 
-    logger.info(f"Detected {len(lines)} visual lines from OCR")
+    line_texts = [" ".join(w["text"] for w in lw) for lw in lines]
+    return lines, line_texts
 
-    # Reconstruct text for each line
-    line_texts = []
-    for line_words in lines:
-        parts = []
-        for w in line_words:
-            parts.append(w["text"])
-        line_texts.append(" ".join(parts))
 
-    # Find table header row and transaction area
+def _extract_table_from_tsv(
+    tsv_data: Dict[str, List], image_width: int, own_account: Optional[str] = None
+) -> Tuple[List[Dict[str, Any]], List[str]]:
+    """
+    Extract table rows from Tesseract TSV output (image_to_data).
+    Groups words by line, then maps to columns using X-position heuristics.
+
+    Returns (transactions, debug_line_texts) — debug_line_texts is the
+    reconstructed text for each visual line (useful for diagnostics).
+    """
+    logger = logging.getLogger(__name__)
+
+    lines, line_texts = _group_tsv_into_lines(tsv_data)
+    if not lines:
+        return [], []
+
+    logger.info(f"Detected {len(lines)} visual lines from TSV")
+    # Log first 30 lines for debugging
+    for i, lt in enumerate(line_texts[:30]):
+        logger.info(f"  TSV line [{i}]: {lt[:120]}")
+
+    # --- Find table header row ---
     header_idx = -1
     totals_idx = len(lines)
 
+    # Header detection keywords (checked on each line)
+    _HEADER_KWS = ["р.бр", "побарува", "должи", "сметка", "дознака", "примач"]
+
     for i, text in enumerate(line_texts):
         lower = text.lower()
+
+        # Primary: exact Р.бр. match
         if "р.бр" in lower or "р. бр" in lower:
             header_idx = i
+
+        # Secondary: line containing 2+ header keywords
+        if header_idx < 0:
+            hits = sum(1 for kw in _HEADER_KWS if kw in lower)
+            if hits >= 2:
+                header_idx = i
+
+        # Totals line
         if "вкупно" in lower and header_idx >= 0:
             totals_idx = i
             break
 
+    # Tertiary: check consecutive line pairs for 2+ keywords
     if header_idx < 0:
-        logger.warning("Could not find table header (Р.бр.) in OCR text")
+        for i in range(len(line_texts) - 1):
+            combined = (line_texts[i] + " " + line_texts[i + 1]).lower()
+            hits = sum(1 for kw in _HEADER_KWS if kw in combined)
+            if hits >= 2:
+                header_idx = i + 1
+                break
+
+    if header_idx >= 0:
+        logger.info(f"Table header at line {header_idx}, totals at {totals_idx}")
+
+        header_words = lines[header_idx]
+        col_positions = _detect_columns_from_header(header_words, image_width)
+        logger.info(f"Detected column positions: {col_positions}")
+
+        transactions = []
+        start_idx = header_idx + 1
+        for i in range(header_idx + 1, min(header_idx + 4, totals_idx)):
+            lower = line_texts[i].lower()
+            if "должи" in lower or "побарува" in lower or "износ" in lower:
+                start_idx = i + 1
+
+        for i in range(start_idx, totals_idx):
+            text = line_texts[i].strip()
+            if not text or len(text) < 3:
+                continue
+            first_word = lines[i][0]["text"].strip()
+            if not first_word.isdigit():
+                if transactions:
+                    prev = transactions[-1]
+                    prev["description"] = (
+                        prev.get("description", "") + " " + text
+                    ).strip()
+                continue
+            tx = _map_words_to_columns(lines[i], col_positions, image_width)
+            tx["row_number"] = int(first_word)
+            transactions.append(tx)
+
+        logger.info(f"Header-based extraction: {len(transactions)} transactions")
+        if transactions:
+            return transactions, line_texts
+
+    # --- Header-free fallback: find rows with account numbers + amounts ---
+    logger.info("Header not found or header extraction empty; trying header-free")
+    return _extract_table_without_header(lines, line_texts, image_width, own_account), line_texts
+
+
+def _extract_table_without_header(
+    lines: List[List[Dict]],
+    line_texts: List[str],
+    image_width: int,
+    own_account: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Extract transactions from TSV lines WITHOUT relying on header detection.
+
+    Strategy: find lines containing bank account numbers (15+ digits) and
+    amounts. Use X-positions to assign amounts to debit/credit columns.
+    Lines with accounts but no amounts get amounts from continuation lines.
+    """
+    logger = logging.getLogger(__name__)
+
+    account_re = re.compile(r"^\d{15,16}$")
+    # Words that look like amounts: digits with comma/period thousands/decimals
+    amount_word_re = re.compile(r"^\d{1,3}(?:[,.]\d{3})*[,.]\d{2}$")
+
+    # Identify transaction-bearing lines: lines with a 15-16 digit number
+    tx_line_indices: List[int] = []
+    for i, lw in enumerate(lines):
+        for w in lw:
+            wt = w["text"].replace(" ", "")
+            if account_re.match(wt) and wt != own_account:
+                tx_line_indices.append(i)
+                break
+
+    logger.info(f"Header-free: found {len(tx_line_indices)} lines with accounts")
+
+    if not tx_line_indices:
         return []
 
-    logger.info(f"Table header at line {header_idx}, totals at line {totals_idx}")
+    # For debit/credit column discrimination, find the X positions of
+    # amount-like words across ALL transaction lines
+    amount_x_positions: List[int] = []
+    for i in tx_line_indices:
+        for w in lines[i]:
+            if amount_word_re.match(w["text"]):
+                amount_x_positions.append(w["left"])
 
-    # Determine column boundaries from the header row
-    # For Macedonian bank statements, typical columns (left to right):
-    # row#, counterparty, account, method, debit, credit, fee, code, description, ref, complaint_ref
-    #
-    # Key approach: find the X positions of key header words to define column ranges
-    header_words = lines[header_idx]
+    # Also collect from lines immediately after transaction lines (continuation)
+    for i in tx_line_indices:
+        for j in range(i + 1, min(i + 3, len(lines))):
+            if j in tx_line_indices:
+                break
+            for w in lines[j]:
+                if amount_word_re.match(w["text"]):
+                    amount_x_positions.append(w["left"])
 
-    # Build column X-ranges based on image width proportions
-    # This is more robust than relying on exact header word positions
-    # since OCR may merge/split header cells
-    #
-    # For Komercijalna format (from the sample image), approximate column positions as % of width:
-    # row#: 0-4%, counterparty: 4-16%, account: 16-28%, method: 28-32%,
-    # debit: 32-42%, credit: 42-52%, fee_debit: 52-56%, fee_credit: 56-60%,
-    # code: 60-64%, description: 64-82%, pbo: 82-88%, ref: 88-100%
+    if not amount_x_positions:
+        logger.info("Header-free: no amount words found")
+        return []
 
-    # Detect column positions dynamically from header keywords
-    col_positions = _detect_columns_from_header(header_words, image_width)
-    logger.info(f"Detected column positions: {col_positions}")
+    # Cluster amount X positions to find debit and credit column centers
+    amount_x_positions.sort()
+    # Simple clustering: split into 2 groups using the largest gap
+    debit_x = amount_x_positions[0]
+    credit_x = amount_x_positions[-1]
+    if len(amount_x_positions) >= 2:
+        max_gap = 0
+        split_at = 0
+        for k in range(len(amount_x_positions) - 1):
+            gap = amount_x_positions[k + 1] - amount_x_positions[k]
+            if gap > max_gap:
+                max_gap = gap
+                split_at = k
+        if max_gap > image_width * 0.03:  # meaningful gap
+            group1 = amount_x_positions[: split_at + 1]
+            group2 = amount_x_positions[split_at + 1 :]
+            debit_x = sum(group1) / len(group1)
+            credit_x = sum(group2) / len(group2)
+            logger.info(
+                f"Amount columns: debit ~{debit_x:.0f}px, credit ~{credit_x:.0f}px"
+            )
 
-    # Extract transaction rows (between header and totals)
-    transactions = []
+    mid_x = (debit_x + credit_x) / 2 if debit_x != credit_x else image_width * 0.5
 
-    # Skip sub-header rows (должи/побарува labels)
-    start_idx = header_idx + 1
-    for i in range(header_idx + 1, min(header_idx + 3, totals_idx)):
-        text = line_texts[i].lower()
-        if "должи" in text or "побарува" in text or "износ" in text:
-            start_idx = i + 1
+    # Build transactions
+    transactions: List[Dict[str, Any]] = []
 
-    for i in range(start_idx, totals_idx):
-        line_word_list = lines[i]
-        text = line_texts[i].strip()
+    for idx, tx_i in enumerate(tx_line_indices):
+        lw = lines[tx_i]
+        text = line_texts[tx_i]
 
-        if not text or len(text) < 3:
+        # Find account
+        account = None
+        acct_x = 0
+        for w in lw:
+            wt = w["text"].replace(" ", "")
+            if account_re.match(wt) and wt != own_account:
+                account = wt
+                acct_x = w["left"]
+                break
+
+        # Find amounts on this line + continuation lines
+        amounts_with_x: List[Tuple[int, float]] = []
+
+        # Context: this line + up to 2 continuation lines before next tx
+        end_line = tx_line_indices[idx + 1] if idx + 1 < len(tx_line_indices) else min(tx_i + 4, len(lines))
+        for j in range(tx_i, end_line):
+            for w in lines[j]:
+                if amount_word_re.match(w["text"]):
+                    val = _parse_amount(w["text"])
+                    if val >= 0:
+                        amounts_with_x.append((w["left"], val))
+
+        # Assign to debit/credit based on X position
+        debit = 0.0
+        credit = 0.0
+        for ax, av in amounts_with_x:
+            if av == 0:
+                continue
+            if ax < mid_x:
+                debit = max(debit, av)  # take largest if multiple
+            else:
+                credit = max(credit, av)
+
+        # If only one non-zero amount and it's unclear, check for zero words
+        if debit == 0 and credit == 0 and amounts_with_x:
+            non_zero = [(ax, av) for ax, av in amounts_with_x if av > 0]
+            if non_zero:
+                credit = non_zero[0][1]  # default to credit
+
+        if debit == 0 and credit == 0:
             continue
 
-        # Check if line starts with a number (transaction row indicator)
-        first_word = line_word_list[0]["text"].strip()
-        if not first_word.isdigit():
-            # Could be a continuation of previous transaction description
-            if transactions:
-                prev = transactions[-1]
-                prev["description"] = (prev.get("description", "") + " " + text).strip()
-            continue
+        # Counterparty: words to the left of account
+        name_words = []
+        for w in lw:
+            if w["left"] < acct_x:
+                wt = w["text"].strip()
+                if not wt.isdigit() or len(wt) > 2:
+                    name_words.append(wt)
+        # Remove the row number (first single digit)
+        if name_words and name_words[0].isdigit() and len(name_words[0]) <= 2:
+            row_num_str = name_words.pop(0)
+        else:
+            row_num_str = None
 
-        tx = _map_words_to_columns(line_word_list, col_positions, image_width)
-        tx["row_number"] = int(first_word)
+        counterparty = " ".join(name_words).strip()
+
+        # Continuation lines may add to name/description
+        description_parts = []
+        for j in range(tx_i + 1, end_line):
+            if j in tx_line_indices:
+                break
+            cont_text = line_texts[j].strip()
+            if cont_text and not re.match(r"^[\d.,\s]+$", cont_text):
+                description_parts.append(cont_text)
+
+        # Reference: 6-7 digit numbers in context
+        reference = None
+        context_text = " ".join(line_texts[tx_i:end_line])
+        for rm in re.finditer(r"\b(\d{6,7})\b", context_text):
+            rv = rm.group(1)
+            if account and rv in account:
+                continue
+            if own_account and rv in own_account:
+                continue
+            reference = rv
+            break
+
+        # Payment code
+        payment_code = None
+        for cm in re.finditer(r"\b(\d{3})\b", context_text):
+            val = int(cm.group(1))
+            if 100 <= val <= 999:
+                payment_code = val
+                break
+
+        tx = {
+            "row_number": len(transactions) + 1,
+            "counterparty_name": counterparty or None,
+            "counterparty_account": account,
+            "debit": debit,
+            "credit": credit,
+            "payment_code": payment_code,
+            "description": " ".join(description_parts).strip() or None,
+            "reference": reference,
+            "pbo": None,
+        }
         transactions.append(tx)
+        logger.info(
+            f"  HdrFree TX {tx['row_number']}: acct={account} "
+            f"debit={debit} credit={credit} name={counterparty[:40]}"
+        )
 
-    logger.info(f"Extracted {len(transactions)} transactions from table")
+    logger.info(f"Header-free extraction: {len(transactions)} transactions")
     return transactions
 
 
@@ -1265,37 +1469,32 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             f"Detected: bank={bank_code}, date={statement_date}, account={account_number}"
         )
 
-        # Step 2: Extract word-level data with bounding boxes for table extraction
-        # Use PSM 6 (uniform block) which works best for tabular data
-        tsv_data = pytesseract.image_to_data(
-            processed_image, lang=langs, config="--oem 3 --psm 6",
-            output_type=pytesseract.Output.DICT,
-        )
+        # Step 2: Try multiple PSM modes with TSV extraction
+        debug_tsv_lines: List[str] = []
+        transactions: List[Dict[str, Any]] = []
 
-        # Step 3: Extract table structure from word positions
-        transactions = _extract_table_from_tsv(tsv_data, width)
-
-        if not transactions:
-            # Fallback: try with original (unprocessed) image
-            logger.info("No transactions from preprocessed image, trying original")
+        for psm, img_label, img in [
+            (6, "preprocessed", processed_image),
+            (6, "original", original_image),
+            (4, "original", original_image),
+            (3, "original", original_image),
+        ]:
+            if transactions:
+                break
+            logger.info(f"TSV attempt: PSM {psm} on {img_label} image")
             tsv_data = pytesseract.image_to_data(
-                original_image, lang=langs, config="--oem 3 --psm 6",
+                img, lang=langs, config=f"--oem 3 --psm {psm}",
                 output_type=pytesseract.Output.DICT,
             )
-            transactions = _extract_table_from_tsv(tsv_data, width)
-
-        if not transactions:
-            # Second fallback: try PSM 3 (fully automatic)
-            logger.info("Still no transactions, trying PSM 3")
-            tsv_data = pytesseract.image_to_data(
-                original_image, lang=langs, config="--oem 3 --psm 3",
-                output_type=pytesseract.Output.DICT,
+            transactions, tsv_lines = _extract_table_from_tsv(
+                tsv_data, width, own_account=account_number
             )
-            transactions = _extract_table_from_tsv(tsv_data, width)
+            if not debug_tsv_lines and tsv_lines:
+                debug_tsv_lines = tsv_lines  # keep first non-empty for debug
 
         if not transactions:
             # Final fallback: parse from plain text using regex patterns
-            logger.info("TSV extraction failed, falling back to plain-text parsing")
+            logger.info("All TSV extraction failed, falling back to plain-text")
             transactions = _extract_transactions_from_text(plain_text)
 
         # Calculate average confidence
@@ -1309,7 +1508,7 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             f"confidence={avg_confidence:.1f}%"
         )
 
-        return JSONResponse(content={
+        response: Dict[str, Any] = {
             "success": True,
             "bank_code": bank_code,
             "bank_name": bank_name,
@@ -1321,7 +1520,13 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             "raw_text": plain_text[:2000],
             "image_width": width,
             "image_height": height,
-        })
+        }
+
+        # Include TSV diagnostic lines when no transactions found
+        if not transactions and debug_tsv_lines:
+            response["debug_tsv_lines"] = debug_tsv_lines[:40]
+
+        return JSONResponse(content=response)
 
     except HTTPException:
         raise
