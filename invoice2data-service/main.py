@@ -539,20 +539,43 @@ def _extract_table_from_tsv(
             if "должи" in lower or "побарува" in lower or "износ" in lower:
                 start_idx = i + 1
 
+        # Group lines into multi-line transaction blocks.
+        # A new transaction starts when a line begins with:
+        # - a digit (row number)
+        # - > or | (OCR-garbled row numbers)
+        tx_blocks: List[List[int]] = []
+        current_block: List[int] = []
+
         for i in range(start_idx, totals_idx):
             text = line_texts[i].strip()
             if not text or len(text) < 3:
                 continue
             first_word = lines[i][0]["text"].strip()
-            if not first_word.isdigit():
-                if transactions:
-                    prev = transactions[-1]
-                    prev["description"] = (
-                        (prev.get("description") or "") + " " + text
-                    ).strip()
-                continue
-            tx = _map_words_to_columns(lines[i], col_positions, image_width)
-            tx["row_number"] = int(first_word)
+            is_new_tx = (
+                first_word.isdigit()
+                or first_word in (">", "|", "Т")
+            )
+            if is_new_tx and current_block:
+                tx_blocks.append(current_block)
+                current_block = [i]
+            else:
+                current_block.append(i)
+        if current_block:
+            tx_blocks.append(current_block)
+
+        logger.info(f"Header-based: {len(tx_blocks)} transaction blocks")
+
+        # Process each block: merge all words, then map to columns
+        for block in tx_blocks:
+            all_words = []
+            for bi in block:
+                all_words.extend(lines[bi])
+            tx = _map_words_to_columns(all_words, col_positions, image_width)
+            first_word = lines[block[0]][0]["text"].strip()
+            tx["row_number"] = (
+                int(first_word) if first_word.isdigit()
+                else len(transactions) + 1
+            )
             transactions.append(tx)
 
         logger.info(f"Header-based extraction: {len(transactions)} transactions")
@@ -869,7 +892,7 @@ def _map_words_to_columns(
 
     return {
         "counterparty_name": counterparty.strip() or None,
-        "counterparty_account": account if len(account) > 10 else None,
+        "counterparty_account": account if len(account) >= 9 else None,
         "debit": debit,
         "credit": credit,
         "payment_code": payment_code,
@@ -1526,7 +1549,7 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
                 tsv_data, width, own_account=account_number
             )
             if tsv_lines:
-                debug_tsv_lines[attempt_key] = tsv_lines[:40]
+                debug_tsv_lines[attempt_key] = tsv_lines[:60]
             if txs:
                 # Filter out zero-amount transactions (OCR noise)
                 txs = [
