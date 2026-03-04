@@ -123,13 +123,13 @@
                       ref="fileInput"
                       type="file"
                       class="sr-only"
-                      accept=".csv,.txt,.xls,.xlsx"
+                      accept=".csv,.txt,.xls,.xlsx,.jpg,.jpeg,.png"
                       @change="handleFileSelect"
                     />
                   </label>
                   <p class="pl-1">{{ $t('banking.or_drag_drop') }}</p>
                 </div>
-                <p class="text-xs text-gray-500">CSV, XLS, XLSX {{ $t('banking.up_to_10mb') }}</p>
+                <p class="text-xs text-gray-500">CSV, XLS, XLSX, JPG, PNG {{ $t('banking.up_to_10mb') }}</p>
               </template>
               <template v-else>
                 <DocumentCheckIcon class="mx-auto h-12 w-12 text-green-500" />
@@ -147,6 +147,13 @@
           </div>
         </div>
 
+        <!-- OCR hint for image files -->
+        <div v-if="isImageUpload" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p class="text-sm text-blue-700">
+            {{ $t('banking.ocr_processing_hint') }}
+          </p>
+        </div>
+
         <!-- Actions -->
         <div class="flex justify-end space-x-3">
           <BaseButton variant="gray" @click="router.push({ name: 'banking.dashboard' })">
@@ -158,7 +165,7 @@
             :disabled="!canProceedToPreview"
             @click="uploadAndPreview"
           >
-            {{ $t('banking.preview_import') }}
+            {{ isImageUpload ? $t('banking.scan_and_preview') : $t('banking.preview_import') }}
           </BaseButton>
         </div>
       </div>
@@ -190,6 +197,15 @@
           <p class="text-sm text-gray-600">
             {{ $t('banking.detected_bank') }}:
             <span class="font-medium text-gray-900">{{ previewData.detected_bank }}</span>
+          </p>
+          <p v-if="previewData.ocr_confidence" class="text-sm text-gray-500 mt-1">
+            {{ $t('banking.ocr_confidence') }}:
+            <span
+              class="font-medium"
+              :class="previewData.ocr_confidence > 0.7 ? 'text-green-600' : previewData.ocr_confidence > 0.4 ? 'text-yellow-600' : 'text-red-600'"
+            >
+              {{ Math.round(previewData.ocr_confidence * 100) }}%
+            </span>
           </p>
         </div>
 
@@ -394,6 +410,12 @@ const canProceedToPreview = computed(() => {
   return selectedAccount.value && uploadedFile.value
 })
 
+const isImageUpload = computed(() => {
+  if (!uploadedFile.value) return false
+  const name = uploadedFile.value.name.toLowerCase()
+  return name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png')
+})
+
 // Methods
 const handleFileSelect = (event) => {
   const file = event.target.files[0]
@@ -412,8 +434,8 @@ const handleFileDrop = (event) => {
 
 const validateAndSetFile = (file) => {
   // Check file type
-  const validTypes = ['text/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
-  const validExtensions = ['.csv', '.txt', '.xls', '.xlsx']
+  const validTypes = ['text/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'image/jpeg', 'image/png']
+  const validExtensions = ['.csv', '.txt', '.xls', '.xlsx', '.jpg', '.jpeg', '.png']
   const hasValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
 
   if (!validTypes.includes(file.type) && !hasValidExtension) {

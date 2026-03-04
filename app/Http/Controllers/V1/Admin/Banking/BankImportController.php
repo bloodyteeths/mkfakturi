@@ -7,6 +7,8 @@ use App\Models\BankAccount;
 use App\Models\BankImportLog;
 use App\Models\BankTransaction;
 use App\Models\Company;
+use App\Services\Banking\BankStatementOcrException;
+use App\Services\Banking\BankStatementOcrService;
 use App\Services\Banking\DeduplicationService;
 use App\Services\Banking\ImportLoggingService;
 use App\Services\Banking\Parsers\CsvParserFactory;
@@ -35,10 +37,12 @@ class BankImportController extends Controller
     /**
      * @param  ImportLoggingService  $loggingService  P0-03: Import logging
      * @param  DeduplicationService  $deduplicationService  P0-11: Transaction dedup
+     * @param  BankStatementOcrService  $ocrService  OCR-based statement parsing
      */
     public function __construct(
         protected ImportLoggingService $loggingService,
         protected DeduplicationService $deduplicationService,
+        protected BankStatementOcrService $ocrService,
     ) {}
 
     /**
@@ -51,7 +55,7 @@ class BankImportController extends Controller
 
         try {
             $request->validate([
-                'file' => 'required|file|mimes:csv,txt,xls,xlsx|max:10240', // 10MB max
+                'file' => 'required|file|mimes:csv,txt,xls,xlsx,jpg,jpeg,png|max:10240', // 10MB max
                 'bank_code' => 'required|string',
                 'account_id' => 'required|integer',
             ]);
@@ -77,8 +81,14 @@ class BankImportController extends Controller
             }
 
             $file = $request->file('file');
+            $isImage = $this->isImageFile($file);
 
-            // Read file content (convert Excel to CSV if needed)
+            if ($isImage) {
+                // OCR-based import for image files
+                return $this->previewFromImage($request, $file, $company, $startTime);
+            }
+
+            // CSV/Excel import path
             $content = $this->readFileContent($file);
 
             // Get parser (auto-detect or specific bank)
@@ -254,10 +264,11 @@ class BankImportController extends Controller
             }
 
             // P0-11: Use DeduplicationService::importWithDedupe for atomic import
+            $source = $importData['source'] ?? BankTransaction::SOURCE_CSV_IMPORT;
             $result = $this->deduplicationService->importWithDedupe(
                 $transactionsForDedup,
                 $company->id,
-                BankTransaction::SOURCE_CSV_IMPORT
+                $source
             );
 
             $duplicatesFromPreview = count(array_filter(
@@ -405,6 +416,165 @@ class BankImportController extends Controller
         return response()->json([
             'data' => $stats,
         ]);
+    }
+
+    /**
+     * Preview import from an image file using OCR.
+     */
+    private function previewFromImage(
+        Request $request,
+        \Illuminate\Http\UploadedFile $file,
+        Company $company,
+        float $startTime
+    ): JsonResponse {
+        $importLog = null;
+
+        try {
+            $account = BankAccount::forCompany($company->id)
+                ->where('id', $request->account_id)
+                ->first();
+
+            if (!$account) {
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Bank account not found',
+                ], 404);
+            }
+
+            // P0-03: Start import log
+            $importLog = $this->loggingService->startImport(
+                $company->id,
+                $request->user()->id,
+                'ocr',
+                $file->getClientOriginalName(),
+                (int) $file->getSize()
+            );
+
+            // Send image to OCR service
+            $ocrResult = $this->ocrService->parse(
+                $file->getRealPath(),
+                $file->getClientOriginalName()
+            );
+
+            $transactions = $ocrResult['transactions'];
+
+            if (empty($transactions)) {
+                $parseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
+                $this->loggingService->failImport(
+                    $importLog,
+                    'No transactions found in the bank statement image',
+                    $parseTimeMs
+                );
+
+                return response()->json([
+                    'error' => true,
+                    'message' => 'No transactions could be extracted from the image. Please ensure the image is clear and shows a bank statement table.',
+                ], 422);
+            }
+
+            // Check for duplicates
+            $newTransactions = [];
+            $duplicateCount = 0;
+
+            foreach ($transactions as $tx) {
+                $txForDedup = $this->prepareTransactionForDedup($tx, $account);
+                $isDuplicate = $this->deduplicationService->isDuplicate($txForDedup, $company->id);
+
+                $tx['is_duplicate'] = $isDuplicate;
+                $newTransactions[] = $tx;
+
+                if ($isDuplicate) {
+                    $duplicateCount++;
+                }
+            }
+
+            // Cache for confirmation step
+            $importId = Str::uuid()->toString();
+            Cache::put("import:{$importId}", [
+                'account_id' => $account->id,
+                'company_id' => $company->id,
+                'transactions' => $newTransactions,
+                'bank_code' => $ocrResult['bank_code'] ?? 'ocr',
+                'import_log_id' => $importLog->id,
+                'source' => BankTransaction::SOURCE_OCR_IMPORT,
+            ], now()->addMinutes(15));
+
+            $parseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
+            $importLog->update([
+                'total_rows' => count($newTransactions),
+                'parsed_rows' => count($newTransactions),
+                'duplicate_rows' => $duplicateCount,
+                'parse_time_ms' => $parseTimeMs,
+                'status' => BankImportLog::STATUS_PENDING,
+            ]);
+
+            $detectedBank = $ocrResult['bank_name']
+                ? $ocrResult['bank_name'] . ' (OCR)'
+                : 'OCR Import';
+
+            Log::info('Bank statement OCR preview generated', [
+                'company_id' => $company->id,
+                'account_id' => $account->id,
+                'total' => count($newTransactions),
+                'new' => count($newTransactions) - $duplicateCount,
+                'duplicates' => $duplicateCount,
+                'detected_bank' => $detectedBank,
+                'confidence' => $ocrResult['confidence'],
+                'import_log_id' => $importLog->id,
+            ]);
+
+            return response()->json([
+                'data' => [
+                    'import_id' => $importId,
+                    'total' => count($newTransactions),
+                    'new' => count($newTransactions) - $duplicateCount,
+                    'duplicates' => $duplicateCount,
+                    'detected_bank' => $detectedBank,
+                    'transactions' => array_slice($newTransactions, 0, 10),
+                    'import_log_id' => $importLog?->id,
+                    'ocr_confidence' => $ocrResult['confidence'],
+                ],
+            ]);
+        } catch (BankStatementOcrException $e) {
+            $parseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
+            if ($importLog) {
+                $this->loggingService->failImport($importLog, $e->getMessage(), $parseTimeMs);
+            }
+
+            Log::error('Bank statement OCR preview failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ], $e->getCode() ?: 500);
+        } catch (\Exception $e) {
+            $parseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
+            if ($importLog) {
+                $this->loggingService->failImport($importLog, $e->getMessage(), $parseTimeMs);
+            }
+
+            Log::error('Bank statement OCR preview failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'error' => true,
+                'message' => 'Failed to process bank statement image: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Check if the uploaded file is an image (for OCR processing).
+     */
+    private function isImageFile(\Illuminate\Http\UploadedFile $file): bool
+    {
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        return in_array($extension, ['jpg', 'jpeg', 'png']);
     }
 
     /**

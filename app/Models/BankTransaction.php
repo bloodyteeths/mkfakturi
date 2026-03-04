@@ -110,6 +110,8 @@ class BankTransaction extends Model
 
     const SOURCE_MANUAL = 'manual';
 
+    const SOURCE_OCR_IMPORT = 'ocr_import';
+
     /**
      * Get the bank account that owns the transaction
      */
