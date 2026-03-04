@@ -13,7 +13,7 @@ class PortfolioController extends Controller
 {
     /**
      * Activate the portfolio program for the authenticated partner.
-     * Sets grace period to 90 days from now.
+     * Sets grace period to 45 days from now.
      */
     public function activate(Request $request): JsonResponse
     {
@@ -27,7 +27,7 @@ class PortfolioController extends Controller
             return response()->json(['error' => 'Portfolio already activated'], 422);
         }
 
-        $graceDays = config('subscriptions.portfolio.grace_period_days', 90);
+        $graceDays = config('subscriptions.portfolio.grace_period_days', 45);
 
         $partner->update([
             'portfolio_enabled' => true,

@@ -582,7 +582,7 @@ return [
     */
     'portfolio' => [
         'enabled' => true,
-        'grace_period_days' => 90,                    // 3 months
+        'grace_period_days' => 45,                    // 45 days
         'coverage_ratio' => 1,                        // 1 paying covers 1 non-paying
         'covered_tier' => 'standard',                 // Tier for covered non-paying companies
         'uncovered_tier' => 'accountant_basic',       // Tier for uncovered non-paying companies
