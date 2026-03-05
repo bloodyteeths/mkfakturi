@@ -34,6 +34,18 @@
 
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_INVOICE)"
+          to="invoices/scan"
+        >
+          <BaseButton variant="primary-outline" class="ml-4">
+            <template #left="slotProps">
+              <BaseIcon name="CameraIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('invoices.scan_invoice') }}
+          </BaseButton>
+        </router-link>
+
+        <router-link
+          v-if="userStore.hasAbilities(abilities.CREATE_INVOICE)"
           to="invoices/create"
         >
           <BaseButton variant="primary" class="ml-4">

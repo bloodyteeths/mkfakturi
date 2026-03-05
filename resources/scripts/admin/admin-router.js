@@ -904,6 +904,12 @@ export default [
         component: InvoiceCreate,
       },
       {
+        path: 'invoices/scan',
+        name: 'invoices.scan',
+        meta: { ability: abilities.CREATE_INVOICE },
+        component: () => import('@/scripts/admin/views/invoices/Scan.vue'),
+      },
+      {
         path: 'invoices/:id/view',
         name: 'invoices.view',
         meta: { ability: abilities.VIEW_INVOICE },
@@ -986,7 +992,8 @@ export default [
       // Imports
       {
         path: 'imports',
-        redirect: { name: 'imports.wizard' },
+        name: 'imports',
+        component: () => import('@/scripts/admin/views/imports/MigrationHub.vue'),
       },
       {
         path: 'imports/wizard',

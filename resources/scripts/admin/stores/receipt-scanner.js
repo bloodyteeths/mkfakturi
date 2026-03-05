@@ -13,6 +13,8 @@ export const useReceiptScannerStore = (useWindow = false) => {
       processingStep: 0,
       // Holds scanned bill data for passing to Create page
       scannedBillData: null,
+      // Holds scanned invoice data for passing to Invoice Create page
+      scannedInvoiceData: null,
     }),
     actions: {
       setScannedBillData(data) {
@@ -21,6 +23,14 @@ export const useReceiptScannerStore = (useWindow = false) => {
       consumeScannedBillData() {
         const data = this.scannedBillData
         this.scannedBillData = null
+        return data
+      },
+      setScannedInvoiceData(data) {
+        this.scannedInvoiceData = data
+      },
+      consumeScannedInvoiceData() {
+        const data = this.scannedInvoiceData
+        this.scannedInvoiceData = null
         return data
       },
       scanReceipt(file) {

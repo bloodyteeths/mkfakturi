@@ -166,6 +166,8 @@ import { useModuleStore } from '@/scripts/admin/stores/module'
 import { useNotesStore } from '@/scripts/admin/stores/note'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useCustomFieldStore } from '@/scripts/admin/stores/custom-field'
+import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
+import invoiceItemStub from '@/scripts/admin/stub/invoice-item'
 
 import InvoiceItems from '@/scripts/admin/components/estimate-invoice-common/CreateItems.vue'
 import InvoiceTotal from '@/scripts/admin/components/estimate-invoice-common/CreateTotal.vue'
@@ -187,6 +189,7 @@ const companyStore = useCompanyStore()
 const customFieldStore = useCustomFieldStore()
 const moduleStore = useModuleStore()
 const notesStore = useNotesStore()
+const receiptScannerStore = useReceiptScannerStore()
 
 const { t } = useI18n()
 let route = useRoute()
@@ -327,6 +330,36 @@ watch(
     } else {
       invoiceStore.newInvoice.selectedCurrency =
         companyStore.selectedCompanyCurrency
+    }
+  }
+)
+
+// Consume scanned invoice data after initial settings have loaded
+const stopScanWatch = watch(
+  () => invoiceStore.isFetchingInitialSettings,
+  (newVal, oldVal) => {
+    if (oldVal === true && newVal === false && !isEdit.value) {
+      const scannedData = receiptScannerStore.consumeScannedInvoiceData()
+      if (scannedData) {
+        const si = scannedData.invoice
+        if (si.invoice_number) invoiceStore.newInvoice.invoice_number = si.invoice_number
+        if (si.invoice_date) invoiceStore.newInvoice.invoice_date = si.invoice_date
+        if (si.due_date) invoiceStore.newInvoice.due_date = si.due_date
+        if (si.notes) invoiceStore.newInvoice.notes = si.notes
+
+        if (scannedData.items?.length > 0) {
+          invoiceStore.newInvoice.items = scannedData.items.map((item) => ({
+            ...invoiceItemStub,
+            id: Guid.raw(),
+            name: item.name || '',
+            description: item.description || '',
+            quantity: item.quantity || 1,
+            price: item.price || 0,
+            taxes: [{ ...TaxStub, id: Guid.raw() }],
+          }))
+        }
+      }
+      stopScanWatch()
     }
   }
 )
