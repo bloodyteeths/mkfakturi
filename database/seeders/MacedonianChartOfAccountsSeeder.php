@@ -43,7 +43,21 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             return;
         }
 
+        $seeded = 0;
+        $skipped = 0;
+
         foreach ($companies as $company) {
+            // Skip companies that already have 3-digit chart of accounts
+            $hasOfficialAccounts = Account::where('company_id', $company->id)
+                ->whereRaw('LENGTH(code) = 3')
+                ->exists();
+
+            if ($hasOfficialAccounts) {
+                $skipped++;
+
+                continue;
+            }
+
             $this->log("Seeding chart of accounts for company: {$company->name}");
 
             // First, clean up old placeholder 4-digit accounts (e.g., 1000, 2000, 3000, 4000, 5000)
@@ -63,6 +77,11 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             $this->seedClass9CapitalAndReserves($company->id);
 
             $this->log("  ✓ Seeded chart of accounts for {$company->name}");
+            $seeded++;
+        }
+
+        if ($skipped > 0) {
+            $this->log("Skipped {$skipped} companies (already have chart of accounts)");
         }
 
         $this->log('Macedonian Chart of Accounts seeded successfully!');
