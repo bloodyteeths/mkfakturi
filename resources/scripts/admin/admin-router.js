@@ -1093,6 +1093,12 @@ export default [
         component: () => import('@/scripts/admin/views/partner/accounting/JournalExport.vue'),
       },
       {
+        path: 'partner/accounting/journal-import',
+        name: 'partner.accounting.journal-import',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/JournalImport.vue'),
+      },
+      {
         path: 'partner/accounting/period-lock',
         name: 'partner.accounting.period-lock',
         meta: { isPartner: true },

@@ -102,6 +102,7 @@ use App\Http\Controllers\V1\Partner\BulkReportController;
 use App\Http\Controllers\V1\Partner\PartnerAccountController;
 use App\Http\Controllers\V1\Partner\PartnerAccountMappingController;
 use App\Http\Controllers\V1\Partner\PartnerJournalExportController;
+use App\Http\Controllers\V1\Partner\PartnerJournalImportController;
 use App\Http\Controllers\V1\Admin\Payroll\LeaveRequestController;
 use App\Http\Controllers\V1\Admin\Payroll\LeaveTypeController;
 use App\Http\Controllers\V1\Admin\Payroll\PayrollEmployeeController;
@@ -1564,6 +1565,11 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
     // Journal Learning System (AI Account Suggestions)
     Route::post('/companies/{company}/journal/learn', [PartnerJournalExportController::class, 'learn']);
     Route::post('/companies/{company}/journal/accept-all', [PartnerJournalExportController::class, 'acceptAll']);
+
+    // Journal Import (Migration from Pantheon/Biznisoft)
+    Route::post('/companies/{company}/journal/import/preview', [PartnerJournalImportController::class, 'preview']);
+    Route::post('/companies/{company}/journal/import', [PartnerJournalImportController::class, 'import']);
+    Route::get('/companies/{company}/journal/import/formats', [PartnerJournalImportController::class, 'formats']);
 
     // Batch AI Account Suggestions (QuickBooks-style)
     Route::post('/companies/{company}/journal/suggest', [PartnerAccountMappingController::class, 'batchSuggest']);

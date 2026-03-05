@@ -850,6 +850,66 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
     },
 
     /**
+     * Preview journal import — upload file, parse, validate (no DB writes)
+     */
+    async previewJournalImport(companyId, file) {
+      this.isLoading = true
+      this.error = null
+
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await axios.post(
+          `/partner/companies/${companyId}/journal/import/preview`,
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        )
+
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Failed to parse file'
+        handleError(error)
+        throw error
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    /**
+     * Import journal entries into IFRS ledger
+     */
+    async importJournalEntries(companyId, data) {
+      const notificationStore = useNotificationStore()
+      this.isSaving = true
+      this.error = null
+
+      try {
+        const response = await axios.post(
+          `/partner/companies/${companyId}/journal/import`,
+          data
+        )
+
+        notificationStore.showNotification({
+          type: 'success',
+          message: response.data.message || 'Journal entries imported successfully',
+        })
+
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Failed to import journal entries'
+        handleError(error)
+        throw error
+      } finally {
+        this.isSaving = false
+      }
+    },
+
+    /**
      * Reset store state
      */
     resetStore() {

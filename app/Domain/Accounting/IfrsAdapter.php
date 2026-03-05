@@ -2601,6 +2601,74 @@ class IfrsAdapter
     }
 
     /**
+     * Post a general journal entry with N line items.
+     *
+     * Used by JournalImportService for partner journal imports.
+     *
+     * @param  array  $entry  ['date' => string, 'narration' => string, 'reference' => string,
+     *                         'line_items' => [['account_code', 'account_name', 'amount', 'credited' => bool], ...]]
+     * @return int|null  Transaction ID or null on failure
+     */
+    public function postJournalEntry(Company $company, array $entry): ?int
+    {
+        if (! $this->isEnabled($company->id)) {
+            return null;
+        }
+
+        $entity = $this->getOrCreateEntityForCompany($company);
+        if (! $entity) {
+            return null;
+        }
+
+        $this->setUserEntityContext($entity);
+
+        $currencyId = $this->getCurrencyId($company->id);
+
+        // Resolve all accounts first
+        $firstAccount = null;
+        $lineItemsData = [];
+        foreach ($entry['line_items'] as $item) {
+            $account = $this->findAccountByCode($entity->id, $item['account_code'], $item['account_name']);
+            if (! $firstAccount) {
+                $firstAccount = $account;
+            }
+            $lineItemsData[] = [
+                'account' => $account,
+                'amount' => $item['amount'],
+                'credited' => $item['credited'],
+            ];
+        }
+
+        $transaction = Transaction::create([
+            'account_id' => $firstAccount->id,
+            'transaction_date' => Carbon::parse($entry['date']),
+            'narration' => $entry['narration'],
+            'reference' => $entry['reference'] ?? null,
+            'transaction_type' => Transaction::JN,
+            'currency_id' => $currencyId,
+            'entity_id' => $entity->id,
+        ]);
+
+        foreach ($lineItemsData as $item) {
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $transaction->id,
+                'account_id' => $item['account']->id,
+                'amount' => $item['amount'],
+                'quantity' => 1,
+                'credited' => $item['credited'],
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $transaction->load('lineItems');
+        $transaction->post();
+
+        return $transaction->id;
+    }
+
+    /**
      * Find an IFRS Account by code, or create it.
      */
     protected function findAccountByCode(int $entityId, string $code, string $name): Account
