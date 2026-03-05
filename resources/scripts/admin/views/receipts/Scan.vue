@@ -45,22 +45,17 @@
             </span>
           </div>
 
-          <!-- Full-width image preview -->
+          <!-- Full-width image preview (uses local file URL, no server fetch needed) -->
           <div class="border rounded-lg overflow-hidden bg-gray-50">
             <div class="overflow-auto" style="max-height: 50vh;">
               <img
-                :src="scanResult.image_url"
+                :src="localImageUrl"
                 :alt="$t('receipts.receipt_image')"
                 class="max-w-full h-auto mx-auto"
                 style="max-width: 600px;"
-                @load="onImageLoad"
-                @error="onImageError"
               />
             </div>
           </div>
-          <p v-if="imageLoadError" class="text-red-600 text-sm mt-2">
-            Failed to load image: {{ imageLoadError }}
-          </p>
 
           <!-- Bill Header Form -->
           <div class="mt-6">
@@ -243,7 +238,7 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive } from 'vue'
+import { computed, ref, reactive, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
 import AiProcessingOverlay from '@/scripts/admin/components/AiProcessingOverlay.vue'
@@ -256,6 +251,9 @@ const files = ref([])
 // Scan result data
 const scanResult = ref(null)
 
+// Local image URL from the file the user uploaded (no server fetch needed)
+const localImageUrl = ref(null)
+
 const receiptSteps = [
   'Uploading document...',
   'AI is reading your invoice...',
@@ -263,8 +261,12 @@ const receiptSteps = [
   'Almost done...',
 ]
 
-// Image loading
-const imageLoadError = ref(null)
+// Clean up object URL on unmount
+onBeforeUnmount(() => {
+  if (localImageUrl.value) {
+    URL.revokeObjectURL(localImageUrl.value)
+  }
+})
 
 // Bill header form
 const billForm = ref({
@@ -307,15 +309,16 @@ function onFileChange(fieldName, fileOrFiles) {
 
   selectedFile.value = file || null
   scanResult.value = null
-  imageLoadError.value = null
-}
 
-function onImageLoad() {
-  imageLoadError.value = null
-}
-
-function onImageError(event) {
-  imageLoadError.value = event.target.src
+  // Create local preview URL from the uploaded file
+  if (localImageUrl.value) {
+    URL.revokeObjectURL(localImageUrl.value)
+  }
+  if (file) {
+    localImageUrl.value = URL.createObjectURL(file)
+  } else {
+    localImageUrl.value = null
+  }
 }
 
 function scan() {
@@ -325,7 +328,6 @@ function scan() {
     const data = response.data
 
     scanResult.value = {
-      image_url: data.image_url,
       stored_path: data.stored_path,
       extraction_method: data.extraction_method || 'unknown',
     }

@@ -1462,10 +1462,10 @@ Extract the following information and return it as a single JSON object:
   "tax": total tax amount as a number,
   "lines": [
     {
-      "description": "item description",
-      "quantity": quantity as number,
+      "description": "item/service description",
+      "quantity": actual quantity as number (default 1 if not clearly a quantity column),
       "unit_price": unit price as number,
-      "tax": tax amount for this line as number,
+      "tax": tax amount for this line as number (0 if not taxed),
       "total": line total as number
     }
   ]
@@ -1474,7 +1474,10 @@ Extract the following information and return it as a single JSON object:
 IMPORTANT:
 - All monetary amounts must be numeric (e.g. 11800.00 not "11,800.00")
 - Amounts are in the smallest visible unit (if the invoice shows 11,800 MKD, return 11800.00)
-- Extract ALL line items
+- Extract ALL line items from the invoice table
+- For quantity: only use the actual quantity/count column. Do NOT confuse apartment numbers, unit IDs, reference numbers, or serial numbers with quantity. If unsure, use 1.
+- The "total" for each line should be the actual line total amount shown on the invoice
+- The "amount" field should be the grand total of the entire invoice (sum of all lines + tax)
 - Return ONLY the raw JSON object, no markdown code fences, no explanation
 - If a field is not visible, use null
 - Ensure all string values are properly escaped (no unescaped quotes or special characters)"""
