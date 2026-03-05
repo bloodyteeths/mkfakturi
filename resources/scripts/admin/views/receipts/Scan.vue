@@ -14,7 +14,6 @@
             v-model="files"
             accept="image/*,application/pdf"
             :multiple="false"
-            :preserve-local-files="true"
             @change="onFileChange"
           />
         </BaseInputGroup>
@@ -33,36 +32,20 @@
           :steps="receiptSteps"
         />
 
-        <!-- Results Layout: Image + Extracted Data -->
+        <!-- Results: Extracted Data -->
         <div v-if="scanResult" class="mt-6">
-          <div class="flex items-center justify-between mb-3">
-            <BaseHeading tag="h3" size="sm">
-              {{ $t('receipts.scanned_receipt') }}
-            </BaseHeading>
-            <span v-if="scanResult.extraction_method" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-              :class="scanResult.extraction_method === 'gemini' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'"
-            >
-              {{ scanResult.extraction_method === 'gemini' ? 'Gemini AI' : 'Tesseract OCR' }}
-            </span>
-          </div>
-
-          <!-- Full-width image preview (uses local file URL, no server fetch needed) -->
-          <div class="border rounded-lg overflow-hidden bg-gray-50">
-            <div class="overflow-auto" style="max-height: 50vh;">
-              <img
-                :src="localImageUrl"
-                :alt="$t('receipts.receipt_image')"
-                class="max-w-full h-auto mx-auto"
-                style="max-width: 600px;"
-              />
-            </div>
-          </div>
-
           <!-- Bill Header Form -->
-          <div class="mt-6">
-            <BaseHeading tag="h3" size="sm" class="mb-4">
-              {{ $t('receipts.create_bill_from_scan') }}
-            </BaseHeading>
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <BaseHeading tag="h3" size="sm">
+                {{ $t('receipts.create_bill_from_scan') }}
+              </BaseHeading>
+              <span v-if="scanResult.extraction_method" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                :class="scanResult.extraction_method === 'gemini' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'"
+              >
+                {{ scanResult.extraction_method === 'gemini' ? 'Gemini AI' : 'Tesseract OCR' }}
+              </span>
+            </div>
             <div class="bg-white border rounded-lg p-6 space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <BaseInputGroup :label="$t('bills.vendor')">
@@ -256,9 +239,6 @@ const files = ref([])
 
 // Scan result data
 const scanResult = ref(null)
-
-// Image preview: use the base64 data URL that BaseFileUploader already generates
-const localImageUrl = computed(() => files.value?.[0]?.image || null)
 
 const receiptSteps = [
   'Uploading document...',
