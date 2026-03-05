@@ -2,7 +2,7 @@
   <BasePage>
     <BasePageHeader :title="$t('partner.accounting.inventory', 'Материјално / Inventory')">
       <template #actions>
-        <BaseButton v-if="inventoryData.length > 0" variant="primary-outline" @click="exportCsv">
+        <BaseButton v-if="activeTab === 'inventory' && inventoryData.length > 0" variant="primary-outline" @click="exportCsv">
           <template #left="slotProps">
             <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
           </template>
@@ -77,7 +77,6 @@
                 <tr>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('items.name', 'Name') }}</th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('items.sku', 'SKU') }}</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('stock.warehouse', 'Warehouse') }}</th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.quantity', 'Quantity') }}</th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.unit_cost', 'Unit Cost') }}</th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.total_value', 'Total Value') }}</th>
@@ -88,7 +87,6 @@
                 <tr v-for="item in inventoryData" :key="item.item_id" class="hover:bg-gray-50">
                   <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ item.name }}</td>
                   <td class="px-4 py-3 text-sm text-gray-500">{{ item.sku || '-' }}</td>
-                  <td class="px-4 py-3 text-sm text-gray-600">{{ item.warehouse_name || '-' }}</td>
                   <td class="px-4 py-3 text-sm text-right" :class="item.quantity < 0 ? 'text-red-600 font-medium' : 'text-gray-900'">
                     {{ formatNumber(item.quantity) }}
                   </td>
@@ -103,7 +101,7 @@
               </tbody>
               <tfoot class="bg-gray-50">
                 <tr class="font-semibold">
-                  <td colspan="3" class="px-4 py-3 text-sm">{{ $t('general.total') }} ({{ inventoryData.length }})</td>
+                  <td colspan="2" class="px-4 py-3 text-sm">{{ $t('general.total') }} ({{ inventoryData.length }})</td>
                   <td class="px-4 py-3 text-sm text-right">{{ formatNumber(totalQuantity) }}</td>
                   <td class="px-4 py-3"></td>
                   <td class="px-4 py-3 text-sm text-right">{{ formatMoney(totalValue) }}</td>
@@ -140,7 +138,7 @@
                 :options="inventoryData"
                 :searchable="true"
                 value-prop="item_id"
-                :custom-label="formatItemLabel"
+                label="name"
                 track-by="name"
                 :placeholder="$t('stock.select_item', 'Select item...')"
               />
@@ -306,11 +304,13 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { useNotificationStore } from '@/scripts/stores/notification'
-import moment from 'moment'
-
 const { t } = useI18n()
 const consoleStore = useConsoleStore()
 const notificationStore = useNotificationStore()
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10)
+}
 
 const selectedCompanyId = ref(null)
 const activeTab = ref('inventory')
@@ -324,8 +324,8 @@ const inventoryData = ref([])
 
 // Item card tab
 const selectedItemId = ref(null)
-const cardFromDate = ref(moment().startOf('year').format('YYYY-MM-DD'))
-const cardToDate = ref(moment().format('YYYY-MM-DD'))
+const cardFromDate = ref(`${new Date().getFullYear()}-01-01`)
+const cardToDate = ref(todayStr())
 const itemCardData = ref(null)
 
 // Valuation tab
@@ -367,8 +367,22 @@ async function loadInventory() {
   isLoading.value = true
   hasSearched.value = true
   try {
-    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/stock-reports/inventory`)
-    inventoryData.value = response.data.data || []
+    // Use valuation endpoint with group_by=item to get full data (name, sku, quantity, cost, value)
+    // The inventoryList endpoint is for physical counting and lacks unit_cost/total_value
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/stock-reports/valuation`, {
+      params: { group_by: 'item' },
+    })
+    const data = response.data.data || response.data
+    // Normalize valuation items to flat inventory format
+    inventoryData.value = (data.items || []).map(entry => ({
+      item_id: entry.item?.id || entry.id,
+      name: entry.item?.name || entry.name,
+      sku: entry.item?.sku || entry.sku,
+      warehouse_name: null,
+      quantity: entry.total_quantity ?? entry.quantity ?? 0,
+      unit_cost: entry.weighted_average_cost ?? entry.unit_cost ?? 0,
+      total_value: entry.total_value ?? 0,
+    }))
   } catch (error) {
     notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to load inventory' })
   } finally {
@@ -380,8 +394,23 @@ async function loadValuation() {
   if (!selectedCompanyId.value) return
   isLoadingValuation.value = true
   try {
-    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/stock-reports/valuation`)
-    valuationData.value = response.data.data || response.data
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/stock-reports/valuation`, {
+      params: { group_by: 'item' },
+    })
+    const data = response.data.data || response.data
+    // Normalize to the shape the template expects
+    valuationData.value = {
+      items: (data.items || []).map(entry => ({
+        item_id: entry.item?.id || entry.id,
+        name: entry.item?.name || entry.name,
+        sku: entry.item?.sku || entry.sku,
+        quantity: entry.total_quantity ?? entry.quantity ?? 0,
+        unit_cost: entry.weighted_average_cost ?? entry.unit_cost ?? 0,
+        total_value: entry.total_value ?? 0,
+      })),
+      total_quantity: data.grand_total?.quantity ?? 0,
+      total_value: data.grand_total?.value ?? 0,
+    }
   } catch (error) {
     console.error('Failed to load valuation:', error)
   } finally {
@@ -409,10 +438,6 @@ function viewItemCard(item) {
   selectedItemId.value = item.item_id
   activeTab.value = 'itemcard'
   loadItemCard()
-}
-
-function formatItemLabel(item) {
-  return item.sku ? `${item.name} (${item.sku})` : item.name
 }
 
 function formatNumber(num) {
@@ -456,9 +481,9 @@ function sourceLabel(sourceType) {
 
 function exportCsv() {
   if (!inventoryData.value.length) return
-  const headers = ['Артикл', 'SKU', 'Магацин', 'Количина', 'Ед. цена', 'Вкупна вредност']
+  const headers = ['Артикл', 'SKU', 'Количина', 'Ед. цена', 'Вкупна вредност']
   const rows = inventoryData.value.map(item => [
-    item.name, item.sku || '', item.warehouse_name || '', item.quantity,
+    item.name, item.sku || '', item.quantity,
     item.unit_cost ? (item.unit_cost / 100).toFixed(2) : '0', item.total_value ? (item.total_value / 100).toFixed(2) : '0',
   ])
   downloadCsv(headers, rows, 'inventory_report')
@@ -491,7 +516,7 @@ function downloadCsv(headers, rows, filename) {
   const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
   const link = document.createElement('a')
   link.href = URL.createObjectURL(blob)
-  link.download = `${filename}_${moment().format('YYYY-MM-DD')}.csv`
+  link.download = `${filename}_${todayStr()}.csv`
   link.click()
 }
 </script>

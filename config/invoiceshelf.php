@@ -814,7 +814,7 @@ return [
         [
             'title' => 'partner.accounting.partner_dashboard',
             'group' => 'partner.accounting',
-            'link' => '/admin/partner/dashboard',
+            'link' => '/admin/console',
             'icon' => 'ArrowUturnLeftIcon',
             'name' => 'partner.accounting.partner-dashboard',
             'owner_only' => false,

@@ -149,40 +149,37 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white">
-            <tr
-              v-for="(cp, index) in result.counterparties"
-              :key="index"
-              class="hover:bg-gray-50 cursor-pointer"
-              @click="toggleExpand(index)"
-            >
-              <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                <div class="flex items-center">
-                  <BaseIcon
-                    :name="expandedRows[index] ? 'ChevronDownIcon' : 'ChevronRightIcon'"
-                    class="h-4 w-4 text-gray-400 mr-2 flex-shrink-0"
-                  />
-                  {{ cp.name || $t('partner.accounting.no_counterparty', 'Без комитент') }}
-                </div>
-              </td>
-              <td class="px-6 py-4 text-sm text-right" :class="balanceClass(cp.opening_balance)">
-                {{ formatMoney(cp.opening_balance) }}
-              </td>
-              <td class="px-6 py-4 text-sm text-right text-gray-900">
-                {{ cp.total_debit > 0 ? formatMoney(cp.total_debit) : '' }}
-              </td>
-              <td class="px-6 py-4 text-sm text-right text-gray-900">
-                {{ cp.total_credit > 0 ? formatMoney(cp.total_credit) : '' }}
-              </td>
-              <td class="px-6 py-4 text-sm text-right font-medium" :class="balanceClass(cp.closing_balance)">
-                {{ formatMoney(cp.closing_balance) }}
-              </td>
-              <td class="px-6 py-4 text-sm text-center text-gray-500">
-                {{ cp.entries.length }}
-              </td>
-            </tr>
-
-            <!-- Expanded detail rows -->
-            <template v-for="(cp, index) in result.counterparties" :key="'detail-' + index">
+            <template v-for="(cp, index) in result.counterparties" :key="index">
+              <tr
+                class="hover:bg-gray-50 cursor-pointer"
+                @click="toggleExpand(index)"
+              >
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                  <div class="flex items-center">
+                    <BaseIcon
+                      :name="expandedRows[index] ? 'ChevronDownIcon' : 'ChevronRightIcon'"
+                      class="h-4 w-4 text-gray-400 mr-2 flex-shrink-0"
+                    />
+                    {{ cp.name || $t('partner.accounting.no_counterparty', 'Без комитент') }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-right" :class="balanceClass(cp.opening_balance)">
+                  {{ formatMoney(cp.opening_balance) }}
+                </td>
+                <td class="px-6 py-4 text-sm text-right text-gray-900">
+                  {{ cp.total_debit > 0 ? formatMoney(cp.total_debit) : '' }}
+                </td>
+                <td class="px-6 py-4 text-sm text-right text-gray-900">
+                  {{ cp.total_credit > 0 ? formatMoney(cp.total_credit) : '' }}
+                </td>
+                <td class="px-6 py-4 text-sm text-right font-medium" :class="balanceClass(cp.closing_balance)">
+                  {{ formatMoney(cp.closing_balance) }}
+                </td>
+                <td class="px-6 py-4 text-sm text-center text-gray-500">
+                  {{ cp.entries.length }}
+                </td>
+              </tr>
+              <!-- Expanded detail row directly below its summary -->
               <tr v-if="expandedRows[index] && cp.entries.length > 0" class="bg-blue-50">
                 <td colspan="6" class="px-8 py-3">
                   <table class="min-w-full text-xs">

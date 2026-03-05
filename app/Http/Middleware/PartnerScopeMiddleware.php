@@ -125,6 +125,10 @@ class PartnerScopeMiddleware
         // First, check route parameter (for routes like /companies/{company}/...)
         $companyParam = $request->route('company');
         if ($companyParam) {
+            // Also set the company header so admin controllers that read from
+            // $request->header('company') get the correct company in partner context
+            $request->headers->set('company', (string) $companyParam);
+
             return (int) $companyParam;
         }
 
