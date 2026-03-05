@@ -1471,11 +1471,17 @@ Extract the following information and return it as a single JSON object:
   ]
 }
 
+STEPS:
+1. First read ALL column headers in the table to understand what each column represents
+2. Identify which column is description, which is quantity, which is unit price, which is tax, which is the line total
+3. Only map a column to "quantity" if its header clearly means quantity/count of items purchased (e.g. "количина", "qty", "кол.")
+4. Extract line item values according to the identified columns
+
 IMPORTANT:
 - All monetary amounts must be numeric (e.g. 11800.00 not "11,800.00")
 - Amounts are in the smallest visible unit (if the invoice shows 11,800 MKD, return 11800.00)
-- Extract ALL line items from the invoice table
-- For quantity: use the actual count of units purchased/consumed. If no clear quantity column exists, default to 1
+- Extract ALL line items from the table
+- If no column header clearly indicates quantity, set quantity to 1 for all lines
 - CRITICAL: The sum of all line "total" values must approximately equal the "amount" (grand total). If the table has multiple amount columns, use the column whose values sum to the grand total.
 - Return ONLY the raw JSON object, no markdown code fences, no explanation
 - If a field is not visible, use null
