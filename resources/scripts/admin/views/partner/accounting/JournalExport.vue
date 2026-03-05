@@ -102,7 +102,7 @@
               v-model="exportForm.company_id"
               :options="companies"
               :searchable="true"
-              track-by="id"
+              track-by="name"
               label="name"
               value-prop="id"
               :placeholder="$t('partner.select_company_placeholder')"
