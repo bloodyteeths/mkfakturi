@@ -950,23 +950,34 @@ class IfrsAdapter
         }
 
         // Create new IFRS Entity for this company
+        // Chicken-and-egg: Entity needs currency_id, but Currency has entity_id (EntityScope).
+        // Solution: create entity first (currency_id is nullable), set user context, then resolve currency.
         try {
-            $currencyId = $this->getCurrencyId($company->id);
-
-            $entity = Entity::create([
+            $entityId = DB::table('ifrs_entities')->insertGetId([
                 'name' => $company->name,
-                'currency_id' => $currencyId,
+                'currency_id' => null,
                 'year_start' => 1, // January
                 'multi_currency' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
-            // CRITICAL: Load currency relationship for reportingCurrency accessor
-            $entity->load('currency');
-
-            // Link entity to company - use DB::table to ensure it saves
+            // Link entity to company immediately
             DB::table('companies')
                 ->where('id', $company->id)
-                ->update(['ifrs_entity_id' => $entity->id]);
+                ->update(['ifrs_entity_id' => $entityId]);
+
+            // Set user entity context BEFORE any IFRS model queries (needed for EntityScope)
+            $entity = Entity::find($entityId);
+            $this->setUserEntityContext($entity);
+
+            // NOW safe to resolve currency (pass entityId for currency creation)
+            $currencyId = $this->getCurrencyId($company->id, $entityId);
+
+            // Update entity with correct currency
+            DB::table('ifrs_entities')->where('id', $entityId)->update(['currency_id' => $currencyId]);
+            $entity->refresh();
+            $entity->load('currency');
 
             Log::info('Created IFRS Entity for company', [
                 'company_id' => $company->id,
@@ -976,9 +987,6 @@ class IfrsAdapter
 
             // Create exchange rate for the entity's currency (required by IFRS package)
             $this->ensureExchangeRateExists($entity, $currencyId);
-
-            // Set user context BEFORE any IFRS queries
-            $this->setUserEntityContext($entity);
 
             // Create ReportingPeriod for current year
             $this->ensureReportingPeriodExists($entity);
@@ -1340,7 +1348,7 @@ class IfrsAdapter
     /**
      * Get currency ID for company (defaults to first currency)
      */
-    protected function getCurrencyId(int $companyId): int
+    protected function getCurrencyId(int $companyId, ?int $entityId = null): int
     {
         // Try 1: Get the company's currency from settings
         $appCurrencyId = CompanySetting::getSetting('currency', $companyId);
@@ -1372,14 +1380,22 @@ class IfrsAdapter
             $appCurrency = \App\Models\Currency::find($appCurrencyId);
 
             if ($appCurrency) {
-                // Find or create corresponding IFRS currency
-                $ifrsCurrency = \IFRS\Models\Currency::where('currency_code', $appCurrency->code)->first();
+                // Find or create corresponding IFRS currency (bypass EntityScope during entity creation)
+                $ifrsCurrency = DB::table('ifrs_currencies')
+                    ->where('currency_code', $appCurrency->code)->first();
 
                 if (! $ifrsCurrency) {
-                    $ifrsCurrency = \IFRS\Models\Currency::create([
+                    $insertData = [
                         'name' => $appCurrency->name,
                         'currency_code' => $appCurrency->code,
-                    ]);
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                    if ($entityId) {
+                        $insertData['entity_id'] = $entityId;
+                    }
+                    $ifrsCurrencyId = DB::table('ifrs_currencies')->insertGetId($insertData);
+                    $ifrsCurrency = DB::table('ifrs_currencies')->find($ifrsCurrencyId);
                     Log::info('getCurrencyId: Created new IFRS currency', [
                         'ifrs_currency_id' => $ifrsCurrency->id,
                         'code' => $appCurrency->code,
@@ -1404,13 +1420,20 @@ class IfrsAdapter
             'company_id' => $companyId,
         ]);
 
-        $currency = \IFRS\Models\Currency::first();
+        $currency = DB::table('ifrs_currencies')->first();
 
         if (! $currency) {
-            $currency = \IFRS\Models\Currency::create([
+            $fallbackData = [
                 'name' => 'Macedonian Denar',
                 'currency_code' => 'MKD',
-            ]);
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            if ($entityId) {
+                $fallbackData['entity_id'] = $entityId;
+            }
+            $currencyId = DB::table('ifrs_currencies')->insertGetId($fallbackData);
+            $currency = DB::table('ifrs_currencies')->find($currencyId);
             Log::info('getCurrencyId: Created fallback MKD currency', [
                 'ifrs_currency_id' => $currency->id,
             ]);
@@ -2649,6 +2672,9 @@ class IfrsAdapter
             'entity_id' => $entity->id,
         ]);
 
+        // Get or create 0% VAT rate (required by IFRS line items)
+        $vatId = $this->getOrCreateExemptVat($entity);
+
         foreach ($lineItemsData as $item) {
             DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
@@ -2656,6 +2682,7 @@ class IfrsAdapter
                 'amount' => $item['amount'],
                 'quantity' => 1,
                 'credited' => $item['credited'],
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -2666,6 +2693,38 @@ class IfrsAdapter
         $transaction->post();
 
         return $transaction->id;
+    }
+
+    /**
+     * Get or create a 0% "Exempt" VAT rate for an IFRS entity.
+     */
+    protected function getOrCreateExemptVat(Entity $entity): int
+    {
+        $vat = DB::table('ifrs_vats')
+            ->where('entity_id', $entity->id)
+            ->where('rate', 0)
+            ->first();
+
+        if ($vat) {
+            return $vat->id;
+        }
+
+        // Need an account for the VAT — use the entity's first account or create a placeholder
+        $vatAccount = DB::table('ifrs_accounts')
+            ->where('entity_id', $entity->id)
+            ->first();
+
+        $accountId = $vatAccount ? $vatAccount->id : null;
+
+        return DB::table('ifrs_vats')->insertGetId([
+            'entity_id' => $entity->id,
+            'account_id' => $accountId,
+            'code' => 'EXEMPT',
+            'name' => 'Tax Exempt (0%)',
+            'rate' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**

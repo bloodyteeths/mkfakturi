@@ -178,7 +178,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function generateMenu($menu, $data)
     {
-        $menu->add($data['title'], $data['link'])
+        $item = $menu->add($data['title'], $data['link'])
             ->data('icon', $data['icon'])
             ->data('name', $data['name'])
             ->data('owner_only', $data['owner_only'])
@@ -187,6 +187,10 @@ class AppServiceProvider extends ServiceProvider
             ->data('group', $data['group'])
             ->data('super_admin_only', $data['super_admin_only'] ?? false)
             ->data('feature_flag', $data['feature_flag'] ?? null);
+
+        if ($item && !empty($data['submenu'])) {
+            $item->data('submenu', $data['submenu']);
+        }
     }
 
     public function bootAuth()

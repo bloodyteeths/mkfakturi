@@ -164,25 +164,6 @@
         </div>
       </div>
 
-      <!-- Video Tutorial -->
-      <div class="border-t border-gray-200 pt-4">
-        <a
-          href="#"
-          @click.prevent="openVideoTutorial"
-          class="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-all"
-        >
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
-              <BaseIcon name="PlayIcon" class="w-6 h-6 text-red-600" />
-            </div>
-            <div>
-              <p class="font-medium text-gray-900">{{ $t('imports.watch_quick_tutorial') }}</p>
-              <p class="text-sm text-gray-600">{{ $t('imports.video_duration_3min') }}</p>
-            </div>
-          </div>
-          <BaseIcon name="ArrowTopRightOnSquareIcon" class="w-5 h-5 text-gray-400" />
-        </a>
-      </div>
     </div>
   </div>
 </template>
@@ -224,11 +205,6 @@ const skipTour = () => {
   localStorage.setItem('migration-wizard-tour-skipped', 'true')
   emit('skip')
   emit('close')
-}
-
-const openVideoTutorial = () => {
-  // This would open a video tutorial modal or external link
-  window.open('https://example.com/migration-wizard-tutorial', '_blank')
 }
 
 onMounted(() => {

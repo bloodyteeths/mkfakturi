@@ -555,7 +555,7 @@ return [
         [
             'title' => 'navigation.migration_wizard',
             'group' => 3,
-            'link' => '/admin/imports/wizard',
+            'link' => '/admin/imports',
             'icon' => 'ArrowDownTrayIcon',
             'name' => 'Migration Wizard',
             'owner_only' => false,
@@ -655,7 +655,7 @@ return [
         [
             'title' => 'partner.accounting.journal_import',
             'group' => 'partner.accounting',
-            'submenu' => 'journals',
+            'submenu' => 'migration',
             'link' => '/admin/partner/accounting/journal-import',
             'icon' => 'ArrowUpTrayIcon',
             'name' => 'partner.accounting.journal-import',

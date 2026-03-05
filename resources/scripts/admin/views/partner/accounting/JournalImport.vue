@@ -1,6 +1,6 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="$t('partner.accounting.journal_import')">
+    <BasePageHeader :title="$t('partner.accounting.journal_import.title')">
       <template #actions>
         <BaseButton
           v-if="currentStep > 1 && currentStep < 4"
@@ -18,61 +18,52 @@
     <!-- Wizard Steps Indicator -->
     <div class="mb-8">
       <nav aria-label="Progress">
-        <ol role="list" class="flex items-center">
+        <ol role="list" class="flex items-center justify-center gap-8 sm:gap-16">
           <li
             v-for="(step, index) in steps"
             :key="index"
-            :class="[
-              index !== steps.length - 1 ? 'pr-8 sm:pr-20' : '',
-              'relative',
-            ]"
+            class="flex items-center gap-3"
           >
             <div
-              v-if="index !== steps.length - 1"
-              class="absolute inset-0 flex items-center"
-              aria-hidden="true"
-            >
+              v-if="index > 0"
+              :class="[
+                currentStep > index ? 'bg-primary-600' : 'bg-gray-200',
+                'hidden h-0.5 w-8 sm:block sm:w-16',
+              ]"
+            />
+            <div class="flex items-center gap-2">
               <div
+                class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
                 :class="[
-                  currentStep > index + 1 ? 'bg-primary-600' : 'bg-gray-200',
-                  'h-0.5 w-full',
-                ]"
-              />
-            </div>
-            <div
-              class="relative flex h-8 w-8 items-center justify-center rounded-full"
-              :class="[
-                currentStep > index + 1
-                  ? 'bg-primary-600'
-                  : currentStep === index + 1
-                  ? 'border-2 border-primary-600 bg-white'
-                  : 'border-2 border-gray-300 bg-white',
-              ]"
-            >
-              <span
-                v-if="currentStep > index + 1"
-                class="flex h-full w-full items-center justify-center"
-              >
-                <BaseIcon name="CheckIcon" class="h-5 w-5 text-white" />
-              </span>
-              <span
-                v-else
-                :class="[
-                  currentStep === index + 1 ? 'text-primary-600' : 'text-gray-500',
-                  'text-sm font-medium',
+                  currentStep > index + 1
+                    ? 'bg-primary-600'
+                    : currentStep === index + 1
+                    ? 'border-2 border-primary-600 bg-white'
+                    : 'border-2 border-gray-300 bg-white',
                 ]"
               >
-                {{ index + 1 }}
+                <BaseIcon
+                  v-if="currentStep > index + 1"
+                  name="CheckIcon"
+                  class="h-5 w-5 text-white"
+                />
+                <span
+                  v-else
+                  :class="[
+                    currentStep === index + 1 ? 'text-primary-600' : 'text-gray-500',
+                    'text-sm font-medium',
+                  ]"
+                >
+                  {{ index + 1 }}
+                </span>
+              </div>
+              <span
+                class="text-xs font-medium"
+                :class="currentStep === index + 1 ? 'text-primary-600' : 'text-gray-500'"
+              >
+                {{ step.name }}
               </span>
             </div>
-            <span
-              class="absolute mt-10 w-max text-xs font-medium"
-              :class="[
-                currentStep === index + 1 ? 'text-primary-600' : 'text-gray-500',
-              ]"
-            >
-              {{ step.name }}
-            </span>
           </li>
         </ol>
       </nav>
@@ -81,7 +72,7 @@
     <!-- Step 1: Upload File -->
     <div v-if="currentStep === 1" class="mx-auto max-w-3xl">
       <div class="rounded-lg bg-white p-6 shadow">
-        <h3 class="mb-4 text-lg font-medium text-gray-900">
+        <h3 class="mb-1 text-lg font-medium text-gray-900">
           {{ $t('partner.accounting.journal_import.title') }}
         </h3>
         <p class="mb-6 text-sm text-gray-500">
@@ -102,23 +93,63 @@
             />
           </BaseInputGroup>
 
-          <!-- File Upload -->
+          <!-- Drag & Drop File Upload -->
           <BaseInputGroup
             :label="$t('partner.accounting.journal_import.select_file')"
             required
           >
-            <div class="mt-1">
+            <div
+              v-if="!selectedFile"
+              class="mt-1 cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors"
+              :class="[
+                isDragOver
+                  ? 'border-primary-300 bg-primary-50'
+                  : 'border-gray-300 hover:border-gray-400',
+              ]"
+              @dragover.prevent="isDragOver = true"
+              @dragleave.prevent="isDragOver = false"
+              @drop.prevent="handleDrop"
+              @click="$refs.fileInput.click()"
+            >
+              <BaseIcon name="CloudArrowUpIcon" class="mx-auto h-10 w-10 text-gray-400" />
+              <p class="mt-2 text-sm font-medium text-gray-700">
+                {{ $t('partner.accounting.journal_import.select_file') }}
+              </p>
+              <p class="mt-1 text-xs text-gray-500">
+                {{ $t('partner.accounting.journal_import.supported_formats') }}
+                — {{ $t('partner.accounting.journal_import.file_hint') }}
+              </p>
+              <div class="mt-3 flex justify-center gap-2">
+                <span class="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">Pantheon .txt</span>
+                <span class="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">CSV</span>
+              </div>
               <input
                 ref="fileInput"
                 type="file"
                 accept=".txt,.csv"
-                class="block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100"
+                class="hidden"
                 @change="onFileSelected"
               />
-              <p class="mt-1 text-xs text-gray-400">
-                {{ $t('partner.accounting.journal_import.supported_formats') }}
-                — {{ $t('partner.accounting.journal_import.file_hint') }}
-              </p>
+            </div>
+
+            <!-- Selected File Display -->
+            <div
+              v-else
+              class="mt-1 flex items-center justify-between rounded-lg border border-green-200 bg-green-50 px-4 py-3"
+            >
+              <div class="flex items-center gap-3">
+                <BaseIcon name="DocumentTextIcon" class="h-5 w-5 text-green-600" />
+                <div>
+                  <p class="text-sm font-medium text-green-900">{{ selectedFile.name }}</p>
+                  <p class="text-xs text-green-700">{{ formatFileSize(selectedFile.size) }}</p>
+                </div>
+              </div>
+              <button
+                class="text-sm text-green-700 hover:text-green-900"
+                @click="removeFile"
+              >
+                {{ $t('general.remove') }}
+              </button>
             </div>
           </BaseInputGroup>
 
@@ -228,9 +259,9 @@
         </div>
 
         <!-- Nalozi Table -->
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
           <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="sticky top-0 bg-gray-50">
               <tr>
                 <th class="w-10 px-3 py-3"></th>
                 <th class="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
@@ -259,8 +290,10 @@
             <tbody class="divide-y divide-gray-200 bg-white">
               <template v-for="(nalog, idx) in previewData?.nalozi || []" :key="nalog.nalog_id">
                 <tr
-                  class="cursor-pointer hover:bg-gray-50"
-                  :class="{ 'bg-red-50': !nalog.balanced }"
+                  class="cursor-pointer transition-colors"
+                  :class="[
+                    !nalog.balanced ? 'bg-red-50 hover:bg-red-100' : idx % 2 === 0 ? 'hover:bg-gray-50' : 'bg-gray-50/50 hover:bg-gray-100',
+                  ]"
                   @click="toggleExpand(idx)"
                 >
                   <td class="px-3 py-3">
@@ -414,7 +447,7 @@
           <!-- Import Errors (partial) -->
           <div v-if="importResult?.errors?.length" class="mt-4 rounded-md bg-yellow-50 p-4 text-left">
             <p class="text-sm font-medium text-yellow-800">
-              {{ importResult.errors.length }} налози прескокнати:
+              {{ importResult.errors.length }} {{ $t('partner.accounting.journal_import.skipped_nalozi') }}:
             </p>
             <ul class="mt-2 list-disc pl-5 text-sm text-yellow-700">
               <li v-for="err in importResult.errors" :key="err.nalog">
@@ -491,6 +524,7 @@ const selectedNalozi = ref({})
 const expandedRows = ref({})
 const autoCreateAccounts = ref(true)
 const fileInput = ref(null)
+const isDragOver = ref(false)
 
 const importForm = reactive({
   company_id: null,
@@ -517,7 +551,37 @@ const missingAccountCount = computed(() => {
 
 // Methods
 function onFileSelected(event) {
-  selectedFile.value = event.target.files[0] || null
+  const file = event.target.files[0]
+  if (file) {
+    validateAndSetFile(file)
+  }
+  event.target.value = ''
+}
+
+function handleDrop(event) {
+  isDragOver.value = false
+  const file = event.dataTransfer.files[0]
+  if (file) {
+    validateAndSetFile(file)
+  }
+}
+
+function validateAndSetFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase()
+  if (!['txt', 'csv'].includes(ext)) {
+    parseError.value = t('partner.accounting.journal_import.supported_formats')
+    return
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    parseError.value = t('partner.accounting.journal_import.file_hint')
+    return
+  }
+  selectedFile.value = file
+  parseError.value = null
+}
+
+function removeFile() {
+  selectedFile.value = null
   parseError.value = null
 }
 
@@ -545,10 +609,10 @@ async function parseFile() {
 
       currentStep.value = 2
     } else {
-      parseError.value = response.message || 'Failed to parse file'
+      parseError.value = response.message || t('partner.accounting.journal_import.import_failed')
     }
   } catch (error) {
-    parseError.value = error.response?.data?.message || error.message || 'Failed to parse file'
+    parseError.value = error.response?.data?.message || error.message || t('partner.accounting.journal_import.import_failed')
   } finally {
     isParsing.value = false
   }
@@ -626,9 +690,6 @@ function resetWizard() {
   expandedRows.value = {}
   selectedFile.value = null
   parseError.value = null
-  if (fileInput.value) {
-    fileInput.value.value = ''
-  }
 }
 
 function formatAmount(val) {
@@ -637,6 +698,14 @@ function formatAmount(val) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
 // Lifecycle
@@ -649,7 +718,7 @@ onMounted(async () => {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: 'Failed to load companies',
+      message: t('partner.accounting.journal_import.import_failed'),
     })
   }
 })

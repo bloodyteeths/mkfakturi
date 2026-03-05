@@ -37,7 +37,7 @@
 
     <div class="grid grid-cols-12 gap-6">
       <!-- Progress Sidebar -->
-      <div :class="showHelpGuide ? 'col-span-2' : 'col-span-3'" class="progress-sidebar">
+      <div class="col-span-3 progress-sidebar">
         <BaseCard>
           <template #header>
             <h3 class="text-lg font-medium leading-6 text-gray-900">
@@ -121,12 +121,12 @@
       </div>
 
       <!-- Main Content -->
-      <div :class="showHelpGuide ? 'col-span-7' : 'col-span-9'">
+      <div :class="showHelpGuide ? 'col-span-5' : 'col-span-9'">
         <BaseCard>
           <BaseWizard
             :current-step="importStore.currentStep - 1"
             :steps="4"
-            wizard-steps-container-class="min-h-96 p-6"
+            wizard-steps-container-class="min-h-64 p-6"
           >
             <!-- Step 1: Upload -->
             <BaseWizardStep v-show="importStore.currentStep === 1">
@@ -197,7 +197,7 @@
       </div>
 
       <!-- Help Guide Sidebar -->
-      <div v-if="showHelpGuide" class="col-span-3">
+      <div v-if="showHelpGuide" class="col-span-4">
         <HelpGuidePanel :current-step="importStore.currentStep" @close="toggleHelpGuide" />
       </div>
     </div>

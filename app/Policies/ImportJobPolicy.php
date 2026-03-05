@@ -30,7 +30,7 @@ class ImportJobPolicy
     public function view(User $user, ImportJob $importJob)
     {
         // Users can only view their own import jobs.
-        return $user->id === $importJob->user_id;
+        return $user->id === $importJob->creator_id;
     }
 
     /**
@@ -52,7 +52,7 @@ class ImportJobPolicy
     public function update(User $user, ImportJob $importJob)
     {
         // Users can only update their own import jobs.
-        return $user->id === $importJob->user_id;
+        return $user->id === $importJob->creator_id;
     }
 
     /**
@@ -63,7 +63,7 @@ class ImportJobPolicy
     public function delete(User $user, ImportJob $importJob)
     {
         // Users can only delete their own import jobs.
-        return $user->id === $importJob->user_id;
+        return $user->id === $importJob->creator_id;
     }
 
     /**

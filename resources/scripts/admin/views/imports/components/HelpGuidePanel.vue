@@ -234,44 +234,12 @@
         </div>
       </div>
 
-      <!-- Video Tutorial Link -->
-      <div class="border-t border-gray-200 pt-4">
-        <a
-          href="#"
-          @click.prevent="openVideoTutorial"
-          class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary-50 to-purple-50 border border-primary-200 rounded-lg hover:shadow-md transition-all"
-        >
-          <div class="flex items-center">
-            <BaseIcon name="PlayCircleIcon" class="w-6 h-6 text-primary-600 mr-3" />
-            <div>
-              <p class="font-medium text-gray-900">{{ $t('imports.watch_video_tutorial') }}</p>
-              <p class="text-sm text-gray-600">{{ $t('imports.video_tutorial_duration') }}</p>
-            </div>
-          </div>
-          <BaseIcon name="ArrowTopRightOnSquareIcon" class="w-5 h-5 text-gray-400" />
-        </a>
-      </div>
-
       <!-- Quick Links -->
       <div class="border-t border-gray-200 pt-4">
         <h5 class="font-medium text-gray-900 mb-3">{{ $t('imports.quick_links') }}</h5>
         <div class="space-y-2">
           <a
-            href="#"
-            class="flex items-center text-sm text-primary-600 hover:text-primary-700"
-          >
-            <BaseIcon name="DocumentTextIcon" class="w-4 h-4 mr-2" />
-            {{ $t('imports.full_documentation') }}
-          </a>
-          <a
-            href="#"
-            class="flex items-center text-sm text-primary-600 hover:text-primary-700"
-          >
-            <BaseIcon name="QuestionMarkCircleIcon" class="w-4 h-4 mr-2" />
-            {{ $t('imports.faq') }}
-          </a>
-          <a
-            href="#"
+            href="mailto:podrska@facturino.mk"
             class="flex items-center text-sm text-primary-600 hover:text-primary-700"
           >
             <BaseIcon name="ChatBubbleLeftRightIcon" class="w-4 h-4 mr-2" />
@@ -295,9 +263,4 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close'])
-
-const openVideoTutorial = () => {
-  // This would open a video tutorial modal or external link
-  window.open('https://example.com/migration-wizard-tutorial', '_blank')
-}
 </script>

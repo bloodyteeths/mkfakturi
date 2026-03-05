@@ -242,10 +242,11 @@ const submenuConfig = {
   closings: { title: 'partner.accounting.submenu.closings', icon: 'LockClosedIcon' },
   reports: { title: 'partner.accounting.submenu.reports', icon: 'ChartBarIcon' },
   compliance: { title: 'partner.accounting.submenu.compliance', icon: 'ClipboardDocumentListIcon' },
+  migration: { title: 'partner.accounting.submenu.migration', icon: 'ArrowPathIcon' },
 }
 
 // Order in which submenu groups appear in the sidebar
-const submenuOrder = ['journals', 'closings', 'reports', 'compliance']
+const submenuOrder = ['journals', 'closings', 'reports', 'compliance', 'migration']
 
 // Track which submenus are expanded
 const expandedSubmenus = reactive({})
