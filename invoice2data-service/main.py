@@ -306,6 +306,17 @@ _BANK_PATTERNS: List[Tuple[str, str]] = [
 ]
 
 
+def _repair_json(text: str) -> str:
+    """Fix common JSON issues from LLM output (trailing commas, comments)."""
+    # Remove trailing commas before } or ]
+    text = re.sub(r",\s*([\]}])", r"\1", text)
+    # Remove single-line comments
+    text = re.sub(r"//[^\n]*", "", text)
+    # Remove control characters except newlines/tabs
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", text)
+    return text
+
+
 def _detect_bank_from_text(text: str) -> Tuple[Optional[str], Optional[str]]:
     """Detect bank code and name from OCR text."""
     lower = text.lower()
@@ -1353,7 +1364,8 @@ async def _extract_with_gemini(
         ],
         "generationConfig": {
             "temperature": 0.1,
-            "maxOutputTokens": 4096,
+            "maxOutputTokens": 16384,
+            "responseMimeType": "application/json",
         },
     }
 
@@ -1395,7 +1407,8 @@ async def _extract_with_gemini(
             text = re.sub(r"\n?```$", "", text)
             text = text.strip()
 
-        # Parse JSON
+        # Parse JSON (with repair for trailing commas etc.)
+        text = _repair_json(text)
         transactions = json_module.loads(text)
 
         if not isinstance(transactions, list):
@@ -1463,7 +1476,8 @@ IMPORTANT:
 - Amounts are in the smallest visible unit (if the invoice shows 11,800 MKD, return 11800.00)
 - Extract ALL line items
 - Return ONLY the raw JSON object, no markdown code fences, no explanation
-- If a field is not visible, use null"""
+- If a field is not visible, use null
+- Ensure all string values are properly escaped (no unescaped quotes or special characters)"""
 
 
 async def _extract_invoice_with_gemini(
@@ -1504,7 +1518,8 @@ async def _extract_invoice_with_gemini(
         ],
         "generationConfig": {
             "temperature": 0.1,
-            "maxOutputTokens": 4096,
+            "maxOutputTokens": 16384,
+            "responseMimeType": "application/json",
         },
     }
 
@@ -1527,8 +1542,13 @@ async def _extract_invoice_with_gemini(
             logger.warning(f"Gemini error: {data['error'].get('message', '')}")
             return None
 
+        # Check finish reason for truncation
+        candidate = data.get("candidates", [{}])[0]
+        finish_reason = candidate.get("finishReason", "UNKNOWN")
+        logger.info(f"Gemini invoice finish_reason: {finish_reason}")
+
         text = (
-            data.get("candidates", [{}])[0]
+            candidate
             .get("content", {})
             .get("parts", [{}])[0]
             .get("text", "")
@@ -1545,7 +1565,48 @@ async def _extract_invoice_with_gemini(
             text = re.sub(r"\n?```$", "", text)
             text = text.strip()
 
-        result = json_module.loads(text)
+        # Repair common LLM JSON issues (trailing commas, etc.)
+        text = _repair_json(text)
+        logger.info(f"Gemini invoice raw JSON ({len(text)} chars)")
+
+        # If JSON is truncated, try to complete it
+        if finish_reason == "MAX_TOKENS" or (text.count("{") > text.count("}")):
+            logger.info("Detected truncated JSON, attempting to close")
+            # Close any open strings, arrays, objects
+            open_braces = text.count("{") - text.count("}")
+            open_brackets = text.count("[") - text.count("]")
+            # If we're mid-string, close it
+            in_string = False
+            for i, c in enumerate(text):
+                if c == '"' and (i == 0 or text[i-1] != '\\'):
+                    in_string = not in_string
+            if in_string:
+                text += '"'
+            # Add null for truncated value
+            if text.rstrip().endswith(":"):
+                text += " null"
+            elif text.rstrip().endswith(","):
+                text = text.rstrip()[:-1]  # remove trailing comma
+            text += "]" * open_brackets
+            text += "}" * open_braces
+            text = _repair_json(text)
+            logger.info(f"Repaired truncated JSON ({len(text)} chars)")
+
+        try:
+            result = json_module.loads(text)
+        except json_module.JSONDecodeError as parse_err:
+            logger.warning(f"First JSON parse failed: {parse_err}")
+            # Try extracting just the JSON object
+            obj_match = re.search(r"\{[\s\S]*\}", text)
+            if obj_match:
+                try:
+                    result = json_module.loads(_repair_json(obj_match.group()))
+                except json_module.JSONDecodeError:
+                    # Last resort: try to fix unescaped newlines in strings
+                    fixed = re.sub(r'(?<=": ")(.*?)(?="[,}])', lambda m: m.group().replace('\n', ' '), text, flags=re.DOTALL)
+                    result = json_module.loads(_repair_json(fixed))
+            else:
+                raise
 
         if not isinstance(result, dict):
             logger.warning(f"Gemini invoice returned non-dict: {type(result)}")
