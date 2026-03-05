@@ -1596,6 +1596,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/cash-flow/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'cashFlowExport']);
         Route::get('/equity-changes', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'equityChanges']);
         Route::get('/equity-changes/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'equityChangesExport']);
+        Route::get('/vat-books', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'vatBooks']);
 
         // Fixed Assets (full CRUD for partners)
         Route::get('/fixed-assets', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'index']);

@@ -1177,6 +1177,24 @@ export default [
         meta: { isPartner: true },
         component: () => import('@/scripts/admin/views/partner/accounting/PartnerInventory.vue'),
       },
+      {
+        path: 'partner/accounting/cash-book',
+        name: 'partner.accounting.cash-book',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/CashBook.vue'),
+      },
+      {
+        path: 'partner/accounting/vat-books',
+        name: 'partner.accounting.vat-books',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/VatBooks.vue'),
+      },
+      {
+        path: 'partner/accounting/ios-statement',
+        name: 'partner.accounting.ios-statement',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/IOSStatement.vue'),
+      },
 
       // Banking
       {

@@ -493,6 +493,100 @@ class PartnerAccountingReportsController extends Controller
         ]);
     }
 
+    /**
+     * VAT Books - Input and Output invoice books with VAT detail.
+     *
+     * Returns per-invoice VAT breakdown for:
+     * - Output book (sales invoices)
+     * - Input book (purchase bills/expenses)
+     */
+    public function vatBooks(Request $request, Company $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner || !$this->hasCompanyAccess($partner, $company->id)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        // Output book - Sales invoices
+        $invoicesQuery = \App\Models\Invoice::where('company_id', $company->id)
+            ->whereNotIn('status', ['DRAFT'])
+            ->with(['customer', 'taxes']);
+
+        if ($fromDate) {
+            $invoicesQuery->where('invoice_date', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $invoicesQuery->where('invoice_date', '<=', $toDate);
+        }
+
+        $invoices = $invoicesQuery->orderBy('invoice_date')->get();
+
+        $outputEntries = $invoices->map(function ($invoice) {
+            $taxTotal = $invoice->taxes->sum('amount') ?? $invoice->tax_total ?? 0;
+            $subTotal = $invoice->sub_total ?? ($invoice->total - $taxTotal);
+            $vatRate = $invoice->taxes->first()?->percent ?? 18;
+
+            return [
+                'id' => $invoice->id,
+                'date' => $invoice->invoice_date?->format('Y-m-d') ?? '',
+                'number' => $invoice->invoice_number ?? '',
+                'party_name' => $invoice->customer?->name ?? '',
+                'party_tax_id' => $invoice->customer?->tax_identification_number ?? '',
+                'total' => (int) ($invoice->total ?? 0),
+                'taxable_base' => (int) $subTotal,
+                'vat_amount' => (int) $taxTotal,
+                'vat_rate' => (float) $vatRate,
+            ];
+        })->values()->toArray();
+
+        // Input book - Bills (purchases)
+        $billsQuery = \App\Models\Bill::where('company_id', $company->id)
+            ->whereNotIn('status', ['DRAFT'])
+            ->with(['supplier', 'taxes']);
+
+        if ($fromDate) {
+            $billsQuery->where('bill_date', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $billsQuery->where('bill_date', '<=', $toDate);
+        }
+
+        $bills = $billsQuery->orderBy('bill_date')->get();
+
+        $inputEntries = $bills->map(function ($bill) {
+            $taxTotal = $bill->taxes->sum('amount') ?? $bill->tax_total ?? 0;
+            $subTotal = $bill->sub_total ?? ($bill->total - $taxTotal);
+            $vatRate = $bill->taxes->first()?->percent ?? 18;
+
+            return [
+                'id' => $bill->id,
+                'date' => $bill->bill_date?->format('Y-m-d') ?? '',
+                'number' => $bill->bill_number ?? '',
+                'party_name' => $bill->supplier?->name ?? '',
+                'party_tax_id' => $bill->supplier?->tax_identification_number ?? '',
+                'total' => (int) ($bill->total ?? 0),
+                'taxable_base' => (int) $subTotal,
+                'vat_amount' => (int) $taxTotal,
+                'vat_rate' => (float) $vatRate,
+            ];
+        })->values()->toArray();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'output' => $outputEntries,
+                'input' => $inputEntries,
+                'period' => [
+                    'from_date' => $fromDate,
+                    'to_date' => $toDate,
+                ],
+            ],
+        ]);
+    }
+
     // CLAUDE-CHECKPOINT
 
     /**
