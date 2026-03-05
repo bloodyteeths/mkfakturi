@@ -17,4 +17,11 @@ interface InvoiceParserClient
      * @return array<string,mixed>
      */
     public function ocr(int $companyId, string $filePath, string $originalName): array;
+
+    /**
+     * Parse a receipt/invoice image and return structured invoice data.
+     *
+     * @return array<string,mixed>
+     */
+    public function parseReceipt(int $companyId, string $filePath, string $originalName): array;
 } // CLAUDE-CHECKPOINT

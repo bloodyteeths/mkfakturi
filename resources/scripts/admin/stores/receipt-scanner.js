@@ -10,16 +10,23 @@ export const useReceiptScannerStore = (useWindow = false) => {
     state: () => ({
       lastResult: null,
       isScanning: false,
+      processingStep: 0,
     }),
     actions: {
       scanReceipt(file) {
+        this.processingStep = 0
         this.isScanning = true
         this.lastResult = null
 
         const formData = new FormData()
         formData.append('receipt', file)
 
+        const stepTimers = []
+
         return new Promise((resolve, reject) => {
+          stepTimers.push(setTimeout(() => { this.processingStep = 1 }, 500))
+          stepTimers.push(setTimeout(() => { this.processingStep = 2 }, 3000))
+
           axios
             .post('/receipts/scan', formData, {
               headers: {
@@ -28,11 +35,17 @@ export const useReceiptScannerStore = (useWindow = false) => {
             })
             .then((response) => {
               this.lastResult = response.data
-              this.isScanning = false
-              resolve(response)
+              this.processingStep = 3
+              setTimeout(() => {
+                this.isScanning = false
+                this.processingStep = 0
+                resolve(response)
+              }, 800)
             })
             .catch((err) => {
+              stepTimers.forEach(clearTimeout)
               this.isScanning = false
+              this.processingStep = 0
               // Surface more detail in browser console for debugging
               // (status code, message, backend payload if any)
               // eslint-disable-next-line no-console

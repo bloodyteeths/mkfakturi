@@ -2,13 +2,9 @@
 
 use App\Http\Controllers\V1\Admin\AccountsPayable\ReceiptScannerController;
 use App\Http\Requests\ReceiptScanRequest;
-use App\Models\Bill;
 use App\Models\Company;
 use App\Models\User;
-use App\Services\FiscalReceiptQrService;
 use App\Services\InvoiceParsing\InvoiceParserClient;
-use App\Services\InvoiceParsing\ParsedInvoiceMapper;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
@@ -37,108 +33,58 @@ test('store validates using a form request for receipt scanner', function () {
     );
 });
 
-test('upload jpeg creates draft bill via parser', function () {
+test('scan returns structured invoice data from parser', function () {
     $company = Company::firstOrFail();
 
-    // Fake parser client returning a normalized invoice payload
     $fakeParserClient = new class implements InvoiceParserClient
     {
         public function parse(int $companyId, string $filePath, string $originalName, string $from, ?string $subject): array
         {
-            return [
-                'supplier' => [
-                    'name' => 'OCR Supplier',
-                    'tax_id' => 'MK9999999',
-                    'email' => 'ocr@example.com',
-                ],
-                'invoice' => [
-                    'number' => 'OCR-INV-1',
-                    'date' => '2025-11-15',
-                    'currency' => 13, // MKD id in seeded data
-                ],
-                'totals' => [
-                    'total' => 1000,
-                    'subtotal' => 1000,
-                    'tax' => 0,
-                    'discount' => 0,
-                ],
-                'line_items' => [
-                    [
-                        'name' => 'OCR Item',
-                        'description' => 'Parsed from image',
-                        'quantity' => 1,
-                        'unit_price' => 1000,
-                        'total' => 1000,
-                        'tax' => 0,
-                    ],
-                ],
-            ];
+            return [];
         }
 
         public function ocr(int $companyId, string $filePath, string $originalName): array
         {
             return [];
         }
-    };
-    $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
-    // Mapper stub that forwards parsed data into Bill components
-    $fakeMapper = new class extends ParsedInvoiceMapper
-    {
-        public function mapToBillComponents(int $companyId, array $parsed): array
+        public function parseReceipt(int $companyId, string $filePath, string $originalName): array
         {
             return [
-                'supplier' => $parsed['supplier'],
-                'bill' => [
-                    'bill_date' => $parsed['invoice']['date'],
-                    'due_date' => null,
-                    'bill_number' => $parsed['invoice']['number'],
-                    'status' => \App\Models\Bill::STATUS_DRAFT,
-                    'paid_status' => \App\Models\Bill::PAID_STATUS_UNPAID,
-                    'sub_total' => $parsed['totals']['subtotal'],
-                    'discount' => 0,
-                    'discount_val' => 0,
-                    'total' => $parsed['totals']['total'],
-                    'tax' => $parsed['totals']['tax'],
-                    'due_amount' => $parsed['totals']['total'],
-                    'currency_id' => $parsed['invoice']['currency'],
-                    'exchange_rate' => 1,
-                    'base_total' => $parsed['totals']['total'],
-                    'base_discount_val' => 0,
-                    'base_sub_total' => $parsed['totals']['subtotal'],
-                    'base_tax' => $parsed['totals']['tax'],
-                    'base_due_amount' => $parsed['totals']['total'],
+                'supplier' => [
+                    'name' => 'OCR Supplier',
+                    'tax_id' => 'MK9999999',
                 ],
-                'items' => [
+                'invoice' => [
+                    'number' => 'OCR-INV-1',
+                    'date' => '2025-11-15',
+                    'due_date' => '2025-12-15',
+                    'currency' => 'MKD',
+                ],
+                'totals' => [
+                    'total' => 100000,
+                    'subtotal' => 84746,
+                    'tax' => 15254,
+                ],
+                'line_items' => [
                     [
-                        'name' => $parsed['line_items'][0]['name'],
-                        'description' => $parsed['line_items'][0]['description'],
-                        'quantity' => $parsed['line_items'][0]['quantity'],
-                        'price' => $parsed['line_items'][0]['unit_price'],
-                        'discount' => 0,
-                        'discount_val' => 0,
-                        'tax' => $parsed['line_items'][0]['tax'],
-                        'total' => $parsed['line_items'][0]['total'],
+                        'name' => 'OCR Item',
+                        'description' => 'Parsed from image',
+                        'quantity' => 1,
+                        'unit_price' => 100000,
+                        'total' => 100000,
+                        'tax' => 15254,
                     ],
                 ],
+                'extraction_method' => 'gemini',
             ];
         }
     };
-    $this->app->instance(ParsedInvoiceMapper::class, $fakeMapper);
+    $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
-    // Ensure QR path fails so we exercise parser fallback in controller
-    $failingQrService = new class extends FiscalReceiptQrService
-    {
-        public function decodeAndNormalize(UploadedFile $file): array
-        {
-            throw new RuntimeException('QR not found in test image');
-        }
-    };
-    $this->app->instance(FiscalReceiptQrService::class, $failingQrService);
+    Storage::fake(config('filesystems.default', 'local'));
 
-    Storage::fake(config('filesystems.default', 'public'));
-
-    $file = UploadedFile::fake()->image('ocr-receipt.jpg');
+    $file = \Illuminate\Http\UploadedFile::fake()->image('ocr-receipt.jpg');
 
     $response = postJson('/api/v1/receipts/scan', [
         'receipt' => $file,
@@ -146,13 +92,34 @@ test('upload jpeg creates draft bill via parser', function () {
         'company' => $company->id,
     ]);
 
-    $response->assertCreated();
+    $response->assertOk();
+    $response->assertJsonStructure([
+        'image_url',
+        'stored_path',
+        'ocr_file_path',
+        'data' => [
+            'vendor_name',
+            'tax_id',
+            'bill_number',
+            'bill_date',
+            'due_date',
+            'total',
+            'subtotal',
+            'tax',
+            'currency',
+            'line_items',
+        ],
+        'extraction_method',
+    ]);
 
-    $bill = Bill::where('company_id', $company->id)
-        ->where('bill_number', 'OCR-INV-1')
-        ->first();
-
-    expect($bill)->not()->toBeNull();
+    $data = $response->json('data');
+    expect($data['vendor_name'])->toBe('OCR Supplier');
+    expect($data['tax_id'])->toBe('MK9999999');
+    expect($data['bill_number'])->toBe('OCR-INV-1');
+    expect($data['bill_date'])->toBe('2025-11-15');
+    expect($data['total'])->toBe(1000.0); // 100000 cents / 100
+    expect($data['tax'])->toBe(152.54); // 15254 cents / 100
+    expect($response->json('extraction_method'))->toBe('gemini');
 });
 
 test('receipt scanner respects tenant isolation', function () {
@@ -163,176 +130,76 @@ test('receipt scanner respects tenant isolation', function () {
     {
         public function parse(int $companyId, string $filePath, string $originalName, string $from, ?string $subject): array
         {
-            return [
-                'supplier' => [
-                    'name' => 'Tenant Supplier',
-                    'tax_id' => 'MK0000000',
-                    'email' => 'tenant@example.com',
-                ],
-                'invoice' => [
-                    'number' => 'TENANT-INV-1',
-                    'date' => '2025-11-15',
-                    'currency' => 13,
-                ],
-                'totals' => [
-                    'total' => 500,
-                    'subtotal' => 500,
-                    'tax' => 0,
-                    'discount' => 0,
-                ],
-                'line_items' => [],
-            ];
+            return [];
         }
 
         public function ocr(int $companyId, string $filePath, string $originalName): array
         {
             return [];
         }
-    };
-    $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
-    $fakeMapper = new class extends ParsedInvoiceMapper
-    {
-        public function mapToBillComponents(int $companyId, array $parsed): array
+        public function parseReceipt(int $companyId, string $filePath, string $originalName): array
         {
             return [
-                'supplier' => $parsed['supplier'],
-                'bill' => [
-                    'bill_date' => $parsed['invoice']['date'],
-                    'due_date' => null,
-                    'bill_number' => $parsed['invoice']['number'],
-                    'status' => \App\Models\Bill::STATUS_DRAFT,
-                    'paid_status' => \App\Models\Bill::PAID_STATUS_UNPAID,
-                    'sub_total' => $parsed['totals']['subtotal'],
-                    'discount' => 0,
-                    'discount_val' => 0,
-                    'total' => $parsed['totals']['total'],
-                    'tax' => $parsed['totals']['tax'],
-                    'due_amount' => $parsed['totals']['total'],
-                    'currency_id' => $parsed['invoice']['currency'],
-                    'exchange_rate' => 1,
-                    'base_total' => $parsed['totals']['total'],
-                    'base_discount_val' => 0,
-                    'base_sub_total' => $parsed['totals']['subtotal'],
-                    'base_tax' => $parsed['totals']['tax'],
-                    'base_due_amount' => $parsed['totals']['total'],
-                ],
-                'items' => [],
+                'supplier' => ['name' => 'Tenant Supplier', 'tax_id' => 'MK0000000'],
+                'invoice' => ['number' => 'TENANT-INV-1', 'date' => '2025-11-15', 'due_date' => null, 'currency' => 'MKD'],
+                'totals' => ['total' => 50000, 'subtotal' => 50000, 'tax' => 0],
+                'line_items' => [],
+                'extraction_method' => 'gemini',
             ];
         }
     };
-    $this->app->instance(ParsedInvoiceMapper::class, $fakeMapper);
+    $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
-    $failingQrService = new class extends FiscalReceiptQrService
-    {
-        public function decodeAndNormalize(UploadedFile $file): array
-        {
-            throw new RuntimeException('QR not found in test image');
-        }
-    };
-    $this->app->instance(FiscalReceiptQrService::class, $failingQrService);
+    Storage::fake(config('filesystems.default', 'local'));
 
-    Storage::fake(config('filesystems.default', 'public'));
+    $file = \Illuminate\Http\UploadedFile::fake()->image('tenant-receipt.png');
 
-    $file = UploadedFile::fake()->image('tenant-receipt.png');
-
-    postJson('/api/v1/receipts/scan', [
+    // Scan for company A should work
+    $responseA = postJson('/api/v1/receipts/scan', [
         'receipt' => $file,
     ], [
         'company' => $companyA->id,
-    ])->assertCreated();
+    ]);
 
-    $billA = Bill::where('company_id', $companyA->id)
-        ->where('bill_number', 'TENANT-INV-1')
-        ->first();
+    $responseA->assertOk();
+    expect($responseA->json('data.vendor_name'))->toBe('Tenant Supplier');
 
-    $billB = Bill::where('company_id', $companyB->id)
-        ->where('bill_number', 'TENANT-INV-1')
-        ->first();
-
-    expect($billA)->not()->toBeNull();
-    expect($billB)->toBeNull();
+    // The stored path should be scoped to company A
+    expect($responseA->json('stored_path'))->toContain('scanned-receipts/'.$companyA->id);
 });
 
-test('parser fallback generates bill_number when missing', function () {
+test('scan handles missing invoice number gracefully', function () {
     $company = Company::firstOrFail();
 
     $fakeParserClient = new class implements InvoiceParserClient
     {
         public function parse(int $companyId, string $filePath, string $originalName, string $from, ?string $subject): array
         {
-            return [
-                'supplier' => [
-                    'name' => 'No Number Supplier',
-                    'tax_id' => 'MK1111111',
-                    'email' => 'nonumber@example.com',
-                ],
-                'invoice' => [
-                    'number' => null,
-                    'date' => '2025-11-15',
-                    'currency' => 13,
-                ],
-                'totals' => [
-                    'total' => 200,
-                    'subtotal' => 200,
-                    'tax' => 0,
-                    'discount' => 0,
-                ],
-                'line_items' => [],
-            ];
+            return [];
         }
 
         public function ocr(int $companyId, string $filePath, string $originalName): array
         {
             return [];
         }
-    };
-    $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
-    $fakeMapper = new class extends ParsedInvoiceMapper
-    {
-        public function mapToBillComponents(int $companyId, array $parsed): array
+        public function parseReceipt(int $companyId, string $filePath, string $originalName): array
         {
             return [
-                'supplier' => $parsed['supplier'],
-                'bill' => [
-                    'bill_date' => $parsed['invoice']['date'],
-                    'due_date' => null,
-                    'bill_number' => null,
-                    'status' => \App\Models\Bill::STATUS_DRAFT,
-                    'paid_status' => \App\Models\Bill::PAID_STATUS_UNPAID,
-                    'sub_total' => $parsed['totals']['subtotal'],
-                    'discount' => 0,
-                    'discount_val' => 0,
-                    'total' => $parsed['totals']['total'],
-                    'tax' => $parsed['totals']['tax'],
-                    'due_amount' => $parsed['totals']['total'],
-                    'currency_id' => $parsed['invoice']['currency'],
-                    'exchange_rate' => 1,
-                    'base_total' => $parsed['totals']['total'],
-                    'base_discount_val' => 0,
-                    'base_sub_total' => $parsed['totals']['subtotal'],
-                    'base_tax' => $parsed['totals']['tax'],
-                    'base_due_amount' => $parsed['totals']['total'],
-                ],
-                'items' => [],
+                'supplier' => ['name' => 'No Number Supplier', 'tax_id' => 'MK1111111'],
+                'invoice' => ['number' => null, 'date' => '2025-11-15', 'due_date' => null, 'currency' => 'MKD'],
+                'totals' => ['total' => 20000, 'subtotal' => 20000, 'tax' => 0],
+                'line_items' => [],
+                'extraction_method' => 'gemini',
             ];
         }
     };
-    $this->app->instance(ParsedInvoiceMapper::class, $fakeMapper);
+    $this->app->instance(InvoiceParserClient::class, $fakeParserClient);
 
-    $failingQrService = new class extends FiscalReceiptQrService
-    {
-        public function decodeAndNormalize(UploadedFile $file): array
-        {
-            throw new RuntimeException('QR not found in test image');
-        }
-    };
-    $this->app->instance(FiscalReceiptQrService::class, $failingQrService);
+    Storage::fake(config('filesystems.default', 'local'));
 
-    Storage::fake(config('filesystems.default', 'public'));
-
-    $file = UploadedFile::fake()->image('no-number-receipt.jpg');
+    $file = \Illuminate\Http\UploadedFile::fake()->image('no-number-receipt.jpg');
 
     $response = postJson('/api/v1/receipts/scan', [
         'receipt' => $file,
@@ -340,12 +207,9 @@ test('parser fallback generates bill_number when missing', function () {
         'company' => $company->id,
     ]);
 
-    $response->assertCreated();
-
-    $bill = Bill::where('company_id', $company->id)->latest()->first();
-
-    expect($bill)->not()->toBeNull();
-    expect($bill->bill_number)->not()->toBeNull();
-    expect($bill->bill_number)->toStartWith('SCAN-');
+    $response->assertOk();
+    expect($response->json('data.bill_number'))->toBeNull();
+    expect($response->json('data.vendor_name'))->toBe('No Number Supplier');
+    expect($response->json('data.total'))->toBe(200.0);
 })
     ->group('receipt-scanner');

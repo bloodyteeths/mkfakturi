@@ -58,6 +58,11 @@
 
       <!-- Step 1: Select Bank & Upload File -->
       <div v-if="currentStep === 1" class="bg-white rounded-lg shadow-md p-6">
+        <AiProcessingOverlay
+          :visible="isUploading && isImageUpload"
+          :current-step="importProcessingStep"
+          :steps="importSteps"
+        />
         <h2 class="text-lg font-semibold text-gray-900 mb-4">
           {{ $t('banking.select_bank_upload') }}
         </h2>
@@ -345,6 +350,7 @@ import {
   DocumentCheckIcon,
   CheckCircleIcon,
 } from '@heroicons/vue/24/outline'
+import AiProcessingOverlay from '@/scripts/admin/components/AiProcessingOverlay.vue'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -358,6 +364,13 @@ const uploadedFile = ref(null)
 const isDragging = ref(false)
 const isUploading = ref(false)
 const isImporting = ref(false)
+const importProcessingStep = ref(0)
+const importSteps = [
+  'Uploading statement...',
+  'AI is analyzing your bank statement...',
+  'Extracting transactions...',
+  'Almost done...',
+]
 const previewData = ref({
   total: 0,
   new: 0,
@@ -466,6 +479,10 @@ const uploadAndPreview = async () => {
   if (!uploadedFile.value || !selectedAccount.value) return
 
   isUploading.value = true
+  importProcessingStep.value = 0
+  const stepTimers = []
+  stepTimers.push(setTimeout(() => { importProcessingStep.value = 1 }, 500))
+  stepTimers.push(setTimeout(() => { importProcessingStep.value = 2 }, 3000))
 
   try {
     const formData = new FormData()
@@ -479,16 +496,19 @@ const uploadAndPreview = async () => {
       },
     })
 
+    importProcessingStep.value = 3
     previewData.value = response.data.data
     importId.value = response.data.data.import_id
     currentStep.value = 2
   } catch (error) {
+    stepTimers.forEach(clearTimeout)
     console.error('Preview failed:', error)
     notificationStore.showNotification({
       type: 'error',
       message: error.response?.data?.message || t('banking.preview_failed'),
     })
   } finally {
+    stepTimers.forEach(clearTimeout)
     isUploading.value = false
   }
 }

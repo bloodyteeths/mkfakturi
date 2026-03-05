@@ -115,65 +115,77 @@ class ReceiptScannerController extends Controller
                 }
             }
 
-            // Call the OCR endpoint to extract text from the image
+            // Call the /parse endpoint (Gemini Vision AI) to extract structured invoice data
             try {
-                \Log::info('ReceiptScannerController::scan - Calling OCR endpoint', [
+                \Log::info('ReceiptScannerController::scan - Calling parse endpoint', [
                     'company_id' => $companyId,
                     'ocr_file_path' => $ocrFilePath,
                     'ocr_file_name' => $ocrFileName,
                     'was_pdf' => $isPdf,
                 ]);
 
-                $ocrResult = $parserClient->ocr(
+                $parseResult = $parserClient->parseReceipt(
                     $companyId,
                     $ocrFilePath,
                     $ocrFileName
                 );
 
-                \Log::info('ReceiptScannerController::scan - OCR completed', [
+                \Log::info('ReceiptScannerController::scan - Parse completed', [
                     'company_id' => $companyId,
-                    'text_length' => strlen($ocrResult['text'] ?? ''),
+                    'extraction_method' => $parseResult['extraction_method'] ?? 'unknown',
+                    'supplier' => $parseResult['supplier']['name'] ?? null,
                 ]);
 
-                // Generate the image URL using our custom route instead of Storage::url()
-                // to avoid dependency on storage:link symlink which doesn't exist in Railway
-                // For PDFs, use the converted image path so we can display the image preview
                 $imageUrl = url('api/v1/receipts/image/'.$ocrFilePath);
 
-                // Parse OCR text to extract structured invoice data for form pre-fill
-                $parsedData = $this->parseOcrText($ocrResult['text'] ?? '');
+                // Map structured Gemini response to bill form fields
+                $parsedData = [
+                    'vendor_name' => $parseResult['supplier']['name'] ?? null,
+                    'tax_id' => $parseResult['supplier']['tax_id'] ?? null,
+                    'bill_number' => $parseResult['invoice']['number'] ?? null,
+                    'bill_date' => $parseResult['invoice']['date'] ?? null,
+                    'due_date' => $parseResult['invoice']['due_date'] ?? null,
+                    'total' => isset($parseResult['totals']['total'])
+                        ? $parseResult['totals']['total'] / 100
+                        : null,
+                    'subtotal' => isset($parseResult['totals']['subtotal'])
+                        ? $parseResult['totals']['subtotal'] / 100
+                        : null,
+                    'tax' => isset($parseResult['totals']['tax'])
+                        ? $parseResult['totals']['tax'] / 100
+                        : null,
+                    'currency' => $parseResult['invoice']['currency'] ?? null,
+                    'line_items' => $parseResult['line_items'] ?? [],
+                ];
 
                 $responsePayload = [
                     'image_url' => $imageUrl,
-                    'stored_path' => $storedPath, // Keep original file path for bill attachment
-                    'ocr_file_path' => $ocrFilePath, // Path used for OCR (converted image for PDFs)
-                    'ocr_text' => $ocrResult['text'] ?? '',
-                    'hocr' => $ocrResult['hocr'] ?? null, // Include hOCR for selectable text overlay
-                    'image_width' => $ocrResult['image_width'] ?? null,
-                    'image_height' => $ocrResult['image_height'] ?? null,
-                    'data' => $parsedData, // Structured data for bill form pre-fill
+                    'stored_path' => $storedPath,
+                    'ocr_file_path' => $ocrFilePath,
+                    'data' => $parsedData,
+                    'extraction_method' => $parseResult['extraction_method'] ?? 'unknown',
                 ];
 
                 \Log::info('ReceiptScannerController::scan - Returning response', [
-                    'response' => $responsePayload,
-                    'image_url_length' => strlen($imageUrl),
-                    'ocr_text_length' => strlen($ocrResult['text'] ?? ''),
-                    'has_hocr' => isset($ocrResult['hocr']),
+                    'image_url' => $imageUrl,
+                    'extraction_method' => $parseResult['extraction_method'] ?? 'unknown',
+                    'vendor' => $parsedData['vendor_name'],
+                    'total' => $parsedData['total'],
                 ]);
 
                 return response()->json($responsePayload, 200);
 
-            } catch (\Throwable $ocrException) {
-                \Log::error('ReceiptScannerController::scan - OCR failed', [
+            } catch (\Throwable $parseException) {
+                \Log::error('ReceiptScannerController::scan - Parse failed', [
                     'user_id' => auth()->id(),
                     'company_id' => $companyId,
-                    'error' => $ocrException->getMessage(),
-                    'exception' => get_class($ocrException),
+                    'error' => $parseException->getMessage(),
+                    'exception' => get_class($parseException),
                 ]);
 
                 return response()->json([
-                    'message' => 'ocr_failed',
-                    'error' => $ocrException->getMessage(),
+                    'message' => 'parse_failed',
+                    'error' => $parseException->getMessage(),
                 ], 422);
             }
         } catch (\Throwable $e) {
@@ -204,25 +216,23 @@ class ReceiptScannerController extends Controller
      * Serve a scanned receipt image from storage.
      * This avoids the need for public/storage symlink in Railway.
      */
-    public function getImage(string $path): \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+    public function getImage(string $path): \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
     {
         try {
             $disk = config('filesystems.default', 'local');
 
-            // Security check: ensure the path starts with scanned-receipts/
             if (! str_starts_with($path, 'scanned-receipts/')) {
                 return response()->json(['error' => 'Invalid path'], 403);
             }
 
-            // Check if file exists
             if (! Storage::disk($disk)->exists($path)) {
                 return response()->json(['error' => 'File not found'], 404);
             }
 
-            $fullPath = Storage::disk($disk)->path($path);
+            $content = Storage::disk($disk)->get($path);
             $mimeType = Storage::disk($disk)->mimeType($path);
 
-            return response()->file($fullPath, [
+            return response()->make($content, 200, [
                 'Content-Type' => $mimeType,
                 'Cache-Control' => 'public, max-age=3600',
             ]);

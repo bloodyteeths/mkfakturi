@@ -26,7 +26,11 @@
           {{ $t('receipts.scan_button') }}
         </BaseButton>
 
-        <BaseSpinner v-if="scannerStore.isScanning" class="mt-4" />
+        <AiProcessingOverlay
+          :visible="scannerStore.isScanning"
+          :current-step="scannerStore.processingStep"
+          :steps="receiptSteps"
+        />
 
         <!-- Results Layout: Full-size Image -->
         <div v-if="scanResult" class="mt-6">
@@ -54,18 +58,12 @@
             Image loaded: {{ imageWidth }}x{{ imageHeight }}px
           </p>
 
-          <!-- OCR text below image -->
-          <div class="mt-4">
-            <BaseHeading tag="h3" size="sm" class="mb-2">
-              {{ $t('receipts.ocr_text') }}
-            </BaseHeading>
-            <BaseTextarea
-              v-model="ocrText"
-              :rows="10"
-              :readonly="true"
-              class="font-mono text-sm"
-              :placeholder="$t('receipts.no_text_extracted')"
-            />
+          <div v-if="scanResult.extraction_method" class="mt-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              :class="scanResult.extraction_method === 'gemini' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'"
+            >
+              {{ scanResult.extraction_method === 'gemini' ? 'Extracted with Gemini AI' : 'Extracted with Tesseract OCR' }}
+            </span>
           </div>
 
           <!-- Bottom: Bill Creation Form -->
@@ -158,6 +156,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
+import AiProcessingOverlay from '@/scripts/admin/components/AiProcessingOverlay.vue'
 
 const scannerStore = useReceiptScannerStore()
 const router = useRouter()
@@ -166,7 +165,13 @@ const files = ref([])
 
 // Scan result data
 const scanResult = ref(null)
-const ocrText = ref('')
+
+const receiptSteps = [
+  'Uploading document...',
+  'AI is reading your invoice...',
+  'Extracting data...',
+  'Almost done...',
+]
 
 // Image loading debug
 const imageLoaded = ref(false)
@@ -193,7 +198,6 @@ function onFileChange(fieldName, fileOrFiles) {
   selectedFile.value = file || null
   // Reset results when a new file is selected
   scanResult.value = null
-  ocrText.value = ''
   imageLoaded.value = false
   imageLoadError.value = null
 }
@@ -221,20 +225,10 @@ function scan() {
     scanResult.value = {
       image_url: response.data.image_url,
       stored_path: response.data.stored_path,
-      ocr_text: response.data.ocr_text || '',
-      hocr: response.data.hocr || null,
-      image_width: response.data.image_width || null,
-      image_height: response.data.image_height || null,
+      extraction_method: response.data.extraction_method || 'unknown',
     }
 
     console.log('scanResult set to:', scanResult.value)
-
-    // Set OCR text for display
-    ocrText.value = response.data.ocr_text || ''
-
-    console.log('Has hOCR:', !!response.data.hocr)
-
-    console.log('ocrText set to:', ocrText.value ? ocrText.value.substring(0, 100) : '(empty)')
 
     // Pre-fill form if structured data is available
     if (response.data.data) {
