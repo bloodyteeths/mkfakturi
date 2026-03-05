@@ -222,7 +222,7 @@ class ReceiptScannerController extends Controller
      * Serve a scanned receipt image from storage.
      * This avoids the need for public/storage symlink in Railway.
      */
-    public function getImage(string $path): \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+    public function getImage(string $path): \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\JsonResponse
     {
         try {
             $disk = config('filesystems.default', 'local');
@@ -235,20 +235,29 @@ class ReceiptScannerController extends Controller
                 return response()->json(['error' => 'File not found'], 404);
             }
 
-            $content = Storage::disk($disk)->get($path);
-            $mimeType = Storage::disk($disk)->mimeType($path);
+            $mimeType = Storage::disk($disk)->mimeType($path) ?: 'application/octet-stream';
+            $size = Storage::disk($disk)->size($path);
 
-            return response()->make($content, 200, [
+            // Stream the file instead of loading into memory (handles large files on S3/R2)
+            return response()->stream(function () use ($disk, $path) {
+                $stream = Storage::disk($disk)->readStream($path);
+                fpassthru($stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+            }, 200, [
                 'Content-Type' => $mimeType,
+                'Content-Length' => $size,
                 'Cache-Control' => 'public, max-age=3600',
             ]);
         } catch (\Throwable $e) {
             \Log::error('ReceiptScannerController::getImage - Failed to serve image', [
                 'path' => $path,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json(['error' => 'Failed to load image'], 500);
+            return response()->json(['error' => 'Failed to load image: '.$e->getMessage()], 500);
         }
     } // CLAUDE-CHECKPOINT
 

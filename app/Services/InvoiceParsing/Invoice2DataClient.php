@@ -120,11 +120,22 @@ class Invoice2DataClient implements InvoiceParserClient
             $baseUrl = 'https://'.$baseUrl;
         }
 
+        // Longer timeout for receipt parsing: cold start + image upload + Gemini Vision API
         $timeout = (int) config('services.invoice2data.timeout', 90);
+        $parseTimeout = max($timeout, 180);
 
         try {
-            $response = Http::timeout($timeout)
-                ->connectTimeout(10)
+            // Warm up the service with a quick health check (handles Railway cold starts)
+            try {
+                Http::timeout(15)->connectTimeout(10)->get($baseUrl.'/health');
+            } catch (\Throwable $e) {
+                Log::info('invoice2data-service health check failed, proceeding anyway', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            $response = Http::timeout($parseTimeout)
+                ->connectTimeout(30)
                 ->attach('file', $fileContents, $originalName)
                 ->post($baseUrl.'/parse', [
                     'company_id' => $companyId,
