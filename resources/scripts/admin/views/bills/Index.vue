@@ -44,6 +44,18 @@
 
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
+          to="/admin/receipts/scan"
+        >
+          <BaseButton variant="primary-outline" class="ml-4">
+            <template #left="slotProps">
+              <BaseIcon name="CameraIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('receipts.scan_button') }}
+          </BaseButton>
+        </router-link>
+
+        <router-link
+          v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
           to="bills/create"
         >
           <BaseButton variant="primary" class="ml-4">

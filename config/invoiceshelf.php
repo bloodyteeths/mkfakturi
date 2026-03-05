@@ -487,16 +487,7 @@ return [
             'model' => Item::class,
             'feature_flag' => 'stock',
         ],
-        [
-            'title' => 'navigation.receipts_scan',
-            'group' => 2,
-            'link' => '/admin/receipts/scan',
-            'icon' => 'QrCodeIcon',
-            'name' => 'Receipt Scanner',
-            'owner_only' => false,
-            'ability' => 'create-expense',
-            'model' => Expense::class,
-        ],
+        // Receipt Scanner moved to Bills page action button
         // Documents moved to header bar (TheSiteHeader.vue) to reduce sidebar clutter
         // CLAUDE-CHECKPOINT
         [
