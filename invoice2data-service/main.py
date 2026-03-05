@@ -1,12 +1,16 @@
 """
 invoice2data microservice with smart OCR preprocessing
-Version: 1.2.0 - Bank statement OCR with table extraction
+Version: 1.3.0 - Bank statement OCR with Gemini Vision enhancement
 """
+import base64
 import io
+import json as json_module
 import logging
 import os
 import re
 from typing import Any, Dict, List, Optional, Tuple
+
+import httpx
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
@@ -1288,6 +1292,298 @@ def _extract_transactions_from_text(plain_text: str) -> List[Dict[str, Any]]:
     return transactions
 
 
+# ---------------------------------------------------------------------------
+# Gemini Vision enhancement
+# ---------------------------------------------------------------------------
+
+_GEMINI_PROMPT = """This is a Macedonian bank statement image. Extract ALL transactions from the table.
+
+Return a JSON array where each element has exactly these fields:
+- row_number: integer (sequential, starting from 1)
+- counterparty_name: string (full company/person name)
+- counterparty_account: string (15-16 digit bank account number)
+- debit: number (amount debited/withdrawn, 0.00 if none)
+- credit: number (amount credited/received, 0.00 if none)
+- payment_code: integer (3-digit payment code, null if not visible)
+- description: string (purpose of payment/transfer)
+- reference: string (6-7 digit reference number, null if not visible)
+
+IMPORTANT:
+- Extract EVERY transaction row, do not skip any
+- Amounts must be numeric (e.g. 10000.00 not "10,000.00")
+- Account numbers are 15-16 digits, do not truncate
+- Return ONLY the raw JSON array, no markdown code fences, no explanation"""
+
+
+async def _extract_with_gemini(
+    contents: bytes, mime_type: str = "image/jpeg"
+) -> Optional[List[Dict[str, Any]]]:
+    """
+    Use Gemini Vision to extract transactions from bank statement image.
+    Returns list of transaction dicts, or None if Gemini is unavailable/fails.
+    """
+    logger = logging.getLogger(__name__)
+
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        logger.info("GEMINI_API_KEY not set, skipping Gemini extraction")
+        return None
+
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{model}:generateContent?key={api_key}"
+    )
+
+    img_b64 = base64.b64encode(contents).decode("utf-8")
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": _GEMINI_PROMPT},
+                    {
+                        "inline_data": {
+                            "mime_type": mime_type,
+                            "data": img_b64,
+                        }
+                    },
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.1,
+            "maxOutputTokens": 4096,
+        },
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(
+                url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+            )
+
+        if resp.status_code != 200:
+            logger.warning(
+                f"Gemini API error {resp.status_code}: {resp.text[:200]}"
+            )
+            return None
+
+        data = resp.json()
+        if "error" in data:
+            logger.warning(f"Gemini error: {data['error'].get('message', '')}")
+            return None
+
+        # Extract text from response
+        text = (
+            data.get("candidates", [{}])[0]
+            .get("content", {})
+            .get("parts", [{}])[0]
+            .get("text", "")
+        )
+
+        if not text:
+            logger.warning("Gemini returned empty text")
+            return None
+
+        # Strip markdown code fences if present
+        text = text.strip()
+        if text.startswith("```"):
+            text = re.sub(r"^```\w*\n?", "", text)
+            text = re.sub(r"\n?```$", "", text)
+            text = text.strip()
+
+        # Parse JSON
+        transactions = json_module.loads(text)
+
+        if not isinstance(transactions, list):
+            logger.warning(f"Gemini returned non-list: {type(transactions)}")
+            return None
+
+        # Normalize fields
+        for tx in transactions:
+            tx["debit"] = float(tx.get("debit") or 0)
+            tx["credit"] = float(tx.get("credit") or 0)
+            tx["row_number"] = int(tx.get("row_number") or 0)
+            # Ensure account is string
+            if tx.get("counterparty_account"):
+                tx["counterparty_account"] = str(tx["counterparty_account"])
+            # Add pbo field for compatibility
+            tx.setdefault("pbo", None)
+
+        logger.info(f"Gemini extracted {len(transactions)} transactions")
+        for tx in transactions:
+            logger.info(
+                f"  Gemini TX{tx['row_number']}: "
+                f"acct={tx.get('counterparty_account')} "
+                f"d={tx['debit']} c={tx['credit']} "
+                f"name={str(tx.get('counterparty_name', ''))[:40]}"
+            )
+
+        return transactions
+
+    except json_module.JSONDecodeError as e:
+        logger.warning(f"Gemini JSON parse error: {e}")
+        return None
+    except httpx.TimeoutException:
+        logger.warning("Gemini request timed out")
+        return None
+    except Exception as e:
+        logger.warning(f"Gemini extraction failed: {e}")
+        return None
+_GEMINI_INVOICE_PROMPT = """This is an invoice or receipt image (possibly in Macedonian/Cyrillic).
+Extract the following information and return it as a single JSON object:
+
+{
+  "issuer": "company/person name that issued the invoice",
+  "tax_id": "VAT/tax ID of the issuer (e.g. MK4030996116740)",
+  "address": "issuer address",
+  "invoice_number": "invoice number/ID",
+  "date": "invoice date in YYYY-MM-DD format",
+  "due_date": "payment due date in YYYY-MM-DD format, null if not visible",
+  "currency": "currency code (MKD, EUR, USD, etc.)",
+  "amount": total amount as a number (e.g. 11800.00),
+  "subtotal": subtotal/net amount before tax as a number,
+  "tax": total tax amount as a number,
+  "lines": [
+    {
+      "description": "item description",
+      "quantity": quantity as number,
+      "unit_price": unit price as number,
+      "tax": tax amount for this line as number,
+      "total": line total as number
+    }
+  ]
+}
+
+IMPORTANT:
+- All monetary amounts must be numeric (e.g. 11800.00 not "11,800.00")
+- Amounts are in the smallest visible unit (if the invoice shows 11,800 MKD, return 11800.00)
+- Extract ALL line items
+- Return ONLY the raw JSON object, no markdown code fences, no explanation
+- If a field is not visible, use null"""
+
+
+async def _extract_invoice_with_gemini(
+    contents: bytes, mime_type: str = "image/jpeg"
+) -> Optional[Dict[str, Any]]:
+    """
+    Use Gemini Vision to extract invoice data from an image.
+    Returns a raw dict compatible with normalize_invoice_data(), or None.
+    """
+    logger = logging.getLogger(__name__)
+
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        logger.info("GEMINI_API_KEY not set, skipping Gemini invoice extraction")
+        return None
+
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{model}:generateContent?key={api_key}"
+    )
+
+    img_b64 = base64.b64encode(contents).decode("utf-8")
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": _GEMINI_INVOICE_PROMPT},
+                    {
+                        "inline_data": {
+                            "mime_type": mime_type,
+                            "data": img_b64,
+                        }
+                    },
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.1,
+            "maxOutputTokens": 4096,
+        },
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(
+                url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+            )
+
+        if resp.status_code != 200:
+            logger.warning(
+                f"Gemini invoice API error {resp.status_code}: {resp.text[:200]}"
+            )
+            return None
+
+        data = resp.json()
+        if "error" in data:
+            logger.warning(f"Gemini error: {data['error'].get('message', '')}")
+            return None
+
+        text = (
+            data.get("candidates", [{}])[0]
+            .get("content", {})
+            .get("parts", [{}])[0]
+            .get("text", "")
+        )
+
+        if not text:
+            logger.warning("Gemini returned empty text for invoice")
+            return None
+
+        # Strip markdown code fences if present
+        text = text.strip()
+        if text.startswith("```"):
+            text = re.sub(r"^```\w*\n?", "", text)
+            text = re.sub(r"\n?```$", "", text)
+            text = text.strip()
+
+        result = json_module.loads(text)
+
+        if not isinstance(result, dict):
+            logger.warning(f"Gemini invoice returned non-dict: {type(result)}")
+            return None
+
+        # Convert amount to cents (integer) for normalize_invoice_data compatibility
+        for field in ("amount", "subtotal", "tax"):
+            if result.get(field) is not None:
+                result[field] = int(float(result[field]) * 100)
+
+        # Normalize line items
+        lines = result.get("lines") or []
+        for line in lines:
+            for field in ("unit_price", "tax", "total"):
+                if line.get(field) is not None:
+                    line[field] = float(line[field])
+            if line.get("quantity") is not None:
+                line["quantity"] = float(line["quantity"])
+
+        logger.info(
+            f"Gemini invoice extracted: issuer={result.get('issuer')}, "
+            f"total={result.get('amount')}, lines={len(lines)}"
+        )
+
+        return result
+
+    except json_module.JSONDecodeError as e:
+        logger.warning(f"Gemini invoice JSON parse error: {e}")
+        return None
+    except httpx.TimeoutException:
+        logger.warning("Gemini invoice request timed out")
+        return None
+    except Exception as e:
+        logger.warning(f"Gemini invoice extraction failed: {e}")
+        return None
+# CLAUDE-CHECKPOINT
+
+
 @app.get("/health")
 def health() -> Dict[str, Any]:
     """Health check endpoint."""
@@ -1457,6 +1753,20 @@ async def parse_invoice(file: UploadFile = File(...)) -> JSONResponse:
             return JSONResponse(content=normalized)
 
         if is_image:
+            # Primary: try Gemini Vision for accurate extraction
+            fname = (file.filename or "").lower()
+            if fname.endswith(".png"):
+                img_mime = "image/png"
+            else:
+                img_mime = "image/jpeg"
+
+            gemini_raw = await _extract_invoice_with_gemini(contents, img_mime)
+            if gemini_raw:
+                normalized = normalize_invoice_data(gemini_raw)
+                normalized["extraction_method"] = "gemini"
+                return JSONResponse(content=normalized)
+
+            # Fallback: Tesseract OCR + regex parser
             if pytesseract is None or Image is None:
                 raise HTTPException(
                     status_code=500,
@@ -1469,6 +1779,7 @@ async def parse_invoice(file: UploadFile = File(...)) -> JSONResponse:
 
             raw = _parse_text_to_raw(text)
             normalized = normalize_invoice_data(raw)
+            normalized["extraction_method"] = "tesseract"
             return JSONResponse(content=normalized)
 
         raise HTTPException(status_code=400, detail="Unsupported file type")
@@ -1524,69 +1835,82 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             f"Detected: bank={bank_code}, date={statement_date}, account={account_number}"
         )
 
-        # Step 2: Try multiple PSM modes with TSV extraction
-        debug_tsv_lines: Dict[str, List[str]] = {}
+        # Step 2: Primary extraction via Gemini Vision (if available)
         transactions: List[Dict[str, Any]] = []
         extraction_method = "none"
         avg_confidence = 0.0
+
+        # Determine MIME type for Gemini
+        fname = (file.filename or "").lower()
+        if fname.endswith(".png"):
+            mime_type = "image/png"
+        elif fname.endswith(".pdf"):
+            mime_type = "application/pdf"
+        else:
+            mime_type = "image/jpeg"
+
+        gemini_txs = await _extract_with_gemini(contents, mime_type)
+        if gemini_txs:
+            transactions = gemini_txs
+            extraction_method = "gemini"
+            avg_confidence = 95.0  # Gemini Vision is high-confidence
+            logger.info(
+                f"Gemini Vision extracted {len(transactions)} transactions"
+            )
+
+        # Step 3: Fallback to Tesseract TSV extraction if Gemini unavailable/failed
+        debug_tsv_lines: Dict[str, List[str]] = {}
         winning_key = ""
 
-        for psm, img_label, img in [
-            (6, "original", original_image),
-            (6, "preprocessed", processed_image),
-            (4, "original", original_image),
-            (3, "original", original_image),
-        ]:
-            if transactions:
-                break
-            attempt_key = f"psm{psm}_{img_label}"
-            logger.info(f"TSV attempt: {attempt_key}")
-            tsv_data = pytesseract.image_to_data(
-                img, lang=langs, config=f"--oem 3 --psm {psm}",
-                output_type=pytesseract.Output.DICT,
-            )
-            txs, tsv_lines = _extract_table_from_tsv(
-                tsv_data, width, own_account=account_number
-            )
-            if tsv_lines:
-                debug_tsv_lines[attempt_key] = tsv_lines[:60]
-            if txs:
-                # Filter noise: remove transactions with zero amounts AND
-                # no valid account. Keep zero-amount txs that have a real
-                # account (15+ digits) — user can fill amounts manually.
-                txs = [
-                    tx for tx in txs
-                    if (
-                        tx.get("debit", 0) > 0
-                        or tx.get("credit", 0) > 0
-                        or (
-                            tx.get("counterparty_account")
-                            and len(str(tx["counterparty_account"])) >= 15
-                        )
-                    )
-                ]
-            if txs:
-                transactions = txs
-                extraction_method = f"tsv_{attempt_key}"
-                winning_key = attempt_key
-                all_confs = [
-                    int(c) for c in tsv_data.get("conf", []) if int(c) > 0
-                ]
-                avg_confidence = (
-                    sum(all_confs) / len(all_confs) if all_confs else 0
+        if not transactions:
+            logger.info("Gemini unavailable/failed, falling back to Tesseract")
+            for psm, img_label, img in [
+                (6, "original", original_image),
+                (6, "preprocessed", processed_image),
+                (4, "original", original_image),
+                (3, "original", original_image),
+            ]:
+                if transactions:
+                    break
+                attempt_key = f"psm{psm}_{img_label}"
+                logger.info(f"TSV attempt: {attempt_key}")
+                tsv_data = pytesseract.image_to_data(
+                    img, lang=langs, config=f"--oem 3 --psm {psm}",
+                    output_type=pytesseract.Output.DICT,
                 )
+                txs, tsv_lines = _extract_table_from_tsv(
+                    tsv_data, width, own_account=account_number
+                )
+                if tsv_lines:
+                    debug_tsv_lines[attempt_key] = tsv_lines[:60]
+                if txs:
+                    txs = [
+                        tx for tx in txs
+                        if (
+                            tx.get("debit", 0) > 0
+                            or tx.get("credit", 0) > 0
+                            or (
+                                tx.get("counterparty_account")
+                                and len(str(tx["counterparty_account"])) >= 15
+                            )
+                        )
+                    ]
+                if txs:
+                    transactions = txs
+                    extraction_method = f"tsv_{attempt_key}"
+                    winning_key = attempt_key
+                    all_confs = [
+                        int(c) for c in tsv_data.get("conf", []) if int(c) > 0
+                    ]
+                    avg_confidence = (
+                        sum(all_confs) / len(all_confs) if all_confs else 0
+                    )
 
         if not transactions:
             # Final fallback: parse from plain text using regex patterns
             logger.info("All TSV extraction failed, falling back to plain-text")
             transactions = _extract_transactions_from_text(plain_text)
             extraction_method = "text_fallback" if transactions else "none"
-            all_confs = [
-                int(c) for c in tsv_data.get("conf", []) if int(c) > 0
-            ]
-            avg_confidence = (
-                sum(all_confs) / len(all_confs) if all_confs else 0
-            )
 
         # Re-number transactions sequentially after filtering
         for i, tx in enumerate(transactions):
@@ -1612,7 +1936,7 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             "image_height": height,
         }
 
-        # Include TSV lines from winning attempt (or first available)
+        # Include TSV debug lines if Tesseract was used
         if debug_tsv_lines:
             key = winning_key if winning_key in debug_tsv_lines else next(iter(debug_tsv_lines))
             response["debug_tsv_lines"] = debug_tsv_lines[key]
