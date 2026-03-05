@@ -4189,6 +4189,7 @@
     "scan_title": "Scan Supplier Invoice",
     "scanned_receipt": "Scanned Invoice",
     "show_ocr_text": "Show OCR Text",
+    "tax_id": "Tax ID (EDB)",
     "upload_receipt": "Upload Invoice (JPEG/PNG/PDF)",
     "uploaded_image": "Uploaded Image"
   },

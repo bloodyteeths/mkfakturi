@@ -11,8 +11,18 @@ export const useReceiptScannerStore = (useWindow = false) => {
       lastResult: null,
       isScanning: false,
       processingStep: 0,
+      // Holds scanned bill data for passing to Create page
+      scannedBillData: null,
     }),
     actions: {
+      setScannedBillData(data) {
+        this.scannedBillData = data
+      },
+      consumeScannedBillData() {
+        const data = this.scannedBillData
+        this.scannedBillData = null
+        return data
+      },
       scanReceipt(file) {
         this.processingStep = 0
         this.isScanning = true

@@ -136,7 +136,13 @@ class ReceiptScannerController extends Controller
                     'supplier' => $parseResult['supplier']['name'] ?? null,
                 ]);
 
-                $imageUrl = url('api/v1/receipts/image/'.$ocrFilePath);
+                // Generate image URL: prefer S3 temporary URL (avoids proxying large files through PHP)
+                try {
+                    $imageUrl = Storage::disk($disk)->temporaryUrl($ocrFilePath, now()->addHours(2));
+                } catch (\RuntimeException $e) {
+                    // Fallback for local disk or drivers that don't support temporary URLs
+                    $imageUrl = url('api/v1/receipts/image/'.$ocrFilePath);
+                }
 
                 // Map structured Gemini response to bill form fields
                 $parsedData = [

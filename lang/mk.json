@@ -1082,6 +1082,7 @@
     "ocr_text": "OCR текст",
     "no_text_extracted": "Нема извлечен текст",
     "show_ocr_text": "Прикажи OCR текст",
+    "tax_id": "Даночен број (ЕДБ)",
     "create_bill_from_scan": "Креирај трошок од скен"
   },
   "items": {

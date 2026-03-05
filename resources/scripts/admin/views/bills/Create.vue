@@ -254,6 +254,7 @@ import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useTaxTypeStore } from '@/scripts/admin/stores/tax-type'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useItemStore } from '@/scripts/admin/stores/item'
+import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
 import ScannerModeToggle from '@/scripts/admin/components/ScannerModeToggle.vue'
 import { useBarcodeScanner } from '@/scripts/admin/composables/useBarcodeScanner'
 
@@ -265,6 +266,7 @@ const companyStore = useCompanyStore()
 const taxTypeStore = useTaxTypeStore()
 const stockStore = useStockStore()
 const itemStore = useItemStore()
+const receiptScannerStore = useReceiptScannerStore()
 
 // Stock module integration
 const stockEnabled = computed(() => {
@@ -564,8 +566,33 @@ onMounted(async () => {
       hydrateForm(response.data.data)
     })
   } else {
-    // Pre-fill from query params (e.g., from receipt scanner)
-    if (route.query.scanned_receipt_path) {
+    // Pre-fill from receipt scanner store (full scanned data with line items)
+    const scannedData = receiptScannerStore.consumeScannedBillData()
+    if (scannedData) {
+      const sb = scannedData.bill
+      bill.bill_number = sb.bill_number || ''
+      bill.bill_date = sb.bill_date || ''
+      bill.due_date = sb.due_date || ''
+      bill.scanned_receipt_path = sb.scanned_receipt_path || null
+
+      // Pre-fill line items from scan
+      if (scannedData.items && scannedData.items.length > 0) {
+        items.splice(0, items.length, ...scannedData.items.map((si) => ({
+          item_id: null,
+          name: si.name || '',
+          description: si.description || '',
+          quantity: si.quantity || 1,
+          price: si.price || 0,
+          taxes: [],
+          warehouse_id: null,
+          track_quantity: false,
+          selectedItem: null,
+        })))
+      }
+    }
+
+    // Legacy: pre-fill from query params
+    if (route.query.scanned_receipt_path && !scannedData) {
       bill.scanned_receipt_path = route.query.scanned_receipt_path
     }
 

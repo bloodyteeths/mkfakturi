@@ -32,15 +32,22 @@
           :steps="receiptSteps"
         />
 
-        <!-- Results Layout: Full-size Image -->
+        <!-- Results Layout: Image + Extracted Data -->
         <div v-if="scanResult" class="mt-6">
-          <BaseHeading tag="h3" size="sm" class="mb-3">
-            {{ $t('receipts.scanned_receipt') }}
-          </BaseHeading>
+          <div class="flex items-center justify-between mb-3">
+            <BaseHeading tag="h3" size="sm">
+              {{ $t('receipts.scanned_receipt') }}
+            </BaseHeading>
+            <span v-if="scanResult.extraction_method" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              :class="scanResult.extraction_method === 'gemini' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'"
+            >
+              {{ scanResult.extraction_method === 'gemini' ? 'Gemini AI' : 'Tesseract OCR' }}
+            </span>
+          </div>
 
-          <!-- Full-width, full-size image with better display for tall receipts -->
+          <!-- Full-width image preview -->
           <div class="border rounded-lg overflow-hidden bg-gray-50">
-            <div class="overflow-auto" style="max-height: 70vh;">
+            <div class="overflow-auto" style="max-height: 50vh;">
               <img
                 :src="scanResult.image_url"
                 :alt="$t('receipts.receipt_image')"
@@ -54,20 +61,9 @@
           <p v-if="imageLoadError" class="text-red-600 text-sm mt-2">
             Failed to load image: {{ imageLoadError }}
           </p>
-          <p v-else-if="imageLoaded" class="text-green-600 text-sm mt-2">
-            Image loaded: {{ imageWidth }}x{{ imageHeight }}px
-          </p>
 
-          <div v-if="scanResult.extraction_method" class="mt-2">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-              :class="scanResult.extraction_method === 'gemini' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'"
-            >
-              {{ scanResult.extraction_method === 'gemini' ? 'Extracted with Gemini AI' : 'Extracted with Tesseract OCR' }}
-            </span>
-          </div>
-
-          <!-- Bottom: Bill Creation Form -->
-          <div class="mt-8">
+          <!-- Bill Header Form -->
+          <div class="mt-6">
             <BaseHeading tag="h3" size="sm" class="mb-4">
               {{ $t('receipts.create_bill_from_scan') }}
             </BaseHeading>
@@ -78,6 +74,14 @@
                     v-model="billForm.vendor"
                     type="text"
                     :placeholder="$t('bills.vendor_placeholder')"
+                  />
+                </BaseInputGroup>
+
+                <BaseInputGroup :label="$t('receipts.tax_id') || 'Tax ID'">
+                  <BaseInput
+                    v-model="billForm.tax_id"
+                    type="text"
+                    placeholder="e.g. MK4030009544251"
                   />
                 </BaseInputGroup>
 
@@ -102,24 +106,110 @@
                     type="date"
                   />
                 </BaseInputGroup>
+              </div>
 
-                <BaseInputGroup :label="$t('bills.amount')">
-                  <BaseInput
-                    v-model="billForm.amount"
-                    type="number"
-                    step="0.01"
-                    :placeholder="$t('bills.amount_placeholder')"
-                  />
-                </BaseInputGroup>
-
-                <BaseInputGroup :label="$t('bills.tax_amount')">
-                  <BaseInput
-                    v-model="billForm.tax_amount"
-                    type="number"
-                    step="0.01"
-                    :placeholder="$t('bills.tax_placeholder')"
-                  />
-                </BaseInputGroup>
+              <!-- Line Items Table -->
+              <div class="mt-6">
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-sm font-medium text-gray-700">{{ $t('bills.items') }}</h4>
+                  <button
+                    type="button"
+                    class="text-sm text-primary-500 hover:text-primary-700"
+                    @click="addLineItem"
+                  >
+                    + {{ $t('bills.add_item') }}
+                  </button>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase w-2/5">
+                          {{ $t('bills.item_name') }}
+                        </th>
+                        <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase w-16">
+                          {{ $t('bills.item_quantity') }}
+                        </th>
+                        <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase w-28">
+                          {{ $t('bills.item_price') }}
+                        </th>
+                        <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase w-24">
+                          {{ $t('bills.tax_amount') }}
+                        </th>
+                        <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase w-28">
+                          {{ $t('bills.total') }}
+                        </th>
+                        <th class="px-3 py-2 w-10"></th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                      <tr v-for="(item, idx) in lineItems" :key="idx" class="hover:bg-gray-50">
+                        <td class="px-3 py-2">
+                          <input
+                            v-model="item.name"
+                            type="text"
+                            class="w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-500 focus:border-primary-500"
+                          />
+                        </td>
+                        <td class="px-3 py-2">
+                          <input
+                            v-model.number="item.quantity"
+                            type="number"
+                            min="0"
+                            step="1"
+                            class="w-full text-right border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-500 focus:border-primary-500"
+                          />
+                        </td>
+                        <td class="px-3 py-2">
+                          <input
+                            v-model.number="item.unit_price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            class="w-full text-right border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-500 focus:border-primary-500"
+                          />
+                        </td>
+                        <td class="px-3 py-2">
+                          <input
+                            v-model.number="item.tax"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            class="w-full text-right border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-500 focus:border-primary-500"
+                          />
+                        </td>
+                        <td class="px-3 py-2">
+                          <input
+                            v-model.number="item.total"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            class="w-full text-right border-gray-300 rounded-md shadow-sm text-sm focus:ring-primary-500 focus:border-primary-500"
+                          />
+                        </td>
+                        <td class="px-3 py-2 text-center">
+                          <button
+                            v-if="lineItems.length > 1"
+                            type="button"
+                            class="text-red-400 hover:text-red-600"
+                            @click="removeLineItem(idx)"
+                          >
+                            &times;
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                    <tfoot class="bg-gray-50 font-medium">
+                      <tr>
+                        <td class="px-3 py-2 text-right" colspan="2">{{ $t('bills.sub_total') }}:</td>
+                        <td class="px-3 py-2 text-right">{{ computedSubtotal.toFixed(2) }}</td>
+                        <td class="px-3 py-2 text-right">{{ computedTax.toFixed(2) }}</td>
+                        <td class="px-3 py-2 text-right">{{ computedTotal.toFixed(2) }}</td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
               </div>
 
               <BaseInputGroup :label="$t('bills.notes')">
@@ -153,7 +243,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
 import AiProcessingOverlay from '@/scripts/admin/components/AiProcessingOverlay.vue'
@@ -173,22 +263,42 @@ const receiptSteps = [
   'Almost done...',
 ]
 
-// Image loading debug
-const imageLoaded = ref(false)
+// Image loading
 const imageLoadError = ref(null)
-const imageWidth = ref(0)
-const imageHeight = ref(0)
 
-// Bill form data
+// Bill header form
 const billForm = ref({
   vendor: '',
+  tax_id: '',
   bill_number: '',
   bill_date: '',
   due_date: '',
-  amount: '',
-  tax_amount: '',
   notes: ''
 })
+
+// Line items (editable)
+const lineItems = reactive([
+  { name: '', quantity: 1, unit_price: 0, tax: 0, total: 0 },
+])
+
+// Computed totals
+const computedSubtotal = computed(() =>
+  lineItems.reduce((sum, item) => sum + ((item.quantity || 0) * (item.unit_price || 0)), 0)
+)
+const computedTax = computed(() =>
+  lineItems.reduce((sum, item) => sum + (Number(item.tax) || 0), 0)
+)
+const computedTotal = computed(() =>
+  lineItems.reduce((sum, item) => sum + (Number(item.total) || 0), 0)
+)
+
+function addLineItem() {
+  lineItems.push({ name: '', quantity: 1, unit_price: 0, tax: 0, total: 0 })
+}
+
+function removeLineItem(idx) {
+  lineItems.splice(idx, 1)
+}
 
 function onFileChange(fieldName, fileOrFiles) {
   const file = Array.isArray(fileOrFiles)
@@ -196,82 +306,105 @@ function onFileChange(fieldName, fileOrFiles) {
     : fileOrFiles
 
   selectedFile.value = file || null
-  // Reset results when a new file is selected
   scanResult.value = null
-  imageLoaded.value = false
   imageLoadError.value = null
 }
 
-function onImageLoad(event) {
-  imageLoaded.value = true
-  imageWidth.value = event.target.naturalWidth
-  imageHeight.value = event.target.naturalHeight
-  console.log('Image loaded successfully:', imageWidth.value, 'x', imageHeight.value)
+function onImageLoad() {
+  imageLoadError.value = null
 }
 
 function onImageError(event) {
   imageLoadError.value = event.target.src
-  console.error('Failed to load image:', event.target.src)
 }
 
 function scan() {
   if (!selectedFile.value) return
 
   scannerStore.scanReceipt(selectedFile.value).then((response) => {
-    console.log('Receipt scan response:', response)
-    console.log('Response data:', response.data)
+    const data = response.data
 
-    // Store the scan result
     scanResult.value = {
-      image_url: response.data.image_url,
-      stored_path: response.data.stored_path,
-      extraction_method: response.data.extraction_method || 'unknown',
+      image_url: data.image_url,
+      stored_path: data.stored_path,
+      extraction_method: data.extraction_method || 'unknown',
     }
 
-    console.log('scanResult set to:', scanResult.value)
+    // Pre-fill header fields
+    if (data.data) {
+      const d = data.data
+      billForm.value.vendor = d.vendor_name || ''
+      billForm.value.tax_id = d.tax_id || ''
+      billForm.value.bill_number = d.bill_number || ''
+      billForm.value.bill_date = d.bill_date || ''
+      billForm.value.due_date = d.due_date || ''
+    }
 
-    // Pre-fill form if structured data is available
-    if (response.data.data) {
-      const data = response.data.data
-      billForm.value.vendor = data.vendor_name || ''
-      billForm.value.bill_number = data.bill_number || ''
-      billForm.value.bill_date = data.bill_date || ''
-      billForm.value.due_date = data.due_date || ''
-      billForm.value.amount = data.total || ''
-      billForm.value.tax_amount = data.tax || ''
+    // Pre-fill line items
+    if (data.data?.line_items && data.data.line_items.length > 0) {
+      lineItems.splice(0, lineItems.length)
+      data.data.line_items.forEach((li) => {
+        lineItems.push({
+          name: li.name || li.description || '',
+          description: li.description || '',
+          quantity: Number(li.quantity) || 1,
+          unit_price: Number(li.unit_price) || 0,
+          tax: Number(li.tax) || 0,
+          total: Number(li.total) || 0,
+        })
+      })
+    } else {
+      // If no line items extracted, show single row with total
+      lineItems.splice(0, lineItems.length)
+      lineItems.push({
+        name: data.data?.vendor_name || '',
+        description: '',
+        quantity: 1,
+        unit_price: Number(data.data?.subtotal) || Number(data.data?.total) || 0,
+        tax: Number(data.data?.tax) || 0,
+        total: Number(data.data?.total) || 0,
+      })
     }
   }).catch((error) => {
     console.error('Scan failed:', error)
-    console.error('Error response:', error.response)
   })
 }
 
 function resetForm() {
   billForm.value = {
     vendor: '',
+    tax_id: '',
     bill_number: '',
     bill_date: '',
     due_date: '',
-    amount: '',
-    tax_amount: '',
     notes: ''
   }
+  lineItems.splice(0, lineItems.length)
+  lineItems.push({ name: '', quantity: 1, unit_price: 0, tax: 0, total: 0 })
 }
 
 function createBill() {
-  // Navigate to bill creation page with pre-filled data and scanned receipt attachment
-  router.push({
-    name: 'bills.create',
-    query: {
-      vendor: billForm.value.vendor,
+  // Store all scanned data in the receipt-scanner store for the Create page to consume
+  scannerStore.setScannedBillData({
+    bill: {
       bill_number: billForm.value.bill_number,
       bill_date: billForm.value.bill_date,
       due_date: billForm.value.due_date,
-      amount: billForm.value.amount,
-      tax_amount: billForm.value.tax_amount,
+      vendor_name: billForm.value.vendor,
+      tax_id: billForm.value.tax_id,
       notes: billForm.value.notes,
-      scanned_receipt_path: scanResult.value?.stored_path
-    }
+      scanned_receipt_path: scanResult.value?.stored_path || null,
+    },
+    items: lineItems.map((item) => ({
+      name: item.name,
+      description: item.description || '',
+      quantity: item.quantity,
+      price: item.unit_price,
+      tax: item.tax,
+      total: item.total,
+    })),
   })
+
+  router.push({ name: 'bills.create' })
 }
 </script>
