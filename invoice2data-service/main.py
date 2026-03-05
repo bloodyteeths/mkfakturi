@@ -1475,9 +1475,8 @@ IMPORTANT:
 - All monetary amounts must be numeric (e.g. 11800.00 not "11,800.00")
 - Amounts are in the smallest visible unit (if the invoice shows 11,800 MKD, return 11800.00)
 - Extract ALL line items from the invoice table
-- For quantity: only use the actual quantity/count column. Do NOT confuse apartment numbers, unit IDs, reference numbers, or serial numbers with quantity. If unsure, use 1.
-- The "total" for each line should be the actual line total amount shown on the invoice
-- The "amount" field should be the grand total of the entire invoice (sum of all lines + tax)
+- For quantity: use the actual count of units. If no quantity column is present, default to 1
+- The "amount" field must equal the grand total shown on the invoice
 - Return ONLY the raw JSON object, no markdown code fences, no explanation
 - If a field is not visible, use null
 - Ensure all string values are properly escaped (no unescaped quotes or special characters)"""
