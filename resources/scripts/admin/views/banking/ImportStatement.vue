@@ -214,48 +214,83 @@
           </p>
         </div>
 
-        <!-- Preview Table -->
+        <!-- Editable hint -->
+        <p class="text-sm text-gray-500 mb-2">
+          {{ $t('banking.edit_before_import_hint') }}
+        </p>
+
+        <!-- Preview Table (editable) -->
         <div class="overflow-x-auto mb-6">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   {{ $t('banking.date') }}
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   {{ $t('banking.description') }}
                 </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                   {{ $t('banking.amount') }}
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   {{ $t('banking.counterparty') }}
                 </th>
-                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                   {{ $t('banking.status') }}
                 </th>
+                <th class="px-3 py-3 w-10"></th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="(tx, index) in previewData.transactions" :key="index">
-                <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
-                  {{ formatDate(tx.transaction_date) }}
+              <tr
+                v-for="(tx, index) in previewData.transactions"
+                :key="index"
+                :class="tx.excluded ? 'opacity-40 bg-gray-50' : ''"
+              >
+                <td class="px-3 py-2 whitespace-nowrap">
+                  <input
+                    v-model="tx.transaction_date"
+                    type="date"
+                    :disabled="tx.is_duplicate || tx.excluded"
+                    class="w-full text-sm border border-gray-200 rounded px-2 py-1.5 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 disabled:text-gray-400"
+                  />
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
-                  {{ tx.description }}
+                <td class="px-3 py-2">
+                  <input
+                    v-model="tx.description"
+                    type="text"
+                    :disabled="tx.is_duplicate || tx.excluded"
+                    class="w-full text-sm border border-gray-200 rounded px-2 py-1.5 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 disabled:text-gray-400"
+                  />
                 </td>
-                <td
-                  class="px-4 py-3 text-sm font-medium text-right whitespace-nowrap"
-                  :class="tx.amount >= 0 ? 'text-green-600' : 'text-red-600'"
-                >
-                  {{ formatMoney(tx.amount, tx.currency) }}
+                <td class="px-3 py-2">
+                  <input
+                    v-model.number="tx.amount"
+                    type="number"
+                    step="0.01"
+                    :disabled="tx.is_duplicate || tx.excluded"
+                    class="w-28 text-sm text-right border border-gray-200 rounded px-2 py-1.5 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 disabled:text-gray-400"
+                    :class="tx.amount >= 0 ? 'text-green-700' : 'text-red-700'"
+                  />
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
-                  {{ tx.counterparty_name || '-' }}
+                <td class="px-3 py-2">
+                  <input
+                    v-model="tx.counterparty_name"
+                    type="text"
+                    :disabled="tx.is_duplicate || tx.excluded"
+                    class="w-full text-sm border border-gray-200 rounded px-2 py-1.5 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 disabled:text-gray-400"
+                  />
                 </td>
-                <td class="px-4 py-3 text-center">
+                <td class="px-3 py-2 text-center">
                   <span
-                    v-if="tx.is_duplicate"
+                    v-if="tx.excluded"
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                  >
+                    {{ $t('banking.excluded') }}
+                  </span>
+                  <span
+                    v-else-if="tx.is_duplicate"
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
                   >
                     {{ $t('banking.duplicate') }}
@@ -266,6 +301,18 @@
                   >
                     {{ $t('banking.new') }}
                   </span>
+                </td>
+                <td class="px-3 py-2 text-center">
+                  <button
+                    v-if="!tx.is_duplicate"
+                    type="button"
+                    class="text-gray-400 hover:text-red-500 transition-colors"
+                    :title="tx.excluded ? $t('banking.include_transaction') : $t('banking.exclude_transaction')"
+                    @click="toggleExclude(index)"
+                  >
+                    <XMarkIcon v-if="!tx.excluded" class="w-5 h-5" />
+                    <ArrowUturnLeftIcon v-else class="w-5 h-5 text-green-500" />
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -289,10 +336,10 @@
             <BaseButton
               variant="primary"
               :loading="isImporting"
-              :disabled="!previewData.new || previewData.new === 0"
+              :disabled="importableCount === 0"
               @click="confirmImport"
             >
-              {{ $t('banking.import_transactions', { count: previewData.new || 0 }) }}
+              {{ $t('banking.import_transactions', { count: importableCount }) }}
             </BaseButton>
           </div>
         </div>
@@ -349,6 +396,8 @@ import {
   DocumentArrowUpIcon,
   DocumentCheckIcon,
   CheckCircleIcon,
+  XMarkIcon,
+  ArrowUturnLeftIcon,
 } from '@heroicons/vue/24/outline'
 import AiProcessingOverlay from '@/scripts/admin/components/AiProcessingOverlay.vue'
 
@@ -427,6 +476,11 @@ const isImageUpload = computed(() => {
   if (!uploadedFile.value) return false
   const name = uploadedFile.value.name.toLowerCase()
   return name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.pdf')
+})
+
+const importableCount = computed(() => {
+  if (!previewData.value.transactions) return 0
+  return previewData.value.transactions.filter(tx => !tx.is_duplicate && !tx.excluded).length
 })
 
 // Methods
@@ -513,14 +567,29 @@ const uploadAndPreview = async () => {
   }
 }
 
+const toggleExclude = (index) => {
+  const tx = previewData.value.transactions[index]
+  tx.excluded = !tx.excluded
+}
+
 const confirmImport = async () => {
   if (!importId.value) return
 
   isImporting.value = true
 
   try {
+    // Send edited transactions so backend can apply user changes
+    const editedTransactions = previewData.value.transactions.map(tx => ({
+      transaction_date: tx.transaction_date,
+      description: tx.description,
+      amount: tx.amount,
+      counterparty_name: tx.counterparty_name || null,
+      excluded: !!tx.excluded,
+    }))
+
     const response = await axios.post('/banking/import/confirm', {
       import_id: importId.value,
+      transactions: editedTransactions,
     })
 
     importResult.value = response.data.data

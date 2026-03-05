@@ -216,6 +216,12 @@ class BankImportController extends Controller
         try {
             $request->validate([
                 'import_id' => 'required|string|uuid',
+                'transactions' => 'sometimes|array',
+                'transactions.*.transaction_date' => 'sometimes|date',
+                'transactions.*.description' => 'sometimes|string|max:500',
+                'transactions.*.amount' => 'sometimes|numeric',
+                'transactions.*.counterparty_name' => 'sometimes|nullable|string|max:255',
+                'transactions.*.excluded' => 'sometimes|boolean',
             ]);
 
             $importId = $request->import_id;
@@ -234,6 +240,31 @@ class BankImportController extends Controller
                     'error' => true,
                     'message' => 'Invalid import session',
                 ], 403);
+            }
+
+            // Apply user edits to cached transactions if provided
+            if ($request->has('transactions')) {
+                $userEdits = $request->input('transactions');
+                $cachedTx = $importData['transactions'];
+                $editableFields = ['transaction_date', 'description', 'amount', 'counterparty_name'];
+
+                foreach ($userEdits as $index => $edit) {
+                    if (!isset($cachedTx[$index])) {
+                        continue;
+                    }
+                    // Mark excluded transactions as duplicates so they're skipped
+                    if (!empty($edit['excluded'])) {
+                        $cachedTx[$index]['is_duplicate'] = true;
+
+                        continue;
+                    }
+                    foreach ($editableFields as $field) {
+                        if (array_key_exists($field, $edit)) {
+                            $cachedTx[$index][$field] = $edit[$field];
+                        }
+                    }
+                }
+                $importData['transactions'] = $cachedTx;
             }
 
             // P0-13: Validate bank account belongs to the company (tenant-scoped)
