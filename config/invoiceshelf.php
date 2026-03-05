@@ -774,6 +774,18 @@ return [
             'model' => '',
             'feature_flag' => 'accounting_backbone',
         ],
+        [
+            'title' => 'partner.accounting.inventory',
+            'group' => 'partner.accounting',
+            'submenu' => 'reports',
+            'link' => '/admin/partner/accounting/inventory',
+            'icon' => 'ArchiveBoxIcon',
+            'name' => 'partner.accounting.inventory',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
         // Submenu: Даноци и плати (Tax & Payroll)
         [
             'title' => 'partner.accounting.vat_returns',

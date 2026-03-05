@@ -1171,6 +1171,12 @@ export default [
         meta: { isPartner: true },
         component: () => import('@/scripts/admin/views/partner/accounting/PayrollReports.vue'),
       },
+      {
+        path: 'partner/accounting/inventory',
+        name: 'partner.accounting.inventory',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/PartnerInventory.vue'),
+      },
 
       // Banking
       {

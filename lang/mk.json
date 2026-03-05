@@ -5783,6 +5783,7 @@
       "vat_returns_tab": "ДДВ пријави (ДДВ-04)",
       "payroll_reports": "Извештаи за плати",
       "fixed_assets": "Основни средства",
+      "inventory": "Материјално / Залиха",
       "equity_changes": "Промени во капитал",
       "cash_flow": "Извештај за парични текови",
       "select_export_scope": "Избери опсег за извоз",
