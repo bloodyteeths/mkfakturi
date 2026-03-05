@@ -465,9 +465,12 @@ async function loadLedger() {
   ledgerData.value = null
 
   try {
+    // Find the selected account's code to pass to IFRS adapter
+    const selectedAccount = accounts.value.find(a => a.id === filters.value.account_id)
     const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/general-ledger`, {
       params: {
         account_id: filters.value.account_id,
+        account_code: selectedAccount?.code || null,
         from_date: filters.value.start_date,
         to_date: filters.value.end_date,
       },

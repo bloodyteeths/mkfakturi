@@ -49,15 +49,29 @@ class PartnerAccountingReportsController extends Controller
         $fromDate = $request->query('from_date', now()->startOfYear()->toDateString());
         $toDate = $request->query('to_date', now()->toDateString());
         $accountId = $request->query('account_id');
+        $accountCode = $request->query('account_code');
 
-        if (!$accountId) {
+        if (!$accountId && !$accountCode) {
             return response()->json([
                 'success' => false,
-                'message' => 'Account ID is required',
+                'message' => 'Account ID or code is required',
             ], 400);
         }
 
-        $ledger = $this->ifrsAdapter->getGeneralLedger($companyModel, (int) $accountId, $fromDate, $toDate);
+        // If account_code provided, look up by code in IFRS; otherwise try by ID
+        // The account_id from the dropdown is from the `accounts` table (App\Models\Account),
+        // but IfrsAdapter needs IFRS account IDs. Pass code so it can find the right IFRS account.
+        if ($accountCode) {
+            $ledger = $this->ifrsAdapter->getGeneralLedger($companyModel, null, $fromDate, $toDate, $accountCode);
+        } else {
+            // Try to get the account code from the App\Models\Account table
+            $appAccount = \App\Models\Account::where('company_id', $company)->find($accountId);
+            if ($appAccount && $appAccount->code) {
+                $ledger = $this->ifrsAdapter->getGeneralLedger($companyModel, null, $fromDate, $toDate, $appAccount->code);
+            } else {
+                $ledger = $this->ifrsAdapter->getGeneralLedger($companyModel, (int) $accountId, $fromDate, $toDate);
+            }
+        }
 
         return response()->json([
             'success' => true,
