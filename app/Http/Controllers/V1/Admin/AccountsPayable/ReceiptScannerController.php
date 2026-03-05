@@ -52,6 +52,9 @@ class ReceiptScannerController extends Controller
             // Authorize based on Bill creation
             $this->authorize('create', Bill::class);
 
+            // Read file contents once (avoids S3 round-trip for non-PDF images)
+            $rawContents = file_get_contents($file->getPathname());
+
             $disk = config('filesystems.default', 'local');
             $storedPath = $file->store('scanned-receipts/'.$companyId, ['disk' => $disk]);
             $ocrFilePath = $storedPath;
@@ -124,10 +127,15 @@ class ReceiptScannerController extends Controller
                     'was_pdf' => $isPdf,
                 ]);
 
+                // For non-PDF: pass raw file contents directly (skip S3 read-back)
+                // For PDF: converted image is already in S3, rawContents won't match
+                $parseContents = $isPdf ? null : $rawContents;
+
                 $parseResult = $parserClient->parseReceipt(
                     $companyId,
                     $ocrFilePath,
-                    $ocrFileName
+                    $ocrFileName,
+                    $parseContents
                 );
 
                 \Log::info('ReceiptScannerController::scan - Parse completed', [

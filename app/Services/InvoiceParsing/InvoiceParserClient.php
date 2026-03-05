@@ -23,5 +23,5 @@ interface InvoiceParserClient
      *
      * @return array<string,mixed>
      */
-    public function parseReceipt(int $companyId, string $filePath, string $originalName): array;
+    public function parseReceipt(int $companyId, string $filePath, string $originalName, ?string $rawContents = null): array;
 } // CLAUDE-CHECKPOINT

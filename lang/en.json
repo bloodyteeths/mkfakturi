@@ -178,6 +178,7 @@
   },
   "banking": {
     "account": "Account",
+    "ai_warning": "AI extraction can make mistakes. Please double-check all transactions before importing.",
     "account_name": "Account Name",
     "account_number": "Account Number",
     "accounts": "Accounts",
@@ -2840,7 +2841,8 @@
     "tax_tools": "Tax Tools",
     "users": "Users",
     "warehouses": "Warehouses",
-    "payouts": "Payouts"
+    "payouts": "Payouts",
+    "partners": "Partners"
   },
   "navigation_hints": {
     "dashboard": "Overview of your business: revenue, expenses, and key metrics",
@@ -2868,7 +2870,8 @@
     "settings": "Application configuration and preferences",
     "support_tickets": "Get help and submit support requests",
     "all_support_tickets": "View all support tickets",
-    "payouts": "Partner commission payouts"
+    "payouts": "Partner commission payouts",
+    "partners": "Manage partner accounts and portfolios"
   },
   "notification_view_estimate": "[Notification] Estimate viewed",
   "notification_view_invoice": "[Notification] Invoice viewed",
@@ -4179,6 +4182,7 @@
     "view_project": "View Project"
   },
   "receipts": {
+    "ai_warning": "AI extraction can make mistakes. Please double-check all values before creating the bill.",
     "create_bill_from_scan": "Create Bill from Scan",
     "document_type": "Document Type",
     "no_text_extracted": "No text extracted",

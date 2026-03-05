@@ -46,6 +46,12 @@
                 {{ scanResult.extraction_method === 'gemini' ? 'Gemini AI' : 'Tesseract OCR' }}
               </span>
             </div>
+            <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
+              <span class="text-amber-500 mt-0.5">&#9888;</span>
+              <p class="text-sm text-amber-700">
+                {{ $t('receipts.ai_warning') }}
+              </p>
+            </div>
             <div class="bg-white border rounded-lg p-6 space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <BaseInputGroup :label="$t('bills.vendor')">

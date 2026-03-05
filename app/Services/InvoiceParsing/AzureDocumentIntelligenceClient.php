@@ -698,7 +698,7 @@ class AzureDocumentIntelligenceClient implements InvoiceParserClient
     {
         return (int) config('services.azure_document_intelligence.timeout', 120);
     }
-    public function parseReceipt(int $companyId, string $filePath, string $originalName): array
+    public function parseReceipt(int $companyId, string $filePath, string $originalName, ?string $rawContents = null): array
     {
         return $this->parse($companyId, $filePath, $originalName, '', null);
     }

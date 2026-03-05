@@ -214,6 +214,14 @@
           </p>
         </div>
 
+        <!-- AI warning for image-based imports -->
+        <div v-if="previewData.ocr_confidence" class="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
+          <span class="text-amber-500 mt-0.5">&#9888;</span>
+          <p class="text-sm text-amber-700">
+            {{ $t('banking.ai_warning') }}
+          </p>
+        </div>
+
         <!-- Editable hint -->
         <p class="text-sm text-gray-500 mb-2">
           {{ $t('banking.edit_before_import_hint') }}

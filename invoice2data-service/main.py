@@ -1488,6 +1488,42 @@ IMPORTANT:
 - Ensure all string values are properly escaped (no unescaped quotes or special characters)"""
 
 
+def _resize_image_for_gemini(contents: bytes, max_dimension: int = 1600) -> bytes:
+    """
+    Resize image to max_dimension on longest side to reduce Gemini API latency.
+    A 4MB photo becomes ~300-500KB, dramatically faster to upload and process.
+    """
+    logger = logging.getLogger(__name__)
+    try:
+        if Image is None:
+            return contents
+
+        img = Image.open(io.BytesIO(contents))
+        w, h = img.size
+
+        if max(w, h) <= max_dimension:
+            logger.info(f"Image {w}x{h} already within {max_dimension}px, no resize needed")
+            return contents
+
+        ratio = max_dimension / max(w, h)
+        new_w, new_h = int(w * ratio), int(h * ratio)
+        img = img.resize((new_w, new_h), Image.LANCZOS)
+
+        buf = io.BytesIO()
+        fmt = "PNG" if img.mode == "RGBA" else "JPEG"
+        img.save(buf, format=fmt, quality=85)
+        resized = buf.getvalue()
+
+        logger.info(
+            f"Resized image {w}x{h} ({len(contents)//1024}KB) -> "
+            f"{new_w}x{new_h} ({len(resized)//1024}KB)"
+        )
+        return resized
+    except Exception as e:
+        logger.warning(f"Image resize failed, using original: {e}")
+        return contents
+
+
 async def _extract_invoice_with_gemini(
     contents: bytes, mime_type: str = "image/jpeg"
 ) -> Optional[Dict[str, Any]]:
@@ -1501,6 +1537,11 @@ async def _extract_invoice_with_gemini(
     if not api_key:
         logger.info("GEMINI_API_KEY not set, skipping Gemini invoice extraction")
         return None
+
+    # Resize large images to reduce upload size and Gemini processing time
+    contents = _resize_image_for_gemini(contents)
+    if mime_type == "image/png" and not contents[:4] == b'\x89PNG':
+        mime_type = "image/jpeg"  # resize may have converted PNG to JPEG
 
     model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     url = (

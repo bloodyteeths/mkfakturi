@@ -110,29 +110,30 @@ class Invoice2DataClient implements InvoiceParserClient
      *
      * @throws \App\Services\InvoiceParsing\Invoice2DataServiceException
      */
-    public function parseReceipt(int $companyId, string $filePath, string $originalName): array
+    public function parseReceipt(int $companyId, string $filePath, string $originalName, ?string $rawContents = null): array
     {
-        $disk = config('filesystems.default', 'local');
-        $fileContents = Storage::disk($disk)->get($filePath);
+        $start = microtime(true);
+
+        // Use raw contents if provided (avoids S3 round-trip), otherwise read from storage
+        if ($rawContents !== null) {
+            $fileContents = $rawContents;
+        } else {
+            $disk = config('filesystems.default', 'local');
+            $fileContents = Storage::disk($disk)->get($filePath);
+        }
+
+        $readTime = round((microtime(true) - $start) * 1000);
 
         $baseUrl = rtrim(config('services.invoice2data.url'), '/');
         if (! str_starts_with($baseUrl, 'http://') && ! str_starts_with($baseUrl, 'https://')) {
             $baseUrl = 'https://'.$baseUrl;
         }
 
-        // Longer timeout for receipt parsing: cold start + image upload + Gemini Vision API
         $timeout = (int) config('services.invoice2data.timeout', 90);
         $parseTimeout = max($timeout, 180);
 
         try {
-            // Warm up the service with a quick health check (handles Railway cold starts)
-            try {
-                Http::timeout(15)->connectTimeout(10)->get($baseUrl.'/health');
-            } catch (\Throwable $e) {
-                Log::info('invoice2data-service health check failed, proceeding anyway', [
-                    'error' => $e->getMessage(),
-                ]);
-            }
+            $apiStart = microtime(true);
 
             $response = Http::timeout($parseTimeout)
                 ->connectTimeout(30)
@@ -141,6 +142,16 @@ class Invoice2DataClient implements InvoiceParserClient
                     'company_id' => $companyId,
                     'request_id' => (string) Str::uuid(),
                 ]);
+
+            $apiTime = round((microtime(true) - $apiStart) * 1000);
+            $totalTime = round((microtime(true) - $start) * 1000);
+
+            Log::info('parseReceipt timing', [
+                'file_read_ms' => $readTime,
+                'api_call_ms' => $apiTime,
+                'total_ms' => $totalTime,
+                'file_size_kb' => round(strlen($fileContents) / 1024),
+            ]);
 
             $response->throw();
 
