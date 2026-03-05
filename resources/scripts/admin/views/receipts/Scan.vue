@@ -14,6 +14,7 @@
             v-model="files"
             accept="image/*,application/pdf"
             :multiple="false"
+            :preserve-local-files="true"
             @change="onFileChange"
           />
         </BaseInputGroup>
@@ -202,6 +203,11 @@
                         <td class="px-3 py-2 text-right">{{ computedTotal.toFixed(2) }}</td>
                         <td></td>
                       </tr>
+                      <tr v-if="invoiceTotal !== null" class="border-t-2 border-gray-300">
+                        <td class="px-3 py-2 text-right font-bold" colspan="4">{{ $t('bills.total') }}:</td>
+                        <td class="px-3 py-2 text-right font-bold">{{ invoiceTotal.toFixed(2) }}</td>
+                        <td></td>
+                      </tr>
                     </tfoot>
                   </table>
                 </div>
@@ -238,7 +244,7 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive, onBeforeUnmount } from 'vue'
+import { computed, ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
 import AiProcessingOverlay from '@/scripts/admin/components/AiProcessingOverlay.vue'
@@ -251,8 +257,8 @@ const files = ref([])
 // Scan result data
 const scanResult = ref(null)
 
-// Local image URL from the file the user uploaded (no server fetch needed)
-const localImageUrl = ref(null)
+// Image preview: use the base64 data URL that BaseFileUploader already generates
+const localImageUrl = computed(() => files.value?.[0]?.image || null)
 
 const receiptSteps = [
   'Uploading document...',
@@ -261,12 +267,8 @@ const receiptSteps = [
   'Almost done...',
 ]
 
-// Clean up object URL on unmount
-onBeforeUnmount(() => {
-  if (localImageUrl.value) {
-    URL.revokeObjectURL(localImageUrl.value)
-  }
-})
+// Invoice grand total from Gemini (the actual total on the invoice)
+const invoiceTotal = ref(null)
 
 // Bill header form
 const billForm = ref({
@@ -309,16 +311,6 @@ function onFileChange(fieldName, fileOrFiles) {
 
   selectedFile.value = file || null
   scanResult.value = null
-
-  // Create local preview URL from the uploaded file
-  if (localImageUrl.value) {
-    URL.revokeObjectURL(localImageUrl.value)
-  }
-  if (file) {
-    localImageUrl.value = URL.createObjectURL(file)
-  } else {
-    localImageUrl.value = null
-  }
 }
 
 function scan() {
@@ -340,6 +332,7 @@ function scan() {
       billForm.value.bill_number = d.bill_number || ''
       billForm.value.bill_date = d.bill_date || ''
       billForm.value.due_date = d.due_date || ''
+      invoiceTotal.value = d.total !== null && d.total !== undefined ? Number(d.total) : null
     }
 
     // Pre-fill line items
