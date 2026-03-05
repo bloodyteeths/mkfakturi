@@ -676,6 +676,18 @@ return [
             'model' => '',
             'feature_flag' => 'accounting_backbone',
         ],
+        [
+            'title' => 'partner.accounting.sub_ledger',
+            'group' => 'partner.accounting',
+            'submenu' => 'journals',
+            'link' => '/admin/partner/accounting/sub-ledger',
+            'icon' => 'UsersIcon',
+            'name' => 'partner.accounting.sub-ledger',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
         // Submenu: Затворање (Closings)
         [
             'title' => 'partner.accounting.daily_closing',

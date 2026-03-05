@@ -1124,6 +1124,12 @@ export default [
         component: () => import('@/scripts/admin/views/partner/accounting/GeneralLedger.vue'),
       },
       {
+        path: 'partner/accounting/sub-ledger',
+        name: 'partner.accounting.sub-ledger',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/SubLedger.vue'),
+      },
+      {
         path: 'partner/accounting/trial-balance',
         name: 'partner.accounting.trial-balance',
         meta: { isPartner: true },

@@ -52,6 +52,20 @@ class JournalImportService
     ];
 
     /**
+     * Firms map: firma_id => firma_name for counterparty resolution.
+     */
+    protected array $firmsMap = [];
+
+    /**
+     * Set the firms map for resolving counterparty names during import.
+     */
+    public function setFirmsMap(array $firmsMap): self
+    {
+        $this->firmsMap = $firmsMap;
+        return $this;
+    }
+
+    /**
      * Nalog type names (Macedonian).
      */
     protected const NALOG_TYPES = [
@@ -152,7 +166,7 @@ class JournalImportService
                     if (!empty($currentItem)) {
                         $currentItems[] = $this->finalizeItem($currentItem);
                     }
-                    $nalozi[] = $this->buildNalog($currentNalog, $currentItems);
+                    $nalozi[] = $this->buildNalog($currentNalog, $currentItems, $this->firmsMap);
                 }
                 $currentNalog = ['id' => $value];
                 $currentItems = [];
@@ -197,7 +211,7 @@ class JournalImportService
             if (!empty($currentItem)) {
                 $currentItems[] = $this->finalizeItem($currentItem);
             }
-            $nalozi[] = $this->buildNalog($currentNalog, $currentItems);
+            $nalozi[] = $this->buildNalog($currentNalog, $currentItems, $this->firmsMap);
         }
 
         return [
@@ -540,7 +554,7 @@ class JournalImportService
     /**
      * Build a nalog structure from parsed data.
      */
-    protected function buildNalog(array $nalogMeta, array $items): array
+    protected function buildNalog(array $nalogMeta, array $items, array $firmsMap = []): array
     {
         $lineItems = [];
 
@@ -551,27 +565,33 @@ class JournalImportService
             $name = $this->guessAccountName($code);
             $description = $item['opis'] ?? '';
             $reference = $item['vvrska'] ?? '';
+            $firmaId = $item['firma'] ?? 0;
+            $counterpartyName = null;
+            if ($firmaId > 0 && isset($firmsMap[$firmaId])) {
+                $counterpartyName = $firmsMap[$firmaId];
+            }
+
+            $base = [
+                'account_code' => $code,
+                'account_name' => $name,
+                'description' => $description,
+                'reference' => $reference,
+                'counterparty_name' => $counterpartyName,
+                'firma_id' => $firmaId > 0 ? $firmaId : null,
+            ];
 
             // A line can have both debit AND credit (compound entry)
             if ($dolguva > 0) {
-                $lineItems[] = [
-                    'account_code' => $code,
-                    'account_name' => $name,
+                $lineItems[] = array_merge($base, [
                     'amount' => $dolguva,
                     'credited' => false,
-                    'description' => $description,
-                    'reference' => $reference,
-                ];
+                ]);
             }
             if ($pobaruva > 0) {
-                $lineItems[] = [
-                    'account_code' => $code,
-                    'account_name' => $name,
+                $lineItems[] = array_merge($base, [
                     'amount' => $pobaruva,
                     'credited' => true,
-                    'description' => $description,
-                    'reference' => $reference,
-                ];
+                ]);
             }
         }
 

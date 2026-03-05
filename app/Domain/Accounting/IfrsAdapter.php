@@ -1577,6 +1577,7 @@ class IfrsAdapter
             // Get ledger entries for the period with transaction details
             $entries = DB::table('ifrs_ledgers as l')
                 ->join('ifrs_transactions as t', 'l.transaction_id', '=', 't.id')
+                ->leftJoin('ifrs_line_items as li', 'l.line_item_id', '=', 'li.id')
                 ->where('l.entity_id', $entity->id)
                 ->where('l.post_account', $accountId)
                 ->whereBetween('l.posting_date', [$start->toDateString(), $end->toDateString()])
@@ -1588,6 +1589,7 @@ class IfrsAdapter
                     't.narration',
                     'l.entry_type',
                     'l.amount',
+                    'li.counterparty_name',
                 ])
                 ->orderBy('l.posting_date')
                 ->orderBy('l.id')
@@ -1614,6 +1616,7 @@ class IfrsAdapter
                     'debit' => $debit,
                     'credit' => $credit,
                     'running_balance' => $runningBalance,
+                    'counterparty_name' => $entry->counterparty_name ?? null,
                 ];
             }
 
@@ -1633,6 +1636,151 @@ class IfrsAdapter
                 'account_id' => $accountId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+            ]);
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Get Sub-Ledger (Аналитика по комитент) for an account.
+     * Groups ledger entries by counterparty and shows per-counterparty balances.
+     */
+    public function getSubLedger(Company $company, string $accountCode, string $startDate, string $endDate): array
+    {
+        if (! $this->isEnabled($company->id)) {
+            return ['error' => 'Accounting backbone feature is disabled'];
+        }
+
+        try {
+            $entity = $this->getOrCreateEntityForCompany($company);
+            if (! $entity) {
+                return ['error' => 'IFRS Entity not available'];
+            }
+
+            $this->setUserEntityContext($entity);
+
+            $account = Account::where('entity_id', $entity->id)->where('code', $accountCode)->first();
+            if (! $account) {
+                return ['error' => 'Account not found in IFRS ledger'];
+            }
+
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+
+            // Query ledger entries joined with line items to get counterparty
+            $entries = DB::table('ifrs_ledgers as l')
+                ->join('ifrs_transactions as t', 'l.transaction_id', '=', 't.id')
+                ->leftJoin('ifrs_line_items as li', 'l.line_item_id', '=', 'li.id')
+                ->where('l.entity_id', $entity->id)
+                ->where('l.post_account', $account->id)
+                ->whereBetween('l.posting_date', [$start->toDateString(), $end->toDateString()])
+                ->select([
+                    'l.posting_date as date',
+                    'l.entry_type',
+                    'l.amount',
+                    't.transaction_no as reference',
+                    't.narration',
+                    'li.counterparty_name',
+                ])
+                ->orderBy('l.posting_date')
+                ->orderBy('l.id')
+                ->get();
+
+            // Also get opening balances per counterparty (before start date)
+            $openingEntries = DB::table('ifrs_ledgers as l')
+                ->leftJoin('ifrs_line_items as li', 'l.line_item_id', '=', 'li.id')
+                ->where('l.entity_id', $entity->id)
+                ->where('l.post_account', $account->id)
+                ->where('l.posting_date', '<', $start->toDateString())
+                ->select([
+                    'li.counterparty_name',
+                    DB::raw("SUM(CASE WHEN l.entry_type = 'D' THEN l.amount ELSE 0 END) as total_debit"),
+                    DB::raw("SUM(CASE WHEN l.entry_type = 'C' THEN l.amount ELSE 0 END) as total_credit"),
+                ])
+                ->groupBy('li.counterparty_name')
+                ->get();
+
+            $openingMap = [];
+            foreach ($openingEntries as $oe) {
+                $key = $oe->counterparty_name ?: '__none__';
+                $openingMap[$key] = $oe->total_debit - $oe->total_credit;
+            }
+
+            // Group entries by counterparty
+            $counterparties = [];
+            foreach ($entries as $entry) {
+                $key = $entry->counterparty_name ?: '__none__';
+                if (!isset($counterparties[$key])) {
+                    $counterparties[$key] = [
+                        'name' => $entry->counterparty_name ?: null,
+                        'opening_balance' => $openingMap[$key] ?? 0,
+                        'total_debit' => 0,
+                        'total_credit' => 0,
+                        'entries' => [],
+                    ];
+                }
+
+                $debit = $entry->entry_type === 'D' ? $entry->amount : 0;
+                $credit = $entry->entry_type === 'C' ? $entry->amount : 0;
+                $counterparties[$key]['total_debit'] += $debit;
+                $counterparties[$key]['total_credit'] += $credit;
+                $counterparties[$key]['entries'][] = [
+                    'date' => $entry->date,
+                    'reference' => $entry->reference ?? '',
+                    'description' => $entry->narration ?? '',
+                    'debit' => $debit,
+                    'credit' => $credit,
+                ];
+            }
+
+            // Also add counterparties that have opening balance but no period entries
+            foreach ($openingMap as $key => $balance) {
+                if (!isset($counterparties[$key]) && $balance != 0) {
+                    $counterparties[$key] = [
+                        'name' => $key === '__none__' ? null : $key,
+                        'opening_balance' => $balance,
+                        'total_debit' => 0,
+                        'total_credit' => 0,
+                        'entries' => [],
+                    ];
+                }
+            }
+
+            // Calculate closing balance for each counterparty
+            $result = [];
+            foreach ($counterparties as $cp) {
+                $cp['closing_balance'] = $cp['opening_balance'] + $cp['total_debit'] - $cp['total_credit'];
+                $result[] = $cp;
+            }
+
+            // Sort by closing balance descending (largest first)
+            usort($result, fn($a, $b) => abs($b['closing_balance']) <=> abs($a['closing_balance']));
+
+            // Calculate totals
+            $totalOpening = array_sum(array_column($result, 'opening_balance'));
+            $totalDebit = array_sum(array_column($result, 'total_debit'));
+            $totalCredit = array_sum(array_column($result, 'total_credit'));
+
+            return [
+                'account' => [
+                    'id' => $account->id,
+                    'name' => $account->name,
+                    'code' => $account->code ?? '',
+                ],
+                'counterparties' => $result,
+                'totals' => [
+                    'opening_balance' => $totalOpening,
+                    'total_debit' => $totalDebit,
+                    'total_credit' => $totalCredit,
+                    'closing_balance' => $totalOpening + $totalDebit - $totalCredit,
+                ],
+            ];
+        } catch (\Exception $e) {
+            Log::error('Failed to generate sub-ledger', [
+                'company_id' => $company->id,
+                'account_code' => $accountCode,
+                'error' => $e->getMessage(),
             ]);
 
             return ['error' => $e->getMessage()];
@@ -2659,6 +2807,7 @@ class IfrsAdapter
                 'account' => $account,
                 'amount' => $item['amount'],
                 'credited' => $item['credited'],
+                'counterparty_name' => $item['counterparty_name'] ?? null,
             ];
         }
 
@@ -2676,7 +2825,7 @@ class IfrsAdapter
         $vatId = $this->getOrCreateExemptVat($entity);
 
         foreach ($lineItemsData as $item) {
-            DB::table('ifrs_line_items')->insert([
+            $insertData = [
                 'transaction_id' => $transaction->id,
                 'account_id' => $item['account']->id,
                 'amount' => $item['amount'],
@@ -2686,7 +2835,11 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ];
+            if (!empty($item['counterparty_name'])) {
+                $insertData['counterparty_name'] = $item['counterparty_name'];
+            }
+            DB::table('ifrs_line_items')->insert($insertData);
         }
 
         $transaction->load('lineItems');

@@ -393,6 +393,51 @@ class PartnerAccountingReportsController extends Controller
         return $pdf->download("equity_changes_{$year}.pdf");
     }
 
+    /**
+     * Get Sub-Ledger (Аналитика по комитент) for an account.
+     */
+    public function subLedger(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            return response()->json(['success' => false, 'message' => 'Company not found'], 404);
+        }
+
+        $accountCode = $request->query('account_code');
+        if (!$accountCode && $request->query('account_id')) {
+            $appAccount = \App\Models\Account::where('company_id', $company)->find($request->query('account_id'));
+            $accountCode = $appAccount?->code;
+        }
+
+        if (!$accountCode) {
+            return response()->json(['success' => false, 'message' => 'Account code is required'], 400);
+        }
+
+        $fromDate = $request->query('from_date', now()->startOfYear()->toDateString());
+        $toDate = $request->query('to_date', now()->toDateString());
+
+        $result = $this->ifrsAdapter->getSubLedger($companyModel, $accountCode, $fromDate, $toDate);
+
+        if (isset($result['error'])) {
+            return response()->json(['success' => false, 'message' => $result['error']], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $result,
+        ]);
+    }
+
     // CLAUDE-CHECKPOINT
 
     public function ifrsStatus(Request $request, int $company): JsonResponse

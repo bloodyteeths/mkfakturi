@@ -1587,6 +1587,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/ifrs-status', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'ifrsStatus']);
         Route::post('/enable-ifrs', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'enableIfrs']);
         Route::get('/general-ledger', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'generalLedger']);
+        Route::get('/sub-ledger', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'subLedger']);
         Route::get('/journal-entries', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'journalEntries']);
         Route::get('/trial-balance', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'trialBalance']);
         Route::get('/balance-sheet', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'balanceSheet']);
