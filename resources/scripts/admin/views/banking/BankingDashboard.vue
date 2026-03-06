@@ -67,15 +67,21 @@
             </template>
             {{ $t('banking.manual_entry.button', 'Manual Entry') }}
           </BaseButton>
-          <BaseButton
-            variant="primary"
-            @click="showConnectModal = true"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="PlusIcon" :class="slotProps.class" />
-            </template>
-            {{ $t('banking.connect_bank') }}
-          </BaseButton>
+          <div class="relative">
+            <BaseButton
+              variant="primary"
+              disabled
+              class="opacity-60 cursor-not-allowed"
+            >
+              <template #left="slotProps">
+                <BaseIcon name="PlusIcon" :class="slotProps.class" />
+              </template>
+              {{ $t('banking.connect_bank') }}
+            </BaseButton>
+            <span class="absolute -top-2 -right-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300">
+              {{ $t('general.coming_soon', 'Coming soon') }}
+            </span>
+          </div>
         </div>
       </template>
     </BasePageHeader>
@@ -89,15 +95,21 @@
       <BanknotesIcon class="mt-5 mb-4 w-20 h-20 text-gray-300" />
 
       <template #actions>
-        <BaseButton
-          variant="primary-outline"
-          @click="showConnectModal = true"
-        >
-          <template #left="slotProps">
-            <BaseIcon name="PlusIcon" :class="slotProps.class" />
-          </template>
-          {{ $t('banking.connect_first_bank') }}
-        </BaseButton>
+        <div class="relative inline-block">
+          <BaseButton
+            variant="primary-outline"
+            disabled
+            class="opacity-60 cursor-not-allowed"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="PlusIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('banking.connect_first_bank') }}
+          </BaseButton>
+          <span class="absolute -top-2 -right-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300">
+            {{ $t('general.coming_soon', 'Coming soon') }}
+          </span>
+        </div>
       </template>
     </BaseEmptyPlaceholder>
 
