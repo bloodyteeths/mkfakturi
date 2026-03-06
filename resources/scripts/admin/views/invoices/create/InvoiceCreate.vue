@@ -168,6 +168,7 @@ import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useCustomFieldStore } from '@/scripts/admin/stores/custom-field'
 import { useCustomerStore } from '@/scripts/admin/stores/customer'
 import { useModalStore } from '@/scripts/stores/modal'
+import { useTaxTypeStore } from '@/scripts/admin/stores/tax-type'
 import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
 import invoiceItemStub from '@/scripts/admin/stub/invoice-item'
 
@@ -350,15 +351,39 @@ const stopScanWatch = watch(
         if (si.notes) invoiceStore.newInvoice.notes = si.notes
 
         if (scannedData.items?.length > 0) {
-          invoiceStore.newInvoice.items = scannedData.items.map((item) => ({
-            ...invoiceItemStub,
-            id: Guid.raw(),
-            name: item.name || '',
-            description: item.description || '',
-            quantity: item.quantity || 1,
-            price: Math.round((item.price || 0) * 100),
-            taxes: [{ ...TaxStub, id: Guid.raw() }],
-          }))
+          // Fetch tax types to match OCR-extracted DDV
+          const taxTypeStore = useTaxTypeStore()
+          taxTypeStore.fetchTaxTypes({ limit: 'all' }).then(() => {
+            invoiceStore.newInvoice.items = scannedData.items.map((item) => {
+              let tax = { ...TaxStub, id: Guid.raw() }
+              const subtotal = (item.price || 0) * (item.quantity || 1)
+              if (item.tax && subtotal > 0) {
+                const rate = Math.round((item.tax / subtotal) * 100)
+                const match = taxTypeStore.taxTypes.find(
+                  (t) => t.percent && Math.abs(t.percent - rate) < 2
+                )
+                if (match) {
+                  tax = {
+                    ...TaxStub,
+                    id: Guid.raw(),
+                    tax_type_id: match.id,
+                    name: match.name,
+                    percent: match.percent,
+                    compound_tax: match.compound_tax || false,
+                  }
+                }
+              }
+              return {
+                ...invoiceItemStub,
+                id: Guid.raw(),
+                name: item.name || '',
+                description: item.description || '',
+                quantity: item.quantity || 1,
+                price: Math.round((item.price || 0) * 100),
+                taxes: [tax],
+              }
+            })
+          })
         }
 
         // Search for existing customer by scanned name
