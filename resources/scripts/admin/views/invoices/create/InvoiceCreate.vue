@@ -167,6 +167,7 @@ import { useNotesStore } from '@/scripts/admin/stores/note'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useCustomFieldStore } from '@/scripts/admin/stores/custom-field'
 import { useCustomerStore } from '@/scripts/admin/stores/customer'
+import { useModalStore } from '@/scripts/stores/modal'
 import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
 import invoiceItemStub from '@/scripts/admin/stub/invoice-item'
 
@@ -366,6 +367,15 @@ const stopScanWatch = watch(
           customerStore.fetchCustomers({ display_name: si.customer_name }).then(() => {
             if (customerStore.customers.length > 0) {
               invoiceStore.selectCustomer(customerStore.customers[0].id)
+            } else {
+              // No match — open "Add Customer" modal pre-filled with scanned name
+              customerStore.currentCustomer.name = si.customer_name
+              const modalStore = useModalStore()
+              modalStore.openModal({
+                title: t('customers.add_customer'),
+                componentName: 'CustomerModal',
+                variant: 'md',
+              })
             }
           })
         }
