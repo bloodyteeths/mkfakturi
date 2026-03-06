@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Modules\Mk\Services\KomerOAuth;
 use Modules\Mk\Services\NlbOAuth;
 use Modules\Mk\Services\StopanskaOAuth;
 
@@ -316,6 +317,7 @@ class BankAuthController extends Controller
         return match ($bankCode) {
             'stopanska' => app(StopanskaOAuth::class),
             'nlb' => app(NlbOAuth::class),
+            'komercijalna' => app(KomerOAuth::class),
             default => null,
         };
     }

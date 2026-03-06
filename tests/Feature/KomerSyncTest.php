@@ -40,7 +40,6 @@ class KomerSyncTest extends TestCase
         // Create test company and currency
         $this->company = Company::factory()->create([
             'name' => 'Komercijalna Test Company',
-            'tax_number' => '5555666777',
         ]);
 
         $this->currency = Currency::factory()->create([
@@ -252,7 +251,7 @@ class KomerSyncTest extends TestCase
             $bankAccount = BankAccount::create([
                 'company_id' => $this->company->id,
                 'currency_id' => $this->currency->id,
-                'name' => $account->getName(),
+                'account_name' => $account->getName(),
                 'account_number' => $account->getAccountNumber(),
                 'iban' => $account->getIban(),
                 'swift_code' => $account->getBic(),
@@ -355,14 +354,14 @@ class KomerSyncTest extends TestCase
 
         // Verify production endpoints are configured for Komercijalna
         $endpoints = $endpointStatus['all_endpoints'];
-        $this->assertStringContains('https://api-psd2.kb.mk', $endpoints['token_production']);
-        $this->assertStringContains('https://api-psd2.kb.mk', $endpoints['accounts_production']);
-        $this->assertStringContains('https://api-psd2.kb.mk', $endpoints['transactions_production']);
+        $this->assertStringContainsString('https://api.ob.kb.mk', $endpoints['token_production']);
+        $this->assertStringContainsString('https://api.ob.kb.mk', $endpoints['accounts_production']);
+        $this->assertStringContainsString('https://api.ob.kb.mk', $endpoints['transactions_production']);
 
         // Verify sandbox endpoints
-        $this->assertStringContains('https://sandbox-api-psd2.kb.mk', $endpoints['token_sandbox']);
-        $this->assertStringContains('https://sandbox-api-psd2.kb.mk', $endpoints['accounts_sandbox']);
-        $this->assertStringContains('https://sandbox-api-psd2.kb.mk', $endpoints['transactions_sandbox']);
+        $this->assertStringContainsString('https://sandbox-api.ob.kb.mk', $endpoints['token_sandbox']);
+        $this->assertStringContainsString('https://sandbox-api.ob.kb.mk', $endpoints['accounts_sandbox']);
+        $this->assertStringContainsString('https://sandbox-api.ob.kb.mk', $endpoints['transactions_sandbox']);
 
         // Verify bank information is correct for Komercijalna
         $this->assertEquals('Komercijalna Banka AD Skopje', $endpointStatus['bank_info']['name']);
@@ -432,7 +431,7 @@ class KomerSyncTest extends TestCase
         foreach ($testData['accounts'] as $account) {
             $this->assertEquals('MKD', $account['currency'], 'Account currency should be MKD');
             $this->assertStringStartsWith('MK', $account['iban'], 'Account IBAN should start with MK');
-            $this->assertStringContains('KB', $account['name'], 'Account name should contain KB');
+            $this->assertStringContainsString('KB', $account['name'], 'Account name should contain KB');
 
             // Balance should be reasonable
             $balance = $account['balances'][0]['balanceAmount']['amount'];

@@ -15,6 +15,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! Schema::hasTable('tax_returns')) {
+            return;
+        }
+
         Schema::table('tax_returns', function (Blueprint $table) {
             if (!Schema::hasColumn('tax_returns', 'return_data')) {
                 $table->json('return_data')->nullable()->after('status')
@@ -37,6 +41,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasTable('tax_returns')) {
+            return;
+        }
+
         Schema::table('tax_returns', function (Blueprint $table) {
             $table->dropColumn(['return_data', 'accepted_at', 'rejected_at', 'rejection_reason']);
         });

@@ -39,7 +39,6 @@ class SyncStopanskaSandboxTest extends TestCase
         // Create test company and currency
         $this->company = Company::factory()->create([
             'name' => 'Sandbox Test Company',
-            'tax_number' => '1234567890',
         ]);
 
         $this->currency = Currency::factory()->create([
@@ -215,7 +214,7 @@ class SyncStopanskaSandboxTest extends TestCase
             $bankAccount = BankAccount::create([
                 'company_id' => $this->company->id,
                 'currency_id' => $this->currency->id,
-                'name' => $account->getName(),
+                'account_name' => $account->getName(),
                 'account_number' => $account->getAccountNumber(),
                 'iban' => $account->getIban(),
                 'swift_code' => $account->getBic(),
@@ -360,9 +359,9 @@ class SyncStopanskaSandboxTest extends TestCase
 
         // Validate sandbox endpoints are configured
         $activeEndpoints = $endpointStatus['active_endpoints'];
-        $this->assertStringContains('sandbox', $activeEndpoints['token']);
-        $this->assertStringContains('sandbox', $activeEndpoints['accounts']);
-        $this->assertStringContains('sandbox', $activeEndpoints['transactions']);
+        $this->assertStringContainsString('sandbox', $activeEndpoints['token']);
+        $this->assertStringContainsString('sandbox', $activeEndpoints['accounts']);
+        $this->assertStringContainsString('sandbox', $activeEndpoints['transactions']);
 
         Log::info('SB-02: Sandbox endpoint validation completed', [
             'task' => 'SB-02',

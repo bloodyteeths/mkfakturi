@@ -323,9 +323,8 @@ return [
         'client_id' => env('MK_KOMER_CLIENT_ID', ''),
         'client_secret' => env('MK_KOMER_CLIENT_SECRET', ''),
         'environment' => env('MK_KOMER_ENVIRONMENT', 'sandbox'),
-        'sandbox_base_url' => env('MK_KOMER_SANDBOX_URL', 'https://api-sandbox.kb.com.mk'),
-        'production_base_url' => env('MK_KOMER_API_URL', 'https://api.kb.com.mk'),
-        'auth_base_url' => env('MK_KOMER_AUTH_URL', 'https://auth.kb.com.mk'),
+        'sandbox_base_url' => env('MK_KOMER_SANDBOX_URL', 'https://sandbox-api.ob.kb.mk/xs2a/v1'),
+        'production_base_url' => env('MK_KOMER_API_URL', 'https://api.ob.kb.mk/xs2a/v1'),
         'redirect_uri' => env('MK_KOMER_REDIRECT_URI', null), // Must be registered in Komercijalna developer portal
         'scopes' => env('MK_KOMER_SCOPES', 'accounts transactions'), // OAuth scopes for PSD2 access
 

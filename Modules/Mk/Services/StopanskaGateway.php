@@ -577,7 +577,11 @@ class StopanskaGateway
      */
     protected function getAccountId(): string
     {
-        return $this->accountId ?? 'default';
+        if (! $this->accountId) {
+            throw new \RuntimeException('Account ID not set. Call setAccountId() before fetching transactions.');
+        }
+
+        return $this->accountId;
     }
 
     /**
@@ -773,7 +777,7 @@ class StopanskaGateway
             'active_endpoints' => [
                 'token' => $this->getAccessTokenUrl(),
                 'accounts' => $this->getAccountDetailsUrl(),
-                'transactions' => $this->getSepaTransactionsUrl(),
+                'transactions' => $this->isSandbox() ? self::API_SEPA_TRANSACTIONS_SANDBOX : self::API_SEPA_TRANSACTIONS,
             ],
             'all_endpoints' => $endpoints,
             'bank_info' => [

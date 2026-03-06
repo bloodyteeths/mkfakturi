@@ -39,7 +39,6 @@ class NlbGatewayTest extends TestCase
         // Create test company and currency
         $this->company = Company::factory()->create([
             'name' => 'NLB Test Company',
-            'tax_number' => '9876543210',
         ]);
 
         $this->currency = Currency::factory()->create([
@@ -72,14 +71,14 @@ class NlbGatewayTest extends TestCase
 
         // Verify production endpoints are real URLs (not placeholders)
         $endpoints = $endpointStatus['all_endpoints'];
-        $this->assertStringContains('https://auth.mk.open-bank.io', $endpoints['token_production']);
-        $this->assertStringContains('https://developer-ob.nlb.mk', $endpoints['accounts_production']);
-        $this->assertStringContains('https://developer-ob.nlb.mk', $endpoints['transactions_production']);
+        $this->assertStringContainsString('https://auth.mk.open-bank.io', $endpoints['token_production']);
+        $this->assertStringContainsString('https://developer-ob.nlb.mk', $endpoints['accounts_production']);
+        $this->assertStringContainsString('https://developer-ob.nlb.mk', $endpoints['transactions_production']);
 
         // Verify sandbox endpoints
-        $this->assertStringContains('https://auth.sandbox.mk.open-bank.io', $endpoints['token_sandbox']);
-        $this->assertStringContains('https://developer-ob.nlb.mk', $endpoints['accounts_sandbox']);
-        $this->assertStringContains('https://developer-ob.nlb.mk', $endpoints['transactions_sandbox']);
+        $this->assertStringContainsString('https://auth.sandbox.mk.open-bank.io', $endpoints['token_sandbox']);
+        $this->assertStringContainsString('https://developer-ob.nlb.mk', $endpoints['accounts_sandbox']);
+        $this->assertStringContainsString('https://developer-ob.nlb.mk', $endpoints['transactions_sandbox']);
 
         // Verify bank information
         $this->assertEquals('NLB Banka AD Skopje', $endpointStatus['bank_info']['name']);
@@ -262,7 +261,7 @@ class NlbGatewayTest extends TestCase
             $bankAccount = BankAccount::create([
                 'company_id' => $this->company->id,
                 'currency_id' => $this->currency->id,
-                'name' => $account->getName(),
+                'account_name' => $account->getName(),
                 'account_number' => $account->getAccountNumber(),
                 'iban' => $account->getIban(),
                 'swift_code' => $account->getBic(),
@@ -473,7 +472,7 @@ class NlbGatewayTest extends TestCase
         foreach ($testData['accounts'] as $account) {
             $this->assertEquals('MKD', $account['currency'], 'Account currency should be MKD');
             $this->assertStringStartsWith('MK', $account['iban'], 'Account IBAN should start with MK');
-            $this->assertStringContains('NLB', $account['name'], 'Account name should contain NLB');
+            $this->assertStringContainsString('NLB', $account['name'], 'Account name should contain NLB');
 
             // Balance should be reasonable
             $balance = $account['balances'][0]['balanceAmount']['amount'];

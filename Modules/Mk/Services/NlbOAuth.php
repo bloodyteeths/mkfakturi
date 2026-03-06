@@ -65,7 +65,7 @@ class NlbOAuth extends Psd2Client
         if ($environment === 'production') {
             return config(
                 'mk.nlb.auth_production_base_url',
-                config('mk.nlb.auth_sandbox_base_url', 'https://auth.sandbox.mk.open-bank.io/v1/authentication/tenants/nlb')
+                'https://auth.mk.open-bank.io/v1/authentication/tenants/nlb'
             );
         }
 

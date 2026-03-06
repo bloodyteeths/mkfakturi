@@ -490,7 +490,7 @@ class NlbGateway
         $default = 'https://developer-ob.nlb.mk/apis/xs2a/v1';
 
         if ($environment === 'production') {
-            return rtrim(config('mk.nlb.production_base_url', config('mk.nlb.sandbox_base_url', $default)), '/');
+            return rtrim(config('mk.nlb.production_base_url', $default), '/');
         }
 
         return rtrim(config('mk.nlb.sandbox_base_url', $default), '/');
@@ -506,7 +506,7 @@ class NlbGateway
 
         if ($environment === 'production') {
             return rtrim(
-                config('mk.nlb.auth_production_base_url', config('mk.nlb.auth_sandbox_base_url', $default)),
+                config('mk.nlb.auth_production_base_url', 'https://auth.mk.open-bank.io/v1/authentication/tenants/nlb'),
                 '/'
             );
         }
@@ -595,7 +595,11 @@ class NlbGateway
      */
     protected function getAccountId(): string
     {
-        return $this->accountId ?? 'default';
+        if (! $this->accountId) {
+            throw new \RuntimeException('Account ID not set. Call setAccountId() before fetching transactions.');
+        }
+
+        return $this->accountId;
     }
 
     /**
@@ -798,7 +802,7 @@ class NlbGateway
             'active_endpoints' => [
                 'token' => $this->getAccessTokenUrl(),
                 'accounts' => $this->getAccountDetailsUrl(),
-                'transactions' => $this->getSepaTransactionsUrl(),
+                'transactions' => $transactionsSandbox,
             ],
             'all_endpoints' => $endpoints,
             'bank_info' => [

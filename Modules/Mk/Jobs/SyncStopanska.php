@@ -130,6 +130,9 @@ class SyncStopanska implements ShouldQueue
             // Find or create bank account record
             $bankAccount = $this->findOrCreateBankAccount($account);
 
+            // Set account ID for transactions endpoint
+            $gateway->setAccountId($account->getId());
+
             // Get transactions (respecting pagination and limits)
             $transactions = $gateway->getSepaTransactions(1, min($this->maxTransactions, 100));
 
@@ -187,7 +190,7 @@ class SyncStopanska implements ShouldQueue
             $bankAccount = BankAccount::create([
                 'company_id' => $this->companyId,
                 'currency_id' => $this->getCurrencyId($account->getCurrency()),
-                'name' => $account->getName() ?? 'Stopanska Account',
+                'account_name' => $account->getName() ?? 'Stopanska Account',
                 'account_number' => $account->getAccountNumber(),
                 'iban' => $account->getIban(),
                 'swift_code' => $account->getBic(),

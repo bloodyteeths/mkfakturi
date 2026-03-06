@@ -145,18 +145,18 @@ class KomerGateway
 {
     // Komercijalna Banka PSD2 API endpoints (Berlin Group NextGenPSD2 compliant)
     // Based on standard KB infrastructure pattern - registration required for detailed documentation
-    protected const API_ACCESS_TOKEN = 'https://api-psd2.kb.mk/xs2a/v1/oauth2/token';
+    protected const API_ACCESS_TOKEN = 'https://api.ob.kb.mk/xs2a/v1/oauth2/token';
 
-    protected const API_ACCOUNT_DETAILS = 'https://api-psd2.kb.mk/xs2a/v1/accounts';
+    protected const API_ACCOUNT_DETAILS = 'https://api.ob.kb.mk/xs2a/v1/accounts';
 
-    protected const API_SEPA_TRANSACTIONS = 'https://api-psd2.kb.mk/xs2a/v1/accounts/{account-id}/transactions';
+    protected const API_SEPA_TRANSACTIONS = 'https://api.ob.kb.mk/xs2a/v1/accounts/{account-id}/transactions';
 
-    // Sandbox URLs (Berlin Group standard paths)
-    protected const API_ACCESS_TOKEN_SANDBOX = 'https://sandbox-api-psd2.kb.mk/xs2a/v1/oauth2/token';
+    // Sandbox URLs (KIBS Open Banking Platform — ob.kb.mk)
+    protected const API_ACCESS_TOKEN_SANDBOX = 'https://sandbox-api.ob.kb.mk/xs2a/v1/oauth2/token';
 
-    protected const API_ACCOUNT_DETAILS_SANDBOX = 'https://sandbox-api-psd2.kb.mk/xs2a/v1/accounts';
+    protected const API_ACCOUNT_DETAILS_SANDBOX = 'https://sandbox-api.ob.kb.mk/xs2a/v1/accounts';
 
-    protected const API_SEPA_TRANSACTIONS_SANDBOX = 'https://sandbox-api-psd2.kb.mk/xs2a/v1/accounts/{account-id}/transactions';
+    protected const API_SEPA_TRANSACTIONS_SANDBOX = 'https://sandbox-api.ob.kb.mk/xs2a/v1/accounts/{account-id}/transactions';
 
     // Rate limiting constants
     protected const RATE_LIMIT_PER_MINUTE = 15;
@@ -577,7 +577,11 @@ class KomerGateway
      */
     protected function getAccountId(): string
     {
-        return $this->accountId ?? 'default';
+        if (! $this->accountId) {
+            throw new \RuntimeException('Account ID not set. Call setAccountId() before fetching transactions.');
+        }
+
+        return $this->accountId;
     }
 
     /**
@@ -773,7 +777,7 @@ class KomerGateway
             'active_endpoints' => [
                 'token' => $this->getAccessTokenUrl(),
                 'accounts' => $this->getAccountDetailsUrl(),
-                'transactions' => $this->getSepaTransactionsUrl(),
+                'transactions' => $this->isSandbox() ? self::API_SEPA_TRANSACTIONS_SANDBOX : self::API_SEPA_TRANSACTIONS,
             ],
             'all_endpoints' => $endpoints,
             'bank_info' => [
