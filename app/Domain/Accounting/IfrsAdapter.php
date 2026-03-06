@@ -158,8 +158,8 @@ class IfrsAdapter
                 throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
-            // Get accounts
-            $cashAccount = $this->getCashAccount($payment->company_id, $entity->id);
+            // Get accounts — route to correct GL account via PaymentMethod.account_code
+            $cashAccount = $this->getCashAccountForModel($payment, $payment->company_id, $entity->id);
             $arAccount = $this->getAccountsReceivableAccount($payment->company_id, $entity->id);
 
             // Create IFRS Transaction (Client Receipt)
@@ -239,9 +239,9 @@ class IfrsAdapter
                 throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
-            // Get accounts
+            // Get accounts — use same cash/bank account as the payment
             $feeExpenseAccount = $this->getFeeExpenseAccount($payment->company_id, $entity->id);
-            $cashAccount = $this->getCashAccount($payment->company_id, $entity->id);
+            $cashAccount = $this->getCashAccountForModel($payment, $payment->company_id, $entity->id);
 
             // Create IFRS Transaction (Journal Entry for Fee)
             $transaction = Transaction::create([
@@ -1196,7 +1196,7 @@ class IfrsAdapter
     }
 
     /**
-     * Get or create Cash account
+     * Get or create Cash account (generic fallback)
      */
     protected function getCashAccount(int $companyId, int $entityId): Account
     {
@@ -1210,6 +1210,105 @@ class IfrsAdapter
             specificName: 'Cash'
         );
     }
+
+    /**
+     * Get the correct cash/bank account based on payment mode.
+     * Routes payments to the proper Macedonian chart-of-accounts code:
+     *   CASH         → 100 (Готовина)
+     *   BANK_TRANSFER→ 102 (Жиро-сметка)
+     *   CREDIT_CARD  → 102 (Жиро-сметка — card settlements go to bank)
+     *   CHECK        → 100 (Готовина)
+     *   OTHER/null   → 100 (Готовина — fallback)
+     */
+    protected function getCashAccountByPaymentMode(?string $paymentMode, int $companyId, int $entityId): Account
+    {
+        $map = [
+            'BANK_TRANSFER' => ['code' => '102', 'name' => 'Жиро-сметка', 'specific' => 'Жиро'],
+            'CREDIT_CARD'   => ['code' => '102', 'name' => 'Жиро-сметка', 'specific' => 'Жиро'],
+        ];
+
+        if ($paymentMode && isset($map[$paymentMode])) {
+            $cfg = $map[$paymentMode];
+
+            return $this->mapUserAccountToIfrs(
+                companyId: $companyId,
+                entityId: $entityId,
+                userAccountType: \App\Models\Account::TYPE_ASSET,
+                ifrsAccountType: Account::BANK,
+                fallbackName: $cfg['name'],
+                fallbackCode: $cfg['code'],
+                specificName: $cfg['specific']
+            );
+        }
+
+        // CASH, CHECK, OTHER, null → default cash account (100)
+        return $this->getCashAccount($companyId, $entityId);
+    }
+
+    /**
+     * Get the GL account code from a model's linked PaymentMethod.
+     * Returns the standardized account_code (100, 102, etc.) or null.
+     */
+    protected function getAccountCodeFromPaymentMethod($model): ?string
+    {
+        if (! $model->payment_method_id) {
+            return null;
+        }
+
+        $method = $model->paymentMethod;
+
+        return $method?->account_code;
+    }
+
+    /**
+     * Get the correct cash/bank IFRS account using a PaymentMethod's account_code.
+     * Falls back to payment_mode (for Payment model) or generic cash account.
+     */
+    protected function getCashAccountForModel($model, int $companyId, int $entityId): Account
+    {
+        // Priority 1: PaymentMethod.account_code (standardized)
+        $accountCode = $this->getAccountCodeFromPaymentMethod($model);
+        if ($accountCode) {
+            return $this->getAccountByCode($accountCode, $companyId, $entityId);
+        }
+
+        // Priority 2: payment_mode field (Payment model only)
+        if (property_exists($model, 'payment_mode') || isset($model->payment_mode)) {
+            return $this->getCashAccountByPaymentMode($model->payment_mode, $companyId, $entityId);
+        }
+
+        // Priority 3: generic cash account
+        return $this->getCashAccount($companyId, $entityId);
+    }
+
+    /**
+     * Get an IFRS account by its chart-of-accounts code.
+     */
+    protected function getAccountByCode(string $code, int $companyId, int $entityId): Account
+    {
+        // Try to find the user's account with this code
+        $userAccount = \App\Models\Account::where('company_id', $companyId)
+            ->where('code', $code)
+            ->where('is_active', true)
+            ->first();
+
+        $accountName = $userAccount ? $userAccount->name : "Account {$code}";
+
+        return Account::firstOrCreate(
+            [
+                'account_type' => Account::BANK,
+                'category_id' => null,
+                'name' => $accountName,
+                'entity_id' => $entityId,
+            ],
+            [
+                'code' => $code,
+                'currency_id' => $this->getCurrencyId($companyId),
+            ]
+        );
+    }
+
+    // CLAUDE-CHECKPOINT
 
     /**
      * Get or create Tax Payable account
@@ -1280,9 +1379,9 @@ class IfrsAdapter
             // EntityGuard check
             \App\Domain\Guards\EntityGuard::ensureEntityExists($expense->company);
 
-            // Get or create accounts
+            // Get or create accounts — route via PaymentMethod.account_code
             $expenseAccount = $this->getExpenseAccount($expense->company_id, $entity->id, $expense->category);
-            $cashAccount = $this->getCashAccount($expense->company_id, $entity->id);
+            $cashAccount = $this->getCashAccountForModel($expense, $expense->company_id, $entity->id);
 
             // Build narration
             $categoryName = $expense->category ? $expense->category->name : 'General Expense';
@@ -2269,8 +2368,8 @@ class IfrsAdapter
                 throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
-            // Get accounts
-            $cashAccount = $this->getCashAccount($billPayment->company_id, $entity->id);
+            // Get accounts — route via PaymentMethod.account_code
+            $cashAccount = $this->getCashAccountForModel($billPayment, $billPayment->company_id, $entity->id);
             $apAccount = $this->getAccountsPayableAccount($billPayment->company_id, $entity->id);
 
             // Build narration

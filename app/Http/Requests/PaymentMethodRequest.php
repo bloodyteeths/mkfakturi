@@ -27,6 +27,7 @@ class PaymentMethodRequest extends FormRequest
                 Rule::unique('payment_methods')
                     ->where('company_id', $this->header('company')),
             ],
+            'account_code' => ['nullable', 'string', 'max:10'],
         ];
 
         if ($this->getMethod() == 'PUT') {

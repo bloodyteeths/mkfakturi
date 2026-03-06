@@ -144,20 +144,19 @@ class DemoSeeder extends Seeder
             'company_id' => $company->id,
         ]);
 
-        // Create Macedonia payment methods
+        // Create Macedonia payment methods with GL account codes
         $paymentMethods = [
-            'Готовина',
-            'Банкарски трансфер',
-            'Кредитна картичка',
-            'Чек',
-            'Вирман',
+            ['name' => 'Готовина', 'account_code' => '100'],
+            ['name' => 'Банкарски трансфер', 'account_code' => '102'],
+            ['name' => 'Кредитна картичка', 'account_code' => '102'],
+            ['name' => 'Чек', 'account_code' => '100'],
+            ['name' => 'Вирман', 'account_code' => '102'],
         ];
 
         foreach ($paymentMethods as $method) {
-            PaymentMethod::create([
-                'name' => $method,
+            PaymentMethod::create(array_merge($method, [
                 'company_id' => $company->id,
-            ]);
+            ]));
         }
 
         // Create Macedonia units

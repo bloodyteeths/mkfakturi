@@ -45,6 +45,7 @@ export const usePaymentStore = (useWindow = false) => {
       currentPaymentMode: {
         id: '',
         name: null,
+        account_code: '100',
       },
 
       isFetchingInitialData: false,

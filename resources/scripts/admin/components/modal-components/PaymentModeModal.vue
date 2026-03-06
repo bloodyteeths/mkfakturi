@@ -12,7 +12,7 @@
     </template>
 
     <form action="" @submit.prevent="submitPaymentMode">
-      <div class="p-4 sm:p-6">
+      <div class="p-4 sm:p-6 space-y-4">
         <BaseInputGroup
           :label="$t('settings.payment_modes.mode_name')"
           :error="
@@ -25,6 +25,20 @@
             v-model="paymentStore.currentPaymentMode.name"
             :invalid="v$.currentPaymentMode.name.$error"
             @input="v$.currentPaymentMode.name.$touch()"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup
+          :label="$t('settings.payment_modes.gl_account')"
+          :help="$t('settings.payment_modes.gl_account_help')"
+        >
+          <BaseMultiselect
+            v-model="paymentStore.currentPaymentMode.account_code"
+            :options="accountCodeOptions"
+            label="label"
+            value-prop="code"
+            :placeholder="$t('settings.payment_modes.select_gl_account')"
+            :can-deselect="false"
           />
         </BaseInputGroup>
       </div>
@@ -74,6 +88,13 @@ const paymentStore = usePaymentStore()
 
 const { t } = useI18n()
 const isSaving = ref(false)
+
+const accountCodeOptions = computed(() => [
+  { code: '100', label: '100 - ' + t('settings.payment_modes.account_cash') },
+  { code: '102', label: '102 - ' + t('settings.payment_modes.account_bank') },
+  { code: '103', label: '103 - ' + t('settings.payment_modes.account_foreign') },
+  { code: '105', label: '105 - ' + t('settings.payment_modes.account_other') },
+])
 
 const rules = computed(() => {
   return {
@@ -127,6 +148,7 @@ function closePaymentModeModal() {
     paymentStore.currentPaymentMode = {
       id: '',
       name: null,
+      account_code: '100',
     }
   })
 }

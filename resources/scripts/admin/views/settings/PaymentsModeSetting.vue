@@ -61,6 +61,12 @@ const paymentColumns = computed(() => {
       tdClass: 'font-medium text-gray-900',
     },
     {
+      key: 'account_code',
+      label: t('settings.payment_modes.gl_account'),
+      thClass: 'extra',
+      tdClass: 'text-gray-600',
+    },
+    {
       key: 'actions',
       label: '',
       tdClass: 'text-right text-sm font-medium',

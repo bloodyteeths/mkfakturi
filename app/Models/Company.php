@@ -365,10 +365,10 @@ class Company extends Model implements HasMedia
 
     public function setupDefaultPaymentMethods()
     {
-        PaymentMethod::create(['name' => 'Cash', 'company_id' => $this->id]);
-        PaymentMethod::create(['name' => 'Check', 'company_id' => $this->id]);
-        PaymentMethod::create(['name' => 'Credit Card', 'company_id' => $this->id]);
-        PaymentMethod::create(['name' => 'Bank Transfer', 'company_id' => $this->id]);
+        PaymentMethod::create(['name' => 'Cash', 'company_id' => $this->id, 'account_code' => PaymentMethod::GL_CASH]);
+        PaymentMethod::create(['name' => 'Check', 'company_id' => $this->id, 'account_code' => PaymentMethod::GL_CASH]);
+        PaymentMethod::create(['name' => 'Credit Card', 'company_id' => $this->id, 'account_code' => PaymentMethod::GL_BANK]);
+        PaymentMethod::create(['name' => 'Bank Transfer', 'company_id' => $this->id, 'account_code' => PaymentMethod::GL_BANK]);
     }
 
     public function setupDefaultUnits()

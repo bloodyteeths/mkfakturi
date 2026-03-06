@@ -5794,7 +5794,14 @@
       "payment_mode_updated": "Payment Mode Updated",
       "payments_attached": "This payment method is already attached to payments. Please delete the attached payments to proceed with deletion.",
       "section_description": "Manage payment methods for your business",
-      "title": "Payment Modes"
+      "title": "Payment Modes",
+      "gl_account": "GL Account",
+      "gl_account_help": "Ledger account for automatic journal posting",
+      "select_gl_account": "Select GL account",
+      "account_cash": "Cash",
+      "account_bank": "Bank Account",
+      "account_foreign": "Foreign Currency Account",
+      "account_other": "Other Cash Equivalents"
     },
     "pdf": {
       "driver": "PDF Driver to use",
