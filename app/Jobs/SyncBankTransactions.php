@@ -125,6 +125,15 @@ class SyncBankTransactions implements ShouldQueue
      */
     protected function syncAccount(BankAccount $account, Carbon $from, Carbon $to): int
     {
+        if (empty($account->bank_code)) {
+            Log::warning('Bank account has no bank_code, skipping sync', [
+                'company_id' => $account->company_id,
+                'account_id' => $account->id,
+            ]);
+
+            return 0;
+        }
+
         // Get PSD2 client for this bank
         $client = $this->getClientForBank($account->bank_code);
 

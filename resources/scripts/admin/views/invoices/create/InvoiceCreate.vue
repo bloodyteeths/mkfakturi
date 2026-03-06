@@ -166,6 +166,7 @@ import { useModuleStore } from '@/scripts/admin/stores/module'
 import { useNotesStore } from '@/scripts/admin/stores/note'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useCustomFieldStore } from '@/scripts/admin/stores/custom-field'
+import { useCustomerStore } from '@/scripts/admin/stores/customer'
 import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
 import invoiceItemStub from '@/scripts/admin/stub/invoice-item'
 
@@ -354,9 +355,19 @@ const stopScanWatch = watch(
             name: item.name || '',
             description: item.description || '',
             quantity: item.quantity || 1,
-            price: item.price || 0,
+            price: Math.round((item.price || 0) * 100),
             taxes: [{ ...TaxStub, id: Guid.raw() }],
           }))
+        }
+
+        // Search for existing customer by scanned name
+        if (si.customer_name) {
+          const customerStore = useCustomerStore()
+          customerStore.fetchCustomers({ display_name: si.customer_name }).then(() => {
+            if (customerStore.customers.length > 0) {
+              invoiceStore.selectCustomer(customerStore.customers[0].id)
+            }
+          })
         }
       }
       stopScanWatch()
