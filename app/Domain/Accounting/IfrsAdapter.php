@@ -440,13 +440,17 @@ class IfrsAdapter
             // Set user's entity context for IFRS EntityScope (multi-tenant support)
             $this->setUserEntityContext($entity);
 
-            // Check if any accounts exist - if not, accounting system not initialized
+            // If no IFRS accounts exist yet, return empty trial balance
             $accountCount = Account::where('entity_id', $entity->id)->count();
             if ($accountCount === 0) {
                 return [
-                    'error' => 'Accounting system not initialized',
-                    'message' => 'No chart of accounts found. The accounting backbone feature is enabled but no accounting data exists yet. Create invoices or payments to generate accounting transactions.',
-                    'status' => 'not_initialized',
+                    'date' => $date->toDateString(),
+                    'year' => $date->year,
+                    'sections' => ['accounts' => []],
+                    'accounts' => [],
+                    'totalDebits' => 0,
+                    'totalCredits' => 0,
+                    'isBalanced' => true,
                 ];
             }
 
@@ -557,7 +561,14 @@ class IfrsAdapter
 
             $accountCount = Account::where('entity_id', $entity->id)->count();
             if ($accountCount === 0) {
-                return ['error' => 'Accounting system not initialized', 'status' => 'not_initialized'];
+                return [
+                    'accounts' => [],
+                    'totals' => [
+                        'opening_debit' => 0, 'opening_credit' => 0,
+                        'period_debit' => 0, 'period_credit' => 0,
+                        'closing_debit' => 0, 'closing_credit' => 0,
+                    ],
+                ];
             }
 
             // Query per-account balances using ifrs_ledgers
@@ -673,13 +684,18 @@ class IfrsAdapter
             // Set user's entity context for IFRS EntityScope (multi-tenant support)
             $this->setUserEntityContext($entity);
 
-            // Check if any accounts exist - if not, accounting system not initialized
+            // If no IFRS accounts exist yet, return empty balance sheet
             $accountCount = Account::where('entity_id', $entity->id)->count();
             if ($accountCount === 0) {
                 return [
-                    'error' => 'Accounting system not initialized',
-                    'message' => 'No chart of accounts found. The accounting backbone feature is enabled but no accounting data exists yet. Create invoices or payments to generate accounting transactions.',
-                    'status' => 'not_initialized',
+                    'date' => $date->toDateString(),
+                    'sections' => ['accounts' => [], 'totals' => [], 'results' => []],
+                    'balance_sheet' => [
+                        'assets' => [], 'liabilities' => [], 'equity' => [],
+                        'totals' => ['assets' => 0, 'liabilities' => 0, 'equity' => 0],
+                    ],
+                    'assets' => [], 'liabilities' => [], 'equity' => [],
+                    'totals' => [], 'results' => [],
                 ];
             }
 
@@ -770,13 +786,19 @@ class IfrsAdapter
             // Set user's entity context for IFRS EntityScope (multi-tenant support)
             $this->setUserEntityContext($entity);
 
-            // Check if any accounts exist - if not, accounting system not initialized
+            // If no IFRS accounts exist yet, return empty income statement
             $accountCount = Account::where('entity_id', $entity->id)->count();
             if ($accountCount === 0) {
                 return [
-                    'error' => 'Accounting system not initialized',
-                    'message' => 'No chart of accounts found. The accounting backbone feature is enabled but no accounting data exists yet. Create invoices or payments to generate accounting transactions.',
-                    'status' => 'not_initialized',
+                    'start_date' => $start->toDateString(),
+                    'end_date' => $end->toDateString(),
+                    'sections' => ['accounts' => [], 'totals' => [], 'results' => []],
+                    'income_statement' => [
+                        'revenues' => [], 'expenses' => [],
+                        'totals' => ['revenue' => 0, 'expenses' => 0],
+                    ],
+                    'revenues' => [], 'expenses' => [],
+                    'results' => [], 'totals' => [],
                 ];
             }
 
@@ -1872,7 +1894,22 @@ class IfrsAdapter
 
             $account = Account::where('entity_id', $entity->id)->where('code', $accountCode)->first();
             if (! $account) {
-                return ['error' => 'Account not found in IFRS ledger'];
+                // Account exists in local chart but not in IFRS ledger — return empty results
+                $localAccount = \App\Models\Account::where('company_id', $company->id)->where('code', $accountCode)->first();
+                return [
+                    'account' => [
+                        'id' => $localAccount?->id ?? 0,
+                        'name' => $localAccount?->name ?? $accountCode,
+                        'code' => $accountCode,
+                    ],
+                    'counterparties' => [],
+                    'totals' => [
+                        'opening_balance' => 0,
+                        'total_debit' => 0,
+                        'total_credit' => 0,
+                        'closing_balance' => 0,
+                    ],
+                ];
             }
 
             $start = Carbon::parse($startDate);
