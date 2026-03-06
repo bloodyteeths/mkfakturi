@@ -125,11 +125,14 @@ class PartnerScopeMiddleware
         // First, check route parameter (for routes like /companies/{company}/...)
         $companyParam = $request->route('company');
         if ($companyParam) {
+            // Route model binding may resolve to Company instance
+            $companyId = $companyParam instanceof Company ? $companyParam->id : (int) $companyParam;
+
             // Also set the company header so admin controllers that read from
             // $request->header('company') get the correct company in partner context
-            $request->headers->set('company', (string) $companyParam);
+            $request->headers->set('company', (string) $companyId);
 
-            return (int) $companyParam;
+            return $companyId;
         }
 
         // Then check the company header (frontend sends company context here)

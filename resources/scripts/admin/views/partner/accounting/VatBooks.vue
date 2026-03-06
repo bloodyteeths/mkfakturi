@@ -2,12 +2,20 @@
   <BasePage>
     <BasePageHeader :title="$t('partner.accounting.vat_books', 'Книга на ДДВ')">
       <template #actions>
-        <BaseButton v-if="currentEntries.length > 0" variant="primary-outline" @click="exportCsv">
-          <template #left="slotProps">
-            <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
-          </template>
-          {{ $t('general.export') }}
-        </BaseButton>
+        <div v-if="currentEntries.length > 0" class="flex space-x-2">
+          <BaseButton variant="primary-outline" @click="exportCsv">
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+            </template>
+            CSV
+          </BaseButton>
+          <BaseButton variant="primary" :loading="isExportingPdf" @click="previewPdf">
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="EyeIcon" />
+            </template>
+            PDF
+          </BaseButton>
+        </div>
       </template>
     </BasePageHeader>
 
@@ -205,6 +213,15 @@
         <p class="mt-1 text-sm text-gray-500">{{ $t('partner.accounting.vat_books_hint', 'Книга на влезни и излезни фактури со ДДВ податоци.') }}</p>
       </div>
     </template>
+    <PdfPreviewModal
+      :show="showPdfPreview"
+      :pdf-url="previewPdfUrl"
+      :title="activeTab === 'output'
+        ? $t('partner.accounting.vat_output_book', 'Книга на излезни фактури')
+        : $t('partner.accounting.vat_input_book', 'Книга на влезни фактури')"
+      @close="closePdfPreview"
+      @download="downloadPdf"
+    />
   </BasePage>
 </template>
 
@@ -213,6 +230,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import PdfPreviewModal from './components/PdfPreviewModal.vue'
 
 const { t } = useI18n()
 const consoleStore = useConsoleStore()
@@ -221,6 +239,10 @@ const notificationStore = useNotificationStore()
 const selectedCompanyId = ref(null)
 const activeTab = ref('output')
 const isLoading = ref(false)
+const isExportingPdf = ref(false)
+const showPdfPreview = ref(false)
+const previewPdfUrl = ref(null)
+const pdfBlob = ref(null)
 const hasSearched = ref(false)
 const outputEntries = ref([])
 const inputEntries = ref([])
@@ -320,6 +342,50 @@ function exportCsv() {
   link.href = URL.createObjectURL(blob)
   link.download = `ddv_kniga_${bookType}_${filters.value.start_date}_${filters.value.end_date}.csv`
   link.click()
+}
+
+async function previewPdf() {
+  if (!selectedCompanyId.value) return
+  isExportingPdf.value = true
+  try {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/vat-books/export`, {
+      params: {
+        type: activeTab.value,
+        from_date: filters.value.start_date,
+        to_date: filters.value.end_date,
+      },
+      responseType: 'blob',
+    })
+    pdfBlob.value = new Blob([response.data], { type: 'application/pdf' })
+    previewPdfUrl.value = window.URL.createObjectURL(pdfBlob.value)
+    showPdfPreview.value = true
+  } catch (error) {
+    console.error('PDF export failed', error)
+  } finally {
+    isExportingPdf.value = false
+  }
+}
+
+function downloadPdf() {
+  if (!pdfBlob.value) return
+  const bookType = activeTab.value === 'output' ? 'izlezni' : 'vlezni'
+  const url = window.URL.createObjectURL(pdfBlob.value)
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', `kniga_ddv_${bookType}_${filters.value.start_date}_${filters.value.end_date}.pdf`)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+function closePdfPreview() {
+  showPdfPreview.value = false
+  if (previewPdfUrl.value) {
+    window.URL.revokeObjectURL(previewPdfUrl.value)
+    previewPdfUrl.value = null
+  }
+  pdfBlob.value = null
 }
 </script>
 

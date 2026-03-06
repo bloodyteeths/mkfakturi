@@ -1590,13 +1590,17 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/sub-ledger', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'subLedger']);
         Route::get('/journal-entries', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'journalEntries']);
         Route::get('/trial-balance', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'trialBalance']);
+        Route::get('/trial-balance/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'trialBalanceExport']);
         Route::get('/balance-sheet', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'balanceSheet']);
         Route::get('/income-statement', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'incomeStatement']);
+        Route::get('/general-ledger/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'generalLedgerExport']);
+        Route::get('/cash-book/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'cashBookExport']);
         Route::get('/cash-flow', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'cashFlow']);
         Route::get('/cash-flow/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'cashFlowExport']);
         Route::get('/equity-changes', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'equityChanges']);
         Route::get('/equity-changes/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'equityChangesExport']);
         Route::get('/vat-books', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'vatBooks']);
+        Route::get('/vat-books/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'vatBooksExport']);
 
         // Fixed Assets (full CRUD for partners)
         Route::get('/fixed-assets', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'index']);

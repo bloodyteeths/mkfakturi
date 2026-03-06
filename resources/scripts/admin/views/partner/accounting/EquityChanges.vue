@@ -41,12 +41,12 @@
             variant="primary-outline"
             :loading="isExporting"
             :disabled="!data"
-            @click="exportPdf"
+            @click="previewPdf"
           >
             <template #left="slotProps">
-              <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+              <BaseIcon :class="slotProps.class" name="EyeIcon" />
             </template>
-            {{ $t('reports.cash_flow.export_pdf', 'Export PDF') }}
+            PDF
           </BaseButton>
         </div>
       </div>
@@ -167,6 +167,13 @@
       <BaseIcon name="BuildingOfficeIcon" class="h-12 w-12 text-gray-400" />
       <p class="mt-2 text-sm text-gray-500">{{ $t('partner.accounting.select_company_to_view') }}</p>
     </div>
+    <PdfPreviewModal
+      :show="showPdfPreview"
+      :pdf-url="previewPdfUrl"
+      :title="$t('partner.accounting.equity_changes', 'Equity Changes')"
+      @close="closePdfPreview"
+      @download="downloadPdf"
+    />
   </BasePage>
 </template>
 
@@ -175,6 +182,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import PdfPreviewModal from './components/PdfPreviewModal.vue'
 
 const { t } = useI18n()
 const consoleStore = useConsoleStore()
@@ -184,6 +192,9 @@ const selectedCompanyId = ref(null)
 const data = ref(null)
 const isLoading = ref(false)
 const isExporting = ref(false)
+const showPdfPreview = ref(false)
+const previewPdfUrl = ref(null)
+const pdfBlob = ref(null)
 const hasSearched = ref(false)
 const selectedYear = ref(new Date().getFullYear() - 1)
 
@@ -237,7 +248,7 @@ async function loadReport() {
   }
 }
 
-async function exportPdf() {
+async function previewPdf() {
   if (!selectedCompanyId.value || !data.value) return
   isExporting.value = true
   try {
@@ -248,19 +259,35 @@ async function exportPdf() {
         responseType: 'blob',
       }
     )
-    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', `equity_changes_${selectedYear.value}.pdf`)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    window.URL.revokeObjectURL(url)
+    pdfBlob.value = new Blob([response.data], { type: 'application/pdf' })
+    previewPdfUrl.value = window.URL.createObjectURL(pdfBlob.value)
+    showPdfPreview.value = true
   } catch (error) {
     notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to export PDF' })
   } finally {
     isExporting.value = false
   }
+}
+
+function downloadPdf() {
+  if (!pdfBlob.value) return
+  const url = window.URL.createObjectURL(pdfBlob.value)
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', `equity_changes_${selectedYear.value}.pdf`)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+function closePdfPreview() {
+  showPdfPreview.value = false
+  if (previewPdfUrl.value) {
+    window.URL.revokeObjectURL(previewPdfUrl.value)
+    previewPdfUrl.value = null
+  }
+  pdfBlob.value = null
 }
 
 function formatMoney(amount) {

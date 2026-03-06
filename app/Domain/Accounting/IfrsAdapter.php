@@ -19,6 +19,7 @@ use IFRS\Reports\IncomeStatement;
 use IFRS\Reports\TrialBalance;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * IFRS Adapter for Eloquent-IFRS Integration
@@ -534,7 +535,116 @@ class IfrsAdapter
         }
     }
 
-    // CLAUDE-CHECKPOINT: Fixed all reports return structure to match blade template expectations
+    /**
+     * Get 6-column Trial Balance (Бруто биланс) for a date range.
+     *
+     * Columns: Opening Debit/Credit, Period Debit/Credit, Closing Debit/Credit
+     * Queries ifrs_ledgers directly for per-account breakdowns.
+     */
+    public function getTrialBalanceSixColumn(Company $company, string $fromDate, string $toDate): array
+    {
+        if (! $this->isEnabled($company->id)) {
+            return ['error' => 'Accounting backbone feature is disabled'];
+        }
+
+        try {
+            $entity = $this->getOrCreateEntityForCompany($company);
+            if (! $entity) {
+                return ['error' => 'IFRS Entity not available', 'status' => 'entity_error'];
+            }
+
+            $this->setUserEntityContext($entity);
+
+            $accountCount = Account::where('entity_id', $entity->id)->count();
+            if ($accountCount === 0) {
+                return ['error' => 'Accounting system not initialized', 'status' => 'not_initialized'];
+            }
+
+            // Query per-account balances using ifrs_ledgers
+            $rows = DB::select("
+                SELECT
+                    a.id,
+                    a.code,
+                    a.name,
+                    a.account_type,
+                    COALESCE(SUM(CASE WHEN l.posting_date < ? AND l.entry_type = 'D' THEN l.amount / l.rate ELSE 0 END), 0) as pre_debit,
+                    COALESCE(SUM(CASE WHEN l.posting_date < ? AND l.entry_type = 'C' THEN l.amount / l.rate ELSE 0 END), 0) as pre_credit,
+                    COALESCE(SUM(CASE WHEN l.posting_date >= ? AND l.posting_date <= ? AND l.entry_type = 'D' THEN l.amount / l.rate ELSE 0 END), 0) as period_debit,
+                    COALESCE(SUM(CASE WHEN l.posting_date >= ? AND l.posting_date <= ? AND l.entry_type = 'C' THEN l.amount / l.rate ELSE 0 END), 0) as period_credit
+                FROM ifrs_accounts a
+                LEFT JOIN ifrs_ledgers l ON a.id = l.post_account AND l.entity_id = a.entity_id AND l.deleted_at IS NULL
+                WHERE a.entity_id = ? AND a.deleted_at IS NULL
+                GROUP BY a.id, a.code, a.name, a.account_type
+                HAVING (pre_debit <> 0 OR pre_credit <> 0 OR period_debit <> 0 OR period_credit <> 0)
+                ORDER BY a.code
+            ", [$fromDate, $fromDate, $fromDate, $toDate, $fromDate, $toDate, $entity->id]);
+
+            $accounts = [];
+            $totals = [
+                'opening_debit' => 0, 'opening_credit' => 0,
+                'period_debit' => 0, 'period_credit' => 0,
+                'closing_debit' => 0, 'closing_credit' => 0,
+            ];
+
+            $mkNames = self::MK_ACCOUNT_TYPES;
+
+            foreach ($rows as $row) {
+                $openingBalance = round($row->pre_debit - $row->pre_credit, 2);
+                $closingBalance = round($openingBalance + $row->period_debit - $row->period_credit, 2);
+
+                $openingDebit = $openingBalance > 0 ? $openingBalance : 0;
+                $openingCredit = $openingBalance < 0 ? abs($openingBalance) : 0;
+                $closingDebit = $closingBalance > 0 ? $closingBalance : 0;
+                $closingCredit = $closingBalance < 0 ? abs($closingBalance) : 0;
+
+                $periodDebit = round($row->period_debit, 2);
+                $periodCredit = round($row->period_credit, 2);
+
+                $translatedName = $mkNames[$row->account_type] ?? $row->name;
+
+                $accounts[] = [
+                    'code' => $row->code,
+                    'name' => $translatedName,
+                    'account_type' => $row->account_type,
+                    'opening_debit' => $openingDebit,
+                    'opening_credit' => $openingCredit,
+                    'period_debit' => $periodDebit,
+                    'period_credit' => $periodCredit,
+                    'closing_debit' => $closingDebit,
+                    'closing_credit' => $closingCredit,
+                ];
+
+                $totals['opening_debit'] += $openingDebit;
+                $totals['opening_credit'] += $openingCredit;
+                $totals['period_debit'] += $periodDebit;
+                $totals['period_credit'] += $periodCredit;
+                $totals['closing_debit'] += $closingDebit;
+                $totals['closing_credit'] += $closingCredit;
+            }
+
+            // Round totals
+            foreach ($totals as $k => $v) {
+                $totals[$k] = round($v, 2);
+            }
+
+            return [
+                'accounts' => $accounts,
+                'totals' => $totals,
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
+                'is_balanced' => abs($totals['closing_debit'] - $totals['closing_credit']) < 0.01,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Failed to generate 6-column trial balance', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    // CLAUDE-CHECKPOINT
 
     /**
      * Get Balance Sheet for a company as of a specific date
@@ -1674,13 +1784,14 @@ class IfrsAdapter
                 ->value('balance') ?? 0;
 
             // Get ledger entries for the period with transaction details
+            $hasCounterparty = Schema::hasColumn('ifrs_line_items', 'counterparty_name');
             $entries = DB::table('ifrs_ledgers as l')
                 ->join('ifrs_transactions as t', 'l.transaction_id', '=', 't.id')
                 ->leftJoin('ifrs_line_items as li', 'l.line_item_id', '=', 'li.id')
                 ->where('l.entity_id', $entity->id)
                 ->where('l.post_account', $accountId)
                 ->whereBetween('l.posting_date', [$start->toDateString(), $end->toDateString()])
-                ->select([
+                ->select(array_filter([
                     'l.posting_date as date',
                     'l.transaction_id',
                     't.transaction_type as document_type',
@@ -1688,8 +1799,8 @@ class IfrsAdapter
                     't.narration',
                     'l.entry_type',
                     'l.amount',
-                    'li.counterparty_name',
-                ])
+                    $hasCounterparty ? 'li.counterparty_name' : DB::raw('NULL as counterparty_name'),
+                ]))
                 ->orderBy('l.posting_date')
                 ->orderBy('l.id')
                 ->get();
@@ -1768,6 +1879,9 @@ class IfrsAdapter
             $end = Carbon::parse($endDate);
 
             // Query ledger entries joined with line items to get counterparty
+            $hasCounterparty = Schema::hasColumn('ifrs_line_items', 'counterparty_name');
+            $counterpartySelect = $hasCounterparty ? 'li.counterparty_name' : DB::raw('NULL as counterparty_name');
+
             $entries = DB::table('ifrs_ledgers as l')
                 ->join('ifrs_transactions as t', 'l.transaction_id', '=', 't.id')
                 ->leftJoin('ifrs_line_items as li', 'l.line_item_id', '=', 'li.id')
@@ -1780,7 +1894,7 @@ class IfrsAdapter
                     'l.amount',
                     't.transaction_no as reference',
                     't.narration',
-                    'li.counterparty_name',
+                    $counterpartySelect,
                 ])
                 ->orderBy('l.posting_date')
                 ->orderBy('l.id')
@@ -1793,11 +1907,11 @@ class IfrsAdapter
                 ->where('l.post_account', $account->id)
                 ->where('l.posting_date', '<', $start->toDateString())
                 ->select([
-                    'li.counterparty_name',
+                    $counterpartySelect,
                     DB::raw("SUM(CASE WHEN l.entry_type = 'D' THEN l.amount ELSE 0 END) as total_debit"),
                     DB::raw("SUM(CASE WHEN l.entry_type = 'C' THEN l.amount ELSE 0 END) as total_credit"),
                 ])
-                ->groupBy('li.counterparty_name')
+                ->groupBy($hasCounterparty ? 'li.counterparty_name' : DB::raw('1'))
                 ->get();
 
             $openingMap = [];

@@ -1581,13 +1581,16 @@
       "accounting": "Muhasebe",
       "trial_balance": {
         "title": "Mizan",
-        "balanced": "Bilançoот е рамamaтежа",
-        "not_balanced": "Bilançoот не е рамamaтежа",
-        "difference": "Разлveка",
-        "no_data": "Yok altındaатоцve",
-        "no_data_description": "Yok bulunduо hesaplar seçilen tarih",
-        "select_and_load": "Tarih secin ve raporu yukleyin",
-        "select_and_load_description": "Mizan gormek istediginiz tarihi secin ve guncelle butonuna tiklayin."
+        "balanced": "Mizan dengelidir",
+        "not_balanced": "Mizan dengeli degil",
+        "difference": "Fark",
+        "opening_balance": "Acilis Bakiyesi",
+        "period_turnover": "Donem Hareketi",
+        "closing_balance": "Kapanis Bakiyesi",
+        "no_data": "Veri bulunamadi",
+        "no_data_description": "Secilen donem icin hesap bulunamadi",
+        "select_and_load": "Donem secin ve raporu yukleyin",
+        "select_and_load_description": "Baslangic ve bitis tarihini secin ve guncelle butonuna tiklayin."
       },
       "balance_sheet": "Bilanço ileсoба",
       "income_statement": "Bilanço успех",

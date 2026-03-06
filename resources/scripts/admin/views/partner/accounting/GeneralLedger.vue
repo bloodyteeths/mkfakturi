@@ -2,18 +2,28 @@
   <BasePage>
     <BasePageHeader :title="$t('partner.accounting.general_ledger')">
       <template #actions>
-        <BaseButton
-          v-if="ledgerData && ledgerData.entries && ledgerData.entries.length > 0"
-          variant="primary-outline"
-          :loading="isExporting"
-          @click="exportToCsv"
-          :aria-label="$t('general.export')"
-        >
-          <template #left="slotProps">
-            <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
-          </template>
-          {{ $t('general.export') }}
-        </BaseButton>
+        <div v-if="ledgerData && ledgerData.entries && ledgerData.entries.length > 0" class="flex space-x-2">
+          <BaseButton
+            variant="primary-outline"
+            :loading="isExporting"
+            @click="exportToCsv"
+          >
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+            </template>
+            CSV
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            :loading="isExportingPdf"
+            @click="previewPdf"
+          >
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="EyeIcon" />
+            </template>
+            PDF
+          </BaseButton>
+        </div>
       </template>
     </BasePageHeader>
 
@@ -264,6 +274,13 @@
         {{ $t('partner.accounting.select_company_to_view') }}
       </p>
     </div>
+    <PdfPreviewModal
+      :show="showPdfPreview"
+      :pdf-url="previewPdfUrl"
+      :title="$t('partner.accounting.general_ledger')"
+      @close="closePdfPreview"
+      @download="downloadPdf"
+    />
   </BasePage>
 </template>
 
@@ -274,6 +291,7 @@ import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { debounce } from 'lodash'
+import PdfPreviewModal from './components/PdfPreviewModal.vue'
 
 const { t } = useI18n()
 const consoleStore = useConsoleStore()
@@ -287,6 +305,10 @@ const ledgerData = ref(null)
 const isLoading = ref(false)
 const isLoadingAccounts = ref(false)
 const isExporting = ref(false)
+const isExportingPdf = ref(false)
+const showPdfPreview = ref(false)
+const previewPdfUrl = ref(null)
+const pdfBlob = ref(null)
 const hasSearched = ref(false)
 const ifrsEnabled = ref(false)
 const ifrsChecked = ref(false)
@@ -549,6 +571,50 @@ async function exportToCsv() {
   } finally {
     isExporting.value = false
   }
+}
+
+async function previewPdf() {
+  if (!selectedCompanyId.value || !filters.value.account_id) return
+  isExportingPdf.value = true
+  try {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/general-ledger/export`, {
+      params: {
+        account_id: filters.value.account_id,
+        account_code: selectedAccountCode.value,
+        from_date: filters.value.start_date,
+        to_date: filters.value.end_date,
+      },
+      responseType: 'blob',
+    })
+    pdfBlob.value = new Blob([response.data], { type: 'application/pdf' })
+    previewPdfUrl.value = window.URL.createObjectURL(pdfBlob.value)
+    showPdfPreview.value = true
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: t('errors.export_failed') })
+  } finally {
+    isExportingPdf.value = false
+  }
+}
+
+function downloadPdf() {
+  if (!pdfBlob.value) return
+  const url = window.URL.createObjectURL(pdfBlob.value)
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', `glavna_kniga_${selectedAccountCode.value || 'all'}_${filters.value.start_date}_${filters.value.end_date}.pdf`)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+function closePdfPreview() {
+  showPdfPreview.value = false
+  if (previewPdfUrl.value) {
+    window.URL.revokeObjectURL(previewPdfUrl.value)
+    previewPdfUrl.value = null
+  }
+  pdfBlob.value = null
 }
 
 function formatDate(dateStr) {

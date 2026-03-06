@@ -2234,14 +2234,17 @@
     "accounting": {
       "accounting": "Kontabilitet",
       "trial_balance": {
-        "title": "Пробен бdheланс",
-        "balanced": "Бdheланmeт е во рамнотежа",
-        "not_balanced": "Бdheланmeт jo е во рамнотежа",
+        "title": "Bilanci i Verifikimit",
+        "balanced": "Bilanci është i balancuar",
+        "not_balanced": "Bilanci nuk është i balancuar",
         "difference": "Diferenca",
-        "no_data": "Joма поpoтоцdhe",
-        "no_data_description": "Joма прajoјditaо llogaritë për dheзбранdheот data",
-        "select_and_load": "Zgjidhni datën dhe ngarkoni raportin",
-        "select_and_load_description": "Zgjidhni datën për të cilën dëshironi të shihni bilancin e verifikimit dhe klikoni butonin e përditësimit."
+        "opening_balance": "Bilanci Fillestar",
+        "period_turnover": "Qarkullimi i Periudhës",
+        "closing_balance": "Bilanci Përfundimtar",
+        "no_data": "Nuk ka të dhëna",
+        "no_data_description": "Nuk u gjetën llogari për periudhën e zgjedhur",
+        "select_and_load": "Zgjidhni periudhën dhe ngarkoni raportin",
+        "select_and_load_description": "Zgjidhni datën e fillimit dhe përfundimit dhe klikoni butonin e përditësimit."
       },
       "balance_sheet": "Бdheланс në menjëqindјба",
       "income_statement": "Бdheланс në sukses",

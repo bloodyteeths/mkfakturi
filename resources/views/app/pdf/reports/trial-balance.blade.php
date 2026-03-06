@@ -6,7 +6,7 @@
     <style type="text/css">
         body {
             font-family: "DejaVu Sans";
-            font-size: 10px;
+            font-size: 9px;
             color: #333;
         }
 
@@ -15,7 +15,7 @@
         }
 
         .sub-container {
-            padding: 0px 15px;
+            padding: 0px 10px;
         }
 
         .report-header {
@@ -25,7 +25,7 @@
 
         .heading-text {
             font-weight: bold;
-            font-size: 20px;
+            font-size: 16px;
             color: #1a1a1a;
             width: 100%;
             text-align: left;
@@ -35,7 +35,7 @@
 
         .heading-date {
             font-weight: normal;
-            font-size: 12px;
+            font-size: 10px;
             color: #666;
             width: 100%;
             text-align: right;
@@ -54,14 +54,14 @@
         }
 
         .form-label {
-            font-size: 10px;
+            font-size: 9px;
             color: #888;
             text-align: center;
-            margin: 2px 0 15px 0;
+            margin: 2px 0 10px 0;
         }
 
         .accounts-table {
-            margin-top: 15px;
+            margin-top: 10px;
             width: 100%;
             border: 1px solid #cbd5e0;
         }
@@ -72,11 +72,26 @@
         }
 
         .table-header-text {
-            padding: 8px 6px;
+            padding: 5px 3px;
             margin: 0px;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 8px;
             color: #2d3748;
+            text-align: center;
+        }
+
+        .group-header {
+            background: #edf2f7;
+            border-bottom: 1px solid #a0aec0;
+            border-top: 1px solid #a0aec0;
+        }
+
+        .group-header-text {
+            padding: 4px 3px;
+            margin: 0px;
+            font-weight: bold;
+            font-size: 8px;
+            color: #4a5568;
             text-align: center;
         }
 
@@ -88,17 +103,25 @@
             background: #f7fafc;
         }
 
-        .account-name {
-            padding: 5px 8px;
+        .account-code {
+            padding: 4px 4px;
             margin: 0px;
-            font-size: 10px;
+            font-size: 9px;
+            color: #4a5568;
+            font-weight: bold;
+        }
+
+        .account-name {
+            padding: 4px 4px;
+            margin: 0px;
+            font-size: 9px;
             color: #2d3748;
         }
 
         .account-amount {
-            padding: 5px 6px;
+            padding: 4px 3px;
             margin: 0px;
-            font-size: 10px;
+            font-size: 9px;
             text-align: right;
             color: #2d3748;
         }
@@ -109,33 +132,33 @@
         }
 
         .total-label {
-            padding: 8px;
+            padding: 6px 4px;
             margin: 0px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 10px;
             color: #1a202c;
         }
 
         .total-amount {
-            padding: 8px 6px;
+            padding: 6px 3px;
             margin: 0px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 9px;
             text-align: right;
             color: #2c5282;
         }
 
         .balanced-indicator {
-            margin-top: 15px;
-            padding: 10px 15px;
+            margin-top: 10px;
+            padding: 8px 10px;
             background: #c6f6d5;
             border: 1px solid #48bb78;
             text-align: center;
         }
 
         .unbalanced-indicator {
-            margin-top: 15px;
-            padding: 10px 15px;
+            margin-top: 10px;
+            padding: 8px 10px;
             background: #fed7d7;
             border: 1px solid #fc8181;
             text-align: center;
@@ -145,7 +168,21 @@
             padding: 0px;
             margin: 0px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
+        }
+
+        .signature-section {
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .signature-label {
+            font-size: 9px;
+            color: #666;
+            border-top: 1px solid #999;
+            padding-top: 3px;
+            width: 200px;
+            text-align: center;
         }
     </style>
 
@@ -156,79 +193,102 @@
 
 <body>
     <div class="sub-container">
-        <table class="report-header">
-            <tr>
-                <td>
-                    <p class="heading-text">{{ $company->name }}</p>
-                </td>
-                <td>
-                    <p class="heading-date">{{ $as_of_date }}</p>
-                </td>
-            </tr>
-        </table>
+        @include('app.pdf.reports._company-header')
+
         <p class="sub-heading-text">БРУТО БИЛАНС</p>
-        <p class="form-label">Состојба на {{ $as_of_date }}</p>
+        <p class="form-label">
+            Период: {{ $from_date ?? '' }} - {{ $to_date ?? '' }}
+        </p>
 
         <table class="accounts-table">
             <thead>
                 <tr class="table-header">
-                    <th style="text-align: left; width: 40%;">
+                    <th rowspan="2" style="text-align: left; width: 6%; border-right: 1px solid #a0aec0;">
+                        <p class="table-header-text" style="text-align: left;">Шифра</p>
+                    </th>
+                    <th rowspan="2" style="text-align: left; width: 24%; border-right: 1px solid #a0aec0;">
                         <p class="table-header-text" style="text-align: left;">Назив на сметка</p>
                     </th>
-                    <th style="width: 15%;">
-                        <p class="table-header-text">Дугува</p>
+                    <th colspan="2" style="border-right: 1px solid #a0aec0; border-bottom: 1px solid #a0aec0;">
+                        <p class="table-header-text">Почетно салдо</p>
                     </th>
-                    <th style="width: 15%;">
-                        <p class="table-header-text">Побарува</p>
+                    <th colspan="2" style="border-right: 1px solid #a0aec0; border-bottom: 1px solid #a0aec0;">
+                        <p class="table-header-text">Промет во период</p>
                     </th>
-                    <th style="width: 15%;">
-                        <p class="table-header-text">Салдо Дугува</p>
+                    <th colspan="2">
+                        <p class="table-header-text">Крајно салдо</p>
                     </th>
-                    <th style="width: 15%;">
-                        <p class="table-header-text">Салдо Побарува</p>
+                </tr>
+                <tr class="group-header">
+                    <th style="width: 10%; border-right: 1px solid #cbd5e0;">
+                        <p class="group-header-text">Дугува</p>
+                    </th>
+                    <th style="width: 10%; border-right: 1px solid #a0aec0;">
+                        <p class="group-header-text">Побарува</p>
+                    </th>
+                    <th style="width: 10%; border-right: 1px solid #cbd5e0;">
+                        <p class="group-header-text">Дугува</p>
+                    </th>
+                    <th style="width: 10%; border-right: 1px solid #a0aec0;">
+                        <p class="group-header-text">Побарува</p>
+                    </th>
+                    <th style="width: 10%; border-right: 1px solid #cbd5e0;">
+                        <p class="group-header-text">Дугува</p>
+                    </th>
+                    <th style="width: 10%;">
+                        <p class="group-header-text">Побарува</p>
                     </th>
                 </tr>
             </thead>
             <tbody>
-                @if(isset($trialBalance['trial_balance']['accounts']))
-                    @foreach($trialBalance['trial_balance']['accounts'] as $account)
+                @if(isset($trialBalance['accounts']))
+                    @foreach($trialBalance['accounts'] as $account)
                     <tr class="account-row">
                         <td>
-                            <p class="account-name">{{ $account['name'] ?? $account['account_name'] ?? 'N/A' }}</p>
+                            <p class="account-code">{{ $account['code'] ?? '-' }}</p>
+                        </td>
+                        <td>
+                            <p class="account-name">{{ $account['name'] ?? '-' }}</p>
                         </td>
                         <td>
                             <p class="account-amount">
-                                @if(isset($account['debit']) && $account['debit'] > 0)
-                                    {!! format_money_pdf($account['debit'] * 100, $currency) !!}
-                                @else
-                                    -
+                                @if(($account['opening_debit'] ?? 0) > 0)
+                                    {!! format_money_pdf(($account['opening_debit'] ?? 0) * 100, $currency) !!}
                                 @endif
                             </p>
                         </td>
                         <td>
                             <p class="account-amount">
-                                @if(isset($account['credit']) && $account['credit'] > 0)
-                                    {!! format_money_pdf($account['credit'] * 100, $currency) !!}
-                                @else
-                                    -
+                                @if(($account['opening_credit'] ?? 0) > 0)
+                                    {!! format_money_pdf(($account['opening_credit'] ?? 0) * 100, $currency) !!}
                                 @endif
                             </p>
                         </td>
                         <td>
                             <p class="account-amount">
-                                @if(isset($account['balance']) && $account['balance'] > 0)
-                                    {!! format_money_pdf($account['balance'] * 100, $currency) !!}
-                                @else
-                                    -
+                                @if(($account['period_debit'] ?? 0) > 0)
+                                    {!! format_money_pdf(($account['period_debit'] ?? 0) * 100, $currency) !!}
                                 @endif
                             </p>
                         </td>
                         <td>
                             <p class="account-amount">
-                                @if(isset($account['balance']) && $account['balance'] < 0)
-                                    {!! format_money_pdf(abs($account['balance']) * 100, $currency) !!}
-                                @else
-                                    -
+                                @if(($account['period_credit'] ?? 0) > 0)
+                                    {!! format_money_pdf(($account['period_credit'] ?? 0) * 100, $currency) !!}
+                                @endif
+                            </p>
+                        </td>
+                        <td>
+                            <p class="account-amount">
+                                @if(($account['closing_debit'] ?? 0) > 0)
+                                    {!! format_money_pdf(($account['closing_debit'] ?? 0) * 100, $currency) !!}
+                                @endif
+                            </p>
+                        </td>
+                        <td>
+                            <p class="account-amount">
+                                @if(($account['closing_credit'] ?? 0) > 0)
+                                    {!! format_money_pdf(($account['closing_credit'] ?? 0) * 100, $currency) !!}
                                 @endif
                             </p>
                         </td>
@@ -238,49 +298,69 @@
             </tbody>
             <tfoot>
                 <tr class="total-row">
-                    <td>
+                    <td colspan="2">
                         <p class="total-label">ВКУПНО</p>
                     </td>
                     <td>
                         <p class="total-amount">
-                            {!! format_money_pdf(($trialBalance['trial_balance']['total_debits'] ?? 0) * 100, $currency) !!}
+                            {!! format_money_pdf(($trialBalance['totals']['opening_debit'] ?? 0) * 100, $currency) !!}
                         </p>
                     </td>
                     <td>
                         <p class="total-amount">
-                            {!! format_money_pdf(($trialBalance['trial_balance']['total_credits'] ?? 0) * 100, $currency) !!}
+                            {!! format_money_pdf(($trialBalance['totals']['opening_credit'] ?? 0) * 100, $currency) !!}
                         </p>
                     </td>
                     <td>
                         <p class="total-amount">
-                            {!! format_money_pdf(($trialBalance['trial_balance']['total_debits'] ?? 0) * 100, $currency) !!}
+                            {!! format_money_pdf(($trialBalance['totals']['period_debit'] ?? 0) * 100, $currency) !!}
                         </p>
                     </td>
                     <td>
                         <p class="total-amount">
-                            {!! format_money_pdf(($trialBalance['trial_balance']['total_credits'] ?? 0) * 100, $currency) !!}
+                            {!! format_money_pdf(($trialBalance['totals']['period_credit'] ?? 0) * 100, $currency) !!}
+                        </p>
+                    </td>
+                    <td>
+                        <p class="total-amount">
+                            {!! format_money_pdf(($trialBalance['totals']['closing_debit'] ?? 0) * 100, $currency) !!}
+                        </p>
+                    </td>
+                    <td>
+                        <p class="total-amount">
+                            {!! format_money_pdf(($trialBalance['totals']['closing_credit'] ?? 0) * 100, $currency) !!}
                         </p>
                     </td>
                 </tr>
             </tfoot>
         </table>
 
-        @if(isset($trialBalance['trial_balance']['is_balanced']) && $trialBalance['trial_balance']['is_balanced'])
+        @if($trialBalance['is_balanced'] ?? false)
         <div class="balanced-indicator">
             <p class="indicator-text" style="color: #22543d;">
-                ✓ Бруто билансот е балансиран
+                &#10003; Бруто билансот е балансиран
             </p>
         </div>
         @else
         <div class="unbalanced-indicator">
             <p class="indicator-text" style="color: #742a2a;">
-                ✗ Бруто билансот НЕ е балансиран
+                &#10007; Бруто билансот НЕ е балансиран
             </p>
         </div>
         @endif
+
+        {{-- Signature section --}}
+        <table class="signature-section">
+            <tr>
+                <td style="width: 50%; text-align: center; padding-top: 40px;">
+                    <p class="signature-label">Составил</p>
+                </td>
+                <td style="width: 50%; text-align: center; padding-top: 40px;">
+                    <p class="signature-label">Одговорно лице</p>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 
 </html>
-
-<!-- CLAUDE-CHECKPOINT -->

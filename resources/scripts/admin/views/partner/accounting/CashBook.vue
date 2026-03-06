@@ -2,12 +2,20 @@
   <BasePage>
     <BasePageHeader :title="$t('partner.accounting.cash_book', 'Касова Книга')">
       <template #actions>
-        <BaseButton v-if="entries.length > 0" variant="primary-outline" @click="exportCsv">
-          <template #left="slotProps">
-            <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
-          </template>
-          {{ $t('general.export') }}
-        </BaseButton>
+        <div v-if="entries.length > 0" class="flex space-x-2">
+          <BaseButton variant="primary-outline" @click="exportCsv">
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+            </template>
+            CSV
+          </BaseButton>
+          <BaseButton variant="primary" :loading="isExportingPdf" @click="previewPdf">
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="EyeIcon" />
+            </template>
+            PDF
+          </BaseButton>
+        </div>
       </template>
     </BasePageHeader>
 
@@ -169,6 +177,13 @@
         <p class="mt-1 text-sm text-gray-500">{{ $t('partner.accounting.cash_book_hint', 'Изберете сметка на каса (пр. 100 Готовина) за да ги видите влезовите и излезите.') }}</p>
       </div>
     </template>
+    <PdfPreviewModal
+      :show="showPdfPreview"
+      :pdf-url="previewPdfUrl"
+      :title="$t('partner.accounting.cash_book', 'Касова Книга')"
+      @close="closePdfPreview"
+      @download="downloadPdf"
+    />
   </BasePage>
 </template>
 
@@ -178,6 +193,7 @@ import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { usePartnerAccountingStore } from '@/scripts/admin/stores/partner-accounting'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import PdfPreviewModal from './components/PdfPreviewModal.vue'
 
 const { t } = useI18n()
 const consoleStore = useConsoleStore()
@@ -187,6 +203,10 @@ const notificationStore = useNotificationStore()
 const selectedCompanyId = ref(null)
 const isLoading = ref(false)
 const isLoadingAccounts = ref(false)
+const isExportingPdf = ref(false)
+const showPdfPreview = ref(false)
+const previewPdfUrl = ref(null)
+const pdfBlob = ref(null)
 const hasSearched = ref(false)
 const ifrsEnabled = ref(false)
 const ifrsChecked = ref(false)
@@ -359,6 +379,51 @@ function exportCsv() {
   link.href = URL.createObjectURL(blob)
   link.download = `kasova_kniga_${filters.value.start_date}_${filters.value.end_date}.csv`
   link.click()
+}
+
+async function previewPdf() {
+  if (!selectedCompanyId.value || !filters.value.account_id) return
+  isExportingPdf.value = true
+  try {
+    const selectedAccount = cashAccounts.value.find(a => a.id === filters.value.account_id)
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/cash-book/export`, {
+      params: {
+        account_code: selectedAccount?.code || '100',
+        from_date: filters.value.start_date,
+        to_date: filters.value.end_date,
+      },
+      responseType: 'blob',
+    })
+    pdfBlob.value = new Blob([response.data], { type: 'application/pdf' })
+    previewPdfUrl.value = window.URL.createObjectURL(pdfBlob.value)
+    showPdfPreview.value = true
+  } catch (error) {
+    console.error('PDF export failed', error)
+  } finally {
+    isExportingPdf.value = false
+  }
+}
+
+function downloadPdf() {
+  if (!pdfBlob.value) return
+  const selectedAccount = cashAccounts.value.find(a => a.id === filters.value.account_id)
+  const url = window.URL.createObjectURL(pdfBlob.value)
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', `kasova_kniga_${selectedAccount?.code || '100'}_${filters.value.start_date}_${filters.value.end_date}.pdf`)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+function closePdfPreview() {
+  showPdfPreview.value = false
+  if (previewPdfUrl.value) {
+    window.URL.revokeObjectURL(previewPdfUrl.value)
+    previewPdfUrl.value = null
+  }
+  pdfBlob.value = null
 }
 </script>
 

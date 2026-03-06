@@ -129,7 +129,7 @@ class PartnerAccountingReportsController extends Controller
     }
 
     /**
-     * Get Trial Balance Report
+     * Get Trial Balance Report (6-column: Opening/Period/Closing)
      */
     public function trialBalance(Request $request, int $company): JsonResponse
     {
@@ -148,9 +148,10 @@ class PartnerAccountingReportsController extends Controller
             return response()->json(['success' => false, 'message' => 'Company not found'], 404);
         }
 
-        $asOfDate = $request->query('as_of_date', now()->toDateString());
+        $fromDate = $request->query('from_date', now()->startOfYear()->toDateString());
+        $toDate = $request->query('to_date', $request->query('as_of_date', now()->toDateString()));
 
-        $trialBalance = $this->ifrsAdapter->getTrialBalance($companyModel, $asOfDate);
+        $trialBalance = $this->ifrsAdapter->getTrialBalanceSixColumn($companyModel, $fromDate, $toDate);
 
         if (isset($trialBalance['error'])) {
             return response()->json($trialBalance, 400);
@@ -160,6 +161,53 @@ class PartnerAccountingReportsController extends Controller
             'success' => true,
             'trial_balance' => $trialBalance,
         ]);
+    }
+
+    /**
+     * Export Trial Balance as PDF
+     */
+    public function trialBalanceExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            abort(404, 'Partner not found');
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'No access to this company');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+
+        $companyModel->load('address');
+
+        $fromDate = $request->query('from_date', now()->startOfYear()->toDateString());
+        $toDate = $request->query('to_date', now()->toDateString());
+
+        $trialBalance = $this->ifrsAdapter->getTrialBalanceSixColumn($companyModel, $fromDate, $toDate);
+
+        if (isset($trialBalance['error'])) {
+            abort(400, $trialBalance['error']);
+        }
+
+        $currency = \App\Models\Currency::find(
+            CompanySetting::getSetting('currency', $company)
+        );
+
+        view()->share([
+            'company' => $companyModel,
+            'trialBalance' => $trialBalance,
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'report_period' => $fromDate . ' - ' . $toDate,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.trial-balance');
+
+        return $pdf->download("bruto_bilans_{$fromDate}_{$toDate}.pdf");
     }
 
     /**
@@ -500,10 +548,10 @@ class PartnerAccountingReportsController extends Controller
      * - Output book (sales invoices)
      * - Input book (purchase bills/expenses)
      */
-    public function vatBooks(Request $request, Company $company): JsonResponse
+    public function vatBooks(Request $request, int $company): JsonResponse
     {
         $partner = $this->getPartnerFromRequest($request);
-        if (!$partner || !$this->hasCompanyAccess($partner, $company->id)) {
+        if (!$partner || !$this->hasCompanyAccess($partner, $company)) {
             return response()->json(['error' => 'Access denied'], 403);
         }
 
@@ -511,7 +559,7 @@ class PartnerAccountingReportsController extends Controller
         $toDate = $request->input('to_date');
 
         // Output book - Sales invoices
-        $invoicesQuery = \App\Models\Invoice::where('company_id', $company->id)
+        $invoicesQuery = \App\Models\Invoice::where('company_id', $company)
             ->whereNotIn('status', ['DRAFT'])
             ->with(['customer', 'taxes']);
 
@@ -543,7 +591,7 @@ class PartnerAccountingReportsController extends Controller
         })->values()->toArray();
 
         // Input book - Bills (purchases)
-        $billsQuery = \App\Models\Bill::where('company_id', $company->id)
+        $billsQuery = \App\Models\Bill::where('company_id', $company)
             ->whereNotIn('status', ['DRAFT'])
             ->with(['supplier', 'taxes']);
 
@@ -585,6 +633,158 @@ class PartnerAccountingReportsController extends Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Export VAT Books as PDF
+     */
+    public function vatBooksExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            abort(404, 'Partner not found');
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'No access to this company');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+        $companyModel->load('address');
+
+        $fromDate = $request->query('from_date', now()->startOfMonth()->toDateString());
+        $toDate = $request->query('to_date', now()->toDateString());
+        $bookType = $request->query('type', 'output'); // output or input
+
+        // Reuse the JSON endpoint logic
+        $jsonRequest = new Request(['from_date' => $fromDate, 'to_date' => $toDate]);
+        $jsonRequest->setUserResolver(function () use ($request) { return $request->user(); });
+        $jsonResponse = $this->vatBooks($jsonRequest, $companyModel->id);
+        $data = json_decode($jsonResponse->getContent(), true)['data'] ?? [];
+
+        $entries = $bookType === 'input' ? ($data['input'] ?? []) : ($data['output'] ?? []);
+
+        $currency = \App\Models\Currency::find(
+            CompanySetting::getSetting('currency', $company)
+        );
+
+        view()->share([
+            'company' => $companyModel,
+            'entries' => $entries,
+            'bookType' => $bookType,
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'report_period' => $fromDate . ' - ' . $toDate,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.vat-books');
+        $typeSlug = $bookType === 'input' ? 'vlezni' : 'izlezni';
+
+        return $pdf->download("kniga_ddv_{$typeSlug}_{$fromDate}_{$toDate}.pdf");
+    }
+
+    /**
+     * Export General Ledger as PDF
+     */
+    public function generalLedgerExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            abort(404, 'Partner not found');
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'No access to this company');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+        $companyModel->load('address');
+
+        $fromDate = $request->query('from_date', now()->startOfYear()->toDateString());
+        $toDate = $request->query('to_date', now()->toDateString());
+        $accountCode = $request->query('account_code');
+        $accountId = $request->query('account_id');
+
+        if (!$accountCode && $accountId) {
+            $appAccount = \App\Models\Account::where('company_id', $company)->find($accountId);
+            $accountCode = $appAccount?->code;
+        }
+
+        if ($accountCode) {
+            $ledger = $this->ifrsAdapter->getGeneralLedger($companyModel, null, $fromDate, $toDate, $accountCode);
+        } else {
+            $ledger = $this->ifrsAdapter->getGeneralLedger($companyModel, (int) $accountId, $fromDate, $toDate);
+        }
+
+        $currency = \App\Models\Currency::find(
+            CompanySetting::getSetting('currency', $company)
+        );
+
+        view()->share([
+            'company' => $companyModel,
+            'ledger' => $ledger,
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'report_period' => $fromDate . ' - ' . $toDate,
+            'currency' => $currency,
+            'account_name' => $ledger['account_name'] ?? ($accountCode ?? ''),
+            'account_code' => $accountCode ?? '',
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.general-ledger');
+        $slug = $accountCode ?: 'all';
+
+        return $pdf->download("glavna_kniga_{$slug}_{$fromDate}_{$toDate}.pdf");
+    }
+
+    /**
+     * Export Cash Book as PDF
+     */
+    public function cashBookExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            abort(404, 'Partner not found');
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'No access to this company');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+        $companyModel->load('address');
+
+        $fromDate = $request->query('from_date', now()->startOfYear()->toDateString());
+        $toDate = $request->query('to_date', now()->toDateString());
+        $accountCode = $request->query('account_code', '100');
+
+        $ledger = $this->ifrsAdapter->getGeneralLedger($companyModel, null, $fromDate, $toDate, $accountCode);
+
+        $currency = \App\Models\Currency::find(
+            CompanySetting::getSetting('currency', $company)
+        );
+
+        view()->share([
+            'company' => $companyModel,
+            'ledger' => $ledger,
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'report_period' => $fromDate . ' - ' . $toDate,
+            'currency' => $currency,
+            'account_name' => $ledger['account_name'] ?? $accountCode,
+            'account_code' => $accountCode,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.cash-book');
+
+        return $pdf->download("kasova_kniga_{$accountCode}_{$fromDate}_{$toDate}.pdf");
     }
 
     // CLAUDE-CHECKPOINT
