@@ -2,6 +2,41 @@ import axios from 'axios'
 import { defineStore } from 'pinia'
 import { handleError } from '@/scripts/helpers/error-handling'
 
+function compressImage(file, maxDim = 1600, quality = 0.8) {
+  return new Promise((resolve) => {
+    if (!file.type.startsWith('image/')) {
+      resolve(file)
+      return
+    }
+    const img = new Image()
+    img.onload = () => {
+      const { width, height } = img
+      if (width <= maxDim && height <= maxDim && file.size <= 1024 * 1024) {
+        URL.revokeObjectURL(img.src)
+        resolve(file)
+        return
+      }
+      const scale = Math.min(maxDim / width, maxDim / height, 1)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(width * scale)
+      canvas.height = Math.round(height * scale)
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      URL.revokeObjectURL(img.src)
+      canvas.toBlob(
+        (blob) => {
+          const compressed = new File([blob], file.name, { type: 'image/jpeg' })
+          resolve(compressed)
+        },
+        'image/jpeg',
+        quality
+      )
+    }
+    img.onerror = () => resolve(file)
+    img.src = URL.createObjectURL(file)
+  })
+}
+
 export const useReceiptScannerStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
 
@@ -33,13 +68,15 @@ export const useReceiptScannerStore = (useWindow = false) => {
         this.scannedInvoiceData = null
         return data
       },
-      scanReceipt(file) {
+      async scanReceipt(file) {
         this.processingStep = 0
         this.isScanning = true
         this.lastResult = null
 
+        const compressed = await compressImage(file)
+
         const formData = new FormData()
-        formData.append('receipt', file)
+        formData.append('receipt', compressed)
 
         const stepTimers = []
 
@@ -52,6 +89,7 @@ export const useReceiptScannerStore = (useWindow = false) => {
               headers: {
                 'Content-Type': 'multipart/form-data',
               },
+              timeout: 120000,
             })
             .then((response) => {
               this.lastResult = response.data
@@ -66,8 +104,6 @@ export const useReceiptScannerStore = (useWindow = false) => {
               stepTimers.forEach(clearTimeout)
               this.isScanning = false
               this.processingStep = 0
-              // Surface more detail in browser console for debugging
-              // (status code, message, backend payload if any)
               // eslint-disable-next-line no-console
               console.error('Receipt scan failed', {
                 status: err.response?.status,

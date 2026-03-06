@@ -81,7 +81,7 @@ class ReceiptScannerController extends Controller
                     }
 
                     // Convert PDF to images (first page only for receipts)
-                    $images = $pdfConverter->convertToImages($storedPath, ['dpi' => 200]);
+                    $images = $pdfConverter->convertToImages($storedPath, ['maxPages' => 1]);
 
                     if (empty($images)) {
                         throw new \Exception('PDF conversion returned no images');

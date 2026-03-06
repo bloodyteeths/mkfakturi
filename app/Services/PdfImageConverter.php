@@ -55,6 +55,7 @@ class PdfImageConverter
 
         $dpi = $options['dpi'] ?? $this->dpi;
         $format = $options['format'] ?? $this->format;
+        $maxPages = $options['maxPages'] ?? null;
 
         Log::info('[PdfImageConverter] Starting PDF conversion', [
             'path' => $pdfPath,
@@ -73,7 +74,7 @@ class PdfImageConverter
         // Route to appropriate backend
         switch ($this->backend) {
             case 'imagick':
-                return $this->convertWithImagick($fullPath, $dpi, $format);
+                return $this->convertWithImagick($fullPath, $dpi, $format, $maxPages);
 
             case 'external_api':
                 return $this->convertWithExternalApi($fullPath, $dpi, $format);
@@ -93,7 +94,7 @@ class PdfImageConverter
      *
      * @throws \Exception If Imagick is not available or conversion fails
      */
-    private function convertWithImagick(string $fullPath, int $dpi, string $format): array
+    private function convertWithImagick(string $fullPath, int $dpi, string $format, ?int $maxPages = null): array
     {
         if (! extension_loaded('imagick')) {
             throw new \Exception(
@@ -109,13 +110,15 @@ class PdfImageConverter
 
             $images = [];
             $pageCount = $imagick->getNumberImages();
+            $pagesToConvert = $maxPages ? min($pageCount, $maxPages) : $pageCount;
 
             Log::info('[PdfImageConverter] Converting with Imagick', [
                 'pages' => $pageCount,
+                'pages_to_convert' => $pagesToConvert,
                 'dpi' => $dpi,
             ]);
 
-            for ($page = 0; $page < $pageCount; $page++) {
+            for ($page = 0; $page < $pagesToConvert; $page++) {
                 $imagick->setIteratorIndex($page);
                 $imagick->setImageFormat($format);
                 $imagick->setImageCompressionQuality(85);
