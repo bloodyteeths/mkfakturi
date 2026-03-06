@@ -238,15 +238,14 @@ const { t } = useI18n()
 
 // Submenu group definitions (title i18n key + icon)
 const submenuConfig = {
-  journals: { title: 'partner.accounting.submenu.journals', icon: 'BookOpenIcon' },
-  closings: { title: 'partner.accounting.submenu.closings', icon: 'LockClosedIcon' },
-  reports: { title: 'partner.accounting.submenu.reports', icon: 'ChartBarIcon' },
-  compliance: { title: 'partner.accounting.submenu.compliance', icon: 'ClipboardDocumentListIcon' },
-  migration: { title: 'partner.accounting.submenu.migration', icon: 'ArrowPathIcon' },
+  setup: { title: 'partner.accounting.submenu.setup', icon: 'WrenchScrewdriverIcon' },
+  ledgers: { title: 'partner.accounting.submenu.ledgers', icon: 'BookOpenIcon' },
+  reports: { title: 'partner.accounting.submenu.reports', icon: 'ChartBarSquareIcon' },
+  compliance: { title: 'partner.accounting.submenu.compliance', icon: 'ShieldCheckIcon' },
 }
 
 // Order in which submenu groups appear in the sidebar
-const submenuOrder = ['journals', 'closings', 'reports', 'compliance', 'migration']
+const submenuOrder = ['setup', 'ledgers', 'reports', 'compliance']
 
 // Track which submenus are expanded
 const expandedSubmenus = reactive({})

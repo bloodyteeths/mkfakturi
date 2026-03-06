@@ -5370,11 +5370,10 @@
     "accounting": {
       "title": "Kontabilitet",
       "submenu": {
-        "journals": "Ditari & Libri",
-        "closings": "Mbylljet",
+        "setup": "Konfigurimi",
+        "ledgers": "Ditari",
         "reports": "Pasqyrat Financiare",
-        "compliance": "Tatimet & Pagat",
-        "migration": "Migrim & Import"
+        "compliance": "Tatimet & Mbyllja"
       },
       "chart_of_accounts": "Plani Kontabël",
       "account_mappings": "Мапdheрање në конта",

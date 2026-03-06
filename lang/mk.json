@@ -5685,11 +5685,10 @@
     "accounting": {
       "title": "Сметководство",
       "submenu": {
-        "journals": "Книжења",
-        "closings": "Затворање",
+        "setup": "Подготовка",
+        "ledgers": "Книжења",
         "reports": "Финансиски извештаи",
-        "compliance": "Даноци и плати",
-        "migration": "Миграција и увоз"
+        "compliance": "Даноци и затворање"
       },
       "chart_of_accounts": "Контен план",
       "account_mappings": "Мапирање на конта",

@@ -3044,11 +3044,10 @@
     },
     "accounting": {
       "submenu": {
-        "journals": "Journals & Ledger",
-        "closings": "Closings",
-        "reports": "Financial Statements",
-        "compliance": "Tax & Payroll",
-        "migration": "Migration & Import"
+        "setup": "Setup & Import",
+        "ledgers": "Ledgers",
+        "reports": "Financial Reports",
+        "compliance": "Tax & Closing"
       },
       "accept_all": "Accept All",
       "accept_all_above": "Accept All (>{threshold}%)",

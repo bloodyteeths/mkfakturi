@@ -4974,11 +4974,10 @@
     },
     "accounting": {
       "submenu": {
-        "journals": "Yevmiye & Defter",
-        "closings": "Kapanışlar",
+        "setup": "Kurulum",
+        "ledgers": "Yevmiye",
         "reports": "Mali Tablolar",
-        "compliance": "Vergi & Bordro",
-        "migration": "Taşıma & İçe Aktarım"
+        "compliance": "Vergi & Kapanış"
       },
       "chart_of_accounts": "Hesap Planı",
       "journal_review": "Yevmiye İnceleme",
