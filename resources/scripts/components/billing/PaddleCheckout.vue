@@ -153,7 +153,7 @@
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-              <span class="text-sm text-gray-700">Bank connections (PSD2)</span>
+              <span class="text-sm text-gray-700">Bank import (CSV/MT940/PDF)</span>
             </li>
             <li class="flex items-start">
               <CheckIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />

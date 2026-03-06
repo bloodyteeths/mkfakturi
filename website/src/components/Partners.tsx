@@ -38,7 +38,7 @@ export default function Partners({ t }: { t: Dictionary }) {
           ))}
         </div>
         <p className="text-center text-xs text-gray-400 mt-6">
-          PSD2 Open Banking API
+          CSV/MT940/PDF Bank Import
         </p>
       </div>
     </section>

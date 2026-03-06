@@ -95,11 +95,11 @@ const copy = {
       {
         title: 'Како Facturino ви помага со расходите',
         content:
-          'Facturino е дизајниран за македонски бизниси и ги разбира локалните барања за сметководство. Автоматски ги категоризира расходите според македонскиот контен план, скенира фактури со OCR технологија и генерира извештаи спремни за УЈП. Со PSD2 банкарска интеграција, расходите од вашата сметка автоматски се внесуваат во системот — без рачно книжење.',
+          'Facturino е дизајниран за македонски бизниси и ги разбира локалните барања за сметководство. Автоматски ги категоризира расходите според македонскиот контен план, скенира фактури со OCR технологија и генерира извештаи спремни за УЈП. Со увоз на банкарски изводи (CSV/MT940/PDF), расходите брзо се книжат во системот.',
         items: [
           'Автоматска категоризација по македонски контен план',
           'OCR скенирање на фактури — сликај и внеси',
-          'PSD2 банкарска интеграција за автоматско внесување',
+          'Увоз на банкарски изводи (CSV/MT940/PDF)',
           'Извештаи за расходи по категорија, период и проект',
           'Пресметка на одбитливи расходи за даночен биланс',
           'Мобилен пристап — следете ги расходите од секаде',
@@ -186,11 +186,11 @@ const copy = {
       {
         title: 'How Facturino helps with expenses',
         content:
-          'Facturino is designed for Macedonian businesses and understands local accounting requirements. It automatically categorizes expenses according to the Macedonian chart of accounts, scans invoices with OCR technology, and generates reports ready for UJP. With PSD2 bank integration, expenses from your account are automatically entered into the system — no manual bookkeeping needed.',
+          'Facturino is designed for Macedonian businesses and understands local accounting requirements. It automatically categorizes expenses according to the Macedonian chart of accounts, scans invoices with OCR technology, and generates reports ready for UJP. With bank statement import (CSV/MT940/PDF), expenses are quickly entered into the system.',
         items: [
           'Automatic categorization by Macedonian chart of accounts',
           'OCR invoice scanning — snap and enter',
-          'PSD2 bank integration for automatic entry',
+          'Bank statement import (CSV/MT940/PDF)',
           'Expense reports by category, period, and project',
           'Deductible expense calculation for tax returns',
           'Mobile access — track expenses from anywhere',
@@ -277,11 +277,11 @@ const copy = {
       {
         title: 'Si ju ndihmon Facturino me shpenzimet',
         content:
-          'Facturino është projektuar për bizneset maqedonase dhe i kupton kërkesat lokale të kontabilitetit. Automatikisht i kategorizon shpenzimet sipas planit kontabël maqedonas, skanon faturat me teknologji OCR dhe gjeneron raporte gati për UJP. Me integrimin bankar PSD2, shpenzimet nga llogaria juaj regjistrohen automatikisht — pa kontabilitet manual.',
+          'Facturino është projektuar për bizneset maqedonase dhe i kupton kërkesat lokale të kontabilitetit. Automatikisht i kategorizon shpenzimet sipas planit kontabël maqedonas, skanon faturat me teknologji OCR dhe gjeneron raporte gati për UJP. Me importin e ekstrakteve bankare (CSV/MT940/PDF), shpenzimet regjistrohen shpejt në sistem.',
         items: [
           'Kategorizim automatik sipas planit kontabël maqedonas',
           'Skanim faturash OCR — fotografo dhe regjistro',
-          'Integrim bankar PSD2 për regjistrim automatik',
+          'Import i ekstrakteve bankare (CSV/MT940/PDF)',
           'Raporte shpenzimesh sipas kategorisë, periudhës dhe projektit',
           'Llogaritje e shpenzimeve të zbritshme për deklaratë tatimore',
           'Qasje mobile — gjurmoni shpenzimet nga kudo',
@@ -368,11 +368,11 @@ const copy = {
       {
         title: 'Facturino giderlerle nasıl yardımcı olur',
         content:
-          'Facturino, Makedon işletmeleri için tasarlanmıştır ve yerel muhasebe gereksinimlerini anlar. Giderleri Makedon hesap planına göre otomatik sınıflandırır, OCR teknolojisiyle faturaları tarar ve UJP\'ye hazır raporlar oluşturur. PSD2 banka entegrasyonuyla, hesabınızdaki giderler otomatik olarak sisteme kaydedilir — manuel muhasebe gerekmez.',
+          'Facturino, Makedon işletmeleri için tasarlanmıştır ve yerel muhasebe gereksinimlerini anlar. Giderleri Makedon hesap planına göre otomatik sınıflandırır, OCR teknolojisiyle faturaları tarar ve UJP\'ye hazır raporlar oluşturur. Banka ekstresi içe aktarma (CSV/MT940/PDF) ile giderler hızla sisteme kaydedilir.',
         items: [
           'Makedon hesap planına göre otomatik sınıflandırma',
           'OCR fatura tarama — fotoğrafla ve kaydet',
-          'Otomatik giriş için PSD2 banka entegrasyonu',
+          'Banka ekstresi içe aktarma (CSV/MT940/PDF)',
           'Kategoriye, döneme ve projeye göre gider raporları',
           'Vergi beyanı için indirilebilir gider hesaplama',
           'Mobil erişim — giderleri her yerden takip edin',

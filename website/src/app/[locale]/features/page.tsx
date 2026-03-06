@@ -16,10 +16,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       en: 'Features — Facturino',
     },
     description: {
-      mk: 'AI фактурирање, е-Фактура, PSD2 банки, IFRS извештаи и повеќе. Откријте ги сите функции на Facturino.',
-      sq: 'Faturim me AI, e-Fature, banka PSD2, raporte IFRS dhe me shume. Zbuloni te gjitha vecorite e Facturino.',
-      tr: 'AI faturalama, e-Fatura, PSD2 bankalar, IFRS raporlari ve dahasi. Facturino ozelliklerini kesfedin.',
-      en: 'AI invoicing, e-Invoice, PSD2 banks, IFRS reports and more. Discover all Facturino features.',
+      mk: 'AI фактурирање, е-Фактура, увоз на банкарски изводи, IFRS извештаи и повеќе. Откријте ги сите функции на Facturino.',
+      sq: 'Faturim me AI, e-Fature, import i ekstrakteve bankare, raporte IFRS dhe me shume. Zbuloni te gjitha vecorite e Facturino.',
+      tr: 'AI faturalama, e-Fatura, banka ekstresi aktarimi, IFRS raporlari ve dahasi. Facturino ozelliklerini kesfedin.',
+      en: 'AI invoicing, e-Invoice, bank statement import, IFRS reports and more. Discover all Facturino features.',
     },
   })
 }
@@ -33,7 +33,7 @@ const copy = {
     hero: {
       title: 'Функции што го прават вашиот бизнис подобар',
       subtitle:
-        'Најнапредната AI сметководствена платформа во Македонија — е-Фактура, PSD2 банки, IFRS извештаи и AI финансиски советник на едно место.',
+        'Најнапредната AI сметководствена платформа во Македонија — е-Фактура, увоз на банкарски изводи, IFRS извештаи и AI финансиски советник на едно место.',
       cta: 'Започни бесплатно',
     },
     sections: [
@@ -123,21 +123,21 @@ const copy = {
       {
         icon: '\u{1F3E6}',
         badge: '',
-        title: 'Банки и готовински тек (PSD2)',
+        title: 'Банки и готовински тек',
         subtitle:
-          'Директна врска со вашите банкарски сметки за автоматизиран увоз на изводи и брзо порамнување.',
+          'Увезете банкарски изводи од CSV, MT940 или PDF и порамнете ги автоматски со фактурите. PSD2 наскоро.',
         features: [
           {
-            title: 'PSD2 банкарски поврзувања',
-            desc: 'Поврзете ги NLB, Стопанска, Комерцијална, Sparkasse и други локални банки директно.',
+            title: 'Увоз на банкарски изводи',
+            desc: 'Увезете изводи од NLB, Стопанска, Комерцијална, Sparkasse и други банки во CSV или MT940 формат.',
           },
           {
             title: 'Полуавтоматско порамнување',
             desc: 'Системот препознава плаќања и ги поврзува со фактури — вие само потврдувате.',
           },
           {
-            title: 'CSV/MT940 алтернатива',
-            desc: 'За банки без PSD2 — увезете изводи рачно во CSV или MT940 формат.',
+            title: 'PDF/OCR скенирање',
+            desc: 'Скенирајте банкарски извод во PDF — AI автоматски ги извлекува трансакциите.',
           },
         ],
       },
@@ -219,7 +219,7 @@ const copy = {
     hero: {
       title: 'Vecorite qe e bejne biznesin tuaj me te mire',
       subtitle:
-        'Platforma me e avancuar kontabiliteti me AI ne Maqedoni — e-Fature, banka PSD2, raporte IFRS dhe keshilltar financiar AI ne nje vend.',
+        'Platforma me e avancuar kontabiliteti me AI ne Maqedoni — e-Fature, import i ekstrakteve bankare, raporte IFRS dhe keshilltar financiar AI ne nje vend.',
       cta: 'Fillo falas',
     },
     sections: [
@@ -309,21 +309,21 @@ const copy = {
       {
         icon: '\u{1F3E6}',
         badge: '',
-        title: 'Bankat dhe fluksi i parase (PSD2)',
+        title: 'Bankat dhe fluksi i parase',
         subtitle:
-          'Lidhje direkte me llogarite tuaja bankare per import automatik te ekstrakteve dhe pajtim te shpejte.',
+          'Importoni ekstrakte bankare nga CSV, MT940 ose PDF dhe pajtojini automatikisht me faturat. PSD2 se shpejti.',
         features: [
           {
-            title: 'Lidhje bankare PSD2',
-            desc: 'Lidhni NLB, Stopanska, Komercijalna, Sparkasse dhe banka te tjera lokale direkt.',
+            title: 'Import i ekstrakteve bankare',
+            desc: 'Importoni ekstrakte nga NLB, Stopanska, Komercijalna, Sparkasse dhe banka te tjera ne format CSV ose MT940.',
           },
           {
             title: 'Pajtim gjysme-automatik',
             desc: 'Sistemi njeh pagesat dhe i lidh me faturat — ju vetem konfirmoni.',
           },
           {
-            title: 'CSV/MT940 alternative',
-            desc: 'Per bankat pa PSD2 — importoni ekstrakte manualisht ne format CSV ose MT940.',
+            title: 'PDF/OCR skanim',
+            desc: 'Skanoni ekstrakt bankar ne PDF — AI nxjerr automatikisht transaksionet.',
           },
         ],
       },
@@ -405,7 +405,7 @@ const copy = {
     hero: {
       title: 'Isinizi daha iyi yapan ozellikler',
       subtitle:
-        "Makedonya'daki en gelismis AI muhasebe platformu — e-Fatura, PSD2 bankalar, IFRS raporlari ve AI mali danisman tek catida.",
+        "Makedonya'daki en gelismis AI muhasebe platformu — e-Fatura, banka ekstresi aktarimi, IFRS raporlari ve AI mali danisman tek catida.",
       cta: 'Ucretsiz basla',
     },
     sections: [
@@ -495,21 +495,21 @@ const copy = {
       {
         icon: '\u{1F3E6}',
         badge: '',
-        title: 'Bankacilik ve nakit akisi (PSD2)',
+        title: 'Bankacilik ve nakit akisi',
         subtitle:
-          'Banka hesaplarinizla dogrudan baglanti: otomatik ekstre aktarimi ve hizli mutabakat.',
+          'Banka ekstrelerini CSV, MT940 veya PDF olarak iceaktarin ve faturalarla otomatik eslestirin. PSD2 yakinda.',
         features: [
           {
-            title: 'PSD2 banka baglantilari',
-            desc: 'NLB, Stopanska, Komercijalna, Sparkasse ve diger yerel bankalari dogrudan baglayin.',
+            title: 'Banka ekstresi aktarimi',
+            desc: 'NLB, Stopanska, Komercijalna, Sparkasse ve diger bankalardan ekstreleri CSV veya MT940 formatinda aktarin.',
           },
           {
             title: 'Yari otomatik mutabakat',
             desc: 'Sistem odemeleri tanir ve faturalarla eslestirir — siz sadece onaylarsiniz.',
           },
           {
-            title: 'CSV/MT940 alternatifi',
-            desc: "PSD2 olmayan bankalar icin — ekstre dosyalarini CSV veya MT940 formatinda ice aktarin.",
+            title: 'PDF/OCR tarama',
+            desc: 'PDF banka ekstresini tarayin — AI islemleri otomatik olarak cikarir.',
           },
         ],
       },
@@ -591,7 +591,7 @@ const copy = {
     hero: {
       title: 'Features That Make Your Business Better',
       subtitle:
-        'The most advanced AI accounting platform in Macedonia — e-Invoice, PSD2 banks, IFRS reports, and an AI financial advisor all in one place.',
+        'The most advanced AI accounting platform in Macedonia — e-Invoice, bank statement import, IFRS reports, and an AI financial advisor all in one place.',
       cta: 'Start Free',
     },
     sections: [
@@ -681,21 +681,21 @@ const copy = {
       {
         icon: '\u{1F3E6}',
         badge: '',
-        title: 'Banking & Cash Flow (PSD2)',
+        title: 'Banking & Cash Flow',
         subtitle:
-          'Direct connection to your bank accounts for automated statement import and fast reconciliation.',
+          'Import bank statements from CSV, MT940, or PDF and auto-reconcile with invoices. PSD2 coming soon.',
         features: [
           {
-            title: 'PSD2 Bank Connections',
-            desc: 'Connect NLB, Stopanska, Komercijalna, Sparkasse, and other local banks directly.',
+            title: 'Bank Statement Import',
+            desc: 'Import statements from NLB, Stopanska, Komercijalna, Sparkasse, and other banks in CSV or MT940 format.',
           },
           {
             title: 'Semi-Automatic Reconciliation',
             desc: 'The system recognizes payments and matches them to invoices — you just confirm.',
           },
           {
-            title: 'CSV/MT940 Alternative',
-            desc: 'For banks without PSD2 — import statements manually in CSV or MT940 format.',
+            title: 'PDF/OCR Scanning',
+            desc: 'Scan a bank statement PDF — AI automatically extracts the transactions.',
           },
         ],
       },

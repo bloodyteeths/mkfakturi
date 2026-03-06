@@ -83,12 +83,12 @@ const copy = {
       {
         title: 'Како Facturino ја олеснува дигиталната трансформација',
         content:
-          'Facturino е дизајниран специфично за македонски бизниси и го олеснува преминот кон дигитално сметководство. Интерфејсот е на македонски јазик, поддржува македонски контен план, генерира фактури со ДДВ согласно македонските прописи и се интегрира со банкарскиот систем преку PSD2. Нема потреба од технички познавања — системот е интуитивен и може да се започне за помалку од 10 минути.',
+          'Facturino е дизајниран специфично за македонски бизниси и го олеснува преминот кон дигитално сметководство. Интерфејсот е на македонски јазик, поддржува македонски контен план, генерира фактури со ДДВ согласно македонските прописи и поддржува увоз на банкарски изводи (CSV/MT940/PDF). Нема потреба од технички познавања — системот е интуитивен и може да се започне за помалку од 10 минути.',
         items: [
           'Интерфејс на македонски јазик со македонски контен план',
           'Автоматско генерирање на е-фактури согласно УЈП барањата',
           'OCR скенирање — фотографирајте хартиена фактура и системот ја дигитализира',
-          'PSD2 банкарска интеграција за автоматско книжење',
+          'Увоз на банкарски изводи (CSV/MT940/PDF) за брзо книжење',
           'Облак складирање — сите документи безбедно зачувани и достапни од секаде',
           'Бесплатна миграција — нашиот тим ви помага при преносот на постоечките податоци',
         ],
@@ -161,12 +161,12 @@ const copy = {
       {
         title: 'How Facturino eases the digital transformation',
         content:
-          'Facturino is designed specifically for Macedonian businesses and makes the transition to digital accounting smooth. The interface is in Macedonian, supports the Macedonian chart of accounts, generates VAT-compliant invoices per Macedonian regulations, and integrates with the banking system via PSD2. No technical knowledge is needed — the system is intuitive and can be started in under 10 minutes.',
+          'Facturino is designed specifically for Macedonian businesses and makes the transition to digital accounting smooth. The interface is in Macedonian, supports the Macedonian chart of accounts, generates VAT-compliant invoices per Macedonian regulations, and supports bank statement import (CSV/MT940/PDF). No technical knowledge is needed — the system is intuitive and can be started in under 10 minutes.',
         items: [
           'Macedonian interface with Macedonian chart of accounts',
           'Automatic e-invoice generation per UJP requirements',
           'OCR scanning — photograph a paper invoice and the system digitizes it',
-          'PSD2 bank integration for automatic bookkeeping',
+          'Bank statement import (CSV/MT940/PDF) for quick bookkeeping',
           'Cloud storage — all documents securely saved and accessible from anywhere',
           'Free migration — our team helps you transfer existing data',
         ],
@@ -239,12 +239,12 @@ const copy = {
       {
         title: 'Si e lehtëson Facturino transformimin dixhital',
         content:
-          'Facturino është projektuar specifikisht për bizneset maqedonase dhe e bën kalimin në kontabilitet dixhital të lehtë. Ndërfaqja është në gjuhën maqedonase, mbështet planin kontabël maqedonas, gjeneron fatura me TVSH sipas rregulloreve maqedonase dhe integrohet me sistemin bankar përmes PSD2. Nuk nevojitet njohuri teknike — sistemi është intuitiv dhe mund të fillohet në më pak se 10 minuta.',
+          'Facturino është projektuar specifikisht për bizneset maqedonase dhe e bën kalimin në kontabilitet dixhital të lehtë. Ndërfaqja është në gjuhën maqedonase, mbështet planin kontabël maqedonas, gjeneron fatura me TVSH sipas rregulloreve maqedonase dhe mbështet importin e ekstrakteve bankare (CSV/MT940/PDF). Nuk nevojitet njohuri teknike — sistemi është intuitiv dhe mund të fillohet në më pak se 10 minuta.',
         items: [
           'Ndërfaqe maqedonase me plan kontabël maqedonas',
           'Gjenerim automatik i e-faturave sipas kërkesave të UJP',
           'Skanim OCR — fotografoni faturën letër dhe sistemi e dixhitalizon',
-          'Integrim bankar PSD2 për kontabilitet automatik',
+          'Import i ekstrakteve bankare (CSV/MT940/PDF) për kontabilitet të shpejtë',
           'Ruajtje cloud — të gjitha dokumentet të ruajtura me siguri dhe të qasshme nga kudo',
           'Migrim falas — ekipi ynë ju ndihmon me transferimin e të dhënave ekzistuese',
         ],
@@ -317,12 +317,12 @@ const copy = {
       {
         title: 'Facturino dijital dönüşümü nasıl kolaylaştırır',
         content:
-          'Facturino özellikle Makedon işletmeleri için tasarlanmıştır ve dijital muhasebeye geçişi kolaylaştırır. Arayüz Makedoncadır, Makedon hesap planını destekler, Makedon düzenlemelerine uygun KDV\'li faturalar oluşturur ve PSD2 aracılığıyla bankacılık sistemiyle entegre olur. Teknik bilgi gerekmez — sistem sezgiseldir ve 10 dakikadan kısa sürede başlatılabilir.',
+          'Facturino özellikle Makedon işletmeleri için tasarlanmıştır ve dijital muhasebeye geçişi kolaylaştırır. Arayüz Makedoncadır, Makedon hesap planını destekler, Makedon düzenlemelerine uygun KDV\'li faturalar oluşturur ve banka ekstresi içe aktarmayı (CSV/MT940/PDF) destekler. Teknik bilgi gerekmez — sistem sezgiseldir ve 10 dakikadan kısa sürede başlatılabilir.',
         items: [
           'Makedon hesap planıyla Makedonca arayüz',
           'UJP gereksinimlerine göre otomatik e-fatura oluşturma',
           'OCR tarama — kâğıt faturayı fotoğraflayın, sistem dijitalleştirir',
-          'Otomatik muhasebe için PSD2 banka entegrasyonu',
+          'Hızlı muhasebe için banka ekstresi içe aktarma (CSV/MT940/PDF)',
           'Bulut depolama — tüm belgeler güvenle saklanır ve her yerden erişilebilir',
           'Ücretsiz göç — ekibimiz mevcut verileri aktarmanıza yardımcı olur',
         ],

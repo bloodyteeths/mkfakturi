@@ -38,7 +38,7 @@ const copy = {
         list: [
           'Креирање и управување со фактури со поддршка за е-Фактура',
           'AI-базирани финансиски анализи и предлози',
-          'PSD2 банкарска интеграција за увоз на изводи',
+          'Банкарски увоз на изводи (CSV/MT940/PDF)',
           'Мулти-клиент управување за сметководствени канцеларии',
           'Финансиски извештаи усогласени со IFRS стандарди',
           'Автоматизирано порамнување на побарувања'
@@ -171,7 +171,7 @@ const copy = {
         list: [
           'Krijim dhe menaxhim faturash me mbështetje për e-Faturë',
           'Analiza financiare dhe sugjerime të bazuara në AI',
-          'Integrim bankar PSD2 për importin e ekstrakteve',
+          'Import bankar i ekstrakteve (CSV/MT940/PDF)',
           'Menaxhim shumë-klientësh për zyrat e kontabilitetit',
           'Raporte financiare në përputhje me standardet IFRS',
           'Përputhje automatike e borxheve'
@@ -304,7 +304,7 @@ const copy = {
         list: [
           'e-Fatura destegi ile fatura olusturma ve yönetim',
           'AI tabanli finansal analizler ve öneriler',
-          'Ekstre ithalati icin PSD2 banka entegrasyonu',
+          'Banka ekstresi içe aktarma (CSV/MT940/PDF)',
           'Muhasebe bürölari icin coklu müsteri yönetimi',
           'IFRS standartlarina uyumlu finansal raporlar',
           'Otomatik alacak mutabakati'
@@ -437,7 +437,7 @@ const copy = {
         list: [
           'Invoice creation and management with e-Invoice support',
           'AI-based financial analysis and suggestions',
-          'PSD2 bank integration for statement import',
+          'Bank statement import (CSV/MT940/PDF)',
           'Multi-client management for accounting offices',
           'Financial reports compliant with IFRS standards',
           'Automated receivables reconciliation'

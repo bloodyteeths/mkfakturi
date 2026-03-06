@@ -39,7 +39,8 @@ const copy = {
           title: 'Банки и плаќања',
           desc: 'Поврзете ги вашите банкарски сметки и примајте плаќања.',
           integrations: ['NLB', 'Стопанска', 'Комерцијална', 'Шпаркасе', 'Халк', 'ПроКредит', 'ТТК', 'Силк Роуд', 'Охридска'],
-          extras: ['PSD2 Open Banking', 'CaSys/cPay', 'Paddle', 'MT940 & CSV увоз'],
+          extras: ['MT940 & CSV увоз', 'PDF/OCR скенирање'],
+          comingSoon: ['PSD2 Open Banking'],
         },
         {
           icon: 'government',
@@ -75,8 +76,8 @@ const copy = {
     },
     timeline: {
       title: 'Статус на интеграции',
-      live: { label: 'Активно', items: ['9 банки (CSV/MT940)', 'Е-Фактура (QES)', 'NBRM курсна листа', 'CaSys/cPay', 'AI инсајти', 'OCR скенирање'] },
-      soon: { label: 'Наскоро', items: ['WooCommerce', 'Viber', 'Централен Регистар', 'eID/OneID'] },
+      live: { label: 'Активно', items: ['9 банки (CSV/MT940/PDF)', 'Е-Фактура (QES)', 'NBRM курсна листа', 'AI инсајти', 'OCR скенирање'] },
+      soon: { label: 'Наскоро', items: ['PSD2 Open Banking', 'WooCommerce', 'Viber', 'Централен Регистар', 'eID/OneID'] },
       planned: { label: 'Планирано', items: ['Фискални уреди', 'МПИН', 'Ananas.mk'] },
     },
     bottomCta: {
@@ -100,7 +101,8 @@ const copy = {
           title: 'Banka dhe pagesa',
           desc: 'Lidhni llogaritë bankare dhe pranoni pagesa.',
           integrations: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'ProCredit', 'TTK', 'Silk Road', 'Ohridska'],
-          extras: ['PSD2 Open Banking', 'CaSys/cPay', 'Paddle', 'MT940 & CSV import'],
+          extras: ['MT940 & CSV import', 'PDF/OCR skanim'],
+          comingSoon: ['PSD2 Open Banking'],
         },
         {
           icon: 'government',
@@ -136,8 +138,8 @@ const copy = {
     },
     timeline: {
       title: 'Statusi i integrimeve',
-      live: { label: 'Aktive', items: ['9 banka (CSV/MT940)', 'e-Faturë (QES)', 'NBRM kurse', 'CaSys/cPay', 'AI insights', 'OCR skanim'] },
-      soon: { label: 'Së shpejti', items: ['WooCommerce', 'Viber', 'Regjistri Qendror', 'eID/OneID'] },
+      live: { label: 'Aktive', items: ['9 banka (CSV/MT940/PDF)', 'e-Faturë (QES)', 'NBRM kurse', 'AI insights', 'OCR skanim'] },
+      soon: { label: 'Së shpejti', items: ['PSD2 Open Banking', 'WooCommerce', 'Viber', 'Regjistri Qendror', 'eID/OneID'] },
       planned: { label: 'Planifikuar', items: ['Pajisje fiskale', 'MPIN', 'Ananas.mk'] },
     },
     bottomCta: {
@@ -161,7 +163,8 @@ const copy = {
           title: 'Bankalar ve ödemeler',
           desc: 'Banka hesaplarınızı bağlayın ve ödeme alın.',
           integrations: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'ProCredit', 'TTK', 'Silk Road', 'Ohridska'],
-          extras: ['PSD2 Open Banking', 'CaSys/cPay', 'Paddle', 'MT940 & CSV içe aktarma'],
+          extras: ['MT940 & CSV içe aktarma', 'PDF/OCR tarama'],
+          comingSoon: ['PSD2 Open Banking'],
         },
         {
           icon: 'government',
@@ -197,8 +200,8 @@ const copy = {
     },
     timeline: {
       title: 'Entegrasyon durumu',
-      live: { label: 'Aktif', items: ['9 banka (CSV/MT940)', 'e-Fatura (QES)', 'NBRM kurları', 'CaSys/cPay', 'AI içgörüler', 'OCR tarama'] },
-      soon: { label: 'Yakında', items: ['WooCommerce', 'Viber', 'Merkez Sicili', 'eID/OneID'] },
+      live: { label: 'Aktif', items: ['9 banka (CSV/MT940/PDF)', 'e-Fatura (QES)', 'NBRM kurları', 'AI içgörüler', 'OCR tarama'] },
+      soon: { label: 'Yakında', items: ['PSD2 Open Banking', 'WooCommerce', 'Viber', 'Merkez Sicili', 'eID/OneID'] },
       planned: { label: 'Planlanmış', items: ['Mali cihazlar', 'MPIN', 'Ananas.mk'] },
     },
     bottomCta: {
@@ -222,7 +225,8 @@ const copy = {
           title: 'Banking & Payments',
           desc: 'Connect your bank accounts and accept payments.',
           integrations: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'ProCredit', 'TTK', 'Silk Road', 'Ohridska'],
-          extras: ['PSD2 Open Banking', 'CaSys/cPay', 'Paddle', 'MT940 & CSV import'],
+          extras: ['MT940 & CSV import', 'PDF/OCR scanning'],
+          comingSoon: ['PSD2 Open Banking'],
         },
         {
           icon: 'government',
@@ -258,8 +262,8 @@ const copy = {
     },
     timeline: {
       title: 'Integration Status',
-      live: { label: 'Live', items: ['9 banks (CSV/MT940)', 'e-Invoice (QES)', 'NBRM exchange rates', 'CaSys/cPay', 'AI insights', 'OCR scanning'] },
-      soon: { label: 'Coming Soon', items: ['WooCommerce', 'Viber', 'Central Registry', 'eID/OneID'] },
+      live: { label: 'Live', items: ['9 banks (CSV/MT940/PDF)', 'e-Invoice (QES)', 'NBRM exchange rates', 'AI insights', 'OCR scanning'] },
+      soon: { label: 'Coming Soon', items: ['PSD2 Open Banking', 'WooCommerce', 'Viber', 'Central Registry', 'eID/OneID'] },
       planned: { label: 'Planned', items: ['Fiscal devices', 'MPIN', 'Ananas.mk'] },
     },
     bottomCta: {

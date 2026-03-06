@@ -27,10 +27,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       en: 'Facturino — AI Accounting Platform for Macedonia',
     },
     description: {
-      mk: 'AI сметководствена платформа подготвена за е-Фактура. Повеќе клиенти, PSD2 банки, IFRS извештаи. Започнете бесплатно за 14 дена.',
-      sq: 'Platformë kontabiliteti me AI, gati për e-Faturë. Shumë-klientë, banka PSD2, raporte IFRS. Filloni provën falas 14-ditore tani.',
-      tr: 'AI destekli muhasebe platformu, e-Fatura\'ya hazır. Çoklu müşteri, PSD2 bankalar, IFRS raporları. 14 gün ücretsiz deneyin.',
-      en: 'AI-powered accounting platform ready for e-Invoice. Multi-client management, PSD2 bank feeds, IFRS reports. Start your free 14-day trial today.',
+      mk: 'AI сметководствена платформа подготвена за е-Фактура. Повеќе клиенти, банкарски увоз, IFRS извештаи. Започнете бесплатно за 14 дена.',
+      sq: 'Platformë kontabiliteti me AI, gati për e-Faturë. Shumë-klientë, import bankar, raporte IFRS. Filloni provën falas 14-ditore tani.',
+      tr: 'AI destekli muhasebe platformu, e-Fatura\'ya hazır. Çoklu müşteri, banka ekstresi içe aktarma, IFRS raporları. 14 gün ücretsiz deneyin.',
+      en: 'AI-powered accounting platform ready for e-Invoice. Multi-client management, bank statement import, IFRS reports. Start your free 14-day trial today.',
     },
   })
 }

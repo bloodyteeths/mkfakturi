@@ -93,12 +93,12 @@ const copy = {
       {
         title: 'Како Facturino го следи готовинскиот тек',
         content:
-          'Facturino ви дава преглед на готовинскиот тек во реално време. Со PSD2 банкарска интеграција, секоја трансакција автоматски се внесува и категоризира. Можете да видите кои фактури се неплатени, колку пари очекувате да примите оваа недела и дали ќе имате доволно готовина за покривање на обврските. Системот автоматски испраќа потсетувања за доспеани фактури и ви помага да го оптимизирате циклусот на плаќање.',
+          'Facturino ви дава преглед на готовинскиот тек во реално време. Со увоз на банкарски изводи (CSV/MT940/PDF), трансакциите брзо се увезуваат и категоризираат. Можете да видите кои фактури се неплатени, колку пари очекувате да примите оваа недела и дали ќе имате доволно готовина за покривање на обврските. Системот автоматски испраќа потсетувања за доспеани фактури и ви помага да го оптимизирате циклусот на плаќање.',
         items: [
           'Dashboard со преглед на готовински тек во реално време',
           'Автоматски потсетувања за неплатени фактури',
           'Проекција на готовински тек за следните 30/60/90 дена',
-          'PSD2 банкарска интеграција за автоматско следење',
+          'Увоз на банкарски изводи (CSV/MT940/PDF)',
           'Извештаи за стареење на побарувањата (aging report)',
           'Преглед на доспеани обврски кон добавувачи',
         ],
@@ -182,12 +182,12 @@ const copy = {
       {
         title: 'How Facturino tracks cash flow',
         content:
-          'Facturino gives you a real-time cash flow overview. With PSD2 bank integration, every transaction is automatically entered and categorized. You can see which invoices are unpaid, how much money you expect to receive this week, and whether you will have enough cash to cover obligations. The system automatically sends reminders for overdue invoices and helps you optimize the payment cycle.',
+          'Facturino gives you a real-time cash flow overview. With bank statement import (CSV/MT940/PDF), transactions are quickly reconciled and categorized. You can see which invoices are unpaid, how much money you expect to receive this week, and whether you will have enough cash to cover obligations. The system automatically sends reminders for overdue invoices and helps you optimize the payment cycle.',
         items: [
           'Dashboard with real-time cash flow overview',
           'Automatic reminders for unpaid invoices',
           'Cash flow projection for the next 30/60/90 days',
-          'PSD2 bank integration for automatic tracking',
+          'Bank statement import (CSV/MT940/PDF)',
           'Accounts receivable aging reports',
           'Overview of payables due to suppliers',
         ],
@@ -271,12 +271,12 @@ const copy = {
       {
         title: 'Si e gjurmon Facturino rrjedhën e parasë',
         content:
-          'Facturino ju jep pamje të rrjedhës së parasë në kohë reale. Me integrimin bankar PSD2, çdo transaksion regjistrohet dhe kategorizohet automatikisht. Mund të shihni cilat fatura janë të papaguara, sa para prisni të merrni këtë javë dhe nëse do të keni para të mjaftueshme për detyrimet. Sistemi dërgon automatikisht kujtues për faturat e vonuara dhe ju ndihmon të optimizoni ciklin e pagesës.',
+          'Facturino ju jep pamje të rrjedhës së parasë në kohë reale. Me importin e ekstrakteve bankare (CSV/MT940/PDF), transaksionet pajtohen dhe kategorizohen shpejt. Mund të shihni cilat fatura janë të papaguara, sa para prisni të merrni këtë javë dhe nëse do të keni para të mjaftueshme për detyrimet. Sistemi dërgon automatikisht kujtues për faturat e vonuara dhe ju ndihmon të optimizoni ciklin e pagesës.',
         items: [
           'Dashboard me pamje të rrjedhës së parasë në kohë reale',
           'Kujtues automatik për faturat e papaguara',
           'Projeksion i rrjedhës së parasë për 30/60/90 ditët e ardhshme',
-          'Integrim bankar PSD2 për gjurmim automatik',
+          'Import i ekstrakteve bankare (CSV/MT940/PDF)',
           'Raporte të plakjes së arkëtimeve (aging report)',
           'Pamje e detyrimeve ndaj furnitorëve',
         ],
@@ -360,12 +360,12 @@ const copy = {
       {
         title: 'Facturino nakit akışını nasıl takip eder',
         content:
-          'Facturino size gerçek zamanlı nakit akışı görünümü sunar. PSD2 banka entegrasyonuyla her işlem otomatik olarak kaydedilir ve sınıflandırılır. Hangi faturaların ödenmemiş olduğunu, bu hafta ne kadar para beklediğinizi ve yükümlülüklerinizi karşılayacak yeterli nakit olup olmadığını görebilirsiniz. Sistem vadesi geçmiş faturalar için otomatik hatırlatmalar gönderir ve ödeme döngüsünü optimize etmenize yardımcı olur.',
+          'Facturino size gerçek zamanlı nakit akışı görünümü sunar. Banka ekstresi içe aktarma (CSV/MT940/PDF) ile işlemler hızla eşleştirilir ve sınıflandırılır. Hangi faturaların ödenmemiş olduğunu, bu hafta ne kadar para beklediğinizi ve yükümlülüklerinizi karşılayacak yeterli nakit olup olmadığını görebilirsiniz. Sistem vadesi geçmiş faturalar için otomatik hatırlatmalar gönderir ve ödeme döngüsünü optimize etmenize yardımcı olur.',
         items: [
           'Gerçek zamanlı nakit akışı görünümlü gösterge paneli',
           'Ödenmemiş faturalar için otomatik hatırlatmalar',
           'Önümüzdeki 30/60/90 gün için nakit akışı projeksiyonu',
-          'Otomatik takip için PSD2 banka entegrasyonu',
+          'Banka ekstresi içe aktarma (CSV/MT940/PDF)',
           'Alacak yaşlandırma raporları (aging report)',
           'Tedarikçilere olan borçların görünümü',
         ],

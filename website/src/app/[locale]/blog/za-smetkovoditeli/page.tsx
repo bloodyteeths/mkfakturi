@@ -16,10 +16,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       tr: 'Muhasebeciler neden Facturino\'ya geçiyor — Facturino',
     },
     description: {
-      mk: 'Водич за сметководствени бироа: повеќе клиенти, помалку рачна работа. PSD2 банки, е-Фактура, годишно затворање и 20% партнерска провизија.',
-      en: 'Guide for accounting firms: more clients, less manual work. PSD2 banking, e-Invoice, year-end closing and 20% partner commission.',
-      sq: 'Udhëzues për zyrat e kontabilitetit: më shumë klientë, më pak punë manuale. Banka PSD2, e-Faturë, mbyllje vjetore dhe 20% komision partneriteti.',
-      tr: 'Muhasebe büroları için rehber: daha fazla müşteri, daha az manuel iş. PSD2 bankacılık, e-Fatura, yıl sonu kapanışı ve %20 ortaklık komisyonu.',
+      mk: 'Водич за сметководствени бироа: повеќе клиенти, помалку рачна работа. Банкарски увоз, е-Фактура, годишно затворање и 20% партнерска провизија.',
+      en: 'Guide for accounting firms: more clients, less manual work. Bank statement import, e-Invoice, year-end closing and 20% partner commission.',
+      sq: 'Udhëzues për zyrat e kontabilitetit: më shumë klientë, më pak punë manuale. Import bankar, e-Faturë, mbyllje vjetore dhe 20% komision partneriteti.',
+      tr: 'Muhasebe büroları için rehber: daha fazla müşteri, daha az manuel iş. Banka ekstresi içe aktarma, e-Fatura, yıl sonu kapanışı ve %20 ortaklık komisyonu.',
     },
   })
 }
@@ -51,7 +51,7 @@ const copy = {
         content: 'Не секој софтвер за фактурирање е погоден за сметководствени бироа. Потребен е систем кој е изграден за управување со повеќе компании истовремено, со автоматизации кои го намалуваат рачниот труд и со целосна усогласеност со македонското законодавство.',
         items: [
           'Дашборд за повеќе компании — пристап до сите клиенти од едно место',
-          'Автоматски банковни фидови преку PSD2 (Open Banking)',
+          'Увоз на банковни изводи (CSV/MT940/PDF)',
           'е-Фактура во UBL 2.1 формат — подготвеност за законската обврска',
           'AI-потпомогнато затворање на книги — автоматска класификација и усогласување',
           'Поддршка за МСФИ и МК ГААП (македонски сметководствени стандарди)',
@@ -65,7 +65,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Едно место за сите клиенти', desc: 'Со партнерската конзола, пристапувате до сите компании на клиентите од еден логин. Нема повеќе жонглирање со различни системи. Секој клиент има посебна компанија со свои фактури, расходи, банковни сметки и извештаи — а вие ги управувате сите од едно место.' },
-          { step: 'PSD2 банковни фидови', desc: 'Поврзете ги банковните сметки на клиентите преку PSD2 стандардот. Трансакциите се увезуваат автоматски, уплатите се препознаваат и усогласуваат со фактурите. Заштедете 2-3 часа неделно по клиент на рачно проверување на изводи.' },
+          { step: 'Увоз на банкарски изводи', desc: 'Увезете ги банковните изводи на клиентите преку CSV, MT940 или PDF формат. Трансакциите брзо се увезуваат, уплатите се препознаваат и усогласуваат со фактурите. Заштедете 2-3 часа неделно по клиент на рачно проверување на изводи. PSD2 поврзување наскоро.' },
           { step: 'е-Фактура подготвеност', desc: 'Facturino генерира фактури во UBL 2.1 XML формат, подготвени за електронско поднесување. Кога е-Фактурата ќе стане задолжителна, вие и вашите клиенти ќе бидете подготвени — без дополнителен трошок или напор.' },
           { step: 'Автоматско годишно затворање', desc: 'Годишното затворање на книги е најстресниот период за секое биро. Facturino го автоматизира процесот — од преглед на отворени ставки, преку класификација на трансакции, до генерирање на биланс на состојба и биланс на успех во формат подготвен за ЦРСМ и УЈП.' },
           { step: 'МПИН и плати', desc: 'Пресметувајте плати за вработените на клиентите со автоматска пресметка на бруто/нето, придонеси и персонален данок. Генерирајте МПИН образци подготвени за поднесување до УЈП — без рачно пресметување, без грешки.' },
@@ -91,7 +91,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Регистрирајте се како партнер', desc: 'Пополнете ја кратката форма за партнерска регистрација. За помалку од 5 минути ќе имате пристап до партнерската конзола каде можете да ги додавате вашите клиенти и да управувате со сите нивни компании.' },
-          { step: 'Онбордирајте го првиот клиент', desc: 'Додадете ја компанијата на вашиот прв клиент, импортирајте ги постоечките податоци од Excel или друг систем и поврзете ја банковната сметка преку PSD2. За помалку од 30 минути, вашиот клиент ќе биде целосно поставен.' },
+          { step: 'Онбордирајте го првиот клиент', desc: 'Додадете ја компанијата на вашиот прв клиент, импортирајте ги постоечките податоци од Excel или друг систем и увезете банковни изводи (CSV/MT940/PDF). За помалку од 30 минути, вашиот клиент ќе биде целосно поставен.' },
           { step: 'Скалирајте и заработувајте', desc: 'Со секој нов клиент што го додавате, вашата ефикасност расте благодарение на автоматизациите, а вашата провизија расте со 20% од секоја претплата. Бироа кои управуваат со 20+ клиенти преку Facturino заштедуваат над 40 часа месечно.' },
         ],
       },
@@ -147,7 +147,7 @@ const copy = {
         content: 'Not every invoicing software is suitable for accounting firms. You need a system built for managing multiple companies simultaneously, with automations that reduce manual effort and full compliance with Macedonian legislation.',
         items: [
           'Multi-company dashboard — access all clients from one place',
-          'Automatic bank feeds via PSD2 (Open Banking)',
+          'Bank statement import (CSV/MT940/PDF)',
           'e-Invoice in UBL 2.1 format — readiness for the legal requirement',
           'AI-assisted book closing — automatic classification and reconciliation',
           'Support for IFRS and MK GAAP (Macedonian accounting standards)',
@@ -161,7 +161,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'One Place for All Clients', desc: 'With the partner console, you access all client companies from a single login. No more juggling different systems. Each client has a separate company with their own invoices, expenses, bank accounts, and reports — and you manage them all from one place.' },
-          { step: 'PSD2 Bank Feeds', desc: 'Connect client bank accounts through the PSD2 standard. Transactions are imported automatically, payments are recognized and reconciled with invoices. Save 2-3 hours per week per client on manual statement checking.' },
+          { step: 'Bank Statement Import', desc: 'Import client bank statements via CSV, MT940, or PDF format. Transactions are quickly imported, payments are recognized and reconciled with invoices. Save 2-3 hours per week per client on manual statement checking. PSD2 connection coming soon.' },
           { step: 'e-Invoice Ready', desc: 'Facturino generates invoices in UBL 2.1 XML format, ready for electronic submission. When e-Invoice becomes mandatory, you and your clients will be prepared — at no additional cost or effort.' },
           { step: 'Automatic Year-End Closing', desc: 'Year-end closing is the most stressful period for every firm. Facturino automates the process — from reviewing open items, through transaction classification, to generating balance sheets and income statements in CRMS and UJP-ready format.' },
           { step: 'MPIN and Payroll', desc: 'Calculate employee payroll for your clients with automatic gross/net calculation, contributions, and personal income tax. Generate MPIN forms ready for UJP submission — no manual calculation, no errors.' },
@@ -187,7 +187,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Sign Up as a Partner', desc: 'Fill out the short partner registration form. In less than 5 minutes you will have access to the partner console where you can add your clients and manage all their companies.' },
-          { step: 'Onboard Your First Client', desc: 'Add your first client\'s company, import existing data from Excel or another system, and connect the bank account via PSD2. In less than 30 minutes, your client will be fully set up.' },
+          { step: 'Onboard Your First Client', desc: 'Add your first client\'s company, import existing data from Excel or another system, and import bank statements (CSV/MT940/PDF). In less than 30 minutes, your client will be fully set up.' },
           { step: 'Scale and Earn', desc: 'With every new client you add, your efficiency grows thanks to automations, and your commission grows by 20% of every subscription. Firms managing 20+ clients through Facturino save over 40 hours per month.' },
         ],
       },
@@ -243,7 +243,7 @@ const copy = {
         content: 'Jo çdo softuer faturimi është i përshtatshëm për zyrat e kontabilitetit. Nevojitet një sistem i ndërtuar për menaxhimin e kompanive të shumta njëkohësisht, me automatizime që zvogëlojnë punën manuale dhe përputhshmëri të plotë me legjislacionin maqedonas.',
         items: [
           'Dëshbord për kompani të shumta — qasje te të gjithë klientët nga një vend',
-          'Furnizime automatike bankare përmes PSD2 (Open Banking)',
+          'Import i ekstrakteve bankare (CSV/MT940/PDF)',
           'e-Faturë në formatin UBL 2.1 — gatishmëri për kërkesën ligjore',
           'Mbyllje librash e ndihmuar nga AI — klasifikim dhe pajtim automatik',
           'Mbështetje për SNRF dhe MK GAAP (standarde kontabiliteti maqedonas)',
@@ -257,7 +257,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Një vend për të gjithë klientët', desc: 'Me konzolën e partnerëve, qaseni te të gjitha kompanitë e klientëve nga një login i vetëm. Jo më zhonglim me sisteme të ndryshme. Çdo klient ka kompani të veçantë me faturat, shpenzimet, llogaritë bankare dhe raportet e veta — dhe ju i menaxhoni të gjitha nga një vend.' },
-          { step: 'Furnizime bankare PSD2', desc: 'Lidhni llogaritë bankare të klientëve përmes standardit PSD2. Transaksionet importohen automatikisht, pagesat njihen dhe pajtohen me faturat. Kurseni 2-3 orë në javë për klient në kontroll manual të deklaratave.' },
+          { step: 'Import i ekstrakteve bankare', desc: 'Importoni ekstraktet bankare të klientëve përmes formatit CSV, MT940 ose PDF. Transaksionet importohen shpejt, pagesat njihen dhe pajtohen me faturat. Kurseni 2-3 orë në javë për klient në kontroll manual të deklaratave. Lidhja PSD2 së shpejti.' },
           { step: 'Gatishmëri për e-Faturë', desc: 'Facturino gjeneron fatura në formatin UBL 2.1 XML, gati për dorëzim elektronik. Kur e-Fatura bëhet e detyrueshme, ju dhe klientët tuaj do të jeni gati — pa kosto ose përpjekje shtesë.' },
           { step: 'Mbyllje automatike e vitit', desc: 'Mbyllja e vitit është periudha më stresuese për çdo zyrë. Facturino e automatizon procesin — nga rishikimi i zërave të hapur, përmes klasifikimit të transaksioneve, deri te gjenerimi i bilancit dhe pasqyrës së të ardhurave në format gati për QRMK dhe DAP.' },
           { step: 'MPIN dhe paga', desc: 'Llogaritni pagat e punonjësve të klientëve me llogaritje automatike bruto/neto, kontribute dhe tatim personal. Gjeneroni formularë MPIN gati për dorëzim në DAP — pa llogaritje manuale, pa gabime.' },
@@ -283,7 +283,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Regjistrohuni si partner', desc: 'Plotësoni formularin e shkurtër të regjistrimit të partnerëve. Brenda 5 minutash do të keni qasje te konzola e partnerëve ku mundni të shtoni klientët dhe të menaxhoni të gjitha kompanitë e tyre.' },
-          { step: 'Regjistroni klientin e parë', desc: 'Shtoni kompaninë e klientit tuaj të parë, importoni të dhënat ekzistuese nga Excel ose sistem tjetër dhe lidhni llogarinë bankare përmes PSD2. Brenda 30 minutash, klienti juaj do të jetë plotësisht i vendosur.' },
+          { step: 'Regjistroni klientin e parë', desc: 'Shtoni kompaninë e klientit tuaj të parë, importoni të dhënat ekzistuese nga Excel ose sistem tjetër dhe importoni ekstraktet bankare (CSV/MT940/PDF). Brenda 30 minutash, klienti juaj do të jetë plotësisht i vendosur.' },
           { step: 'Shkallëzoni dhe fitoni', desc: 'Me çdo klient të ri që shtoni, efikasiteti juaj rritet falë automatizimeve dhe komisioni juaj rritet me 20% të çdo abonimi. Zyrat që menaxhojnë 20+ klientë përmes Facturino kursejnë mbi 40 orë në muaj.' },
         ],
       },
@@ -339,7 +339,7 @@ const copy = {
         content: 'Her faturalama yazılımı muhasebe büroları için uygun değildir. Birden fazla şirketi aynı anda yönetmek için inşa edilmiş, manuel çabayı azaltan otomasyonlara ve Makedon mevzuatıyla tam uyumluluğa sahip bir sisteme ihtiyaç vardır.',
         items: [
           'Çoklu şirket panosu — tüm müşterilere tek bir yerden erişim',
-          'PSD2 (Açık Bankacılık) ile otomatik banka beslemeleri',
+          'Banka ekstresi içe aktarma (CSV/MT940/PDF)',
           'UBL 2.1 formatında e-Fatura — yasal gereklilik için hazırlık',
           'Yapay zeka destekli defter kapanışı — otomatik sınıflandırma ve eşleştirme',
           'UFRS ve MK GAAP (Makedon muhasebe standartları) desteği',
@@ -353,7 +353,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Tüm müşteriler için tek yer', desc: 'Ortak konsolle, tüm müşteri şirketlerine tek bir girişle erişirsiniz. Artık farklı sistemler arasında geçiş yapmak yok. Her müşterinin kendi faturaları, giderleri, banka hesapları ve raporlarıyla ayrı bir şirketi vardır — ve hepsini tek bir yerden yönetirsiniz.' },
-          { step: 'PSD2 banka beslemeleri', desc: 'Müşteri banka hesaplarını PSD2 standardı üzerinden bağlayın. İşlemler otomatik olarak içe aktarılır, ödemeler tanınır ve faturalarla eşleştirilir. Müşteri başına haftada 2-3 saat manuel hesap özeti kontrolünden tasarruf edin.' },
+          { step: 'Banka ekstresi içe aktarma', desc: 'Müşteri banka ekstrelerini CSV, MT940 veya PDF formatında içe aktarın. İşlemler hızla içe aktarılır, ödemeler tanınır ve faturalarla eşleştirilir. Müşteri başına haftada 2-3 saat manuel hesap özeti kontrolünden tasarruf edin. PSD2 bağlantısı yakında.' },
           { step: 'e-Fatura hazırlığı', desc: 'Facturino, UBL 2.1 XML formatında faturalar oluşturur, elektronik gönderime hazırdır. e-Fatura zorunlu hale geldiğinde, siz ve müşterileriniz hazır olacaksınız — ek maliyet veya çaba olmadan.' },
           { step: 'Otomatik yıl sonu kapanışı', desc: 'Yıl sonu kapanışı her büro için en stresli dönemdir. Facturino süreci otomatikleştirir — açık kalemlerin gözden geçirilmesinden, işlem sınıflandırmasına, CRMS ve UJP formatında bilanço ve gelir tablosu oluşturmaya kadar.' },
           { step: 'MPIN ve bordro', desc: 'Müşterilerinizin çalışanlarının maaşlarını otomatik brüt/net hesaplama, primler ve kişisel gelir vergisi ile hesaplayın. UJP\'ye sunuma hazır MPIN formları oluşturun — manuel hesaplama yok, hata yok.' },
@@ -379,7 +379,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Ortak olarak kaydolun', desc: 'Kısa ortak kayıt formunu doldurun. 5 dakikadan kısa sürede müşterilerinizi ekleyebileceğiniz ve tüm şirketlerini yönetebileceğiniz ortak konsoluna erişiminiz olacak.' },
-          { step: 'İlk müşterinizi ekleyin', desc: 'İlk müşterinizin şirketini ekleyin, mevcut verileri Excel veya başka bir sistemden içe aktarın ve banka hesabını PSD2 üzerinden bağlayın. 30 dakikadan kısa sürede müşteriniz tamamen kurulmuş olacak.' },
+          { step: 'İlk müşterinizi ekleyin', desc: 'İlk müşterinizin şirketini ekleyin, mevcut verileri Excel veya başka bir sistemden içe aktarın ve banka ekstrelerini içe aktarın (CSV/MT940/PDF). 30 dakikadan kısa sürede müşteriniz tamamen kurulmuş olacak.' },
           { step: 'Ölçeklendirin ve kazanın', desc: 'Eklediğiniz her yeni müşteriyle, otomasyonlar sayesinde verimliliğiniz artar ve komisyonunuz her aboneliğin %20\'si kadar büyür. Facturino üzerinden 20+ müşteri yöneten bürolar ayda 40 saatten fazla tasarruf eder.' },
         ],
       },

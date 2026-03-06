@@ -65,8 +65,8 @@ const copy = {
           icon: 'grid',
         },
         {
-          title: 'PSD2 банкарски фидови',
-          body: 'Автоматски увоз на изводи од банка и интелигентно порамнување. Без PDF, без copy‑paste.',
+          title: 'Банкарски увоз (CSV/MT940/PDF)',
+          body: 'Увоз на изводи од банка во CSV, MT940 или PDF формат и интелигентно порамнување. Без рачно внесување.',
           icon: 'bank',
         },
         {
@@ -109,7 +109,7 @@ const copy = {
       rows: [
         { feature: 'Мултијазичен UI (MK, SQ, TR, EN)', facturino: true, others: false },
         { feature: 'ДДВ правила за МК (5%, 18%)', facturino: true, others: false },
-        { feature: 'PSD2 банкарска интеграција', facturino: true, others: false },
+        { feature: 'Банкарски увоз (CSV/MT940/PDF)', facturino: true, others: false },
         { feature: 'е-Фактура подготвеност (UBL 2.1)', facturino: true, others: false },
         { feature: 'AI контирање и предлози', facturino: true, others: false },
         { feature: 'IFRS извештаи', facturino: true, others: true },
@@ -182,8 +182,8 @@ const copy = {
           icon: 'grid',
         },
         {
-          title: 'PSD2 lidhje bankare',
-          body: 'Import automatik i ekstrakteve dhe pajtim inteligjent. Pa PDF, pa copy‑paste.',
+          title: 'Import bankar (CSV/MT940/PDF)',
+          body: 'Import i ekstrakteve bankare ne format CSV, MT940 ose PDF dhe pajtim inteligjent. Pa futje manuale.',
           icon: 'bank',
         },
         {
@@ -226,7 +226,7 @@ const copy = {
       rows: [
         { feature: 'Ndërfaqe shumëgjuhëshe (MK, SQ, TR, EN)', facturino: true, others: false },
         { feature: 'Rregulla TVSH për MK (5%, 18%)', facturino: true, others: false },
-        { feature: 'Integrim bankar PSD2', facturino: true, others: false },
+        { feature: 'Import bankar (CSV/MT940/PDF)', facturino: true, others: false },
         { feature: 'Gatishmëri e-Fatura (UBL 2.1)', facturino: true, others: false },
         { feature: 'Kontim dhe sugjerime me AI', facturino: true, others: false },
         { feature: 'Raporte IFRS', facturino: true, others: true },
@@ -299,8 +299,8 @@ const copy = {
           icon: 'grid',
         },
         {
-          title: 'PSD2 banka bağlantısı',
-          body: 'Otomatik ekstre aktarımı ve akıllı mutabakat. PDF yok, kopyala‑yapıştır yok.',
+          title: 'Banka ithalatı (CSV/MT940/PDF)',
+          body: 'CSV, MT940 veya PDF formatında ekstre aktarımı ve akıllı mutabakat. Manuel giriş yok.',
           icon: 'bank',
         },
         {
@@ -343,7 +343,7 @@ const copy = {
       rows: [
         { feature: 'Çok dilli arayüz (MK, SQ, TR, EN)', facturino: true, others: false },
         { feature: 'MK KDV kuralları (5%, 18%)', facturino: true, others: false },
-        { feature: 'PSD2 banka entegrasyonu', facturino: true, others: false },
+        { feature: 'Banka ithalatı (CSV/MT940/PDF)', facturino: true, others: false },
         { feature: 'e-Fatura hazırlığı (UBL 2.1)', facturino: true, others: false },
         { feature: 'AI muhasebe kaydı ve öneriler', facturino: true, others: false },
         { feature: 'IFRS raporları', facturino: true, others: true },
@@ -416,8 +416,8 @@ const copy = {
           icon: 'grid',
         },
         {
-          title: 'PSD2 bank feeds',
-          body: 'Automatic statement import and intelligent matching. No PDFs, no copy‑paste.',
+          title: 'Bank Import (CSV/MT940/PDF)',
+          body: 'Import bank statements in CSV, MT940, or PDF format with intelligent matching. No manual entry.',
           icon: 'bank',
         },
         {
@@ -460,7 +460,7 @@ const copy = {
       rows: [
         { feature: 'Multilingual UI (MK, SQ, TR, EN)', facturino: true, others: false },
         { feature: 'MK VAT rules (5%, 18%)', facturino: true, others: false },
-        { feature: 'PSD2 bank integration', facturino: true, others: false },
+        { feature: 'Bank import (CSV/MT940/PDF)', facturino: true, others: false },
         { feature: 'e-Invoice readiness (UBL 2.1)', facturino: true, others: false },
         { feature: 'AI journal entries and suggestions', facturino: true, others: false },
         { feature: 'IFRS reports', facturino: true, others: true },

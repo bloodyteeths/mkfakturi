@@ -150,7 +150,7 @@ const tiers = {
     price: 59,
     features: [
       '150 invoices/month',
-      'Bank connections (PSD2)',
+      'Bank import (CSV/MT940/PDF)',
       'Auto-reconciliation',
       'Multi-currency',
       'API access',

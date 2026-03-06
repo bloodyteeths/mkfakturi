@@ -82,7 +82,7 @@ const copy = {
         list: [
           'Paddle: обработка на плаќања и управување со претплати (Paddle.com Market Limited, Велика Британија)',
           'Railway: хостинг на инфраструктура во ЕУ регион',
-          'PSD2 банкарски провајдери: поврзување со банкарски сметки за увоз на изводи',
+          'Банкарски увоз: CSV/MT940/PDF увоз на изводи',
           'Е-пошта провајдери: за системски известувања'
         ],
         extra: 'Секој под-обработувач е обврзан со договор за обработка на податоци (DPA) и ги обработува вашите податоци исклучиво според нашите инструкции.'
@@ -196,7 +196,7 @@ const copy = {
         list: [
           'Paddle: përpunim i pagesave dhe menaxhim i abonimeve',
           'Railway: strehim i infrastrukturës në rajonin e BE-së',
-          'Ofrues bankarë PSD2: lidhje me llogari bankare',
+          'Import bankar: CSV/MT940/PDF import i ekstrakteve',
           'Ofrues emaili: për njoftime të sistemit'
         ]
       },
@@ -309,7 +309,7 @@ const copy = {
         list: [
           'Paddle: ödeme isleme ve abonelik yönetimi',
           'Railway: AB bölgesinde altyapi barindirma',
-          'PSD2 bankacilik saglayicilari: banka hesabi baglantisi',
+          'Banka içe aktarma: CSV/MT940/PDF ekstre içe aktarma',
           'E-posta saglayicilari: sistem bildirimleri icin'
         ]
       },
@@ -423,7 +423,7 @@ const copy = {
         list: [
           'Paddle: payment processing and subscription management (Paddle.com Market Limited, UK)',
           'Railway: infrastructure hosting in the EU region',
-          'PSD2 banking providers: connecting to bank accounts for statement import',
+          'Bank import: CSV/MT940/PDF statement import',
           'Email providers: for system notifications'
         ],
         extra: 'Each sub-processor is bound by a data processing agreement (DPA) and processes your data exclusively according to our instructions.'

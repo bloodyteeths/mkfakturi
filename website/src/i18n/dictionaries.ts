@@ -66,7 +66,7 @@ const mk: Dictionary = {
   meta: {
     title: 'Facturino — AI сметководство и е-Фактура за Македонија',
     description:
-      'AI сметководствена платформа подготвена за е-Фактура. Повеќе клиенти, PSD2 банки, IFRS извештаи. Започнете бесплатно за 14 дена.'
+      'AI сметководствена платформа подготвена за е-Фактура. Повеќе клиенти, банкарски увоз, IFRS извештаи. Започнете бесплатно за 14 дена.'
   },
   nav: {
     features: 'Функции',
@@ -93,7 +93,7 @@ const mk: Dictionary = {
     claim:
       'Facturino е најнапредната AI сметководствена платформа во Македонија, подготвена за новиот систем за е‑Фактура.',
     onlyPlatform:
-      'Единствена локална платформа што комбинира AI, македонски сметководствени правила, подготвеност за е‑Фактура и PSD2 банкарски поврзувања – на едно место.'
+      'Единствена локална платформа што комбинира AI, македонски сметководствени правила, подготвеност за е‑Фактура и банкарски увоз (CSV/MT940/PDF) – на едно место.'
   },
   heroTagline: 'Сметководствениот софтвер што го очекувавте – конечно е тука.',
   aiSection: {
@@ -112,7 +112,7 @@ const mk: Dictionary = {
     subtitle: 'Моќни функции дизајнирани за современи македонски бизниси и сметководители.',
     features: [
       { title: 'Подготвено за е‑Фактура', desc: 'Целосно усогласено со новите владини прописи. Поврзете се веднаш кога ќе се отвори API.' },
-      { title: 'Банкарска интеграција', desc: 'Поврзете ги вашите локални банкарски сметки за ажурирања на трансакции во реално време.' },
+      { title: 'Банкарски увоз', desc: 'Увезете банкарски изводи (CSV/MT940/PDF) и порамнете со фактури полуавтоматски.' },
       { title: 'Безбедност на банкарско ниво', desc: 'Вашите податоци се енкриптирани и безбедно чувани во ЕУ дата центри.' },
       { title: 'Мулти‑клиент', desc: 'Совршено за сметководители кои управуваат со повеќе клиентски компании од едно место.' }
     ]
@@ -123,7 +123,7 @@ const mk: Dictionary = {
     cards: [
       { title: 'AI фактурирање и книжење', body: 'Паметни предлози за ДДВ категории и сметки по ставка – вие потврдувате.' },
       { title: 'Е‑Фактура подготвен', body: 'Моделот веќе ги поддржува сите структури; поврзување штом UJP отвори продукциски API + QES.' },
-      { title: 'PSD2 банки', body: 'Изводи директно во Facturino и полуавтоматско порамнување со фактури.' },
+      { title: 'Банкарски увоз', body: 'CSV/MT940/PDF увоз на изводи и полуавтоматско порамнување со фактури. PSD2 наскоро.' },
       { title: 'Мулти‑клиент за канцеларии', body: 'Едно најавување, многу компании, посебни сметки, извештаи и овластувања.' },
       { title: 'IFRS извештаи', body: 'IFRS пакет вграден во заднината за професионални извештаи.' },
       { title: 'Безбедност', body: 'ЕU‑хостинг, енкрипција, резервни копии и трагови на активности.' }
@@ -148,13 +148,13 @@ const mk: Dictionary = {
       { title: '3. Порамни побарувања', body: 'Увезете извод и усогласете за минути, не за часови.' }
     ]
   },
-  partners: { title: 'Поврзано со', subtitle: 'Банкарски интеграции преку PSD2', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
+  partners: { title: 'Поврзано со', subtitle: 'Банкарски увоз (CSV/MT940/PDF)', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
   pricingPreview: {
     title: 'Пакети',
     cta: 'Види ги цените',
     plans: [
       { name: 'Starter', bullets: ['Е‑Фактура подготвено', '1 корисник', 'AI предлози (основно)'] },
-      { name: 'Pro', bullets: ['Мулти‑корисници/улоги', 'PSD2 изводи', 'Автоматизации'] },
+      { name: 'Pro', bullets: ['Мулти‑корисници/улоги', 'Увоз на изводи', 'Автоматизации'] },
       { name: 'Business', bullets: ['Повеќе компании', 'API и напредни овластувања', 'SLA'] }
     ]
   },
@@ -162,7 +162,7 @@ const mk: Dictionary = {
     title: 'Што велат корисниците',
     subtitle: 'Сметководители и бизниси кои веќе работат со Facturino.',
     items: [
-      { quote: 'Месечното затворање за 12 клиенти ни падна од 3 дена на неколку часа. PSD2 изводите влегуваат директно и порамнувањето е полуавтоматско.', author: 'Елена Стојановска, Сметководствено биро „Биланс Про" — Скопје' },
+      { quote: 'Месечното затворање за 12 клиенти ни падна од 3 дена на неколку часа. Увозот на изводи е брз, а порамнувањето е полуавтоматско.', author: 'Елена Стојановска, Сметководствено биро „Биланс Про" — Скопје' },
       { quote: 'Подготовката за е‑Фактура ни даде огромна предност. Додека конкуренцијата чека, ние веќе ги имаме структурираните податоци спремни за UJP.', author: 'Дарко Митревски, Ревизорска канцеларија „Финанс Консалт" — Битола' },
       { quote: 'AI советникот ми покажа дека 40% од фактурите ни се задоцнети повеќе од 30 дена. Веднаш го променивме процесот на наплата и готовинскиот тек се подобри за еден месец.', author: 'Ивана Петрова, Управител на „Трговија Плус" ДООЕЛ — Штип' }
     ]
@@ -172,7 +172,7 @@ const mk: Dictionary = {
     items: [
       { q: 'Дали сте подготвени за е‑Фактура?', a: 'Да, моделот е изграден околу е‑фактури и се поврзуваме штом UJP отвори продукциски API + QES.' },
       { q: 'Како функционира AI?', a: 'Предлага ДДВ/конта по ставка — човек секогаш потврдува/уредува.' },
-      { q: 'Поддржувате ли PSD2?', a: 'Да, вклучително увоз на изводи и полуавтоматско порамнување.' },
+      { q: 'Поддржувате ли банкарски увоз?', a: 'Да, CSV/MT940/PDF увоз на изводи и полуавтоматско порамнување. PSD2 директни конекции — наскоро.' },
       { q: 'Што може да го прашам AI советникот?', a: 'Било што за твојот бизнис! "Кој ми должи?", "Дали сум профитабилен?", "Што ако го изгубам најголемиот клиент?", "Како да го зголемам профитот?" — AI ги анализира твоите податоци и дава конкретни одговори на македонски.' }
     ]
   },
@@ -203,9 +203,9 @@ const mk: Dictionary = {
       {
         title: 'Банки и готовински тек',
         items: [
-          'PSD2 поврзувања со локални банки',
-          'Увоз на изводи и полуавтоматско порамнување',
-          'CSV/MT940 како алтернатива'
+          'Увоз на банкарски изводи (CSV/MT940/PDF)',
+          'Полуавтоматско порамнување со фактури',
+          'PSD2 директни конекции (наскоро)'
         ]
       },
       {
@@ -238,7 +238,7 @@ const mk: Dictionary = {
       { name: 'Free', price: '0 ден', period: '/засекогаш', bullets: ['3 фактури/месец', '1 корисник', 'PDF извоз', '2 AI прашања/месец'], popular: false },
       { name: 'Starter', price: '740 ден', period: '/месец', bullets: ['30 фактури/месец', '1 корисник', 'Е‑Фактура (5/месец)', '5 AI прашања/месец'], popular: false },
       { name: 'Standard', price: '2,400 ден', period: '/месец', bullets: ['60 фактури/месец', '3 корисници', 'Е‑Фактура + QES (неограничено)', '25 AI прашања/месец'], popular: true },
-      { name: 'Business', price: '3,630 ден', period: '/месец', bullets: ['150 фактури/месец', '5 корисници', 'Банкарски поврзувања (PSD2)', 'Авто-рекончилијација', 'Повеќе валути'], popular: false },
+      { name: 'Business', price: '3,630 ден', period: '/месец', bullets: ['150 фактури/месец', '5 корисници', 'Банкарски увоз (CSV/MT940/PDF)', 'Авто-рекончилијација', 'Повеќе валути'], popular: false },
       { name: 'Max', price: '9,170 ден', period: '/месец', bullets: ['Неограничено фактури', 'Неограничено корисници', 'API пристап', 'Мулти-локации', 'IFRS извештаи'], popular: false }
     ],
     partnerPlans: [
@@ -258,7 +258,7 @@ const mk: Dictionary = {
         { feature: 'Е-Фактура (UJP)', values: [false, '5/месец', 'Неограничено', 'Неограничено', 'Неограничено'] },
         { feature: 'QES потпис', values: [false, false, true, true, true] },
         { feature: 'AI Прашања/месец', values: ['2', '5', '25', '50', '100'] },
-        { feature: 'Банкарски поврзувања (PSD2)', values: [false, false, false, true, true] },
+        { feature: 'Банкарски увоз (CSV/MT940/PDF)', values: [false, false, false, true, true] },
         { feature: 'Авто-рекончилијација', values: [false, false, false, true, true] },
         { feature: 'API Пристап', values: [false, false, false, true, true] },
         { feature: 'Поддршка', values: ['Email', 'Email', 'Email/Chat', 'Приоритетна', 'WhatsApp'] }
@@ -271,7 +271,7 @@ const sq: Dictionary = {
   meta: {
     title: 'Facturino — Platformë AI kontabiliteti, gati për e-Faturë',
     description:
-      'Platformë kontabiliteti me AI, gati për e-Faturë. Shumë-klientë, banka PSD2, raporte IFRS. Filloni provën falas 14-ditore tani.'
+      'Platformë kontabiliteti me AI, gati për e-Faturë. Shumë-klientë, import bankar, raporte IFRS. Filloni provën falas 14-ditore tani.'
   },
   nav: {
     features: 'Veçoritë',
@@ -298,7 +298,7 @@ const sq: Dictionary = {
     claim:
       'Facturino është platforma më e avancuar kontabiliteti me AI në Maqedoni, gati për sistemin e ri të e‑Faturës.',
     onlyPlatform:
-      'E vetmja platformë lokale që kombinon AI, rregullat kontabël maqedonase, gatishmërinë për e‑Faturë dhe lidhjet bankare PSD2 – në një vend.'
+      'E vetmja platformë lokale që kombinon AI, rregullat kontabël maqedonase, gatishmërinë për e‑Faturë dhe import bankar (CSV/MT940/PDF) – në një vend.'
   },
   heroTagline: 'Softueri i kontabilitetit që keni pritur – më në fund është këtu.',
   aiSection: {
@@ -317,7 +317,7 @@ const sq: Dictionary = {
     subtitle: 'Veçori të fuqishme të dizajnuara për bizneset dhe kontabilistët modernë maqedonas.',
     features: [
       { title: 'Gati për e‑Faturë', desc: 'Plotësisht në përputhje me rregulloret e reja qeveritare. Lidhuni menjëherë kur të hapet API.' },
-      { title: 'Integrim bankar', desc: 'Lidhni llogaritë tuaja bankare lokale për përditësime transaksionesh në kohë reale.' },
+      { title: 'Import bankar', desc: 'Importoni ekstrakte bankare (CSV/MT940/PDF) dhe pajtoni me fatura gjysmë-automatikisht.' },
       { title: 'Siguri në nivel bankar', desc: 'Të dhënat tuaja janë të enkriptuara dhe ruhen në mënyrë të sigurt në qendrat e të dhënave të BE-së.' },
       { title: 'Multi-klient', desc: 'Perfekt për kontabilistët që menaxhojnë kompani të shumta klientësh nga një vend.' }
     ]
@@ -328,7 +328,7 @@ const sq: Dictionary = {
     cards: [
       { title: 'Faturim & kodim me AI', body: 'Sugjerime të mençura për TVSH dhe llogari për çdo rresht – ju konfirmoni.' },
       { title: 'Gati për e‑Faturë', body: 'Modeli mbështet të gjithë strukturën; lidhemi sapo UJP hapë API + QES.' },
-      { title: 'Banka PSD2', body: 'Ekstraktet hyjnë direkt në Facturino dhe pajtimi gjysmë‑automatik.' },
+      { title: 'Import bankar', body: 'CSV/MT940/PDF import i ekstrakteve dhe pajtim gjysmë‑automatik. PSD2 së shpejti.' },
       { title: 'Shumë‑klientë për zyra', body: 'Një hyrje, shumë kompani, llogari/raporte/rollet të ndara.' },
       { title: 'Raporte IFRS', body: 'Paketa IFRS e integruar për raporte profesionale.' },
       { title: 'Siguri', body: 'Strehim në BE, enkriptim, kopje rezervë dhe audit‑trail.' }
@@ -353,13 +353,13 @@ const sq: Dictionary = {
       { title: '3. Pajtimi', body: 'Importoni ekstraktin dhe pajtoni në minuta, jo orë.' }
     ]
   },
-  partners: { title: 'E lidhur me', subtitle: 'Integrime bankare nëpërmjet PSD2', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
+  partners: { title: 'E lidhur me', subtitle: 'Import bankar (CSV/MT940/PDF)', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
   pricingPreview: {
     title: 'Planet',
     cta: 'Shiko çmimet',
     plans: [
       { name: 'Starter', bullets: ['Gati për e‑Faturë', '1 përdorues', 'AI (bazë)'] },
-      { name: 'Pro', bullets: ['Shumë përdorues/role', 'Ekstrakte PSD2', 'Automatizime'] },
+      { name: 'Pro', bullets: ['Shumë përdorues/role', 'Import ekstraktesh', 'Automatizime'] },
       { name: 'Business', bullets: ['Shumë kompani', 'API & leje të avancuara', 'SLA'] }
     ]
   },
@@ -367,7 +367,7 @@ const sq: Dictionary = {
     title: 'Çfarë thonë përdoruesit',
     subtitle: 'Kontabilistë dhe biznese që tashmë punojnë me Facturino.',
     items: [
-      { quote: 'Mbyllja mujore për 12 klientë ra nga 3 ditë në disa orë. Ekstraktet PSD2 hyjnë direkt dhe pajtimi është gjysmë‑automatik.', author: 'Elena Stojanovska, Zyra kontabël „Bilans Pro" — Shkup' },
+      { quote: 'Mbyllja mujore për 12 klientë ra nga 3 ditë në disa orë. Importi i ekstrakteve është i shpejtë dhe pajtimi është gjysmë‑automatik.', author: 'Elena Stojanovska, Zyra kontabël „Bilans Pro" — Shkup' },
       { quote: 'Përgatitja për e‑Faturë na dha avantazh të madh. Ndërsa konkurrenca pret, ne tashmë i kemi të dhënat e strukturuara gati për UJP.', author: 'Darko Mitrevski, Zyra e revizionit „Finans Konsalt" — Manastir' },
       { quote: 'Këshilltari AI më tregoi se 40% e faturave tona janë të vonuara mbi 30 ditë. Menjëherë e ndërruam procesin e arkëtimit dhe fluksi i parasë u përmirësua brenda një muaji.', author: 'Ivana Petrova, Drejtore e „Tregtia Plus" SHPK — Shtip' }
     ]
@@ -377,7 +377,7 @@ const sq: Dictionary = {
     items: [
       { q: 'A jeni gati për e‑Faturë?', a: 'Po, modeli është ndërtuar mbi e‑faturë dhe lidhemi sapo UJP hap API + QES.' },
       { q: 'Si punon AI?', a: 'Sugjeron TVSH/llogari për çdo rresht — njeriu gjithmonë konfirmon.' },
-      { q: 'A mbështesni PSD2?', a: 'Po, import ekstraktesh dhe pajtim gjysmë‑automatik.' },
+      { q: 'A mbështesni import bankar?', a: 'Po, CSV/MT940/PDF import i ekstrakteve dhe pajtim gjysmë‑automatik. PSD2 lidhje direkte — së shpejti.' },
       { q: 'Çfarë mund të pyes këshilltarin AI?', a: 'Çdo gjë për biznesin tuaj! "Kush më detyron?", "A jam profitabil?", "Çfarë nëse humb klientin më të madh?", "Si ta rris profitin?" — AI analizon të dhënat tuaja dhe jep përgjigje konkrete.' }
     ]
   },
@@ -408,9 +408,9 @@ const sq: Dictionary = {
       {
         title: 'Bankat & Flukset e parasë',
         items: [
-          'Lidhje PSD2 me bankat lokale',
-          'Import i ekstrakteve dhe pajtim gjysmë‑automatik',
-          'CSV/MT940 si alternativë'
+          'Import i ekstrakteve bankare (CSV/MT940/PDF)',
+          'Pajtim gjysmë‑automatik me fatura',
+          'PSD2 lidhje direkte (së shpejti)'
         ]
       },
       {
@@ -443,7 +443,7 @@ const sq: Dictionary = {
       { name: 'Free', price: '0 den', period: '/përgjithmonë', bullets: ['3 fatura/muaj', '1 përdorues', 'Eksport PDF', '2 pyetje AI/muaj'], popular: false },
       { name: 'Starter', price: '740 den', period: '/muaj', bullets: ['30 fatura/muaj', '1 përdorues', 'e‑Faturë (5/muaj)', '5 pyetje AI/muaj'], popular: false },
       { name: 'Standard', price: '2,400 den', period: '/muaj', bullets: ['60 fatura/muaj', '3 përdorues', 'e‑Faturë + QES (pa limit)', '25 pyetje AI/muaj'], popular: true },
-      { name: 'Business', price: '3,630 den', period: '/muaj', bullets: ['150 fatura/muaj', '5 përdorues', 'Lidhje bankare (PSD2)', 'Auto-rekonçilim', 'Shumë monedha'], popular: false },
+      { name: 'Business', price: '3,630 den', period: '/muaj', bullets: ['150 fatura/muaj', '5 përdorues', 'Import bankar (CSV/MT940/PDF)', 'Auto-rekonçilim', 'Shumë monedha'], popular: false },
       { name: 'Max', price: '9,170 den', period: '/muaj', bullets: ['Fatura pa limit', 'Përdorues pa limit', 'Qasje API', 'Multi-lokacione', 'Raporte IFRS'], popular: false }
     ],
     partnerPlans: [
@@ -463,7 +463,7 @@ const sq: Dictionary = {
         { feature: 'e-Faturë (UJP)', values: [false, '5/muaj', 'Pa limit', 'Pa limit', 'Pa limit'] },
         { feature: 'QES nënshkrim', values: [false, false, true, true, true] },
         { feature: 'Pyetje AI/muaj', values: ['2', '5', '25', '50', '100'] },
-        { feature: 'Lidhje bankare (PSD2)', values: [false, false, false, true, true] },
+        { feature: 'Import bankar (CSV/MT940/PDF)', values: [false, false, false, true, true] },
         { feature: 'Auto-rekonçilim', values: [false, false, false, true, true] },
         { feature: 'Qasje API', values: [false, false, false, true, true] },
         { feature: 'Mbështetje', values: ['Email', 'Email', 'Email/Chat', 'Prioritet', 'WhatsApp'] }
@@ -476,7 +476,7 @@ const tr: Dictionary = {
   meta: {
     title: 'Facturino — AI Muhasebe ve e-Fatura Platformu',
     description:
-      'AI destekli muhasebe platformu, e-Fatura\'ya hazır. Çoklu müşteri, PSD2 bankalar, IFRS raporları. 14 gün ücretsiz deneyin.'
+      'AI destekli muhasebe platformu, e-Fatura\'ya hazır. Çoklu müşteri, banka ekstresi içe aktarma, IFRS raporları. 14 gün ücretsiz deneyin.'
   },
   nav: {
     features: 'Özellikler',
@@ -503,7 +503,7 @@ const tr: Dictionary = {
     claim:
       'Facturino, Makedonya için özel geliştirilmiş, en gelişmiş yapay zekâ destekli ve e‑Fatura’ya hazır muhasebe platformudur.',
     onlyPlatform:
-      'Yapay zekâ, Makedonya muhasebe kuralları, e‑Fatura hazırlığı ve PSD2 banka bağlantılarını tek çatı altında birleştiren tek yerel platform.'
+      'Yapay zekâ, Makedonya muhasebe kuralları, e‑Fatura hazırlığı ve banka ekstresi içe aktarma (CSV/MT940/PDF) tek çatı altında birleştiren tek yerel platform.'
   },
   heroTagline: 'Beklediğiniz muhasebe yazılımı – nihayet burada.',
   aiSection: {
@@ -522,7 +522,7 @@ const tr: Dictionary = {
     subtitle: 'Modern Makedon işletmeleri ve muhasebeciler için tasarlanmış güçlü özellikler.',
     features: [
       { title: 'e-Fatura hazır', desc: 'Yeni hükümet düzenlemelerine tam uyumlu. API açıldığında anında bağlanın.' },
-      { title: 'Banka entegrasyonu', desc: 'Gerçek zamanlı işlem güncellemeleri için yerel banka hesaplarınızı bağlayın.' },
+      { title: 'Banka içe aktarma', desc: 'Banka ekstrelerini (CSV/MT940/PDF) içe aktarın ve faturalarla yarı otomatik eşleştirin.' },
       { title: 'Banka seviyesinde güvenlik', desc: 'Verileriniz şifrelenir ve AB merkezli veri merkezlerinde güvenle saklanır.' },
       { title: 'Çoklu kiracı', desc: 'Birden fazla müşteri şirketini tek yerden yöneten muhasebeciler için mükemmel.' }
     ]
@@ -533,7 +533,7 @@ const tr: Dictionary = {
     cards: [
       { title: 'AI faturalama ve kodlama', body: 'Her satır için KDV ve hesap önerileri – onay sizde.' },
       { title: 'e‑Fatura hazır', body: 'Model tüm yapıyı destekler; UJP üretim API + QES açılır açılmaz bağlanırız.' },
-      { title: 'PSD2 bankalar', body: 'Ekstreler doğrudan Facturino’ya iner; yarı otomatik mutabakat.' },
+      { title: 'Banka içe aktarma', body: 'CSV/MT940/PDF ekstre içe aktarma ve yarı otomatik mutabakat. PSD2 yakında.' },
       { title: 'Muhasebe ofisleri için çoklu müşteri', body: 'Tek giriş, çok şirket, ayrı hesaplar/raporlar/yetkiler.' },
       { title: 'IFRS raporları', body: 'Arka planda IFRS paketiyle profesyonel raporlar.' },
       { title: 'Güvenlik', body: 'AB bölgesi barındırma, şifreleme, yedekler ve işlem günlükleri.' }
@@ -558,13 +558,13 @@ const tr: Dictionary = {
       { title: '3. Mutabakat', body: 'Ekstreyi içe aktarın ve dakikalarda eşleştirin.' }
     ]
   },
-  partners: { title: 'Entegre edildi', subtitle: 'PSD2 ile banka entegrasyonları', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
+  partners: { title: 'Entegre edildi', subtitle: 'Banka içe aktarma (CSV/MT940/PDF)', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
   pricingPreview: {
     title: 'Paketler',
     cta: 'Fiyatları gör',
     plans: [
       { name: 'Starter', bullets: ['e‑Fatura hazır', '1 kullanıcı', 'AI (temel)'] },
-      { name: 'Pro', bullets: ['Çoklu kullanıcı/roller', 'PSD2 ekstreleri', 'Otomasyonlar'] },
+      { name: 'Pro', bullets: ['Çoklu kullanıcı/roller', 'Ekstre içe aktarma', 'Otomasyonlar'] },
       { name: 'Business', bullets: ['Çok şirket', 'API ve gelişmiş yetkiler', 'SLA'] }
     ]
   },
@@ -572,7 +572,7 @@ const tr: Dictionary = {
     title: 'Kullanıcılar ne diyor',
     subtitle: 'Facturino ile zaten calısan muhasebeciler ve isletmeler.',
     items: [
-      { quote: '12 musteri icin ay sonu kapanısı 3 gunden birkac saate dustu. PSD2 ekstreleri dogrudan iniyor ve uzlastırma yarı otomatik.', author: 'Elena Stojanovska, Muhasebe Burosu „Bilans Pro" — Uskup' },
+      { quote: '12 musteri icin ay sonu kapanısı 3 gunden birkac saate dustu. Ekstre içe aktarımı hızlı ve uzlastırma yarı otomatik.', author: 'Elena Stojanovska, Muhasebe Burosu „Bilans Pro" — Uskup' },
       { quote: 'e-Fatura hazırlıgı bize buyuk avantaj sagladi. Rakipler beklerken, biz yapılandırılmıs verileri UJP icin hazır tuttuk.', author: 'Darko Mitrevski, Denetim Ofisi „Finans Konsalt" — Manastır' },
       { quote: 'AI danısman faturalarımızın %40\'ının 30 gunden fazla geciktigini gosterdi. Hemen tahsilat surecini degistirdik ve nakit akısı bir ayda iyilesti.', author: 'Ivana Petrova, „Trgovija Plus" DOOЕЛ Muduru — Stip' }
     ]
@@ -582,7 +582,7 @@ const tr: Dictionary = {
     items: [
       { q: "e‑Fatura'ya hazır mısınız?", a: 'Evet, model e‑fatura verileriyle kurulu; UJP üretim API + QES açılınca bağlanıyoruz.' },
       { q: 'AI nasıl çalışır?', a: 'Her satır için KDV/hesap önerir — onay sizde.' },
-      { q: 'PSD2 destekliyor musunuz?', a: 'Evet, ekstre içe aktarma ve yarı otomatik mutabakat.' },
+      { q: 'Banka içe aktarma destekliyor musunuz?', a: 'Evet, CSV/MT940/PDF ekstre içe aktarma ve yarı otomatik mutabakat. PSD2 doğrudan bağlantılar — yakında.' },
       { q: 'AI danışmana ne sorabilirim?', a: 'İşinizle ilgili her şey! "Kim borçlu?", "Kârlı mıyım?", "En büyük müşteriyi kaybedersem ne olur?", "Kârı nasıl artırabilirim?" — AI verilerinizi analiz eder ve somut cevaplar verir.' }
     ]
   },
@@ -613,9 +613,9 @@ const tr: Dictionary = {
       {
         title: 'Bankacılık ve nakit akışı',
         items: [
-          'Yerel bankalara PSD2 bağlantılar',
-          'Ekstre içe aktarımı ve yarı otomatik mutabakat',
-          'Alternatif olarak CSV/MT940'
+          'Banka ekstresi içe aktarma (CSV/MT940/PDF)',
+          'Yarı otomatik mutabakat',
+          'PSD2 doğrudan bağlantılar (yakında)'
         ]
       },
       {
@@ -648,7 +648,7 @@ const tr: Dictionary = {
       { name: 'Free', price: '0 den', period: '/süresiz', bullets: ['3 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', '2 AI soru/ay'], popular: false },
       { name: 'Starter', price: '740 den', period: '/ay', bullets: ['30 fatura/ay', '1 kullanıcı', 'e‑Fatura (5/ay)', '5 AI soru/ay'], popular: false },
       { name: 'Standard', price: '2,400 den', period: '/ay', bullets: ['60 fatura/ay', '3 kullanıcı', 'e‑Fatura + QES (sınırsız)', '25 AI soru/ay'], popular: true },
-      { name: 'Business', price: '3,630 den', period: '/ay', bullets: ['150 fatura/ay', '5 kullanıcı', 'Banka bağlantıları (PSD2)', 'Otomatik eşleştirme', 'Çoklu para birimi'], popular: false },
+      { name: 'Business', price: '3,630 den', period: '/ay', bullets: ['150 fatura/ay', '5 kullanıcı', 'Banka içe aktarma (CSV/MT940/PDF)', 'Otomatik eşleştirme', 'Çoklu para birimi'], popular: false },
       { name: 'Max', price: '9,170 den', period: '/ay', bullets: ['Sınırsız fatura', 'Sınırsız kullanıcı', 'API erişimi', 'Çoklu lokasyon', 'IFRS raporları'], popular: false }
     ],
     partnerPlans: [
@@ -668,7 +668,7 @@ const tr: Dictionary = {
         { feature: 'e-Fatura (UJP)', values: [false, '5/ay', 'Sınırsız', 'Sınırsız', 'Sınırsız'] },
         { feature: 'QES imza', values: [false, false, true, true, true] },
         { feature: 'AI Soru/ay', values: ['2', '5', '25', '50', '100'] },
-        { feature: 'Banka bağlantıları (PSD2)', values: [false, false, false, true, true] },
+        { feature: 'Banka içe aktarma (CSV/MT940/PDF)', values: [false, false, false, true, true] },
         { feature: 'Otomatik eşleştirme', values: [false, false, false, true, true] },
         { feature: 'API Erişimi', values: [false, false, false, true, true] },
         { feature: 'Destek', values: ['Email', 'Email', 'Email/Chat', 'Öncelikli', 'WhatsApp'] }
@@ -681,7 +681,7 @@ const en: Dictionary = {
   meta: {
     title: 'Facturino — AI Accounting Platform for Macedonia',
     description:
-      'AI-powered accounting platform ready for e-Invoice. Multi-client management, PSD2 bank feeds, IFRS reports. Start your free 14-day trial today.'
+      'AI-powered accounting platform ready for e-Invoice. Multi-client management, bank statement import, IFRS reports. Start your free 14-day trial today.'
   },
   nav: {
     features: 'Features',
@@ -708,7 +708,7 @@ const en: Dictionary = {
     claim:
       'Facturino is the most advanced AI accounting platform in Macedonia, ready for the new e-Invoice system.',
     onlyPlatform:
-      'The only local platform that combines AI, Macedonian accounting rules, e-Invoice readiness, and PSD2 bank connections — all in one place.'
+      'The only local platform that combines AI, Macedonian accounting rules, e-Invoice readiness, and bank statement import (CSV/MT940/PDF) — all in one place.'
   },
   heroTagline: 'The accounting software you have been waiting for — is finally here.',
   aiSection: {
@@ -727,7 +727,7 @@ const en: Dictionary = {
     subtitle: 'Powerful features designed for modern Macedonian businesses and accountants.',
     features: [
       { title: 'e-Invoice Ready', desc: 'Fully compliant with new government regulations. Connect immediately when the API opens.' },
-      { title: 'Bank Integration', desc: 'Connect your local bank accounts for real-time transaction updates.' },
+      { title: 'Bank Import', desc: 'Import bank statements (CSV/MT940/PDF) and semi-automatically reconcile with invoices.' },
       { title: 'Bank-Level Security', desc: 'Your data is encrypted and securely stored in EU data centers.' },
       { title: 'Multi-Client', desc: 'Perfect for accountants managing multiple client companies from one place.' }
     ]
@@ -738,7 +738,7 @@ const en: Dictionary = {
     cards: [
       { title: 'AI Invoicing & Coding', body: 'Smart suggestions for VAT categories and accounts per line item — you confirm.' },
       { title: 'e-Invoice Ready', body: 'The model already supports all structures; connecting as soon as UJP opens production API + QES.' },
-      { title: 'PSD2 Banks', body: 'Bank statements directly in Facturino with semi-automatic reconciliation with invoices.' },
+      { title: 'Bank Import', body: 'CSV/MT940/PDF statement import with semi-automatic reconciliation. PSD2 coming soon.' },
       { title: 'Multi-Client for Offices', body: 'One login, many companies, separate accounts, reports, and permissions.' },
       { title: 'IFRS Reports', body: 'IFRS package built into the backend for professional reports.' },
       { title: 'Security', body: 'EU hosting, encryption, backups, and activity audit trails.' }
@@ -763,13 +763,13 @@ const en: Dictionary = {
       { title: '3. Reconcile Receivables', body: 'Import bank statements and reconcile in minutes, not hours.' }
     ]
   },
-  partners: { title: 'Integrates with', subtitle: 'Bank integrations via PSD2', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
+  partners: { title: 'Integrates with', subtitle: 'Bank import (CSV/MT940/PDF)', logos: ['NLB', 'Stopanska', 'Komercijalna', 'Sparkasse', 'Halk', 'Eurostandard'] },
   pricingPreview: {
     title: 'Plans',
     cta: 'View Pricing',
     plans: [
       { name: 'Starter', bullets: ['e-Invoice Ready', '1 user', 'AI suggestions (basic)'] },
-      { name: 'Pro', bullets: ['Multi-users/roles', 'PSD2 statements', 'Automations'] },
+      { name: 'Pro', bullets: ['Multi-users/roles', 'Statement import', 'Automations'] },
       { name: 'Business', bullets: ['Multiple companies', 'API and advanced permissions', 'SLA'] }
     ]
   },
@@ -777,7 +777,7 @@ const en: Dictionary = {
     title: 'What our users say',
     subtitle: 'Accountants and businesses already working with Facturino.',
     items: [
-      { quote: 'Month-end closing for 12 clients dropped from 3 days to a few hours. PSD2 bank statements come in directly and reconciliation is semi-automatic.', author: 'Elena Stojanovska, Accounting Bureau "Bilans Pro" — Skopje' },
+      { quote: 'Month-end closing for 12 clients dropped from 3 days to a few hours. Statement import is fast and reconciliation is semi-automatic.', author: 'Elena Stojanovska, Accounting Bureau "Bilans Pro" — Skopje' },
       { quote: 'e-Invoice readiness gave us a huge advantage. While competitors wait, we already have structured data ready for UJP.', author: 'Darko Mitrevski, Audit Office "Finans Konsalt" — Bitola' },
       { quote: 'The AI advisor showed me that 40% of our invoices were overdue by more than 30 days. We immediately changed our collection process and cash flow improved within a month.', author: 'Ivana Petrova, Manager at "Trgovija Plus" DOOEL — Shtip' }
     ]
@@ -787,7 +787,7 @@ const en: Dictionary = {
     items: [
       { q: 'Are you ready for e-Invoice?', a: 'Yes, the model is built around e-invoices and we connect as soon as UJP opens production API + QES.' },
       { q: 'How does AI work?', a: 'It suggests VAT/accounts per line item — a human always confirms/edits.' },
-      { q: 'Do you support PSD2?', a: 'Yes, including bank statement import and semi-automatic reconciliation.' },
+      { q: 'Do you support bank import?', a: 'Yes, CSV/MT940/PDF statement import with semi-automatic reconciliation. PSD2 direct connections — coming soon.' },
       { q: 'What can I ask the AI advisor?', a: 'Anything about your business! "Who owes me?", "Am I profitable?", "What if I lose my biggest client?", "How do I increase profit?" — AI analyzes your data and provides concrete answers.' }
     ]
   },
@@ -818,9 +818,9 @@ const en: Dictionary = {
       {
         title: 'Banking & Cash Flow',
         items: [
-          'PSD2 connections with local banks',
-          'Bank statement import and semi-automatic reconciliation',
-          'CSV/MT940 as alternative'
+          'Bank statement import (CSV/MT940/PDF)',
+          'Semi-automatic reconciliation with invoices',
+          'PSD2 direct connections (coming soon)'
         ]
       },
       {
@@ -853,7 +853,7 @@ const en: Dictionary = {
       { name: 'Free', price: '0 MKD', period: '/forever', bullets: ['3 invoices/month', '1 user', 'PDF export', '2 AI questions/month'], popular: false },
       { name: 'Starter', price: '740 MKD', period: '/month', bullets: ['30 invoices/month', '1 user', 'e-Invoice (5/month)', '5 AI questions/month'], popular: false },
       { name: 'Standard', price: '2,400 MKD', period: '/month', bullets: ['60 invoices/month', '3 users', 'Unlimited e-Invoice + QES', '25 AI questions/month'], popular: true },
-      { name: 'Business', price: '3,630 MKD', period: '/month', bullets: ['150 invoices/month', '5 users', 'Bank connections (PSD2)', 'Auto-reconciliation', 'Multi-currency'], popular: false },
+      { name: 'Business', price: '3,630 MKD', period: '/month', bullets: ['150 invoices/month', '5 users', 'Bank import (CSV/MT940/PDF)', 'Auto-reconciliation', 'Multi-currency'], popular: false },
       { name: 'Max', price: '9,170 MKD', period: '/month', bullets: ['Unlimited invoices', 'Unlimited users', 'API access', 'Multi-locations', 'IFRS reports'], popular: false }
     ],
     partnerPlans: [
@@ -873,7 +873,7 @@ const en: Dictionary = {
         { feature: 'e-Invoice (UJP)', values: [false, '5/month', 'Unlimited', 'Unlimited', 'Unlimited'] },
         { feature: 'QES Signing', values: [false, false, true, true, true] },
         { feature: 'AI Questions/month', values: ['2', '5', '25', '50', '100'] },
-        { feature: 'Bank Connections (PSD2)', values: [false, false, false, true, true] },
+        { feature: 'Bank Import (CSV/MT940/PDF)', values: [false, false, false, true, true] },
         { feature: 'Auto-Reconciliation', values: [false, false, false, true, true] },
         { feature: 'API Access', values: [false, false, false, true, true] },
         { feature: 'Support', values: ['Email', 'Email', 'Email/Chat', 'Priority', 'WhatsApp'] }
