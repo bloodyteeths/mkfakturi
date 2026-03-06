@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Company;
 use App\Models\CompanySetting;
 use App\Models\Currency;
+use App\Models\Bill;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Tax;
@@ -277,15 +278,18 @@ class VatXmlService
         $vatCalculation->appendChild($exemptSupplies);
         $this->buildVATRateElement($dom, $exemptSupplies, 0.00, $vatData['exempt']);
 
-        // Input VAT (simplified - would need expense/purchase data)
+        // Input VAT from purchase invoices (bills)
+        $inputVatData = $this->calculateInputVatForPeriod();
+        $totalInputVatAmount = $inputVatData['standard']['vat_amount'] + $inputVatData['reduced']['vat_amount'];
+
         $inputVAT = $dom->createElement('InputVAT');
         $vatCalculation->appendChild($inputVAT);
 
-        $inputVAT->appendChild($dom->createElement('PurchaseVAT', '0.00'));
+        $inputVAT->appendChild($dom->createElement('PurchaseVAT', $this->formatAmount($totalInputVatAmount)));
         $inputVAT->appendChild($dom->createElement('ImportVAT', '0.00'));
         $inputVAT->appendChild($dom->createElement('CapitalGoodsVAT', '0.00'));
         $inputVAT->appendChild($dom->createElement('OtherDeductibleVAT', '0.00'));
-        $inputVAT->appendChild($dom->createElement('TotalInputVAT', '0.00'));
+        $inputVAT->appendChild($dom->createElement('TotalInputVAT', $this->formatAmount($totalInputVatAmount)));
     }
 
     /**
@@ -309,7 +313,8 @@ class VatXmlService
 
         $vatData = $this->calculateVatForPeriod();
         $totalOutputVAT = $vatData['standard']['vat_amount'] + $vatData['reduced']['vat_amount'];
-        $totalInputVAT = 0; // Would need expense/purchase data
+        $inputVatData = $this->calculateInputVatForPeriod();
+        $totalInputVAT = $inputVatData['standard']['vat_amount'] + $inputVatData['reduced']['vat_amount'];
         $netVATDue = max(0, $totalOutputVAT - $totalInputVAT);
         $vatRefund = max(0, $totalInputVAT - $totalOutputVAT);
 
@@ -429,6 +434,108 @@ class VatXmlService
         }
 
         return $vatData;
+    }
+
+    /**
+     * Calculate Input VAT from purchase invoices (bills) for the period
+     */
+    protected function calculateInputVatForPeriod(): array
+    {
+        $vatData = [
+            'standard' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
+            'reduced' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
+            'zero' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
+            'exempt' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
+        ];
+
+        if (! isset($this->company->id)) {
+            return $vatData;
+        }
+
+        try {
+            $bills = Bill::where('company_id', $this->company->id)
+                ->whereIn('paid_status', [Bill::PAID_STATUS_PAID, Bill::PAID_STATUS_PARTIALLY_PAID])
+                ->whereBetween('bill_date', [
+                    $this->periodStart->format('Y-m-d'),
+                    $this->periodEnd->format('Y-m-d'),
+                ])
+                ->with(['taxes.taxType', 'items.taxes.taxType'])
+                ->get();
+
+            if ($bills->isEmpty()) {
+                return $vatData;
+            }
+
+            foreach ($bills as $bill) {
+                foreach ($bill->taxes as $tax) {
+                    $this->categorizeBillVatAmount($tax, $vatData);
+                }
+
+                foreach ($bill->items as $item) {
+                    foreach ($item->taxes as $tax) {
+                        $this->categorizeBillVatAmount($tax, $vatData);
+                    }
+                }
+
+                $dominantRate = $this->getDominantBillVatRate($bill);
+                if ($dominantRate >= 15) {
+                    $vatData['standard']['transaction_count']++;
+                } elseif ($dominantRate >= 3) {
+                    $vatData['reduced']['transaction_count']++;
+                } else {
+                    $vatData['zero']['transaction_count']++;
+                }
+            }
+        } catch (Exception $e) {
+            // Bills may not exist for all companies — return zeros gracefully
+            return $vatData;
+        }
+
+        return $vatData;
+    }
+
+    /**
+     * Categorize VAT amount from a bill tax by rate
+     */
+    protected function categorizeBillVatAmount(Tax $tax, array &$vatData): void
+    {
+        $rate = $tax->percent ?? $tax->taxType->percent ?? 0;
+        $amount = $tax->amount ?? 0;
+
+        $taxableBase = 0;
+        if ($rate > 0) {
+            $taxableBase = ($amount * 100) / $rate;
+        } elseif ($tax->billItem) {
+            $taxableBase = $tax->billItem->total ?? 0;
+        }
+
+        if ($rate >= 15) {
+            $vatData['standard']['vat_amount'] += $amount;
+            $vatData['standard']['taxable_base'] += $taxableBase;
+        } elseif ($rate >= 3) {
+            $vatData['reduced']['vat_amount'] += $amount;
+            $vatData['reduced']['taxable_base'] += $taxableBase;
+        } else {
+            $vatData['zero']['vat_amount'] += $amount;
+            $vatData['zero']['taxable_base'] += $taxableBase;
+        }
+    }
+
+    /**
+     * Get dominant VAT rate for a bill
+     */
+    protected function getDominantBillVatRate(Bill $bill): float
+    {
+        $rates = collect();
+
+        foreach ($bill->items as $item) {
+            foreach ($item->taxes as $tax) {
+                $rate = $tax->percent ?? $tax->taxType->percent ?? 0;
+                $rates->push($rate);
+            }
+        }
+
+        return $rates->isEmpty() ? 0 : $rates->mode()[0] ?? $rates->first();
     }
 
     /**
