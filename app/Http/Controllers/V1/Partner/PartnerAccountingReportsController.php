@@ -579,7 +579,7 @@ class PartnerAccountingReportsController extends Controller
 
             return [
                 'id' => $invoice->id,
-                'date' => $invoice->invoice_date?->format('Y-m-d') ?? '',
+                'date' => $invoice->invoice_date instanceof \DateTimeInterface ? $invoice->invoice_date->format('Y-m-d') : ($invoice->invoice_date ?? ''),
                 'number' => $invoice->invoice_number ?? '',
                 'party_name' => $invoice->customer?->name ?? '',
                 'party_tax_id' => $invoice->customer?->tax_identification_number ?? '',
@@ -611,7 +611,7 @@ class PartnerAccountingReportsController extends Controller
 
             return [
                 'id' => $bill->id,
-                'date' => $bill->bill_date?->format('Y-m-d') ?? '',
+                'date' => $bill->bill_date instanceof \DateTimeInterface ? $bill->bill_date->format('Y-m-d') : ($bill->bill_date ?? ''),
                 'number' => $bill->bill_number ?? '',
                 'party_name' => $bill->supplier?->name ?? '',
                 'party_tax_id' => $bill->supplier?->tax_identification_number ?? '',
