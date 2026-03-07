@@ -150,7 +150,7 @@ async function removeBill(id) {
     .then((res) => {
       id = id
       if (res) {
-        billStore.deleteBill({ ids: [id] }).then((res) => {
+        billStore.deleteBill(id).then((res) => {
           if (res.data.success) {
             router.push('/admin/bills')
             props.table && props.table.refresh()
@@ -178,7 +178,7 @@ async function cloneBillData(data) {
     })
     .then((res) => {
       if (res) {
-        billStore.cloneBill(data).then((res) => {
+        billStore.cloneBill(data.id).then((res) => {
           router.push(`/admin/bills/${res.data.data.id}/edit`)
         })
       }

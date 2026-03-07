@@ -732,6 +732,7 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/bills/{bill}/send', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'send']);
             Route::post('/bills/{bill}/clone', CloneBillController::class);
+            Route::post('/bills/{bill}/mark-as-sent', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsSent']);
             Route::post('/bills/{bill}/mark-as-viewed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsViewed']);
             Route::post('/bills/{bill}/mark-as-completed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsCompleted']);
             Route::get('/bills/{bill}/download-pdf', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'downloadPdf']);

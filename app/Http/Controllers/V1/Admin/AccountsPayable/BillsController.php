@@ -210,6 +210,21 @@ class BillsController extends Controller
     }
 
     /**
+     * Mark bill as sent (without emailing).
+     */
+    public function markAsSent(Bill $bill): JsonResponse
+    {
+        $this->authorize('send', $bill);
+
+        $bill->markAsSent();
+
+        return response()->json([
+            'success' => true,
+            'message' => __('bills.marked_sent_message'),
+        ]);
+    }
+
+    /**
      * Send bill to supplier via email.
      */
     public function send(Request $request, Bill $bill): JsonResponse
