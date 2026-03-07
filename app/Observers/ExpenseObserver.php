@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Domain\Accounting\IfrsAdapter;
 use App\Models\Expense;
 use Illuminate\Support\Facades\Log;
+use Modules\Mk\Services\CostCenterAutoAssigner;
 
 /**
  * Expense Observer
@@ -16,9 +17,12 @@ class ExpenseObserver
 {
     protected IfrsAdapter $ifrsAdapter;
 
-    public function __construct(IfrsAdapter $ifrsAdapter)
+    protected CostCenterAutoAssigner $costCenterAssigner;
+
+    public function __construct(IfrsAdapter $ifrsAdapter, CostCenterAutoAssigner $costCenterAssigner)
     {
         $this->ifrsAdapter = $ifrsAdapter;
+        $this->costCenterAssigner = $costCenterAssigner;
     }
 
     /**
@@ -28,6 +32,9 @@ class ExpenseObserver
      */
     public function created(Expense $expense): void
     {
+        // Auto-assign cost center from rules (before ledger posting)
+        $this->costCenterAssigner->assignIfMatched($expense);
+
         // Only post to ledger if feature is enabled
         if ($this->isFeatureEnabled()) {
             try {
@@ -64,6 +71,9 @@ class ExpenseObserver
      */
     public function updated(Expense $expense): void
     {
+        // Auto-assign cost center from rules (before ledger posting)
+        $this->costCenterAssigner->assignIfMatched($expense);
+
         // Only post if not already posted and feature is enabled
         if ($this->isFeatureEnabled() && ! $expense->ifrs_transaction_id) {
             try {

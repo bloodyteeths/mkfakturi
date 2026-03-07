@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Domain\Accounting\IfrsAdapter;
 use App\Models\Bill;
 use Illuminate\Support\Facades\Log;
+use Modules\Mk\Services\CostCenterAutoAssigner;
 use Vinkla\Hashids\Facades\Hashids;
 
 /**
@@ -17,9 +18,12 @@ class BillObserver
 {
     protected IfrsAdapter $ifrsAdapter;
 
-    public function __construct(IfrsAdapter $ifrsAdapter)
+    protected CostCenterAutoAssigner $costCenterAssigner;
+
+    public function __construct(IfrsAdapter $ifrsAdapter, CostCenterAutoAssigner $costCenterAssigner)
     {
         $this->ifrsAdapter = $ifrsAdapter;
+        $this->costCenterAssigner = $costCenterAssigner;
     }
 
     /**
@@ -50,6 +54,9 @@ class BillObserver
                 // Do not block bill creation on hash generation failures
             }
         }
+
+        // Auto-assign cost center from rules (before ledger posting)
+        $this->costCenterAssigner->assignIfMatched($bill);
 
         // Post to ledger only when bill is marked as COMPLETED
         if ($this->shouldPostToLedger($bill)) {
@@ -93,6 +100,9 @@ class BillObserver
             $bill->status === Bill::STATUS_COMPLETED &&
             $this->shouldPostToLedger($bill) &&
             ! $bill->ifrs_transaction_id) {
+
+            // Auto-assign cost center from rules (before ledger posting)
+            $this->costCenterAssigner->assignIfMatched($bill);
 
             try {
                 $this->ifrsAdapter->postBill($bill);

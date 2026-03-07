@@ -20,6 +20,7 @@ use IFRS\Reports\TrialBalance;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Modules\Mk\Services\CostCenterLedgerService;
 
 /**
  * IFRS Adapter for Eloquent-IFRS Integration
@@ -30,6 +31,13 @@ use Illuminate\Support\Facades\Schema;
  */
 class IfrsAdapter
 {
+    protected CostCenterLedgerService $costCenterLedgerService;
+
+    public function __construct(CostCenterLedgerService $costCenterLedgerService)
+    {
+        $this->costCenterLedgerService = $costCenterLedgerService;
+    }
+
     /**
      * Post an Invoice to the general ledger
      * Creates: DR Accounts Receivable, CR Revenue
@@ -116,6 +124,11 @@ class IfrsAdapter
 
             // Post the transaction to the ledger
             $transaction->post();
+
+            // Tag ledger entries with cost center if assigned
+            if ($invoice->cost_center_id) {
+                $this->costCenterLedgerService->tagLedgerEntries($transaction->id, $invoice->cost_center_id);
+            }
 
             // Store the IFRS transaction ID on the invoice for reference
             $invoice->update(['ifrs_transaction_id' => $transaction->id]);
@@ -1555,6 +1568,11 @@ class IfrsAdapter
             // Post the transaction to the ledger
             $transaction->post();
 
+            // Tag ledger entries with cost center if assigned
+            if ($expense->cost_center_id) {
+                $this->costCenterLedgerService->tagLedgerEntries($transaction->id, $expense->cost_center_id);
+            }
+
             // Store the IFRS transaction ID on the expense for reference
             $expense->ifrs_transaction_id = $transaction->id;
             $expense->saveQuietly();
@@ -2464,6 +2482,11 @@ class IfrsAdapter
 
             // Post the transaction to the ledger
             $transaction->post();
+
+            // Tag ledger entries with cost center if assigned
+            if ($bill->cost_center_id) {
+                $this->costCenterLedgerService->tagLedgerEntries($transaction->id, $bill->cost_center_id);
+            }
 
             // Store the IFRS transaction ID on the bill for reference
             $bill->update(['ifrs_transaction_id' => $transaction->id, 'posted_to_ifrs' => true]);

@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Domain\Accounting\IfrsAdapter;
 use App\Models\Invoice;
 use Illuminate\Support\Facades\Log;
+use Modules\Mk\Services\CostCenterAutoAssigner;
 
 /**
  * Invoice Observer
@@ -16,9 +17,12 @@ class InvoiceObserver
 {
     protected IfrsAdapter $ifrsAdapter;
 
-    public function __construct(IfrsAdapter $ifrsAdapter)
+    protected CostCenterAutoAssigner $costCenterAssigner;
+
+    public function __construct(IfrsAdapter $ifrsAdapter, CostCenterAutoAssigner $costCenterAssigner)
     {
         $this->ifrsAdapter = $ifrsAdapter;
+        $this->costCenterAssigner = $costCenterAssigner;
     }
 
     /**
@@ -34,6 +38,9 @@ class InvoiceObserver
             'status' => $invoice->status,
             'should_post' => $this->shouldPostToLedger($invoice),
         ]);
+
+        // Auto-assign cost center from rules (before ledger posting)
+        $this->costCenterAssigner->assignIfMatched($invoice);
 
         // Only post to ledger if not in draft status and feature is enabled
         if ($this->shouldPostToLedger($invoice)) {
@@ -88,6 +95,9 @@ class InvoiceObserver
         if ($statusChanged && $wasFromDraft &&
             $this->shouldPostToLedger($invoice) &&
             ! $invoice->ifrs_transaction_id) {
+
+            // Auto-assign cost center from rules (before ledger posting)
+            $this->costCenterAssigner->assignIfMatched($invoice);
 
             try {
                 $this->ifrsAdapter->postInvoice($invoice);
