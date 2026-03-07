@@ -247,6 +247,10 @@ Route::get('/terms', function () {
     return view('app');
 })->name('terms');
 
+Route::get('/support', function () {
+    return redirect('/admin/support');
+});
+
 // Move other http requests to the Vue App
 // -------------------------------------------------
 
