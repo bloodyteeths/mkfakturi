@@ -16,6 +16,21 @@
       </template>
     </BasePageHeader>
 
+    <!-- Sub-navigation tabs -->
+    <div class="flex border-b border-gray-200 mb-6">
+      <router-link
+        v-for="tab in tabs"
+        :key="tab.name"
+        :to="tab.to"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="currentRouteName === tab.name
+          ? 'border-primary-500 text-primary-600'
+          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+      >
+        {{ tab.label }}
+      </router-link>
+    </div>
+
     <!-- Filters -->
     <div class="p-6 bg-white rounded-lg shadow mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -278,11 +293,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import ccMessages from '@/scripts/admin/i18n/cost-centers.js'
 
+const route = useRoute()
 const notificationStore = useNotificationStore()
+
+const currentRouteName = computed(() => route.name)
 
 const locale = document.documentElement.lang || 'mk'
 function t(key) {
@@ -290,6 +309,12 @@ function t(key) {
     || ccMessages['en']?.cost_centers?.[key]
     || key
 }
+
+const tabs = computed(() => [
+  { name: 'cost-centers.index', to: '/admin/cost-centers', label: t('title') },
+  { name: 'cost-centers.rules', to: '/admin/cost-centers/rules', label: t('rules') },
+  { name: 'cost-centers.summary', to: '/admin/cost-centers/summary', label: t('summary') },
+])
 
 // State
 const summaryData = ref(null)

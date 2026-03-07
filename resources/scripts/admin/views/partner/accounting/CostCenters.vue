@@ -10,7 +10,7 @@
               :class="viewMode === 'tree' ? 'bg-primary-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
               @click="viewMode = 'tree'"
             >
-              <BaseIcon name="Squares2X2Icon" class="h-4 w-4" />
+              <BaseIcon name="Bars3BottomLeftIcon" class="h-4 w-4" />
             </button>
             <button
               class="px-3 py-1.5 text-sm border-l border-gray-300"

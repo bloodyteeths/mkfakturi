@@ -10,7 +10,7 @@
               :class="viewMode === 'tree' ? 'bg-primary-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
               @click="viewMode = 'tree'"
             >
-              <BaseIcon name="Squares2X2Icon" class="h-4 w-4" />
+              <BaseIcon name="Bars3BottomLeftIcon" class="h-4 w-4" />
             </button>
             <button
               class="px-3 py-1.5 text-sm border-l border-gray-300"
@@ -30,6 +30,21 @@
         </div>
       </template>
     </BasePageHeader>
+
+    <!-- Sub-navigation tabs -->
+    <div class="flex border-b border-gray-200 mb-6">
+      <router-link
+        v-for="tab in tabs"
+        :key="tab.name"
+        :to="tab.to"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="currentRouteName === tab.name
+          ? 'border-primary-500 text-primary-600'
+          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+      >
+        {{ tab.label }}
+      </router-link>
+    </div>
 
     <!-- Loading state -->
     <div v-if="isLoading" class="bg-white rounded-lg shadow p-6">
@@ -167,6 +182,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { useI18n } from 'vue-i18n'
@@ -174,9 +190,12 @@ import CostCenterForm from './Form.vue'
 import CostCenterTreeNode from './TreeNode.vue'
 import ccMessages from '@/scripts/admin/i18n/cost-centers.js'
 
+const route = useRoute()
 const notificationStore = useNotificationStore()
 const dialogStore = useDialogStore()
 const { t: $t } = useI18n()
+
+const currentRouteName = computed(() => route.name)
 
 const locale = document.documentElement.lang || 'mk'
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
@@ -187,6 +206,12 @@ function t(key) {
     || ccMessages['en']?.cost_centers?.[key]
     || key
 }
+
+const tabs = computed(() => [
+  { name: 'cost-centers.index', to: '/admin/cost-centers', label: t('title') },
+  { name: 'cost-centers.rules', to: '/admin/cost-centers/rules', label: t('rules') },
+  { name: 'cost-centers.summary', to: '/admin/cost-centers/summary', label: t('summary') },
+])
 
 // State
 const costCenters = ref([])

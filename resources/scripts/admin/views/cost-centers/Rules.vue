@@ -11,6 +11,21 @@
       </template>
     </BasePageHeader>
 
+    <!-- Sub-navigation tabs -->
+    <div class="flex border-b border-gray-200 mb-6">
+      <router-link
+        v-for="tab in tabs"
+        :key="tab.name"
+        :to="tab.to"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="currentRouteName === tab.name
+          ? 'border-primary-500 text-primary-600'
+          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+      >
+        {{ tab.label }}
+      </router-link>
+    </div>
+
     <!-- Explanation -->
     <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
       <div class="flex">
@@ -66,7 +81,7 @@
               </span>
             </td>
             <td class="px-4 py-3 text-sm text-gray-900">
-              {{ rule.match_value }}
+              {{ resolveMatchValue(rule) }}
             </td>
             <td class="px-4 py-3 text-sm">
               <div v-if="rule.cost_center" class="flex items-center">
@@ -158,12 +173,51 @@
               />
             </BaseInputGroup>
 
-            <!-- Match Value -->
+            <!-- Match Value — dynamic based on match_type -->
             <BaseInputGroup :label="t('match_value')" required>
-              <BaseInput
+              <!-- Vendor: supplier dropdown -->
+              <BaseMultiselect
+                v-if="ruleForm.match_type === 'vendor'"
                 v-model="ruleForm.match_value"
-                :placeholder="matchValuePlaceholder"
+                :options="suppliers"
+                label="name"
+                value-prop="id"
+                :searchable="true"
+                :placeholder="t('vendor_placeholder')"
+                :can-clear="true"
               />
+
+              <!-- Account: account dropdown (code - name) -->
+              <BaseMultiselect
+                v-else-if="ruleForm.match_type === 'account'"
+                v-model="ruleForm.match_value"
+                :options="accountOptions"
+                label="display"
+                value-prop="code"
+                :searchable="true"
+                :placeholder="t('account_placeholder')"
+                :can-clear="true"
+              />
+
+              <!-- Item: item dropdown -->
+              <BaseMultiselect
+                v-else-if="ruleForm.match_type === 'item'"
+                v-model="ruleForm.match_value"
+                :options="items"
+                label="name"
+                value-prop="id"
+                :searchable="true"
+                :placeholder="t('item_placeholder')"
+                :can-clear="true"
+              />
+
+              <!-- Description: free text -->
+              <BaseInput
+                v-else
+                v-model="ruleForm.match_value"
+                :placeholder="t('description_placeholder') || 'keyword'"
+              />
+
               <p class="mt-1 text-xs text-gray-500">{{ matchValueHelp }}</p>
             </BaseInputGroup>
 
@@ -228,15 +282,23 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { useI18n } from 'vue-i18n'
+import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
+import { useAccountStore } from '@/scripts/admin/stores/account'
+import { useItemStore } from '@/scripts/admin/stores/item'
 import ccMessages from '@/scripts/admin/i18n/cost-centers.js'
 
+const route = useRoute()
 const notificationStore = useNotificationStore()
 const dialogStore = useDialogStore()
 const { t: $t } = useI18n()
+const suppliersStore = useSuppliersStore()
+const accountStore = useAccountStore()
+const itemStore = useItemStore()
 
 const locale = document.documentElement.lang || 'mk'
 function t(key) {
@@ -244,6 +306,14 @@ function t(key) {
     || ccMessages['en']?.cost_centers?.[key]
     || key
 }
+
+const currentRouteName = computed(() => route.name)
+
+const tabs = computed(() => [
+  { name: 'cost-centers.index', to: '/admin/cost-centers', label: t('title') },
+  { name: 'cost-centers.rules', to: '/admin/cost-centers/rules', label: t('rules') },
+  { name: 'cost-centers.summary', to: '/admin/cost-centers/summary', label: t('summary') },
+])
 
 // State
 const rules = ref([])
@@ -269,17 +339,17 @@ const ruleForm = ref({
   is_active: true,
 })
 
-// Computed
-const matchValuePlaceholder = computed(() => {
-  switch (ruleForm.value.match_type) {
-    case 'vendor': return t('vendor_placeholder') || 'Supplier ID'
-    case 'account': return t('account_placeholder') || '5000'
-    case 'description': return t('description_placeholder') || 'keyword'
-    case 'item': return t('item_placeholder') || 'Item ID'
-    default: return ''
-  }
-})
+// Data for dropdowns
+const suppliers = computed(() => suppliersStore.suppliers || [])
+const items = computed(() => itemStore.items || [])
+const accountOptions = computed(() =>
+  (accountStore.accounts || []).map(a => ({
+    ...a,
+    display: `${a.code} - ${a.name}`,
+  }))
+)
 
+// Computed
 const matchValueHelp = computed(() => {
   switch (ruleForm.value.match_type) {
     case 'vendor': return t('vendor_help')
@@ -290,10 +360,19 @@ const matchValueHelp = computed(() => {
   }
 })
 
+// Clear match_value when match_type changes
+watch(() => ruleForm.value.match_type, () => {
+  ruleForm.value.match_value = ''
+})
+
 // Lifecycle
 onMounted(() => {
   loadRules()
   loadCostCenters()
+  // Load data for dropdowns
+  suppliersStore.fetchSuppliers({ limit: 'all' }).catch(() => {})
+  accountStore.fetchAccounts().catch(() => {})
+  itemStore.fetchItems({ limit: 'all' }).catch(() => {})
 })
 
 // Methods
@@ -326,6 +405,26 @@ function matchTypeLabel(type) {
   return opt?.label || type
 }
 
+function resolveMatchValue(rule) {
+  const val = rule.match_value
+  switch (rule.match_type) {
+    case 'vendor': {
+      const s = suppliers.value.find(s => String(s.id) === String(val))
+      return s ? s.name : val
+    }
+    case 'account': {
+      const a = (accountStore.accounts || []).find(a => a.code === val)
+      return a ? `${a.code} - ${a.name}` : val
+    }
+    case 'item': {
+      const i = items.value.find(i => String(i.id) === String(val))
+      return i ? i.name : val
+    }
+    default:
+      return val
+  }
+}
+
 function openCreateRule() {
   editingRule.value = null
   ruleForm.value = {
@@ -340,9 +439,14 @@ function openCreateRule() {
 
 function openEditRule(rule) {
   editingRule.value = rule
+  // For vendor/item, match_value is stored as string ID — convert to number for multiselect
+  let matchVal = rule.match_value
+  if (rule.match_type === 'vendor' || rule.match_type === 'item') {
+    matchVal = Number(matchVal) || matchVal
+  }
   ruleForm.value = {
     match_type: rule.match_type,
-    match_value: rule.match_value,
+    match_value: matchVal,
     cost_center_id: rule.cost_center_id,
     priority: rule.priority,
     is_active: rule.is_active,
@@ -356,18 +460,25 @@ function closeRuleForm() {
 }
 
 async function saveRule() {
-  if (!ruleForm.value.match_value?.trim() || !ruleForm.value.cost_center_id) return
+  const val = ruleForm.value.match_value
+  if ((!val && val !== 0) || !ruleForm.value.cost_center_id) return
+
+  // Convert IDs to string for vendor/item (backend stores as varchar)
+  const payload = { ...ruleForm.value }
+  if (payload.match_type === 'vendor' || payload.match_type === 'item') {
+    payload.match_value = String(payload.match_value)
+  }
 
   isSavingRule.value = true
   try {
     if (editingRule.value?.id) {
-      await window.axios.put(`/cost-centers/rules/${editingRule.value.id}`, ruleForm.value)
+      await window.axios.put(`/cost-centers/rules/${editingRule.value.id}`, payload)
       notificationStore.showNotification({
         type: 'success',
         message: t('updated_success') || 'Updated successfully',
       })
     } else {
-      await window.axios.post('/cost-centers/rules', ruleForm.value)
+      await window.axios.post('/cost-centers/rules', payload)
       notificationStore.showNotification({
         type: 'success',
         message: t('created_success') || 'Created successfully',
