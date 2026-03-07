@@ -261,8 +261,16 @@
 
         <div v-if="selected.attachments && selected.attachments.length" class="space-y-1">
           <p class="text-sm font-medium text-gray-700">{{ t('attachments') }}:</p>
-          <div v-for="(att, i) in selected.attachments" :key="i" class="text-sm text-gray-600">
-            {{ att.name }} ({{ att.size }})
+          <div v-for="(att, i) in selected.attachments" :key="i" class="flex items-center space-x-2">
+            <a
+              :href="getAttachmentUrl(selected.id, i)"
+              target="_blank"
+              class="text-sm text-primary-600 hover:text-primary-800 hover:underline flex items-center"
+            >
+              <BaseIcon name="PaperClipIcon" class="h-4 w-4 mr-1" />
+              {{ att.name }}
+            </a>
+            <span class="text-xs text-gray-400">({{ att.size }})</span>
           </div>
         </div>
 
@@ -597,6 +605,8 @@ const priorityClass = (priority) => {
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
 const formatDateTime = (d) => d ? new Date(d).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''
+
+const getAttachmentUrl = (contactId, index) => `/api/v1/support/admin/contacts/${contactId}/attachments/${index}`
 
 let searchTimeout = null
 watch(() => filters.value.search, () => {

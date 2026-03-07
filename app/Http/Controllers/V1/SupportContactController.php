@@ -203,6 +203,33 @@ class SupportContactController extends Controller
     }
 
     /**
+     * Download a support contact attachment (admin only).
+     */
+    public function downloadAttachment(Request $request, SupportContact $supportContact, int $index)
+    {
+        $user = $request->user();
+        if (! $user->isOwner()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $attachments = $supportContact->attachments;
+        if (! $attachments || ! isset($attachments[$index])) {
+            return response()->json(['error' => 'Attachment not found'], 404);
+        }
+
+        $attachment = $attachments[$index];
+        $path = storage_path('app/'.$attachment['path']);
+
+        if (! file_exists($path)) {
+            return response()->json(['error' => 'File not found on disk'], 404);
+        }
+
+        return response()->download($path, $attachment['name'], [
+            'Content-Type' => $attachment['mime_type'] ?? 'application/octet-stream',
+        ]);
+    }
+
+    /**
      * Get support contact statistics (Admin only).
      */
     public function statistics(): JsonResponse
