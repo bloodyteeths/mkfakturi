@@ -1316,6 +1316,12 @@ export default [
         component: () => import('@/scripts/admin/views/purchase-orders/View.vue'),
       },
       {
+        path: 'purchase-orders/:id/edit',
+        name: 'purchase-orders.edit',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/purchase-orders/Edit.vue'),
+      },
+      {
         path: 'purchase-orders/:id/receive',
         name: 'purchase-orders.receive',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },

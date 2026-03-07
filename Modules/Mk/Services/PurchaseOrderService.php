@@ -2,10 +2,14 @@
 
 namespace Modules\Mk\Services;
 
+use App\Mail\SendPurchaseOrderMail;
 use App\Models\Bill;
+use App\Models\Company;
 use App\Models\CompanySetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Modules\Mk\Models\GoodsReceipt;
 use Modules\Mk\Models\GoodsReceiptItem;
 use Modules\Mk\Models\PurchaseOrder;
@@ -78,10 +82,10 @@ class PurchaseOrderService
             $subTotal = 0;
             $taxTotal = 0;
 
-            // Calculate totals from items
+            // Calculate totals from items (tax is per-unit, multiply by quantity)
             foreach ($data['items'] as $item) {
                 $itemTotal = (int) ($item['price'] * $item['quantity']);
-                $itemTax = (int) ($item['tax'] ?? 0);
+                $itemTax = (int) (($item['tax'] ?? 0) * $item['quantity']);
                 $subTotal += $itemTotal;
                 $taxTotal += $itemTax;
             }
@@ -108,20 +112,23 @@ class PurchaseOrderService
                 'created_by' => $userId,
             ]);
 
-            // Create items
+            // Create items (tax stored per-unit, total = (price + tax) * qty)
             foreach ($data['items'] as $item) {
-                $itemTotal = (int) ($item['price'] * $item['quantity']);
-                $itemTax = (int) ($item['tax'] ?? 0);
+                $qty = (float) $item['quantity'];
+                $unitPrice = (int) $item['price'];
+                $unitTax = (int) ($item['tax'] ?? 0);
+                $itemTotal = (int) ($unitPrice * $qty);
+                $itemTaxTotal = (int) ($unitTax * $qty);
 
                 PurchaseOrderItem::create([
                     'purchase_order_id' => $po->id,
                     'item_id' => $item['item_id'] ?? null,
                     'name' => $item['name'],
-                    'quantity' => (float) $item['quantity'],
+                    'quantity' => $qty,
                     'received_quantity' => 0,
-                    'price' => (int) $item['price'],
-                    'tax' => $itemTax,
-                    'total' => $itemTotal + $itemTax,
+                    'price' => $unitPrice,
+                    'tax' => $unitTax,
+                    'total' => $itemTotal + $itemTaxTotal,
                 ]);
             }
 
@@ -157,20 +164,23 @@ class PurchaseOrderService
                 $taxTotal = 0;
 
                 foreach ($data['items'] as $item) {
-                    $itemTotal = (int) ($item['price'] * $item['quantity']);
-                    $itemTax = (int) ($item['tax'] ?? 0);
+                    $qty = (float) $item['quantity'];
+                    $unitPrice = (int) $item['price'];
+                    $unitTax = (int) ($item['tax'] ?? 0);
+                    $itemTotal = (int) ($unitPrice * $qty);
+                    $itemTaxTotal = (int) ($unitTax * $qty);
                     $subTotal += $itemTotal;
-                    $taxTotal += $itemTax;
+                    $taxTotal += $itemTaxTotal;
 
                     PurchaseOrderItem::create([
                         'purchase_order_id' => $po->id,
                         'item_id' => $item['item_id'] ?? null,
                         'name' => $item['name'],
-                        'quantity' => (float) $item['quantity'],
+                        'quantity' => $qty,
                         'received_quantity' => 0,
-                        'price' => (int) $item['price'],
-                        'tax' => $itemTax,
-                        'total' => $itemTotal + $itemTax,
+                        'price' => $unitPrice,
+                        'tax' => $unitTax,
+                        'total' => $itemTotal + $itemTaxTotal,
                     ]);
                 }
 
@@ -186,17 +196,74 @@ class PurchaseOrderService
     }
 
     /**
-     * Mark purchase order as sent.
+     * Mark purchase order as sent and email supplier if they have an email.
+     *
+     * @return array{po: PurchaseOrder, email_sent_to: string|null}
      */
-    public function send(PurchaseOrder $po): PurchaseOrder
+    public function send(PurchaseOrder $po): array
     {
         if (!in_array($po->status, ['draft'])) {
             throw new \InvalidArgumentException('Only draft purchase orders can be sent.');
         }
 
+        $po->load(['items', 'supplier']);
         $po->update(['status' => 'sent']);
 
-        return $po->fresh(['items', 'supplier']);
+        $emailSentTo = null;
+        $supplierEmail = $po->supplier?->email;
+
+        if ($supplierEmail) {
+            try {
+                $company = Company::find($po->company_id);
+                $companyName = $company?->name ?? 'Facturino';
+
+                $mailData = [
+                    'to' => $supplierEmail,
+                    'from' => $company?->email ?? config('mail.from.address'),
+                    'subject' => "Purchase Order {$po->po_number} — {$companyName}",
+                    'body' => "<p>Purchase Order <strong>{$po->po_number}</strong> from <strong>{$companyName}</strong>.</p>"
+                        . ($po->expected_delivery_date ? "<p>Expected delivery: {$po->expected_delivery_date}</p>" : ''),
+                    'company' => [
+                        'name' => $companyName,
+                        'logo' => $company?->logo ?? null,
+                    ],
+                    'purchase_order' => [
+                        'id' => $po->id,
+                        'po_number' => $po->po_number,
+                        'po_date' => $po->po_date,
+                        'total' => $po->total,
+                        'notes' => $po->notes,
+                        'items' => $po->items->map(fn ($item) => [
+                            'name' => $item->name,
+                            'quantity' => $item->quantity,
+                            'price' => $item->price,
+                            'total' => $item->total,
+                        ])->toArray(),
+                    ],
+                    'labels' => [
+                        'item' => 'Item',
+                        'qty' => 'Qty',
+                        'price' => 'Price',
+                        'total' => 'Total',
+                        'notes' => 'Notes',
+                    ],
+                ];
+
+                Mail::to($supplierEmail)->send(new SendPurchaseOrderMail($mailData));
+                $emailSentTo = $supplierEmail;
+            } catch (\Exception $e) {
+                Log::warning('Failed to send PO email', [
+                    'po_id' => $po->id,
+                    'supplier_email' => $supplierEmail,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return [
+            'po' => $po->fresh(['items', 'supplier']),
+            'email_sent_to' => $emailSentTo,
+        ];
     }
 
     /**

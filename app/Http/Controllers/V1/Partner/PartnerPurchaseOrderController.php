@@ -147,6 +147,242 @@ class PartnerPurchaseOrderController extends Controller
         ]);
     }
 
+    /**
+     * Update a draft purchase order.
+     */
+    public function update(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $po = PurchaseOrder::forCompany($company)->where('id', $id)->first();
+        if (!$po) {
+            return response()->json(['success' => false, 'message' => 'Purchase order not found'], 404);
+        }
+
+        $request->validate([
+            'supplier_id' => 'nullable|integer',
+            'po_date' => 'nullable|date',
+            'expected_delivery_date' => 'nullable|date',
+            'currency_id' => 'nullable|integer',
+            'warehouse_id' => 'nullable|integer',
+            'notes' => 'nullable|string|max:2000',
+            'items' => 'nullable|array|min:1',
+            'items.*.item_id' => 'nullable|integer',
+            'items.*.name' => 'required_with:items|string|max:255',
+            'items.*.quantity' => 'required_with:items|numeric|min:0.0001',
+            'items.*.price' => 'required_with:items|integer|min:0',
+            'items.*.tax' => 'nullable|integer|min:0',
+        ]);
+
+        try {
+            $po = $this->service->update($po, $request->all());
+
+            return response()->json([
+                'success' => true,
+                'data' => $po,
+                'message' => 'Purchase order updated successfully',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Mark purchase order as sent (and email supplier).
+     */
+    public function send(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $po = PurchaseOrder::forCompany($company)->where('id', $id)->first();
+        if (!$po) {
+            return response()->json(['success' => false, 'message' => 'Purchase order not found'], 404);
+        }
+
+        try {
+            $result = $this->service->send($po);
+
+            return response()->json([
+                'success' => true,
+                'data' => $result['po'],
+                'email_sent_to' => $result['email_sent_to'],
+                'message' => $result['email_sent_to']
+                    ? 'Purchase order sent to ' . $result['email_sent_to']
+                    : 'Purchase order marked as sent',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Receive goods for a purchase order.
+     */
+    public function receiveGoods(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $po = PurchaseOrder::forCompany($company)->where('id', $id)->first();
+        if (!$po) {
+            return response()->json(['success' => false, 'message' => 'Purchase order not found'], 404);
+        }
+
+        $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.purchase_order_item_id' => 'required|integer',
+            'items.*.quantity_received' => 'required|numeric|min:0',
+            'items.*.quantity_accepted' => 'nullable|numeric|min:0',
+            'items.*.quantity_rejected' => 'nullable|numeric|min:0',
+        ]);
+
+        try {
+            $receipt = $this->service->receiveGoods($po, $request->input('items'), $request->user()?->id);
+            $po = $po->fresh(['items', 'supplier', 'goodsReceipts']);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'receipt' => $receipt,
+                    'purchase_order' => $po,
+                ],
+                'message' => 'Goods received successfully',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Convert purchase order to bill.
+     */
+    public function convertToBill(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $po = PurchaseOrder::forCompany($company)->where('id', $id)->first();
+        if (!$po) {
+            return response()->json(['success' => false, 'message' => 'Purchase order not found'], 404);
+        }
+
+        try {
+            $bill = $this->service->convertToBill($po);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'bill' => $bill,
+                    'purchase_order' => $po->fresh(),
+                ],
+                'message' => 'Bill created from purchase order',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Cancel a purchase order.
+     */
+    public function cancel(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $po = PurchaseOrder::forCompany($company)->where('id', $id)->first();
+        if (!$po) {
+            return response()->json(['success' => false, 'message' => 'Purchase order not found'], 404);
+        }
+
+        try {
+            $po = $this->service->cancel($po);
+
+            return response()->json([
+                'success' => true,
+                'data' => $po,
+                'message' => 'Purchase order cancelled',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Delete a purchase order (draft only).
+     */
+    public function destroy(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $po = PurchaseOrder::forCompany($company)->where('id', $id)->first();
+        if (!$po) {
+            return response()->json(['success' => false, 'message' => 'Purchase order not found'], 404);
+        }
+
+        try {
+            $this->service->deletePo($po);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Purchase order deleted',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
     // ---- Partner access helpers (same pattern as PartnerCompensationController) ----
 
     /**

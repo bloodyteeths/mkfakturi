@@ -13,6 +13,19 @@
 
       <template #actions>
         <div v-if="po" class="flex items-center space-x-2">
+          <!-- Edit (draft only) -->
+          <router-link
+            v-if="po.status === 'draft'"
+            :to="`/admin/purchase-orders/${po.id}/edit`"
+          >
+            <BaseButton variant="primary-outline">
+              <template #left="slotProps">
+                <BaseIcon name="PencilSquareIcon" :class="slotProps.class" />
+              </template>
+              {{ t('edit_draft') }}
+            </BaseButton>
+          </router-link>
+
           <!-- Send (draft only) -->
           <BaseButton
             v-if="po.status === 'draft'"
@@ -122,6 +135,9 @@
               <p class="text-xs text-gray-500 uppercase font-medium">{{ t('supplier') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-1">
                 {{ po.supplier?.name || '-' }}
+              </p>
+              <p v-if="po.supplier?.email" class="text-xs text-gray-500 mt-0.5">
+                {{ po.supplier.email }}
               </p>
             </div>
             <div>
@@ -342,12 +358,33 @@
       <div class="fixed inset-0 bg-black bg-opacity-50" @click="showSendDialog = false" />
       <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
         <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('send_title') }}</h3>
-        <p class="text-sm text-gray-500 mb-6">{{ t('send_message') }}</p>
+
+        <!-- Supplier email info -->
+        <div v-if="supplierEmail" class="mb-4">
+          <p class="text-sm text-gray-500 mb-2">{{ t('send_email_message') }}</p>
+          <div class="flex items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+            <BaseIcon name="EnvelopeIcon" class="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
+            <div>
+              <p class="text-xs text-blue-600 font-medium">{{ t('supplier_email') }}</p>
+              <p class="text-sm font-medium text-blue-800">{{ supplierEmail }}</p>
+            </div>
+          </div>
+        </div>
+        <div v-else class="mb-4">
+          <div class="flex items-start bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+            <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-amber-500 mr-2 flex-shrink-0 mt-0.5" />
+            <p class="text-sm text-amber-700">{{ t('no_supplier_email') }}</p>
+          </div>
+        </div>
+
         <div class="flex justify-end space-x-3">
           <BaseButton variant="primary-outline" @click="showSendDialog = false">
             {{ t('back') }}
           </BaseButton>
           <BaseButton variant="primary" :loading="isSending" @click="sendPo">
+            <template #left="slotProps">
+              <BaseIcon name="PaperAirplaneIcon" :class="slotProps.class" />
+            </template>
             {{ t('send_to_supplier') }}
           </BaseButton>
         </div>
@@ -408,7 +445,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import poMessages from '@/scripts/admin/i18n/purchase-orders.js'
@@ -424,6 +461,9 @@ function t(key) {
     || poMessages['en']?.purchaseOrders?.[key]
     || key
 }
+
+// Computed
+const supplierEmail = computed(() => po.value?.supplier?.email || null)
 
 // State
 const po = ref(null)
@@ -501,16 +541,21 @@ async function sendPo() {
     const response = await window.axios.post(`/purchase-orders/${po.value.id}/send`)
     po.value = response.data?.data || po.value
     showSendDialog.value = false
+
+    const emailTo = response.data?.email_sent_to
+    const msg = emailTo
+      ? `${t('sent_success')} — ${t('email_sent_to')}: ${emailTo}`
+      : (response.data?.message || t('sent_success'))
+
     notificationStore.showNotification({
       type: 'success',
-      message: response.data?.message || t('sent_success') || 'Purchase order sent',
+      message: msg,
     })
-    // Reload to get full data
     fetchPo()
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_sending') || 'Failed to send',
+      message: error.response?.data?.message || t('error_sending'),
     })
   } finally {
     isSending.value = false

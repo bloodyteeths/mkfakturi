@@ -165,12 +165,15 @@ class PurchaseOrderController extends Controller
         }
 
         try {
-            $po = $this->service->send($po);
+            $result = $this->service->send($po);
 
             return response()->json([
                 'success' => true,
-                'data' => $po,
-                'message' => 'Purchase order sent successfully',
+                'data' => $result['po'],
+                'email_sent_to' => $result['email_sent_to'],
+                'message' => $result['email_sent_to']
+                    ? 'Purchase order sent to ' . $result['email_sent_to']
+                    : 'Purchase order marked as sent',
             ]);
         } catch (\InvalidArgumentException $e) {
             return response()->json([

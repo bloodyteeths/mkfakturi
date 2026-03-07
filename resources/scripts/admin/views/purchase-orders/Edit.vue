@@ -1,14 +1,24 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="t('new_po')">
+    <BasePageHeader :title="t('edit_po')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem :title="t('title')" to="../purchase-orders" />
-        <BaseBreadcrumbItem :title="t('new_po')" to="#" active />
+        <BaseBreadcrumbItem :title="t('title')" to="../../purchase-orders" />
+        <BaseBreadcrumbItem :title="t('edit_po')" to="#" active />
       </BaseBreadcrumb>
     </BasePageHeader>
 
-    <div class="space-y-6">
+    <!-- Loading -->
+    <div v-if="isLoadingPo" class="bg-white rounded-lg shadow p-6">
+      <div class="space-y-4">
+        <div v-for="i in 6" :key="i" class="flex space-x-4 animate-pulse">
+          <div class="h-4 bg-gray-200 rounded w-32"></div>
+          <div class="h-4 bg-gray-200 rounded flex-1"></div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="space-y-6">
       <!-- Header Fields -->
       <div class="bg-white rounded-lg shadow p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -183,7 +193,7 @@
 
       <!-- Actions -->
       <div class="flex justify-between">
-        <router-link to="../purchase-orders">
+        <router-link :to="`/admin/purchase-orders/${poId}`">
           <BaseButton variant="primary-outline">
             <template #left="slotProps">
               <BaseIcon name="ArrowLeftIcon" :class="slotProps.class" />
@@ -196,12 +206,12 @@
           variant="primary"
           :loading="isSaving"
           :disabled="!canSave"
-          @click="savePurchaseOrder"
+          @click="updatePurchaseOrder"
         >
           <template #left="slotProps">
             <BaseIcon name="CheckIcon" :class="slotProps.class" />
           </template>
-          {{ t('save_draft') }}
+          {{ t('update_draft') }}
         </BaseButton>
       </div>
     </div>
@@ -210,10 +220,11 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import poMessages from '@/scripts/admin/i18n/purchase-orders.js'
 
+const route = useRoute()
 const router = useRouter()
 const notificationStore = useNotificationStore()
 
@@ -225,28 +236,21 @@ function t(key) {
 }
 
 // State
+const poId = route.params.id
 const isSaving = ref(false)
+const isLoadingPo = ref(true)
 const isLoadingSuppliers = ref(false)
 const suppliers = ref([])
 const warehouses = ref([])
 const inventoryItems = ref([])
 
-function getLocalDateString(date = new Date()) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
 const form = reactive({
   supplier_id: null,
-  po_date: getLocalDateString(),
+  po_date: '',
   expected_delivery_date: null,
   warehouse_id: null,
   notes: '',
-  items: [
-    { item_id: null, name: '', quantity: 1, price: 0, tax: 0 },
-  ],
+  items: [],
 })
 
 // Computed
@@ -301,8 +305,51 @@ function onItemSelect(index, itemId) {
   const selectedItem = inventoryItems.value.find(i => i.id === itemId)
   if (selectedItem) {
     form.items[index].name = selectedItem.name
-    // Price comes from Item model as cents (cost field for purchase price)
     form.items[index].price = selectedItem.cost || selectedItem.price || 0
+  }
+}
+
+async function fetchPo() {
+  isLoadingPo.value = true
+  try {
+    const response = await window.axios.get(`/purchase-orders/${poId}`)
+    const po = response.data?.data
+    if (!po) {
+      notificationStore.showNotification({ type: 'error', message: t('not_found') })
+      router.push({ path: '/admin/purchase-orders' })
+      return
+    }
+
+    if (po.status !== 'draft') {
+      notificationStore.showNotification({ type: 'error', message: 'Only draft purchase orders can be edited.' })
+      router.push({ path: `/admin/purchase-orders/${poId}` })
+      return
+    }
+
+    form.supplier_id = po.supplier_id
+    form.po_date = po.po_date
+    form.expected_delivery_date = po.expected_delivery_date
+    form.warehouse_id = po.warehouse_id
+    form.notes = po.notes || ''
+    form.items = (po.items || []).map(item => ({
+      item_id: item.item_id,
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      tax: item.tax || 0,
+    }))
+
+    if (form.items.length === 0) {
+      form.items.push({ item_id: null, name: '', quantity: 1, price: 0, tax: 0 })
+    }
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('error_loading'),
+    })
+    router.push({ path: '/admin/purchase-orders' })
+  } finally {
+    isLoadingPo.value = false
   }
 }
 
@@ -336,7 +383,7 @@ async function fetchItems() {
   }
 }
 
-async function savePurchaseOrder() {
+async function updatePurchaseOrder() {
   isSaving.value = true
   try {
     const payload = {
@@ -354,23 +401,18 @@ async function savePurchaseOrder() {
       })),
     }
 
-    const response = await window.axios.post('/purchase-orders', payload)
+    const response = await window.axios.put(`/purchase-orders/${poId}`, payload)
 
     notificationStore.showNotification({
       type: 'success',
-      message: response.data?.message || t('created_success') || 'Purchase order created',
+      message: response.data?.message || t('updated_success'),
     })
 
-    const poId = response.data?.data?.id
-    if (poId) {
-      router.push({ path: `/admin/purchase-orders/${poId}` })
-    } else {
-      router.push({ path: '/admin/purchase-orders' })
-    }
+    router.push({ path: `/admin/purchase-orders/${poId}` })
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_creating') || 'Failed to create purchase order',
+      message: error.response?.data?.message || t('error_updating'),
     })
   } finally {
     isSaving.value = false
@@ -379,6 +421,7 @@ async function savePurchaseOrder() {
 
 // Lifecycle
 onMounted(() => {
+  fetchPo()
   fetchSuppliers()
   fetchWarehouses()
   fetchItems()
