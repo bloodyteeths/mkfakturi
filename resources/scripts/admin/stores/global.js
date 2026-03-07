@@ -104,10 +104,12 @@ export const useGlobalStore = (useWindow = false) => {
               if(typeof global.locale !== 'string') {
                 // Check localStorage first, then server settings, then default to Macedonian
                 const savedLocale = localStorage.getItem('invoiceshelf_locale')
-                global.locale.value = savedLocale || 
-                  response.data.current_company_settings?.language || 
-                  response.data.current_user_settings?.language || 
+                const resolvedLocale = savedLocale ||
+                  response.data.current_company_settings?.language ||
+                  response.data.current_user_settings?.language ||
                   'mk'
+                global.locale.value = resolvedLocale
+                document.documentElement.lang = resolvedLocale
               }
 
               // Set app as loaded immediately after data is populated
@@ -305,11 +307,13 @@ export const useGlobalStore = (useWindow = false) => {
         } else {
           global.locale = newLocale
         }
-        
+
+        // Sync HTML lang attribute so feature pages pick up the new locale
+        document.documentElement.lang = newLocale
+
         // Save to localStorage for persistence
         localStorage.setItem('invoiceshelf_locale', newLocale)
-        
-        // Optionally save to user settings via API (can be enhanced later)
+
         console.log(`Language updated to: ${newLocale}`)
       },
     },

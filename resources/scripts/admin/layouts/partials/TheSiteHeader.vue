@@ -347,6 +347,7 @@ function onLogoError() {
 
 function setLanguage(newLocale) {
   locale.value = newLocale
+  document.documentElement.lang = newLocale
   // Save the language preference to local storage for persistence
   localStorage.setItem('invoiceshelf_locale', newLocale)
   // Update global store if available

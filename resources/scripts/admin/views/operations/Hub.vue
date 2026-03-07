@@ -60,6 +60,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   ArrowsRightLeftIcon,
   ShoppingCartIcon,
@@ -70,7 +71,7 @@ import {
   FolderOpenIcon,
 } from '@heroicons/vue/24/outline'
 
-const locale = document.documentElement.lang || 'mk'
+const { locale } = useI18n({ useScope: 'global' })
 
 const messages = {
   mk: {
@@ -152,7 +153,7 @@ const messages = {
 }
 
 function t(key) {
-  return messages[locale]?.[key] || messages['en']?.[key] || key
+  return messages[locale.value]?.[key] || messages['en']?.[key] || key
 }
 
 const documentCards = computed(() => [

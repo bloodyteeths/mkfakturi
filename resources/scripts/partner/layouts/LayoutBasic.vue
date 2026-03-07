@@ -239,6 +239,7 @@ const goToConsole = () => {
  */
 function setLanguage(newLocale) {
   locale.value = newLocale
+  document.documentElement.lang = newLocale
   localStorage.setItem('invoiceshelf_locale', newLocale)
   try {
     globalStore.updateLanguage(newLocale)
