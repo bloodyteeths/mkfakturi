@@ -266,14 +266,42 @@
           </div>
         </div>
 
-        <!-- Status Change -->
-        <div class="border-t pt-4 flex justify-end space-x-3">
-          <BaseButton v-if="selected.status !== 'in_progress'" variant="primary-outline" @click="changeStatus(selected, 'in_progress'); showModal = false">
-            {{ t('mark_in_progress') }}
-          </BaseButton>
-          <BaseButton v-if="selected.status !== 'resolved'" variant="primary" @click="changeStatus(selected, 'resolved'); showModal = false">
-            {{ t('mark_resolved') }}
-          </BaseButton>
+        <!-- Existing Admin Reply -->
+        <div v-if="selected.admin_reply" class="border-t pt-4">
+          <p class="text-sm font-medium text-gray-700 mb-2">{{ t('previous_reply') }}
+            <span class="text-xs text-gray-400 font-normal ml-1">{{ formatDateTime(selected.admin_replied_at) }}</span>
+          </p>
+          <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+            <p class="text-gray-800 whitespace-pre-wrap">{{ selected.admin_reply }}</p>
+          </div>
+        </div>
+
+        <!-- Reply Form -->
+        <div class="border-t pt-4">
+          <p class="text-sm font-medium text-gray-700 mb-2">{{ selected.admin_reply ? t('update_reply') : t('write_reply') }}</p>
+          <BaseTextarea
+            v-model="replyText"
+            :placeholder="t('reply_placeholder')"
+            rows="4"
+          />
+          <div class="flex items-center justify-between mt-3">
+            <div class="flex space-x-2">
+              <BaseButton v-if="selected.status !== 'in_progress'" size="sm" variant="primary-outline" @click="changeStatus(selected, 'in_progress')">
+                {{ t('mark_in_progress') }}
+              </BaseButton>
+              <BaseButton v-if="selected.status !== 'resolved'" size="sm" variant="primary-outline" @click="changeStatus(selected, 'resolved')">
+                {{ t('mark_resolved') }}
+              </BaseButton>
+            </div>
+            <BaseButton
+              variant="primary"
+              :loading="isSendingReply"
+              :disabled="!replyText.trim() || isSendingReply"
+              @click="sendReply"
+            >
+              {{ t('send_reply') }}
+            </BaseButton>
+          </div>
         </div>
       </div>
     </BaseModal>
@@ -314,6 +342,13 @@ const messages = {
     mark_resolved: 'Mark Resolved',
     ref: 'Ref #',
     subject: 'Subject',
+    previous_reply: 'Your Previous Reply',
+    write_reply: 'Reply to User',
+    update_reply: 'Update Reply',
+    reply_placeholder: 'Type your reply here... This will be emailed to the user.',
+    send_reply: 'Send Reply',
+    reply_sent: 'Reply sent successfully',
+    reply_failed: 'Failed to send reply',
   },
   mk: {
     title: 'Сите барања за поддршка',
@@ -339,6 +374,13 @@ const messages = {
     mark_resolved: 'Означи решено',
     ref: 'Реф #',
     subject: 'Предмет',
+    previous_reply: 'Вашиот претходен одговор',
+    write_reply: 'Одговори на корисник',
+    update_reply: 'Ажурирај одговор',
+    reply_placeholder: 'Внесете го вашиот одговор... Ова ќе биде испратено по е-пошта до корисникот.',
+    send_reply: 'Испрати одговор',
+    reply_sent: 'Одговорот е успешно испратен',
+    reply_failed: 'Неуспешно испраќање на одговор',
   },
   sq: {
     title: 'Te gjitha kerkesat per mbeshtetje',
@@ -364,6 +406,13 @@ const messages = {
     mark_resolved: 'Sheno te zgjidhur',
     ref: 'Ref #',
     subject: 'Subjekti',
+    previous_reply: 'Pergjigja juaj e meparshme',
+    write_reply: 'Pergjigju perdoruesit',
+    update_reply: 'Perditeso pergjigjen',
+    reply_placeholder: 'Shkruani pergjigjen tuaj... Kjo do ti dergohet perdoruesit me email.',
+    send_reply: 'Dergo pergjigjen',
+    reply_sent: 'Pergjigja u dergua me sukses',
+    reply_failed: 'Dergimi i pergjigjes deshtoi',
   },
   tr: {
     title: 'Tum Destek Talepleri',
@@ -389,6 +438,13 @@ const messages = {
     mark_resolved: 'Cozuldu olarak isaretle',
     ref: 'Ref #',
     subject: 'Konu',
+    previous_reply: 'Onceki yanitiniz',
+    write_reply: 'Kullaniciya yanit ver',
+    update_reply: 'Yaniti guncelle',
+    reply_placeholder: 'Yanitinizi yazin... Bu kullaniciya e-posta olarak gonderilecektir.',
+    send_reply: 'Yanit gonder',
+    reply_sent: 'Yanit basariyla gonderildi',
+    reply_failed: 'Yanit gonderilemedi',
   },
 }
 
@@ -405,6 +461,8 @@ const currentPage = ref(1)
 const isFetching = ref(false)
 const showModal = ref(false)
 const selected = ref(null)
+const replyText = ref('')
+const isSendingReply = ref(false)
 
 const filters = ref({ status: null, category: null, search: '' })
 
@@ -466,7 +524,27 @@ const loadStats = async () => {
 
 const viewContact = (contact) => {
   selected.value = contact
+  replyText.value = contact.admin_reply || ''
   showModal.value = true
+}
+
+const sendReply = async () => {
+  if (!replyText.value.trim() || !selected.value) return
+  isSendingReply.value = true
+  try {
+    await axios.post(`/support/admin/contacts/${selected.value.id}/reply`, {
+      reply: replyText.value,
+    })
+    notificationStore.showNotification({ type: 'success', message: t('reply_sent') })
+    showModal.value = false
+    loadContacts()
+    loadStats()
+  } catch (err) {
+    console.error('Error sending reply:', err)
+    notificationStore.showNotification({ type: 'error', message: t('reply_failed') })
+  } finally {
+    isSendingReply.value = false
+  }
 }
 
 const changeStatus = async (contact, status) => {

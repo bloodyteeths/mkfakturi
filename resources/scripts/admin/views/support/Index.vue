@@ -179,7 +179,14 @@
                 {{ statusLabel(contact.status) }}
               </span>
             </div>
-            <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ contact.message }}</p>
+            <p class="text-sm text-gray-600 mb-2 line-clamp-2">{{ contact.message }}</p>
+            <!-- Admin Reply -->
+            <div v-if="contact.admin_reply" class="bg-blue-50 border border-blue-100 rounded-md p-3 mb-3">
+              <p class="text-xs font-medium text-blue-700 mb-1">{{ t('admin_reply') }}
+                <span class="text-blue-400 font-normal ml-1">{{ formatDate(contact.admin_replied_at) }}</span>
+              </p>
+              <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ contact.admin_reply }}</p>
+            </div>
             <div class="flex items-center justify-between text-xs text-gray-500">
               <div class="flex items-center space-x-2">
                 <span
@@ -232,10 +239,32 @@
               </span>
             </template>
 
+            <template #cell-reply="{ row }">
+              <span v-if="row.data.admin_reply" class="text-green-600 cursor-pointer" :title="t('click_to_view')" @click="expandedId = expandedId === row.data.id ? null : row.data.id">
+                <BaseIcon name="ChatBubbleLeftEllipsisIcon" class="h-5 w-5" />
+              </span>
+              <span v-else class="text-gray-300">—</span>
+            </template>
+
             <template #cell-created_at="{ row }">
               <span class="text-sm text-gray-600">{{ formatDate(row.data.created_at) }}</span>
             </template>
           </BaseTable>
+
+          <!-- Expanded Reply Row -->
+          <div v-if="expandedContact" class="bg-blue-50 border border-blue-100 rounded-md p-4 mt-2 mb-4">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-xs font-medium text-blue-700 mb-1">{{ t('admin_reply') }}
+                  <span class="text-blue-400 font-normal ml-1">{{ formatDate(expandedContact.admin_replied_at) }}</span>
+                </p>
+                <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ expandedContact.admin_reply }}</p>
+              </div>
+              <button class="text-gray-400 hover:text-gray-600 ml-4" @click="expandedId = null">
+                <BaseIcon name="XMarkIcon" class="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -295,6 +324,9 @@ const messages = {
     col_priority: 'Priority',
     col_status: 'Status',
     col_date: 'Date',
+    col_reply: 'Reply',
+    admin_reply: 'Support Response',
+    click_to_view: 'Click to view reply',
   },
   mk: {
     title: 'Поддршка',
@@ -341,6 +373,9 @@ const messages = {
     col_priority: 'Приоритет',
     col_status: 'Статус',
     col_date: 'Датум',
+    col_reply: 'Одговор',
+    admin_reply: 'Одговор од поддршка',
+    click_to_view: 'Кликнете за преглед',
   },
   sq: {
     title: 'Mbeshtetja',
@@ -387,6 +422,9 @@ const messages = {
     col_priority: 'Prioriteti',
     col_status: 'Statusi',
     col_date: 'Data',
+    col_reply: 'Pergjigje',
+    admin_reply: 'Pergjigja e mbeshtetjes',
+    click_to_view: 'Klikoni per te pare',
   },
   tr: {
     title: 'Destek',
@@ -433,6 +471,9 @@ const messages = {
     col_priority: 'Oncelik',
     col_status: 'Durum',
     col_date: 'Tarih',
+    col_reply: 'Yanit',
+    admin_reply: 'Destek yaniti',
+    click_to_view: 'Goruntlemek icin tiklayin',
   },
 }
 
@@ -450,6 +491,12 @@ const errors = ref({})
 const serverError = ref('')
 const previousContacts = ref([])
 const fileInput = ref(null)
+const expandedId = ref(null)
+
+const expandedContact = computed(() => {
+  if (!expandedId.value) return null
+  return previousContacts.value.find(c => c.id === expandedId.value)
+})
 
 const form = ref({
   name: '',
@@ -481,6 +528,7 @@ const columns = computed(() => [
   { key: 'category', label: t('col_category'), thClass: 'w-32' },
   { key: 'priority', label: t('col_priority'), thClass: 'w-24' },
   { key: 'status', label: t('col_status'), thClass: 'w-28' },
+  { key: 'reply', label: t('col_reply'), thClass: 'w-20' },
   { key: 'created_at', label: t('col_date'), thClass: 'w-32' },
 ])
 

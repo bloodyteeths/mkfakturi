@@ -167,6 +167,42 @@ class SupportContactController extends Controller
     }
 
     /**
+     * Admin reply to a support contact — saves reply and emails the user.
+     */
+    public function reply(Request $request, SupportContact $supportContact): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->isOwner()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'reply' => 'required|string|min:5|max:5000',
+        ]);
+
+        $supportContact->update([
+            'admin_reply' => $request->reply,
+            'admin_replied_at' => now(),
+            'admin_user_id' => $user->id,
+            'status' => 'in_progress',
+        ]);
+
+        // Send reply email to the user
+        try {
+            Mail::to($supportContact->email)
+                ->send(new \App\Mail\SupportContactReply($supportContact));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send support reply email: '.$e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reply sent successfully.',
+            'data' => $supportContact,
+        ]);
+    }
+
+    /**
      * Get support contact statistics (Admin only).
      */
     public function statistics(): JsonResponse

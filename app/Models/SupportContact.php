@@ -28,6 +28,9 @@ class SupportContact extends Model
         'attachments',
         'status',
         'resolved_at',
+        'admin_reply',
+        'admin_replied_at',
+        'admin_user_id',
     ];
 
     /**
@@ -38,6 +41,7 @@ class SupportContact extends Model
     protected $casts = [
         'attachments' => 'array',
         'resolved_at' => 'datetime',
+        'admin_replied_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

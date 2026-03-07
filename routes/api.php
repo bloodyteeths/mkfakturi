@@ -815,6 +815,7 @@ Route::prefix('/v1')->group(function () {
                     Route::get('/contacts/statistics', [\App\Http\Controllers\V1\SupportContactController::class, 'statistics']);
                     Route::get('/contacts/{supportContact}', [\App\Http\Controllers\V1\SupportContactController::class, 'show']);
                     Route::post('/contacts/{supportContact}/status', [\App\Http\Controllers\V1\SupportContactController::class, 'updateStatus']);
+                    Route::post('/contacts/{supportContact}/reply', [\App\Http\Controllers\V1\SupportContactController::class, 'reply']);
 
                     Route::get('/tickets', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'listAllTickets']);
                     Route::get('/statistics', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'getStatistics']);
