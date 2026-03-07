@@ -421,15 +421,17 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import travelMessages from '@/scripts/admin/i18n/travel-orders.js'
 
 const router = useRouter()
 const notificationStore = useNotificationStore()
+const { locale: i18nLocale } = useI18n()
 
-const locale = document.documentElement.lang || 'mk'
 function t(key) {
-  return travelMessages[locale]?.travel_orders?.[key]
+  const l = i18nLocale.value || 'mk'
+  return travelMessages[l]?.travel_orders?.[key]
     || travelMessages['en']?.travel_orders?.[key]
     || key
 }
@@ -472,27 +474,27 @@ const form = reactive({
   expenses: [],
 })
 
-const steps = [t('step1_basic'), t('step2_segments'), t('step3_expenses'), t('step4_review')]
+const steps = computed(() => [t('step1_basic'), t('step2_segments'), t('step3_expenses'), t('step4_review')])
 
-const typeOptions = [
+const typeOptions = computed(() => [
   { value: 'domestic', label: t('domestic') },
   { value: 'foreign', label: t('foreign') },
-]
+])
 
-const transportOptions = [
+const transportOptions = computed(() => [
   { value: 'car', label: t('transport_car') },
   { value: 'bus', label: t('transport_bus') },
   { value: 'train', label: t('transport_train') },
   { value: 'plane', label: t('transport_plane') },
   { value: 'other', label: t('transport_other') },
-]
+])
 
-const categoryOptions = [
+const categoryOptions = computed(() => [
   { value: 'transport', label: t('category_transport') },
   { value: 'accommodation', label: t('category_accommodation') },
   { value: 'meals', label: t('category_meals') },
   { value: 'other', label: t('category_other') },
-]
+])
 
 // Computed
 const canProceedStep1 = computed(() => {
@@ -515,10 +517,10 @@ const totalExpensesCents = computed(() => {
 
 // Methods
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const fmtLocale = localeMap[locale] || 'mk-MK'
 
 function formatMoney(cents) {
   if (!cents && cents !== 0) return '-'
+  const fmtLocale = localeMap[i18nLocale.value] || 'mk-MK'
   return new Intl.NumberFormat(fmtLocale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -528,16 +530,17 @@ function formatMoney(cents) {
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
+  const fmtLocale = localeMap[i18nLocale.value] || 'mk-MK'
   return d.toLocaleDateString(fmtLocale, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
 function transportLabel(type) {
-  const opt = transportOptions.find(o => o.value === type)
+  const opt = transportOptions.value.find(o => o.value === type)
   return opt ? opt.label : type
 }
 
 function categoryLabel(cat) {
-  const opt = categoryOptions.find(o => o.value === cat)
+  const opt = categoryOptions.value.find(o => o.value === cat)
   return opt ? opt.label : cat
 }
 

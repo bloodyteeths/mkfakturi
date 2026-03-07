@@ -313,42 +313,30 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import travelMessages from '@/scripts/admin/i18n/travel-orders.js'
 
 const route = useRoute()
 const router = useRouter()
 const notificationStore = useNotificationStore()
+const { locale: i18nLocale } = useI18n()
 
-const locale = document.documentElement.lang || 'mk'
 function t(key) {
-  return travelMessages[locale]?.travel_orders?.[key]
+  const l = i18nLocale.value || 'mk'
+  return travelMessages[l]?.travel_orders?.[key]
     || travelMessages['en']?.travel_orders?.[key]
     || key
 }
 
-// Transport & category labels
-const transportLabels = {
-  car: t('transport_car'),
-  bus: t('transport_bus'),
-  train: t('transport_train'),
-  plane: t('transport_plane'),
-  other: t('transport_other'),
-}
-
-const categoryLabels = {
-  transport: t('category_transport'),
-  accommodation: t('category_accommodation'),
-  meals: t('category_meals'),
-  other: t('category_other'),
-}
-
 function transportLabel(type) {
-  return transportLabels[type] || type
+  const labels = { car: t('transport_car'), bus: t('transport_bus'), train: t('transport_train'), plane: t('transport_plane'), other: t('transport_other') }
+  return labels[type] || type
 }
 
 function categoryLabel(cat) {
-  return categoryLabels[cat] || cat
+  const labels = { transport: t('category_transport'), accommodation: t('category_accommodation'), meals: t('category_meals'), other: t('category_other') }
+  return labels[cat] || cat
 }
 
 // State
@@ -366,10 +354,10 @@ const showDeleteDialog = ref(false)
 
 // Methods
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const fmtLocale = localeMap[locale] || 'mk-MK'
 
 function formatMoney(cents) {
   if (!cents && cents !== 0) return '-'
+  const fmtLocale = localeMap[i18nLocale.value] || 'mk-MK'
   return new Intl.NumberFormat(fmtLocale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -379,6 +367,7 @@ function formatMoney(cents) {
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
+  const fmtLocale = localeMap[i18nLocale.value] || 'mk-MK'
   return d.toLocaleDateString(fmtLocale, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 

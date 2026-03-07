@@ -221,17 +221,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import travelMessages from '@/scripts/admin/i18n/travel-orders.js'
 
 const router = useRouter()
 const notificationStore = useNotificationStore()
+const { locale: i18nLocale } = useI18n()
 
-const locale = document.documentElement.lang || 'mk'
 function t(key) {
-  return travelMessages[locale]?.travel_orders?.[key]
+  const l = i18nLocale.value || 'mk'
+  return travelMessages[l]?.travel_orders?.[key]
     || travelMessages['en']?.travel_orders?.[key]
     || key
 }
@@ -251,34 +253,35 @@ const filters = reactive({
   date_to: null,
 })
 
-const statusOptions = [
+const statusOptions = computed(() => [
   { value: 'draft', label: t('status_draft') },
   { value: 'pending_approval', label: t('status_pending_approval') },
   { value: 'approved', label: t('status_approved') },
   { value: 'settled', label: t('status_settled') },
   { value: 'rejected', label: t('status_rejected') },
-]
+])
 
-const typeOptions = [
+const typeOptions = computed(() => [
   { value: 'domestic', label: t('domestic') },
   { value: 'foreign', label: t('foreign') },
-]
+])
 
 // Methods
+const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
+
 function formatMoney(cents) {
   if (!cents && cents !== 0) return '-'
+  const fmtLocale = localeMap[i18nLocale.value] || 'mk-MK'
   return new Intl.NumberFormat(fmtLocale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(cents / 100)
 }
 
-const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const fmtLocale = localeMap[locale] || 'mk-MK'
-
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
+  const fmtLocale = localeMap[i18nLocale.value] || 'mk-MK'
   return d.toLocaleDateString(fmtLocale, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
