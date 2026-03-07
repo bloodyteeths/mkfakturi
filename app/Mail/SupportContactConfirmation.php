@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 class SupportContactConfirmation extends Mailable
@@ -21,6 +22,18 @@ class SupportContactConfirmation extends Mailable
         public int $responseTime = 48,
         public ?string $supportUrl = null
     ) {}
+
+    /**
+     * Get the message headers (Postmark broadcast stream).
+     */
+    public function headers(): Headers
+    {
+        return new Headers(
+            text: [
+                'X-PM-Message-Stream' => 'broadcast',
+            ],
+        );
+    }
 
     /**
      * Get the message envelope.
@@ -55,15 +68,5 @@ class SupportContactConfirmation extends Mailable
     public function attachments(): array
     {
         return [];
-    }
-
-    /**
-     * Set Postmark broadcast stream (default outbound silently drops).
-     */
-    public function build()
-    {
-        return $this->withSymfonyMessage(function ($message) {
-            $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
-        });
     }
 }
