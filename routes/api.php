@@ -1035,10 +1035,12 @@ Route::prefix('/v1')->group(function () {
                 Route::put('/rules/{ruleId}', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'updateRule']);
                 Route::delete('/rules/{ruleId}', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'deleteRule']);
                 Route::post('/suggest', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'suggest']);
+                Route::post('/reorder', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'reorder']);
                 Route::get('/{id}', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'show']);
                 Route::put('/{id}', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'update']);
                 Route::delete('/{id}', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'destroy']);
                 Route::get('/{id}/trial-balance', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'trialBalance']);
+                Route::get('/{id}/profit-loss', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'profitLoss']);
             });
 
             // ----------------------------------
@@ -1785,10 +1787,12 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::post('/rules', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'storeRule']);
             Route::put('/rules/{ruleId}', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'updateRule']);
             Route::delete('/rules/{ruleId}', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'deleteRule']);
+            Route::post('/reorder', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'reorder']);
             Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'show']);
             Route::put('/{id}', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'update']);
             Route::delete('/{id}', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'destroy']);
             Route::get('/{id}/trial-balance', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'trialBalance']);
+            Route::get('/{id}/profit-loss', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'profitLoss']);
         });
 
         // F4: Interest Calculations (Partner)

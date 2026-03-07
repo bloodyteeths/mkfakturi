@@ -162,25 +162,21 @@
       @close="closeForm"
     />
 
-    <!-- Delete Confirmation -->
-    <BaseConfirmDialog
-      v-if="showDeleteConfirm"
-      :title="$t('general.are_you_sure')"
-      :message="deleteConfirmMessage"
-      @confirm="deleteCostCenter"
-      @cancel="showDeleteConfirm = false"
-    />
   </BasePage>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useDialogStore } from '@/scripts/stores/dialog'
+import { useI18n } from 'vue-i18n'
 import CostCenterForm from './Form.vue'
 import CostCenterTreeNode from './TreeNode.vue'
 import ccMessages from '@/scripts/admin/i18n/cost-centers.js'
 
 const notificationStore = useNotificationStore()
+const dialogStore = useDialogStore()
+const { t: $t } = useI18n()
 
 const locale = document.documentElement.lang || 'mk'
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
@@ -201,14 +197,7 @@ const viewMode = ref('tree')
 const showForm = ref(false)
 const editingCostCenter = ref(null)
 const defaultParentId = ref(null)
-const showDeleteConfirm = ref(false)
 const deletingCostCenter = ref(null)
-
-// Computed
-const deleteConfirmMessage = computed(() => {
-  if (!deletingCostCenter.value) return ''
-  return `Delete "${deletingCostCenter.value.name}"?`
-})
 
 // Lifecycle
 onMounted(() => {
@@ -290,27 +279,34 @@ async function saveCostCenter(formData) {
 
 function confirmDelete(cc) {
   deletingCostCenter.value = cc
-  showDeleteConfirm.value = true
-}
-
-async function deleteCostCenter() {
-  if (!deletingCostCenter.value) return
-
-  try {
-    await window.axios.delete(`/cost-centers/${deletingCostCenter.value.id}`)
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('deleted_success') || 'Deleted successfully',
+  dialogStore
+    .openDialog({
+      title: $t('general.are_you_sure'),
+      message: `${$t('general.delete')} "${cc.name}"?`,
+      yesLabel: $t('general.ok'),
+      noLabel: $t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+      size: 'lg',
     })
-    showDeleteConfirm.value = false
-    deletingCostCenter.value = null
-    await loadCostCenters()
-  } catch (error) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: error.response?.data?.error || t('error_deleting') || 'Failed to delete',
+    .then(async (res) => {
+      if (res) {
+        try {
+          await window.axios.delete(`/cost-centers/${cc.id}`)
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('deleted_success') || 'Deleted successfully',
+          })
+          deletingCostCenter.value = null
+          await loadCostCenters()
+        } catch (error) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.error || t('error_deleting') || 'Failed to delete',
+          })
+        }
+      }
     })
-  }
 }
 </script>
 

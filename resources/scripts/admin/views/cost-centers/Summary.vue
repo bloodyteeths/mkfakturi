@@ -22,16 +22,12 @@
         <BaseInputGroup :label="$t('reports.accounting.from_date')" required>
           <BaseDatePicker
             v-model="filters.from_date"
-            :calendar-button="true"
-            calendar-button-icon="CalendarDaysIcon"
           />
         </BaseInputGroup>
 
         <BaseInputGroup :label="$t('reports.accounting.to_date')" required>
           <BaseDatePicker
             v-model="filters.to_date"
-            :calendar-button="true"
-            calendar-button-icon="CalendarDaysIcon"
           />
         </BaseInputGroup>
 

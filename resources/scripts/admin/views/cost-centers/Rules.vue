@@ -224,23 +224,19 @@
       </div>
     </div>
 
-    <!-- Delete Confirmation -->
-    <BaseConfirmDialog
-      v-if="showDeleteRuleConfirm"
-      :title="$t('general.are_you_sure')"
-      :message="$t('general.delete_confirm')"
-      @confirm="deleteRule"
-      @cancel="showDeleteRuleConfirm = false"
-    />
   </BasePage>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useDialogStore } from '@/scripts/stores/dialog'
+import { useI18n } from 'vue-i18n'
 import ccMessages from '@/scripts/admin/i18n/cost-centers.js'
 
 const notificationStore = useNotificationStore()
+const dialogStore = useDialogStore()
+const { t: $t } = useI18n()
 
 const locale = document.documentElement.lang || 'mk'
 function t(key) {
@@ -256,7 +252,6 @@ const isLoading = ref(false)
 const showRuleForm = ref(false)
 const editingRule = ref(null)
 const isSavingRule = ref(false)
-const showDeleteRuleConfirm = ref(false)
 const deletingRuleId = ref(null)
 
 const matchTypeOptions = [
@@ -392,27 +387,34 @@ async function saveRule() {
 
 function confirmDeleteRule(rule) {
   deletingRuleId.value = rule.id
-  showDeleteRuleConfirm.value = true
-}
-
-async function deleteRule() {
-  if (!deletingRuleId.value) return
-
-  try {
-    await window.axios.delete(`/cost-centers/rules/${deletingRuleId.value}`)
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('deleted_success') || 'Deleted successfully',
+  dialogStore
+    .openDialog({
+      title: $t('general.are_you_sure'),
+      message: $t('general.delete_confirm') || `Delete this rule?`,
+      yesLabel: $t('general.ok'),
+      noLabel: $t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+      size: 'lg',
     })
-    showDeleteRuleConfirm.value = false
-    deletingRuleId.value = null
-    await loadRules()
-  } catch (error) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: error.response?.data?.error || t('error_deleting') || 'Failed to delete',
+    .then(async (res) => {
+      if (res) {
+        try {
+          await window.axios.delete(`/cost-centers/rules/${deletingRuleId.value}`)
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('deleted_success') || 'Deleted successfully',
+          })
+          deletingRuleId.value = null
+          await loadRules()
+        } catch (error) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.error || t('error_deleting') || 'Failed to delete',
+          })
+        }
+      }
     })
-  }
 }
 </script>
 

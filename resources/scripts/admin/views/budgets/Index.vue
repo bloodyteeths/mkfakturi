@@ -153,24 +153,20 @@
       </BaseButton>
     </div>
 
-    <!-- Delete Confirmation -->
-    <BaseConfirmDialog
-      v-if="showDeleteConfirm"
-      :title="$t('general.are_you_sure')"
-      :message="t('confirm_delete')"
-      @confirm="deleteBudget"
-      @cancel="showDeleteConfirm = false"
-    />
   </BasePage>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useDialogStore } from '@/scripts/stores/dialog'
+import { useI18n } from 'vue-i18n'
 import { debounce } from 'lodash'
 import budgetMessages from '@/scripts/admin/i18n/budgets.js'
 
 const notificationStore = useNotificationStore()
+const dialogStore = useDialogStore()
+const { t: $t } = useI18n()
 
 const locale = document.documentElement.lang || 'mk'
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
@@ -186,7 +182,6 @@ const budgets = ref([])
 const isLoading = ref(false)
 const filterStatus = ref('')
 const filterYear = ref('')
-const showDeleteConfirm = ref(false)
 const deletingBudget = ref(null)
 
 // Computed
@@ -293,27 +288,34 @@ function scenarioBadgeClass(scenario) {
 
 function confirmDelete(budget) {
   deletingBudget.value = budget
-  showDeleteConfirm.value = true
-}
-
-async function deleteBudget() {
-  if (!deletingBudget.value) return
-
-  try {
-    await window.axios.delete(`/budgets/${deletingBudget.value.id}`)
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('delete'),
+  dialogStore
+    .openDialog({
+      title: $t('general.are_you_sure'),
+      message: t('confirm_delete') || `Delete "${budget.name}"?`,
+      yesLabel: $t('general.ok'),
+      noLabel: $t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+      size: 'lg',
     })
-    showDeleteConfirm.value = false
-    deletingBudget.value = null
-    await loadBudgets()
-  } catch (error) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: error.response?.data?.error || t('error_loading'),
+    .then(async (res) => {
+      if (res) {
+        try {
+          await window.axios.delete(`/budgets/${deletingBudget.value.id}`)
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('deleted_success') || 'Deleted successfully',
+          })
+          deletingBudget.value = null
+          await loadBudgets()
+        } catch (error) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.error || t('error_loading'),
+          })
+        }
+      }
     })
-  }
 }
 </script>
 

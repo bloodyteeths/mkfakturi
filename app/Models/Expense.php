@@ -42,6 +42,7 @@ class Expense extends Model implements HasMedia
         'currency_id',
         'creator_id',
         'ifrs_transaction_id',
+        'cost_center_id',
     ];
 
     protected $appends = [

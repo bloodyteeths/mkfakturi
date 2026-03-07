@@ -198,23 +198,6 @@
       </div>
     </template>
 
-    <!-- Approve Confirmation -->
-    <BaseConfirmDialog
-      v-if="showApproveConfirm"
-      :title="t('approve')"
-      :message="t('confirm_approve')"
-      @confirm="approveBudget"
-      @cancel="showApproveConfirm = false"
-    />
-
-    <!-- Lock Confirmation -->
-    <BaseConfirmDialog
-      v-if="showLockConfirm"
-      :title="t('lock')"
-      :message="t('confirm_lock')"
-      @confirm="lockBudget"
-      @cancel="showLockConfirm = false"
-    />
   </BasePage>
 </template>
 
@@ -222,11 +205,15 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useDialogStore } from '@/scripts/stores/dialog'
+import { useI18n } from 'vue-i18n'
 import budgetMessages from '@/scripts/admin/i18n/budgets.js'
 
 const route = useRoute()
 const router = useRouter()
 const notificationStore = useNotificationStore()
+const dialogStore = useDialogStore()
+const { t: $t } = useI18n()
 
 const locale = document.documentElement.lang || 'mk'
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
@@ -247,8 +234,6 @@ function accountTypeLabel(type) {
 const budget = ref(null)
 const comparison = ref(null)
 const isLoading = ref(false)
-const showApproveConfirm = ref(false)
-const showLockConfirm = ref(false)
 
 // Computed
 const sortedLines = computed(() => {
@@ -377,45 +362,63 @@ function barWidth(value, row) {
 }
 
 function confirmApprove() {
-  showApproveConfirm.value = true
+  dialogStore
+    .openDialog({
+      title: t('approve'),
+      message: t('confirm_approve') || 'Are you sure you want to approve this budget?',
+      yesLabel: $t('general.ok'),
+      noLabel: $t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        try {
+          await window.axios.post(`/budgets/${budget.value.id}/approve`)
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('approved'),
+          })
+          await loadBudget()
+        } catch (error) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.error || t('error_loading'),
+          })
+        }
+      }
+    })
 }
 
 function confirmLock() {
-  showLockConfirm.value = true
-}
-
-async function approveBudget() {
-  try {
-    await window.axios.post(`/budgets/${budget.value.id}/approve`)
-    showApproveConfirm.value = false
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('approved'),
+  dialogStore
+    .openDialog({
+      title: t('lock'),
+      message: t('confirm_lock') || 'Are you sure you want to lock this budget?',
+      yesLabel: $t('general.ok'),
+      noLabel: $t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
     })
-    await loadBudget()
-  } catch (error) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: error.response?.data?.error || t('error_loading'),
+    .then(async (res) => {
+      if (res) {
+        try {
+          await window.axios.post(`/budgets/${budget.value.id}/lock`)
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('locked'),
+          })
+          await loadBudget()
+        } catch (error) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.error || t('error_loading'),
+          })
+        }
+      }
     })
-  }
-}
-
-async function lockBudget() {
-  try {
-    await window.axios.post(`/budgets/${budget.value.id}/lock`)
-    showLockConfirm.value = false
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('locked'),
-    })
-    await loadBudget()
-  } catch (error) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: error.response?.data?.error || t('error_loading'),
-    })
-  }
 }
 </script>
 

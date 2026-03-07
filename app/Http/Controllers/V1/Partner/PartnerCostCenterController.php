@@ -244,6 +244,35 @@ class PartnerCostCenterController extends Controller
         }
     }
 
+    /**
+     * Reorder cost centers (update sort_order and parent_id in bulk).
+     */
+    public function reorder(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'orders' => 'required|array',
+            'orders.*.id' => 'required|integer|exists:cost_centers,id',
+            'orders.*.sort_order' => 'required|integer|min:0',
+            'orders.*.parent_id' => 'nullable|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
+        }
+
+        $this->service->reorder($company, $request->input('orders'));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cost centers reordered successfully.',
+        ]);
+    }
+
     // ---- Rules ----
 
     /**
