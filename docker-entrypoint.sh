@@ -84,7 +84,9 @@ echo "Nginx configured to listen on ports 80 and 8080"
 
 # Build optimization caches
 # NOTE: config:cache is intentionally OMITTED — Railway injects env vars at runtime
-# NOTE: cache:clear is intentionally OMITTED — Redis/database cache should persist across deploys
+# Clear application cache on deploy — menu and bootstrap caches contain config-dependent data
+echo "Clearing application cache..."
+php artisan cache:clear 2>/dev/null || echo "Warning: cache:clear failed"
 echo "Building optimization caches..."
 php artisan route:cache || echo "Warning: route:cache failed, falling back to uncached routes"
 php artisan view:cache || echo "Warning: view:cache failed"

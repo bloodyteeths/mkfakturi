@@ -537,6 +537,7 @@ return [
             'owner_only' => false,
             'ability' => '',
             'model' => '',
+            'feature_flag' => 'accounting_backbone',
         ],
         [
             'title' => 'navigation.projects',
@@ -548,6 +549,7 @@ return [
             'owner_only' => false,
             'ability' => 'view-project',
             'model' => Project::class,
+            'feature_flag' => 'accounting_backbone',
         ],
         // CLAUDE-CHECKPOINT
         [
