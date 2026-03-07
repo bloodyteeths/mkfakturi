@@ -26,6 +26,8 @@ use App\Space\InstallUtils;
 use App\Services\ClawdNotifier;
 use Gate;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 use Silber\Bouncer\Database\Models as BouncerModels;
@@ -112,6 +114,14 @@ class AppServiceProvider extends ServiceProvider
         $this->bootBroadcast();
         $this->bootObservers();
         $this->bootClawdNotifications();
+
+        // Postmark: default all emails to 'broadcast' stream (outbound stream silently drops)
+        Event::listen(MessageSending::class, function (MessageSending $event) {
+            $headers = $event->message->getHeaders();
+            if (!$headers->has('X-PM-Message-Stream')) {
+                $headers->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            }
+        });
 
         // In demo mode, prevent all outgoing emails and notifications
         if (config('app.env') === 'demo') {
