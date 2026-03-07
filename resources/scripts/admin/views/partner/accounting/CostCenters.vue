@@ -211,7 +211,7 @@ const deleteConfirmMessage = computed(() => {
 })
 
 function apiBase() {
-  return `/partner/companies/${selectedCompanyId.value}/cost-centers`
+  return `/partner/companies/${selectedCompanyId.value}/accounting/cost-centers`
 }
 
 // Lifecycle

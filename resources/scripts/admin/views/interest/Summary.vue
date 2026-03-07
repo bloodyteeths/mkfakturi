@@ -186,7 +186,7 @@ async function toggleExpand(customerId) {
 
   if (!customerDetails[customerId]) {
     try {
-      const response = await window.axios.get('/mk/interest', {
+      const response = await window.axios.get('/interest', {
         params: { customer_id: customerId, limit: 'all' }
       })
       customerDetails[customerId] = response.data.data || []
@@ -204,7 +204,7 @@ async function viewCustomerDetails(customerId) {
 async function fetchSummary() {
   isLoading.value = true
   try {
-    const response = await window.axios.get('/mk/interest/summary')
+    const response = await window.axios.get('/interest/summary')
     summary.value = response.data.data || null
   } catch (error) {
     notificationStore.showNotification({

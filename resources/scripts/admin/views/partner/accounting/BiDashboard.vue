@@ -170,9 +170,11 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useConsoleStore } from '@/scripts/admin/stores/console'
 import biMessages from '@/scripts/admin/i18n/bi-dashboard.js'
 
 const notificationStore = useNotificationStore()
+const consoleStore = useConsoleStore()
 
 const locale = document.documentElement.lang || 'mk'
 function t(key) {
@@ -181,7 +183,7 @@ function t(key) {
     || key
 }
 
-const companies = ref([])
+const companies = computed(() => consoleStore.managedCompanies || [])
 const selectedCompanyId = ref(null)
 const isLoading = ref(false)
 const summaryData = ref(null)
@@ -268,12 +270,7 @@ function partnerApi(path) {
 }
 
 async function loadCompanies() {
-  try {
-    const { data } = await axios.get('/partner/companies')
-    companies.value = data.data || data.companies || data || []
-  } catch (e) {
-    notificationStore.showNotification({ type: 'error', message: t('error_loading_summary') })
-  }
+  await consoleStore.fetchCompanies()
 }
 
 async function onCompanyChange() {

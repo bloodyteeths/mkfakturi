@@ -1202,6 +1202,18 @@ export default [
         component: () => import('@/scripts/admin/views/partner/accounting/IOSStatement.vue'),
       },
 
+      // Hub Pages
+      {
+        path: 'operations',
+        name: 'operations.hub',
+        component: () => import('@/scripts/admin/views/operations/Hub.vue'),
+      },
+      {
+        path: 'finance',
+        name: 'finance.hub',
+        component: () => import('@/scripts/admin/views/finance/Hub.vue'),
+      },
+
       // F1: Compensations
       {
         path: 'compensations',

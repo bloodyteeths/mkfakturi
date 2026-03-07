@@ -363,7 +363,7 @@ async function fetchCalculations(page = 1) {
     if (filters.status) params.status = filters.status
     if (filters.customer_id) params.customer_id = filters.customer_id
 
-    const response = await window.axios.get('/mk/interest', { params })
+    const response = await window.axios.get('/interest', { params })
     calculations.value = response.data.data || []
     meta.value = response.data.meta || null
   } catch (error) {
@@ -378,7 +378,7 @@ async function fetchCalculations(page = 1) {
 
 async function fetchSummary() {
   try {
-    const response = await window.axios.get('/mk/interest/summary')
+    const response = await window.axios.get('/interest/summary')
     summary.value = response.data.data || null
   } catch {
     // Silently fail
@@ -400,7 +400,7 @@ async function batchCalculate() {
     const payload = {}
     if (asOfDate.value) payload.as_of_date = asOfDate.value
 
-    const response = await window.axios.post('/mk/interest/calculate', payload)
+    const response = await window.axios.post('/interest/calculate', payload)
 
     notificationStore.showNotification({
       type: 'success',
@@ -428,7 +428,7 @@ async function generateNote() {
 
   isGenerating.value = true
   try {
-    const response = await window.axios.post('/mk/interest/generate-note', {
+    const response = await window.axios.post('/interest/generate-note', {
       customer_id: firstCalc.customer_id,
       calculation_ids: selectedIds.value,
     })
@@ -455,7 +455,7 @@ async function waiveCalculation(id) {
   if (!confirm(t('confirm_waive'))) return
 
   try {
-    await window.axios.post(`/mk/interest/${id}/waive`)
+    await window.axios.post(`/interest/${id}/waive`)
 
     notificationStore.showNotification({
       type: 'success',

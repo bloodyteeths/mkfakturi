@@ -2856,7 +2856,9 @@
     "collections": "Collections & Reminders",
     "budgets": "Budgets",
     "bi_dashboard": "BI Dashboard",
-    "custom_reports": "Custom Reports"
+    "custom_reports": "Custom Reports",
+    "operations": "Operations",
+    "finance": "Finance"
   },
   "navigation_hints": {
     "dashboard": "Overview of your business: revenue, expenses, and key metrics",
@@ -2885,7 +2887,9 @@
     "support_tickets": "Get help and submit support requests",
     "all_support_tickets": "View all support tickets",
     "payouts": "Partner commission payouts",
-    "partners": "Manage partner accounts and portfolios"
+    "partners": "Manage partner accounts and portfolios",
+    "operations": "Compensations, orders, cost centers and projects",
+    "finance": "BI analysis, budgets, interest, collections and custom reports"
   },
   "notification_view_estimate": "[Notification] Estimate viewed",
   "notification_view_invoice": "[Notification] Invoice viewed",

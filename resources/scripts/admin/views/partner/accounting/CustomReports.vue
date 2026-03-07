@@ -193,9 +193,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useConsoleStore } from '@/scripts/admin/stores/console'
 import crMessages from '@/scripts/admin/i18n/custom-reports.js'
 
 const axios = window.axios
+const consoleStore = useConsoleStore()
 
 const locale = document.documentElement.lang || 'mk'
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
@@ -209,7 +211,7 @@ function t(key) {
 
 const notificationStore = useNotificationStore()
 
-const companies = ref([])
+const companies = computed(() => consoleStore.managedCompanies || [])
 const selectedCompanyId = ref(null)
 const templates = ref([])
 const selectedTemplate = ref(null)
@@ -288,15 +290,7 @@ function formatNumber(val) {
 }
 
 async function loadCompanies() {
-  try {
-    const { data } = await axios.get('/partner/companies')
-    companies.value = data.data || data.companies || data || []
-  } catch (e) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('error_loading'),
-    })
-  }
+  await consoleStore.fetchCompanies()
 }
 
 async function onCompanyChange() {

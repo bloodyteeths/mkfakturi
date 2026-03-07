@@ -161,11 +161,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useConsoleStore } from '@/scripts/admin/stores/console'
 import collectionMessages from '@/scripts/admin/i18n/collections.js'
 
 const notificationStore = useNotificationStore()
+const consoleStore = useConsoleStore()
 
 const locale = document.documentElement.lang || 'mk'
 function t(key) {
@@ -177,7 +179,7 @@ function t(key) {
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
 const fmtLocale = localeMap[locale] || 'mk-MK'
 
-const companies = ref([])
+const companies = computed(() => consoleStore.managedCompanies || [])
 const selectedCompanyId = ref(null)
 const overdueInvoices = ref([])
 const history = ref([])
@@ -216,16 +218,7 @@ function partnerApi(path) {
 }
 
 async function loadCompanies() {
-  try {
-    const { data } = await window.axios.get('/partner/companies')
-    companies.value = data.data || data.companies || data || []
-  } catch (e) {
-    console.error('Failed to load companies', e)
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('error_loading') || 'Failed to load companies',
-    })
-  }
+  await consoleStore.fetchCompanies()
 }
 
 async function onCompanyChange() {
