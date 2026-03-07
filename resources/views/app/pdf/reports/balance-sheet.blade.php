@@ -239,6 +239,18 @@
                 ✗ Актива ({{ number_format($aopData['total_aktiva'], 2) }}) ≠ Пасива ({{ number_format($aopData['total_pasiva'], 2) }})
             @endif
         </div>
+
+        <!-- Signatures -->
+        <table style="margin-top: 30px; width: 100%;">
+            <tr>
+                <td style="width: 50%; text-align: center; padding-top: 40px;">
+                    <p style="font-size: 9px; color: #666; border-top: 1px solid #999; padding-top: 3px; width: 200px; text-align: center; margin: 0 auto;">Составил</p>
+                </td>
+                <td style="width: 50%; text-align: center; padding-top: 40px;">
+                    <p style="font-size: 9px; color: #666; border-top: 1px solid #999; padding-top: 3px; width: 200px; text-align: center; margin: 0 auto;">Одговорно лице</p>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 
