@@ -75,7 +75,7 @@ return new class extends Migration
         // 3. Add cost_center_id to ifrs_ledgers
         if (Schema::hasTable('ifrs_ledgers') && ! Schema::hasColumn('ifrs_ledgers', 'cost_center_id')) {
             Schema::table('ifrs_ledgers', function (Blueprint $table) {
-                $table->unsignedBigInteger('cost_center_id')->nullable()->after('entity_id');
+                $table->unsignedBigInteger('cost_center_id')->nullable();
                 $table->index('cost_center_id', 'idx_ledger_cost_center');
             });
         }

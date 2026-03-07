@@ -93,17 +93,17 @@ return new class extends Migration
         if (Schema::hasTable('suppliers')) {
             if (! Schema::hasColumn('suppliers', 'iban')) {
                 Schema::table('suppliers', function (Blueprint $table) {
-                    $table->string('iban', 34)->nullable()->after('currency_id');
+                    $table->string('iban', 34)->nullable();
                 });
             }
             if (! Schema::hasColumn('suppliers', 'bic')) {
                 Schema::table('suppliers', function (Blueprint $table) {
-                    $table->string('bic', 11)->nullable()->after('iban');
+                    $table->string('bic', 11)->nullable();
                 });
             }
             if (! Schema::hasColumn('suppliers', 'bank_name')) {
                 Schema::table('suppliers', function (Blueprint $table) {
-                    $table->string('bank_name', 255)->nullable()->after('bic');
+                    $table->string('bank_name', 255)->nullable();
                 });
             }
         }
