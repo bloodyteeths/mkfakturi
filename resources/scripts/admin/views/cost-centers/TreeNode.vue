@@ -95,8 +95,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, defineOptions } from 'vue'
 import ccMessages from '@/scripts/admin/i18n/cost-centers.js'
+
+defineOptions({ name: 'CostCenterTreeNode' })
 
 const locale = document.documentElement.lang || 'mk'
 function t(key) {
