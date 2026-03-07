@@ -95,6 +95,44 @@ class SupportContactController extends Controller
     }
 
     /**
+     * Admin listing of ALL support contacts (cross-tenant).
+     */
+    public function indexAll(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->isOwner()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $query = SupportContact::query()
+            ->with(['user', 'company'])
+            ->orderBy('created_at', 'desc');
+
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        if ($request->has('category')) {
+            $query->where('category', $request->category);
+        }
+        if ($request->has('priority')) {
+            $query->where('priority', $request->priority);
+        }
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('subject', 'like', "%{$search}%")
+                    ->orWhere('reference_number', 'like', "%{$search}%");
+            });
+        }
+
+        $contacts = $query->paginate($request->get('per_page', 25));
+
+        return response()->json($contacts);
+    }
+
+    /**
      * Display the specified support contact.
      */
     public function show(SupportContact $supportContact): JsonResponse

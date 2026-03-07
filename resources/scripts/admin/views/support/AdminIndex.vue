@@ -1,16 +1,16 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="$t('tickets.all_tickets')">
+    <BasePageHeader :title="t('title')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem :title="$t('tickets.all_tickets')" to="#" active />
+        <BaseBreadcrumbItem :title="t('title')" to="#" active />
       </BaseBreadcrumb>
 
       <template #actions>
         <BaseButton
-          v-show="ticketTotalCount"
+          v-show="totalCount"
           variant="primary-outline"
-          @click="toggleFilter"
+          @click="showFilters = !showFilters"
         >
           {{ $t('general.filter') }}
           <template #right="slotProps">
@@ -26,22 +26,22 @@
     </BasePageHeader>
 
     <!-- Statistics Cards -->
-    <div v-if="statistics" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div v-if="stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="text-2xl font-bold text-gray-900">{{ statistics.total_tickets }}</div>
-        <div class="text-sm text-gray-600">{{ $t('tickets.total_tickets') }}</div>
+        <div class="text-2xl font-bold text-gray-900">{{ stats.total }}</div>
+        <div class="text-sm text-gray-600">{{ t('total') }}</div>
       </div>
       <div class="bg-white rounded-lg shadow-sm border border-blue-200 p-4">
-        <div class="text-2xl font-bold text-blue-600">{{ statistics.open_tickets }}</div>
-        <div class="text-sm text-gray-600">{{ $t('tickets.open') }}</div>
+        <div class="text-2xl font-bold text-blue-600">{{ stats.new }}</div>
+        <div class="text-sm text-gray-600">{{ t('status_new') }}</div>
       </div>
       <div class="bg-white rounded-lg shadow-sm border border-yellow-200 p-4">
-        <div class="text-2xl font-bold text-yellow-600">{{ statistics.in_progress_tickets }}</div>
-        <div class="text-sm text-gray-600">{{ $t('tickets.in_progress') }}</div>
+        <div class="text-2xl font-bold text-yellow-600">{{ stats.in_progress }}</div>
+        <div class="text-sm text-gray-600">{{ t('status_in_progress') }}</div>
       </div>
-      <div class="bg-white rounded-lg shadow-sm border border-red-200 p-4">
-        <div class="text-2xl font-bold text-red-600">{{ statistics.urgent_tickets }}</div>
-        <div class="text-sm text-gray-600">{{ $t('tickets.urgent') }}</div>
+      <div class="bg-white rounded-lg shadow-sm border border-green-200 p-4">
+        <div class="text-2xl font-bold text-green-600">{{ stats.resolved }}</div>
+        <div class="text-sm text-gray-600">{{ t('status_resolved') }}</div>
       </div>
     </div>
 
@@ -50,26 +50,28 @@
       :row-on-xl="true"
       @clear="clearFilter"
     >
-      <BaseInputGroup :label="$t('tickets.status')">
+      <BaseInputGroup :label="t('status')">
         <BaseMultiselect
           v-model="filters.status"
           :options="statusOptions"
-          searchable
-          :placeholder="$t('general.select_a_status')"
+          label="name"
+          value-prop="id"
+          :placeholder="t('all_statuses')"
         />
       </BaseInputGroup>
 
-      <BaseInputGroup :label="$t('tickets.priority')">
+      <BaseInputGroup :label="t('category')">
         <BaseMultiselect
-          v-model="filters.priority"
-          :options="priorityOptions"
-          searchable
-          :placeholder="$t('tickets.select_priority')"
+          v-model="filters.category"
+          :options="categoryOptions"
+          label="name"
+          value-prop="id"
+          :placeholder="t('all_categories')"
         />
       </BaseInputGroup>
 
       <BaseInputGroup :label="$t('general.search')">
-        <BaseInput v-model="filters.search" :placeholder="$t('tickets.search_placeholder')">
+        <BaseInput v-model="filters.search" :placeholder="t('search_placeholder')">
           <template #left="slotProps">
             <BaseIcon name="MagnifyingGlassIcon" :class="slotProps.class" />
           </template>
@@ -78,78 +80,46 @@
     </BaseFilterWrapper>
 
     <BaseEmptyPlaceholder
-      v-show="showEmptyScreen"
-      :title="$t('tickets.no_tickets')"
-      :description="$t('tickets.no_tickets_admin')"
-    >
-    </BaseEmptyPlaceholder>
+      v-show="showEmpty"
+      :title="t('no_contacts')"
+      :description="t('no_contacts_desc')"
+    />
 
-    <div v-show="!showEmptyScreen" class="relative table-container">
-      <div
-        class="
-          relative
-          flex
-          items-center
-          justify-between
-          h-10
-          mt-5
-          list-none
-          border-b-2 border-gray-200 border-solid
-        "
-      >
-        <!-- Tabs -->
+    <div v-show="!showEmpty" class="relative table-container">
+      <!-- Tabs -->
+      <div class="relative flex items-center h-10 mt-5 list-none border-b-2 border-gray-200 border-solid">
         <BaseTabGroup class="-mb-5" @change="setStatusFilter">
           <BaseTab :title="$t('general.all')" filter="" />
-          <BaseTab :title="$t('tickets.open')" filter="open" />
-          <BaseTab :title="$t('tickets.in_progress')" filter="in_progress" />
-          <BaseTab :title="$t('tickets.resolved')" filter="resolved" />
-          <BaseTab :title="$t('tickets.closed')" filter="closed" />
+          <BaseTab :title="t('status_new')" filter="new" />
+          <BaseTab :title="t('status_in_progress')" filter="in_progress" />
+          <BaseTab :title="t('status_resolved')" filter="resolved" />
         </BaseTabGroup>
       </div>
 
       <!-- Mobile: Card View -->
       <div class="block md:hidden mt-4 space-y-4">
         <div
-          v-for="ticket in tickets"
-          :key="ticket.id"
+          v-for="contact in contacts"
+          :key="contact.id"
           class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer"
-          @click="viewTicket(ticket)"
+          @click="viewContact(contact)"
         >
           <div class="flex items-start justify-between mb-2">
-            <h3 class="text-base font-semibold text-gray-900 flex-1">
-              {{ ticket.title }}
-            </h3>
-            <span
-              :class="getStatusBadgeClass(ticket.status)"
-              class="ml-2 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap"
-            >
-              {{ getStatusLabel(ticket.status) }}
+            <div>
+              <h3 class="text-base font-semibold text-gray-900">{{ contact.subject }}</h3>
+              <p class="text-xs text-gray-500">{{ contact.reference_number }}</p>
+            </div>
+            <span :class="statusClass(contact.status)" class="ml-2 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap">
+              {{ statusLabel(contact.status) }}
             </span>
           </div>
-
-          <p class="text-sm text-gray-600 mb-2">
-            <span class="font-medium">{{ $t('tickets.company') }}:</span>
-            {{ ticket.company?.name || 'N/A' }}
-          </p>
-
-          <p class="text-sm text-gray-600 mb-3 line-clamp-2">
-            {{ ticket.message }}
-          </p>
-
+          <p class="text-sm text-gray-600 mb-2">{{ contact.name }} &middot; {{ contact.email }}</p>
+          <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ contact.message }}</p>
           <div class="flex items-center justify-between text-xs text-gray-500">
-            <div class="flex items-center space-x-3">
-              <span
-                :class="getPriorityBadgeClass(ticket.priority)"
-                class="px-2 py-1 rounded-full font-medium"
-              >
-                {{ getPriorityLabel(ticket.priority) }}
-              </span>
-              <span v-if="ticket.messages_count" class="flex items-center">
-                <BaseIcon name="ChatBubbleLeftIcon" class="h-4 w-4 mr-1" />
-                {{ ticket.messages_count }}
-              </span>
-            </div>
-            <span>{{ formatDate(ticket.created_at) }}</span>
+            <span :class="priorityClass(contact.priority)" class="px-2 py-1 rounded-full font-medium">
+              {{ contact.priority }}
+            </span>
+            <span>{{ formatDate(contact.created_at) }}</span>
           </div>
         </div>
       </div>
@@ -157,91 +127,68 @@
       <!-- Desktop: Table View -->
       <div class="hidden md:block">
         <BaseTable
-          ref="table"
-          :data="tickets"
-          :columns="ticketColumns"
+          :data="contacts"
+          :columns="columns"
           class="mt-3"
         >
-          <template #cell-title="{ row }">
-            <a
-              href="#"
-              class="font-medium text-primary-500 hover:text-primary-600"
-              @click.prevent="viewTicket(row.data)"
-            >
-              {{ row.data.title }}
+          <template #cell-reference_number="{ row }">
+            <a href="#" class="font-mono text-sm text-primary-500 hover:text-primary-600" @click.prevent="viewContact(row.data)">
+              {{ row.data.reference_number }}
             </a>
           </template>
 
-          <template #cell-company="{ row }">
-            <span class="text-sm text-gray-700">
-              {{ row.data.company?.name || 'N/A' }}
-            </span>
+          <template #cell-subject="{ row }">
+            <a href="#" class="font-medium text-gray-900 hover:text-primary-600" @click.prevent="viewContact(row.data)">
+              {{ row.data.subject }}
+            </a>
           </template>
 
-          <template #cell-user="{ row }">
-            <span class="text-sm text-gray-700">
-              {{ row.data.user?.name || 'Unknown' }}
+          <template #cell-from="{ row }">
+            <div class="text-sm">
+              <div class="text-gray-900">{{ row.data.name }}</div>
+              <div class="text-gray-500 text-xs">{{ row.data.email }}</div>
+            </div>
+          </template>
+
+          <template #cell-category="{ row }">
+            <span class="text-sm text-gray-700 capitalize">{{ row.data.category }}</span>
+          </template>
+
+          <template #cell-priority="{ row }">
+            <span :class="priorityClass(row.data.priority)" class="px-2 py-1 text-xs font-medium rounded-full capitalize">
+              {{ row.data.priority }}
             </span>
           </template>
 
           <template #cell-status="{ row }">
-            <span
-              :class="getStatusBadgeClass(row.data.status)"
-              class="px-2 py-1 text-xs font-medium rounded-full"
-            >
-              {{ getStatusLabel(row.data.status) }}
+            <span :class="statusClass(row.data.status)" class="px-2 py-1 text-xs font-medium rounded-full">
+              {{ statusLabel(row.data.status) }}
             </span>
-          </template>
-
-          <template #cell-priority="{ row }">
-            <span
-              :class="getPriorityBadgeClass(row.data.priority)"
-              class="px-2 py-1 text-xs font-medium rounded-full"
-            >
-              {{ getPriorityLabel(row.data.priority) }}
-            </span>
-          </template>
-
-          <template #cell-messages_count="{ row }">
-            <div class="flex items-center text-gray-600">
-              <BaseIcon name="ChatBubbleLeftIcon" class="h-4 w-4 mr-1" />
-              {{ row.data.messages_count || 0 }}
-            </div>
           </template>
 
           <template #cell-created_at="{ row }">
-            <span class="text-sm text-gray-600">
-              {{ formatDate(row.data.created_at) }}
-            </span>
+            <span class="text-sm text-gray-600">{{ formatDate(row.data.created_at) }}</span>
           </template>
 
           <template #cell-actions="{ row }">
             <BaseDropdown>
               <template #activator>
-                <BaseIcon
-                  name="EllipsisHorizontalIcon"
-                  class="h-5 text-gray-500 cursor-pointer"
-                />
+                <BaseIcon name="EllipsisHorizontalIcon" class="h-5 text-gray-500 cursor-pointer" />
               </template>
 
-              <BaseDropdownItem @click="viewTicket(row.data)">
+              <BaseDropdownItem @click="viewContact(row.data)">
                 <BaseIcon name="EyeIcon" class="h-5 mr-3 text-gray-600" />
                 {{ $t('general.view') }}
               </BaseDropdownItem>
 
-              <BaseDropdownItem @click="changeTicketStatus(row.data, 'in_progress')">
+              <BaseDropdownItem @click="changeStatus(row.data, 'in_progress')">
                 <BaseIcon name="PlayCircleIcon" class="h-5 mr-3 text-yellow-600" />
-                {{ $t('tickets.mark_in_progress') }}
+                {{ t('mark_in_progress') }}
               </BaseDropdownItem>
 
-              <BaseDropdownItem @click="changeTicketStatus(row.data, 'resolved')">
+              <BaseDropdownItem @click="changeStatus(row.data, 'resolved')">
                 <BaseIcon name="CheckCircleIcon" class="h-5 mr-3 text-green-600" />
-                {{ $t('tickets.mark_resolved') }}
-              </BaseDropdownItem>
-
-              <BaseDropdownItem @click="changeTicketStatus(row.data, 'closed')">
-                <BaseIcon name="XCircleIcon" class="h-5 mr-3 text-gray-600" />
-                {{ $t('tickets.close_ticket') }}
+                {{ t('mark_resolved') }}
               </BaseDropdownItem>
             </BaseDropdown>
           </template>
@@ -249,192 +196,84 @@
       </div>
 
       <BasePagination
-        v-if="ticketTotalCount > 0"
+        v-if="totalCount > 0"
         v-model="currentPage"
         :total-pages="totalPages"
-        :total-count="ticketTotalCount"
+        :total-count="totalCount"
         :per-page="25"
         class="mt-6"
       />
     </div>
 
-    <!-- View Ticket Modal -->
-    <BaseModal
-      :show="showViewModal"
-      @close="closeViewModal"
-    >
+    <!-- View Contact Modal -->
+    <BaseModal :show="showModal" @close="showModal = false">
       <template #header>
         <div class="flex items-center justify-between w-full">
-          <h3 class="text-lg font-semibold">
-            #{{ selectedTicket?.id }} - {{ selectedTicket?.title }}
-          </h3>
+          <h3 class="text-lg font-semibold">{{ selected?.reference_number }} — {{ selected?.subject }}</h3>
         </div>
       </template>
 
-      <div v-if="selectedTicket" class="space-y-4">
-        <!-- Ticket Info -->
+      <div v-if="selected" class="space-y-4">
         <div class="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span class="text-gray-600">{{ $t('tickets.company') }}:</span>
-            <span class="font-medium ml-2">{{ selectedTicket.company?.name || 'N/A' }}</span>
+            <span class="text-gray-500">{{ t('from') }}:</span>
+            <span class="font-medium ml-1">{{ selected.name }}</span>
           </div>
           <div>
-            <span class="text-gray-600">{{ $t('tickets.created_by') }}:</span>
-            <span class="font-medium ml-2">{{ selectedTicket.user?.name }}</span>
+            <span class="text-gray-500">{{ t('email') }}:</span>
+            <span class="font-medium ml-1">{{ selected.email }}</span>
           </div>
           <div>
-            <span class="text-gray-600">{{ $t('tickets.status') }}:</span>
-            <span
-              :class="getStatusBadgeClass(selectedTicket.status)"
-              class="ml-2 px-2 py-1 text-xs font-medium rounded-full"
-            >
-              {{ getStatusLabel(selectedTicket.status) }}
+            <span class="text-gray-500">{{ t('category') }}:</span>
+            <span class="font-medium ml-1 capitalize">{{ selected.category }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">{{ t('priority') }}:</span>
+            <span :class="priorityClass(selected.priority)" class="ml-1 px-2 py-0.5 text-xs font-medium rounded-full capitalize">
+              {{ selected.priority }}
             </span>
           </div>
           <div>
-            <span class="text-gray-600">{{ $t('tickets.priority') }}:</span>
-            <span
-              :class="getPriorityBadgeClass(selectedTicket.priority)"
-              class="ml-2 px-2 py-1 text-xs font-medium rounded-full"
-            >
-              {{ getPriorityLabel(selectedTicket.priority) }}
+            <span class="text-gray-500">{{ t('status') }}:</span>
+            <span :class="statusClass(selected.status)" class="ml-1 px-2 py-0.5 text-xs font-medium rounded-full">
+              {{ statusLabel(selected.status) }}
             </span>
+          </div>
+          <div>
+            <span class="text-gray-500">{{ t('date') }}:</span>
+            <span class="font-medium ml-1">{{ formatDateTime(selected.created_at) }}</span>
           </div>
         </div>
 
-        <!-- Original Message -->
+        <div v-if="selected.user" class="text-sm">
+          <span class="text-gray-500">{{ t('user') }}:</span>
+          <span class="font-medium ml-1">{{ selected.user.name }} (ID: {{ selected.user.id }})</span>
+        </div>
+
+        <div v-if="selected.company" class="text-sm">
+          <span class="text-gray-500">{{ t('company') }}:</span>
+          <span class="font-medium ml-1">{{ selected.company.name }}</span>
+        </div>
+
         <div class="p-4 bg-gray-50 rounded-lg">
-          <p class="text-gray-800 whitespace-pre-wrap">{{ selectedTicket.message }}</p>
+          <p class="text-gray-800 whitespace-pre-wrap">{{ selected.message }}</p>
         </div>
 
-        <!-- Messages Thread -->
-        <div v-if="selectedTicket.messages && selectedTicket.messages.length > 0" class="space-y-3">
-          <h4 class="font-medium text-gray-700">{{ $t('tickets.conversation') }}</h4>
-          <div
-            v-for="message in selectedTicket.messages"
-            :key="message.id"
-            class="p-3 rounded-lg"
-            :class="message.is_internal ? 'bg-yellow-50 border border-yellow-200' : 'bg-blue-50'"
-          >
-            <div class="flex items-center justify-between mb-2">
-              <span class="font-medium text-sm">{{ message.user?.name || 'Unknown' }}</span>
-              <span class="text-xs text-gray-500">{{ formatDateTime(message.created_at) }}</span>
-            </div>
-            <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ message.message }}</p>
-
-            <!-- Message Attachments -->
-            <div v-if="message.attachments && message.attachments.length > 0" class="mt-3 flex flex-wrap gap-2">
-              <a
-                v-for="attachment in message.attachments"
-                :key="attachment.id"
-                :href="attachment.url"
-                target="_blank"
-                class="flex items-center space-x-2 px-3 py-2 bg-white rounded border border-gray-200 hover:border-primary-300 text-sm"
-              >
-                <BaseIcon
-                  :name="attachment.mime_type.startsWith('image/') ? 'PhotoIcon' : 'DocumentIcon'"
-                  class="h-4 w-4 text-gray-500"
-                />
-                <span class="text-gray-700 truncate max-w-[150px]">{{ attachment.name }}</span>
-                <span class="text-gray-400 text-xs">({{ attachment.human_readable_size }})</span>
-              </a>
-            </div>
-
-            <span v-if="message.is_internal" class="text-xs text-yellow-600 mt-1 inline-block">
-              {{ $t('tickets.internal_note') }}
-            </span>
+        <div v-if="selected.attachments && selected.attachments.length" class="space-y-1">
+          <p class="text-sm font-medium text-gray-700">{{ t('attachments') }}:</p>
+          <div v-for="(att, i) in selected.attachments" :key="i" class="text-sm text-gray-600">
+            {{ att.name }} ({{ att.size }})
           </div>
         </div>
 
-        <!-- Reply Form -->
-        <div v-if="!selectedTicket.is_locked" class="border-t pt-4">
-          <div class="flex space-x-2 mb-3">
-            <BaseButton
-              :variant="replyMode === 'public' ? 'primary' : 'primary-outline'"
-              size="sm"
-              @click="replyMode = 'public'"
-            >
-              {{ $t('tickets.public_reply') }}
-            </BaseButton>
-            <BaseButton
-              :variant="replyMode === 'internal' ? 'primary' : 'primary-outline'"
-              size="sm"
-              @click="replyMode = 'internal'"
-            >
-              {{ $t('tickets.internal_note') }}
-            </BaseButton>
-          </div>
-
-          <BaseTextarea
-            v-model="replyContent"
-            :placeholder="replyMode === 'internal' ? $t('tickets.type_internal_note') : $t('tickets.type_your_reply')"
-            rows="4"
-          />
-
-          <!-- Attachment Input -->
-          <div class="mt-3">
-            <input
-              ref="attachmentInput"
-              type="file"
-              multiple
-              accept="image/*,application/pdf"
-              class="hidden"
-              @change="handleAttachmentSelect"
-            />
-            <BaseButton
-              type="button"
-              variant="primary-outline"
-              size="sm"
-              @click="$refs.attachmentInput.click()"
-            >
-              <BaseIcon name="PaperClipIcon" class="h-4 w-4 mr-1" />
-              {{ $t('tickets.attach_files') }}
-            </BaseButton>
-
-            <!-- Selected Attachments Preview -->
-            <div v-if="replyAttachments.length > 0" class="mt-2 flex flex-wrap gap-2">
-              <div
-                v-for="(file, index) in replyAttachments"
-                :key="index"
-                class="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded text-sm"
-              >
-                <BaseIcon
-                  :name="file.type.startsWith('image/') ? 'PhotoIcon' : 'DocumentIcon'"
-                  class="h-4 w-4 text-gray-500"
-                />
-                <span class="text-gray-700 truncate max-w-[150px]">{{ file.name }}</span>
-                <button
-                  type="button"
-                  class="text-red-500 hover:text-red-700"
-                  @click="removeAttachment(index)"
-                >
-                  <BaseIcon name="XMarkIcon" class="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-3 flex justify-end space-x-3">
-            <BaseButton
-              variant="primary-outline"
-              @click="closeViewModal"
-            >
-              {{ $t('general.close') }}
-            </BaseButton>
-            <BaseButton
-              :loading="isSubmittingReply"
-              :disabled="!replyContent.trim()"
-              variant="primary"
-              @click="submitReply"
-            >
-              {{ replyMode === 'internal' ? $t('tickets.add_note') : $t('tickets.send_reply') }}
-            </BaseButton>
-          </div>
-        </div>
-
-        <div v-else class="text-center py-4 text-gray-500">
-          <BaseIcon name="LockClosedIcon" class="h-6 w-6 mx-auto mb-2" />
-          {{ $t('tickets.ticket_locked') }}
+        <!-- Status Change -->
+        <div class="border-t pt-4 flex justify-end space-x-3">
+          <BaseButton v-if="selected.status !== 'in_progress'" variant="primary-outline" @click="changeStatus(selected, 'in_progress'); showModal = false">
+            {{ t('mark_in_progress') }}
+          </BaseButton>
+          <BaseButton v-if="selected.status !== 'resolved'" variant="primary" @click="changeStatus(selected, 'resolved'); showModal = false">
+            {{ t('mark_resolved') }}
+          </BaseButton>
         </div>
       </div>
     </BaseModal>
@@ -446,334 +285,254 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
-import moment from 'moment'
 
-const { t } = useI18n()
+const { locale } = useI18n({ useScope: 'global' })
 const notificationStore = useNotificationStore()
 
-const tickets = ref([])
-const ticketTotalCount = ref(0)
-const statistics = ref(null)
+const messages = {
+  en: {
+    title: 'All Support Requests',
+    total: 'Total',
+    status_new: 'New',
+    status_in_progress: 'In Progress',
+    status_resolved: 'Resolved',
+    status: 'Status',
+    category: 'Category',
+    priority: 'Priority',
+    from: 'From',
+    email: 'Email',
+    date: 'Date',
+    user: 'User',
+    company: 'Company',
+    attachments: 'Attachments',
+    all_statuses: 'All Statuses',
+    all_categories: 'All Categories',
+    search_placeholder: 'Search by name, email, subject...',
+    no_contacts: 'No Support Requests',
+    no_contacts_desc: 'Support requests submitted via the contact form will appear here.',
+    mark_in_progress: 'Mark In Progress',
+    mark_resolved: 'Mark Resolved',
+    ref: 'Ref #',
+    subject: 'Subject',
+  },
+  mk: {
+    title: 'Сите барања за поддршка',
+    total: 'Вкупно',
+    status_new: 'Ново',
+    status_in_progress: 'Во тек',
+    status_resolved: 'Решено',
+    status: 'Статус',
+    category: 'Категорија',
+    priority: 'Приоритет',
+    from: 'Од',
+    email: 'Е-пошта',
+    date: 'Датум',
+    user: 'Корисник',
+    company: 'Компанија',
+    attachments: 'Прилози',
+    all_statuses: 'Сите статуси',
+    all_categories: 'Сите категории',
+    search_placeholder: 'Барај по име, е-пошта, предмет...',
+    no_contacts: 'Нема барања за поддршка',
+    no_contacts_desc: 'Барањата поднесени преку формуларот за контакт ќе се појават тука.',
+    mark_in_progress: 'Означи во тек',
+    mark_resolved: 'Означи решено',
+    ref: 'Реф #',
+    subject: 'Предмет',
+  },
+  sq: {
+    title: 'Te gjitha kerkesat per mbeshtetje',
+    total: 'Totali',
+    status_new: 'E re',
+    status_in_progress: 'Ne progres',
+    status_resolved: 'E zgjidhur',
+    status: 'Statusi',
+    category: 'Kategoria',
+    priority: 'Prioriteti',
+    from: 'Nga',
+    email: 'Email',
+    date: 'Data',
+    user: 'Perdoruesi',
+    company: 'Kompania',
+    attachments: 'Bashkengjitjet',
+    all_statuses: 'Te gjitha statuset',
+    all_categories: 'Te gjitha kategorite',
+    search_placeholder: 'Kerko sipas emrit, emailit, subjektit...',
+    no_contacts: 'Nuk ka kerkesa',
+    no_contacts_desc: 'Kerkesat e derguara permes formularit te kontaktit do te shfaqen ketu.',
+    mark_in_progress: 'Sheno ne progres',
+    mark_resolved: 'Sheno te zgjidhur',
+    ref: 'Ref #',
+    subject: 'Subjekti',
+  },
+  tr: {
+    title: 'Tum Destek Talepleri',
+    total: 'Toplam',
+    status_new: 'Yeni',
+    status_in_progress: 'Devam Ediyor',
+    status_resolved: 'Cozuldu',
+    status: 'Durum',
+    category: 'Kategori',
+    priority: 'Oncelik',
+    from: 'Gonderen',
+    email: 'E-posta',
+    date: 'Tarih',
+    user: 'Kullanici',
+    company: 'Sirket',
+    attachments: 'Ekler',
+    all_statuses: 'Tum durumlar',
+    all_categories: 'Tum kategoriler',
+    search_placeholder: 'Ad, e-posta, konu ile ara...',
+    no_contacts: 'Destek talebi yok',
+    no_contacts_desc: 'Iletisim formu ile gonderilen talepler burada gorunecektir.',
+    mark_in_progress: 'Devam ediyor olarak isaretle',
+    mark_resolved: 'Cozuldu olarak isaretle',
+    ref: 'Ref #',
+    subject: 'Konu',
+  },
+}
+
+const t = (key) => {
+  const lang = locale.value || 'mk'
+  return messages[lang]?.[key] || messages['en']?.[key] || key
+}
+
+const contacts = ref([])
+const totalCount = ref(0)
+const stats = ref(null)
 const showFilters = ref(false)
 const currentPage = ref(1)
 const isFetching = ref(false)
+const showModal = ref(false)
+const selected = ref(null)
 
-const showViewModal = ref(false)
-const selectedTicket = ref(null)
-const replyContent = ref('')
-const replyMode = ref('public')
-const replyAttachments = ref([])
-const attachmentInput = ref(null)
-const isSubmittingReply = ref(false)
+const filters = ref({ status: null, category: null, search: '' })
 
-const filters = ref({
-  status: '',
-  priority: '',
-  search: '',
-})
+const statusOptions = computed(() => [
+  { id: 'new', name: t('status_new') },
+  { id: 'in_progress', name: t('status_in_progress') },
+  { id: 'resolved', name: t('status_resolved') },
+])
 
-const statusOptions = [
-  { label: t('tickets.open'), value: 'open' },
-  { label: t('tickets.in_progress'), value: 'in_progress' },
-  { label: t('tickets.resolved'), value: 'resolved' },
-  { label: t('tickets.closed'), value: 'closed' },
+const categoryOptions = [
+  { id: 'technical', name: 'Technical' },
+  { id: 'billing', name: 'Billing' },
+  { id: 'feature', name: 'Feature Request' },
+  { id: 'general', name: 'General' },
 ]
 
-const priorityOptions = [
-  { label: t('tickets.low'), value: 'low' },
-  { label: t('tickets.normal'), value: 'normal' },
-  { label: t('tickets.high'), value: 'high' },
-  { label: t('tickets.urgent'), value: 'urgent' },
-]
+const columns = computed(() => [
+  { key: 'reference_number', label: t('ref'), thClass: 'w-28' },
+  { key: 'subject', label: t('subject'), thClass: 'min-w-[200px]' },
+  { key: 'from', label: t('from'), thClass: 'w-44' },
+  { key: 'category', label: t('category'), thClass: 'w-28' },
+  { key: 'priority', label: t('priority'), thClass: 'w-24' },
+  { key: 'status', label: t('status'), thClass: 'w-28' },
+  { key: 'created_at', label: t('date'), thClass: 'w-32' },
+  { key: 'actions', label: '', thClass: 'w-16' },
+])
 
-const ticketColumns = [
-  {
-    key: 'title',
-    label: t('tickets.title'),
-    thClass: 'min-w-[200px]',
-  },
-  {
-    key: 'company',
-    label: t('tickets.company'),
-    thClass: 'w-40',
-  },
-  {
-    key: 'user',
-    label: t('tickets.created_by'),
-    thClass: 'w-32',
-  },
-  {
-    key: 'status',
-    label: t('tickets.status'),
-    thClass: 'w-32',
-  },
-  {
-    key: 'priority',
-    label: t('tickets.priority'),
-    thClass: 'w-24',
-  },
-  {
-    key: 'messages_count',
-    label: t('tickets.replies'),
-    thClass: 'w-20 text-center',
-  },
-  {
-    key: 'created_at',
-    label: t('general.created_at'),
-    thClass: 'w-32',
-  },
-  {
-    key: 'actions',
-    label: '',
-    thClass: 'w-16',
-  },
-]
+const showEmpty = computed(() => !totalCount.value && !isFetching.value)
+const totalPages = computed(() => Math.ceil(totalCount.value / 25))
 
-const showEmptyScreen = computed(() => {
-  return !ticketTotalCount.value && !isFetching.value
-})
-
-const totalPages = computed(() => {
-  return Math.ceil(ticketTotalCount.value / 25)
-})
-
-const toggleFilter = () => {
-  showFilters.value = !showFilters.value
-}
-
-const clearFilter = () => {
-  filters.value = {
-    status: '',
-    priority: '',
-    search: '',
-  }
-  refreshTable()
-}
-
-const setStatusFilter = (filter) => {
-  filters.value.status = filter
-  refreshTable()
-}
-
-const refreshTable = () => {
-  currentPage.value = 1
-  loadTickets()
-}
-
-const loadTickets = async () => {
+const loadContacts = async () => {
   isFetching.value = true
-
   try {
     const params = {
       page: currentPage.value,
-      limit: 25,
+      per_page: 25,
       status: filters.value.status || undefined,
-      priority: filters.value.priority?.value || undefined,
+      category: filters.value.category || undefined,
       search: filters.value.search || undefined,
     }
-
-    const response = await axios.get('/support/admin/tickets', { params })
-    tickets.value = response.data.data
-    ticketTotalCount.value = response.data.meta?.ticket_total_count || 0
-  } catch (error) {
-    console.error('Error loading tickets:', error)
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('tickets.error_loading'),
-    })
+    const { data } = await axios.get('/support/admin/contacts', { params })
+    contacts.value = data.data || []
+    totalCount.value = data.total || 0
+  } catch (err) {
+    console.error('Error loading contacts:', err)
   } finally {
     isFetching.value = false
   }
 }
 
-const loadStatistics = async () => {
+const loadStats = async () => {
   try {
-    const response = await axios.get('/support/admin/statistics')
-    statistics.value = response.data
-  } catch (error) {
-    console.error('Error loading statistics:', error)
+    const { data } = await axios.get('/support/admin/contacts/statistics')
+    stats.value = data.data || data
+  } catch (err) {
+    console.error('Error loading stats:', err)
   }
 }
 
-const viewTicket = async (ticket) => {
-  // Safety check - ensure ticket and ticket.id exist
-  if (!ticket || !ticket.id) {
-    console.error('Invalid ticket object:', ticket)
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('tickets.error_loading'),
-    })
-    return
-  }
+const viewContact = (contact) => {
+  selected.value = contact
+  showModal.value = true
+}
 
+const changeStatus = async (contact, status) => {
   try {
-    // Load full ticket with messages
-    const response = await axios.get(`/support/tickets/${ticket.id}`)
-    selectedTicket.value = response.data.data
-    showViewModal.value = true
-    replyContent.value = ''
-    replyMode.value = 'public'
-  } catch (error) {
-    console.error('Error loading ticket:', error)
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('tickets.error_loading'),
-    })
+    await axios.post(`/support/admin/contacts/${contact.id}/status`, { status })
+    notificationStore.showNotification({ type: 'success', message: 'Status updated' })
+    loadContacts()
+    loadStats()
+  } catch (err) {
+    console.error('Error updating status:', err)
+    notificationStore.showNotification({ type: 'error', message: 'Failed to update status' })
   }
 }
 
-const closeViewModal = () => {
-  showViewModal.value = false
-  selectedTicket.value = null
-  replyContent.value = ''
-  replyAttachments.value = []
+const setStatusFilter = (filter) => {
+  filters.value.status = filter || null
+  currentPage.value = 1
+  loadContacts()
 }
 
-const handleAttachmentSelect = (event) => {
-  const files = Array.from(event.target.files)
-  for (const file of files) {
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      notificationStore.showNotification({
-        type: 'error',
-        message: t('tickets.file_too_large', { filename: file.name }),
-      })
-      continue
-    }
-    replyAttachments.value.push(file)
-  }
-  // Reset input
-  if (attachmentInput.value) {
-    attachmentInput.value.value = ''
-  }
+const clearFilter = () => {
+  filters.value = { status: null, category: null, search: '' }
+  currentPage.value = 1
+  loadContacts()
 }
 
-const removeAttachment = (index) => {
-  replyAttachments.value.splice(index, 1)
-}
-
-const submitReply = async () => {
-  if (!replyContent.value.trim() || !selectedTicket.value) return
-
-  isSubmittingReply.value = true
-
-  try {
-    if (replyMode.value === 'internal') {
-      // Add internal note (no attachments for internal notes)
-      await axios.post(`/support/admin/tickets/${selectedTicket.value.id}/internal-notes`, {
-        message: replyContent.value,
-      })
-    } else {
-      // Add public reply with attachments
-      const formData = new FormData()
-      formData.append('message', replyContent.value)
-
-      // Add attachments
-      replyAttachments.value.forEach((file, index) => {
-        formData.append(`attachments[${index}]`, file)
-      })
-
-      await axios.post(`/support/tickets/${selectedTicket.value.id}/messages`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-    }
-
-    notificationStore.showNotification({
-      type: 'success',
-      message: replyMode.value === 'internal'
-        ? t('tickets.internal_note_added')
-        : t('tickets.reply_sent'),
-    })
-
-    // Clear attachments
-    replyAttachments.value = []
-
-    // Reload ticket to show new message
-    await viewTicket(selectedTicket.value)
-  } catch (error) {
-    console.error('Error submitting reply:', error)
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('tickets.error_sending_reply'),
-    })
-  } finally {
-    isSubmittingReply.value = false
-  }
-}
-
-const changeTicketStatus = async (ticket, status) => {
-  try {
-    await axios.post(`/support/admin/tickets/${ticket.id}/change-status`, { status })
-
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('tickets.status_updated'),
-    })
-
-    loadTickets()
-    loadStatistics()
-  } catch (error) {
-    console.error('Error changing status:', error)
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('tickets.error_updating_status'),
-    })
-  }
-}
-
-const getStatusBadgeClass = (status) => {
-  const classes = {
-    open: 'bg-blue-100 text-blue-800',
+const statusClass = (status) => {
+  const map = {
+    new: 'bg-blue-100 text-blue-800',
     in_progress: 'bg-yellow-100 text-yellow-800',
     resolved: 'bg-green-100 text-green-800',
-    closed: 'bg-gray-100 text-gray-800',
   }
-  return classes[status] || classes.open
+  return map[status] || map.new
 }
 
-const getPriorityBadgeClass = (priority) => {
-  const classes = {
+const statusLabel = (status) => {
+  const map = { new: 'status_new', in_progress: 'status_in_progress', resolved: 'status_resolved' }
+  return t(map[status] || 'status_new')
+}
+
+const priorityClass = (priority) => {
+  const map = {
     low: 'bg-gray-100 text-gray-800',
-    normal: 'bg-blue-100 text-blue-800',
+    medium: 'bg-blue-100 text-blue-800',
     high: 'bg-orange-100 text-orange-800',
     urgent: 'bg-red-100 text-red-800',
   }
-  return classes[priority] || classes.normal
+  return map[priority] || map.medium
 }
 
-const getStatusLabel = (status) => {
-  if (!status) return t('tickets.open')
-  return t(`tickets.${status}`)
-}
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
+const formatDateTime = (d) => d ? new Date(d).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''
 
-const getPriorityLabel = (priority) => {
-  if (!priority) return t('tickets.normal')
-  return t(`tickets.${priority}`)
-}
-
-const formatDate = (date) => {
-  return moment(date).format('MMM DD, YYYY')
-}
-
-const formatDateTime = (date) => {
-  return moment(date).format('MMM DD, YYYY HH:mm')
-}
-
-watch(
-  () => filters.value.search,
-  () => {
-    refreshTable()
-  }
-)
-
-watch(currentPage, () => {
-  loadTickets()
+let searchTimeout = null
+watch(() => filters.value.search, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1
+    loadContacts()
+  }, 400)
 })
 
+watch(currentPage, () => loadContacts())
+
 onMounted(() => {
-  loadTickets()
-  loadStatistics()
+  loadContacts()
+  loadStats()
 })
 </script>

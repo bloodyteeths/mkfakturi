@@ -807,6 +807,12 @@ Route::prefix('/v1')->group(function () {
                 // TRACK 3: MILESTONE 3.2 - Agent Dashboard (Admin/Support Only)
                 // Admin Ticket Operations (Cross-Tenant - Admins/Support Only)
                 Route::prefix('admin')->group(function () {
+                    // Support Contacts (from contact form)
+                    Route::get('/contacts', [\App\Http\Controllers\V1\SupportContactController::class, 'indexAll']);
+                    Route::get('/contacts/statistics', [\App\Http\Controllers\V1\SupportContactController::class, 'statistics']);
+                    Route::get('/contacts/{supportContact}', [\App\Http\Controllers\V1\SupportContactController::class, 'show']);
+                    Route::post('/contacts/{supportContact}/status', [\App\Http\Controllers\V1\SupportContactController::class, 'updateStatus']);
+
                     Route::get('/tickets', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'listAllTickets']);
                     Route::get('/statistics', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'getStatistics']);
                     Route::post('/tickets/{ticket}/assign', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'assignTicket']);
