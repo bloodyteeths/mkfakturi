@@ -200,7 +200,7 @@ class PostmarkWebhookController extends Controller
 
                 // Move deal to followup_due so wife sees it (only if currently in emailed stage)
                 if ($mapping->hubspot_deal_id && in_array($mapping->deal_stage, ['emailed'])) {
-                    $followupStageId = config('hubspot.deal_stages.followup');
+                    $followupStageId = config('hubspot.stages.followup_due');
 
                     if ($followupStageId) {
                         $this->hubspot->updateDealStage($mapping->hubspot_deal_id, $followupStageId);
@@ -283,7 +283,7 @@ class PostmarkWebhookController extends Controller
 
                 // Move deal to followup_due (from emailed or new_lead stages)
                 if ($mapping->hubspot_deal_id && in_array($mapping->deal_stage, ['emailed', 'new', 'new_lead'])) {
-                    $followupStageId = config('hubspot.deal_stages.followup');
+                    $followupStageId = config('hubspot.stages.followup_due');
 
                     if ($followupStageId) {
                         $this->hubspot->updateDealStage($mapping->hubspot_deal_id, $followupStageId);
@@ -357,7 +357,7 @@ class PostmarkWebhookController extends Controller
                 }
 
                 if ($mapping->hubspot_deal_id) {
-                    $lostStageId = config('hubspot.deal_stages.lost');
+                    $lostStageId = config('hubspot.stages.lost');
                     if ($lostStageId) {
                         $this->hubspot->updateDealStage($mapping->hubspot_deal_id, $lostStageId);
                         $mapping->update(['deal_stage' => 'lost']);
@@ -415,7 +415,7 @@ class PostmarkWebhookController extends Controller
                 }
 
                 if ($mapping->hubspot_deal_id) {
-                    $lostStageId = config('hubspot.deal_stages.lost');
+                    $lostStageId = config('hubspot.stages.lost');
                     if ($lostStageId) {
                         $this->hubspot->updateDealStage($mapping->hubspot_deal_id, $lostStageId);
                         $mapping->update(['deal_stage' => 'lost']);

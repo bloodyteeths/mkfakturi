@@ -199,7 +199,7 @@ class UnsubscribeController extends Controller
 
             // 2. Move deal to Lost stage
             if ($mapping->hubspot_deal_id) {
-                $lostStageId = config('hubspot.deal_stages.lost');
+                $lostStageId = config('hubspot.stages.lost');
 
                 if ($lostStageId) {
                     $this->hubspot->updateDealStage($mapping->hubspot_deal_id, $lostStageId);

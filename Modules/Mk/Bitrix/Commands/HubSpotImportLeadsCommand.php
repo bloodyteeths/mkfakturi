@@ -519,7 +519,7 @@ class HubSpotImportLeadsCommand extends Command
             // 5. Create Deal if no open deal exists
             if (!$hasOpenDeal) {
                 $pipelineId = config('hubspot.pipeline', 'default');
-                $newLeadStage = config('hubspot.deal_stages.new', 'appointmentscheduled');
+                $newLeadStage = config('hubspot.stages.new_lead', 'appointmentscheduled');
 
                 $dealProperties = [
                     'dealname' => "Partner: {$lead->company_name}",

@@ -55,7 +55,7 @@ class HubSpotApiClient
         $this->accessToken = config('hubspot.access_token') ?? '';
         // Support both hubspot.pipeline and hubspot.pipeline_id for compatibility
         $this->pipelineId = config('hubspot.pipeline') ?? config('hubspot.pipeline_id', 'default') ?? 'default';
-        $this->dealStages = config('hubspot.deal_stages', []) ?? [];
+        $this->dealStages = config('hubspot.stages', []) ?? [];
     }
 
     /**

@@ -922,9 +922,10 @@ class HubSpotService
      * @param string $stageId Stage ID
      * @return array Array of deals
      */
-    public function getDealsByStage(string $pipelineId, string $stageId): array
+    public function getDealsByStage(string $pipelineId, string $stageId, array $extraProperties = []): array
     {
         try {
+            $properties = array_unique(array_merge(['dealname', 'dealstage', 'pipeline', 'amount'], $extraProperties));
             $response = $this->request('POST', '/crm/v3/objects/deals/search', [
                 'filterGroups' => [
                     [
@@ -942,7 +943,7 @@ class HubSpotService
                         ],
                     ],
                 ],
-                'properties' => ['dealname', 'dealstage', 'pipeline', 'amount'],
+                'properties' => $properties,
                 'limit' => 100,
             ]);
 

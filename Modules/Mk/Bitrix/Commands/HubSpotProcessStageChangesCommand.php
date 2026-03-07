@@ -74,7 +74,8 @@ class HubSpotProcessStageChangesCommand extends Command
 
         try {
             // Get deals in "interested" stage
-            $deals = $hubspot->getDealsByStage($interestedStageId, [
+            $pipelineId = config('hubspot.pipeline_id') ?: config('hubspot.pipeline', 'default');
+            $deals = $hubspot->getDealsByStage($pipelineId, $interestedStageId, [
                 'facturino_lead_id',
                 'facturino_partner_id',
             ]);
@@ -124,13 +125,13 @@ class HubSpotProcessStageChangesCommand extends Command
      */
     protected function getInterestedStageId(HubSpotService $hubspot): ?string
     {
-        // First try config
-        $configuredStage = config('hubspot.deal_stages.interested');
-        if ($configuredStage) {
+        // First try config (hubspot.stages, not deal_stages)
+        $configuredStage = config('hubspot.stages.interested');
+        if (is_string($configuredStage) && $configuredStage !== '') {
             return $configuredStage;
         }
 
-        // Otherwise look up by label
+        // Otherwise look up by label from the HubSpot API
         return $hubspot->getStageIdByLabel('Interested');
     }
 
@@ -256,13 +257,13 @@ class HubSpotProcessStageChangesCommand extends Command
      */
     protected function getInviteSentStageId(HubSpotService $hubspot): ?string
     {
-        // First try config
-        $configuredStage = config('hubspot.deal_stages.invite_sent');
-        if ($configuredStage) {
+        // First try config (hubspot.stages, not deal_stages)
+        $configuredStage = config('hubspot.stages.invite_sent');
+        if (is_string($configuredStage) && $configuredStage !== '') {
             return $configuredStage;
         }
 
-        // Otherwise look up by label
+        // Otherwise look up by label from the HubSpot API
         return $hubspot->getStageIdByLabel('Invite Sent');
     }
 
@@ -371,4 +372,4 @@ class HubSpotProcessStageChangesCommand extends Command
         }
     }
 }
-
+// CLAUDE-CHECKPOINT
