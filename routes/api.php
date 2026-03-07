@@ -1828,6 +1828,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::post('/{id}/receive-goods', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'receiveGoods']);
             Route::post('/{id}/convert-to-bill', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'convertToBill']);
             Route::get('/{id}/three-way-match', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'threeWayMatch']);
+            Route::get('/{id}/pdf', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'pdf']);
             Route::post('/{id}/cancel', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'cancel']);
             Route::delete('/{id}', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'destroy']);
         });

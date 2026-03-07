@@ -75,6 +75,18 @@
             {{ t('three_way_match') }}
           </BaseButton>
 
+          <!-- Download PDF -->
+          <BaseButton
+            variant="primary-outline"
+            :loading="isDownloading"
+            @click="downloadPdf"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
+            </template>
+            {{ t('download_pdf') }}
+          </BaseButton>
+
           <!-- Cancel (draft/sent only) -->
           <BaseButton
             v-if="['draft', 'sent'].includes(po.status)"
@@ -474,6 +486,7 @@ const isCancelling = ref(false)
 const isDeleting = ref(false)
 const isConverting = ref(false)
 const isMatching = ref(false)
+const isDownloading = ref(false)
 const showReceiveModal = ref(false)
 const showSendDialog = ref(false)
 const showCancelDialog = ref(false)
@@ -636,6 +649,30 @@ async function runThreeWayMatch() {
     })
   } finally {
     isMatching.value = false
+  }
+}
+
+async function downloadPdf() {
+  isDownloading.value = true
+  try {
+    const response = await window.axios.get(`/purchase-orders/${po.value.id}/pdf`, {
+      responseType: 'blob',
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `nabavka-${po.value.po_number}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('error_downloading') || 'Failed to download PDF',
+    })
+  } finally {
+    isDownloading.value = false
   }
 }
 

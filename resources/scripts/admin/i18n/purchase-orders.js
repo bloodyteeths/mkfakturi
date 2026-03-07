@@ -101,6 +101,8 @@ export default {
       goods_received: 'Стоки примени',
       updated_success: 'Набавката е ажурирана',
       not_found: 'Нарачката не е пронајдена',
+      download_pdf: 'Преземи PDF',
+      error_downloading: 'Грешка при преземање на PDF',
     }
   },
   en: {
@@ -205,6 +207,8 @@ export default {
       goods_received: 'Goods received successfully',
       updated_success: 'Purchase order updated',
       not_found: 'Purchase order not found',
+      download_pdf: 'Download PDF',
+      error_downloading: 'Error downloading PDF',
     }
   },
   tr: {
@@ -309,6 +313,8 @@ export default {
       goods_received: 'Mal başarıyla teslim alındı',
       updated_success: 'Sipariş güncellendi',
       not_found: 'Sipariş bulunamadı',
+      download_pdf: 'PDF İndir',
+      error_downloading: 'PDF indirme hatası',
     }
   },
   sq: {
@@ -413,6 +419,8 @@ export default {
       goods_received: 'Mallrat u pranuan me sukses',
       updated_success: 'Porosia u përditësua',
       not_found: 'Porosia nuk u gjet',
+      download_pdf: 'Shkarko PDF',
+      error_downloading: 'Gabim në shkarkimin e PDF',
     }
   }
 }

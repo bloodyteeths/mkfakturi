@@ -4,8 +4,10 @@ namespace App\Http\Controllers\V1\Partner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Modules\Mk\Models\PurchaseOrder;
 use Modules\Mk\Services\PurchaseOrderService;
 
@@ -381,6 +383,47 @@ class PartnerPurchaseOrderController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    /**
+     * Generate PDF for a purchase order.
+     */
+    public function pdf(Request $request, int $company, int $id): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            abort(404, 'Partner not found');
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'No access to this company');
+        }
+
+        $po = PurchaseOrder::forCompany($company)
+            ->with([
+                'supplier.billingAddress',
+                'items.item',
+                'createdBy:id,name',
+                'currency:id,name,code,symbol',
+                'warehouse',
+                'convertedBill',
+                'goodsReceipts.items',
+                'company.address',
+            ])
+            ->where('id', $id)
+            ->first();
+
+        if (!$po) {
+            abort(404, 'Purchase order not found');
+        }
+
+        $companyModel = $po->company;
+
+        $pdf = Pdf::loadView('app.pdf.reports.purchase-order', ['po' => $po, 'company' => $companyModel]);
+        $pdf->setPaper('A4', 'portrait');
+
+        $filename = "nabavka-{$po->po_number}.pdf";
+
+        return $pdf->download($filename);
     }
 
     // ---- Partner access helpers (same pattern as PartnerCompensationController) ----

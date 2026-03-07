@@ -3,8 +3,10 @@
 namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Modules\Mk\Models\PurchaseOrder;
 use Modules\Mk\Services\PurchaseOrderService;
@@ -344,6 +346,41 @@ class PurchaseOrderController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    /**
+     * Generate PDF for a purchase order.
+     */
+    public function pdf(Request $request, int $id): Response
+    {
+        $companyId = (int) $request->header('company');
+
+        $po = PurchaseOrder::forCompany($companyId)
+            ->with([
+                'supplier.billingAddress',
+                'items.item',
+                'createdBy:id,name',
+                'currency:id,name,code,symbol',
+                'warehouse',
+                'convertedBill',
+                'goodsReceipts.items',
+                'company.address',
+            ])
+            ->where('id', $id)
+            ->first();
+
+        if (!$po) {
+            abort(404, 'Purchase order not found');
+        }
+
+        $company = $po->company;
+
+        $pdf = Pdf::loadView('app.pdf.reports.purchase-order', compact('po', 'company'));
+        $pdf->setPaper('A4', 'portrait');
+
+        $filename = "nabavka-{$po->po_number}.pdf";
+
+        return $pdf->download($filename);
     }
 }
 
