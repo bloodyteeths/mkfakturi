@@ -47,8 +47,6 @@ class TravelOrder extends Model
             'total_mileage_cost' => 'integer',
             'grand_total' => 'integer',
             'reimbursement_amount' => 'integer',
-            'accommodation_provided' => 'boolean',
-            'meals_provided' => 'boolean',
         ];
     }
 

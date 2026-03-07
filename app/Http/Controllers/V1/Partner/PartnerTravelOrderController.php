@@ -218,7 +218,7 @@ class PartnerTravelOrderController extends Controller
         }
 
         $order = TravelOrder::forCompany($company)
-            ->with(['employee', 'segments', 'expenses', 'approvedByUser', 'company'])
+            ->with(['employee', 'segments', 'expenses', 'approvedByUser', 'company.address'])
             ->where('id', $id)
             ->first();
 
