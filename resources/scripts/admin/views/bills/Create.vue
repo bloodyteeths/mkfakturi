@@ -15,28 +15,36 @@
     <BaseCard>
       <form @submit.prevent="handleSubmit">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <BaseInputGroup :label="$t('bills.bill_number')">
+          <BaseInputGroup
+            :label="$t('bills.bill_number')"
+            :error="validationErrors.bill_number"
+          >
             <BaseInput v-model="bill.bill_number" required />
           </BaseInputGroup>
 
-          <BaseInputGroup :label="$t('bills.bill_date')">
+          <BaseInputGroup
+            :label="$t('bills.bill_date')"
+            :error="validationErrors.bill_date"
+          >
             <BaseDatePicker
               v-model="bill.bill_date"
-              :calendar-button="true"
             />
           </BaseInputGroup>
 
           <BaseInputGroup :label="$t('bills.due_date')">
             <BaseDatePicker
               v-model="bill.due_date"
-              :calendar-button="true"
             />
           </BaseInputGroup>
 
-          <BaseInputGroup :label="$t('bills.supplier')">
+          <BaseInputGroup
+            :label="$t('bills.supplier')"
+            :error="validationErrors.supplier_id"
+          >
             <BaseSupplierSelectInput
               v-model="bill.supplier_id"
               fetch-all
+              show-action
             />
           </BaseInputGroup>
 
@@ -90,7 +98,7 @@
             <div
               v-for="(line, index) in items"
               :key="index"
-              class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end"
+              class="relative grid grid-cols-1 md:grid-cols-6 gap-4 items-end border border-gray-100 rounded-md p-3"
             >
               <BaseInputGroup :label="$t('bills.item_name')" class="col-span-2">
                 <!-- Show selected item or search field -->
@@ -103,27 +111,34 @@
                     <BaseIcon name="XCircleIcon" />
                   </span>
                 </div>
-                <BaseMultiselect
-                  v-else
-                  v-model="line.selectedItem"
-                  value-prop="id"
-                  track-by="name"
-                  label="name"
-                  :filter-results="false"
-                  :delay="300"
-                  searchable
-                  object
-                  :options="searchItems"
-                  :placeholder="$t('items.select_a_unit')"
-                  @update:model-value="(val) => selectItem(index, val)"
-                >
-                  <template #option="{ option }">
-                    <div class="flex justify-between items-center w-full">
-                      <span>{{ option.name }}</span>
-                      <span v-if="option.sku" class="text-gray-500 text-xs ml-2">({{ option.sku }})</span>
-                    </div>
-                  </template>
-                </BaseMultiselect>
+                <template v-else>
+                  <BaseMultiselect
+                    v-model="line.selectedItem"
+                    value-prop="id"
+                    track-by="name"
+                    label="name"
+                    :filter-results="false"
+                    :delay="300"
+                    searchable
+                    object
+                    :options="searchItems"
+                    :placeholder="$t('items.search_item')"
+                    @update:model-value="(val) => selectItem(index, val)"
+                  >
+                    <template #option="{ option }">
+                      <div class="flex justify-between items-center w-full">
+                        <span>{{ option.name }}</span>
+                        <span v-if="option.sku" class="text-gray-500 text-xs ml-2">({{ option.sku }})</span>
+                      </div>
+                    </template>
+                  </BaseMultiselect>
+                  <!-- Manual item name input when no item selected from dropdown -->
+                  <BaseInput
+                    v-model="line.name"
+                    class="mt-1"
+                    :placeholder="$t('bills.item_name')"
+                  />
+                </template>
                 <!-- Description below item name -->
                 <BaseInput
                   v-model="line.description"
@@ -136,20 +151,19 @@
                 <BaseInput
                   v-model.number="line.quantity"
                   type="number"
-                  min="1"
+                  min="0"
+                  step="any"
                 />
               </BaseInputGroup>
 
               <BaseInputGroup :label="$t('bills.item_price')">
-                <BaseInput
-                  v-model.number="line.price"
-                  type="number"
-                  min="0"
-                  step="0.01"
+                <BaseMoney
+                  v-model="line.price"
+                  :currency="selectedCurrency"
                 />
               </BaseInputGroup>
 
-              <BaseInputGroup :label="$t('bills.item_tax')">
+              <BaseInputGroup :label="$t('bills.item_tax_rate')">
                 <BaseMultiselect
                   v-model="line.taxes"
                   :options="taxTypeStore.taxTypes"
@@ -176,6 +190,20 @@
                   :can-deselect="true"
                 />
               </BaseInputGroup>
+
+              <!-- Remove item row button -->
+              <div
+                v-if="items.length > 1"
+                class="absolute top-1 right-1"
+              >
+                <button
+                  type="button"
+                  class="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                  @click="removeItemRow(index)"
+                >
+                  <BaseIcon name="TrashIcon" class="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             <BaseButton
@@ -190,6 +218,18 @@
               {{ $t('bills.add_item') }}
             </BaseButton>
           </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="mt-6">
+          <BaseInputGroup :label="$t('general.notes')">
+            <textarea
+              v-model="bill.notes"
+              rows="3"
+              :placeholder="$t('general.notes')"
+              class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-sm"
+            />
+          </BaseInputGroup>
         </div>
 
         <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -233,10 +273,15 @@
         </div>
 
         <div class="mt-6 flex justify-end space-x-3">
-          <BaseButton variant="secondary" @click="$router.push('/admin/bills')">
+          <BaseButton variant="secondary" type="button" @click="$router.push('/admin/bills')">
             {{ $t('general.cancel') }}
           </BaseButton>
-          <BaseButton variant="primary" type="submit">
+          <BaseButton
+            variant="primary"
+            type="submit"
+            :loading="isSaving"
+            :disabled="isSaving"
+          >
             {{ isEdit ? $t('general.update') : $t('general.create') }}
           </BaseButton>
         </div>
@@ -255,6 +300,7 @@ import { useTaxTypeStore } from '@/scripts/admin/stores/tax-type'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
+import { useNotificationStore } from '@/scripts/stores/notification'
 import ScannerModeToggle from '@/scripts/admin/components/ScannerModeToggle.vue'
 import { useBarcodeScanner } from '@/scripts/admin/composables/useBarcodeScanner'
 
@@ -267,6 +313,14 @@ const taxTypeStore = useTaxTypeStore()
 const stockStore = useStockStore()
 const itemStore = useItemStore()
 const receiptScannerStore = useReceiptScannerStore()
+const notificationStore = useNotificationStore()
+
+const isSaving = ref(false)
+const validationErrors = reactive({
+  bill_number: '',
+  bill_date: '',
+  supplier_id: '',
+})
 
 // Stock module integration
 const stockEnabled = computed(() => {
@@ -303,38 +357,45 @@ const {
 
 const currencies = ref([])
 
+// Today's date in YYYY-MM-DD format
+const today = new Date().toISOString().split('T')[0]
+
 const bill = reactive({
   id: null,
   bill_number: '',
-  bill_date: '',
+  bill_date: today,
   due_date: '',
   supplier_id: null,
   currency_id: null,
   exchange_rate: 1,
   discount: 0,
+  notes: '',
   scanned_receipt_path: null,
   project_id: null,
 })
 
 const items = reactive([
-  {
+  createEmptyItem(),
+])
+
+function createEmptyItem() {
+  return {
     item_id: null,
     name: '',
     description: '',
     quantity: 1,
     price: 0,
     taxes: [],
-    warehouse_id: null, // Stock module: warehouse for stock IN
+    warehouse_id: null,
     track_quantity: false,
     selectedItem: null,
-  },
-])
+  }
+}
 
 // Search items for autocomplete
 async function searchItems(query) {
   try {
     if (!query || query.length < 1) {
-      // Return all items if no query
       await itemStore.fetchItems({ limit: 50 })
       return itemStore.items || []
     }
@@ -353,7 +414,8 @@ function selectItem(index, item) {
   items[index].item_id = item.id
   items[index].name = item.name
   items[index].description = item.description || ''
-  // Item prices are stored in cents, always divide by 100 for display
+  // Item prices are stored in cents in the DB.
+  // BaseMoney v-model works in display format (dollars/denars), so divide by 100.
   items[index].price = item.price / 100
   items[index].track_quantity = item.track_quantity || false
   items[index].selectedItem = item
@@ -373,6 +435,7 @@ function clearItem(index) {
   items[index].price = 0
   items[index].track_quantity = false
   items[index].selectedItem = null
+  items[index].taxes = []
 }
 
 const isEdit = computed(() => !!route.params.id)
@@ -393,76 +456,131 @@ function hydrateForm(data) {
   bill.currency_id = data.currency_id
   bill.exchange_rate = data.exchange_rate || 1
   bill.discount = data.discount || 0
+  bill.notes = data.notes || ''
   bill.scanned_receipt_path = data.scanned_receipt_path || null
   bill.project_id = data.project_id || null
 
   if (data.items && data.items.length) {
-    items.splice(0, items.length, ...data.items.map((i) => ({
-      name: i.name,
-      description: i.description,
-      quantity: i.quantity,
-      price: i.price,
-      tax_rate: 0,
-    })))
+    items.splice(0, items.length, ...data.items.map((i) => {
+      // Extract tax IDs from the item's taxes relationship
+      const taxIds = (i.taxes || []).map(t => t.tax_type_id).filter(Boolean)
+
+      return {
+        item_id: i.item_id || null,
+        name: i.name || '',
+        description: i.description || '',
+        quantity: i.quantity || 1,
+        // API returns price in cents — convert to display format for BaseMoney
+        price: (i.price || 0) / 100,
+        taxes: taxIds,
+        warehouse_id: i.warehouse_id || null,
+        track_quantity: i.track_quantity || false,
+        selectedItem: i.item_id ? { id: i.item_id, name: i.name } : null,
+      }
+    }))
   }
 }
 
+// Helper: convert display price to cents
+function priceToCents(displayPrice) {
+  return Math.round((Number(displayPrice) || 0) * 100)
+}
+
+// Helper: compute line-level tax in cents with compound tax support
+function computeLineTax(line) {
+  const qty = Number(line.quantity) || 0
+  const priceCents = priceToCents(line.price)
+  const lineSubtotalCents = Math.round(qty * priceCents)
+  const taxIds = line.taxes || []
+
+  // First pass: simple (non-compound) taxes
+  let simpleTaxCents = 0
+  taxIds.forEach(taxId => {
+    const taxType = taxTypeStore.taxTypes.find(t => t.id === taxId)
+    if (taxType && !taxType.compound_tax) {
+      simpleTaxCents += Math.round(lineSubtotalCents * Number(taxType.percent) / 100)
+    }
+  })
+
+  // Second pass: compound taxes (applied on subtotal + simple taxes)
+  let compoundTaxCents = 0
+  taxIds.forEach(taxId => {
+    const taxType = taxTypeStore.taxTypes.find(t => t.id === taxId)
+    if (taxType && taxType.compound_tax) {
+      compoundTaxCents += Math.round((lineSubtotalCents + simpleTaxCents) * Number(taxType.percent) / 100)
+    }
+  })
+
+  return simpleTaxCents + compoundTaxCents
+}
+
+// All computed values return CENTS (BaseFormatMoney divides by 100 for display)
 const calculatedSubTotal = computed(() =>
-  items.reduce(
-    (sum, line) => sum + (Number(line.quantity) || 0) * (Number(line.price) || 0),
-    0
-  )
+  items.reduce((sum, line) => {
+    const qty = Number(line.quantity) || 0
+    const priceCents = priceToCents(line.price)
+    return sum + Math.round(qty * priceCents)
+  }, 0)
 )
 
 const calculatedTax = computed(() =>
-  items.reduce((sum, line) => {
-    const qty = Number(line.quantity) || 0
-    const price = Number(line.price) || 0
-    const lineSubtotal = qty * price
-
-    // Calculate tax based on selected tax types
-    const lineTax = (line.taxes || []).reduce((taxSum, taxId) => {
-      const taxType = taxTypeStore.taxTypes.find(t => t.id === taxId)
-      if (taxType) {
-        return taxSum + (lineSubtotal * Number(taxType.percent)) / 100
-      }
-      return taxSum
-    }, 0)
-
-    return sum + lineTax
-  }, 0)
+  items.reduce((sum, line) => sum + computeLineTax(line), 0)
 )
 
 const calculatedDiscountVal = computed(() => {
   const discountRate = Number(bill.discount) || 0
-  return (calculatedSubTotal.value * discountRate) / 100
+  return Math.round(calculatedSubTotal.value * discountRate / 100)
 })
 
-const calculatedTotal = computed(
-  () =>
-    calculatedSubTotal.value - calculatedDiscountVal.value + calculatedTax.value
+const calculatedTotal = computed(() =>
+  calculatedSubTotal.value - calculatedDiscountVal.value + calculatedTax.value
 )
 
 function addItemRow() {
-  items.push({
-    item_id: null,
-    name: '',
-    description: '',
-    quantity: 1,
-    price: 0,
-    taxes: [],
-    warehouse_id: null, // Stock module: warehouse for stock IN
-    track_quantity: false,
-    selectedItem: null,
-  })
+  items.push(createEmptyItem())
+}
+
+function removeItemRow(index) {
+  if (items.length > 1) {
+    items.splice(index, 1)
+  }
+}
+
+function validateForm() {
+  let isValid = true
+  validationErrors.bill_number = ''
+  validationErrors.bill_date = ''
+  validationErrors.supplier_id = ''
+
+  if (!bill.bill_number || !bill.bill_number.trim()) {
+    validationErrors.bill_number = window.i18n.global.t('validation.required')
+    isValid = false
+  }
+
+  if (!bill.bill_date) {
+    validationErrors.bill_date = window.i18n.global.t('validation.required')
+    isValid = false
+  }
+
+  if (!bill.supplier_id) {
+    validationErrors.supplier_id = window.i18n.global.t('validation.required')
+    isValid = false
+  }
+
+  // Check at least one item has a name
+  const hasValidItem = items.some(line => (line.name && line.name.trim()) || line.item_id)
+  if (!hasValidItem) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: window.i18n.global.t('bills.item_name') + ' ' + window.i18n.global.t('validation.required'),
+    })
+    isValid = false
+  }
+
+  return isValid
 }
 
 function buildPayload() {
-  const subTotal = calculatedSubTotal.value
-  const discountVal = calculatedDiscountVal.value
-  const taxAmount = calculatedTax.value
-  const total = calculatedTotal.value
-
   return {
     id: bill.id,
     bill_number: bill.bill_number,
@@ -472,70 +590,87 @@ function buildPayload() {
     currency_id: bill.currency_id,
     exchange_rate: bill.exchange_rate,
     discount: bill.discount || 0,
+    notes: bill.notes || '',
     project_id: bill.project_id,
     scanned_receipt_path: bill.scanned_receipt_path || null,
-    discount_val: Math.round(discountVal),
-    sub_total: Math.round(subTotal),
-    tax: Math.round(taxAmount),
-    total: Math.round(total),
-    items: items.map((line) => {
-      const lineSubTotal =
-        (Number(line.quantity) || 0) * (Number(line.price) || 0)
+    // All amounts in cents
+    discount_val: calculatedDiscountVal.value,
+    sub_total: calculatedSubTotal.value,
+    tax: calculatedTax.value,
+    total: calculatedTotal.value,
+    items: items
+      .filter(line => (line.name && line.name.trim()) || line.item_id)
+      .map((line) => {
+        const qty = Number(line.quantity) || 0
+        const priceCents = priceToCents(line.price)
+        const lineSubtotalCents = Math.round(qty * priceCents)
+        const lineTaxCents = computeLineTax(line)
+        const lineTotalCents = lineSubtotalCents + lineTaxCents
 
-      // Calculate total tax for this line item
-      const lineTax = (line.taxes || []).reduce((taxSum, taxId) => {
-        const taxType = taxTypeStore.taxTypes.find(t => t.id === taxId)
-        if (taxType) {
-          return taxSum + (lineSubTotal * Number(taxType.percent)) / 100
-        }
-        return taxSum
-      }, 0)
+        // Build taxes array with per-tax amounts in cents
+        const itemTaxes = (line.taxes || []).map(taxId => {
+          const taxType = taxTypeStore.taxTypes.find(t => t.id === taxId)
+          if (!taxType) return null
 
-      const lineTotal = lineSubTotal + lineTax
+          let taxAmountCents
+          if (taxType.compound_tax) {
+            // Compound: calculate simple taxes first, then apply on subtotal + simple
+            let simpleTax = 0
+            ;(line.taxes || []).forEach(tid => {
+              const tt = taxTypeStore.taxTypes.find(t => t.id === tid)
+              if (tt && !tt.compound_tax) {
+                simpleTax += Math.round(lineSubtotalCents * Number(tt.percent) / 100)
+              }
+            })
+            taxAmountCents = Math.round((lineSubtotalCents + simpleTax) * Number(taxType.percent) / 100)
+          } else {
+            taxAmountCents = Math.round(lineSubtotalCents * Number(taxType.percent) / 100)
+          }
 
-      // Build taxes array with details
-      const itemTaxes = (line.taxes || []).map(taxId => {
-        const taxType = taxTypeStore.taxTypes.find(t => t.id === taxId)
-        if (taxType) {
-          const taxAmount = (lineSubTotal * Number(taxType.percent)) / 100
           return {
             tax_type_id: taxType.id,
             name: taxType.name,
             percent: Number(taxType.percent),
-            amount: Math.round(taxAmount),
+            amount: taxAmountCents,
             compound_tax: taxType.compound_tax || 0,
           }
-        }
-        return null
-      }).filter(Boolean)
+        }).filter(Boolean)
 
-      return {
-        item_id: line.item_id || null,
-        name: line.name || line.description || 'Item',
-        description: line.description,
-        quantity: Number(line.quantity) || 0,
-        price: Number(line.price) || 0,
-        discount: 0,
-        discount_val: 0,
-        tax: Math.round(lineTax),
-        total: Math.round(lineTotal),
-        taxes: itemTaxes,
-        warehouse_id: line.warehouse_id || null, // Stock module: warehouse for stock IN
-      }
-    }),
+        return {
+          item_id: line.item_id || null,
+          name: line.name || line.description || 'Item',
+          description: line.description || '',
+          quantity: qty,
+          price: priceCents,
+          discount: 0,
+          discount_val: 0,
+          tax: lineTaxCents,
+          total: lineTotalCents,
+          taxes: itemTaxes,
+          warehouse_id: line.warehouse_id || null,
+        }
+      }),
   }
 }
 
-function handleSubmit() {
-  const payload = buildPayload()
-  if (isEdit.value) {
-    billsStore.updateBill(payload).then(() => {
-      router.push('/admin/bills')
-    })
-  } else {
-    billsStore.createBill(payload).then(() => {
-      router.push('/admin/bills')
-    })
+async function handleSubmit() {
+  if (!validateForm()) return
+
+  isSaving.value = true
+
+  try {
+    const payload = buildPayload()
+    if (isEdit.value) {
+      await billsStore.updateBill(payload)
+    } else {
+      await billsStore.createBill(payload)
+    }
+    router.push('/admin/bills')
+  } catch (err) {
+    // Error notification handled by store's handleError
+    console.error('Bill save error:', err)
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -549,8 +684,8 @@ onMounted(async () => {
     }
   })
 
-  // Fetch tax types
-  taxTypeStore.fetchTaxTypes()
+  // Fetch all tax types
+  taxTypeStore.fetchTaxTypes({ limit: 'all' })
 
   // Stock module: fetch warehouses if enabled
   if (stockEnabled.value) {
