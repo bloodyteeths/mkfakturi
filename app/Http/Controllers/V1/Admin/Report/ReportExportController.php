@@ -9,6 +9,7 @@ use App\Models\CompanySetting;
 use App\Models\Currency;
 use App\Models\Expense;
 use App\Models\Tax;
+use App\Services\AopReportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,30 +33,33 @@ class ReportExportController extends Controller
         ]);
 
         $company = Company::where('unique_hash', $hash)->first();
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
         $this->authorize('view report', $company);
 
-        // Check if accounting backbone feature is enabled
         if (!$this->isFeatureEnabled()) {
             abort(400, 'Accounting Backbone feature is disabled');
         }
 
-        $locale = CompanySetting::getSetting('language', $company->id);
+        $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
         App::setLocale($locale);
 
-        $adapter = new IfrsAdapter();
         $asOfDate = $request->as_of_date;
-        $balanceSheet = $adapter->getBalanceSheet($company, $asOfDate);
-
-        if (isset($balanceSheet['error'])) {
-            abort(400, $balanceSheet['error']);
-        }
-
         $format = $request->format;
 
         if ($format === 'csv') {
+            $adapter = new IfrsAdapter();
+            $balanceSheet = $adapter->getBalanceSheet($company, $asOfDate);
+            if (isset($balanceSheet['error'])) {
+                abort(400, $balanceSheet['error']);
+            }
             return $this->exportBalanceSheetCsv($balanceSheet, $company, $asOfDate);
         } else {
-            return $this->exportBalanceSheetPdf($balanceSheet, $company, $asOfDate);
+            $year = (int) Carbon::parse($asOfDate)->format('Y');
+            $aopService = app(AopReportService::class);
+            $aopData = $aopService->getBalanceSheetAop($company, $year);
+            return $this->exportBalanceSheetPdf($aopData, $company, $asOfDate);
         }
     }
 
@@ -71,30 +75,34 @@ class ReportExportController extends Controller
         ]);
 
         $company = Company::where('unique_hash', $hash)->first();
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
         $this->authorize('view report', $company);
 
         if (!$this->isFeatureEnabled()) {
             abort(400, 'Accounting Backbone feature is disabled');
         }
 
-        $locale = CompanySetting::getSetting('language', $company->id);
+        $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
         App::setLocale($locale);
 
-        $adapter = new IfrsAdapter();
         $fromDate = $request->from_date;
         $toDate = $request->to_date;
-        $incomeStatement = $adapter->getIncomeStatement($company, $fromDate, $toDate);
-
-        if (isset($incomeStatement['error'])) {
-            abort(400, $incomeStatement['error']);
-        }
-
         $format = $request->format;
 
         if ($format === 'csv') {
+            $adapter = new IfrsAdapter();
+            $incomeStatement = $adapter->getIncomeStatement($company, $fromDate, $toDate);
+            if (isset($incomeStatement['error'])) {
+                abort(400, $incomeStatement['error']);
+            }
             return $this->exportIncomeStatementCsv($incomeStatement, $company, $fromDate, $toDate);
         } else {
-            return $this->exportIncomeStatementPdf($incomeStatement, $company, $fromDate, $toDate);
+            $year = (int) Carbon::parse($toDate)->format('Y');
+            $aopService = app(AopReportService::class);
+            $aopData = $aopService->getIncomeStatementAop($company, $year);
+            return $this->exportIncomeStatementPdf($aopData, $company, $fromDate, $toDate);
         }
     }
 
@@ -109,13 +117,16 @@ class ReportExportController extends Controller
         ]);
 
         $company = Company::where('unique_hash', $hash)->first();
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
         $this->authorize('view report', $company);
 
         if (!$this->isFeatureEnabled()) {
             abort(400, 'Accounting Backbone feature is disabled');
         }
 
-        $locale = CompanySetting::getSetting('language', $company->id);
+        $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
         App::setLocale($locale);
 
         $adapter = new IfrsAdapter();
@@ -147,9 +158,12 @@ class ReportExportController extends Controller
         ]);
 
         $company = Company::where('unique_hash', $hash)->first();
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
         $this->authorize('view report', $company);
 
-        $locale = CompanySetting::getSetting('language', $company->id);
+        $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
         App::setLocale($locale);
 
         $taxTypes = Tax::with('taxType', 'invoice', 'invoiceItem')
@@ -184,9 +198,12 @@ class ReportExportController extends Controller
         ]);
 
         $company = Company::where('unique_hash', $hash)->first();
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
         $this->authorize('view report', $company);
 
-        $locale = CompanySetting::getSetting('language', $company->id);
+        $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
         App::setLocale($locale);
 
         $expenseCategories = Expense::with('category')
@@ -214,8 +231,8 @@ class ReportExportController extends Controller
      */
     private function exportBalanceSheetCsv($balanceSheet, $company, $asOfDate): Response
     {
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $currency = $this->getSafeCurrency($company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd.m.Y';
         $formattedDate = Carbon::createFromFormat('Y-m-d', $asOfDate)->translatedFormat($dateFormat);
 
         $csv = "Balance Sheet\n";
@@ -264,33 +281,17 @@ class ReportExportController extends Controller
     /**
      * Export Balance Sheet to PDF format
      */
-    private function exportBalanceSheetPdf($balanceSheet, $company, $asOfDate): Response
+    private function exportBalanceSheetPdf($aopData, $company, $asOfDate): Response
     {
         $company->load('address');
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd.m.Y';
         $formattedDate = Carbon::createFromFormat('Y-m-d', $asOfDate)->translatedFormat($dateFormat);
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
-
-        $colors = [
-            'primary_text_color',
-            'heading_text_color',
-            'section_heading_text_color',
-            'border_color',
-            'body_text_color',
-            'footer_text_color',
-            'footer_total_color',
-            'footer_bg_color',
-            'date_text_color',
-        ];
-        $colorSettings = CompanySetting::whereIn('option', $colors)
-            ->whereCompany($company->id)
-            ->get();
+        $currency = $this->getSafeCurrency($company->id);
 
         view()->share([
             'company' => $company,
-            'balanceSheet' => $balanceSheet,
+            'aopData' => $aopData,
             'as_of_date' => $formattedDate,
-            'colorSettings' => $colorSettings,
             'currency' => $currency,
         ]);
 
@@ -303,8 +304,8 @@ class ReportExportController extends Controller
      */
     private function exportIncomeStatementCsv($incomeStatement, $company, $fromDate, $toDate): Response
     {
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $currency = $this->getSafeCurrency($company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd.m.Y';
         $formattedFromDate = Carbon::createFromFormat('Y-m-d', $fromDate)->translatedFormat($dateFormat);
         $formattedToDate = Carbon::createFromFormat('Y-m-d', $toDate)->translatedFormat($dateFormat);
 
@@ -351,34 +352,18 @@ class ReportExportController extends Controller
     /**
      * Export Income Statement to PDF format
      */
-    private function exportIncomeStatementPdf($incomeStatement, $company, $fromDate, $toDate): Response
+    private function exportIncomeStatementPdf($aopData, $company, $fromDate, $toDate): Response
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd.m.Y';
         $formattedFromDate = Carbon::createFromFormat('Y-m-d', $fromDate)->translatedFormat($dateFormat);
         $formattedToDate = Carbon::createFromFormat('Y-m-d', $toDate)->translatedFormat($dateFormat);
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
-
-        $colors = [
-            'primary_text_color',
-            'heading_text_color',
-            'section_heading_text_color',
-            'border_color',
-            'body_text_color',
-            'footer_text_color',
-            'footer_total_color',
-            'footer_bg_color',
-            'date_text_color',
-        ];
-        $colorSettings = CompanySetting::whereIn('option', $colors)
-            ->whereCompany($company->id)
-            ->get();
+        $currency = $this->getSafeCurrency($company->id);
 
         view()->share([
             'company' => $company,
-            'incomeStatement' => $incomeStatement,
+            'aopData' => $aopData,
             'from_date' => $formattedFromDate,
             'to_date' => $formattedToDate,
-            'colorSettings' => $colorSettings,
             'currency' => $currency,
         ]);
 
@@ -391,8 +376,8 @@ class ReportExportController extends Controller
      */
     private function exportTrialBalanceCsv($trialBalance, $company, $asOfDate): Response
     {
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $currency = $this->getSafeCurrency($company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd.m.Y';
         $formattedDate = Carbon::createFromFormat('Y-m-d', $asOfDate)->translatedFormat($dateFormat);
 
         $csv = "Trial Balance\n";
@@ -422,30 +407,16 @@ class ReportExportController extends Controller
      */
     private function exportTrialBalancePdf($trialBalance, $company, $asOfDate): Response
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd.m.Y';
         $formattedDate = Carbon::createFromFormat('Y-m-d', $asOfDate)->translatedFormat($dateFormat);
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
-
-        $colors = [
-            'primary_text_color',
-            'heading_text_color',
-            'section_heading_text_color',
-            'border_color',
-            'body_text_color',
-            'footer_text_color',
-            'footer_total_color',
-            'footer_bg_color',
-            'date_text_color',
-        ];
-        $colorSettings = CompanySetting::whereIn('option', $colors)
-            ->whereCompany($company->id)
-            ->get();
+        $currency = $this->getSafeCurrency($company->id);
 
         view()->share([
             'company' => $company,
             'trialBalance' => $trialBalance,
             'as_of_date' => $formattedDate,
-            'colorSettings' => $colorSettings,
+            'from_date' => $formattedDate,
+            'to_date' => $formattedDate,
             'currency' => $currency,
         ]);
 
@@ -458,8 +429,8 @@ class ReportExportController extends Controller
      */
     private function exportTaxSummaryCsv($taxTypes, $totalAmount, $company, $fromDate, $toDate): Response
     {
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $currency = $this->getSafeCurrency($company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd.m.Y';
         $formattedFromDate = Carbon::createFromFormat('Y-m-d', $fromDate)->translatedFormat($dateFormat);
         $formattedToDate = Carbon::createFromFormat('Y-m-d', $toDate)->translatedFormat($dateFormat);
 
@@ -491,30 +462,14 @@ class ReportExportController extends Controller
      */
     private function exportTaxSummaryPdf($taxTypes, $totalAmount, $company, $fromDate, $toDate): Response
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd.m.Y';
         $formattedFromDate = Carbon::createFromFormat('Y-m-d', $fromDate)->translatedFormat($dateFormat);
         $formattedToDate = Carbon::createFromFormat('Y-m-d', $toDate)->translatedFormat($dateFormat);
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
-
-        $colors = [
-            'primary_text_color',
-            'heading_text_color',
-            'section_heading_text_color',
-            'border_color',
-            'body_text_color',
-            'footer_text_color',
-            'footer_total_color',
-            'footer_bg_color',
-            'date_text_color',
-        ];
-        $colorSettings = CompanySetting::whereIn('option', $colors)
-            ->whereCompany($company->id)
-            ->get();
+        $currency = $this->getSafeCurrency($company->id);
 
         view()->share([
             'taxTypes' => $taxTypes,
             'totalTaxAmount' => $totalAmount,
-            'colorSettings' => $colorSettings,
             'company' => $company,
             'from_date' => $formattedFromDate,
             'to_date' => $formattedToDate,
@@ -530,8 +485,8 @@ class ReportExportController extends Controller
      */
     private function exportExpensesCsv($expenseCategories, $totalAmount, $company, $fromDate, $toDate): Response
     {
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $currency = $this->getSafeCurrency($company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd.m.Y';
         $formattedFromDate = Carbon::createFromFormat('Y-m-d', $fromDate)->translatedFormat($dateFormat);
         $formattedToDate = Carbon::createFromFormat('Y-m-d', $toDate)->translatedFormat($dateFormat);
 
@@ -561,29 +516,13 @@ class ReportExportController extends Controller
      */
     private function exportExpensesPdf($expenseCategories, $totalAmount, $company, $fromDate, $toDate): Response
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd.m.Y';
         $formattedFromDate = Carbon::createFromFormat('Y-m-d', $fromDate)->translatedFormat($dateFormat);
         $formattedToDate = Carbon::createFromFormat('Y-m-d', $toDate)->translatedFormat($dateFormat);
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
-
-        $colors = [
-            'primary_text_color',
-            'heading_text_color',
-            'section_heading_text_color',
-            'border_color',
-            'body_text_color',
-            'footer_text_color',
-            'footer_total_color',
-            'footer_bg_color',
-            'date_text_color',
-        ];
-        $colorSettings = CompanySetting::whereIn('option', $colors)
-            ->whereCompany($company->id)
-            ->get();
+        $currency = $this->getSafeCurrency($company->id);
 
         view()->share([
             'expenseCategories' => $expenseCategories,
-            'colorSettings' => $colorSettings,
             'totalExpense' => $totalAmount,
             'company' => $company,
             'from_date' => $formattedFromDate,
@@ -593,6 +532,19 @@ class ReportExportController extends Controller
 
         $pdf = PDF::loadView('app.pdf.reports.expenses');
         return $pdf->download("expenses_report_{$fromDate}_{$toDate}.pdf");
+    }
+
+    /**
+     * Get currency with MKD fallback for safe lookups
+     */
+    private function getSafeCurrency($companyId): Currency
+    {
+        $currencyId = CompanySetting::getSetting('currency', $companyId);
+        $currency = $currencyId ? Currency::find($currencyId) : null;
+        if (! $currency) {
+            $currency = Currency::where('code', 'MKD')->first() ?: Currency::first();
+        }
+        return $currency;
     }
 
     /**
