@@ -859,19 +859,8 @@ return [
             'model' => '',
             'feature_flag' => 'accounting_backbone',
         ],
-        // ── Setup (new features) ──
-        [
-            'title' => 'partner.accounting.cost_centers',
-            'group' => 'partner.accounting',
-            'submenu' => 'setup',
-            'link' => '/admin/partner/accounting/cost-centers',
-            'icon' => 'TagIcon',
-            'name' => 'partner.accounting.cost-centers',
-            'owner_only' => false,
-            'ability' => '',
-            'model' => '',
-            'feature_flag' => 'accounting_backbone',
-        ],
+        // Cost Centers → moved to Operations Hub (accessible by partners via company menu)
+        // CLAUDE-CHECKPOINT
         // ── Ledgers (new features) ──
         [
             'title' => 'partner.accounting.compensations',
