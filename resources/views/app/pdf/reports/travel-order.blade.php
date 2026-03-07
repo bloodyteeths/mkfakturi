@@ -6,8 +6,10 @@
     <style type="text/css">
         body {
             font-family: "DejaVu Sans";
-            font-size: 9px;
+            font-size: 8px;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
 
         table {
@@ -20,12 +22,12 @@
 
         .report-header {
             width: 100%;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
 
         .heading-text {
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;
             color: #1a1a1a;
             width: 100%;
             text-align: left;
@@ -35,7 +37,7 @@
 
         .heading-date {
             font-weight: normal;
-            font-size: 10px;
+            font-size: 9px;
             color: #666;
             width: 100%;
             text-align: right;
@@ -45,47 +47,46 @@
 
         .sub-heading-text {
             font-weight: bold;
-            font-size: 13px;
+            font-size: 11px;
             color: #333;
             padding: 0px;
             margin: 0px;
-            margin-top: 2px;
             text-align: center;
         }
 
         .part-header {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
             color: #fff;
             background-color: #1e40af;
-            padding: 5px 8px;
-            margin: 14px 0 6px 0;
+            padding: 3px 6px;
+            margin: 8px 0 4px 0;
             text-align: center;
             letter-spacing: 1px;
         }
 
         .section-title {
             font-weight: bold;
-            font-size: 10px;
+            font-size: 8px;
             color: #1a1a1a;
-            margin: 8px 0 4px 0;
-            padding: 3px 6px;
+            margin: 4px 0 2px 0;
+            padding: 2px 4px;
             background-color: #f3f4f6;
             border-bottom: 1px solid #d1d5db;
         }
 
         .data-table {
             width: 100%;
-            margin-bottom: 6px;
+            margin-bottom: 3px;
             border: 1px solid #d1d5db;
         }
 
         .data-table th {
             background-color: #f9fafb;
             border: 1px solid #d1d5db;
-            padding: 3px 5px;
+            padding: 2px 3px;
             text-align: left;
-            font-size: 7px;
+            font-size: 6.5px;
             font-weight: bold;
             color: #374151;
             text-transform: uppercase;
@@ -93,8 +94,8 @@
 
         .data-table td {
             border: 1px solid #d1d5db;
-            padding: 2px 5px;
-            font-size: 8px;
+            padding: 1px 3px;
+            font-size: 7px;
         }
 
         .text-right {
@@ -114,35 +115,15 @@
             font-weight: bold;
         }
 
-        .summary-box {
-            width: 100%;
-            margin-top: 8px;
-            border: 2px solid #1d4ed8;
-            padding: 6px;
-            background-color: #eff6ff;
-        }
-
-        .summary-box .label {
-            font-size: 9px;
-            color: #1e40af;
-            font-weight: bold;
-        }
-
-        .summary-box .amount {
-            font-size: 13px;
-            color: #1e40af;
-            font-weight: bold;
-        }
-
         .meta-table {
             width: 100%;
-            margin-bottom: 6px;
+            margin-bottom: 3px;
             border: 1px solid #e5e7eb;
         }
 
         .meta-table td {
-            padding: 3px 6px;
-            font-size: 9px;
+            padding: 2px 4px;
+            font-size: 7.5px;
             border: 1px solid #e5e7eb;
         }
 
@@ -160,62 +141,62 @@
         .employee-box {
             width: 100%;
             border: 1px solid #e5e7eb;
-            padding: 6px;
-            margin-bottom: 6px;
+            padding: 3px 5px;
+            margin-bottom: 3px;
         }
 
         .employee-box .emp-label {
-            font-size: 7px;
+            font-size: 6px;
             color: #6b7280;
             text-transform: uppercase;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
 
         .employee-box .emp-name {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: bold;
             color: #1f2937;
         }
 
         .employee-box .emp-detail {
-            font-size: 8px;
+            font-size: 7px;
             color: #4b5563;
         }
 
         .signature-table {
             width: 100%;
-            margin-top: 30px;
+            margin-top: 12px;
         }
 
         .signature-table td {
             text-align: center;
             vertical-align: bottom;
-            padding-top: 30px;
+            padding-top: 15px;
         }
 
         .signature-line {
             border-top: 1px solid #9ca3af;
-            margin: 0 12px;
-            padding-top: 3px;
-            font-size: 7px;
+            margin: 0 8px;
+            padding-top: 2px;
+            font-size: 6.5px;
             color: #6b7280;
         }
 
         .stamp-circle {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border: 1px dashed #9ca3af;
             border-radius: 50%;
-            margin: 0 auto 4px auto;
-            line-height: 50px;
+            margin: 0 auto 2px auto;
+            line-height: 40px;
             text-align: center;
-            font-size: 7px;
+            font-size: 6px;
             color: #9ca3af;
         }
 
         .divider {
             border-top: 2px dashed #d1d5db;
-            margin: 10px 0;
+            margin: 6px 0;
         }
     </style>
 </head>
@@ -289,9 +270,9 @@
                 <td class="meta-value" colspan="3">{{ $order->purpose }}</td>
             </tr>
             <tr>
-                <td class="meta-label">Датум и час на заминување / Departure:</td>
+                <td class="meta-label">Заминување / Departure:</td>
                 <td class="meta-value">{{ \Carbon\Carbon::parse($order->departure_date)->format('d.m.Y H:i') }}</td>
-                <td class="meta-label">Датум и час на враќање / Return:</td>
+                <td class="meta-label">Враќање / Return:</td>
                 <td class="meta-value">{{ \Carbon\Carbon::parse($order->return_date)->format('d.m.Y H:i') }}</td>
             </tr>
             @php
@@ -302,22 +283,12 @@
                 $remainingHours = $totalHours % 24;
             @endphp
             <tr>
-                <td class="meta-label">Траење на патување / Duration:</td>
-                <td class="meta-value" colspan="3">
-                    @if($totalDays > 0){{ $totalDays }} ден(а) @endif{{ $remainingHours }} час(а)
-                    (вкупно {{ $totalHours }} часа)
+                <td class="meta-label">Траење / Duration:</td>
+                <td class="meta-value">
+                    @if($totalDays > 0){{ $totalDays }} ден(а) @endif{{ $remainingHours }}ч (вкупно {{ $totalHours }}ч)
                 </td>
-            </tr>
-            <tr>
-                <td class="meta-label">Износ на аванс / Advance:</td>
+                <td class="meta-label">Аванс / Advance:</td>
                 <td class="meta-value">{{ number_format($order->advance_amount / 100, 2) }} ден.</td>
-                @if($order->cost_center_id)
-                    <td class="meta-label">Трошковен центар / Cost Center:</td>
-                    <td class="meta-value">{{ $order->cost_center_id }}</td>
-                @else
-                    <td class="meta-label">&nbsp;</td>
-                    <td>&nbsp;</td>
-                @endif
             </tr>
         </table>
 
@@ -328,12 +299,12 @@
                 <thead>
                     <tr>
                         <th style="width: 4%;">#</th>
-                        <th style="width: 12%;">Од / From</th>
-                        <th style="width: 12%;">До / To</th>
+                        <th style="width: 13%;">Од / From</th>
+                        <th style="width: 13%;">До / To</th>
                         <th style="width: 14%;">Заминување</th>
                         <th style="width: 14%;">Пристигнување</th>
                         <th style="width: 10%;">Превоз</th>
-                        <th class="text-right" style="width: 8%;">Км</th>
+                        <th class="text-right" style="width: 7%;">Км</th>
                         <th class="text-center" style="width: 6%;">Смештај</th>
                         <th class="text-center" style="width: 6%;">Оброци</th>
                         @if($order->type === 'foreign')
@@ -400,18 +371,18 @@
         <p class="part-header">ДЕЛ 2: ПРЕСМЕТКА НА ПАТНИ ТРОШОЦИ</p>
 
         {{-- Per Diem Calculation --}}
-        <p class="section-title">ПРЕСМЕТКА НА ДНЕВНИЦИ / PER DIEM CALCULATION</p>
+        <p class="section-title">ДНЕВНИЦИ / PER DIEM</p>
         <table class="data-table">
             <thead>
                 <tr>
                     <th style="width: 4%;">#</th>
-                    <th style="width: 20%;">Релација / Route</th>
-                    <th style="width: 16%;">Заминување</th>
-                    <th style="width: 16%;">Пристигнување</th>
-                    <th class="text-right" style="width: 8%;">Часа</th>
+                    <th style="width: 22%;">Релација</th>
+                    <th style="width: 14%;">Заминување</th>
+                    <th style="width: 14%;">Пристигнување</th>
+                    <th class="text-right" style="width: 7%;">Часа</th>
                     <th class="text-right" style="width: 8%;">Денови</th>
-                    <th class="text-right" style="width: 12%;">Стапка (ден.)</th>
-                    <th class="text-right" style="width: 12%;">Износ (ден.)</th>
+                    <th class="text-right" style="width: 12%;">Стапка</th>
+                    <th class="text-right" style="width: 12%;">Износ</th>
                 </tr>
             </thead>
             <tbody>
@@ -434,13 +405,13 @@
                     @if($seg->meals_provided)
                         <tr>
                             <td></td>
-                            <td colspan="6" style="font-size: 7px; color: #6b7280;">&nbsp;&nbsp;↳ Намалување 50% за обезбедени оброци / 50% meal reduction</td>
+                            <td colspan="6" style="font-size: 6px; color: #6b7280;">&nbsp;&nbsp;↳ Намалување 50% за оброци</td>
                             <td></td>
                         </tr>
                     @endif
                 @endforeach
                 <tr class="total-row">
-                    <td colspan="7" class="text-right">Вкупно дневници / Total Per Diem:</td>
+                    <td colspan="7" class="text-right">Вкупно дневници:</td>
                     <td class="text-right">{{ number_format($order->total_per_diem / 100, 2) }}</td>
                 </tr>
             </tbody>
@@ -448,15 +419,15 @@
 
         {{-- Mileage Calculation --}}
         @if($order->total_mileage_cost > 0)
-            <p class="section-title">ПРЕСМЕТКА НА КИЛОМЕТРАЖА / MILEAGE CALCULATION</p>
+            <p class="section-title">КИЛОМЕТРАЖА / MILEAGE</p>
             <table class="data-table">
                 <thead>
                     <tr>
                         <th style="width: 4%;">#</th>
-                        <th style="width: 30%;">Релација / Route</th>
-                        <th class="text-right" style="width: 15%;">Км / Km</th>
+                        <th style="width: 34%;">Релација</th>
+                        <th class="text-right" style="width: 15%;">Км</th>
                         <th class="text-right" style="width: 20%;">Стапка (ден./км)</th>
-                        <th class="text-right" style="width: 20%;">Износ (ден.)</th>
+                        <th class="text-right" style="width: 20%;">Износ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -474,26 +445,23 @@
                         @endif
                     @endforeach
                     <tr class="total-row">
-                        <td colspan="4" class="text-right">Вкупно километража / Total Mileage:</td>
+                        <td colspan="4" class="text-right">Вкупно километража:</td>
                         <td class="text-right">{{ number_format($order->total_mileage_cost / 100, 2) }}</td>
                     </tr>
                 </tbody>
             </table>
-            <p style="font-size: 7px; color: #9ca3af; margin: 0 0 4px 0;">
-                * Стапка: 30% од цената на горивото (чл. 35, Општ колективен договор) ≈ 15 МКД/км
-            </p>
         @endif
 
         {{-- Expenses --}}
         @if($order->expenses->count() > 0)
-            <p class="section-title">ДРУГИ ТРОШОЦИ / OTHER EXPENSES</p>
+            <p class="section-title">ДРУГИ ТРОШОЦИ / EXPENSES</p>
             <table class="data-table">
                 <thead>
                     <tr>
                         <th style="width: 4%;">#</th>
                         <th style="width: 20%;">Категорија</th>
-                        <th style="width: 45%;">Опис / Description</th>
-                        <th class="text-right" style="width: 18%;">Износ (ден.)</th>
+                        <th style="width: 45%;">Опис</th>
+                        <th class="text-right" style="width: 18%;">Износ</th>
                         <th style="width: 8%;">Валута</th>
                     </tr>
                 </thead>
@@ -515,7 +483,7 @@
                         </tr>
                     @endforeach
                     <tr class="total-row">
-                        <td colspan="3" class="text-right">Вкупно трошоци / Total:</td>
+                        <td colspan="3" class="text-right">Вкупно трошоци:</td>
                         <td class="text-right">{{ number_format($order->total_expenses / 100, 2) }}</td>
                         <td></td>
                     </tr>
@@ -539,7 +507,7 @@
                     <td>3. Вкупно други трошоци / Total Expenses:</td>
                     <td class="text-right text-bold">{{ number_format($order->total_expenses / 100, 2) }} ден.</td>
                 </tr>
-                <tr class="total-row" style="font-size: 10px;">
+                <tr class="total-row" style="font-size: 9px;">
                     <td class="text-bold">4. ВКУПНО (1+2+3) / GRAND TOTAL:</td>
                     <td class="text-right text-bold">{{ number_format($order->grand_total / 100, 2) }} ден.</td>
                 </tr>
@@ -547,7 +515,7 @@
                     <td>5. Примен аванс / Advance Received:</td>
                     <td class="text-right text-bold">{{ number_format($order->advance_amount / 100, 2) }} ден.</td>
                 </tr>
-                <tr style="font-size: 10px; {{ $order->reimbursement_amount >= 0 ? 'background-color: #f0fdf4;' : 'background-color: #fef2f2;' }}">
+                <tr style="font-size: 9px; {{ $order->reimbursement_amount >= 0 ? 'background-color: #f0fdf4;' : 'background-color: #fef2f2;' }}">
                     <td class="text-bold">
                         6.
                         @if($order->reimbursement_amount >= 0)
@@ -556,25 +524,25 @@
                             ЗА ВРАЌАЊЕ ОД ВРАБОТЕН (5-4):
                         @endif
                     </td>
-                    <td class="text-right text-bold" style="font-size: 12px;">{{ number_format(abs($order->reimbursement_amount) / 100, 2) }} ден.</td>
+                    <td class="text-right text-bold" style="font-size: 11px;">{{ number_format(abs($order->reimbursement_amount) / 100, 2) }} ден.</td>
                 </tr>
             </tbody>
         </table>
 
         {{-- Notes --}}
         @if($order->notes)
-            <p style="margin-top: 6px; font-size: 8px; color: #4b5563;">
-                <strong>Забелешки / Notes:</strong> {{ $order->notes }}
+            <p style="margin-top: 3px; font-size: 7px; color: #4b5563;">
+                <strong>Забелешки:</strong> {{ $order->notes }}
             </p>
         @endif
 
         {{-- Legal basis --}}
-        <p style="margin-top: 8px; font-size: 7px; color: #9ca3af;">
-            Согласно чл. 113 од Законот за работните односи (Сл. Весник 145/2014) и чл. 35 од Општиот колективен договор за приватниот сектор.
+        <p style="margin-top: 4px; font-size: 6px; color: #9ca3af;">
+            Согласно чл. 113 од ЗРО (Сл. Весник 145/2014) и чл. 35 од ОКД за приватниот сектор.
             @if($order->type === 'domestic')
-                Дневница: 8% од просечна месечна нето плата ({{ number_format(2670, 0) }} МКД/ден). Километража: 30% од цена на гориво ({{ number_format(15, 0) }} МКД/км).
+                Дневница: 8% од просечна нето плата (≈{{ number_format(2670, 0) }} МКД/ден). Километража: 30% од гориво (≈{{ number_format(15, 0) }} МКД/км).
             @else
-                Дневница за странство: согласно Уредбата за издатоците за службени патувања и селидби во странство.
+                Дневница за странство: согласно Уредбата за издатоците за службени патувања во странство.
             @endif
             Рок за пресметка: 7 дена по завршување на патувањето.
         </p>
@@ -584,27 +552,27 @@
             <tr>
                 <td style="width: 33%;">
                     <div class="signature-line">
-                        Вработен (патник)<br/>Employee (traveler)
+                        Вработен (патник) / Employee
                     </div>
                 </td>
                 <td style="width: 34%;">
                     <div class="signature-line">
                         Одобрил / Authorized by
                         @if($order->approved_by_user)
-                            <br/><span style="color: #1f2937; font-weight: bold; font-size: 8px;">{{ $order->approved_by_user->name }}</span>
+                            <br/><span style="color: #1f2937; font-weight: bold; font-size: 7px;">{{ $order->approved_by_user->name }}</span>
                         @endif
                     </div>
                 </td>
                 <td style="width: 33%;">
                     <div class="signature-line">
-                        Сметководител<br/>Accountant
+                        Сметководител / Accountant
                     </div>
                 </td>
             </tr>
         </table>
 
         {{-- Footer --}}
-        <p style="text-align: center; font-size: 7px; color: #9ca3af; margin-top: 15px;">
+        <p style="text-align: center; font-size: 6px; color: #9ca3af; margin-top: 8px;">
             Генерирано од Facturino &mdash; app.facturino.mk
         </p>
 

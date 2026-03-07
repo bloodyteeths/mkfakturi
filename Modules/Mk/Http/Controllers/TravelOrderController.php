@@ -3,6 +3,7 @@
 namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\PayrollEmployee;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -313,6 +314,31 @@ class TravelOrderController extends Controller
         $filename = "paten-nalog-{$order->travel_number}.pdf";
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * Lightweight employee list for travel order dropdowns.
+     * No tier check — travel orders are Standard tier, payroll is Business.
+     */
+    public function employees(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $employees = PayrollEmployee::where('company_id', $companyId)
+            ->where('is_active', true)
+            ->select('id', 'first_name', 'last_name', 'position')
+            ->orderBy('first_name')
+            ->get()
+            ->map(fn ($e) => [
+                'id' => $e->id,
+                'name' => "{$e->first_name} {$e->last_name}",
+                'position' => $e->position,
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $employees,
+        ]);
     }
 
     /**

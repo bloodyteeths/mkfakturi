@@ -579,12 +579,8 @@ function removeExpense(index) {
 async function fetchEmployees() {
   isLoadingEmployees.value = true
   try {
-    const response = await window.axios.get('/payroll-employees', { params: { limit: 'all' } })
-    const data = response.data?.data || response.data?.employees?.data || []
-    employees.value = data.map(e => ({
-      id: e.id,
-      name: `${e.first_name} ${e.last_name}`,
-    }))
+    const response = await window.axios.get('/travel-orders/employees')
+    employees.value = response.data?.data || []
   } catch {
     employees.value = []
   } finally {

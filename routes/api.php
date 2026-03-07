@@ -1078,6 +1078,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/{id}/receive-goods', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'receiveGoods']);
                 Route::post('/{id}/convert-to-bill', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'convertToBill']);
                 Route::get('/{id}/three-way-match', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'threeWayMatch']);
+                Route::get('/{id}/pdf', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'pdf']);
                 Route::post('/{id}/cancel', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'cancel']);
                 Route::delete('/{id}', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'destroy']);
             });
@@ -1103,6 +1104,7 @@ Route::prefix('/v1')->group(function () {
             Route::prefix('travel-orders')->middleware('tier:standard')->group(function () {
                 Route::get('/', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'index']);
                 Route::get('/summary', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'summary']);
+                Route::get('/employees', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'employees']);
                 Route::post('/', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'store']);
                 Route::get('/{id}', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'show']);
                 Route::put('/{id}', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'update']);
