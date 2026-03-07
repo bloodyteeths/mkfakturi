@@ -11,7 +11,6 @@ use App\Models\StockMovement;
 use Carbon\Carbon;
 use IFRS\Models\Account;
 use IFRS\Models\Entity;
-use IFRS\Models\LineItem;
 use IFRS\Models\ReportingPeriod;
 use IFRS\Models\Transaction;
 use IFRS\Reports\BalanceSheet;
@@ -187,24 +186,32 @@ class IfrsAdapter
             ]);
 
             // Line Item: Debit Cash
-            LineItem::create([
+            // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $cashAccount->id,
                 'amount' => $payment->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // Line Item: Credit Accounts Receivable
-            LineItem::create([
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $arAccount->id,
                 'amount' => $payment->amount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
+
+            // Reload line items so post() sees them (Transaction::create caches empty lineItems)
+            $transaction->load('lineItems');
 
             // Post the transaction to the ledger
             $transaction->post();
@@ -224,6 +231,7 @@ class IfrsAdapter
             Log::error('Failed to post payment to ledger', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -268,24 +276,32 @@ class IfrsAdapter
             ]);
 
             // Line Item: Debit Fee Expense
-            LineItem::create([
+            // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $feeExpenseAccount->id,
                 'amount' => $fee / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // Line Item: Credit Cash
-            LineItem::create([
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $cashAccount->id,
                 'amount' => $fee / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
+
+            // Reload line items so post() sees them (Transaction::create caches empty lineItems)
+            $transaction->load('lineItems');
 
             // Post the transaction to the ledger
             $transaction->post();
@@ -302,6 +318,7 @@ class IfrsAdapter
             Log::error('Failed to post payment fee to ledger', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -368,37 +385,47 @@ class IfrsAdapter
             ]);
 
             // Line Item: Credit Accounts Receivable (reduce asset)
-            LineItem::create([
+            // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $arAccount->id,
                 'amount' => $creditNote->total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // Line Item: Debit Revenue (reduce revenue)
-            LineItem::create([
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $revenueAccount->id,
                 'amount' => $creditNote->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // If there's tax, create a line to reduce tax payable
             if ($creditNote->tax > 0) {
                 $taxPayableAccount = $this->getTaxPayableAccount($creditNote->company_id, $entity->id);
-                LineItem::create([
+                DB::table('ifrs_line_items')->insert([
                     'transaction_id' => $transaction->id,
                     'account_id' => $taxPayableAccount->id,
                     'amount' => $creditNote->tax / 100,
                     'quantity' => 1,
                     'credited' => false, // Debit to reduce liability
                     'entity_id' => $entity->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             }
+
+            // Reload line items so post() sees them (Transaction::create caches empty lineItems)
+            $transaction->load('lineItems');
 
             // Post the transaction to the ledger
             $transaction->post();
@@ -420,6 +447,7 @@ class IfrsAdapter
             Log::error('Failed to post credit note to ledger', [
                 'credit_note_id' => $creditNote->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -1546,24 +1574,32 @@ class IfrsAdapter
             ]);
 
             // Line Item: Debit Expense Account
-            LineItem::create([
+            // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $expenseAccount->id,
                 'amount' => $expense->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // Line Item: Credit Cash/Bank
-            LineItem::create([
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $cashAccount->id,
                 'amount' => $expense->amount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
+
+            // Reload line items so post() sees them (Transaction::create caches empty lineItems)
+            $transaction->load('lineItems');
 
             // Post the transaction to the ledger
             $transaction->post();
@@ -1589,6 +1625,7 @@ class IfrsAdapter
             Log::error('Failed to post expense to ledger', [
                 'expense_id' => $expense->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -2448,37 +2485,47 @@ class IfrsAdapter
             ]);
 
             // Line Item: Debit Expense Account
-            LineItem::create([
+            // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $expenseAccount->id,
                 'amount' => $bill->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // If there's input VAT, debit VAT Receivable (input VAT is an asset)
             if ($bill->tax > 0) {
                 $vatReceivableAccount = $this->getVatReceivableAccount($bill->company_id, $entity->id);
-                LineItem::create([
+                DB::table('ifrs_line_items')->insert([
                     'transaction_id' => $transaction->id,
                     'account_id' => $vatReceivableAccount->id,
                     'amount' => $bill->tax / 100,
                     'quantity' => 1,
                     'credited' => false, // Debit entry
                     'entity_id' => $entity->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             }
 
             // Line Item: Credit Accounts Payable
-            LineItem::create([
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $apAccount->id,
                 'amount' => $bill->total / 100, // Total includes tax
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
+
+            // Reload line items so post() sees them (Transaction::create caches empty lineItems)
+            $transaction->load('lineItems');
 
             // Post the transaction to the ledger
             $transaction->post();
@@ -2503,6 +2550,7 @@ class IfrsAdapter
             Log::error('Failed to post bill to ledger', [
                 'bill_id' => $bill->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -2563,24 +2611,32 @@ class IfrsAdapter
             ]);
 
             // Line Item: Debit Accounts Payable (reduce liability)
-            LineItem::create([
+            // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $apAccount->id,
                 'amount' => $billPayment->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // Line Item: Credit Cash and Bank (reduce asset)
-            LineItem::create([
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $cashAccount->id,
                 'amount' => $billPayment->amount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
+
+            // Reload line items so post() sees them (Transaction::create caches empty lineItems)
+            $transaction->load('lineItems');
 
             // Post the transaction to the ledger
             $transaction->post();
@@ -2600,6 +2656,7 @@ class IfrsAdapter
             Log::error('Failed to post bill payment to ledger', [
                 'bill_payment_id' => $billPayment->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -3198,3 +3255,10 @@ class IfrsAdapter
 // Added getInventoryAccount(), getCogsAccount(), getPurchaseCalculationAccount()
 // Added getInventoryAdjustmentAccount(), getOpeningBalanceAccount()
 // Per-item GL account overrides via inventory_account_id, cogs_account_id, purchase_account_id
+// CLAUDE-CHECKPOINT: Fix IFRS ledger posting bug — "Transaction must have at least one LineItem"
+// Root cause: Transaction::create()->save() calls load('lineItems') which caches empty collection
+// before LineItems are inserted. When post() later calls getLineItems(), it reads the stale cache.
+// Fix: Converted all 6 broken methods from LineItem::create() to DB::table('ifrs_line_items')->insert()
+// then added $transaction->load('lineItems') before $transaction->post() — same pattern as postInvoice().
+// Affected methods: postPayment, postFee, postCreditNote, postExpense, postBill, postBillPayment.
+// Also added trace to error logging for future debugging.

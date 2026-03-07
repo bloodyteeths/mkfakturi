@@ -745,6 +745,9 @@ Route::prefix('/v1')->group(function () {
             Route::put('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'update']);
             Route::delete('/bills/{bill}/payments/{payment}', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'destroy']);
 
+            // Bill Payments listing (all bill payments for current company, not scoped to a single bill)
+            Route::get('/bill-payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentListController::class, 'index']);
+
             // Bills CSV/XLSX Import
             Route::post('/bills/import', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsImportController::class, 'import']);
 

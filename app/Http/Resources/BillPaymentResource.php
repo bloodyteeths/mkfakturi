@@ -13,6 +13,7 @@ class BillPaymentResource extends JsonResource
             'bill_id' => $this->bill_id,
             'company_id' => $this->company_id,
             'creator_id' => $this->creator_id,
+            'payment_number' => $this->payment_number,
             'payment_date' => $this->payment_date,
             'amount' => $this->amount,
             'exchange_rate' => $this->exchange_rate,
@@ -29,4 +30,5 @@ class BillPaymentResource extends JsonResource
             }),
         ];
     }
+    // CLAUDE-CHECKPOINT
 }

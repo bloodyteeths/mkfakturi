@@ -238,14 +238,18 @@ const { t } = useI18n()
 
 // Submenu group definitions (title i18n key + icon)
 const submenuConfig = {
+  // Partner accounting submenus
   setup: { title: 'partner.accounting.submenu.setup', icon: 'WrenchScrewdriverIcon' },
   ledgers: { title: 'partner.accounting.submenu.ledgers', icon: 'BookOpenIcon' },
   reports: { title: 'partner.accounting.submenu.reports', icon: 'ChartBarSquareIcon' },
   compliance: { title: 'partner.accounting.submenu.compliance', icon: 'ShieldCheckIcon' },
+  // Main sidebar collapsible sections
+  operations: { title: 'navigation.operations', icon: 'Cog6ToothIcon' },
+  finance: { title: 'navigation.finance', icon: 'ChartPieIcon' },
 }
 
 // Order in which submenu groups appear in the sidebar
-const submenuOrder = ['setup', 'ledgers', 'reports', 'compliance']
+const submenuOrder = ['setup', 'ledgers', 'reports', 'compliance', 'operations', 'finance']
 
 // Track which submenus are expanded
 const expandedSubmenus = reactive({})
@@ -280,9 +284,11 @@ function isSubmenuActive(items) {
 }
 
 // Organize a menu group into submenu sections + loose items
+// Preserves original item order: submenu group appears at the position of its first child
 function getOrganizedMenu(menu) {
   const result = []
   const groups = {}
+  const insertedGroups = new Set()
 
   menu.forEach(item => {
     if (item.submenu && submenuConfig[item.submenu]) {
@@ -290,25 +296,22 @@ function getOrganizedMenu(menu) {
         groups[item.submenu] = []
       }
       groups[item.submenu].push(item)
-    }
-  })
 
-  // Add submenu groups in defined order
-  submenuOrder.forEach(key => {
-    if (groups[key] && groups[key].length > 0) {
-      result.push({
-        type: 'submenu',
-        key,
-        title: submenuConfig[key].title,
-        icon: submenuConfig[key].icon,
-        items: groups[key],
-      })
+      // Insert the submenu group at the position of the first child item
+      if (!insertedGroups.has(item.submenu)) {
+        insertedGroups.add(item.submenu)
+        result.push({
+          type: 'submenu',
+          key: item.submenu,
+          title: submenuConfig[item.submenu].title,
+          icon: submenuConfig[item.submenu].icon,
+          items: groups[item.submenu], // reference - will accumulate subsequent items
+        })
+      }
+    } else {
+      // Regular item (no submenu) - render inline
+      result.push({ type: 'item', key: item.link, item })
     }
-  })
-
-  // Add non-submenu items at the end (e.g., "Back to Partner Portal")
-  menu.filter(item => !item.submenu).forEach(item => {
-    result.push({ type: 'item', key: item.link, item })
   })
 
   return result
@@ -377,3 +380,4 @@ function hideTooltip() {
   tooltip.visible = false
 }
 </script>
+<!-- CLAUDE-CHECKPOINT -->

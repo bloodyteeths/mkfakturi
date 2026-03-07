@@ -109,37 +109,125 @@
                 :key="index"
                 class="mt-5 space-y-1"
               >
-                <router-link
-                  v-for="item in menu"
-                  :key="item.name"
-                  :to="item.link"
-                  :class="[
-                    hasActiveUrl(item.link)
-                      ? 'text-primary-500 border-primary-500 bg-gray-100'
-                      : 'text-black',
-                    'cursor-pointer px-0 pl-4 py-3 border-transparent flex items-start border-l-4 border-solid text-sm not-italic font-medium',
-                  ]"
-                  @click="close"
-                >
-                  <BaseIcon
-                    :name="item.icon"
+                <template v-if="hasSubmenus(menu)">
+                  <template v-for="group in getOrganizedMenu(menu)" :key="group.key || group.item?.link">
+                    <!-- Collapsible submenu header -->
+                    <template v-if="group.type === 'submenu'">
+                      <button
+                        @click="toggleSubmenu(group.key)"
+                        class="w-full cursor-pointer px-0 pl-4 py-3 border-transparent flex items-center border-l-4 border-solid text-sm not-italic font-medium"
+                        :class="[
+                          isSubmenuActive(group.items)
+                            ? 'text-primary-500 border-primary-500 bg-gray-100'
+                            : 'text-black'
+                        ]"
+                      >
+                        <BaseIcon
+                          :name="group.icon"
+                          :class="[
+                            isSubmenuActive(group.items) ? 'text-primary-500' : 'text-gray-400',
+                            'mr-4 shrink-0 h-5 w-5'
+                          ]"
+                        />
+                        <span class="flex-1 text-left">{{ $t(group.title) }}</span>
+                        <BaseIcon
+                          name="ChevronRightIcon"
+                          :class="[
+                            'h-4 w-4 mr-4 text-gray-400 transition-transform duration-200',
+                            expandedMobileSubmenus[group.key] ? 'rotate-90' : ''
+                          ]"
+                        />
+                      </button>
+                      <!-- Submenu children -->
+                      <div v-show="expandedMobileSubmenus[group.key]">
+                        <router-link
+                          v-for="item in group.items"
+                          :key="item.link"
+                          :to="item.link"
+                          :class="[
+                            hasActiveUrl(item.link)
+                              ? 'text-primary-500 border-primary-500 bg-gray-50'
+                              : 'text-gray-600 border-transparent',
+                            'cursor-pointer pl-12 pr-4 py-2.5 flex items-center border-l-4 border-solid text-sm',
+                          ]"
+                          @click="close"
+                        >
+                          <BaseIcon
+                            :name="item.icon"
+                            :class="[
+                              hasActiveUrl(item.link) ? 'text-primary-500' : 'text-gray-400',
+                              'mr-3 shrink-0 h-4 w-4',
+                            ]"
+                          />
+                          <span>{{ $t(item.title) }}</span>
+                        </router-link>
+                      </div>
+                    </template>
+                    <!-- Regular item in a mixed group -->
+                    <router-link
+                      v-else
+                      :to="group.item.link"
+                      :class="[
+                        hasActiveUrl(group.item.link)
+                          ? 'text-primary-500 border-primary-500 bg-gray-100'
+                          : 'text-black',
+                        'cursor-pointer px-0 pl-4 py-3 border-transparent flex items-start border-l-4 border-solid text-sm not-italic font-medium',
+                      ]"
+                      @click="close"
+                    >
+                      <BaseIcon
+                        :name="group.item.icon"
+                        :class="[
+                          hasActiveUrl(group.item.link) ? 'text-primary-500' : 'text-gray-400',
+                          'mr-4 shrink-0 h-5 w-5 mt-0.5',
+                        ]"
+                      />
+                      <div>
+                        <div>{{ $t(group.item.title) }}</div>
+                        <div
+                          v-if="getHint(group.item.title)"
+                          class="text-xs font-normal text-gray-400 mt-0.5 leading-tight"
+                        >
+                          {{ getHint(group.item.title) }}
+                        </div>
+                      </div>
+                    </router-link>
+                  </template>
+                </template>
+                <!-- Regular groups (no submenus at all) -->
+                <template v-else>
+                  <router-link
+                    v-for="item in menu"
+                    :key="item.name"
+                    :to="item.link"
                     :class="[
                       hasActiveUrl(item.link)
-                        ? 'text-primary-500'
-                        : 'text-gray-400',
-                      'mr-4 shrink-0 h-5 w-5 mt-0.5',
+                        ? 'text-primary-500 border-primary-500 bg-gray-100'
+                        : 'text-black',
+                      'cursor-pointer px-0 pl-4 py-3 border-transparent flex items-start border-l-4 border-solid text-sm not-italic font-medium',
                     ]"
-                  />
-                  <div>
-                    <div>{{ $t(item.title) }}</div>
-                    <div
-                      v-if="getHint(item.title)"
-                      class="text-xs font-normal text-gray-400 mt-0.5 leading-tight"
-                    >
-                      {{ getHint(item.title) }}
+                    @click="close"
+                  >
+                    <BaseIcon
+                      :name="item.icon"
+                      :class="[
+                        hasActiveUrl(item.link)
+                          ? 'text-primary-500'
+                          : 'text-gray-400',
+                        'mr-4 shrink-0 h-5 w-5 mt-0.5',
+                      ]"
+                    />
+                    <div>
+                      <div>{{ $t(item.title) }}</div>
+                      <div
+                        v-if="getHint(item.title)"
+                        class="text-xs font-normal text-gray-400 mt-0.5 leading-tight"
+                      >
+                        {{ getHint(item.title) }}
+                      </div>
                     </div>
-                  </div>
-                </router-link>
+                  </router-link>
+                </template>
               </nav>
             </div>
           </div>
@@ -154,7 +242,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
@@ -174,6 +262,60 @@ const { t } = useI18n()
 
 const isOpen = ref(false)
 
+// Submenu config (same definitions as desktop sidebar)
+const submenuConfig = {
+  setup: { title: 'partner.accounting.submenu.setup', icon: 'WrenchScrewdriverIcon' },
+  ledgers: { title: 'partner.accounting.submenu.ledgers', icon: 'BookOpenIcon' },
+  reports: { title: 'partner.accounting.submenu.reports', icon: 'ChartBarSquareIcon' },
+  compliance: { title: 'partner.accounting.submenu.compliance', icon: 'ShieldCheckIcon' },
+  operations: { title: 'navigation.operations', icon: 'Cog6ToothIcon' },
+  finance: { title: 'navigation.finance', icon: 'ChartPieIcon' },
+}
+
+const expandedMobileSubmenus = reactive({})
+
+function hasSubmenus(menu) {
+  return menu.some(item => item.submenu)
+}
+
+function isSubmenuActive(items) {
+  return items.some(item => hasActiveUrl(item.link))
+}
+
+function getOrganizedMenu(menu) {
+  const result = []
+  const groups = {}
+  const insertedGroups = new Set()
+
+  menu.forEach(item => {
+    if (item.submenu && submenuConfig[item.submenu]) {
+      if (!groups[item.submenu]) {
+        groups[item.submenu] = []
+      }
+      groups[item.submenu].push(item)
+
+      if (!insertedGroups.has(item.submenu)) {
+        insertedGroups.add(item.submenu)
+        result.push({
+          type: 'submenu',
+          key: item.submenu,
+          title: submenuConfig[item.submenu].title,
+          icon: submenuConfig[item.submenu].icon,
+          items: groups[item.submenu],
+        })
+      }
+    } else {
+      result.push({ type: 'item', key: item.link, item })
+    }
+  })
+
+  return result
+}
+
+function toggleSubmenu(key) {
+  expandedMobileSubmenus[key] = !expandedMobileSubmenus[key]
+}
+
 function getHint(titleKey) {
   const hintKey = titleKey.replace('navigation.', 'navigation_hints.')
   const hint = t(hintKey)
@@ -183,6 +325,17 @@ function getHint(titleKey) {
 function open() {
   isOpen.value = true
   globalStore.setSidebarVisibility(true)
+
+  // Auto-expand submenus with active routes
+  for (const menu of globalStore.menuGroups) {
+    if (!hasSubmenus(menu)) continue
+    const organized = getOrganizedMenu(menu)
+    for (const group of organized) {
+      if (group.type === 'submenu' && isSubmenuActive(group.items)) {
+        expandedMobileSubmenus[group.key] = true
+      }
+    }
+  }
 }
 
 function close() {
@@ -204,4 +357,5 @@ watch(
   }
 )
 
+// CLAUDE-CHECKPOINT
 </script>
