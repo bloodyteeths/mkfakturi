@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\V1\Admin\Report;
 
-use App\Domain\Accounting\IfrsAdapter;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\CompanySetting;
 use App\Models\Currency;
+use App\Services\AopReportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -23,6 +23,11 @@ class BalanceSheetReportController extends Controller
     public function __invoke(Request $request, $hash)
     {
         $company = Company::where('unique_hash', $hash)->first();
+
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
+
         $company->load('address');
 
         $this->authorize('view report', $company);
@@ -34,54 +39,34 @@ class BalanceSheetReportController extends Controller
             ]);
         }
 
-        $locale = CompanySetting::getSetting('language', $company->id);
+        $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
         App::setLocale($locale);
 
-        // Get balance sheet data via IfrsAdapter
-        $adapter = new IfrsAdapter;
         $asOfDate = $request->has('as_of_date')
             ? $request->as_of_date
             : now()->toDateString();
 
-        $balanceSheet = $adapter->getBalanceSheet($company, $asOfDate);
+        $year = (int) Carbon::parse($asOfDate)->format('Y');
 
-        // Handle errors from adapter
-        if (isset($balanceSheet['error'])) {
-            return response()->view('app.pdf.reports.feature-disabled', [
-                'message' => $balanceSheet['error'],
-            ]);
-        }
+        // Use AopReportService to get Образец 36 data
+        $aopService = app(AopReportService::class);
+        $aopData = $aopService->getBalanceSheetAop($company, $year);
 
         // Format date
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd/m/Y';
         $formatted_date = Carbon::createFromFormat('Y-m-d', $asOfDate)
             ->translatedFormat($dateFormat);
 
-        $currency = Currency::findOrFail(
-            CompanySetting::getSetting('currency', $company->id)
-        );
-
-        // Get color settings
-        $colors = [
-            'primary_text_color',
-            'heading_text_color',
-            'section_heading_text_color',
-            'border_color',
-            'body_text_color',
-            'footer_text_color',
-            'footer_total_color',
-            'footer_bg_color',
-            'date_text_color',
-        ];
-        $colorSettings = CompanySetting::whereIn('option', $colors)
-            ->whereCompany($company->id)
-            ->get();
+        $currencyId = CompanySetting::getSetting('currency', $company->id);
+        $currency = $currencyId ? Currency::find($currencyId) : null;
+        if (! $currency) {
+            $currency = Currency::where('code', 'MKD')->first() ?: Currency::first();
+        }
 
         view()->share([
             'company' => $company,
-            'balanceSheet' => $balanceSheet,
+            'aopData' => $aopData,
             'as_of_date' => $formatted_date,
-            'colorSettings' => $colorSettings,
             'currency' => $currency,
         ]);
 
@@ -112,3 +97,4 @@ class BalanceSheetReportController extends Controller
     }
 }
 
+// CLAUDE-CHECKPOINT

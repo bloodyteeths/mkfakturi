@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mk">
 
 <head>
-    <title>@lang('pdf_tax_summery_label')</title>
+    <title>Извештај за даноци</title>
     <style type="text/css">
         body {
             font-family: "DejaVu Sans";
+            font-size: 9px;
+            color: #333;
         }
 
         table {
@@ -13,28 +15,28 @@
         }
 
         .sub-container {
-            padding: 0px 20px;
+            padding: 0px 15px;
         }
 
         .report-header {
             width: 100%;
-            margin-bottom: 60px
+            margin-bottom: 5px;
         }
 
         .heading-text {
             font-weight: bold;
-            font-size: 24px;
-            color: #5851D8;
+            font-size: 16px;
+            color: #1a1a1a;
             width: 100%;
             text-align: left;
             padding: 0px;
             margin: 0px;
         }
 
-        .heading-date-range {
+        .heading-date {
             font-weight: normal;
-            font-size: 15px;
-            color: #A5ACC1;
+            font-size: 10px;
+            color: #666;
             width: 100%;
             text-align: right;
             padding: 0px;
@@ -43,96 +45,95 @@
 
         .sub-heading-text {
             font-weight: bold;
-            font-size: 16px;
-            color: #595959;
-            padding: 0px;
-            margin: 0px;
-            margin-top: 6px;
-        }
-
-        .tax-types-title {
-            margin-top: 20px;
-            padding-left: 3px;
-            font-size: 16px;
-            line-height: 21px;
-            color: #040405;
-        }
-
-        .tax-table-container {
-            padding-left: 10px;
-        }
-
-        .tax-table {
-            width: 100%;
-            padding-bottom: 10px;
-        }
-
-        .tax-title {
-            padding: 0px;
-            margin: 0px;
             font-size: 14px;
-            line-height: 21px;
-            color: #595959;
-        }
-
-        .tax-amount {
+            color: #333;
             padding: 0px;
             margin: 0px;
-            font-size: 14px;
-            line-height: 21px;
-            text-align: right;
-            color: #595959;
+            margin-top: 2px;
+            text-align: center;
         }
 
-        .tax-total-table {
-            border-top: 1px solid #EAF1FB;
+        .form-label {
+            font-size: 9px;
+            color: #888;
+            text-align: center;
+            margin: 2px 0 10px 0;
+        }
+
+        .data-table {
             width: 100%;
+            border: 1px solid #cbd5e0;
+            margin-top: 10px;
         }
 
-        .tax-total-cell {
-            padding-right: 20px;
-            padding-top: 10px;
-        }
-
-        .tax-total {
-            padding-top: 10px;
-            padding-right: 30px;
-            padding: 0px;
-            margin: 0px;
-            text-align: right;
+        .data-table th {
+            background: #e2e8f0;
+            padding: 5px 6px;
+            font-size: 8px;
             font-weight: bold;
-            font-size: 16px;
-            line-height: 21px;
-            text-align: right;
-            color: #040405;
+            color: #2d3748;
+            border-bottom: 2px solid #a0aec0;
         }
 
-        .report-footer {
-            width: 100%;
-            margin-top: 40px;
-            padding: 15px 20px;
-            background: #F9FBFF;
-            box-sizing: border-box;
+        .data-row {
+            border-bottom: 1px solid #edf2f7;
         }
 
-        .report-footer-label {
-            padding: 0px;
-            margin: 0px;
+        .data-row:nth-child(even) {
+            background: #f7fafc;
+        }
+
+        .data-row td {
+            padding: 4px 6px;
+            font-size: 9px;
+            color: #2d3748;
+        }
+
+        .num-col {
+            text-align: center;
+            width: 6%;
+            color: #718096;
+        }
+
+        .label-col {
             text-align: left;
-            font-weight: bold;
-            font-size: 16px;
-            line-height: 21px;
-            color: #595959;
+            width: 44%;
         }
 
-        .report-footer-value {
-            padding: 0px;
-            margin: 0px;
+        .rate-col {
+            text-align: center;
+            width: 15%;
+        }
+
+        .amount-col {
             text-align: right;
+            width: 25%;
+        }
+
+        .total-row {
+            background: #e2e8f0 !important;
+            border-top: 2px solid #2c5282;
+        }
+
+        .total-row td {
             font-weight: bold;
-            font-size: 20px;
-            line-height: 21px;
-            color: #5851D8;
+            font-size: 10px;
+            color: #1a202c;
+            padding: 6px 6px;
+        }
+
+        .signature-section {
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .signature-label {
+            font-size: 9px;
+            color: #666;
+            border-top: 1px solid #999;
+            padding-top: 3px;
+            width: 200px;
+            text-align: center;
         }
     </style>
 
@@ -143,68 +144,52 @@
 
 <body>
     <div class="sub-container">
-        <table class="report-header">
+        @include('app.pdf.reports._company-header', ['report_period' => $from_date . ' - ' . $to_date])
+
+        <p class="sub-heading-text">ПРЕГЛЕД НА ДАНОЦИ</p>
+        <p class="form-label">За период: {{ $from_date }} - {{ $to_date }}</p>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="text-align: center; width: 6%;">Р.б.</th>
+                    <th style="text-align: left; width: 44%;">Вид на данок</th>
+                    <th style="text-align: center; width: 15%;">Стапка</th>
+                    <th style="text-align: right; width: 10%;">Бр. фактури</th>
+                    <th style="text-align: right; width: 25%;">Износ на данок</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($taxTypes as $index => $tax)
+                <tr class="data-row">
+                    <td class="num-col">{{ $index + 1 }}</td>
+                    <td class="label-col">{{ $tax->taxType->name ?? '-' }}</td>
+                    <td class="rate-col">{{ $tax->taxType->percent ?? '-' }}%</td>
+                    <td style="text-align: right;">{{ $tax->invoice_count ?? '-' }}</td>
+                    <td class="amount-col">{!! format_money_pdf($tax->total_tax_amount, $currency) !!}</td>
+                </tr>
+                @endforeach
+                <tr class="total-row">
+                    <td colspan="4">ВКУПНО ДАНОЦИ</td>
+                    <td class="amount-col">{!! format_money_pdf($totalTaxAmount, $currency) !!}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Signatures -->
+        <table class="signature-section">
             <tr>
-                <td>
-                    <p class="heading-text">
-                        {{ $company->name }}
-                    </p>
+                <td style="width: 50%; text-align: center; padding-top: 40px;">
+                    <p class="signature-label">Составил</p>
                 </td>
-                <td>
-                    <p class="heading-date-range">
-                        {{ $from_date }} - {{ $to_date }}
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <p class="sub-heading-text">@lang('pdf_tax_report_label')</p>
+                <td style="width: 50%; text-align: center; padding-top: 40px;">
+                    <p class="signature-label">Одговорно лице</p>
                 </td>
             </tr>
         </table>
-        <p class="tax-types-title">@lang('pdf_tax_types_label')</p>
-        <div class="tax-table-container">
-            <table class="tax-table">
-                @foreach ($taxTypes as $tax)
-                <tr>
-                    <td>
-                        <p class="tax-title">
-                            {{ $tax->taxType->name }}
-                        </p>
-                    </td>
-                    <td>
-                        <p class="tax-amount">
-                            {!! format_money_pdf($tax->total_tax_amount, $currency) !!}
-                        </p>
-                    </td>
-                </tr>
-                @endforeach
-
-            </table>
-        </div>
     </div>
-
-    <table class="tax-total-table">
-        <tr>
-            <td class="tax-total-cell">
-                <p class="tax-total">
-                    {!! format_money_pdf($totalTaxAmount, $currency) !!}
-                </p>
-            </td>
-        </tr>
-    </table>
-    <table class="report-footer">
-        <tr>
-            <td>
-                <p class="report-footer-label">@lang('pdf_total_tax_label')</p>
-            </td>
-            <td>
-                <p class="report-footer-value">
-                    {!! format_money_pdf($totalTaxAmount, $currency) !!}
-                </p>
-            </td>
-        </tr>
-    </table>
 </body>
 
 </html>
+
+<!-- CLAUDE-CHECKPOINT -->

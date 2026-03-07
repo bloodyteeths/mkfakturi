@@ -19,25 +19,31 @@ class ProfitLossReportController extends Controller
      * Handle the incoming request.
      *
      * @param  string  $hash
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\Response
      */
     public function __invoke(Request $request, $hash)
     {
         $company = Company::where('unique_hash', $hash)->first();
 
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
+
         $this->authorize('view report', $company);
 
-        $locale = CompanySetting::getSetting('language', $company->id);
-
+        $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
         App::setLocale($locale);
 
+        $fromDate = $request->from_date ?: now()->startOfMonth()->format('Y-m-d');
+        $toDate = $request->to_date ?: now()->endOfMonth()->format('Y-m-d');
+
         $paymentsAmount = Payment::whereCompanyId($company->id)
-            ->applyFilters($request->only(['from_date', 'to_date']))
+            ->applyFilters(['from_date' => $fromDate, 'to_date' => $toDate])
             ->sum('base_amount');
 
         $expenseCategories = Expense::with('category')
             ->whereCompanyId($company->id)
-            ->applyFilters($request->only(['from_date', 'to_date']))
+            ->applyFilters(['from_date' => $fromDate, 'to_date' => $toDate])
             ->expensesAttributes()
             ->get();
 
@@ -46,37 +52,26 @@ class ProfitLossReportController extends Controller
             $totalAmount += $category->total_amount;
         }
 
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
-        $from_date = Carbon::createFromFormat('Y-m-d', $request->from_date)->translatedFormat($dateFormat);
-        $to_date = Carbon::createFromFormat('Y-m-d', $request->to_date)->translatedFormat($dateFormat);
-        $currency = Currency::findOrFail(CompanySetting::getSetting('currency', $company->id));
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd/m/Y';
+        $from_date = Carbon::createFromFormat('Y-m-d', $fromDate)->translatedFormat($dateFormat);
+        $to_date = Carbon::createFromFormat('Y-m-d', $toDate)->translatedFormat($dateFormat);
 
-        $colors = [
-            'primary_text_color',
-            'heading_text_color',
-            'section_heading_text_color',
-            'border_color',
-            'body_text_color',
-            'footer_text_color',
-            'footer_total_color',
-            'footer_bg_color',
-            'date_text_color',
-        ];
-        $colorSettings = CompanySetting::whereIn('option', $colors)
-            ->whereCompany($company->id)
-            ->get();
+        $currencyId = CompanySetting::getSetting('currency', $company->id);
+        $currency = $currencyId ? Currency::find($currencyId) : null;
+        if (! $currency) {
+            $currency = Currency::where('code', 'MKD')->first() ?: Currency::first();
+        }
 
         view()->share([
             'company' => $company,
             'income' => $paymentsAmount,
             'expenseCategories' => $expenseCategories,
             'totalExpense' => $totalAmount,
-            'colorSettings' => $colorSettings,
-            'company' => $company,
             'from_date' => $from_date,
             'to_date' => $to_date,
             'currency' => $currency,
         ]);
+
         $pdf = PDF::loadView('app.pdf.reports.profit-loss');
 
         if ($request->has('preview')) {
@@ -90,3 +85,5 @@ class ProfitLossReportController extends Controller
         return $pdf->stream();
     }
 }
+
+// CLAUDE-CHECKPOINT

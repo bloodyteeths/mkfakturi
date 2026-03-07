@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\V1\Admin\Report;
 
-use App\Domain\Accounting\IfrsAdapter;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\CompanySetting;
 use App\Models\Currency;
+use App\Services\AopReportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -24,6 +24,10 @@ class IncomeStatementReportController extends Controller
     {
         $company = Company::where('unique_hash', $hash)->first();
 
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
+
         $this->authorize('view report', $company);
 
         // Check if accounting backbone feature is enabled
@@ -33,60 +37,40 @@ class IncomeStatementReportController extends Controller
             ]);
         }
 
-        $locale = CompanySetting::getSetting('language', $company->id);
+        $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
         App::setLocale($locale);
 
-        // Get income statement data via IfrsAdapter
-        $adapter = new IfrsAdapter;
         $fromDate = $request->has('from_date')
             ? $request->from_date
-            : now()->startOfMonth()->toDateString();
+            : now()->startOfYear()->toDateString();
         $toDate = $request->has('to_date')
             ? $request->to_date
             : now()->toDateString();
 
-        $incomeStatement = $adapter->getIncomeStatement($company, $fromDate, $toDate);
+        $year = (int) Carbon::parse($toDate)->format('Y');
 
-        // Handle errors from adapter
-        if (isset($incomeStatement['error'])) {
-            return response()->view('app.pdf.reports.feature-disabled', [
-                'message' => $incomeStatement['error'],
-            ]);
-        }
+        // Use AopReportService to get Образец 37 data
+        $aopService = app(AopReportService::class);
+        $aopData = $aopService->getIncomeStatementAop($company, $year);
 
         // Format dates
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd/m/Y';
         $formatted_from_date = Carbon::createFromFormat('Y-m-d', $fromDate)
             ->translatedFormat($dateFormat);
         $formatted_to_date = Carbon::createFromFormat('Y-m-d', $toDate)
             ->translatedFormat($dateFormat);
 
-        $currency = Currency::findOrFail(
-            CompanySetting::getSetting('currency', $company->id)
-        );
-
-        // Get color settings
-        $colors = [
-            'primary_text_color',
-            'heading_text_color',
-            'section_heading_text_color',
-            'border_color',
-            'body_text_color',
-            'footer_text_color',
-            'footer_total_color',
-            'footer_bg_color',
-            'date_text_color',
-        ];
-        $colorSettings = CompanySetting::whereIn('option', $colors)
-            ->whereCompany($company->id)
-            ->get();
+        $currencyId = CompanySetting::getSetting('currency', $company->id);
+        $currency = $currencyId ? Currency::find($currencyId) : null;
+        if (! $currency) {
+            $currency = Currency::where('code', 'MKD')->first() ?: Currency::first();
+        }
 
         view()->share([
             'company' => $company,
-            'incomeStatement' => $incomeStatement,
+            'aopData' => $aopData,
             'from_date' => $formatted_from_date,
             'to_date' => $formatted_to_date,
-            'colorSettings' => $colorSettings,
             'currency' => $currency,
         ]);
 
@@ -117,3 +101,4 @@ class IncomeStatementReportController extends Controller
     }
 }
 
+// CLAUDE-CHECKPOINT

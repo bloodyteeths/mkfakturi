@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mk">
 
 <head>
-    <title>@lang('pdf_expense_report_label')</title>
+    <title>Извештај за расходи</title>
     <style type="text/css">
         body {
             font-family: "DejaVu Sans";
+            font-size: 9px;
+            color: #333;
         }
 
         table {
@@ -13,27 +15,28 @@
         }
 
         .sub-container {
-            padding: 0px 20px;
+            padding: 0px 15px;
         }
 
         .report-header {
             width: 100%;
+            margin-bottom: 5px;
         }
 
         .heading-text {
             font-weight: bold;
-            font-size: 24px;
-            color: #5851D8;
+            font-size: 16px;
+            color: #1a1a1a;
             width: 100%;
             text-align: left;
             padding: 0px;
             margin: 0px;
         }
 
-        .heading-date-range {
+        .heading-date {
             font-weight: normal;
-            font-size: 15px;
-            color: #A5ACC1;
+            font-size: 10px;
+            color: #666;
             width: 100%;
             text-align: right;
             padding: 0px;
@@ -41,97 +44,91 @@
         }
 
         .sub-heading-text {
-            font-weight: normal;
-            font-size: 16px;
-            color: #595959;
-            padding: 0px;
-            margin: 0px;
-            margin-top: 6px;
-        }
-
-        .expenses-title {
-            margin-top: 60px;
-            padding-left: 3px;
-            font-size: 16px;
-            line-height: 21px;
-            color: #040405;
-        }
-
-        .expenses-table-container {
-            padding-left: 10px;
-        }
-
-        .expenses-table {
-            width: 100%;
-            padding-bottom: 10px;
-        }
-
-        .expense-title {
-            padding: 0px;
-            margin: 0px;
-            font-size: 14px;
-            line-height: 21px;
-            color: #595959;
-        }
-
-        .expense-amount {
-            padding: 0px;
-            margin: 0px;
-            font-size: 14px;
-            line-height: 21px;
-            text-align: right;
-            color: #595959;
-        }
-
-        .expense-total-table {
-            border-top: 1px solid #EAF1FB;
-            width: 100%;
-        }
-
-        .expense-total-cell {
-            padding-right: 20px;
-            padding-top: 10px;
-        }
-
-        .expense-total {
-            padding-top: 10px;
-            padding-right: 30px;
-            padding: 0px;
-            margin: 0px;
-            text-align: right;
             font-weight: bold;
-            font-size: 16px;
-            line-height: 21px;
-            text-align: right;
-            color: #040405;
-        }
-
-        .report-footer {
-            width: 100%;
-            margin-top: 40px;
-            padding: 15px 20px;
-            background: #F9FBFF;
-            box-sizing: border-box;
-        }
-
-        .report-footer-label {
+            font-size: 14px;
+            color: #333;
             padding: 0px;
             margin: 0px;
+            margin-top: 2px;
+            text-align: center;
+        }
+
+        .form-label {
+            font-size: 9px;
+            color: #888;
+            text-align: center;
+            margin: 2px 0 10px 0;
+        }
+
+        .data-table {
+            width: 100%;
+            border: 1px solid #cbd5e0;
+            margin-top: 10px;
+        }
+
+        .data-table th {
+            background: #e2e8f0;
+            padding: 5px 6px;
+            font-size: 8px;
+            font-weight: bold;
+            color: #2d3748;
+            border-bottom: 2px solid #a0aec0;
+        }
+
+        .data-row {
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .data-row:nth-child(even) {
+            background: #f7fafc;
+        }
+
+        .data-row td {
+            padding: 4px 6px;
+            font-size: 9px;
+            color: #2d3748;
+        }
+
+        .num-col {
+            text-align: center;
+            width: 6%;
+            color: #718096;
+        }
+
+        .label-col {
             text-align: left;
-            font-weight: bold;
-            font-size: 16px;
-            line-height: 21px;
-            color: #595959;
+            width: 69%;
         }
 
-        .report-footer-value {
-            padding: 0px;
-            margin: 0px;
+        .amount-col {
             text-align: right;
+            width: 25%;
+        }
+
+        .total-row {
+            background: #e2e8f0 !important;
+            border-top: 2px solid #2c5282;
+        }
+
+        .total-row td {
             font-weight: bold;
-            font-size: 20px;
-            line-height: 21px;
-            color: #5851D8;
+            font-size: 10px;
+            color: #1a202c;
+            padding: 6px 6px;
+        }
+
+        .signature-section {
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .signature-label {
+            font-size: 9px;
+            color: #666;
+            border-top: 1px solid #999;
+            padding-top: 3px;
+            width: 200px;
+            text-align: center;
         }
     </style>
 
@@ -142,59 +139,48 @@
 
 <body>
     <div class="sub-container">
-        <table class="report-header">
+        @include('app.pdf.reports._company-header', ['report_period' => $from_date . ' - ' . $to_date])
+
+        <p class="sub-heading-text">ИЗВЕШТАЈ ЗА РАСХОДИ</p>
+        <p class="form-label">За период: {{ $from_date }} - {{ $to_date }}</p>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="text-align: center; width: 6%;">Р.б.</th>
+                    <th style="text-align: left; width: 69%;">Категорија на расход</th>
+                    <th style="text-align: right; width: 25%;">Износ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($expenseCategories as $index => $expenseCategory)
+                <tr class="data-row">
+                    <td class="num-col">{{ $index + 1 }}</td>
+                    <td class="label-col">{{ $expenseCategory->category->name ?? '-' }}</td>
+                    <td class="amount-col">{!! format_money_pdf($expenseCategory->total_amount, $currency) !!}</td>
+                </tr>
+                @endforeach
+                <tr class="total-row">
+                    <td colspan="2">ВКУПНО РАСХОДИ</td>
+                    <td class="amount-col">{!! format_money_pdf($totalExpense, $currency) !!}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Signatures -->
+        <table class="signature-section">
             <tr>
-                <td>
-                    <p class="heading-text">{{ $company->name }}</p>
+                <td style="width: 50%; text-align: center; padding-top: 40px;">
+                    <p class="signature-label">Составил</p>
                 </td>
-                <td>
-                    <p class="heading-date-range">{{ $from_date }} - {{ $to_date }}</p>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <p class="sub-heading-text">@lang('pdf_expense_report_label')</p>
+                <td style="width: 50%; text-align: center; padding-top: 40px;">
+                    <p class="signature-label">Одговорно лице</p>
                 </td>
             </tr>
         </table>
-        <p class="expenses-title">@lang('pdf_expenses_label')</p>
-        <div class="expenses-table-container">
-            <table class="expenses-table">
-                @foreach ($expenseCategories as $expenseCategory)
-                <tr>
-                    <td>
-                        <p class="expense-title">
-                            {{ $expenseCategory->category->name }}
-                        </p>
-                    </td>
-                    <td>
-                        <p class="expense-amount">
-                            {!! format_money_pdf($expenseCategory->total_amount, $currency) !!}
-                        </p>
-                    </td>
-                </tr>
-                @endforeach
-            </table>
-        </div>
     </div>
-
-    <table class="expense-total-table">
-        <tr>
-            <td class="expense-total-cell">
-                <p class="expense-total">{!! format_money_pdf($totalExpense, $currency) !!}</p>
-            </td>
-        </tr>
-    </table>
-    <table class="report-footer">
-        <tr>
-            <td>
-                <p class="report-footer-label">@lang('pdf_total_expenses_label')</p>
-            </td>
-            <td>
-                <p class="report-footer-value">{!! format_money_pdf($totalExpense, $currency) !!}</p>
-            </td>
-        </tr>
-    </table>
 </body>
 
 </html>
+
+<!-- CLAUDE-CHECKPOINT -->

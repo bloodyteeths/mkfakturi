@@ -24,6 +24,10 @@ class TrialBalanceReportController extends Controller
     {
         $company = Company::where('unique_hash', $hash)->first();
 
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
+
         $this->authorize('view report', $company);
 
         // Check if accounting backbone feature is enabled
@@ -33,7 +37,7 @@ class TrialBalanceReportController extends Controller
             ]);
         }
 
-        $locale = CompanySetting::getSetting('language', $company->id);
+        $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
         App::setLocale($locale);
 
         // Get trial balance data via IfrsAdapter
@@ -52,35 +56,22 @@ class TrialBalanceReportController extends Controller
         }
 
         // Format date
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company->id) ?: 'd/m/Y';
         $formatted_date = Carbon::createFromFormat('Y-m-d', $asOfDate)
             ->translatedFormat($dateFormat);
 
-        $currency = Currency::findOrFail(
-            CompanySetting::getSetting('currency', $company->id)
-        );
-
-        // Get color settings
-        $colors = [
-            'primary_text_color',
-            'heading_text_color',
-            'section_heading_text_color',
-            'border_color',
-            'body_text_color',
-            'footer_text_color',
-            'footer_total_color',
-            'footer_bg_color',
-            'date_text_color',
-        ];
-        $colorSettings = CompanySetting::whereIn('option', $colors)
-            ->whereCompany($company->id)
-            ->get();
+        $currencyId = CompanySetting::getSetting('currency', $company->id);
+        $currency = $currencyId ? Currency::find($currencyId) : null;
+        if (! $currency) {
+            $currency = Currency::where('code', 'MKD')->first() ?: Currency::first();
+        }
 
         view()->share([
             'company' => $company,
             'trialBalance' => $trialBalance,
             'as_of_date' => $formatted_date,
-            'colorSettings' => $colorSettings,
+            'from_date' => $formatted_date,
+            'to_date' => $formatted_date,
             'currency' => $currency,
         ]);
 
@@ -111,3 +102,4 @@ class TrialBalanceReportController extends Controller
     }
 }
 
+// CLAUDE-CHECKPOINT
