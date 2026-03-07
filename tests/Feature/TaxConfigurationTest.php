@@ -114,7 +114,7 @@ class TaxConfigurationTest extends TestCase
         $customer = Customer::factory()->create([
             'company_id' => $this->company->id,
             'name' => 'Стопанска Банка АД',
-            'vat_id' => 'MK4002002123456',
+            'vat_number' => 'MK4002002123456',
         ]);
 
         // Create item
@@ -174,17 +174,17 @@ class TaxConfigurationTest extends TestCase
         foreach ($validVatIds as $vatId) {
             $customer = Customer::factory()->create([
                 'company_id' => $this->company->id,
-                'vat_id' => $vatId,
+                'vat_number' => $vatId,
             ]);
 
-            $this->assertEquals($vatId, $customer->vat_id);
+            $this->assertEquals($vatId, $customer->vat_number);
         }
 
         // Test that invalid VAT IDs can be stored but should be validated in application logic
         foreach ($invalidVatIds as $vatId) {
             $customer = Customer::factory()->create([
                 'company_id' => $this->company->id,
-                'vat_id' => $vatId,
+                'vat_number' => $vatId,
             ]);
 
             // Customer is created but VAT ID validation would happen in form requests

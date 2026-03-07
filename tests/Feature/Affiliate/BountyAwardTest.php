@@ -51,7 +51,7 @@ class BountyAwardTest extends TestCase
             // Create active subscription
             DB::table('company_subscriptions')->insert([
                 'company_id' => $company->id,
-                'tier' => 'standard',
+                'plan' => 'standard',
                 'status' => 'active',
                 'provider' => 'paddle',
                 'created_at' => now(),
@@ -83,7 +83,16 @@ class BountyAwardTest extends TestCase
             'created_at' => now()->subDays(31),
         ]);
 
-        // No companies needed for this test
+        // Partner needs at least one company linked so that recordPartnerBounty
+        // can set the required company_id on the affiliate_events record
+        $company = Company::factory()->create();
+        DB::table('partner_company_links')->insert([
+            'partner_id' => $partner->id,
+            'company_id' => $company->id,
+            'is_active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // Run the job
         $job = new AwardBounties;
@@ -122,7 +131,7 @@ class BountyAwardTest extends TestCase
 
             DB::table('company_subscriptions')->insert([
                 'company_id' => $company->id,
-                'tier' => 'standard',
+                'plan' => 'standard',
                 'status' => 'active',
                 'provider' => 'paddle',
                 'created_at' => now(),
@@ -153,9 +162,20 @@ class BountyAwardTest extends TestCase
             'created_at' => now()->subDays(31),
         ]);
 
+        // Partner needs a linked company for the affiliate_events.company_id NOT NULL constraint
+        $company = Company::factory()->create();
+        DB::table('partner_company_links')->insert([
+            'partner_id' => $partner->id,
+            'company_id' => $company->id,
+            'is_active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         // Award bounty manually first
         AffiliateEvent::create([
             'affiliate_partner_id' => $partner->id,
+            'company_id' => $company->id,
             'event_type' => 'partner_bounty',
             'amount' => 300.00,
         ]);
@@ -193,7 +213,7 @@ class BountyAwardTest extends TestCase
 
         DB::table('company_subscriptions')->insert([
             'company_id' => $company->id,
-            'tier' => 'standard',
+            'plan' => 'standard',
             'status' => 'active',
             'provider' => 'paddle',
             'created_at' => now()->subDays(5),
@@ -235,8 +255,8 @@ class BountyAwardTest extends TestCase
 
         DB::table('company_subscriptions')->insert([
             'company_id' => $company->id,
-            'tier' => 'standard',
-            'status' => 'trialing', // Trial status, not active
+            'plan' => 'standard',
+            'status' => 'trial', // Trial status, not active
             'provider' => 'paddle',
             'created_at' => now(),
             'updated_at' => now(),
@@ -276,7 +296,7 @@ class BountyAwardTest extends TestCase
 
         DB::table('company_subscriptions')->insert([
             'company_id' => $company->id,
-            'tier' => 'standard',
+            'plan' => 'standard',
             'status' => 'active',
             'provider' => 'paddle',
             'created_at' => now(),
@@ -327,7 +347,7 @@ class BountyAwardTest extends TestCase
 
             DB::table('company_subscriptions')->insert([
                 'company_id' => $company->id,
-                'tier' => 'standard',
+                'plan' => 'standard',
                 'status' => 'active',
                 'provider' => 'paddle',
                 'created_at' => now()->subDays(10 - $i), // First company has oldest subscription
@@ -379,7 +399,7 @@ class BountyAwardTest extends TestCase
 
             DB::table('company_subscriptions')->insert([
                 'company_id' => $company->id,
-                'tier' => 'standard',
+                'plan' => 'standard',
                 'status' => 'active',
                 'provider' => 'paddle',
                 'created_at' => now(),

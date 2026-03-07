@@ -23,8 +23,9 @@ test('owner can access suppliers and bills endpoints', function () {
 });
 
 test('non-privileged user without supplier/bill abilities is forbidden', function () {
-    $user = User::factory()->create();
-    $company = $user->companies()->first() ?: $user->companies()->attach(\App\Models\Company::first()->id);
+    $user = User::factory()->create(['role' => 'user']);
+    $company = \App\Models\Company::first();
+    $user->companies()->attach($company->id);
 
     $this->withHeaders([
         'company' => \App\Models\Company::first()->id,

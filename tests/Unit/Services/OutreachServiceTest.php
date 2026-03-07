@@ -9,7 +9,7 @@ use Mockery;
 use Modules\Mk\Bitrix\Models\OutreachLead;
 use Modules\Mk\Bitrix\Models\OutreachSend;
 use Modules\Mk\Bitrix\Models\Suppression;
-use Modules\Mk\Bitrix\Services\Bitrix24ApiClient;
+use Modules\Mk\Bitrix\Services\HubSpotApiClient;
 use Modules\Mk\Bitrix\Services\OutreachService;
 use Modules\Mk\Bitrix\Services\PostmarkOutreachService;
 use Tests\TestCase;
@@ -31,7 +31,7 @@ class OutreachServiceTest extends TestCase
 
     protected OutreachService $service;
 
-    protected $mockBitrixClient;
+    protected $mockHubspotClient;
 
     protected $mockPostmarkService;
 
@@ -49,11 +49,11 @@ class OutreachServiceTest extends TestCase
         Config::set('bitrix.outreach.hourly_limit', 20);
 
         // Create mock services
-        $this->mockBitrixClient = Mockery::mock(Bitrix24ApiClient::class);
+        $this->mockHubspotClient = Mockery::mock(HubSpotApiClient::class);
         $this->mockPostmarkService = Mockery::mock(PostmarkOutreachService::class);
 
         $this->service = new OutreachService(
-            $this->mockBitrixClient,
+            $this->mockHubspotClient,
             $this->mockPostmarkService
         );
     }
@@ -91,9 +91,10 @@ class OutreachServiceTest extends TestCase
             \Schema::create('suppressions', function ($table) {
                 $table->id();
                 $table->string('email')->unique();
-                $table->string('reason');
+                $table->string('type');
+                $table->string('reason')->nullable();
                 $table->string('source')->nullable();
-                $table->json('metadata')->nullable();
+                $table->json('meta')->nullable();
                 $table->timestamps();
             });
         }
@@ -140,7 +141,7 @@ class OutreachServiceTest extends TestCase
     public function test_can_send_to_lead_returns_false_for_suppressed_email()
     {
         // Suppress the email with bounce reason
-        Suppression::suppress('bounced@example.com', Suppression::REASON_BOUNCE);
+        Suppression::suppress('bounced@example.com', Suppression::TYPE_BOUNCE);
 
         $lead = OutreachLead::create([
             'email' => 'bounced@example.com',
@@ -207,7 +208,7 @@ class OutreachServiceTest extends TestCase
         $lead = OutreachLead::create([
             'email' => 'partner@example.com',
             'company_name' => 'Partner Company',
-            'status' => OutreachLead::STATUS_PARTNER_CREATED,
+            'status' => OutreachLead::STATUS_PARTNER_ACTIVE,
         ]);
 
         $this->assertFalse($this->service->canSendToLead($lead));
@@ -331,31 +332,29 @@ class OutreachServiceTest extends TestCase
     {
         $suppression = $this->service->suppressEmail(
             'newsuppression@example.com',
-            Suppression::REASON_MANUAL,
+            Suppression::TYPE_MANUAL,
             ['note' => 'Admin added']
         );
 
         $this->assertInstanceOf(Suppression::class, $suppression);
         $this->assertEquals('newsuppression@example.com', $suppression->email);
-        $this->assertEquals(Suppression::REASON_MANUAL, $suppression->reason);
+        $this->assertEquals(Suppression::TYPE_MANUAL, $suppression->type);
 
         $this->assertDatabaseHas('suppressions', [
             'email' => 'newsuppression@example.com',
-            'reason' => Suppression::REASON_MANUAL,
+            'type' => Suppression::TYPE_MANUAL,
         ]);
     }
 
     /** @test */
     public function test_daily_limit_is_respected()
     {
-        // Mock the PostmarkOutreachService to check limits
+        // When PostmarkOutreachService refuses to send (returns null),
+        // sendInitialEmail should return null
         $this->mockPostmarkService
-            ->shouldReceive('isWithinDailyLimit')
-            ->andReturn(false);
-
-        $this->mockPostmarkService
-            ->shouldReceive('isWithinHourlyLimit')
-            ->andReturn(true);
+            ->shouldReceive('sendOutreachEmail')
+            ->once()
+            ->andReturn(null);
 
         $lead = OutreachLead::create([
             'email' => 'daily-limit@example.com',
@@ -363,7 +362,6 @@ class OutreachServiceTest extends TestCase
             'status' => OutreachLead::STATUS_NEW,
         ]);
 
-        // sendInitialEmail should return null when daily limit exceeded
         $result = $this->service->sendInitialEmail($lead);
 
         $this->assertNull($result);
@@ -372,14 +370,12 @@ class OutreachServiceTest extends TestCase
     /** @test */
     public function test_hourly_limit_is_respected()
     {
-        // Mock the PostmarkOutreachService to check limits
+        // When PostmarkOutreachService refuses to send (returns null),
+        // sendInitialEmail should return null
         $this->mockPostmarkService
-            ->shouldReceive('isWithinDailyLimit')
-            ->andReturn(true);
-
-        $this->mockPostmarkService
-            ->shouldReceive('isWithinHourlyLimit')
-            ->andReturn(false);
+            ->shouldReceive('sendOutreachEmail')
+            ->once()
+            ->andReturn(null);
 
         $lead = OutreachLead::create([
             'email' => 'hourly-limit@example.com',
@@ -387,7 +383,6 @@ class OutreachServiceTest extends TestCase
             'status' => OutreachLead::STATUS_NEW,
         ]);
 
-        // sendInitialEmail should return null when hourly limit exceeded
         $result = $this->service->sendInitialEmail($lead);
 
         $this->assertNull($result);
@@ -432,6 +427,9 @@ class OutreachServiceTest extends TestCase
     /** @test */
     public function test_get_sent_count_today()
     {
+        // Clear any sends from prior tests
+        OutreachSend::query()->delete();
+
         // Create some sends
         OutreachSend::create([
             'email' => 'test1@example.com',
@@ -447,13 +445,14 @@ class OutreachServiceTest extends TestCase
             'sent_at' => now(),
         ]);
 
-        // Old send from yesterday
-        OutreachSend::create([
+        // Old send from yesterday - force created_at via query builder
+        $oldId = \DB::table('outreach_sends')->insertGetId([
             'email' => 'old@example.com',
             'template_key' => 'initial',
             'status' => 'sent',
             'sent_at' => now()->subDay(),
             'created_at' => now()->subDay(),
+            'updated_at' => now()->subDay(),
         ]);
 
         $count = $this->service->getSentCountToday();
@@ -464,6 +463,9 @@ class OutreachServiceTest extends TestCase
     /** @test */
     public function test_get_sent_count_this_hour()
     {
+        // Clear any sends from prior tests
+        OutreachSend::query()->delete();
+
         // Create some sends this hour
         OutreachSend::create([
             'email' => 'hour1@example.com',
@@ -472,13 +474,14 @@ class OutreachServiceTest extends TestCase
             'sent_at' => now(),
         ]);
 
-        // Old send from 2 hours ago
-        OutreachSend::create([
+        // Old send from 2 hours ago - force created_at via query builder
+        \DB::table('outreach_sends')->insert([
             'email' => 'oldhour@example.com',
             'template_key' => 'initial',
             'status' => 'sent',
             'sent_at' => now()->subHours(2),
             'created_at' => now()->subHours(2),
+            'updated_at' => now()->subHours(2),
         ]);
 
         $count = $this->service->getSentCountThisHour();

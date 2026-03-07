@@ -107,7 +107,9 @@ class InvoiceFactory extends Factory
             },
             'notes' => $this->faker->text(80),
             'unique_hash' => str_random(60),
-            'customer_id' => null, // Must be passed in or use ->for(Customer::factory())
+            'customer_id' => function () {
+                return Customer::first()?->id ?? Customer::factory()->create()->id;
+            },
             'recurring_invoice_id' => null,
             'exchange_rate' => $this->faker->randomDigitNotNull(),
             'base_discount_val' => $this->faker->randomDigitNotNull(),

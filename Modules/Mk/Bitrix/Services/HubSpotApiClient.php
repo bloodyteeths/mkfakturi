@@ -95,6 +95,7 @@ class HubSpotApiClient
             $response = match (strtoupper($method)) {
                 'GET' => $request->get($url),
                 'POST' => $request->post($url, $data),
+                'PUT' => $request->put($url, $data),
                 'PATCH' => $request->patch($url, $data),
                 'DELETE' => $request->delete($url),
                 default => throw new \Exception("Unsupported HTTP method: {$method}"),

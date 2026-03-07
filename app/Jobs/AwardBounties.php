@@ -86,7 +86,7 @@ class AwardBounties implements ShouldQueue
             // 2. Registered 30+ days ago
 
             $activePayingCompaniesCount = $this->getActivePayingCompaniesCount($partner);
-            $daysSinceRegistration = now()->diffInDays($partner->created_at);
+            $daysSinceRegistration = $partner->created_at->diffInDays(now());
 
             $meetsCompanyRequirement = $activePayingCompaniesCount >= config('affiliate.bounty_min_companies', 3);
             $meetsDaysRequirement = $daysSinceRegistration >= config('affiliate.bounty_min_days', 30);

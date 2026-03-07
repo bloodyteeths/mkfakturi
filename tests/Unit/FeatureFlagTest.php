@@ -36,18 +36,6 @@ class FeatureFlagTest extends TestCase
         $this->assertFalse(Feature::active('mcp-ai-tools'));
         $this->assertFalse(Feature::active('monitoring'));
         $this->assertFalse(Feature::active('redis-queues'));
-
-        // Partner mocked data should default to ON (safety)
-        $this->assertTrue(Feature::active('partner-mocked-data'));
-    }
-
-    /**
-     * Test that partner mocked data flag defaults to true for safety.
-     */
-    public function test_partner_mocked_data_defaults_to_true(): void
-    {
-        $this->assertTrue(Feature::active('partner-mocked-data'));
-        $this->assertTrue(FeatureHelper::partnerMockedData());
     }
 
     /**
@@ -59,7 +47,6 @@ class FeatureFlagTest extends TestCase
         $this->assertFalse(FeatureHelper::migrationWizardEnabled());
         $this->assertFalse(FeatureHelper::psd2BankingEnabled());
         $this->assertFalse(FeatureHelper::partnerPortalEnabled());
-        $this->assertTrue(FeatureHelper::partnerMockedData());
         $this->assertFalse(FeatureHelper::advancedPaymentsEnabled());
         $this->assertFalse(FeatureHelper::mcpAiToolsEnabled());
         $this->assertFalse(FeatureHelper::monitoringEnabled());
@@ -74,13 +61,12 @@ class FeatureFlagTest extends TestCase
         $features = FeatureHelper::getAllFeatures();
 
         $this->assertIsArray($features);
-        $this->assertCount(9, $features);
+        $this->assertCount(8, $features);
 
         $this->assertFalse($features['accounting-backbone']);
         $this->assertFalse($features['migration-wizard']);
         $this->assertFalse($features['psd2-banking']);
         $this->assertFalse($features['partner-portal']);
-        $this->assertTrue($features['partner-mocked-data']);
         $this->assertFalse($features['advanced-payments']);
         $this->assertFalse($features['mcp-ai-tools']);
         $this->assertFalse($features['monitoring']);

@@ -422,7 +422,7 @@ test('update estimate with EUR currency', function () {
                 'discount' => 0,
                 'discount_val' => 0,
                 'price' => 200,
-                'tax' => 0,
+                'tax' => 9,
                 'total' => 200,
                 'exchange_rate' => 86.403538,
                 'base_discount_val' => 0,

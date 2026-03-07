@@ -217,7 +217,7 @@ class PartnerTriggerController extends Controller
 
                     // Update lead status
                     $lead->update([
-                        'status' => OutreachLead::STATUS_PARTNER_CREATED,
+                        'status' => OutreachLead::STATUS_PARTNER_ACTIVE,
                         'partner_id' => $existingPartner->id,
                     ]);
 
@@ -251,7 +251,7 @@ class PartnerTriggerController extends Controller
 
                 // Update lead status
                 $lead->update([
-                    'status' => OutreachLead::STATUS_PARTNER_CREATED,
+                    'status' => OutreachLead::STATUS_PARTNER_ACTIVE,
                     'partner_id' => $partner->id,
                 ]);
 

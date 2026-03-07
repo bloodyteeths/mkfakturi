@@ -292,7 +292,7 @@ class HubSpotCreatePartnerCommand extends Command
 
         // Update local records
         $lead->update([
-            'status' => $noEmail ? OutreachLead::STATUS_PARTNER_CREATED : OutreachLead::STATUS_INVITE_SENT,
+            'status' => $noEmail ? OutreachLead::STATUS_PARTNER_ACTIVE : OutreachLead::STATUS_INVITE_SENT,
             'partner_id' => $partner->id,
         ]);
 

@@ -314,7 +314,7 @@ class OutreachService
             'type' => $type,
         ]);
 
-        return Suppression::suppress($email, $type, Suppression::SOURCE_SYSTEM, $meta);
+        return Suppression::suppress($email, $type, null, Suppression::SOURCE_ADMIN, $meta);
     }
 
     /**
@@ -393,7 +393,7 @@ class OutreachService
             }
 
             // Add to suppression list
-            $this->suppressEmail($email, Suppression::REASON_UNSUBSCRIBE, [
+            $this->suppressEmail($email, Suppression::TYPE_UNSUB, [
                 'source' => 'one_click',
                 'timestamp' => now()->toISOString(),
             ]);
@@ -442,7 +442,7 @@ class OutreachService
 
                     // Update lead status
                     $lead->update([
-                        'status' => OutreachLead::STATUS_PARTNER_CREATED,
+                        'status' => OutreachLead::STATUS_PARTNER_ACTIVE,
                         'partner_id' => $existingPartner->id,
                     ]);
 
@@ -473,7 +473,7 @@ class OutreachService
 
                 // Update lead status
                 $lead->update([
-                    'status' => OutreachLead::STATUS_PARTNER_CREATED,
+                    'status' => OutreachLead::STATUS_PARTNER_ACTIVE,
                     'partner_id' => $partner->id,
                 ]);
 
@@ -567,8 +567,7 @@ class OutreachService
                 OutreachLead::STATUS_FOLLOWUP => 'followup',
                 OutreachLead::STATUS_INTERESTED => 'interested',
                 OutreachLead::STATUS_INVITE_SENT => 'invite_sent',
-                OutreachLead::STATUS_PARTNER_CREATED => 'won',
-                OutreachLead::STATUS_ACTIVE => 'won',
+                OutreachLead::STATUS_PARTNER_ACTIVE => 'won',
                 OutreachLead::STATUS_LOST => 'lost',
             ];
 

@@ -57,19 +57,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->isHealthCheckRequest() || $this->app->runningInConsole()) {
-            return;
-        }
-
-        // Ensure cache directory exists (fix for ephemeral environments)
-        if (! file_exists(storage_path('framework/cache/data'))) {
-            @mkdir(storage_path('framework/cache/data'), 0775, true);
-        }
-
-        if (InstallUtils::isDbCreated()) {
-            $this->addMenus();
-        }
-
+        // Gate definitions and policies must ALWAYS be registered,
+        // including during tests (console mode), so authorization works properly.
         Gate::policy(Role::class, RolePolicy::class);
 
         // Phase 2 Policies
@@ -101,9 +90,25 @@ class AppServiceProvider extends ServiceProvider
         // Client Document Upload Portal (P8-01)
         Gate::policy(\App\Models\ClientDocument::class, \App\Policies\ClientDocumentPolicy::class);
 
+        // Register Gate definitions (authorization checks used in controllers)
+        $this->bootAuth();
+
+        // Skip remaining boot tasks for health checks and console (artisan/tests)
+        if ($this->isHealthCheckRequest() || $this->app->runningInConsole()) {
+            return;
+        }
+
+        // Ensure cache directory exists (fix for ephemeral environments)
+        if (! file_exists(storage_path('framework/cache/data'))) {
+            @mkdir(storage_path('framework/cache/data'), 0775, true);
+        }
+
+        if (InstallUtils::isDbCreated()) {
+            $this->addMenus();
+        }
+
         View::addNamespace('pdf_templates', storage_path('app/templates/pdf'));
 
-        $this->bootAuth();
         $this->bootBroadcast();
         $this->bootObservers();
         $this->bootClawdNotifications();

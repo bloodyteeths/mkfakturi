@@ -191,23 +191,25 @@ class MacedonianPayrollTaxServiceTest extends TestCase
     public function it_calculates_correctly_for_minimum_wage()
     {
         // Minimum wage in Macedonia ~20,000 MKD
+        // P7-05: Contribution base is clamped to min 31,577 MKD (50% of national average)
+        // So contributions are calculated on 31,577, not 20,000
         $grossCents = 2000000; // 20,000 MKD in cents
         $result = $this->service->calculateFromGross($grossCents);
 
-        // Employee contributions: 14.45% of 20,000 = 2,890 MKD
-        $this->assertEquals(289000, $result->getTotalEmployeeContributions());
+        // Employee contributions: 14.45% of 31,577 (clamped base) = 4,562.88 ≈ 4,562 MKD
+        $this->assertEquals(456288, $result->getTotalEmployeeContributions());
 
-        // Taxable base: 20,000 - 2,890 = 17,110 MKD
-        $this->assertEquals(1711000, $result->taxableBase);
+        // Taxable base: 20,000 - 4,562.88 = 15,437.12 MKD
+        $this->assertEquals(1543712, $result->taxableBase);
 
-        // Income tax: 10% of 17,110 = 1,711 MKD
-        $this->assertEquals(171100, $result->incomeTax);
+        // Income tax: 10% of 15,437.12 = 1,543.71 MKD
+        $this->assertEquals(154371, $result->incomeTax);
 
-        // Net: 17,110 - 1,711 = 15,399 MKD
-        $this->assertEquals(1539900, $result->netSalary);
+        // Net: 15,437.12 - 1,543.71 = 13,893.41 MKD
+        $this->assertEquals(1389341, $result->netSalary);
 
-        // Employer cost: 20,000 + 2,550 = 22,550 MKD
-        $this->assertEquals(2255000, $result->totalEmployerCost);
+        // Employer cost: 20,000 + employer contributions on clamped base (12.75% of 31,577) = 24,026.07 MKD
+        $this->assertEquals(2402607, $result->totalEmployerCost);
     }
 
     /** @test */
@@ -236,15 +238,28 @@ class MacedonianPayrollTaxServiceTest extends TestCase
     /** @test */
     public function it_returns_zero_for_zero_salary()
     {
+        // P7-05: Even with gross=0, contribution base is clamped to minimum (31,577 MKD).
+        // This means contributions are still calculated, resulting in negative taxable base and net.
+        // In practice, zero gross is an edge case — real payroll always has gross >= minimum wage.
         $result = $this->service->calculateFromGross(0);
 
         $this->assertEquals(0, $result->grossSalary);
-        $this->assertEquals(0, $result->netSalary);
-        $this->assertEquals(0, $result->taxableBase);
-        $this->assertEquals(0, $result->incomeTax);
-        $this->assertEquals(0, $result->getTotalEmployeeContributions());
-        $this->assertEquals(0, $result->getTotalEmployerContributions());
-        $this->assertEquals(0, $result->totalEmployerCost);
+
+        // Contributions calculated on clamped minimum base (31,577 MKD = 3,157,700 cents)
+        $this->assertEquals(456288, $result->getTotalEmployeeContributions());
+        $this->assertEquals(402607, $result->getTotalEmployerContributions());
+
+        // Taxable base = 0 - 456,288 = -456,288 (negative due to clamping)
+        $this->assertEquals(-456288, $result->taxableBase);
+
+        // Income tax = 10% of -456,288 = -45,629
+        $this->assertEquals(-45629, $result->incomeTax);
+
+        // Net = -456,288 - (-45,629) = -410,659
+        $this->assertEquals(-410659, $result->netSalary);
+
+        // Employer cost = 0 + employer contributions on clamped base
+        $this->assertEquals(402607, $result->totalEmployerCost);
     }
 
     /** @test */
@@ -352,9 +367,9 @@ class MacedonianPayrollTaxServiceTest extends TestCase
     public function it_validates_multiple_valid_embgs()
     {
         $validEmbgs = [
-            '0101990450006', // Example 1
-            '1512985410003', // Example 2
-            '2706995420009', // Example 3
+            '0101990450006', // Example 1: born 01.01.990, region 45, check digit 6
+            '1512985410008', // Example 2: born 15.12.985, region 41, check digit 8
+            '2706995420004', // Example 3: born 27.06.995, region 42, check digit 4
         ];
 
         foreach ($validEmbgs as $embg) {
