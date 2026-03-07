@@ -14,6 +14,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Notification Emails
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated list of email addresses that will receive notifications
+    | when a new support ticket is created.
+    |
+    */
+    'admin_notify_emails' => env('SUPPORT_ADMIN_NOTIFY_EMAILS', ''),
+
+    /*
+    |--------------------------------------------------------------------------
     | Expected Response Time (Hours)
     |--------------------------------------------------------------------------
     |

@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Ticket\CreateTicketRequest;
 use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
+use App\Notifications\AdminTicketCreatedNotification;
 use App\Notifications\TicketCreatedNotification;
 use App\Services\ClawdNotifier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class TicketController extends Controller
 {
@@ -97,6 +99,16 @@ class TicketController extends Controller
 
         // Send notification to customer
         $user->notify(new TicketCreatedNotification($ticket));
+
+        // Send notification to admin emails
+        $adminEmails = config('support.admin_notify_emails');
+        if ($adminEmails) {
+            $ticket->load('company');
+            foreach (array_filter(array_map('trim', explode(',', $adminEmails))) as $email) {
+                Notification::route('mail', $email)
+                    ->notify(new AdminTicketCreatedNotification($ticket));
+            }
+        }
 
         // Notify Clawd AI assistant in real-time
         ClawdNotifier::push('support_ticket', [
