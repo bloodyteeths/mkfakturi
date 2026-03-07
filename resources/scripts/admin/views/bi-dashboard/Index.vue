@@ -9,7 +9,7 @@
             :searchable="false"
             label="label"
             value-prop="value"
-            class="w-48"
+            class="w-64"
             @update:model-value="loadSummary"
           />
           <BaseButton variant="primary-outline" size="sm" @click="refreshData">
