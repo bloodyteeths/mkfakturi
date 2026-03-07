@@ -4,8 +4,10 @@ namespace App\Http\Controllers\V1\Partner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Modules\Mk\Models\TravelOrder;
 use Modules\Mk\Services\TravelOrderService;
 
@@ -200,6 +202,43 @@ class PartnerTravelOrderController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    /**
+     * Download travel order PDF for a partner's client company.
+     */
+    public function pdf(Request $request, int $company, int $id): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            abort(404, 'Partner not found');
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'Access denied');
+        }
+
+        $order = TravelOrder::forCompany($company)
+            ->with(['employee', 'segments', 'expenses', 'approvedByUser', 'company'])
+            ->where('id', $id)
+            ->first();
+
+        if (! $order) {
+            abort(404, 'Travel order not found');
+        }
+
+        $employee = $order->employee;
+        $companyModel = $order->company;
+
+        $pdf = Pdf::loadView('app.pdf.reports.travel-order', [
+            'order' => $order,
+            'employee' => $employee,
+            'company' => $companyModel,
+        ]);
+        $pdf->setPaper('A4', 'portrait');
+
+        $filename = "paten-nalog-{$order->travel_number}.pdf";
+
+        return $pdf->download($filename);
     }
 
     // ---- Partner access helpers ----

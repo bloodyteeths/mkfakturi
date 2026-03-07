@@ -4,12 +4,20 @@ namespace Modules\Mk\Services;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Mk\Models\TravelOrder;
 use Modules\Mk\Models\TravelSegment;
 use Modules\Mk\Models\TravelExpense;
 
 class TravelOrderService
 {
+    protected TravelOrderGLService $glService;
+
+    public function __construct(TravelOrderGLService $glService)
+    {
+        $this->glService = $glService;
+    }
+
     /**
      * MK Legal Constants for domestic per-diem.
      * Base salary: 33,370 MKD, rate: 8% = ~2,670 MKD/day
@@ -108,6 +116,7 @@ class TravelOrderService
                         'arrival_at' => $segmentData['arrival_at'],
                         'transport_type' => $segmentData['transport_type'] ?? 'car',
                         'distance_km' => $segmentData['distance_km'] ?? null,
+                        'per_diem_rate' => $segmentData['per_diem_rate'] ?? null,
                         'accommodation_provided' => $segmentData['accommodation_provided'] ?? false,
                         'meals_provided' => $segmentData['meals_provided'] ?? false,
                     ]);
@@ -167,6 +176,7 @@ class TravelOrderService
                         'arrival_at' => $segmentData['arrival_at'],
                         'transport_type' => $segmentData['transport_type'] ?? 'car',
                         'distance_km' => $segmentData['distance_km'] ?? null,
+                        'per_diem_rate' => $segmentData['per_diem_rate'] ?? null,
                         'accommodation_provided' => $segmentData['accommodation_provided'] ?? false,
                         'meals_provided' => $segmentData['meals_provided'] ?? false,
                     ]);
@@ -213,7 +223,7 @@ class TravelOrderService
     }
 
     /**
-     * Settle a travel order. Calculates reimbursement.
+     * Settle a travel order. Calculates reimbursement and posts GL entry.
      */
     public function settle(TravelOrder $order): TravelOrder
     {
@@ -229,6 +239,16 @@ class TravelOrderService
             'status' => 'settled',
             'reimbursement_amount' => $reimbursement,
         ]);
+
+        // Post journal entry to IFRS ledger (DR 441, CR 140/100)
+        try {
+            $this->glService->postSettlement($order);
+        } catch (\Exception $e) {
+            Log::warning('TravelOrder: GL posting failed but settlement succeeded', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return $order->fresh(['segments', 'expenses', 'employee']);
     }

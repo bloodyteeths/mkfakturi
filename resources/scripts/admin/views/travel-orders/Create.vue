@@ -579,7 +579,7 @@ function removeExpense(index) {
 async function fetchEmployees() {
   isLoadingEmployees.value = true
   try {
-    const response = await window.axios.get('/payroll/employees', { params: { limit: 'all' } })
+    const response = await window.axios.get('/payroll-employees', { params: { limit: 'all' } })
     const data = response.data?.data || response.data?.employees?.data || []
     employees.value = data.map(e => ({
       id: e.id,
@@ -603,6 +603,7 @@ async function saveTravelOrder() {
     arrival_at: s.arrival_at,
     transport_type: s.transport_type,
     distance_km: s.distance_km ? parseFloat(s.distance_km) : null,
+    per_diem_rate: s.per_diem_rate ? parseFloat(s.per_diem_rate) : null,
     accommodation_provided: s.accommodation_provided,
     meals_provided: s.meals_provided,
   }))

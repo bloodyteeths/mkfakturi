@@ -3,8 +3,10 @@
 namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Modules\Mk\Models\TravelOrder;
 use Modules\Mk\Services\TravelOrderService;
 
@@ -87,6 +89,7 @@ class TravelOrderController extends Controller
             'segments.*.arrival_at' => 'required|date',
             'segments.*.transport_type' => 'required|in:car,bus,train,plane,other',
             'segments.*.distance_km' => 'nullable|numeric|min:0',
+            'segments.*.per_diem_rate' => 'nullable|numeric|min:0',
             'segments.*.accommodation_provided' => 'nullable|boolean',
             'segments.*.meals_provided' => 'nullable|boolean',
             'expenses' => 'nullable|array',
@@ -143,6 +146,7 @@ class TravelOrderController extends Controller
             'segments.*.arrival_at' => 'required|date',
             'segments.*.transport_type' => 'required|in:car,bus,train,plane,other',
             'segments.*.distance_km' => 'nullable|numeric|min:0',
+            'segments.*.per_diem_rate' => 'nullable|numeric|min:0',
             'segments.*.accommodation_provided' => 'nullable|boolean',
             'segments.*.meals_provided' => 'nullable|boolean',
             'expenses' => 'nullable|array',
@@ -282,6 +286,33 @@ class TravelOrderController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    /**
+     * Download travel order as PDF.
+     */
+    public function pdf(Request $request, int $id): Response
+    {
+        $companyId = (int) $request->header('company');
+
+        $order = TravelOrder::forCompany($companyId)
+            ->with(['employee', 'segments', 'expenses', 'approvedByUser', 'company.address'])
+            ->where('id', $id)
+            ->first();
+
+        if (! $order) {
+            abort(404, 'Travel order not found');
+        }
+
+        $employee = $order->employee;
+        $company = $order->company;
+
+        $pdf = Pdf::loadView('app.pdf.reports.travel-order', compact('order', 'employee', 'company'));
+        $pdf->setPaper('A4', 'portrait');
+
+        $filename = "paten-nalog-{$order->travel_number}.pdf";
+
+        return $pdf->download($filename);
     }
 
     /**

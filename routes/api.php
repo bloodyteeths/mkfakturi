@@ -1109,6 +1109,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/{id}/approve', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'approve']);
                 Route::post('/{id}/settle', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'settle']);
                 Route::post('/{id}/reject', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'reject']);
+                Route::get('/{id}/pdf', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'pdf']);
                 Route::delete('/{id}', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'destroy']);
             });
 
@@ -1834,6 +1835,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerTravelOrderController::class, 'store']);
             Route::post('/{id}/approve', [\App\Http\Controllers\V1\Partner\PartnerTravelOrderController::class, 'approve']);
             Route::post('/{id}/settle', [\App\Http\Controllers\V1\Partner\PartnerTravelOrderController::class, 'settle']);
+            Route::get('/{id}/pdf', [\App\Http\Controllers\V1\Partner\PartnerTravelOrderController::class, 'pdf']);
         });
 
         // F9: BI Dashboards (Partner)

@@ -13,6 +13,18 @@
 
       <template #actions>
         <div v-if="order" class="flex items-center space-x-2">
+          <!-- Download PDF button (always visible) -->
+          <BaseButton
+            variant="primary-outline"
+            :loading="isDownloading"
+            @click="downloadPdf"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
+            </template>
+            {{ t('download_pdf') }}
+          </BaseButton>
+
           <!-- Approve button (draft / pending_approval) -->
           <BaseButton
             v-if="order.status === 'draft' || order.status === 'pending_approval'"
@@ -346,6 +358,7 @@ const isApproving = ref(false)
 const isSettling = ref(false)
 const isRejecting = ref(false)
 const isDeleting = ref(false)
+const isDownloading = ref(false)
 const showApproveDialog = ref(false)
 const showSettleDialog = ref(false)
 const showRejectDialog = ref(false)
@@ -400,6 +413,30 @@ async function fetchOrder() {
     })
   } finally {
     isLoading.value = false
+  }
+}
+
+async function downloadPdf() {
+  isDownloading.value = true
+  try {
+    const response = await window.axios.get(`/travel-orders/${order.value.id}/pdf`, {
+      responseType: 'blob',
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `paten-nalog-${order.value.travel_number}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('error_downloading'),
+    })
+  } finally {
+    isDownloading.value = false
   }
 }
 
