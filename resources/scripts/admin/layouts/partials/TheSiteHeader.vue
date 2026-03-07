@@ -201,37 +201,6 @@
             </div>
           </BaseDropdownItem>
 
-          <BaseDropdownItem @click="setLanguage('sr')">
-            <div class="flex items-center">
-              <span class="mr-3 text-base">🇷🇸</span>
-              Српски
-              <span v-if="currentLocale === 'sr'" class="ml-auto text-green-500">✓</span>
-            </div>
-          </BaseDropdownItem>
-
-          <BaseDropdownItem @click="setLanguage('sk')">
-            <div class="flex items-center">
-              <span class="mr-3 text-base">🇸🇰</span>
-              Slovenčina
-              <span v-if="currentLocale === 'sk'" class="ml-auto text-green-500">✓</span>
-            </div>
-          </BaseDropdownItem>
-
-          <BaseDropdownItem @click="setLanguage('hr')">
-            <div class="flex items-center">
-              <span class="mr-3 text-base">🇭🇷</span>
-              Hrvatski
-              <span v-if="currentLocale === 'hr'" class="ml-auto text-green-500">✓</span>
-            </div>
-          </BaseDropdownItem>
-
-          <BaseDropdownItem @click="setLanguage('de')">
-            <div class="flex items-center">
-              <span class="mr-3 text-base">🇩🇪</span>
-              Deutsch
-              <span v-if="currentLocale === 'de'" class="ml-auto text-green-500">✓</span>
-            </div>
-          </BaseDropdownItem>
         </BaseDropdown>
       </li>
 

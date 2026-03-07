@@ -55,29 +55,10 @@ return [
     * List of languages supported by Facturino.
     */
     'languages' => [
-        ['code' => 'ar', 'name' => 'Arabic'],
-        ['code' => 'nl', 'name' => 'Dutch'],
-        ['code' => 'en', 'name' => 'English'],
-        ['code' => 'fr', 'name' => 'French'],
-        ['code' => 'de', 'name' => 'German'],
-        ['code' => 'ja', 'name' => 'Japanese'],
-        ['code' => 'it', 'name' => 'Italian'],
-        ['code' => 'lv', 'name' => 'Latvian'],
-        ['code' => 'pl', 'name' => 'Polish'],
-        ['code' => 'pt_BR', 'name' => 'Portuguese (Brazilian)'],
-        ['code' => 'sr', 'name' => 'Serbian Latin'],
-        ['code' => 'ko', 'name' => 'Korean'],
-        ['code' => 'es', 'name' => 'Spanish'],
-        ['code' => 'sv', 'name' => 'Svenska'],
-        ['code' => 'sk', 'name' => 'Slovak'],
-        ['code' => 'vi', 'name' => 'Tiếng Việt'],
-        ['code' => 'cs', 'name' => 'Czech'],
-        ['code' => 'el', 'name' => 'Greek'],
-        ['code' => 'hr', 'name' => 'Crotian'],
         ['code' => 'mk', 'name' => 'Macedonian'],
+        ['code' => 'en', 'name' => 'English'],
         ['code' => 'sq', 'name' => 'Albanian'],
         ['code' => 'tr', 'name' => 'Turkish'],
-        ['code' => 'th', 'name' => 'ไทย'],
     ],
 
     /*
