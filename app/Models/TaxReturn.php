@@ -65,6 +65,8 @@ class TaxReturn extends Model
 
     public const TYPE_CORPORATE = 'CORPORATE';
 
+    public const TYPE_ANNUAL_ACCOUNT = 'ANNUAL_ACCOUNT';
+
     /**
      * The attributes that are mass assignable.
      *

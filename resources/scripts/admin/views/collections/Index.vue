@@ -1,0 +1,319 @@
+<template>
+  <BasePage>
+    <BasePageHeader :title="t('title')">
+      <template #actions>
+        <BaseButton
+          variant="primary-outline"
+          @click="activeTab = 'templates'"
+          v-if="activeTab !== 'templates'"
+        >
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="DocumentTextIcon" />
+          </template>
+          {{ t('templates') }}
+        </BaseButton>
+        <BaseButton
+          variant="primary-outline"
+          @click="activeTab = 'history'"
+          v-if="activeTab !== 'history'"
+        >
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="ClockIcon" />
+          </template>
+          {{ t('history') }}
+        </BaseButton>
+        <BaseButton
+          variant="primary"
+          @click="activeTab = 'overdue'"
+          v-if="activeTab !== 'overdue'"
+        >
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="ExclamationTriangleIcon" />
+          </template>
+          {{ t('total_overdue') }}
+        </BaseButton>
+      </template>
+    </BasePageHeader>
+
+    <!-- Summary Cards -->
+    <div v-if="summary" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-lg shadow p-4">
+        <p class="text-xs text-gray-500 uppercase">{{ t('total_overdue') }}</p>
+        <p class="text-2xl font-bold text-red-600">{{ formatMoney(summary.total_overdue_amount) }}</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <p class="text-xs text-gray-500 uppercase">{{ t('invoice_count') }}</p>
+        <p class="text-2xl font-bold text-gray-900">{{ summary.invoice_count || 0 }}</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <p class="text-xs text-gray-500 uppercase">{{ t('customer_count') }}</p>
+        <p class="text-2xl font-bold text-gray-900">{{ summary.customer_count || 0 }}</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <p class="text-xs text-gray-500 uppercase">{{ t('avg_days') }}</p>
+        <p class="text-2xl font-bold text-amber-600">{{ summary.avg_days_overdue || 0 }}</p>
+      </div>
+    </div>
+
+    <!-- Overdue Invoices Tab -->
+    <div v-if="activeTab === 'overdue'">
+      <!-- Filters -->
+      <div class="p-4 bg-white rounded-lg shadow mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <BaseInputGroup :label="t('filter_level')">
+            <BaseMultiselect
+              v-model="filters.escalation_level"
+              :options="levelOptions"
+              :searchable="false"
+              label="label"
+              value-prop="value"
+              :placeholder="$t('general.all')"
+            />
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('customer')">
+            <BaseInput
+              v-model="filters.search"
+              :placeholder="t('search_placeholder')"
+              type="text"
+            />
+          </BaseInputGroup>
+          <div class="flex items-end">
+            <BaseButton variant="primary-outline" @click="loadOverdue">
+              {{ $t('general.filter') }}
+            </BaseButton>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div v-if="isLoading" class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="p-6 space-y-4">
+          <div v-for="i in 5" :key="i" class="flex space-x-4 animate-pulse">
+            <div class="h-4 bg-gray-200 rounded w-24"></div>
+            <div class="h-4 bg-gray-200 rounded w-20"></div>
+            <div class="h-4 bg-gray-200 rounded flex-1"></div>
+            <div class="h-4 bg-gray-200 rounded w-16"></div>
+            <div class="h-4 bg-gray-200 rounded w-20"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="overdueInvoices.length === 0" class="text-center py-16 bg-white rounded-lg shadow">
+        <BaseIcon name="CheckCircleIcon" class="h-12 w-12 text-green-400 mx-auto mb-4" />
+        <h3 class="text-lg font-medium text-gray-900">{{ t('no_overdue') }}</h3>
+        <p class="text-sm text-gray-500 mt-1">{{ t('no_overdue_description') }}</p>
+      </div>
+
+      <!-- Table -->
+      <div v-else class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('customer') }}</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('invoice_number') }}</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('due_date') }}</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('amount_due') }}</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('days_overdue') }}</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('escalation') }}</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('reminders_sent') }}</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('general.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr v-for="inv in overdueInvoices" :key="inv.id" class="hover:bg-gray-50">
+              <td class="px-4 py-3 text-sm text-gray-900">{{ inv.customer_name }}</td>
+              <td class="px-4 py-3 text-sm text-gray-600">{{ inv.invoice_number }}</td>
+              <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(inv.due_date) }}</td>
+              <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">{{ formatMoney(inv.due_amount) }}</td>
+              <td class="px-4 py-3 text-center">
+                <span :class="daysOverdueClass(inv.days_overdue)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">
+                  {{ inv.days_overdue }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <span :class="levelBadgeClass(inv.escalation_level)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">
+                  {{ t(inv.escalation_level) }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center text-sm text-gray-500">{{ inv.reminder_count || 0 }}</td>
+              <td class="px-4 py-3 text-right">
+                <BaseButton
+                  size="sm"
+                  variant="primary"
+                  @click="openSendDialog(inv)"
+                >
+                  {{ t('send_reminder') }}
+                </BaseButton>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Templates Tab -->
+    <div v-if="activeTab === 'templates'">
+      <CollectionTemplates ref="templatesRef" />
+    </div>
+
+    <!-- History Tab -->
+    <div v-if="activeTab === 'history'">
+      <CollectionHistory ref="historyRef" />
+    </div>
+
+    <!-- Send Reminder Dialog -->
+    <BaseModal :show="showSendDialog" @close="showSendDialog = false">
+      <template #header>
+        <h3 class="text-lg font-medium">{{ t('confirm_send_title') }}</h3>
+      </template>
+      <div v-if="selectedInvoice" class="space-y-4">
+        <p class="text-sm text-gray-600">{{ t('confirm_send') }}</p>
+        <div class="bg-gray-50 rounded p-3">
+          <p class="text-sm"><strong>{{ t('customer') }}:</strong> {{ selectedInvoice.customer_name }}</p>
+          <p class="text-sm"><strong>{{ t('invoice_number') }}:</strong> {{ selectedInvoice.invoice_number }}</p>
+          <p class="text-sm"><strong>{{ t('amount_due') }}:</strong> {{ formatMoney(selectedInvoice.due_amount) }}</p>
+        </div>
+        <BaseInputGroup :label="t('escalation')">
+          <BaseMultiselect
+            v-model="sendLevel"
+            :options="levelOptions.filter(l => l.value)"
+            label="label"
+            value-prop="value"
+          />
+        </BaseInputGroup>
+      </div>
+      <template #footer>
+        <BaseButton variant="primary-outline" @click="showSendDialog = false">{{ $t('general.cancel') }}</BaseButton>
+        <BaseButton variant="primary" :loading="isSending" @click="confirmSend">{{ t('send_reminder') }}</BaseButton>
+      </template>
+    </BaseModal>
+  </BasePage>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted } from 'vue'
+import { useNotificationStore } from '@/scripts/stores/notification'
+import collectionMessages from '@/scripts/admin/i18n/collections.js'
+import CollectionTemplates from './Templates.vue'
+import CollectionHistory from './History.vue'
+
+const notificationStore = useNotificationStore()
+
+const locale = document.documentElement.lang || 'mk'
+function t(key) {
+  return collectionMessages[locale]?.collections?.[key]
+    || collectionMessages['en']?.collections?.[key]
+    || key
+}
+
+const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
+const fmtLocale = localeMap[locale] || 'mk-MK'
+
+const activeTab = ref('overdue')
+const isLoading = ref(false)
+const isSending = ref(false)
+const overdueInvoices = ref([])
+const summary = ref(null)
+const showSendDialog = ref(false)
+const selectedInvoice = ref(null)
+const sendLevel = ref('friendly')
+
+const filters = reactive({
+  escalation_level: null,
+  search: '',
+})
+
+const levelOptions = [
+  { value: null, label: t('level_all') || 'All' },
+  { value: 'friendly', label: t('level_friendly') || 'Friendly' },
+  { value: 'firm', label: t('level_firm') || 'Firm' },
+  { value: 'final', label: t('level_final') || 'Final' },
+  { value: 'legal', label: t('level_legal') || 'Legal' },
+]
+
+function formatMoney(cents) {
+  if (cents === null || cents === undefined) return '0.00'
+  return (cents / 100).toLocaleString(fmtLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+function formatDate(d) {
+  if (!d) return '-'
+  return new Date(d).toLocaleDateString(fmtLocale, { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+function daysOverdueClass(days) {
+  if (days > 60) return 'bg-red-100 text-red-800'
+  if (days > 30) return 'bg-orange-100 text-orange-800'
+  if (days > 7) return 'bg-yellow-100 text-yellow-800'
+  return 'bg-gray-100 text-gray-800'
+}
+
+function levelBadgeClass(level) {
+  const map = {
+    friendly: 'bg-blue-100 text-blue-800',
+    firm: 'bg-yellow-100 text-yellow-800',
+    final: 'bg-orange-100 text-orange-800',
+    legal: 'bg-red-100 text-red-800',
+  }
+  return map[level] || 'bg-gray-100 text-gray-800'
+}
+
+async function loadOverdue() {
+  isLoading.value = true
+  try {
+    const params = {}
+    if (filters.escalation_level) params.escalation_level = filters.escalation_level
+    if (filters.search) params.search = filters.search
+    const { data } = await window.axios.get('/collections/overdue', { params })
+    overdueInvoices.value = data.data || []
+    summary.value = data.summary || null
+  } catch (e) {
+    console.error('Failed to load overdue invoices', e)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('error_loading') || 'Failed to load overdue invoices',
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
+
+function openSendDialog(inv) {
+  selectedInvoice.value = inv
+  sendLevel.value = inv.escalation_level || 'friendly'
+  showSendDialog.value = true
+}
+
+async function confirmSend() {
+  if (!selectedInvoice.value) return
+  isSending.value = true
+  try {
+    await window.axios.post('/collections/send-reminder', {
+      invoice_id: selectedInvoice.value.id,
+      level: sendLevel.value,
+    })
+    showSendDialog.value = false
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('reminder_sent_success') || 'Reminder sent successfully.',
+    })
+    loadOverdue()
+  } catch (e) {
+    console.error('Failed to send reminder', e)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('error_sending') || 'Failed to send reminder',
+    })
+  } finally {
+    isSending.value = false
+  }
+}
+
+onMounted(() => {
+  loadOverdue()
+})
+// CLAUDE-CHECKPOINT
+</script>
+
+<!-- CLAUDE-CHECKPOINT -->

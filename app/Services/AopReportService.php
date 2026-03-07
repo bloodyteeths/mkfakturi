@@ -109,7 +109,7 @@ class AopReportService
      * Extract IFRS account type balances from balance sheet data.
      * Returns: ['RECEIVABLE' => 59, 'EQUITY' => 221, ...]
      */
-    protected function extractBalanceSheetByType(array $bsData): array
+    public function extractBalanceSheetByType(array $bsData): array
     {
         $balances = [];
 
@@ -148,7 +148,7 @@ class AopReportService
      * Extract IFRS account type balances from income statement data.
      * All values returned as positive (absolute).
      */
-    protected function extractIncomeStatementByType(array $isData): array
+    public function extractIncomeStatementByType(array $isData): array
     {
         $balances = [];
 
@@ -178,10 +178,13 @@ class AopReportService
     /**
      * Build AOP rows from config, mapping IFRS type balances to AOP positions.
      * Computes subtotals bottom-up.
+     *
+     * Supports signed sum_of entries: ['+066', '-068'] means add 066, subtract 068.
+     * Unsigned entries default to addition for backward compatibility.
      */
-    protected function buildAopRows(array $config, array $currentBalances, array $previousBalances): array
+    public function buildAopRows(array $config, array $currentBalances, array $previousBalances, ?array $fallbackOverride = null): array
     {
-        $fallback = config('ujp_aop.ifrs_to_aop_fallback', []);
+        $fallback = $fallbackOverride ?? config('ujp_aop.ifrs_to_aop_fallback', []);
 
         // First pass: fill leaf nodes from IFRS balances
         $rows = [];
@@ -233,10 +236,18 @@ class AopReportService
         foreach ($totalRows as $idx => $totalRow) {
             $currentSum = 0;
             $previousSum = 0;
-            foreach ($totalRow['sum_of'] as $childAop) {
+            foreach ($totalRow['sum_of'] as $childRef) {
+                $sign = 1;
+                $childAop = (string) $childRef;
+                if (is_string($childRef) && str_starts_with($childRef, '-')) {
+                    $sign = -1;
+                    $childAop = substr($childRef, 1);
+                } elseif (is_string($childRef) && str_starts_with($childRef, '+')) {
+                    $childAop = substr($childRef, 1);
+                }
                 if (isset($rowsByAop[$childAop])) {
-                    $currentSum += $rowsByAop[$childAop]['current'];
-                    $previousSum += $rowsByAop[$childAop]['previous'];
+                    $currentSum += $sign * $rowsByAop[$childAop]['current'];
+                    $previousSum += $sign * $rowsByAop[$childAop]['previous'];
                 }
             }
             $rowsByAop[$totalRow['aop']]['current'] = round($currentSum, 2);
@@ -327,7 +338,7 @@ class AopReportService
     /**
      * Get previous year balance sheet data.
      */
-    protected function getPreviousYearBalanceSheet(Company $company, int $prevYear): array
+    public function getPreviousYearBalanceSheet(Company $company, int $prevYear): array
     {
         if ($prevYear < 2020) {
             return [];
@@ -365,7 +376,7 @@ class AopReportService
     /**
      * Get previous year income statement data.
      */
-    protected function getPreviousYearIncomeStatement(Company $company, int $prevYear): array
+    public function getPreviousYearIncomeStatement(Company $company, int $prevYear): array
     {
         if ($prevYear < 2020) {
             return [];

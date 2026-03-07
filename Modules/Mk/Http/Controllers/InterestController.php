@@ -1,0 +1,198 @@
+<?php
+
+namespace Modules\Mk\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Modules\Mk\Models\InterestCalculation;
+use Modules\Mk\Services\InterestCalculationService;
+
+class InterestController extends Controller
+{
+    protected InterestCalculationService $service;
+
+    public function __construct(InterestCalculationService $service)
+    {
+        $this->service = $service;
+    }
+
+    /**
+     * List interest calculations with filters.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $query = InterestCalculation::forCompany($companyId)
+            ->with(['customer:id,name', 'invoice:id,invoice_number,total,due_amount,due_date'])
+            ->orderBy('calculation_date', 'desc');
+
+        if ($status = $request->query('status')) {
+            $query->byStatus($status);
+        }
+
+        if ($customerId = $request->query('customer_id')) {
+            $query->where('customer_id', (int) $customerId);
+        }
+
+        if ($dateFrom = $request->query('date_from')) {
+            $query->where('calculation_date', '>=', $dateFrom);
+        }
+
+        if ($dateTo = $request->query('date_to')) {
+            $query->where('calculation_date', '<=', $dateTo);
+        }
+
+        $limit = $request->query('limit', 15);
+        if ($limit === 'all') {
+            return response()->json([
+                'success' => true,
+                'data' => $query->get(),
+            ]);
+        }
+
+        $calculations = $query->paginate((int) $limit);
+
+        return response()->json([
+            'success' => true,
+            'data' => $calculations->items(),
+            'meta' => [
+                'current_page' => $calculations->currentPage(),
+                'last_page' => $calculations->lastPage(),
+                'per_page' => $calculations->perPage(),
+                'total' => $calculations->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * Trigger batch calculation for all overdue invoices.
+     */
+    public function calculate(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $asOfDate = $request->input('as_of_date');
+
+        try {
+            $calculations = $this->service->batchCalculate($companyId, $asOfDate);
+            $saved = $this->service->saveCalculations($companyId, $calculations);
+
+            return response()->json([
+                'success' => true,
+                'data' => $calculations,
+                'saved_count' => count($saved),
+                'annual_rate' => $this->service->getAnnualRate($companyId),
+                'message' => sprintf('Calculated interest for %d overdue invoices.', count($calculations)),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Show a single interest calculation.
+     */
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $calculation = InterestCalculation::forCompany($companyId)
+            ->with(['customer', 'invoice', 'interestInvoice'])
+            ->where('id', $id)
+            ->first();
+
+        if (! $calculation) {
+            return response()->json(['success' => false, 'message' => 'Interest calculation not found'], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $calculation,
+        ]);
+    }
+
+    /**
+     * Generate interest note (invoice) for selected calculations.
+     */
+    public function generateNote(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $request->validate([
+            'customer_id' => 'required|integer',
+            'calculation_ids' => 'required|array|min:1',
+            'calculation_ids.*' => 'integer',
+        ]);
+
+        try {
+            $result = $this->service->generateInterestNote(
+                $companyId,
+                (int) $request->input('customer_id'),
+                $request->input('calculation_ids')
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => $result,
+                'message' => 'Interest note generated successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Waive an interest calculation.
+     */
+    public function waive(Request $request, int $id): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $calculation = InterestCalculation::forCompany($companyId)
+            ->where('id', $id)
+            ->first();
+
+        if (! $calculation) {
+            return response()->json(['success' => false, 'message' => 'Interest calculation not found'], 404);
+        }
+
+        try {
+            $waived = $this->service->waive($calculation);
+
+            return response()->json([
+                'success' => true,
+                'data' => $waived,
+                'message' => 'Interest calculation waived.',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Get summary statistics.
+     */
+    public function summary(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $summary = $this->service->getSummary($companyId);
+
+        return response()->json([
+            'success' => true,
+            'data' => $summary,
+        ]);
+    }
+}
+
+// CLAUDE-CHECKPOINT

@@ -713,6 +713,13 @@ Route::prefix('/v1')->group(function () {
                 Route::get('cit-return/periods', [App\Http\Controllers\V1\Admin\Tax\CitReturnController::class, 'getPeriods']);
                 Route::get('cit-return/periods/{periodId}/returns', [App\Http\Controllers\V1\Admin\Tax\CitReturnController::class, 'getReturns']);
                 Route::get('cit-return/{id}/download-xml', [App\Http\Controllers\V1\Admin\Tax\CitReturnController::class, 'downloadXml']);
+
+                // UJP Tax Forms (unified endpoint for all forms)
+                Route::get('ujp-forms/list', [App\Http\Controllers\V1\Admin\Tax\UjpFormController::class, 'list']);
+                Route::get('ujp-forms/{formCode}/preview', [App\Http\Controllers\V1\Admin\Tax\UjpFormController::class, 'preview']);
+                Route::post('ujp-forms/{formCode}/xml', [App\Http\Controllers\V1\Admin\Tax\UjpFormController::class, 'generateXml']);
+                Route::post('ujp-forms/{formCode}/pdf', [App\Http\Controllers\V1\Admin\Tax\UjpFormController::class, 'generatePdf']);
+                Route::post('ujp-forms/{formCode}/file', [App\Http\Controllers\V1\Admin\Tax\UjpFormController::class, 'file']);
             });
 
             // Suppliers, Bills, Bill Payments (Accounts Payable)
@@ -987,6 +994,144 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{id}/download', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'download']);
                 Route::get('/{id}', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'show']);
                 Route::delete('/{id}', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'destroy']);
+            });
+
+            // F1: Compensations (Kompenzacija) - Standard+ tier
+            // ----------------------------------
+            Route::prefix('compensations')->middleware('tier:standard')->group(function () {
+                Route::get('/', [\Modules\Mk\Http\Controllers\CompensationController::class, 'index']);
+                Route::get('/opportunities', [\Modules\Mk\Http\Controllers\CompensationController::class, 'opportunities']);
+                Route::get('/eligible-documents', [\Modules\Mk\Http\Controllers\CompensationController::class, 'eligibleDocuments']);
+                Route::post('/', [\Modules\Mk\Http\Controllers\CompensationController::class, 'store']);
+                Route::get('/{id}', [\Modules\Mk\Http\Controllers\CompensationController::class, 'show']);
+                Route::post('/{id}/confirm', [\Modules\Mk\Http\Controllers\CompensationController::class, 'confirm']);
+                Route::post('/{id}/cancel', [\Modules\Mk\Http\Controllers\CompensationController::class, 'cancel']);
+                Route::get('/{id}/pdf', [\Modules\Mk\Http\Controllers\CompensationController::class, 'pdf']);
+            });
+
+            // F2: Payment Orders (Nalozi za Plakjanje) - Standard+ tier
+            // ----------------------------------
+            Route::prefix('payment-orders')->middleware('tier:standard')->group(function () {
+                Route::get('/', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'index']);
+                Route::get('/payable-bills', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'payableBills']);
+                Route::get('/overdue-summary', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'overdueSummary']);
+                Route::post('/', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'store']);
+                Route::get('/{id}', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'show']);
+                Route::post('/{id}/approve', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'approve']);
+                Route::get('/{id}/export', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'export']);
+                Route::post('/{id}/confirm', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'confirm']);
+                Route::post('/{id}/cancel', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'cancel']);
+            });
+
+            // F3: Cost Centers - Standard+ tier
+            // ----------------------------------
+            Route::prefix('cost-centers')->middleware('tier:standard')->group(function () {
+                Route::get('/', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'index']);
+                Route::post('/', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'store']);
+                Route::get('/summary', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'summary']);
+                Route::get('/rules', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'rules']);
+                Route::post('/rules', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'storeRule']);
+                Route::put('/rules/{ruleId}', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'updateRule']);
+                Route::delete('/rules/{ruleId}', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'deleteRule']);
+                Route::post('/suggest', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'suggest']);
+                Route::get('/{id}', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'show']);
+                Route::put('/{id}', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'update']);
+                Route::delete('/{id}', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'destroy']);
+                Route::get('/{id}/trial-balance', [\Modules\Mk\Http\Controllers\CostCenterController::class, 'trialBalance']);
+            });
+
+            // ----------------------------------
+            // F4: Late Interest Calculations
+            // ----------------------------------
+            Route::prefix('interest')->middleware('tier:standard')->group(function () {
+                Route::get('/', [\Modules\Mk\Http\Controllers\InterestController::class, 'index']);
+                Route::post('/calculate', [\Modules\Mk\Http\Controllers\InterestController::class, 'calculate']);
+                Route::get('/summary', [\Modules\Mk\Http\Controllers\InterestController::class, 'summary']);
+                Route::get('/{id}', [\Modules\Mk\Http\Controllers\InterestController::class, 'show']);
+                Route::post('/{id}/generate-note', [\Modules\Mk\Http\Controllers\InterestController::class, 'generateNote']);
+                Route::post('/{id}/waive', [\Modules\Mk\Http\Controllers\InterestController::class, 'waive']);
+            });
+
+            // ----------------------------------
+            // F5: Collections & Payment Reminders
+            // ----------------------------------
+            Route::prefix('collections')->middleware('tier:standard')->group(function () {
+                Route::get('/overdue', [\Modules\Mk\Http\Controllers\CollectionController::class, 'overdueInvoices']);
+                Route::post('/send-reminder', [\Modules\Mk\Http\Controllers\CollectionController::class, 'sendReminder']);
+                Route::get('/templates', [\Modules\Mk\Http\Controllers\CollectionController::class, 'templates']);
+                Route::post('/templates', [\Modules\Mk\Http\Controllers\CollectionController::class, 'storeTemplate']);
+                Route::put('/templates/{id}', [\Modules\Mk\Http\Controllers\CollectionController::class, 'updateTemplate']);
+                Route::delete('/templates/{id}', [\Modules\Mk\Http\Controllers\CollectionController::class, 'deleteTemplate']);
+                Route::get('/history', [\Modules\Mk\Http\Controllers\CollectionController::class, 'history']);
+                Route::get('/effectiveness', [\Modules\Mk\Http\Controllers\CollectionController::class, 'effectiveness']);
+            });
+
+            // ----------------------------------
+            // F6: Purchase Orders
+            // ----------------------------------
+            Route::prefix('purchase-orders')->middleware('tier:standard')->group(function () {
+                Route::get('/', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'index']);
+                Route::post('/', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'store']);
+                Route::get('/{id}', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'show']);
+                Route::put('/{id}', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'update']);
+                Route::post('/{id}/send', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'send']);
+                Route::post('/{id}/receive-goods', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'receiveGoods']);
+                Route::post('/{id}/convert-to-bill', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'convertToBill']);
+                Route::get('/{id}/three-way-match', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'threeWayMatch']);
+                Route::post('/{id}/cancel', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'cancel']);
+                Route::delete('/{id}', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'destroy']);
+            });
+
+            // ----------------------------------
+            // F7: Budgeting & Planning
+            // ----------------------------------
+            Route::prefix('budgets')->middleware('tier:standard')->group(function () {
+                Route::get('/', [\Modules\Mk\Http\Controllers\BudgetController::class, 'index']);
+                Route::post('/', [\Modules\Mk\Http\Controllers\BudgetController::class, 'store']);
+                Route::post('/prefill-actuals', [\Modules\Mk\Http\Controllers\BudgetController::class, 'prefillFromActuals']);
+                Route::get('/{id}', [\Modules\Mk\Http\Controllers\BudgetController::class, 'show']);
+                Route::put('/{id}', [\Modules\Mk\Http\Controllers\BudgetController::class, 'update']);
+                Route::post('/{id}/approve', [\Modules\Mk\Http\Controllers\BudgetController::class, 'approve']);
+                Route::post('/{id}/lock', [\Modules\Mk\Http\Controllers\BudgetController::class, 'lock']);
+                Route::get('/{id}/vs-actual', [\Modules\Mk\Http\Controllers\BudgetController::class, 'budgetVsActual']);
+                Route::delete('/{id}', [\Modules\Mk\Http\Controllers\BudgetController::class, 'destroy']);
+            });
+
+            // ----------------------------------
+            // F8: Travel Expense Management (Патни Налози)
+            // ----------------------------------
+            Route::prefix('travel-orders')->middleware('tier:standard')->group(function () {
+                Route::get('/', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'index']);
+                Route::get('/summary', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'summary']);
+                Route::post('/', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'store']);
+                Route::get('/{id}', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'show']);
+                Route::put('/{id}', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'update']);
+                Route::post('/{id}/approve', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'approve']);
+                Route::post('/{id}/settle', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'settle']);
+                Route::post('/{id}/reject', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'reject']);
+                Route::delete('/{id}', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'destroy']);
+            });
+
+            // ----------------------------------
+            // F9: BI Dashboards
+            // ----------------------------------
+            Route::prefix('bi-dashboard')->middleware('tier:standard')->group(function () {
+                Route::get('/ratios', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'ratios']);
+                Route::get('/trends', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'trends']);
+                Route::get('/summary', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'summary']);
+                Route::post('/refresh', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'refresh']);
+            });
+
+            // F11: Custom Report Builder
+            Route::prefix('custom-reports')->middleware('tier:standard')->group(function () {
+                Route::get('/', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'index']);
+                Route::post('/', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'store']);
+                Route::post('/preview', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'preview']);
+                Route::get('/{id}', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'show']);
+                Route::put('/{id}', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'update']);
+                Route::get('/{id}/execute', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'execute']);
+                Route::get('/{id}/export-pdf', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'exportPdf']);
+                Route::delete('/{id}', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'destroy']);
             });
 
             // PSD2 Banking Integration (OAuth + Transaction Management)
@@ -1602,6 +1747,110 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/vat-books', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'vatBooks']);
         Route::get('/vat-books/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'vatBooksExport']);
 
+        // F1: Compensations (Partner)
+        Route::prefix('compensations')->group(function () {
+            Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerCompensationController::class, 'index']);
+            Route::get('/opportunities', [\App\Http\Controllers\V1\Partner\PartnerCompensationController::class, 'opportunities']);
+            Route::get('/eligible-documents', [\App\Http\Controllers\V1\Partner\PartnerCompensationController::class, 'eligibleDocuments']);
+            Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerCompensationController::class, 'store']);
+            Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerCompensationController::class, 'show']);
+            Route::post('/{id}/confirm', [\App\Http\Controllers\V1\Partner\PartnerCompensationController::class, 'confirm']);
+            Route::post('/{id}/cancel', [\App\Http\Controllers\V1\Partner\PartnerCompensationController::class, 'cancel']);
+            Route::get('/{id}/pdf', [\App\Http\Controllers\V1\Partner\PartnerCompensationController::class, 'pdf']);
+        });
+
+        // F2: Payment Orders (Partner)
+        Route::prefix('payment-orders')->group(function () {
+            Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'index']);
+            Route::get('/payable-bills', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'payableBills']);
+            Route::get('/overdue-summary', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'overdueSummary']);
+            Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'store']);
+            Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'show']);
+            Route::post('/{id}/approve', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'approve']);
+            Route::get('/{id}/export', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'export']);
+            Route::post('/{id}/confirm', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'confirm']);
+            Route::post('/{id}/cancel', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'cancel']);
+        });
+
+        // F3: Cost Centers (Partner)
+        Route::prefix('cost-centers')->group(function () {
+            Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'store']);
+            Route::get('/summary', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'summary']);
+            Route::get('/rules', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'rules']);
+            Route::post('/rules', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'storeRule']);
+            Route::put('/rules/{ruleId}', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'updateRule']);
+            Route::delete('/rules/{ruleId}', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'deleteRule']);
+            Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'show']);
+            Route::put('/{id}', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'update']);
+            Route::delete('/{id}', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'destroy']);
+            Route::get('/{id}/trial-balance', [\App\Http\Controllers\V1\Partner\PartnerCostCenterController::class, 'trialBalance']);
+        });
+
+        // F4: Interest Calculations (Partner)
+        Route::prefix('interest')->group(function () {
+            Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'index']);
+            Route::post('/calculate', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'calculate']);
+            Route::get('/summary', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'summary']);
+            Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'show']);
+            Route::post('/{id}/generate-note', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'generateNote']);
+            Route::post('/{id}/waive', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'waive']);
+        });
+
+        // F5: Collections (Partner)
+        Route::prefix('collections')->group(function () {
+            Route::get('/overdue', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'overdueInvoices']);
+            Route::post('/send-reminder', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'sendReminder']);
+            Route::get('/templates', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'templates']);
+            Route::get('/history', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'history']);
+            Route::get('/effectiveness', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'effectiveness']);
+        });
+
+        // F6: Purchase Orders (Partner)
+        Route::prefix('purchase-orders')->group(function () {
+            Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'index']);
+            Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'show']);
+            Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'store']);
+            Route::put('/{id}', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'update']);
+            Route::post('/{id}/send', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'send']);
+            Route::post('/{id}/receive-goods', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'receiveGoods']);
+            Route::post('/{id}/convert-to-bill', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'convertToBill']);
+            Route::get('/{id}/three-way-match', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'threeWayMatch']);
+            Route::post('/{id}/cancel', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'cancel']);
+            Route::delete('/{id}', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'destroy']);
+        });
+
+        // F7: Budgets (Partner)
+        Route::prefix('budgets')->group(function () {
+            Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'index']);
+            Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'show']);
+            Route::get('/{id}/vs-actual', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'budgetVsActual']);
+        });
+
+        // F8: Travel Orders (Partner)
+        Route::prefix('travel-orders')->group(function () {
+            Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerTravelOrderController::class, 'index']);
+            Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerTravelOrderController::class, 'show']);
+            Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerTravelOrderController::class, 'store']);
+            Route::post('/{id}/approve', [\App\Http\Controllers\V1\Partner\PartnerTravelOrderController::class, 'approve']);
+            Route::post('/{id}/settle', [\App\Http\Controllers\V1\Partner\PartnerTravelOrderController::class, 'settle']);
+        });
+
+        // F9: BI Dashboards (Partner)
+        Route::prefix('bi-dashboard')->group(function () {
+            Route::get('/ratios', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'ratios']);
+            Route::get('/trends', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'trends']);
+            Route::get('/summary', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'summary']);
+        });
+
+        // F11: Custom Reports (Partner)
+        Route::prefix('custom-reports')->group(function () {
+            Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerCustomReportController::class, 'index']);
+            Route::post('/preview', [\App\Http\Controllers\V1\Partner\PartnerCustomReportController::class, 'preview']);
+            Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerCustomReportController::class, 'show']);
+            Route::get('/{id}/execute', [\App\Http\Controllers\V1\Partner\PartnerCustomReportController::class, 'execute']);
+        });
+
         // Fixed Assets (full CRUD for partners)
         Route::get('/fixed-assets', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'index']);
         Route::post('/fixed-assets', [\App\Http\Controllers\V1\Partner\PartnerFixedAssetController::class, 'store']);
@@ -1628,6 +1877,15 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::post('/cit-return', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'citGenerate']);
         Route::post('/cit-return/file', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'citFile']);
         Route::get('/cit-return/{id}/download-xml', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'citDownloadXml']);
+    });
+
+    // Partner UJP Tax Forms for Client Companies
+    Route::prefix('/companies/{company}/ujp-forms')->group(function () {
+        Route::get('/list', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'list']);
+        Route::get('/{formCode}/preview', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'preview']);
+        Route::post('/{formCode}/xml', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'generateXml']);
+        Route::post('/{formCode}/pdf', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'generatePdf']);
+        Route::post('/{formCode}/file', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'file']);
     });
 
     // Partner Payroll Reports for Client Companies
@@ -1665,6 +1923,30 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::post('/multi-company', [BulkReportController::class, 'multiCompany']);
         Route::post('/consolidated', [BulkReportController::class, 'consolidated']);
         Route::post('/export', [BulkReportController::class, 'export']);
+    });
+
+    // F10: Batch Operations (Partner)
+    Route::prefix('/batch-operations')->group(function () {
+        Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerBatchOperationController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerBatchOperationController::class, 'store']);
+        Route::get('/operations', [\App\Http\Controllers\V1\Partner\PartnerBatchOperationController::class, 'operations']);
+        Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerBatchOperationController::class, 'show']);
+        Route::post('/{id}/cancel', [\App\Http\Controllers\V1\Partner\PartnerBatchOperationController::class, 'cancel']);
+        Route::get('/{id}/progress', [\App\Http\Controllers\V1\Partner\PartnerBatchOperationController::class, 'progress']);
+    });
+
+    // F12: Financial Consolidation (Partner)
+    Route::prefix('/consolidation')->group(function () {
+        Route::get('/groups', [\App\Http\Controllers\V1\Partner\PartnerConsolidationController::class, 'index']);
+        Route::post('/groups', [\App\Http\Controllers\V1\Partner\PartnerConsolidationController::class, 'store']);
+        Route::get('/groups/{id}', [\App\Http\Controllers\V1\Partner\PartnerConsolidationController::class, 'show']);
+        Route::put('/groups/{id}', [\App\Http\Controllers\V1\Partner\PartnerConsolidationController::class, 'update']);
+        Route::delete('/groups/{id}', [\App\Http\Controllers\V1\Partner\PartnerConsolidationController::class, 'destroy']);
+        Route::get('/groups/{id}/intercompany', [\App\Http\Controllers\V1\Partner\PartnerConsolidationController::class, 'intercompany']);
+        Route::post('/groups/{id}/eliminations', [\App\Http\Controllers\V1\Partner\PartnerConsolidationController::class, 'eliminations']);
+        Route::get('/groups/{id}/trial-balance', [\App\Http\Controllers\V1\Partner\PartnerConsolidationController::class, 'trialBalance']);
+        Route::get('/groups/{id}/income-statement', [\App\Http\Controllers\V1\Partner\PartnerConsolidationController::class, 'incomeStatement']);
+        Route::get('/groups/{id}/balance-sheet', [\App\Http\Controllers\V1\Partner\PartnerConsolidationController::class, 'balanceSheet']);
     });
 });
 

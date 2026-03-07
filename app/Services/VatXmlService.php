@@ -47,6 +47,20 @@ class VatXmlService
     protected string $periodType;
 
     /**
+     * Initialize service properties for a period.
+     * Allows external callers (DDV04FormService) to set up without reflection.
+     */
+    public function initForPeriod(Company $company, Carbon $periodStart, Carbon $periodEnd, string $periodType = 'MONTHLY'): self
+    {
+        $this->company = $company;
+        $this->periodStart = $periodStart;
+        $this->periodEnd = $periodEnd;
+        $this->periodType = $periodType;
+
+        return $this;
+    }
+
+    /**
      * Generate ДДВ-04 XML for specified company and period
      */
     public function generateVatReturn(
@@ -356,9 +370,12 @@ class VatXmlService
     }
 
     /**
-     * Calculate VAT data for the specified period
+     * Calculate VAT data for the specified period.
+     *
+     * Note: Properties $company, $periodStart, $periodEnd must be set before calling.
+     * Use initForPeriod() to set them conveniently.
      */
-    protected function calculateVatForPeriod(): array
+    public function calculateVatForPeriod(): array
     {
         $vatData = [
             'standard' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
@@ -437,9 +454,12 @@ class VatXmlService
     }
 
     /**
-     * Calculate Input VAT from purchase invoices (bills) for the period
+     * Calculate Input VAT from purchase invoices (bills) for the period.
+     *
+     * Note: Properties $company, $periodStart, $periodEnd must be set before calling.
+     * Use initForPeriod() to set them conveniently.
      */
-    protected function calculateInputVatForPeriod(): array
+    public function calculateInputVatForPeriod(): array
     {
         $vatData = [
             'standard' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],

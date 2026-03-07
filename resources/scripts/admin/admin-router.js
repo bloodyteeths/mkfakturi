@@ -1166,6 +1166,12 @@ export default [
         component: () => import('@/scripts/admin/views/partner/accounting/VatReturns.vue'),
       },
       {
+        path: 'partner/accounting/ujp-forms',
+        name: 'partner.accounting.ujp-forms',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/UjpForms.vue'),
+      },
+      {
         path: 'partner/accounting/payroll-reports',
         name: 'partner.accounting.payroll-reports',
         meta: { isPartner: true },
@@ -1194,6 +1200,280 @@ export default [
         name: 'partner.accounting.ios-statement',
         meta: { isPartner: true },
         component: () => import('@/scripts/admin/views/partner/accounting/IOSStatement.vue'),
+      },
+
+      // F1: Compensations
+      {
+        path: 'compensations',
+        name: 'compensations.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/compensations/Index.vue'),
+      },
+      {
+        path: 'compensations/create',
+        name: 'compensations.create',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/compensations/Create.vue'),
+      },
+      {
+        path: 'compensations/:id',
+        name: 'compensations.view',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/compensations/View.vue'),
+      },
+
+      // F2: Payment Orders
+      {
+        path: 'payment-orders',
+        name: 'payment-orders.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/payment-orders/Index.vue'),
+      },
+      {
+        path: 'payment-orders/create',
+        name: 'payment-orders.create',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/payment-orders/Create.vue'),
+      },
+      {
+        path: 'payment-orders/:id',
+        name: 'payment-orders.view',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/payment-orders/View.vue'),
+      },
+
+      // F3: Cost Centers
+      {
+        path: 'cost-centers',
+        name: 'cost-centers.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/cost-centers/Index.vue'),
+      },
+      {
+        path: 'cost-centers/rules',
+        name: 'cost-centers.rules',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/cost-centers/Rules.vue'),
+      },
+      {
+        path: 'cost-centers/summary',
+        name: 'cost-centers.summary',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/cost-centers/Summary.vue'),
+      },
+
+      // F4: Late Interest
+      {
+        path: 'interest',
+        name: 'interest.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/interest/Index.vue'),
+      },
+      {
+        path: 'interest/summary',
+        name: 'interest.summary',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/interest/Summary.vue'),
+      },
+
+      // F5: Collections & Reminders
+      {
+        path: 'collections',
+        name: 'collections.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/collections/Index.vue'),
+      },
+
+      // F6: Purchase Orders
+      {
+        path: 'purchase-orders',
+        name: 'purchase-orders.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/purchase-orders/Index.vue'),
+      },
+      {
+        path: 'purchase-orders/create',
+        name: 'purchase-orders.create',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/purchase-orders/Create.vue'),
+      },
+      {
+        path: 'purchase-orders/:id',
+        name: 'purchase-orders.view',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/purchase-orders/View.vue'),
+      },
+      {
+        path: 'purchase-orders/:id/receive',
+        name: 'purchase-orders.receive',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/purchase-orders/ReceiveGoods.vue'),
+      },
+
+      // F7: Budgets
+      {
+        path: 'budgets',
+        name: 'budgets.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/budgets/Index.vue'),
+      },
+      {
+        path: 'budgets/create',
+        name: 'budgets.create',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/budgets/Create.vue'),
+      },
+      {
+        path: 'budgets/:id',
+        name: 'budgets.view',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/budgets/View.vue'),
+      },
+
+      // F8: Travel Orders
+      {
+        path: 'travel-orders',
+        name: 'travel-orders.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/travel-orders/Index.vue'),
+      },
+      {
+        path: 'travel-orders/create',
+        name: 'travel-orders.create',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/travel-orders/Create.vue'),
+      },
+      {
+        path: 'travel-orders/:id',
+        name: 'travel-orders.view',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/travel-orders/View.vue'),
+      },
+
+      // F9: BI Dashboards
+      {
+        path: 'bi-dashboard',
+        name: 'bi-dashboard.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/bi-dashboard/Index.vue'),
+      },
+      {
+        path: 'bi-dashboard/ratios',
+        name: 'bi-dashboard.ratios',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/bi-dashboard/Ratios.vue'),
+      },
+      {
+        path: 'bi-dashboard/trends',
+        name: 'bi-dashboard.trends',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/bi-dashboard/Trends.vue'),
+      },
+
+      // F11: Custom Reports
+      {
+        path: 'custom-reports',
+        name: 'custom-reports.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/custom-reports/Index.vue'),
+      },
+      {
+        path: 'custom-reports/create',
+        name: 'custom-reports.create',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/custom-reports/Create.vue'),
+      },
+      {
+        path: 'custom-reports/:id',
+        name: 'custom-reports.view',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/custom-reports/View.vue'),
+      },
+
+      // Partner: F1 Compensations, F2 Payment Orders, F3 Cost Centers
+      {
+        path: 'partner/accounting/compensations',
+        name: 'partner.accounting.compensations',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/Compensations.vue'),
+      },
+      {
+        path: 'partner/accounting/payment-orders',
+        name: 'partner.accounting.payment-orders',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/PaymentOrders.vue'),
+      },
+      {
+        path: 'partner/accounting/cost-centers',
+        name: 'partner.accounting.cost-centers',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/CostCenters.vue'),
+      },
+
+      // Partner: F4 Interest, F5 Collections, F6 Purchase Orders, F7 Budgets
+      {
+        path: 'partner/accounting/interest',
+        name: 'partner.accounting.interest',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/Interest.vue'),
+      },
+      {
+        path: 'partner/accounting/collections',
+        name: 'partner.accounting.collections',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/Collections.vue'),
+      },
+      {
+        path: 'partner/accounting/purchase-orders',
+        name: 'partner.accounting.purchase-orders',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/PurchaseOrders.vue'),
+      },
+      {
+        path: 'partner/accounting/budgets',
+        name: 'partner.accounting.budgets',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/Budgets.vue'),
+      },
+
+      // F8: Travel Orders (Partner)
+      {
+        path: 'partner/accounting/travel-orders',
+        name: 'partner.accounting.travel-orders',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/TravelOrders.vue'),
+      },
+
+      // F9: BI Dashboards (Partner)
+      {
+        path: 'partner/accounting/bi-dashboard',
+        name: 'partner.accounting.bi-dashboard',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/BiDashboard.vue'),
+      },
+
+      // F10: Batch Operations (Partner)
+      {
+        path: 'partner/accounting/batch-operations',
+        name: 'partner.accounting.batch-operations',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/BatchOperations.vue'),
+      },
+
+      // F11: Custom Reports (Partner)
+      {
+        path: 'partner/accounting/custom-reports',
+        name: 'partner.accounting.custom-reports',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/CustomReports.vue'),
+      },
+
+      // F12: Financial Consolidation (Partner)
+      {
+        path: 'partner/accounting/consolidation',
+        name: 'partner.accounting.consolidation',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/Consolidation.vue'),
       },
 
       // Banking
