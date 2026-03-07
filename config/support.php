@@ -10,7 +10,7 @@ return [
     | All support inquiries from the contact form will be delivered to this address.
     |
     */
-    'email' => env('SUPPORT_EMAIL', 'support@facturino.mk'),
+    'email' => env('SUPPORT_EMAIL', 'partners@facturino.mk'),
 
     /*
     |--------------------------------------------------------------------------

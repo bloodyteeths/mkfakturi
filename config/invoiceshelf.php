@@ -573,14 +573,14 @@ return [
             'model' => '',
         ],
         [
-            'title' => 'navigation.support_tickets',
+            'title' => 'navigation.support',
             'group' => 3,
             'link' => '/admin/support',
             'icon' => 'LifebuoyIcon',
-            'name' => 'Support Tickets',
+            'name' => 'Support',
             'owner_only' => false,
-            'ability' => 'viewAny',
-            'model' => \Coderflex\LaravelTicket\Models\Ticket::class,
+            'ability' => '',
+            'model' => '',
         ],
         [
             'title' => 'navigation.all_support_tickets',

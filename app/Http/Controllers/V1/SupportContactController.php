@@ -83,35 +83,11 @@ class SupportContactController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $user = $request->user();
+
         $query = SupportContact::query()
-            ->with(['user', 'company'])
+            ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc');
-
-        // Filter by status
-        if ($request->has('status') && $request->status !== 'all') {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by category
-        if ($request->has('category')) {
-            $query->where('category', $request->category);
-        }
-
-        // Filter by priority
-        if ($request->has('priority')) {
-            $query->where('priority', $request->priority);
-        }
-
-        // Search
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('subject', 'like', "%{$search}%")
-                    ->orWhere('message', 'like', "%{$search}%");
-            });
-        }
 
         $contacts = $query->paginate($request->get('per_page', 15));
 

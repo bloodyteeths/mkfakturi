@@ -54,4 +54,14 @@ class SupportContactNotification extends Mailable
     {
         return [];
     }
+
+    /**
+     * Set Postmark broadcast stream (default outbound silently drops).
+     */
+    public function build()
+    {
+        return $this->withSymfonyMessage(function ($message) {
+            $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+        });
+    }
 }

@@ -787,6 +787,10 @@ Route::prefix('/v1')->group(function () {
             // ----------------------------------
 
             Route::prefix('support')->group(function () {
+                // Contact form (sends email to support team)
+                Route::post('/contact', [\App\Http\Controllers\V1\SupportContactController::class, 'store']);
+                Route::get('/contact', [\App\Http\Controllers\V1\SupportContactController::class, 'index']);
+
                 // Tickets (Customer View - Tenant Isolated)
                 Route::get('/tickets', [\App\Http\Controllers\V1\Admin\Support\TicketController::class, 'index']);
                 Route::post('/tickets', [\App\Http\Controllers\V1\Admin\Support\TicketController::class, 'store']);

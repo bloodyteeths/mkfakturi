@@ -236,10 +236,8 @@ const PricingPage = () => import('@/js/pages/pricing/Companies.vue')
 const BillingIndex = () => import('@/js/pages/billing/Index.vue')
 const BillingSuccess = () => import('@/js/pages/billing/Success.vue')
 
-// Support Ticketing
-const TicketIndex = () => import('@/scripts/admin/views/support/Index.vue')
-const TicketCreate = () => import('@/scripts/admin/views/support/Create.vue')
-const TicketView = () => import('@/scripts/admin/views/support/View.vue')
+// Support Contact
+const SupportIndex = () => import('@/scripts/admin/views/support/Index.vue')
 const TicketAdminIndex = () => import('@/scripts/admin/views/support/AdminIndex.vue')
 
 // Payroll Module
@@ -1589,24 +1587,12 @@ export default [
         component: () => import('./views/accounting/FixedAssets.vue'),
       },
 
-      // Support Tickets
+      // Support Contact
       {
         path: 'support',
         name: 'support.index',
         meta: { requiresAuth: true },
-        component: TicketIndex,
-      },
-      {
-        path: 'support/create',
-        name: 'support.create',
-        meta: { requiresAuth: true },
-        component: TicketCreate,
-      },
-      {
-        path: 'support/:id',
-        name: 'support.view',
-        meta: { requiresAuth: true },
-        component: TicketView,
+        component: SupportIndex,
       },
 
       // Super Admin Support Tickets (Cross-Tenant View)

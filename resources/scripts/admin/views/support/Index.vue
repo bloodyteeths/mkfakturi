@@ -1,472 +1,472 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="$t('tickets.title')">
+    <BasePageHeader :title="t('title')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem :title="$t('tickets.ticket', 2)" to="#" active />
+        <BaseBreadcrumbItem :title="t('title')" to="#" active />
       </BaseBreadcrumb>
-
-      <template #actions>
-        <BaseButton
-          v-show="ticketStore.ticketTotalCount"
-          variant="primary-outline"
-          @click="toggleFilter"
-        >
-          {{ $t('general.filter') }}
-          <template #right="slotProps">
-            <BaseIcon
-              v-if="!showFilters"
-              name="FunnelIcon"
-              :class="slotProps.class"
-            />
-            <BaseIcon v-else name="XMarkIcon" :class="slotProps.class" />
-          </template>
-        </BaseButton>
-
-        <router-link to="support/create">
-          <BaseButton variant="primary" class="ml-4">
-            <template #left="slotProps">
-              <BaseIcon name="PlusIcon" :class="slotProps.class" />
-            </template>
-            {{ $t('tickets.new_ticket') }}
-          </BaseButton>
-        </router-link>
-      </template>
     </BasePageHeader>
 
-    <BaseFilterWrapper
-      v-show="showFilters"
-      :row-on-xl="true"
-      @clear="clearFilter"
-    >
-      <BaseInputGroup :label="$t('tickets.status')">
-        <BaseMultiselect
-          v-model="filters.status"
-          :options="statusOptions"
-          searchable
-          :placeholder="$t('general.select_a_status')"
-        />
-      </BaseInputGroup>
-
-      <BaseInputGroup :label="$t('tickets.priority')">
-        <BaseMultiselect
-          v-model="filters.priority"
-          :options="priorityOptions"
-          searchable
-          :placeholder="$t('tickets.select_priority')"
-        />
-      </BaseInputGroup>
-
-      <BaseInputGroup :label="$t('general.search')">
-        <BaseInput v-model="filters.search" :placeholder="$t('tickets.search_placeholder')">
-          <template #left="slotProps">
-            <BaseIcon name="MagnifyingGlassIcon" :class="slotProps.class" />
-          </template>
-        </BaseInput>
-      </BaseInputGroup>
-    </BaseFilterWrapper>
-
-    <BaseEmptyPlaceholder
-      v-show="showEmptyScreen"
-      :title="$t('tickets.no_tickets')"
-      :description="$t('tickets.list_of_tickets')"
-    >
-      <template #actions>
-        <BaseButton
-          variant="primary-outline"
-          @click="$router.push('/admin/support/create')"
-        >
-          <template #left="slotProps">
-            <BaseIcon name="PlusIcon" :class="slotProps.class" />
-          </template>
-          {{ $t('tickets.create_new_ticket') }}
+    <!-- Success State -->
+    <div v-if="submitted" class="max-w-2xl mx-auto mt-8">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <BaseIcon name="CheckCircleIcon" class="h-8 w-8 text-green-600" />
+        </div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ t('success_title') }}</h2>
+        <p class="text-gray-600 mb-4">{{ t('success_message') }}</p>
+        <div class="bg-gray-50 rounded-md p-4 mb-6">
+          <p class="text-sm text-gray-500">{{ t('reference') }}</p>
+          <p class="text-lg font-mono font-semibold text-primary-600">{{ referenceNumber }}</p>
+        </div>
+        <p class="text-sm text-gray-500 mb-6">{{ t('response_time') }}</p>
+        <BaseButton variant="primary" @click="resetForm">
+          {{ t('new_request') }}
         </BaseButton>
-      </template>
-    </BaseEmptyPlaceholder>
-
-    <div v-show="!showEmptyScreen" class="relative table-container">
-      <div
-        class="
-          relative
-          flex
-          items-center
-          justify-between
-          h-10
-          mt-5
-          list-none
-          border-b-2 border-gray-200 border-solid
-        "
-      >
-        <!-- Tabs -->
-        <BaseTabGroup class="-mb-5" @change="setStatusFilter">
-          <BaseTab :title="$t('general.all')" filter="" />
-          <BaseTab :title="$t('tickets.open')" filter="open" />
-          <BaseTab :title="$t('tickets.in_progress')" filter="in_progress" />
-          <BaseTab :title="$t('tickets.resolved')" filter="resolved" />
-          <BaseTab :title="$t('tickets.closed')" filter="closed" />
-        </BaseTabGroup>
-
-        <BaseDropdown
-          v-if="ticketStore.selectedTickets.length"
-          class="absolute float-right"
-        >
-          <template #activator>
-            <span
-              class="
-                flex
-                text-sm
-                font-medium
-                cursor-pointer
-                select-none
-                text-primary-400
-              "
-            >
-              {{ $t('general.actions') }}
-              <BaseIcon name="ChevronDownIcon" class="h-5" />
-            </span>
-          </template>
-
-          <BaseDropdownItem @click="removeMultipleTickets">
-            <BaseIcon name="TrashIcon" class="h-5 mr-3 text-gray-600" />
-            {{ $t('general.delete') }}
-          </BaseDropdownItem>
-        </BaseDropdown>
       </div>
+    </div>
 
-      <!-- Mobile: Card View -->
-      <div class="block md:hidden mt-4 space-y-4">
-        <div
-          v-for="ticket in ticketStore.tickets"
-          :key="ticket.id"
-          class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer"
-          @click="$router.push(`/admin/support/${ticket.id}`)"
-        >
-          <div class="flex items-start justify-between mb-2">
-            <h3 class="text-base font-semibold text-gray-900 flex-1">
-              {{ ticket.title }}
-            </h3>
-            <span
-              :class="getStatusBadgeClass(ticket.status)"
-              class="ml-2 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap"
-            >
-              {{ getStatusLabel(ticket.status) }}
-            </span>
+    <!-- Contact Form -->
+    <div v-else class="max-w-2xl mx-auto mt-8">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-1">{{ t('form_title') }}</h2>
+        <p class="text-sm text-gray-500 mb-6">{{ t('form_subtitle') }}</p>
+
+        <form @submit.prevent="submitForm" class="space-y-5">
+          <!-- Name & Email -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BaseInputGroup :label="t('name')" required :error="errors.name">
+              <BaseInput v-model="form.name" :placeholder="t('name_placeholder')" />
+            </BaseInputGroup>
+
+            <BaseInputGroup :label="t('email')" required :error="errors.email">
+              <BaseInput v-model="form.email" type="email" :placeholder="t('email_placeholder')" />
+            </BaseInputGroup>
           </div>
 
-          <p class="text-sm text-gray-600 mb-3 line-clamp-2">
-            {{ ticket.message }}
-          </p>
+          <!-- Subject -->
+          <BaseInputGroup :label="t('subject')" required :error="errors.subject">
+            <BaseInput v-model="form.subject" :placeholder="t('subject_placeholder')" />
+          </BaseInputGroup>
 
-          <div class="flex items-center justify-between text-xs text-gray-500">
-            <div class="flex items-center space-x-3">
-              <span
-                :class="getPriorityBadgeClass(ticket.priority)"
-                class="px-2 py-1 rounded-full font-medium"
+          <!-- Category & Priority -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BaseInputGroup :label="t('category')" required :error="errors.category">
+              <BaseMultiselect
+                v-model="form.category"
+                :options="categoryOptions"
+                label="name"
+                value-prop="id"
+                :placeholder="t('select_category')"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup :label="t('priority')" required :error="errors.priority">
+              <BaseMultiselect
+                v-model="form.priority"
+                :options="priorityOptions"
+                label="name"
+                value-prop="id"
+                :placeholder="t('select_priority')"
+              />
+            </BaseInputGroup>
+          </div>
+
+          <!-- Message -->
+          <BaseInputGroup :label="t('message')" required :error="errors.message">
+            <BaseTextarea
+              v-model="form.message"
+              :placeholder="t('message_placeholder')"
+              rows="6"
+            />
+            <p class="mt-1 text-xs text-gray-400">{{ form.message.length }} / 2000</p>
+          </BaseInputGroup>
+
+          <!-- File Upload -->
+          <BaseInputGroup :label="t('attachments')">
+            <input
+              ref="fileInput"
+              type="file"
+              multiple
+              accept=".jpg,.jpeg,.png,.gif,.pdf"
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+              @change="handleFiles"
+            />
+            <p class="mt-1 text-xs text-gray-400">{{ t('attachments_hint') }}</p>
+            <div v-if="form.attachments.length" class="mt-2 space-y-1">
+              <div
+                v-for="(file, i) in form.attachments"
+                :key="i"
+                class="flex items-center justify-between bg-gray-50 rounded px-3 py-1.5 text-sm"
               >
-                {{ getPriorityLabel(ticket.priority) }}
-              </span>
-              <span v-if="ticket.messages_count" class="flex items-center">
-                <BaseIcon name="ChatBubbleLeftIcon" class="h-4 w-4 mr-1" />
-                {{ ticket.messages_count }}
+                <span class="text-gray-700 truncate">{{ file.name }}</span>
+                <button type="button" class="text-red-500 hover:text-red-700 ml-2" @click="removeFile(i)">
+                  <BaseIcon name="XMarkIcon" class="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </BaseInputGroup>
+
+          <!-- Server error -->
+          <div v-if="serverError" class="bg-red-50 border border-red-200 rounded-md p-3">
+            <p class="text-sm text-red-700">{{ serverError }}</p>
+          </div>
+
+          <!-- Submit -->
+          <div class="flex justify-end pt-2">
+            <BaseButton type="submit" variant="primary" :loading="isSubmitting" :disabled="isSubmitting">
+              {{ t('submit') }}
+            </BaseButton>
+          </div>
+        </form>
+      </div>
+
+      <!-- Previous Submissions -->
+      <div v-if="previousContacts.length" class="mt-8">
+        <h3 class="text-base font-semibold text-gray-900 mb-3">{{ t('previous') }}</h3>
+        <div class="space-y-3">
+          <div
+            v-for="contact in previousContacts"
+            :key="contact.id"
+            class="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
+          >
+            <div class="flex items-start justify-between">
+              <div>
+                <h4 class="font-medium text-gray-900">{{ contact.subject }}</h4>
+                <p class="text-sm text-gray-500 mt-1">{{ contact.reference_number }} &middot; {{ formatDate(contact.created_at) }}</p>
+              </div>
+              <span
+                :class="statusClass(contact.status)"
+                class="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap"
+              >
+                {{ statusLabel(contact.status) }}
               </span>
             </div>
-            <span>{{ formatDate(ticket.created_at) }}</span>
+            <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ contact.message }}</p>
           </div>
         </div>
       </div>
-
-      <!-- Desktop: Table View -->
-      <div class="hidden md:block">
-        <BaseTable
-          ref="table"
-          :data="ticketStore.tickets"
-          :columns="ticketColumns"
-          class="mt-3"
-        >
-          <template #cell-select="{ row }">
-            <BaseCheckbox
-              :id="row.data.id"
-              v-model="selectField"
-              :value="row.data.id"
-            />
-          </template>
-
-          <template #cell-title="{ row }">
-            <router-link
-              :to="`/admin/support/${row.data.id}`"
-              class="font-medium text-primary-500 hover:text-primary-600"
-            >
-              {{ row.data.title }}
-            </router-link>
-          </template>
-
-          <template #cell-status="{ row }">
-            <span
-              :class="getStatusBadgeClass(row.data.status)"
-              class="px-2 py-1 text-xs font-medium rounded-full"
-            >
-              {{ getStatusLabel(row.data.status) }}
-            </span>
-          </template>
-
-          <template #cell-priority="{ row }">
-            <span
-              :class="getPriorityBadgeClass(row.data.priority)"
-              class="px-2 py-1 text-xs font-medium rounded-full"
-            >
-              {{ getPriorityLabel(row.data.priority) }}
-            </span>
-          </template>
-
-          <template #cell-messages_count="{ row }">
-            <div class="flex items-center text-gray-600">
-              <BaseIcon name="ChatBubbleLeftIcon" class="h-4 w-4 mr-1" />
-              {{ row.data.messages_count || 0 }}
-            </div>
-          </template>
-
-          <template #cell-created_at="{ row }">
-            <span class="text-sm text-gray-600">
-              {{ formatDate(row.data.created_at) }}
-            </span>
-          </template>
-
-          <template #cell-actions="{ row }">
-            <BaseDropdown>
-              <template #activator>
-                <BaseIcon
-                  name="EllipsisHorizontalIcon"
-                  class="h-5 text-gray-500 cursor-pointer"
-                />
-              </template>
-
-              <BaseDropdownItem @click="$router.push(`/admin/support/${row.data.id}`)">
-                <BaseIcon name="EyeIcon" class="h-5 mr-3 text-gray-600" />
-                {{ $t('general.view') }}
-              </BaseDropdownItem>
-
-              <BaseDropdownItem @click="removeTicket(row.data.id)">
-                <BaseIcon name="TrashIcon" class="h-5 mr-3 text-gray-600" />
-                {{ $t('general.delete') }}
-              </BaseDropdownItem>
-            </BaseDropdown>
-          </template>
-        </BaseTable>
-      </div>
-
-      <BasePagination
-        v-if="ticketStore.ticketTotalCount > 0"
-        v-model="currentPage"
-        :total-pages="totalPages"
-        :total-count="ticketStore.ticketTotalCount"
-        :per-page="25"
-        class="mt-6"
-      />
     </div>
   </BasePage>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useTicketStore } from '@/scripts/admin/stores/ticket'
-import { useDialogStore } from '@/scripts/stores/dialog'
-import moment from 'moment'
+import axios from 'axios'
 
-const { t } = useI18n()
-const router = useRouter()
-const ticketStore = useTicketStore()
-const dialogStore = useDialogStore()
+const { locale } = useI18n({ useScope: 'global' })
 
-const showFilters = ref(false)
-const currentPage = ref(1)
-const selectField = ref([])
-
-const filters = ref({
-  status: '',
-  priority: '',
-  search: '',
-})
-
-const statusOptions = [
-  { label: t('tickets.open'), value: 'open' },
-  { label: t('tickets.in_progress'), value: 'in_progress' },
-  { label: t('tickets.resolved'), value: 'resolved' },
-  { label: t('tickets.closed'), value: 'closed' },
-]
-
-const priorityOptions = [
-  { label: t('tickets.low'), value: 'low' },
-  { label: t('tickets.normal'), value: 'normal' },
-  { label: t('tickets.high'), value: 'high' },
-  { label: t('tickets.urgent'), value: 'urgent' },
-]
-
-const ticketColumns = [
-  {
-    key: 'select',
-    thClass: 'w-12',
+const messages = {
+  en: {
+    title: 'Support',
+    form_title: 'Contact Support',
+    form_subtitle: 'Describe your issue and our team will get back to you within 48 hours.',
+    name: 'Name',
+    name_placeholder: 'Your full name',
+    email: 'Email',
+    email_placeholder: 'your@email.com',
+    subject: 'Subject',
+    subject_placeholder: 'Brief description of your issue',
+    category: 'Category',
+    select_category: 'Select a category',
+    priority: 'Priority',
+    select_priority: 'Select priority',
+    message: 'Message',
+    message_placeholder: 'Please describe your issue in detail (min 20 characters)...',
+    attachments: 'Attachments',
+    attachments_hint: 'JPG, PNG, GIF, or PDF. Max 5 files, 5MB each.',
+    submit: 'Send Message',
+    success_title: 'Message Sent!',
+    success_message: 'Your support request has been submitted successfully.',
+    reference: 'Reference Number',
+    response_time: 'We typically respond within 48 hours during business days.',
+    new_request: 'Submit Another Request',
+    previous: 'Previous Requests',
+    status_new: 'New',
+    status_in_progress: 'In Progress',
+    status_resolved: 'Resolved',
+    cat_technical: 'Technical Issue',
+    cat_billing: 'Billing Question',
+    cat_feature: 'Feature Request',
+    cat_general: 'General Inquiry',
+    pri_low: 'Low',
+    pri_medium: 'Medium',
+    pri_high: 'High',
+    pri_urgent: 'Urgent',
   },
-  {
-    key: 'title',
-    label: t('tickets.title'),
-    thClass: 'min-w-[300px]',
+  mk: {
+    title: 'Поддршка',
+    form_title: 'Контактирајте ја поддршката',
+    form_subtitle: 'Опишете го проблемот и нашиот тим ќе ви одговори во рок од 48 часа.',
+    name: 'Име',
+    name_placeholder: 'Вашето целосно име',
+    email: 'Е-пошта',
+    email_placeholder: 'vasha@email.com',
+    subject: 'Предмет',
+    subject_placeholder: 'Краток опис на вашиот проблем',
+    category: 'Категорија',
+    select_category: 'Изберете категорија',
+    priority: 'Приоритет',
+    select_priority: 'Изберете приоритет',
+    message: 'Порака',
+    message_placeholder: 'Ве молиме опишете го проблемот детално (мин 20 карактери)...',
+    attachments: 'Прилози',
+    attachments_hint: 'JPG, PNG, GIF или PDF. Максимум 5 датотеки, 5MB секоја.',
+    submit: 'Испрати порака',
+    success_title: 'Пораката е испратена!',
+    success_message: 'Вашето барање за поддршка е успешно поднесено.',
+    reference: 'Референтен број',
+    response_time: 'Обично одговараме во рок од 48 часа за време на работни денови.',
+    new_request: 'Поднеси ново барање',
+    previous: 'Претходни барања',
+    status_new: 'Ново',
+    status_in_progress: 'Во тек',
+    status_resolved: 'Решено',
+    cat_technical: 'Технички проблем',
+    cat_billing: 'Прашање за наплата',
+    cat_feature: 'Барање за функционалност',
+    cat_general: 'Општо прашање',
+    pri_low: 'Низок',
+    pri_medium: 'Среден',
+    pri_high: 'Висок',
+    pri_urgent: 'Итно',
   },
-  {
-    key: 'status',
-    label: t('tickets.status'),
-    thClass: 'w-32',
+  sq: {
+    title: 'Mbeshtetja',
+    form_title: 'Kontaktoni Mbeshtetjen',
+    form_subtitle: 'Pershkruani problemin tuaj dhe ekipi yne do t\'ju pergjigjet brenda 48 oreve.',
+    name: 'Emri',
+    name_placeholder: 'Emri juaj i plote',
+    email: 'Email',
+    email_placeholder: 'juaji@email.com',
+    subject: 'Subjekti',
+    subject_placeholder: 'Pershkrim i shkurter i problemit',
+    category: 'Kategoria',
+    select_category: 'Zgjidhni kategorine',
+    priority: 'Prioriteti',
+    select_priority: 'Zgjidhni prioritetin',
+    message: 'Mesazhi',
+    message_placeholder: 'Ju lutem pershkruani problemin ne detaje (min 20 karaktere)...',
+    attachments: 'Bashkengjitjet',
+    attachments_hint: 'JPG, PNG, GIF ose PDF. Maks 5 skedare, 5MB secili.',
+    submit: 'Dergo Mesazhin',
+    success_title: 'Mesazhi u Dergua!',
+    success_message: 'Kerkesa juaj per mbeshtetje u dergua me sukses.',
+    reference: 'Numri i References',
+    response_time: 'Zakonisht pergjigjemi brenda 48 oreve gjate diteve te punes.',
+    new_request: 'Dergo Kerkese Tjeter',
+    previous: 'Kerkesat e Meparshme',
+    status_new: 'E re',
+    status_in_progress: 'Ne progres',
+    status_resolved: 'E zgjidhur',
+    cat_technical: 'Problem Teknik',
+    cat_billing: 'Pyetje Faturimi',
+    cat_feature: 'Kerkese Funksionaliteti',
+    cat_general: 'Pyetje e Pergjithshme',
+    pri_low: 'I ulet',
+    pri_medium: 'Mesatar',
+    pri_high: 'I larte',
+    pri_urgent: 'Urgjent',
   },
-  {
-    key: 'priority',
-    label: t('tickets.priority'),
-    thClass: 'w-32',
+  tr: {
+    title: 'Destek',
+    form_title: 'Destek ile Iletisim',
+    form_subtitle: 'Sorununuzu aciklain, ekibimiz 48 saat icinde size donecektir.',
+    name: 'Ad',
+    name_placeholder: 'Tam adiniz',
+    email: 'E-posta',
+    email_placeholder: 'sizin@email.com',
+    subject: 'Konu',
+    subject_placeholder: 'Sorununuzun kisa aciklamasi',
+    category: 'Kategori',
+    select_category: 'Kategori secin',
+    priority: 'Oncelik',
+    select_priority: 'Oncelik secin',
+    message: 'Mesaj',
+    message_placeholder: 'Lutfen sorununuzu ayrintili olarak aciklayin (min 20 karakter)...',
+    attachments: 'Ekler',
+    attachments_hint: 'JPG, PNG, GIF veya PDF. Maksimum 5 dosya, her biri 5MB.',
+    submit: 'Mesaj Gonder',
+    success_title: 'Mesaj Gonderildi!',
+    success_message: 'Destek talebiniz basariyla gonderildi.',
+    reference: 'Referans Numarasi',
+    response_time: 'Genellikle is gunlerinde 48 saat icinde yanitliyoruz.',
+    new_request: 'Yeni Talep Gonder',
+    previous: 'Onceki Talepler',
+    status_new: 'Yeni',
+    status_in_progress: 'Devam Ediyor',
+    status_resolved: 'Cozuldu',
+    cat_technical: 'Teknik Sorun',
+    cat_billing: 'Faturalama Sorusu',
+    cat_feature: 'Ozellik Istegi',
+    cat_general: 'Genel Soru',
+    pri_low: 'Dusuk',
+    pri_medium: 'Orta',
+    pri_high: 'Yuksek',
+    pri_urgent: 'Acil',
   },
-  {
-    key: 'messages_count',
-    label: t('tickets.replies'),
-    thClass: 'w-24 text-center',
-  },
-  {
-    key: 'created_at',
-    label: t('general.created_at'),
-    thClass: 'w-40',
-  },
-  {
-    key: 'actions',
-    label: '',
-    thClass: 'w-20',
-  },
-]
-
-const showEmptyScreen = computed(() => {
-  return !ticketStore.ticketTotalCount && !ticketStore.isFetchingTickets
-})
-
-const totalPages = computed(() => {
-  return Math.ceil(ticketStore.ticketTotalCount / 25)
-})
-
-const toggleFilter = () => {
-  showFilters.value = !showFilters.value
 }
 
-const clearFilter = () => {
-  filters.value = {
-    status: '',
-    priority: '',
-    search: '',
+const t = (key) => {
+  const lang = locale.value || 'mk'
+  return messages[lang]?.[key] || messages['en']?.[key] || key
+}
+
+const form = ref({
+  name: '',
+  email: '',
+  subject: '',
+  category: null,
+  priority: null,
+  message: '',
+  attachments: [],
+})
+
+const errors = ref({})
+const serverError = ref('')
+const isSubmitting = ref(false)
+const submitted = ref(false)
+const referenceNumber = ref('')
+const previousContacts = ref([])
+const fileInput = ref(null)
+
+const categoryOptions = computed(() => [
+  { id: 'technical', name: t('cat_technical') },
+  { id: 'billing', name: t('cat_billing') },
+  { id: 'feature', name: t('cat_feature') },
+  { id: 'general', name: t('cat_general') },
+])
+
+const priorityOptions = computed(() => [
+  { id: 'low', name: t('pri_low') },
+  { id: 'medium', name: t('pri_medium') },
+  { id: 'high', name: t('pri_high') },
+  { id: 'urgent', name: t('pri_urgent') },
+])
+
+const handleFiles = (e) => {
+  const files = Array.from(e.target.files)
+  const total = form.value.attachments.length + files.length
+  if (total > 5) {
+    form.value.attachments = [...form.value.attachments, ...files].slice(0, 5)
+  } else {
+    form.value.attachments = [...form.value.attachments, ...files]
   }
-  refreshTable()
 }
 
-const setStatusFilter = (filter) => {
-  filters.value.status = filter
-  refreshTable()
+const removeFile = (index) => {
+  form.value.attachments.splice(index, 1)
 }
 
-const refreshTable = () => {
-  currentPage.value = 1
-  loadTickets()
-}
+const submitForm = async () => {
+  errors.value = {}
+  serverError.value = ''
 
-const loadTickets = async () => {
-  const params = {
-    page: currentPage.value,
-    limit: 25,
-    status: filters.value.status || undefined,
-    priority: filters.value.priority?.value || undefined,
-    search: filters.value.search || undefined,
+  // Client-side validation
+  if (!form.value.name) errors.value.name = 'Required'
+  if (!form.value.email) errors.value.email = 'Required'
+  if (!form.value.subject) errors.value.subject = 'Required'
+  if (!form.value.category) errors.value.category = 'Required'
+  if (!form.value.priority) errors.value.priority = 'Required'
+  if (!form.value.message || form.value.message.length < 20) errors.value.message = 'Min 20 characters'
+
+  if (Object.keys(errors.value).length) return
+
+  isSubmitting.value = true
+
+  try {
+    const formData = new FormData()
+    formData.append('name', form.value.name)
+    formData.append('email', form.value.email)
+    formData.append('subject', form.value.subject)
+    formData.append('category', form.value.category)
+    formData.append('priority', form.value.priority)
+    formData.append('message', form.value.message)
+
+    form.value.attachments.forEach((file) => {
+      formData.append('attachments[]', file)
+    })
+
+    const { data } = await axios.post('/support/contact', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+
+    referenceNumber.value = data.reference_number
+    submitted.value = true
+    loadPreviousContacts()
+  } catch (err) {
+    if (err.response?.status === 422 && err.response?.data?.errors) {
+      const serverErrors = err.response.data.errors
+      Object.keys(serverErrors).forEach((key) => {
+        errors.value[key] = serverErrors[key][0]
+      })
+    } else {
+      serverError.value = err.response?.data?.message || 'Something went wrong. Please try again.'
+    }
+  } finally {
+    isSubmitting.value = false
   }
-
-  await ticketStore.fetchTickets(params)
 }
 
-const removeTicket = (id) => {
-  dialogStore
-    .openDialog({
-      title: t('general.are_you_sure'),
-      message: t('tickets.confirm_delete'),
-      yesLabel: t('general.yes'),
-      noLabel: t('general.no'),
-    })
-    .then((result) => {
-      if (result) {
-        ticketStore.deleteTicket(id).then(() => {
-          refreshTable()
-        })
-      }
-    })
+const resetForm = () => {
+  form.value = {
+    name: '',
+    email: '',
+    subject: '',
+    category: null,
+    priority: null,
+    message: '',
+    attachments: [],
+  }
+  submitted.value = false
+  referenceNumber.value = ''
+  if (fileInput.value) fileInput.value.value = ''
 }
 
-const removeMultipleTickets = () => {
-  dialogStore
-    .openDialog({
-      title: t('general.are_you_sure'),
-      message: t('tickets.confirm_delete_multiple'),
-      yesLabel: t('general.yes'),
-      noLabel: t('general.no'),
-    })
-    .then((result) => {
-      if (result) {
-        ticketStore.deleteMultipleTickets(ticketStore.selectedTickets).then(() => {
-          refreshTable()
-        })
-      }
-    })
+const loadPreviousContacts = async () => {
+  try {
+    const { data } = await axios.get('/support/contact')
+    previousContacts.value = data.data || []
+  } catch {
+    // Silently fail — not critical
+  }
 }
 
-const getStatusBadgeClass = (status) => {
+const formatDate = (dateStr) => {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+const statusClass = (status) => {
   const classes = {
-    open: 'bg-blue-100 text-blue-800',
+    new: 'bg-blue-100 text-blue-800',
     in_progress: 'bg-yellow-100 text-yellow-800',
     resolved: 'bg-green-100 text-green-800',
-    closed: 'bg-gray-100 text-gray-800',
   }
-  return classes[status] || classes.open
+  return classes[status] || classes.new
 }
 
-const getPriorityBadgeClass = (priority) => {
-  const classes = {
-    low: 'bg-gray-100 text-gray-800',
-    normal: 'bg-blue-100 text-blue-800',
-    high: 'bg-orange-100 text-orange-800',
-    urgent: 'bg-red-100 text-red-800',
+const statusLabel = (status) => {
+  const map = { new: 'status_new', in_progress: 'status_in_progress', resolved: 'status_resolved' }
+  return t(map[status] || 'status_new')
+}
+
+// Pre-fill name/email from current user if available
+onMounted(async () => {
+  try {
+    const { data } = await axios.get('/me')
+    if (data?.data) {
+      form.value.name = data.data.name || ''
+      form.value.email = data.data.email || ''
+    } else if (data?.name) {
+      form.value.name = data.name || ''
+      form.value.email = data.email || ''
+    }
+  } catch {
+    // Not critical
   }
-  return classes[priority] || classes.normal
-}
-
-const getStatusLabel = (status) => {
-  if (!status) return t('tickets.open') // Default to 'open' if no status
-  return t(`tickets.${status}`)
-}
-
-const getPriorityLabel = (priority) => {
-  if (!priority) return t('tickets.normal') // Default to 'normal' if no priority
-  return t(`tickets.${priority}`)
-}
-
-const formatDate = (date) => {
-  return moment(date).format('MMM DD, YYYY')
-}
-
-watch(selectField, (val) => {
-  ticketStore.selectTicket(val)
-})
-
-watch(
-  () => filters.value.search,
-  () => {
-    refreshTable()
-  }
-)
-
-watch(currentPage, () => {
-  loadTickets()
-})
-
-onMounted(() => {
-  loadTickets()
+  loadPreviousContacts()
 })
 </script>
