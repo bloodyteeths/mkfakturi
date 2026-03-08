@@ -787,7 +787,73 @@ class PartnerAccountingReportsController extends Controller
         return $pdf->download("kasova_kniga_{$accountCode}_{$fromDate}_{$toDate}.pdf");
     }
 
-    // CLAUDE-CHECKPOINT
+    /**
+     * Download a single journal entry (налог) as PDF.
+     */
+    public function journalEntryPdf(Request $request, int $company, int $transaction): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            abort(404, 'Partner not found');
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'No access to this company');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+        $companyModel->load('address');
+
+        $entry = $this->ifrsAdapter->getJournalEntry($companyModel, $transaction);
+        if (!$entry) {
+            abort(404, 'Journal entry not found');
+        }
+
+        view()->share([
+            'company' => $companyModel,
+            'entry' => $entry,
+            'report_period' => \Carbon\Carbon::parse($entry['date'])->format('d.m.Y'),
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.journal-entry');
+        $ref = str_replace('/', '-', $entry['reference'] ?? $transaction);
+
+        return $pdf->download("nalog_{$ref}.pdf");
+    }
+
+    /**
+     * Reverse (storno) a posted journal entry.
+     * Creates a mirror transaction with opposite debit/credit.
+     */
+    public function reverseJournalEntry(Request $request, int $company, int $transaction): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            return response()->json(['success' => false, 'message' => 'Company not found'], 404);
+        }
+
+        $reversalId = $this->ifrsAdapter->reverseJournalEntry($companyModel, $transaction);
+
+        if (!$reversalId) {
+            return response()->json(['success' => false, 'message' => 'Failed to reverse entry'], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Сторно книжење е креирано',
+            'reversal_transaction_id' => $reversalId,
+        ]);
+    }
 
     /**
      * Get partner from authenticated request.

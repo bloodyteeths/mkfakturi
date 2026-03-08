@@ -2166,6 +2166,7 @@ class IfrsAdapter
                         'debit' => $lineItem->credited ? 0 : (int) ($lineItem->amount * 100),
                         'credit' => $lineItem->credited ? (int) ($lineItem->amount * 100) : 0,
                         'description' => $lineItem->narration ?? '',
+                        'counterparty_name' => $lineItem->counterparty_name ?? null,
                     ];
                 }
 
@@ -2205,6 +2206,124 @@ class IfrsAdapter
 
             return ['error' => $e->getMessage()];
         }
+    }
+
+    /**
+     * Get a single journal entry by transaction ID.
+     */
+    public function getJournalEntry(Company $company, int $transactionId): ?array
+    {
+        if (! $this->isEnabled($company->id)) {
+            return null;
+        }
+
+        $entity = $this->getOrCreateEntityForCompany($company);
+        if (! $entity) {
+            return null;
+        }
+
+        $this->setUserEntityContext($entity);
+
+        $transaction = Transaction::where('entity_id', $entity->id)
+            ->where('id', $transactionId)
+            ->with(['lineItems.account'])
+            ->first();
+
+        if (! $transaction) {
+            return null;
+        }
+
+        $lines = [];
+        foreach ($transaction->lineItems as $lineItem) {
+            if (! $lineItem->account) {
+                continue;
+            }
+            $lines[] = [
+                'account_name' => $lineItem->account->name,
+                'account_code' => $lineItem->account->code ?? '',
+                'debit' => $lineItem->credited ? 0 : (int) ($lineItem->amount * 100),
+                'credit' => $lineItem->credited ? (int) ($lineItem->amount * 100) : 0,
+                'description' => $lineItem->narration ?? '',
+                'counterparty_name' => $lineItem->counterparty_name ?? null,
+            ];
+        }
+
+        $totalDebit = array_sum(array_column($lines, 'debit'));
+        $totalCredit = array_sum(array_column($lines, 'credit'));
+
+        return [
+            'id' => $transaction->id,
+            'date' => $transaction->transaction_date,
+            'transaction_type' => $this->mapTransactionType($transaction->transaction_type),
+            'narration' => $transaction->narration ?? '',
+            'reference' => $transaction->transaction_no ?? null,
+            'is_posted' => true,
+            'lines' => $lines,
+            'lines_count' => count($lines),
+            'total_debit' => $totalDebit,
+            'total_credit' => $totalCredit,
+            'total_amount' => max($totalDebit, $totalCredit),
+        ];
+    }
+
+    /**
+     * Reverse (storno) a posted journal entry by creating a mirror transaction.
+     */
+    public function reverseJournalEntry(Company $company, int $transactionId): ?int
+    {
+        if (! $this->isEnabled($company->id)) {
+            return null;
+        }
+
+        $entity = $this->getOrCreateEntityForCompany($company);
+        if (! $entity) {
+            return null;
+        }
+
+        $this->setUserEntityContext($entity);
+
+        $original = Transaction::where('entity_id', $entity->id)
+            ->where('id', $transactionId)
+            ->with(['lineItems.account'])
+            ->first();
+
+        if (! $original || $original->lineItems->isEmpty()) {
+            return null;
+        }
+
+        $currencyId = $this->getCurrencyId($company->id);
+
+        // Create reversal transaction
+        $reversal = Transaction::create([
+            'account_id' => $original->account_id,
+            'transaction_date' => Carbon::now(),
+            'narration' => "Сторно: {$original->narration}",
+            'reference' => "STORNO-{$original->transaction_no}",
+            'transaction_type' => Transaction::JN,
+            'currency_id' => $currencyId,
+            'entity_id' => $entity->id,
+        ]);
+
+        // Create mirror line items (flip credited flag)
+        foreach ($original->lineItems as $lineItem) {
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $reversal->id,
+                'account_id' => $lineItem->account_id,
+                'amount' => $lineItem->amount,
+                'quantity' => 1,
+                'credited' => ! $lineItem->credited, // Flip debit/credit
+                'narration' => "Сторно: " . ($lineItem->narration ?? ''),
+                'counterparty_name' => $lineItem->counterparty_name,
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $reversal->load('lineItems');
+        $reversal->post();
+
+        return $reversal->id;
     }
 
     /**

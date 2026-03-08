@@ -880,6 +880,8 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/general-ledger/export', [AccountingReportsController::class, 'generalLedgerExport']);
                 Route::get('/journal-entries', [AccountingReportsController::class, 'journalEntries']);
                 Route::get('/journal-entries/export', [AccountingReportsController::class, 'journalEntriesExport']);
+                Route::get('/journal-entries/{transaction}/pdf', [AccountingReportsController::class, 'journalEntryPdf']);
+                Route::post('/journal-entries/{transaction}/reverse', [AccountingReportsController::class, 'reverseJournalEntry']);
                 Route::get('/cash-flow', [AccountingReportsController::class, 'cashFlow']);
                 Route::get('/equity-changes', [AccountingReportsController::class, 'equityChanges']);
                 Route::post('/backfill-invoices', [AccountingReportsController::class, 'backfillInvoices']);
@@ -1757,6 +1759,8 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/general-ledger', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'generalLedger']);
         Route::get('/sub-ledger', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'subLedger']);
         Route::get('/journal-entries', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'journalEntries']);
+        Route::get('/journal-entries/{transaction}/pdf', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'journalEntryPdf']);
+        Route::post('/journal-entries/{transaction}/reverse', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'reverseJournalEntry']);
         Route::get('/trial-balance', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'trialBalance']);
         Route::get('/trial-balance/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'trialBalanceExport']);
         Route::get('/balance-sheet', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'balanceSheet']);

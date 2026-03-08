@@ -665,6 +665,71 @@ class AccountingReportsController extends Controller
     }
 
     /**
+     * Download a single journal entry (налог) as PDF.
+     */
+    public function journalEntryPdf(Request $request, int $transaction)
+    {
+        if (! $this->isFeatureEnabled()) {
+            abort(403, 'Accounting backbone feature is disabled');
+        }
+
+        $companyId = $request->header('company');
+        $company = Company::find($companyId);
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
+
+        $this->authorize('view', $company);
+        $company->load('address');
+
+        $entry = $this->ifrsAdapter->getJournalEntry($company, $transaction);
+        if (! $entry) {
+            abort(404, 'Journal entry not found');
+        }
+
+        view()->share([
+            'company' => $company,
+            'entry' => $entry,
+            'report_period' => \Carbon\Carbon::parse($entry['date'])->format('d.m.Y'),
+        ]);
+
+        $pdf = \PDF::loadView('app.pdf.reports.journal-entry');
+        $ref = str_replace('/', '-', $entry['reference'] ?? $transaction);
+
+        return $pdf->download("nalog_{$ref}.pdf");
+    }
+
+    /**
+     * Reverse (storno) a posted journal entry.
+     */
+    public function reverseJournalEntry(Request $request, int $transaction): JsonResponse
+    {
+        if (! $this->isFeatureEnabled()) {
+            return response()->json(['error' => 'Accounting backbone feature is disabled'], 403);
+        }
+
+        $companyId = $request->header('company');
+        $company = Company::find($companyId);
+        if (! $company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $this->authorize('view', $company);
+
+        $reversalId = $this->ifrsAdapter->reverseJournalEntry($company, $transaction);
+
+        if (! $reversalId) {
+            return response()->json(['error' => 'Failed to reverse entry'], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Сторно книжење е креирано',
+            'reversal_transaction_id' => $reversalId,
+        ]);
+    }
+
+    /**
      * Cash Flow Statement (indirect method)
      * GET /api/v1/accounting/cash-flow?start_date=2025-01-01&end_date=2025-12-31
      */

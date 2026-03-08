@@ -1,7 +1,65 @@
 <template>
-  <div class="grid gap-8 pt-10">
+  <BasePage>
+    <BasePageHeader :title="$t('accounting.journal_entries.title', 'Налози за книжење')">
+      <template #actions>
+        <BaseButton
+          v-if="entries.length > 0"
+          variant="primary-outline"
+          :loading="isExporting"
+          @click="exportToCsv"
+        >
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+          </template>
+          {{ $t('general.export') }}
+        </BaseButton>
+      </template>
+    </BasePageHeader>
+
+    <!-- Company Selector -->
+    <div class="mb-6">
+      <BaseInputGroup :label="$t('partner.select_company')">
+        <BaseMultiselect
+          v-model="selectedCompanyId"
+          :options="companies"
+          :searchable="true"
+          track-by="name"
+          label="name"
+          value-prop="id"
+          :placeholder="$t('partner.select_company_placeholder')"
+          @update:model-value="onCompanyChange"
+        />
+      </BaseInputGroup>
+    </div>
+
+    <!-- IFRS Not Enabled Warning -->
+    <div
+      v-if="selectedCompanyId && ifrsChecked && !ifrsEnabled"
+      class="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-6"
+    >
+      <div class="flex items-start">
+        <BaseIcon name="ExclamationTriangleIcon" class="h-6 w-6 text-yellow-600 mr-3 flex-shrink-0 mt-0.5" />
+        <div class="flex-1">
+          <h3 class="text-sm font-medium text-yellow-800">
+            {{ $t('partner.accounting.ifrs_not_enabled_title', 'Accounting is not enabled for this company') }}
+          </h3>
+          <p class="mt-1 text-sm text-yellow-700">
+            {{ $t('partner.accounting.ifrs_not_enabled_description', 'Enable double-entry accounting to start tracking journal entries, general ledger, and financial reports for this company.') }}
+          </p>
+          <BaseButton
+            class="mt-3"
+            variant="primary"
+            :loading="isEnablingIfrs"
+            @click="enableIfrs"
+          >
+            {{ $t('partner.accounting.enable_accounting', 'Enable Accounting') }}
+          </BaseButton>
+        </div>
+      </div>
+    </div>
+
     <!-- Filters Card -->
-    <div class="p-6 bg-white rounded-lg shadow">
+    <div v-if="selectedCompanyId && ifrsEnabled" class="p-6 bg-white rounded-lg shadow mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Account filter -->
         <BaseInputGroup :label="$t('accounting.general_ledger.select_account', 'Filter by Account')">
@@ -50,20 +108,6 @@
           </BaseButton>
         </div>
       </div>
-    </div>
-
-    <!-- Export Button -->
-    <div v-if="entries.length > 0" class="flex justify-end">
-      <BaseButton
-        variant="primary-outline"
-        :loading="isExporting"
-        @click="exportToCsv"
-      >
-        <template #left="slotProps">
-          <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
-        </template>
-        {{ $t('general.export') }}
-      </BaseButton>
     </div>
 
     <!-- Journal Entries List -->
@@ -132,29 +176,19 @@
             <table class="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr>
-                  <th
-                    class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
+                  <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     {{ $t('accounting.journal_entries.account') }}
                   </th>
-                  <th
-                    class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
+                  <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     {{ $t('accounting.journal_entries.counterparty', 'Партнер') }}
                   </th>
-                  <th
-                    class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
+                  <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     {{ $t('general.description') }}
                   </th>
-                  <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
+                  <th class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                     {{ $t('accounting.journal_entries.debit') }}
                   </th>
-                  <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
+                  <th class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                     {{ $t('accounting.journal_entries.credit') }}
                   </th>
                 </tr>
@@ -237,13 +271,13 @@
     </div>
 
     <!-- Pagination -->
-    <div v-if="pagination.totalPages > 1" class="flex justify-center">
+    <div v-if="pagination.totalPages > 1" class="flex justify-center mt-6">
       <div class="flex items-center gap-2">
         <BaseButton
           variant="gray"
           size="sm"
           :disabled="pagination.currentPage === 1"
-          @click="loadPage(pagination.currentPage - 1)"
+          @click="loadEntries(pagination.currentPage - 1)"
         >
           <BaseIcon name="ChevronLeftIcon" class="h-4 w-4" />
         </BaseButton>
@@ -256,7 +290,7 @@
           variant="gray"
           size="sm"
           :disabled="pagination.currentPage === pagination.totalPages"
-          @click="loadPage(pagination.currentPage + 1)"
+          @click="loadEntries(pagination.currentPage + 1)"
         >
           <BaseIcon name="ChevronRightIcon" class="h-4 w-4" />
         </BaseButton>
@@ -265,7 +299,7 @@
 
     <!-- Empty State -->
     <div
-      v-if="hasSearched && entries.length === 0"
+      v-if="hasSearched && entries.length === 0 && !isLoading"
       class="bg-white rounded-lg shadow p-12 text-center"
     >
       <BaseIcon name="DocumentTextIcon" class="mx-auto h-12 w-12 text-gray-400" />
@@ -276,44 +310,74 @@
         {{ $t('accounting.journal_entries.no_entries_description') }}
       </p>
     </div>
-  </div>
+
+    <!-- Initial State -->
+    <div
+      v-if="selectedCompanyId && ifrsEnabled && !hasSearched && entries.length === 0"
+      class="bg-white rounded-lg shadow p-12 text-center"
+    >
+      <BaseIcon name="MagnifyingGlassIcon" class="mx-auto h-12 w-12 text-gray-400" />
+      <h3 class="mt-2 text-sm font-medium text-gray-900">
+        {{ $t('accounting.journal_entries.select_and_load', 'Изберете период и притиснете Вчитај') }}
+      </h3>
+    </div>
+
+    <!-- Select company message -->
+    <div
+      v-if="!selectedCompanyId"
+      class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 py-12"
+    >
+      <BaseIcon name="BuildingOfficeIcon" class="h-12 w-12 text-gray-400" />
+      <p class="mt-2 text-sm text-gray-500">
+        {{ $t('partner.accounting.select_company_to_view') }}
+      </p>
+    </div>
+  </BasePage>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useCompanyStore } from '@/scripts/admin/stores/company'
-import moment from 'moment'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useConsoleStore } from '@/scripts/admin/stores/console'
+import { useNotificationStore } from '@/scripts/stores/notification'
 
-const companyStore = useCompanyStore()
+const { t } = useI18n()
+const consoleStore = useConsoleStore()
+const notificationStore = useNotificationStore()
 
+// State
+const selectedCompanyId = ref(null)
 const entries = ref([])
 const expandedEntries = ref(new Set())
 const isLoading = ref(false)
 const isExporting = ref(false)
 const hasSearched = ref(false)
 const accounts = ref([])
+const ifrsEnabled = ref(false)
+const ifrsChecked = ref(false)
+const isEnablingIfrs = ref(false)
+const printingEntryId = ref(null)
+const reversingEntryId = ref(null)
+
+let abortController = null
+
+function getLocalDateString(date = new Date()) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getStartOfMonthString() {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+}
 
 const filters = ref({
-  start_date: moment().startOf('month').format('YYYY-MM-DD'),
-  end_date: moment().endOf('month').format('YYYY-MM-DD'),
+  start_date: getStartOfMonthString(),
+  end_date: getLocalDateString(),
   account_id: null,
 })
-
-// Load accounts for filter dropdown
-async function loadAccounts() {
-  try {
-    const response = await window.axios.get('/accounting/accounts', { params: { limit: 'all' } })
-    if (response.data?.data) {
-      accounts.value = response.data.data.map(a => ({
-        ...a,
-        label: `${a.code} - ${a.name}`,
-      }))
-    }
-  } catch {
-    // Accounting not enabled
-  }
-}
-loadAccounts()
 
 const pagination = ref({
   currentPage: 1,
@@ -322,9 +386,108 @@ const pagination = ref({
   total: 0,
 })
 
+// Computed
+const companies = computed(() => consoleStore.managedCompanies || [])
+
+const selectedCompanyCurrency = computed(() => {
+  if (!selectedCompanyId.value) return 'MKD'
+  const company = companies.value.find(c => c.id === selectedCompanyId.value)
+  return company?.currency?.code || 'MKD'
+})
+
 const canLoadEntries = computed(() => {
   return filters.value.start_date && filters.value.end_date
 })
+
+// Lifecycle
+onMounted(async () => {
+  try {
+    await consoleStore.fetchCompanies()
+    if (companies.value.length > 0) {
+      selectedCompanyId.value = companies.value[0].id
+      await checkIfrsStatus()
+      if (ifrsEnabled.value) {
+        await loadAccounts()
+      }
+    }
+  } catch {
+    // silently handle
+  }
+})
+
+onUnmounted(() => {
+  if (abortController) {
+    abortController.abort()
+  }
+})
+
+// Methods
+async function checkIfrsStatus() {
+  if (!selectedCompanyId.value) return
+  ifrsChecked.value = false
+  try {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/ifrs-status`)
+    ifrsEnabled.value = response.data?.ifrs_enabled === true
+  } catch {
+    ifrsEnabled.value = false
+  } finally {
+    ifrsChecked.value = true
+  }
+}
+
+async function enableIfrs() {
+  if (!selectedCompanyId.value) return
+  isEnablingIfrs.value = true
+  try {
+    await window.axios.post(`/partner/companies/${selectedCompanyId.value}/accounting/enable-ifrs`)
+    ifrsEnabled.value = true
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('partner.accounting.accounting_enabled_success', 'Accounting has been enabled for this company'),
+    })
+    await loadAccounts()
+  } catch {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('errors.failed_to_enable_accounting', 'Failed to enable accounting'),
+    })
+  } finally {
+    isEnablingIfrs.value = false
+  }
+}
+
+async function loadAccounts() {
+  if (!selectedCompanyId.value) return
+  try {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounts`, {
+      params: { limit: 'all' },
+    })
+    if (response.data?.data) {
+      accounts.value = response.data.data.map(a => ({
+        ...a,
+        label: `${a.code} - ${a.name}`,
+      }))
+    }
+  } catch {
+    accounts.value = []
+  }
+}
+
+function onCompanyChange() {
+  entries.value = []
+  hasSearched.value = false
+  accounts.value = []
+  filters.value.account_id = null
+  ifrsEnabled.value = false
+  ifrsChecked.value = false
+  expandedEntries.value.clear()
+
+  checkIfrsStatus().then(() => {
+    if (ifrsEnabled.value) {
+      loadAccounts()
+    }
+  })
+}
 
 function toggleEntry(entryId) {
   if (expandedEntries.value.has(entryId)) {
@@ -339,7 +502,12 @@ function isExpanded(entryId) {
 }
 
 async function loadEntries(page = 1) {
-  if (!canLoadEntries.value) return
+  if (!canLoadEntries.value || !selectedCompanyId.value) return
+
+  if (abortController) {
+    abortController.abort()
+  }
+  abortController = new AbortController()
 
   isLoading.value = true
   hasSearched.value = true
@@ -354,7 +522,11 @@ async function loadEntries(page = 1) {
     if (filters.value.account_id) {
       params.account_id = filters.value.account_id
     }
-    const response = await window.axios.get('/accounting/journal-entries', { params })
+
+    const response = await window.axios.get(
+      `/partner/companies/${selectedCompanyId.value}/accounting/journal-entries`,
+      { params, signal: abortController.signal }
+    )
 
     entries.value = response.data.data
     pagination.value = {
@@ -364,9 +536,11 @@ async function loadEntries(page = 1) {
       total: response.data.meta?.total || 0,
     }
 
-    // Clear expanded entries when loading new data
     expandedEntries.value.clear()
   } catch (error) {
+    if (error.name === 'CanceledError' || error.name === 'AbortError') {
+      return
+    }
     console.error('Failed to load journal entries:', error)
     entries.value = []
   } finally {
@@ -374,71 +548,93 @@ async function loadEntries(page = 1) {
   }
 }
 
-function loadPage(page) {
-  loadEntries(page)
-}
-
 async function exportToCsv() {
-  if (entries.value.length === 0) return
+  if (entries.value.length === 0 || !selectedCompanyId.value) return
 
   isExporting.value = true
-
   try {
-    const response = await window.axios.get('/accounting/journal-entries/export', {
-      params: {
-        start_date: filters.value.start_date,
-        end_date: filters.value.end_date,
-      },
-      responseType: 'blob',
-    })
+    const response = await window.axios.get(
+      `/partner/companies/${selectedCompanyId.value}/accounting/journal-entries`,
+      {
+        params: {
+          start_date: filters.value.start_date,
+          end_date: filters.value.end_date,
+          per_page: 9999,
+        },
+      }
+    )
 
-    // Create download link
-    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const allEntries = response.data.data || []
+    const headers = [
+      t('general.date'),
+      t('general.reference'),
+      t('general.description'),
+      t('accounting.journal_entries.account'),
+      t('accounting.journal_entries.counterparty', 'Партнер'),
+      t('accounting.journal_entries.debit'),
+      t('accounting.journal_entries.credit'),
+    ]
+
+    const rows = []
+    for (const entry of allEntries) {
+      for (const line of (entry.lines || [])) {
+        rows.push([
+          entry.date || '',
+          entry.reference || '',
+          entry.narration || '',
+          `${line.account_code} - ${line.account_name}`,
+          line.counterparty_name || '',
+          line.debit > 0 ? (line.debit / 100).toFixed(2) : '',
+          line.credit > 0 ? (line.credit / 100).toFixed(2) : '',
+        ])
+      }
+    }
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
+    ].join('\n')
+
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-
-    const filename = `journal_entries_${filters.value.start_date}_${filters.value.end_date}.csv`
-    link.setAttribute('download', filename)
+    link.setAttribute('download', `nalozi_${filters.value.start_date}_${filters.value.end_date}.csv`)
     document.body.appendChild(link)
     link.click()
     link.remove()
     window.URL.revokeObjectURL(url)
   } catch (error) {
-    console.error('Failed to export journal entries:', error)
+    console.error('Failed to export:', error)
+    notificationStore.showNotification({ type: 'error', message: t('errors.export_failed') })
   } finally {
     isExporting.value = false
   }
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '-'
-  return moment(dateStr).format('DD MMM YYYY')
-}
-
-function formatMoney(amount) {
-  if (amount === null || amount === undefined) return '-'
-
-  const currency = companyStore.selectedCompanyCurrency
-  const absAmount = Math.abs(amount)
-  const formatted = new Intl.NumberFormat('mk-MK', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(absAmount / 100)
-
-  const sign = amount < 0 ? '-' : ''
-  return `${sign}${formatted} ${currency?.code || 'MKD'}`
-}
-
-// ---- Print PDF & Reverse ----
-const printingEntryId = ref(null)
-const reversingEntryId = ref(null)
-
 async function printEntryPdf(entry) {
   printingEntryId.value = entry.id
   try {
-    const response = await window.axios.get(`/accounting/journal-entries/${entry.id}/pdf`, {
-      responseType: 'blob',
-    })
+    const response = await window.axios.get(
+      `/partner/companies/${selectedCompanyId.value}/accounting/journal-entries/${entry.id}/pdf`,
+      { responseType: 'blob' }
+    )
+
+    // Check if the response is actually a PDF
+    if (response.data.type && !response.data.type.includes('pdf')) {
+      const text = await response.data.text()
+      try {
+        const errorData = JSON.parse(text)
+        notificationStore.showNotification({
+          type: 'error',
+          message: errorData.message || t('errors.export_failed'),
+        })
+      } catch {
+        notificationStore.showNotification({ type: 'error', message: t('errors.export_failed') })
+      }
+      return
+    }
+
     const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
     const link = document.createElement('a')
     link.href = url
@@ -450,37 +646,85 @@ async function printEntryPdf(entry) {
     window.URL.revokeObjectURL(url)
   } catch (error) {
     console.error('Failed to download PDF:', error)
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const errorData = JSON.parse(text)
+        notificationStore.showNotification({
+          type: 'error',
+          message: errorData.message || t('errors.export_failed'),
+        })
+      } catch {
+        notificationStore.showNotification({ type: 'error', message: t('errors.export_failed') })
+      }
+    } else {
+      notificationStore.showNotification({ type: 'error', message: t('errors.export_failed') })
+    }
   } finally {
     printingEntryId.value = null
   }
 }
 
 async function confirmReverse(entry) {
-  if (!window.confirm(`Дали сте сигурни дека сакате да го сторнирате налогот ${entry.reference || entry.narration}?`)) {
+  if (!window.confirm(`${t('accounting.journal_entries.reverse_confirm', 'Дали сте сигурни дека сакате да го сторнирате налогот')} ${entry.reference || entry.narration}?`)) {
     return
   }
   reversingEntryId.value = entry.id
   try {
-    await window.axios.post(`/accounting/journal-entries/${entry.id}/reverse`)
-    // Reload entries to show the new storno entry
+    await window.axios.post(
+      `/partner/companies/${selectedCompanyId.value}/accounting/journal-entries/${entry.id}/reverse`
+    )
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('accounting.journal_entries.reverse_success', 'Налогот е успешно сторниран'),
+    })
     await loadEntries(pagination.value.currentPage)
   } catch (error) {
     console.error('Failed to reverse entry:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('accounting.journal_entries.reverse_error', 'Грешка при сторнирање'),
+    })
   } finally {
     reversingEntryId.value = null
   }
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) return '-'
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return '-'
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    })
+  } catch {
+    return '-'
+  }
+}
+
+function formatMoney(amount) {
+  if (amount === null || amount === undefined) return '-'
+  const absAmount = Math.abs(amount)
+  const formatted = new Intl.NumberFormat('mk-MK', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(absAmount / 100)
+  const sign = amount < 0 ? '-' : ''
+  return `${sign}${formatted} ${selectedCompanyCurrency.value}`
+}
+
 function formatSourceType(sourceType) {
   if (!sourceType) return '-'
-
   const typeMap = {
     'App\\Models\\Invoice': 'Invoice',
     'App\\Models\\Payment': 'Payment',
     'App\\Models\\Expense': 'Expense',
     'App\\Models\\Bill': 'Bill',
   }
-
   return typeMap[sourceType] || sourceType
 }
 
@@ -504,4 +748,3 @@ function getSourceTextColor(sourceType) {
   return colorMap[sourceType] || 'text-gray-800'
 }
 </script>
-

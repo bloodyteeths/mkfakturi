@@ -770,6 +770,18 @@ return [
             'feature_flag' => 'accounting_backbone',
         ],
         [
+            'title' => 'partner.accounting.journal_entries',
+            'group' => 'partner.accounting',
+            'submenu' => 'ledgers',
+            'link' => '/admin/partner/accounting/journal-entries',
+            'icon' => 'ClipboardDocumentListIcon',
+            'name' => 'partner.accounting.journal-entries',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
+        [
             'title' => 'partner.accounting.general_ledger',
             'group' => 'partner.accounting',
             'submenu' => 'ledgers',

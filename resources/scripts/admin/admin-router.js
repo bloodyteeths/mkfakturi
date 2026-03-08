@@ -1104,6 +1104,12 @@ export default [
         component: () => import('@/scripts/admin/views/partner/accounting/JournalImport.vue'),
       },
       {
+        path: 'partner/accounting/journal-entries',
+        name: 'partner.accounting.journal-entries',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/JournalEntries.vue'),
+      },
+      {
         path: 'partner/accounting/period-lock',
         name: 'partner.accounting.period-lock',
         meta: { isPartner: true },
