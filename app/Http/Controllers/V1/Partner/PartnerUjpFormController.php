@@ -151,6 +151,9 @@ class PartnerUjpFormController extends Controller
 
     /**
      * Generate and download PDF for a client company.
+     *
+     * Uses step-by-step generation: render blade → HTML string → DomPDF → output.
+     * Each step is logged independently for diagnostics.
      */
     public function generatePdf(Request $request, $company, string $formCode): JsonResponse
     {
@@ -175,45 +178,90 @@ class PartnerUjpFormController extends Controller
             'overrides' => 'nullable|array',
         ]);
 
+        $year = $validated['year'];
         $companyModel = Company::findOrFail($company);
+        $debug = ['form' => $formCode, 'company_id' => $company, 'year' => $year];
 
         try {
+            // Step 1: Collect form data
             $data = $service->collect(
                 $companyModel,
-                $validated['year'],
+                $year,
                 $validated['month'] ?? null,
                 $validated['quarter'] ?? null,
                 $validated['overrides'] ?? []
             );
+            $debug['step1_collect'] = 'ok';
+            $debug['data_keys'] = array_keys($data);
 
-            // Generate PDF using output() directly instead of going through
-            // Response->getContent() which can return false for binary data
-            $pdfResponse = $service->toPdf($companyModel, $data, $validated['year']);
-            $content = $pdfResponse->getContent();
+            // Step 2: Build view data
+            $viewName = 'app.pdf.reports.ujp.' . $formCode;
+            $viewData = $this->buildPdfViewData($service, $companyModel, $data, $formCode, $year);
+            $debug['step2_viewdata'] = 'ok';
+            $debug['view_name'] = $viewName;
+            $debug['view_exists'] = view()->exists($viewName);
 
-            // Fallback: if getContent() returned false/empty, use output buffering
-            if (empty($content)) {
-                ob_start();
-                $pdfResponse->sendContent();
-                $content = ob_get_clean();
+            // Step 3: Render blade template to HTML string
+            $html = view($viewName, $viewData)->render();
+            $debug['step3_html_length'] = strlen($html);
+            $debug['step3_html_preview'] = substr(strip_tags($html), 0, 300);
+
+            if (empty($html)) {
+                throw new \RuntimeException('Blade template rendered to empty HTML');
             }
 
-            // Last resort: regenerate directly via DomPDF output()
+            // Step 4: Generate PDF from HTML string (bypasses loadView entirely)
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+            $pdf->setPaper('A4', 'portrait');
+            $content = $pdf->output();
+            $debug['step4_pdf_length'] = strlen($content ?: '');
+
             if (empty($content)) {
-                $content = $this->regeneratePdfDirect($service, $companyModel, $data, $validated['year'], $formCode);
+                // Fallback: try via loadView + output directly
+                \Illuminate\Support\Facades\Log::warning('UJP PDF: loadHTML produced empty, trying loadView', $debug);
+                $pdf2 = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, $viewData);
+                $pdf2->setPaper('A4', 'portrait');
+                $content = $pdf2->output();
+                $debug['step4_fallback_pdf_length'] = strlen($content ?: '');
             }
 
-            $filename = $formCode . '_' . $validated['year'] . '.pdf';
+            if (empty($content)) {
+                throw new \RuntimeException(
+                    "DomPDF produced empty output (html_length={$debug['step3_html_length']})"
+                );
+            }
+
+            // Step 5: Validate PDF magic bytes
+            $magic = substr($content, 0, 5);
+            $debug['step5_magic'] = $magic;
+
+            if ($magic !== '%PDF-') {
+                throw new \RuntimeException('Generated content is not valid PDF (magic: ' . bin2hex($magic) . ')');
+            }
+
+            $filename = $formCode . '_' . $year . '.pdf';
+
+            \Illuminate\Support\Facades\Log::info('UJP PDF generated successfully', [
+                'form' => $formCode,
+                'company' => $company,
+                'html_length' => $debug['step3_html_length'],
+                'pdf_length' => strlen($content),
+            ]);
 
             return response()->json([
-                'pdf' => base64_encode((string) $content),
+                'pdf' => base64_encode($content),
                 'filename' => $filename,
-                'size' => strlen((string) $content),
+                'size' => strlen($content),
+                'debug' => $debug,
             ]);
         } catch (\Throwable $e) {
+            $debug['error'] = $e->getMessage();
+            $debug['error_location'] = basename($e->getFile()) . ':' . $e->getLine();
+
             \Illuminate\Support\Facades\Log::error('UJP PDF generation failed', [
                 'form' => $formCode,
                 'company' => $company,
+                'debug' => $debug,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -221,6 +269,7 @@ class PartnerUjpFormController extends Controller
             return response()->json([
                 'error' => 'Failed to generate PDF',
                 'message' => $e->getMessage(),
+                'debug' => $debug,
             ], 500);
         }
     }
@@ -337,22 +386,12 @@ class PartnerUjpFormController extends Controller
     }
 
     /**
-     * Regenerate PDF directly using DomPDF output() as fallback.
+     * Build view data array for a given form code (used by generatePdf).
      */
-    protected function regeneratePdfDirect(TaxFormService $service, Company $company, array $data, int $year, string $formCode): string
+    protected function buildPdfViewData(TaxFormService $service, Company $company, array $data, string $formCode, int $year): array
     {
-        // Map form code to blade view name
-        $viewMap = [
-            'ddv-04' => 'ddv-04',
-            'db' => 'db',
-            'obrazec-36' => 'obrazec-36',
-            'obrazec-37' => 'obrazec-37',
-        ];
-
-        $viewName = 'app.pdf.reports.ujp.' . ($viewMap[$formCode] ?? $formCode);
         $config = config('ujp_forms.' . str_replace('-', '_', $formCode)) ?? [];
 
-        // Build view data based on form code
         $viewData = [
             'company' => $company,
             'year' => $year,
@@ -364,7 +403,6 @@ class PartnerUjpFormController extends Controller
             'periodEnd' => sprintf('31.12.%d', $year),
         ];
 
-        // Add form-specific data
         if ($formCode === 'obrazec-36') {
             $viewData['aktiva'] = $data['aktiva'] ?? [];
             $viewData['pasiva'] = $data['pasiva'] ?? [];
@@ -387,10 +425,7 @@ class PartnerUjpFormController extends Controller
             $viewData['currency'] = $company->currency ?? null;
         }
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, $viewData);
-        $pdf->setPaper('A4', 'portrait');
-
-        return $pdf->output();
+        return $viewData;
     }
 }
 

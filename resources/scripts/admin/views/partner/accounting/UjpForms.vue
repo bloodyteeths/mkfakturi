@@ -316,8 +316,13 @@ async function handleGeneratePdf(formCode) {
     pdfPreviewTitle.value = `${t(`forms.${formCode}.title`)} — ${t(`forms.${formCode}.name`)}`
     showPdfPreview.value = true
   } catch (error) {
+    // Log full debug info from server response (even on error responses)
+    const serverDebug = error.response?.data?.debug || null
     const message = error.response?.data?.message || error.response?.data?.error || error.message || 'Error generating PDF'
-    console.error('PDF generation error:', formCode, error)
+    console.error('[UJP PDF]', formCode, 'ERROR:', message)
+    if (serverDebug) {
+      console.table(serverDebug)
+    }
     notificationStore.showNotification({ type: 'error', message })
   } finally {
     loadingForm.value = null
