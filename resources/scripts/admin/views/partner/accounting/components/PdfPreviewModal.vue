@@ -38,13 +38,26 @@
           </div>
         </div>
 
-        <!-- PDF iframe -->
+        <!-- PDF viewer -->
         <div class="flex-1 p-4">
-          <iframe
+          <object
             v-if="pdfUrl"
-            :src="pdfUrl"
+            :data="pdfUrl"
+            type="application/pdf"
             class="w-full h-full bg-white rounded-lg shadow-lg"
-          />
+          >
+            <div class="flex items-center justify-center w-full h-full bg-gray-50 rounded-lg">
+              <div class="text-center">
+                <p class="text-sm text-gray-600 mb-3">{{ $t('general.pdf_preview_fallback', 'PDF preview not available in this browser.') }}</p>
+                <button
+                  class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
+                  @click="$emit('download')"
+                >
+                  {{ $t('general.download', 'Download') }} PDF
+                </button>
+              </div>
+            </div>
+          </object>
           <div v-else class="flex items-center justify-center w-full h-full">
             <div class="text-center">
               <svg class="mx-auto h-12 w-12 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">

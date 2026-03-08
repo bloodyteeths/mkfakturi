@@ -291,6 +291,11 @@ async function handleGeneratePdf(formCode) {
 
     const blob = response.data
 
+    // Debug: log blob details to diagnose PDF viewer issues
+    console.log('[UJP PDF]', formCode, 'blob:', blob.size, 'bytes, type:', blob.type)
+    const headerSlice = await blob.slice(0, 20).text()
+    console.log('[UJP PDF]', formCode, 'header:', JSON.stringify(headerSlice))
+
     // Check empty response
     if (!blob || blob.size === 0) {
       throw new Error('Server returned empty PDF (0 bytes)')
@@ -302,6 +307,14 @@ async function handleGeneratePdf(formCode) {
       let parsed = null
       try { parsed = JSON.parse(text) } catch (_) {}
       throw new Error(parsed?.message || parsed?.error || 'Server returned ' + blob.type + ' instead of PDF')
+    }
+
+    // Verify PDF magic bytes
+    if (!headerSlice.startsWith('%PDF')) {
+      console.error('[UJP PDF]', formCode, 'INVALID: content does not start with %PDF')
+      const preview = await blob.slice(0, 200).text()
+      console.error('[UJP PDF]', formCode, 'first 200 bytes:', preview)
+      throw new Error('Server returned invalid PDF content')
     }
 
     pdfBlob.value = blob

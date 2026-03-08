@@ -186,8 +186,22 @@ class PartnerUjpFormController extends Controller
                 $validated['overrides'] ?? []
             );
 
-            return $service->toPdf($companyModel, $data, $validated['year']);
+            $pdfResponse = $service->toPdf($companyModel, $data, $validated['year']);
+
+            // Ensure Content-Length is set to prevent chunked transfer issues
+            $content = $pdfResponse->getContent();
+            $pdfResponse->headers->set('Content-Length', (string) strlen($content));
+            $pdfResponse->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+            return $pdfResponse;
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('UJP PDF generation failed', [
+                'form' => $formCode,
+                'company' => $company,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return response()->json([
                 'error' => 'Failed to generate PDF',
                 'message' => $e->getMessage(),
