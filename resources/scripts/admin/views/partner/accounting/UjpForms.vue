@@ -289,15 +289,42 @@ async function handleGeneratePdf(formCode) {
       { responseType: 'blob' }
     )
 
-    pdfBlob.value = response.data
-    pdfPreviewUrl.value = URL.createObjectURL(response.data)
+    const blob = response.data
+
+    // Check empty response
+    if (!blob || blob.size === 0) {
+      throw new Error('Server returned empty PDF (0 bytes)')
+    }
+
+    // Check if the response is actually a PDF (not a JSON error wrapped in 200)
+    if (blob.type && !blob.type.includes('pdf')) {
+      const text = await blob.text()
+      let parsed = null
+      try { parsed = JSON.parse(text) } catch (_) {}
+      throw new Error(parsed?.message || parsed?.error || 'Server returned ' + blob.type + ' instead of PDF')
+    }
+
+    pdfBlob.value = blob
+    pdfPreviewUrl.value = URL.createObjectURL(blob)
     pdfPreviewTitle.value = `${t(`forms.${formCode}.title`)} — ${t(`forms.${formCode}.name`)}`
     showPdfPreview.value = true
   } catch (error) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: error.response?.data?.message || 'Error generating PDF',
-    })
+    let message = 'Error generating PDF'
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        message = json.message || json.error || message
+      } catch (_) {
+        // Blob couldn't be parsed as JSON
+      }
+    } else if (error.response?.data?.message) {
+      message = error.response.data.message
+    } else if (error.message) {
+      message = error.message
+    }
+    console.error('PDF generation error:', formCode, error)
+    notificationStore.showNotification({ type: 'error', message })
   } finally {
     loadingForm.value = null
     loadingText.value = ''

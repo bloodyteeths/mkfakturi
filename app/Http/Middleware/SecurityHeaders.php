@@ -30,8 +30,10 @@ class SecurityHeaders
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: https:",
             "font-src 'self' data:",
-            "connect-src 'self' https://api.postmarkapp.com",
-            "frame-src 'self' blob:", // Allow frames from same origin and blob URLs for email preview
+            "connect-src 'self' https://api.postmarkapp.com wss:",
+            "frame-src 'self' blob:", // Allow frames from same origin and blob URLs for PDF preview
+            "object-src 'self' blob:", // Allow blob PDFs in embed/object (Chrome PDF viewer)
+            "worker-src 'self' blob:", // Allow blob workers (PDF.js, Vite HMR)
             "frame-ancestors 'self'", // Allow being framed by same origin
             "base-uri 'self'",
             "form-action 'self'",
