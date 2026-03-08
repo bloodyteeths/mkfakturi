@@ -5,11 +5,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Re-import ДЕМИРОВИЌ КОМПАНИ ДООЕЛ journal entries into entity 48
- * (the real company linked to partner 24 / Maja).
+ * Retry: create the 14 journal entries for ДЕМИРОВИЌ КОМПАНИ (entity 48).
  *
- * Original import went to entity 25 (test company "qwe") without counterparty names.
- * This migration creates the same 14 nalozi under entity 48 WITH counterparty_name populated.
+ * The original migration (2026_03_08_200000) set up entity/accounts correctly
+ * but failed to create transactions because exchange_rate_id was missing from
+ * the insert statement (NOT NULL FK constraint).
  */
 return new class extends Migration
 {
@@ -17,97 +17,35 @@ return new class extends Migration
 
     public function up(): void
     {
-        // ================================================================
-        // 1. FIND COMPANY & ENTITY
-        // ================================================================
-        $company = DB::table('companies')->where('id', self::COMPANY_ID)->first();
-        if (! $company) {
-            Log::warning('Demirovic migration: company 48 not found, skipping');
-            return;
-        }
-
-        // Entity 48 already exists (auto-created as "(System)") — reuse it
         $entity = DB::table('ifrs_entities')->where('id', self::COMPANY_ID)->first();
         if (! $entity) {
-            Log::warning('Demirovic migration: entity 48 not found, skipping');
+            Log::warning('Demirovic retry: entity 48 not found');
             return;
-        }
-
-        // Fix: company 48 was incorrectly linked to entity 25 (the test company).
-        // Re-point it to entity 48 (the correct one matching its ID).
-        if ($company->ifrs_entity_id != $entity->id) {
-            DB::table('companies')->where('id', self::COMPANY_ID)->update([
-                'ifrs_entity_id' => $entity->id,
-            ]);
         }
 
         // Idempotency: skip if entity 48 already has transactions
         $existingTxnCount = DB::table('ifrs_transactions')->where('entity_id', $entity->id)->count();
         if ($existingTxnCount > 0) {
-            Log::info("Demirovic migration: entity {$entity->id} already has {$existingTxnCount} transactions, skipping");
+            Log::info("Demirovic retry: entity {$entity->id} already has {$existingTxnCount} transactions, skipping");
             return;
         }
 
-        // ================================================================
-        // 2. SET UP ENTITY (currency, reporting period, exchange rate)
-        // ================================================================
         $currency = DB::table('ifrs_currencies')->where('currency_code', 'MKD')->first();
         if (! $currency) {
-            Log::warning('Demirovic migration: MKD currency not found, skipping');
             return;
         }
         $currencyId = $currency->id;
 
-        // Update entity with currency if not set
-        if (! $entity->currency_id) {
-            DB::table('ifrs_entities')->where('id', $entity->id)->update([
-                'currency_id' => $currencyId,
-                'updated_at' => now(),
-            ]);
-        }
-
-        // Remove "(System)" suffix from entity name
-        if (str_contains($entity->name, '(System)')) {
-            DB::table('ifrs_entities')->where('id', $entity->id)->update([
-                'name' => trim(str_replace('(System)', '', $entity->name)),
-                'updated_at' => now(),
-            ]);
-        }
-
-        // Reporting period for 2026
-        $hasRP = DB::table('ifrs_reporting_periods')
-            ->where('entity_id', $entity->id)
-            ->where('calendar_year', 2026)
-            ->exists();
-        if (! $hasRP) {
-            DB::table('ifrs_reporting_periods')->insert([
-                'entity_id' => $entity->id,
-                'calendar_year' => 2026,
-                'period_count' => 1,
-                'status' => 'OPEN',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        // Exchange rate
+        // Get exchange rate (created by previous migration)
         $exchangeRate = DB::table('ifrs_exchange_rates')
             ->where('entity_id', $entity->id)
             ->where('currency_id', $currencyId)
             ->first();
         if (! $exchangeRate) {
-            $exchangeRateId = DB::table('ifrs_exchange_rates')->insertGetId([
-                'entity_id' => $entity->id,
-                'currency_id' => $currencyId,
-                'rate' => 1.0,
-                'valid_from' => '2026-01-01',
-                'valid_to' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } else {
-            $exchangeRateId = $exchangeRate->id;
+            Log::warning('Demirovic retry: no exchange rate for entity 48');
+            return;
         }
+        $exchangeRateId = $exchangeRate->id;
 
         // Set user context for IFRS EntityScope
         $user = DB::table('users')->where('email', 'smetkovoditel0881@gmail.com')->first();
@@ -115,99 +53,36 @@ return new class extends Migration
             auth()->loginUsingId($user->id);
         }
 
-        // ================================================================
-        // 3. ACCOUNT MAP (Macedonian chart of accounts)
-        // ================================================================
-        $accountMap = [
-            '01203'  => ['name' => 'Деловни згради', 'type' => 'NON_CURRENT_ASSET'],
-            '01215'  => ['name' => 'Машини и опрема', 'type' => 'NON_CURRENT_ASSET'],
-            '013031' => ['name' => 'Алат и инвентар', 'type' => 'NON_CURRENT_ASSET'],
-            '013151' => ['name' => 'Транспортни средства', 'type' => 'NON_CURRENT_ASSET'],
-            '0192'   => ['name' => 'Исправка на вредност на ОС', 'type' => 'CONTRA_ASSET'],
-            '1001'   => ['name' => 'Каса во денари', 'type' => 'BANK'],
-            '1005'   => ['name' => 'Жиро сметка во денари', 'type' => 'BANK'],
-            '1009'   => ['name' => 'Побарувања од вработени', 'type' => 'RECEIVABLE'],
-            '1021'   => ['name' => 'Побарувања од основачи', 'type' => 'RECEIVABLE'],
-            '1200'   => ['name' => 'Побарувања од купувачи', 'type' => 'RECEIVABLE'],
-            '1300'   => ['name' => 'ДДВ - претходен данок', 'type' => 'RECEIVABLE'],
-            '130618' => ['name' => 'ДДВ претходен данок 18%', 'type' => 'RECEIVABLE'],
-            '1309'   => ['name' => 'Аванси за набавки', 'type' => 'RECEIVABLE'],
-            '1330'   => ['name' => 'Активни временски разграничувања', 'type' => 'CURRENT_ASSET'],
-            '1620'   => ['name' => 'Дадени краткорочни заеми', 'type' => 'RECEIVABLE'],
-            '1621'   => ['name' => 'Побарувања по заеми', 'type' => 'RECEIVABLE'],
-            '2200'   => ['name' => 'Обврски кон добавувачи', 'type' => 'PAYABLE'],
-            '2300'   => ['name' => 'Краткорочни заеми', 'type' => 'CURRENT_LIABILITY'],
-            '23018'  => ['name' => 'Задржан данок на доход', 'type' => 'CURRENT_LIABILITY'],
-            '2340'   => ['name' => 'ПИО - пензиско осигурување', 'type' => 'CURRENT_LIABILITY'],
-            '2341'   => ['name' => 'Здравствено осигурување', 'type' => 'CURRENT_LIABILITY'],
-            '2342'   => ['name' => 'Данок на доход од плати', 'type' => 'CURRENT_LIABILITY'],
-            '2343'   => ['name' => 'Дополнително здравствено', 'type' => 'CURRENT_LIABILITY'],
-            '2344'   => ['name' => 'Придонес за вработување', 'type' => 'CURRENT_LIABILITY'],
-            '2401'   => ['name' => 'Обврски за нето плати', 'type' => 'CURRENT_LIABILITY'],
-            '2420'   => ['name' => 'Обврски за придонеси', 'type' => 'CURRENT_LIABILITY'],
-            '286019' => ['name' => 'Одложени приходи по договори', 'type' => 'CURRENT_LIABILITY'],
-            '3100'   => ['name' => 'Приходи од продажба', 'type' => 'OPERATING_REVENUE'],
-            '3510'   => ['name' => 'Финансиски приходи', 'type' => 'OPERATING_REVENUE'],
-            '4111'   => ['name' => 'Телекомуникации', 'type' => 'OPERATING_EXPENSE'],
-            '4200'   => ['name' => 'Бруто плати на вработени', 'type' => 'OPERATING_EXPENSE'],
-            '4460'   => ['name' => 'Провизии и такси на банки', 'type' => 'OPERATING_EXPENSE'],
-            '44902'  => ['name' => 'Наем / Закупнина', 'type' => 'OPERATING_EXPENSE'],
-            '6600'   => ['name' => 'Вонредни расходи', 'type' => 'DIRECT_EXPENSE'],
-            '740001' => ['name' => 'Приходи од вршење услуги', 'type' => 'OPERATING_REVENUE'],
-            '74010'  => ['name' => 'Приходи од градежништво', 'type' => 'OPERATING_REVENUE'],
-            '9000'   => ['name' => 'Основна главнина', 'type' => 'EQUITY'],
-            '9400'   => ['name' => 'Резерви', 'type' => 'EQUITY'],
-            '9500'   => ['name' => 'Акумулирана добивка', 'type' => 'EQUITY'],
-            '9510'   => ['name' => 'Добивка во тековна година', 'type' => 'EQUITY'],
-        ];
+        // Build account cache from existing IFRS accounts for this entity
+        $accountCache = [];
+        $ifrsAccounts = DB::table('ifrs_accounts')->where('entity_id', $entity->id)->get();
+        foreach ($ifrsAccounts as $acct) {
+            $accountCache[$acct->code] = $acct->id;
+        }
 
-        // ================================================================
-        // 4. FIRMS (counterparty map)
-        // ================================================================
+        if (empty($accountCache)) {
+            Log::warning('Demirovic retry: no IFRS accounts found for entity 48');
+            return;
+        }
+
         $firms = [
-            5 => 'КОСМОС',
-            16 => 'ПОПЕ И СИНОВИ ДООЕЛ',
-            20 => 'НЕЏАТ ДЕМИРОВИЌ',
-            22 => 'БЛЕРО-ФИКС ДООЕЛ',
-            33 => 'МАЈА ВЕЛИЧКОВА',
-            38 => 'М-КОНСАЛТИНГ Т.П',
-            44 => 'А1 МАКЕДОНИЈА ДООЕЛ',
-            49 => 'ВИЗИОН ГРУП ДООЕЛ',
-            51 => 'А2-КОМПАНИ ДООЕЛ',
-            64 => 'ШПАРКАСЕ БАНКА',
-            68 => 'МУХАМЕД ЛИЧИНА',
-            69 => 'ХАЛИТ ЌЕРИМИ',
-            71 => 'ФАХРУДИН СУЉОВИЌ',
-            72 => 'ИСАК АДЕМОВСКИ',
-            73 => 'КАФКАЗ ГРАДБА ДООЕЛ',
-            74 => 'СЕРВИС ПЕТРОЛ ДОО СКОПЈЕ',
-            75 => 'МАК ГУТЕ ПРЕВОЗ ДООЕЛ',
-            76 => 'ЏИДИ КОМЕРЦ',
-            79 => 'ЛИЧИНА ЕДИН',
-            83 => 'АДА-АН ИНЖЕНЕРИНГ 2020',
-            93 => 'АДЕМЕ ШАБОТИЌ',
-            97 => 'АТАНАСОВСКИ ГРУП ДООЕЛ',
-            99 => 'ДАЦКО ИНЖЕНЕРИНГ ЛТД ДООЕЛ',
-            101 => 'ЛИЧИНА МУХАМЕД',
-            103 => 'АДЕМОВСКИ ИСАК',
-            104 => 'ЕДИН ЛИЧИНА',
-            123 => 'НОАР ГРУП ДООЕЛ',
-            126 => 'САШКО ВЕЛКОВСКИ',
-            127 => 'НЕЏАТ ШАБОТИЌ',
-            131 => 'СЛОГА ИМПОРТ ДООЕЛ',
-            132 => 'ТИНК ИМПАКТ ДООЕЛ',
+            5 => 'КОСМОС', 16 => 'ПОПЕ И СИНОВИ ДООЕЛ', 20 => 'НЕЏАТ ДЕМИРОВИЌ',
+            22 => 'БЛЕРО-ФИКС ДООЕЛ', 33 => 'МАЈА ВЕЛИЧКОВА', 38 => 'М-КОНСАЛТИНГ Т.П',
+            44 => 'А1 МАКЕДОНИЈА ДООЕЛ', 49 => 'ВИЗИОН ГРУП ДООЕЛ', 51 => 'А2-КОМПАНИ ДООЕЛ',
+            64 => 'ШПАРКАСЕ БАНКА', 68 => 'МУХАМЕД ЛИЧИНА', 69 => 'ХАЛИТ ЌЕРИМИ',
+            71 => 'ФАХРУДИН СУЉОВИЌ', 72 => 'ИСАК АДЕМОВСКИ', 73 => 'КАФКАЗ ГРАДБА ДООЕЛ',
+            74 => 'СЕРВИС ПЕТРОЛ ДОО СКОПЈЕ', 75 => 'МАК ГУТЕ ПРЕВОЗ ДООЕЛ', 76 => 'ЏИДИ КОМЕРЦ',
+            79 => 'ЛИЧИНА ЕДИН', 83 => 'АДА-АН ИНЖЕНЕРИНГ 2020', 93 => 'АДЕМЕ ШАБОТИЌ',
+            97 => 'АТАНАСОВСКИ ГРУП ДООЕЛ', 99 => 'ДАЦКО ИНЖЕНЕРИНГ ЛТД ДООЕЛ',
+            101 => 'ЛИЧИНА МУХАМЕД', 103 => 'АДЕМОВСКИ ИСАК', 104 => 'ЕДИН ЛИЧИНА',
+            123 => 'НОАР ГРУП ДООЕЛ', 126 => 'САШКО ВЕЛКОВСКИ', 127 => 'НЕЏАТ ШАБОТИЌ',
+            131 => 'СЛОГА ИМПОРТ ДООЕЛ', 132 => 'ТИНК ИМПАКТ ДООЕЛ',
         ];
 
-        // ================================================================
-        // 5. NALOG DATA (14 journal entries)
-        // ================================================================
         $nalogTypes = [
-            '00' => 'Почетно салдо',
-            '10' => 'Тековна сметка - Банка',
-            '11' => 'Каса / Благајна',
-            '20' => 'Влезни фактури',
-            '21' => 'Излезни фактури - Примена',
-            '30' => 'Излезни фактури - Продажба',
+            '00' => 'Почетно салдо', '10' => 'Тековна сметка - Банка',
+            '11' => 'Каса / Благајна', '20' => 'Влезни фактури',
+            '21' => 'Излезни фактури - Примена', '30' => 'Излезни фактури - Продажба',
             '40' => 'Плати',
         ];
 
@@ -429,92 +304,12 @@ return new class extends Migration
             ]],
         ];
 
-        // ================================================================
-        // 6. CREATE IFRS ACCOUNTS
-        // ================================================================
-        $accountCache = [];
-
-        // Map string types to IFRS Account constants
-        $typeConstants = [
-            'NON_CURRENT_ASSET' => \IFRS\Models\Account::NON_CURRENT_ASSET,
-            'CONTRA_ASSET' => \IFRS\Models\Account::CONTRA_ASSET,
-            'BANK' => \IFRS\Models\Account::BANK,
-            'RECEIVABLE' => \IFRS\Models\Account::RECEIVABLE,
-            'CURRENT_ASSET' => \IFRS\Models\Account::CURRENT_ASSET,
-            'PAYABLE' => \IFRS\Models\Account::PAYABLE,
-            'CURRENT_LIABILITY' => \IFRS\Models\Account::CURRENT_LIABILITY,
-            'OPERATING_REVENUE' => \IFRS\Models\Account::OPERATING_REVENUE,
-            'OPERATING_EXPENSE' => \IFRS\Models\Account::OPERATING_EXPENSE,
-            'DIRECT_EXPENSE' => \IFRS\Models\Account::DIRECT_EXPENSE,
-            'EQUITY' => \IFRS\Models\Account::EQUITY,
-        ];
-
-        // App-level account type mapping
-        $appTypeMap = [
-            '0' => 'asset', '1' => 'asset', '2' => 'liability',
-            '3' => 'revenue', '4' => 'expense', '5' => 'expense',
-            '6' => 'expense', '7' => 'revenue', '8' => 'asset', '9' => 'equity',
-        ];
-
-        foreach ($accountMap as $code => $info) {
-            // Create app-level account if missing
-            $appExists = DB::table('accounts')
-                ->where('company_id', self::COMPANY_ID)
-                ->where('code', $code)
-                ->exists();
-            if (! $appExists) {
-                $appType = $appTypeMap[substr($code, 0, 1)] ?? 'expense';
-                DB::table('accounts')->insert([
-                    'company_id' => self::COMPANY_ID,
-                    'code' => $code,
-                    'name' => $info['name'],
-                    'type' => $appType,
-                    'is_active' => true,
-                    'system_defined' => false,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-
-            // Create IFRS account if missing
-            $ifrsAccount = DB::table('ifrs_accounts')
-                ->where('entity_id', $entity->id)
-                ->where('code', $code)
-                ->first();
-
-            if (! $ifrsAccount) {
-                $accountType = $typeConstants[$info['type']] ?? \IFRS\Models\Account::OPERATING_EXPENSE;
-
-                // CONTRA_ASSET may not exist in all IFRS package versions — fallback
-                if ($info['type'] === 'CONTRA_ASSET' && ! defined('IFRS\Models\Account::CONTRA_ASSET')) {
-                    $accountType = \IFRS\Models\Account::NON_CURRENT_ASSET;
-                }
-
-                $ifrsAccountId = DB::table('ifrs_accounts')->insertGetId([
-                    'entity_id' => $entity->id,
-                    'code' => $code,
-                    'name' => $info['name'],
-                    'account_type' => $accountType,
-                    'currency_id' => $currencyId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                $accountCache[$code] = $ifrsAccountId;
-            } else {
-                $accountCache[$code] = $ifrsAccount->id;
-            }
-        }
-
-        // ================================================================
-        // 7. CREATE JOURNAL ENTRIES
-        // ================================================================
         $created = 0;
 
         foreach ($nalozi as [$nalogId, $dataKn, $entries]) {
             $prefix = explode('-', $nalogId)[0];
             $nalogType = $nalogTypes[$prefix] ?? 'Непознат тип';
 
-            // Validate balance
             $totalD = 0;
             $totalC = 0;
             foreach ($entries as $entry) {
@@ -522,11 +317,10 @@ return new class extends Migration
                 $totalC += $entry[5];
             }
             if ($totalD !== $totalC) {
-                Log::warning("Demirovic migration: nalog {$nalogId} unbalanced D={$totalD} C={$totalC}, skipping");
+                Log::warning("Demirovic retry: nalog {$nalogId} unbalanced D={$totalD} C={$totalC}");
                 continue;
             }
 
-            // Parse booking date DD-MM-YYYY
             $dateParts = explode('-', $dataKn);
             $bookingDate = sprintf('%04d-%02d-%02d', (int) $dateParts[2], (int) $dateParts[1], (int) $dateParts[0]);
 
@@ -535,13 +329,12 @@ return new class extends Migration
             $primaryAccountId = $accountCache[$firstKonto] ?? null;
 
             if (! $primaryAccountId) {
-                Log::warning("Demirovic migration: account {$firstKonto} not found for nalog {$nalogId}");
+                Log::warning("Demirovic retry: account {$firstKonto} not found");
                 continue;
             }
 
             DB::beginTransaction();
             try {
-                // Create transaction
                 $txnId = DB::table('ifrs_transactions')->insertGetId([
                     'account_id' => $primaryAccountId,
                     'transaction_date' => $bookingDate,
@@ -555,7 +348,6 @@ return new class extends Migration
                     'updated_at' => now(),
                 ]);
 
-                // Create line items WITH counterparty_name
                 foreach ($entries as $entry) {
                     [$konto, $data, $firma, $opis, $dolguva, $pobaruva, $vvrska] = $entry;
 
@@ -598,7 +390,7 @@ return new class extends Migration
                     }
                 }
 
-                // Post to ledger using the IFRS Transaction model
+                // Post to ledger
                 $transaction = \IFRS\Models\Transaction::withoutGlobalScope(\IFRS\Scopes\EntityScope::class)
                     ->find($txnId);
                 $transaction->load('lineItems');
@@ -608,15 +400,15 @@ return new class extends Migration
                 $created++;
             } catch (\Exception $e) {
                 DB::rollBack();
-                Log::error("Demirovic migration: failed nalog {$nalogId}: {$e->getMessage()}");
+                Log::error("Demirovic retry: failed nalog {$nalogId}: {$e->getMessage()}");
             }
         }
 
-        Log::info("Demirovic migration: imported {$created}/14 nalozi to entity {$entity->id}");
+        Log::info("Demirovic retry: imported {$created}/14 nalozi to entity {$entity->id}");
     }
 
     public function down(): void
     {
-        // Do not auto-reverse — manual cleanup if needed
+        // Manual cleanup if needed
     }
 };
