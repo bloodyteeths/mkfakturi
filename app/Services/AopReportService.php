@@ -42,17 +42,25 @@ class AopReportService
 
         // Get per-account balances with type info for precise AOP distribution
         $currentAccounts = $this->extractAccountBalances($company, '2020-01-01', $endDate);
-        $currentAopBalances = $this->distributeToAopCodes($currentAccounts, $codeToAop, $fallback);
+
+        // CRITICAL: Filter out P&L-typed accounts before BS distribution.
+        // IFRS account codes can collide with MK chart codes (e.g., IFRS code '600'
+        // is OPERATING_REVENUE, but MK code '600' means WIP inventory). Including
+        // P&L accounts in the BS distribution corrupts asset/liability totals.
+        // All P&L impact is handled exclusively by injectNetIncome() into equity.
+        $currentBsAccounts = $this->filterBalanceSheetAccounts($currentAccounts);
+        $currentAopBalances = $this->distributeToAopCodes($currentBsAccounts, $codeToAop, $fallback);
 
         // Inject accumulated P&L into equity AOPs (075/076 prior years, 077/078 current year)
-        // Pass codeToAop so accounts already mapped to BS AOPs are excluded from P&L calc
-        $this->injectNetIncome($currentAopBalances, $company, $year, $currentAccounts, $codeToAop);
+        // Uses UNFILTERED accounts so all P&L accounts contribute to the equity injection.
+        $this->injectNetIncome($currentAopBalances, $company, $year, $currentAccounts);
 
         // Get previous year data
         $previousBalances = $this->getPreviousYearBalanceSheet($company, $year - 1);
         $prevAccounts = $this->extractAccountBalances($company, '2020-01-01', ($year - 1) . '-12-31');
-        $prevAopBalances = $this->distributeToAopCodes($prevAccounts, $codeToAop, $fallback);
-        $this->injectNetIncome($prevAopBalances, $company, $year - 1, $prevAccounts, $codeToAop);
+        $prevBsAccounts = $this->filterBalanceSheetAccounts($prevAccounts);
+        $prevAopBalances = $this->distributeToAopCodes($prevBsAccounts, $codeToAop, $fallback);
+        $this->injectNetIncome($prevAopBalances, $company, $year - 1, $prevAccounts);
 
         // Build AOP rows for АКТИВА (official 112-row config)
         $aktivaConfig = config('ujp_forms.obrazec_36.aktiva', []);
@@ -557,6 +565,25 @@ class AopReportService
     }
 
     /**
+     * Filter accounts to only include balance sheet types (exclude P&L types).
+     *
+     * IFRS account codes can collide with MK chart codes (e.g., IFRS '600' = revenue,
+     * MK '600' = WIP inventory). P&L accounts must not enter the balance sheet
+     * distribution — they are handled by injectNetIncome() into equity.
+     */
+    protected function filterBalanceSheetAccounts(array $accounts): array
+    {
+        $plTypes = [
+            'OPERATING_REVENUE', 'NON_OPERATING_REVENUE',
+            'OPERATING_EXPENSE', 'DIRECT_EXPENSE', 'OVERHEAD_EXPENSE', 'OTHER_EXPENSE',
+        ];
+
+        return array_values(array_filter($accounts, function ($account) use ($plTypes) {
+            return ! in_array($account['type'] ?? '', $plTypes);
+        }));
+    }
+
+    /**
      * Get previous year balance sheet data.
      */
     public function getPreviousYearBalanceSheet(Company $company, int $prevYear): array
@@ -645,9 +672,11 @@ class AopReportService
      * Calculates total unbooked P&L from trial balance accounts, then splits
      * into current year (from income statement) and prior years (remainder).
      */
-    protected function injectNetIncome(array &$aopBalances, Company $company, int $year, array $extractedAccounts = [], array $codeToAopMap = []): void
+    protected function injectNetIncome(array &$aopBalances, Company $company, int $year, array $extractedAccounts = []): void
     {
-        // P&L account types that are NOT mapped to balance sheet AOP codes
+        // P&L account types — these were filtered from the BS distribution by
+        // filterBalanceSheetAccounts(), so ALL P&L accounts must be included here
+        // for the equity injection to balance correctly.
         $plTypes = [
             'OPERATING_REVENUE', 'NON_OPERATING_REVENUE',
             'OPERATING_EXPENSE', 'DIRECT_EXPENSE', 'OVERHEAD_EXPENSE', 'OTHER_EXPENSE',
@@ -656,21 +685,10 @@ class AopReportService
         // Calculate total accumulated unbooked P&L from trial balance.
         // Revenue accounts have negative balance (credits > debits), expenses positive.
         // Net income = -(sum of all P&L balances): positive = profit, negative = loss.
-        //
-        // IMPORTANT: Skip accounts whose code is already mapped to a BS AOP code.
-        // Some accounts have P&L IFRS types but MK codes that map to balance sheet
-        // positions (e.g., code 600 = WIP inventory, typed as OPERATING_REVENUE).
-        // These are already included via distributeToAopCodes — counting them here
-        // would double-count.
         $totalPnL = 0;
         if (! empty($extractedAccounts)) {
             foreach ($extractedAccounts as $account) {
                 if (in_array($account['type'] ?? '', $plTypes)) {
-                    $code = $account['code'] ?? '';
-                    // Skip if already mapped to a BS AOP code
-                    if ($code !== '' && isset($codeToAopMap[$code])) {
-                        continue;
-                    }
                     $totalPnL -= $account['balance'] ?? 0;
                 }
             }
