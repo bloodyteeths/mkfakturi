@@ -288,12 +288,35 @@ async function handleGeneratePdf(formCode) {
       params
     )
 
-    const { pdf, filename, size, debug } = response.data
+    // Debug: log raw response type and content for diagnosis
+    const rawType = typeof response.data
+    const rawStatus = response.status
+    const contentType = response.headers?.['content-type'] || 'unknown'
+    console.log('[UJP PDF]', formCode, 'raw response:', {
+      status: rawStatus,
+      contentType,
+      dataType: rawType,
+      dataLength: rawType === 'string' ? response.data.length : null,
+      dataPreview: rawType === 'string' ? response.data.substring(0, 500) : null,
+    })
 
-    console.log('[UJP PDF]', formCode, 'response:', { size, filename, pdfLength: pdf?.length, debug })
+    // If response.data is a string (axios failed to parse JSON), try manual parse
+    let data = response.data
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data)
+        console.log('[UJP PDF]', formCode, 'manually parsed JSON, keys:', Object.keys(data))
+      } catch (parseErr) {
+        console.error('[UJP PDF]', formCode, 'response is NOT JSON. First 500 chars:', data.substring(0, 500))
+        throw new Error('Server returned non-JSON response (Content-Type: ' + contentType + ', length: ' + data.length + ')')
+      }
+    }
+
+    const { pdf, filename, size, debug, _v } = data
+    console.log('[UJP PDF]', formCode, 'parsed:', { size, filename, pdfLength: pdf?.length, _v, debug })
 
     if (!pdf) {
-      throw new Error('Server returned empty PDF (size=' + size + ', keys=' + Object.keys(response.data).join(',') + ')')
+      throw new Error('Server returned empty PDF (size=' + size + ', debug=' + JSON.stringify(debug) + ')')
     }
 
     // Decode base64 to binary
@@ -316,13 +339,10 @@ async function handleGeneratePdf(formCode) {
     pdfPreviewTitle.value = `${t(`forms.${formCode}.title`)} — ${t(`forms.${formCode}.name`)}`
     showPdfPreview.value = true
   } catch (error) {
-    // Log full debug info from server response (even on error responses)
     const serverDebug = error.response?.data?.debug || null
     const message = error.response?.data?.message || error.response?.data?.error || error.message || 'Error generating PDF'
     console.error('[UJP PDF]', formCode, 'ERROR:', message)
-    if (serverDebug) {
-      console.table(serverDebug)
-    }
+    if (serverDebug) console.table(serverDebug)
     notificationStore.showNotification({ type: 'error', message })
   } finally {
     loadingForm.value = null

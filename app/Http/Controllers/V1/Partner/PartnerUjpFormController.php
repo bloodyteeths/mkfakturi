@@ -249,6 +249,7 @@ class PartnerUjpFormController extends Controller
             ]);
 
             return response()->json([
+                '_v' => '2026-03-08b',
                 'pdf' => base64_encode($content),
                 'filename' => $filename,
                 'size' => strlen($content),
@@ -267,6 +268,7 @@ class PartnerUjpFormController extends Controller
             ]);
 
             return response()->json([
+                '_v' => '2026-03-08b',
                 'error' => 'Failed to generate PDF',
                 'message' => $e->getMessage(),
                 'debug' => $debug,
