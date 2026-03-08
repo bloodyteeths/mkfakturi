@@ -116,45 +116,63 @@ return new class extends Migration
             }
         }
 
-        // Verify balance
-        $totalDebits = round(array_sum(array_column($debits, 'amount')), 4);
-        $totalCredits = round(array_sum(array_column($credits, 'amount')), 4);
-
-        if (abs($totalDebits - $totalCredits) > 0.01) {
-            Log::warning("JN compound fix: txn {$txn->id} unbalanced (D={$totalDebits} C={$totalCredits}), skipping");
-            return false;
-        }
-
         if (empty($debits) || empty($credits)) {
             Log::warning("JN compound fix: txn {$txn->id} has no debits or no credits, skipping");
             return false;
         }
 
+        $totalDebits = round(array_sum(array_column($debits, 'amount')), 4);
+        $totalCredits = round(array_sum(array_column($credits, 'amount')), 4);
+        $gap = round(abs($totalDebits - $totalCredits), 4);
+        $balanced = $gap < 0.01;
+
         DB::beginTransaction();
         try {
-            // Pick first debit as the main account
-            $mainEntry = array_shift($debits);
-
             // 1. Delete existing (incorrect) ledger entries
             DB::table('ifrs_ledgers')->where('transaction_id', $txn->id)->delete();
 
-            // 2. Update transaction to compound mode
-            DB::table('ifrs_transactions')->where('id', $txn->id)->update([
-                'account_id' => $mainEntry['id'],
-                'compound' => true,
-                'main_account_amount' => $mainEntry['amount'],
-                'credited' => false, // main is debit
-                'updated_at' => now(),
-            ]);
+            if ($balanced) {
+                // Line items balance — pick first debit as main account
+                $mainEntry = array_shift($debits);
 
-            // 3. Delete the main entry's line item (it's now represented by the transaction itself)
-            DB::table('ifrs_line_items')->where('id', $mainEntry['line_item_id'])->delete();
+                DB::table('ifrs_transactions')->where('id', $txn->id)->update([
+                    'account_id' => $mainEntry['id'],
+                    'compound' => true,
+                    'main_account_amount' => $mainEntry['amount'],
+                    'credited' => false,
+                    'updated_at' => now(),
+                ]);
 
-            // 4. Create new compound ledger entries with proper allocation
-            //    Re-add main entry to debits array for allocation purposes
-            $allDebits = array_merge([['id' => $mainEntry['id'], 'amount' => $mainEntry['amount']]], $debits);
-            $allCredits = $credits;
+                DB::table('ifrs_line_items')->where('id', $mainEntry['line_item_id'])->delete();
 
+                $allDebits = array_merge([['id' => $mainEntry['id'], 'amount' => $mainEntry['amount']]], $debits);
+                $allCredits = $credits;
+            } else {
+                // Line items DON'T balance — the original main account fills the gap.
+                // In postBasic, the main account absorbed all contra-entries.
+                // For compound mode, the main account goes on the SHORT side with gap amount.
+                $mainCredited = ($totalDebits > $totalCredits) ? true : false;
+
+                DB::table('ifrs_transactions')->where('id', $txn->id)->update([
+                    'account_id' => $txn->account_id, // keep original main account
+                    'compound' => true,
+                    'main_account_amount' => $gap,
+                    'credited' => $mainCredited,
+                    'updated_at' => now(),
+                ]);
+
+                // Keep ALL line items — the main account entry is additional
+                $mainCompound = ['id' => $txn->account_id, 'amount' => $gap];
+                if ($mainCredited) {
+                    $allDebits = $debits;
+                    $allCredits = array_merge([$mainCompound], $credits);
+                } else {
+                    $allDebits = array_merge([$mainCompound], $debits);
+                    $allCredits = $credits;
+                }
+            }
+
+            // Create new compound ledger entries with proper allocation
             $this->createCompoundLedgers($allDebits, $allCredits, $txn, $entityId, $rate);
 
             DB::commit();
