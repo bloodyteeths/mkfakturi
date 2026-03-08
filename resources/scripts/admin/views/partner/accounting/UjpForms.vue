@@ -274,7 +274,7 @@ function closePreview() {
   expandedForm.value = null
 }
 
-// PDF Generation — raw binary PDF response (no base64 JSON to avoid proxy truncation)
+// PDF Generation — same pattern as TrialBalance, CashFlow, etc.
 async function handleGeneratePdf(formCode) {
   if (!selectedCompanyId.value) return
 
@@ -286,46 +286,24 @@ async function handleGeneratePdf(formCode) {
     const response = await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/ujp-forms/${formCode}/pdf`,
       params,
-      { responseType: 'arraybuffer' }
+      { responseType: 'blob' }
     )
 
-    const contentType = response.headers?.['content-type'] || ''
-
-    // If server returned JSON error (not PDF), parse it
-    if (!contentType.includes('application/pdf')) {
-      const text = new TextDecoder().decode(response.data)
-      let errMsg = 'Error generating PDF'
-      try {
-        const errJson = JSON.parse(text)
-        errMsg = errJson.message || errJson.error || errMsg
-      } catch (_) {
-        errMsg = text.substring(0, 200) || errMsg
-      }
-      throw new Error(errMsg)
-    }
-
-    const bytes = new Uint8Array(response.data)
-
-    // Verify PDF magic bytes
-    const header = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3], bytes[4])
-    if (!header.startsWith('%PDF')) {
-      throw new Error('Server returned invalid PDF content')
-    }
-
-    const blob = new Blob([bytes], { type: 'application/pdf' })
-    pdfBlob.value = blob
-    pdfPreviewUrl.value = URL.createObjectURL(blob)
+    pdfBlob.value = new Blob([response.data], { type: 'application/pdf' })
+    pdfPreviewUrl.value = window.URL.createObjectURL(pdfBlob.value)
     pdfPreviewTitle.value = `${t(`forms.${formCode}.title`)} — ${t(`forms.${formCode}.name`)}`
     showPdfPreview.value = true
   } catch (error) {
-    // Handle axios error responses (4xx/5xx) which are also arraybuffer
-    let message = error.message || 'Error generating PDF'
-    if (error.response?.data instanceof ArrayBuffer) {
+    // With responseType: 'blob', error responses are also blobs
+    let message = 'Error generating PDF'
+    if (error.response?.data instanceof Blob) {
       try {
-        const text = new TextDecoder().decode(error.response.data)
+        const text = await error.response.data.text()
         const errJson = JSON.parse(text)
         message = errJson.message || errJson.error || message
       } catch (_) {}
+    } else {
+      message = error.response?.data?.message || error.message || message
     }
     notificationStore.showNotification({ type: 'error', message })
   } finally {
