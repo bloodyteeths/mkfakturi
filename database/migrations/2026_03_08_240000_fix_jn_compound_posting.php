@@ -283,7 +283,7 @@ return new class extends Migration
         }
 
         // Try to find a user linked to this company
-        $userId = $company->creator_id;
+        $userId = $company->owner_id ?? null;
         if (! $userId) {
             $user = DB::table('users')->where('entity_id', $entityId)->first();
             $userId = $user ? $user->id : null;
