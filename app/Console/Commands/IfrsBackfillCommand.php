@@ -287,12 +287,10 @@ class IfrsBackfillCommand extends Command
 
     protected function getUnpostedPayments(int $companyId)
     {
+        // Payments table has no 'status' column — only gateway_status exists.
+        // All completed payments are valid for posting (most are manual/bank_transfer).
         return Payment::where('company_id', $companyId)
             ->whereNull('ifrs_transaction_id')
-            ->where(function ($q) {
-                $q->where('status', Payment::STATUS_COMPLETED)
-                    ->orWhere('gateway_status', Payment::GATEWAY_STATUS_COMPLETED);
-            })
             ->with(['customer', 'company', 'invoice', 'paymentMethod'])
             ->orderBy('payment_date', 'asc')
             ->get();
