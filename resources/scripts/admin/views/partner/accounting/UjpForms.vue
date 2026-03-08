@@ -182,6 +182,7 @@ const validationResults = ref({})
 const showPdfPreview = ref(false)
 const pdfPreviewUrl = ref(null)
 const pdfPreviewTitle = ref('')
+const pdfBlob = ref(null)
 
 // Form code lists
 const taxFormCodes = ['ddv-04', 'db']
@@ -273,33 +274,76 @@ function closePreview() {
   expandedForm.value = null
 }
 
-// PDF Generation — web route with session auth (same pattern as admin reports)
-function handleGeneratePdf(formCode) {
+// PDF Generation — axios blob (same pattern as TrialBalance and other working reports)
+async function handleGeneratePdf(formCode) {
   if (!selectedCompanyId.value) return
 
-  const company = companies.value.find(c => c.id === selectedCompanyId.value)
-  if (!company?.unique_hash) return
+  loadingForm.value = formCode
+  loadingText.value = t('generating_pdf') || 'Generating PDF...'
 
-  const params = buildParams(formCode)
-  const query = new URLSearchParams({ year: params.year })
-  if (params.month) query.set('month', params.month)
+  try {
+    const params = buildParams(formCode)
+    const response = await window.axios.get(
+      `/partner/companies/${selectedCompanyId.value}/ujp-forms/${formCode}/pdf`,
+      {
+        params,
+        responseType: 'blob',
+      }
+    )
 
-  // Use web route (session auth) — same as /reports/balance-sheet/{hash}
-  const url = `/reports/ujp-forms/${company.unique_hash}/${formCode}?${query.toString()}`
-  pdfPreviewUrl.value = url
-  pdfPreviewTitle.value = `${t(`forms.${formCode}.title`)} — ${t(`forms.${formCode}.name`)}`
-  showPdfPreview.value = true
+    // Check if response is actually a PDF (error responses come as blob too)
+    if (response.data.type && !response.data.type.includes('pdf')) {
+      const text = await response.data.text()
+      let errorMsg = 'Failed to generate PDF'
+      try {
+        const json = JSON.parse(text)
+        errorMsg = json.message || json.error || errorMsg
+      } catch (_) {}
+      notificationStore.showNotification({ type: 'error', message: errorMsg })
+      return
+    }
+
+    pdfBlob.value = new Blob([response.data], { type: 'application/pdf' })
+    pdfPreviewUrl.value = window.URL.createObjectURL(pdfBlob.value)
+    pdfPreviewTitle.value = `${t(`forms.${formCode}.title`)} — ${t(`forms.${formCode}.name`)}`
+    showPdfPreview.value = true
+  } catch (error) {
+    let errorMsg = 'Error generating PDF'
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        errorMsg = json.message || json.error || errorMsg
+      } catch (_) {}
+    } else {
+      errorMsg = error.response?.data?.message || error.response?.data?.error || errorMsg
+    }
+    notificationStore.showNotification({ type: 'error', message: errorMsg })
+  } finally {
+    loadingForm.value = null
+    loadingText.value = ''
+  }
 }
 
 function closePdfPreview() {
   showPdfPreview.value = false
-  pdfPreviewUrl.value = null
+  if (pdfPreviewUrl.value) {
+    window.URL.revokeObjectURL(pdfPreviewUrl.value)
+    pdfPreviewUrl.value = null
+  }
+  pdfBlob.value = null
 }
 
 function downloadCurrentPdf() {
-  if (!pdfPreviewUrl.value) return
-  const separator = pdfPreviewUrl.value.includes('?') ? '&' : '?'
-  window.open(pdfPreviewUrl.value + separator + 'download=true')
+  if (!pdfBlob.value) return
+  const url = window.URL.createObjectURL(pdfBlob.value)
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', `${pdfPreviewTitle.value || 'ujp-form'}.pdf`)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
 }
 
 // XML Download
