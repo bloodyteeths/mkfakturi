@@ -125,7 +125,8 @@ class DepreciationGLService
 
             $narration = "Monthly depreciation: {$asset->name} ({$month->format('Y-m')})";
 
-            // Create IFRS Transaction (Journal Entry)
+            // Compound mode: debit (depreciation expense) is main account,
+            // credit (accumulated depreciation) is line item.
             $transaction = Transaction::create([
                 'account_id' => $depreciationExpenseAccount->id,
                 'transaction_date' => $month->copy()->endOfMonth(),
@@ -133,26 +134,21 @@ class DepreciationGLService
                 'transaction_type' => Transaction::JN,
                 'currency_id' => $this->getCurrencyId($asset->company_id),
                 'entity_id' => $entity->id,
-            ]);
-
-            // DR: Depreciation Expense
-            LineItem::create([
-                'transaction_id' => $transaction->id,
-                'account_id' => $depreciationExpenseAccount->id,
-                'amount' => $amount,
-                'quantity' => 1,
+                'compound' => true,
+                'main_account_amount' => $amount,
                 'credited' => false,
-                'entity_id' => $entity->id,
             ]);
 
-            // CR: Accumulated Depreciation (contra-asset)
-            LineItem::create([
+            // CR: Accumulated Depreciation (debit is the main account)
+            DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $accumulatedDepreciationAccount->id,
                 'amount' => $amount,
                 'quantity' => 1,
                 'credited' => true,
                 'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             $transaction->load('lineItems');

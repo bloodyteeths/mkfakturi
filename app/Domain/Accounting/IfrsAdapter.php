@@ -274,46 +274,33 @@ class IfrsAdapter
             $feeExpenseAccount = $this->getFeeExpenseAccount($payment->company_id, $entity->id);
             $cashAccount = $this->getCashAccountForModel($payment, $payment->company_id, $entity->id);
 
-            // Create IFRS Transaction (Journal Entry for Fee)
+            // Compound mode: debit (fee expense) is main account, credit (cash) is line item.
+            $feeAmount = $fee / 100; // Convert cents to dollars
             $transaction = Transaction::create([
                 'account_id' => $feeExpenseAccount->id,
                 'transaction_date' => $payment->payment_date ?? Carbon::now(),
                 'narration' => "Payment processing fee for #{$payment->payment_number}",
-                'transaction_type' => Transaction::JN, // Journal Entry
+                'transaction_type' => Transaction::JN,
                 'currency_id' => $this->getCurrencyId($payment->company_id),
                 'entity_id' => $entity->id,
+                'compound' => true,
+                'main_account_amount' => $feeAmount,
+                'credited' => false,
             ]);
 
-
-
-            // Line Item: Debit Fee Expense
-            // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
-            DB::table('ifrs_line_items')->insert([
-                'transaction_id' => $transaction->id,
-                'account_id' => $feeExpenseAccount->id,
-                'amount' => $fee / 100, // Convert cents to dollars
-                'quantity' => 1,
-                'credited' => false, // Debit entry
-
-                'entity_id' => $entity->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Line Item: Credit Cash
+            // Line Item: Credit Cash (debit is the main account)
             DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $cashAccount->id,
-                'amount' => $fee / 100,
+                'amount' => $feeAmount,
                 'quantity' => 1,
-                'credited' => true, // Credit entry
+                'credited' => true,
 
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            // Reload line items so post() sees them (Transaction::create caches empty lineItems)
             $transaction->load('lineItems');
 
             // Post the transaction to the ledger
@@ -2293,27 +2280,55 @@ class IfrsAdapter
 
         $currencyId = $this->getCurrencyId($company->id);
 
-        // Create reversal transaction
+        // Collect ALL original entries: main account + line items, then flip
+        $allEntries = [];
+
+        // If compound, the main account is a separate entry not in lineItems
+        if ($original->compound && $original->main_account_amount > 0) {
+            $allEntries[] = [
+                'account_id' => $original->account_id,
+                'amount' => $original->main_account_amount,
+                'credited' => ! $original->credited,
+                'narration' => 'Сторно',
+                'counterparty_name' => null,
+            ];
+        }
+
+        foreach ($original->lineItems as $lineItem) {
+            $allEntries[] = [
+                'account_id' => $lineItem->account_id,
+                'amount' => $lineItem->amount,
+                'credited' => ! $lineItem->credited,
+                'narration' => "Сторно: " . ($lineItem->narration ?? ''),
+                'counterparty_name' => $lineItem->counterparty_name,
+            ];
+        }
+
+        // First entry becomes main account in compound mode
+        $mainItem = array_shift($allEntries);
+
         $reversal = Transaction::create([
-            'account_id' => $original->account_id,
+            'account_id' => $mainItem['account_id'],
             'transaction_date' => Carbon::now(),
             'narration' => "Сторно: {$original->narration}",
             'reference' => "STORNO-{$original->transaction_no}",
             'transaction_type' => Transaction::JN,
             'currency_id' => $currencyId,
             'entity_id' => $entity->id,
+            'compound' => true,
+            'main_account_amount' => $mainItem['amount'],
+            'credited' => $mainItem['credited'],
         ]);
 
-        // Create mirror line items (flip credited flag)
-        foreach ($original->lineItems as $lineItem) {
+        foreach ($allEntries as $item) {
             DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $reversal->id,
-                'account_id' => $lineItem->account_id,
-                'amount' => $lineItem->amount,
+                'account_id' => $item['account_id'],
+                'amount' => $item['amount'],
                 'quantity' => 1,
-                'credited' => ! $lineItem->credited, // Flip debit/credit
-                'narration' => "Сторно: " . ($lineItem->narration ?? ''),
-                'counterparty_name' => $lineItem->counterparty_name,
+                'credited' => $item['credited'],
+                'narration' => $item['narration'],
+                'counterparty_name' => $item['counterparty_name'],
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -2957,6 +2972,7 @@ class IfrsAdapter
             }
 
             // Create IFRS Transaction (Journal Entry for stock movement)
+            // Compound mode: debit is main account, credit is line item.
             $transaction = Transaction::create([
                 'account_id' => $debitAccount->id,
                 'transaction_date' => $movement->movement_date ?? Carbon::now(),
@@ -2964,24 +2980,12 @@ class IfrsAdapter
                 'transaction_type' => $transactionType,
                 'currency_id' => $this->getCurrencyId($movement->company_id),
                 'entity_id' => $entity->id,
-            ]);
-
-
-
-            // Line Item: Debit
-            DB::table('ifrs_line_items')->insert([
-                'transaction_id' => $transaction->id,
-                'account_id' => $debitAccount->id,
-                'amount' => $amount,
-                'quantity' => 1,
+                'compound' => true,
+                'main_account_amount' => $amount,
                 'credited' => false,
-
-                'entity_id' => $entity->id,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
 
-            // Line Item: Credit
+            // Line Item: Credit only (debit is the main account)
             DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $creditAccount->id,
@@ -2994,7 +2998,6 @@ class IfrsAdapter
                 'updated_at' => now(),
             ]);
 
-            // Reload line items so post() sees them
             $transaction->load('lineItems');
 
             // Post the transaction to the ledger
@@ -3215,6 +3218,8 @@ class IfrsAdapter
         $debitAccount = $this->findAccountByCode($entity->id, $entry['debit_code'], $entry['debit_name']);
         $creditAccount = $this->findAccountByCode($entity->id, $entry['credit_code'], $entry['credit_name']);
 
+        // Compound mode: debit account is main, credit account is line item.
+        // This avoids postBasic() creating phantom contra-entries on the main account.
         $transaction = Transaction::create([
             'account_id' => $debitAccount->id,
             'transaction_date' => Carbon::parse($entry['date']),
@@ -3222,18 +3227,9 @@ class IfrsAdapter
             'transaction_type' => Transaction::JN,
             'currency_id' => $this->getCurrencyId($company->id),
             'entity_id' => $entity->id,
-        ]);
-
-        // Use DB::table to bypass Eloquent global scopes (proven pattern from invoice posting)
-        DB::table('ifrs_line_items')->insert([
-            'transaction_id' => $transaction->id,
-            'account_id' => $debitAccount->id,
-            'amount' => $entry['amount'],
-            'quantity' => 1,
+            'compound' => true,
+            'main_account_amount' => $entry['amount'],
             'credited' => false,
-            'entity_id' => $entity->id,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
         DB::table('ifrs_line_items')->insert([
@@ -3247,7 +3243,6 @@ class IfrsAdapter
             'updated_at' => now(),
         ]);
 
-        // Reload line items so post() sees them
         $transaction->load('lineItems');
 
         $transaction->post();
@@ -3279,14 +3274,10 @@ class IfrsAdapter
 
         $currencyId = $this->getCurrencyId($company->id);
 
-        // Resolve all accounts first
-        $firstAccount = null;
+        // Resolve all accounts
         $lineItemsData = [];
         foreach ($entry['line_items'] as $item) {
             $account = $this->findAccountByCode($entity->id, $item['account_code'], $item['account_name']);
-            if (! $firstAccount) {
-                $firstAccount = $account;
-            }
             $lineItemsData[] = [
                 'account' => $account,
                 'amount' => $item['amount'],
@@ -3295,14 +3286,22 @@ class IfrsAdapter
             ];
         }
 
+        // Use compound mode: first line item becomes the main account,
+        // remaining items become line items. This avoids the postBasic() bug
+        // where the main account gets phantom contra-entries for EVERY line item.
+        $mainItem = array_shift($lineItemsData);
+
         $transaction = Transaction::create([
-            'account_id' => $firstAccount->id,
+            'account_id' => $mainItem['account']->id,
             'transaction_date' => Carbon::parse($entry['date']),
             'narration' => $entry['narration'],
             'reference' => $entry['reference'] ?? null,
             'transaction_type' => Transaction::JN,
             'currency_id' => $currencyId,
             'entity_id' => $entity->id,
+            'compound' => true,
+            'main_account_amount' => $mainItem['amount'],
+            'credited' => $mainItem['credited'],
         ]);
 
         foreach ($lineItemsData as $item) {
