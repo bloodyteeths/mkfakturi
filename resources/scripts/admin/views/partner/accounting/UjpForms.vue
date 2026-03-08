@@ -273,16 +273,19 @@ function closePreview() {
   expandedForm.value = null
 }
 
-// PDF Generation — direct URL loading (no axios/blob, same as admin reports)
+// PDF Generation — web route with session auth (same pattern as admin reports)
 function handleGeneratePdf(formCode) {
   if (!selectedCompanyId.value) return
+
+  const company = companies.value.find(c => c.id === selectedCompanyId.value)
+  if (!company?.unique_hash) return
 
   const params = buildParams(formCode)
   const query = new URLSearchParams({ year: params.year })
   if (params.month) query.set('month', params.month)
 
-  // Load PDF directly via URL — browser handles it natively (no blob)
-  const url = `/api/v1/partner/companies/${selectedCompanyId.value}/ujp-forms/${formCode}/pdf?${query.toString()}`
+  // Use web route (session auth) — same as /reports/balance-sheet/{hash}
+  const url = `/reports/ujp-forms/${company.unique_hash}/${formCode}?${query.toString()}`
   pdfPreviewUrl.value = url
   pdfPreviewTitle.value = `${t(`forms.${formCode}.title`)} — ${t(`forms.${formCode}.name`)}`
   showPdfPreview.value = true
@@ -295,12 +298,8 @@ function closePdfPreview() {
 
 function downloadCurrentPdf() {
   if (!pdfPreviewUrl.value) return
-  const a = document.createElement('a')
-  a.href = pdfPreviewUrl.value
-  a.download = `${pdfPreviewTitle.value || 'form'}.pdf`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+  const separator = pdfPreviewUrl.value.includes('?') ? '&' : '?'
+  window.open(pdfPreviewUrl.value + separator + 'download=true')
 }
 
 // XML Download

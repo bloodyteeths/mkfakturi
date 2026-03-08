@@ -11,6 +11,7 @@ use App\Http\Controllers\V1\Admin\Report\TaxSummaryReportController;
 use App\Http\Controllers\V1\Admin\Report\CashFlowReportController;
 use App\Http\Controllers\V1\Admin\Report\EquityChangesReportController;
 use App\Http\Controllers\V1\Admin\Report\TrialBalanceReportController;
+use App\Http\Controllers\V1\Admin\Report\UjpFormReportController;
 use App\Http\Controllers\V1\Customer\Auth\LoginController as CustomerLoginController;
 use App\Http\Controllers\V1\Customer\EstimatePdfController as CustomerEstimatePdfController;
 use App\Http\Controllers\V1\Customer\InvoicePdfController as CustomerInvoicePdfController;
@@ -103,6 +104,9 @@ Route::middleware('auth:sanctum')->prefix('reports')->group(function () {
     Route::get('/income-statement/{hash}', IncomeStatementReportController::class);
     Route::get('/cash-flow/{hash}', CashFlowReportController::class);
     Route::get('/equity-changes/{hash}', EquityChangesReportController::class);
+
+    // UJP Tax Form PDFs
+    Route::get('/ujp-forms/{hash}/{formCode}', UjpFormReportController::class);
 
     // download expense receipt
     // -------------------------------------------------
