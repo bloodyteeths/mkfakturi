@@ -131,7 +131,7 @@ class ReportExportController extends Controller
 
         $adapter = app(IfrsAdapter::class);
         $asOfDate = $request->as_of_date;
-        $trialBalance = $adapter->getTrialBalance($company, $asOfDate);
+        $trialBalance = $adapter->getTrialBalanceSixColumn($company, '2020-01-01', $asOfDate);
 
         if (isset($trialBalance['error'])) {
             abort(400, $trialBalance['error']);
@@ -384,15 +384,26 @@ class ReportExportController extends Controller
         $csv .= "{$company->name}\n";
         $csv .= "As of {$formattedDate}\n\n";
 
-        $csv .= "Account,Debit,Credit\n";
+        $csv .= "Code,Account,Opening Debit,Opening Credit,Period Debit,Period Credit,Closing Debit,Closing Credit\n";
         foreach ($trialBalance['accounts'] ?? [] as $account) {
-            $debit = $account['debit'] > 0 ? $account['debit'] : '';
-            $credit = $account['credit'] > 0 ? $account['credit'] : '';
-            $csv .= "\"{$account['name']}\",{$debit},{$credit}\n";
+            $code = $account['code'] ?? '';
+            $name = $account['name'] ?? '';
+            $od = ($account['opening_debit'] ?? 0) > 0 ? $account['opening_debit'] : '';
+            $oc = ($account['opening_credit'] ?? 0) > 0 ? $account['opening_credit'] : '';
+            $pd = ($account['period_debit'] ?? 0) > 0 ? $account['period_debit'] : '';
+            $pc = ($account['period_credit'] ?? 0) > 0 ? $account['period_credit'] : '';
+            $cd = ($account['closing_debit'] ?? 0) > 0 ? $account['closing_debit'] : '';
+            $cc = ($account['closing_credit'] ?? 0) > 0 ? $account['closing_credit'] : '';
+            $csv .= "\"{$code}\",\"{$name}\",{$od},{$oc},{$pd},{$pc},{$cd},{$cc}\n";
         }
-        $totalDebit = $trialBalance['trial_balance']['total_debits'] ?? $trialBalance['total_debit'] ?? 0;
-        $totalCredit = $trialBalance['trial_balance']['total_credits'] ?? $trialBalance['total_credit'] ?? 0;
-        $csv .= "Total,{$totalDebit},{$totalCredit}\n";
+        $totals = $trialBalance['totals'] ?? [];
+        $csv .= ",Total";
+        $csv .= "," . ($totals['opening_debit'] ?? 0);
+        $csv .= "," . ($totals['opening_credit'] ?? 0);
+        $csv .= "," . ($totals['period_debit'] ?? 0);
+        $csv .= "," . ($totals['period_credit'] ?? 0);
+        $csv .= "," . ($totals['closing_debit'] ?? 0);
+        $csv .= "," . ($totals['closing_credit'] ?? 0) . "\n";
 
         $filename = "trial_balance_{$asOfDate}.csv";
 

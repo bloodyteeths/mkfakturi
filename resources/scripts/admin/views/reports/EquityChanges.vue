@@ -137,12 +137,16 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 const companyStore = useCompanyStore()
+const globalStore = useGlobalStore()
 const data = ref(null)
 const isLoading = ref(false)
 const hasSearched = ref(false)
 const selectedYear = ref(new Date().getFullYear() - 1)
+
+globalStore.downloadReport = downloadReport
 
 const yearOptions = computed(() => {
   const current = new Date().getFullYear()
@@ -178,6 +182,13 @@ function formatMoney(amount) {
 function amountClass(amount) {
   if (!amount) return 'text-gray-500'
   return amount >= 0 ? 'text-green-700' : 'text-red-600'
+}
+
+function downloadReport() {
+  const company = companyStore.selectedCompany
+  if (!company) return
+  const url = `/reports/equity-changes/${company.unique_hash}?year=${selectedYear.value}&download=true`
+  window.open(url)
 }
 </script>
 

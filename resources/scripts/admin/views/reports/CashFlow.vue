@@ -118,13 +118,17 @@
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import { useGlobalStore } from '@/scripts/admin/stores/global'
 import moment from 'moment'
 
 const { t } = useI18n()
 const companyStore = useCompanyStore()
+const globalStore = useGlobalStore()
 const data = ref(null)
 const isLoading = ref(false)
 const hasSearched = ref(false)
+
+globalStore.downloadReport = downloadReport
 
 const filters = ref({
   start_date: moment().startOf('year').format('YYYY-MM-DD'),
@@ -190,6 +194,13 @@ function formatMoney(amount) {
 function amountClass(amount) {
   if (!amount) return 'text-gray-900'
   return amount >= 0 ? 'text-green-700' : 'text-red-600'
+}
+
+function downloadReport() {
+  const company = companyStore.selectedCompany
+  if (!company) return
+  const url = `/reports/cash-flow/${company.unique_hash}?start_date=${filters.value.start_date}&end_date=${filters.value.end_date}&download=true`
+  window.open(url)
 }
 </script>
 

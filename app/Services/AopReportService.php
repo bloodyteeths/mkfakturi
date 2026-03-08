@@ -36,18 +36,22 @@ class AopReportService
         $fallback = config('ujp_forms.obrazec_36.ifrs_to_aop_fallback', []);
         $codeToAop = config('ujp_forms.obrazec_36.account_code_to_aop', []);
 
-        // Get IFRS type-level balances (fallback data)
+        // Get IFRS type-level balances (for buildAopRows fallback when no AOP balances)
         $current = $this->ifrsAdapter->getBalanceSheet($company, $endDate);
         $currentBalances = $this->extractBalanceSheetByType($current);
 
-        // Get per-account-code balances for precise AOP distribution
-        $currentCodeBalances = $this->extractBalancesByAccountCode($company, '2020-01-01', $endDate);
-        $currentAopBalances = $this->distributeToAopCodes($currentCodeBalances, $currentBalances, $codeToAop, $fallback);
+        // Get per-account balances with type info for precise AOP distribution
+        $currentAccounts = $this->extractAccountBalances($company, '2020-01-01', $endDate);
+        $currentAopBalances = $this->distributeToAopCodes($currentAccounts, $codeToAop, $fallback);
 
-        // Get previous year data (type-level only — code-level requires live query)
+        // Inject current year net income into equity AOP 077 (profit) or 078 (loss)
+        $this->injectNetIncome($currentAopBalances, $company, $year);
+
+        // Get previous year data
         $previousBalances = $this->getPreviousYearBalanceSheet($company, $year - 1);
-        $prevCodeBalances = $this->extractBalancesByAccountCode($company, '2020-01-01', "{$year}-01-01");
-        $prevAopBalances = $this->distributeToAopCodes($prevCodeBalances, $previousBalances, $codeToAop, $fallback);
+        $prevAccounts = $this->extractAccountBalances($company, '2020-01-01', ($year - 1) . '-12-31');
+        $prevAopBalances = $this->distributeToAopCodes($prevAccounts, $codeToAop, $fallback);
+        $this->injectNetIncome($prevAopBalances, $company, $year - 1);
 
         // Build AOP rows for АКТИВА (official 112-row config)
         $aktivaConfig = config('ujp_forms.obrazec_36.aktiva', []);
@@ -82,20 +86,20 @@ class AopReportService
         $fallback = config('ujp_forms.obrazec_37.ifrs_to_aop_fallback', []);
         $codeToAop = config('ujp_forms.obrazec_37.account_code_to_aop', []);
 
-        // Get IFRS type-level balances (fallback data)
+        // Get IFRS type-level balances (for buildAopRows fallback when no AOP balances)
         $current = $this->ifrsAdapter->getIncomeStatement($company, $startDate, $endDate);
         $currentBalances = $this->extractIncomeStatementByType($current);
 
-        // Get per-account-code period balances for precise AOP distribution
-        $currentCodeBalances = $this->extractPeriodBalancesByAccountCode($company, $startDate, $endDate);
-        $currentAopBalances = $this->distributeToAopCodes($currentCodeBalances, $currentBalances, $codeToAop, $fallback);
+        // Get per-account period balances with type info for precise AOP distribution
+        $currentAccounts = $this->extractPeriodAccountBalances($company, $startDate, $endDate);
+        $currentAopBalances = $this->distributeToAopCodes($currentAccounts, $codeToAop, $fallback);
 
         // Get previous year data
         $previousBalances = $this->getPreviousYearIncomeStatement($company, $year - 1);
-        $prevCodeBalances = $this->extractPeriodBalancesByAccountCode(
+        $prevAccounts = $this->extractPeriodAccountBalances(
             $company, ($year - 1) . '-01-01', ($year - 1) . '-12-31'
         );
-        $prevAopBalances = $this->distributeToAopCodes($prevCodeBalances, $previousBalances, $codeToAop, $fallback);
+        $prevAopBalances = $this->distributeToAopCodes($prevAccounts, $codeToAop, $fallback);
 
         // Build AOP rows for Приходи (official config)
         $prihodiConfig = config('ujp_forms.obrazec_37.prihodi', []);
@@ -432,11 +436,12 @@ class AopReportService
     }
 
     /**
-     * Extract per-account-code closing balances from trial balance.
-     * Returns signed values: positive for debit balances, negative for credit balances.
+     * Extract per-account records with code, IFRS type, and closing balance.
+     * Returns: [['code' => '100', 'type' => 'BANK', 'balance' => 49000.60], ...]
+     * Balance = closing_debit - closing_credit (signed: positive=debit, negative=credit).
      * Used for balance sheet — closing balances represent cumulative state.
      */
-    public function extractBalancesByAccountCode(Company $company, string $fromDate, string $toDate): array
+    public function extractAccountBalances(Company $company, string $fromDate, string $toDate): array
     {
         try {
             $trialBalance = $this->ifrsAdapter->getTrialBalanceSixColumn($company, $fromDate, $toDate);
@@ -448,22 +453,25 @@ class AopReportService
             return [];
         }
 
-        $codeBalances = [];
+        $accounts = [];
         foreach ($trialBalance['accounts'] as $account) {
-            $code = (string) $account['code'];
-            $balance = round(($account['closing_debit'] ?? 0) - ($account['closing_credit'] ?? 0), 2);
-            $codeBalances[$code] = ($codeBalances[$code] ?? 0) + $balance;
+            $accounts[] = [
+                'code' => (string) ($account['code'] ?? ''),
+                'type' => $account['account_type'] ?? '',
+                'balance' => round(($account['closing_debit'] ?? 0) - ($account['closing_credit'] ?? 0), 2),
+            ];
         }
 
-        return $codeBalances;
+        return $accounts;
     }
 
     /**
-     * Extract per-account-code period balances from trial balance.
-     * Returns absolute period activity amounts (debit or credit side, whichever is larger).
+     * Extract per-account records with code, IFRS type, and period activity balance.
+     * Returns: [['code' => '720', 'type' => 'OPERATING_REVENUE', 'balance' => 5000], ...]
+     * Uses the larger of period_debit/period_credit as the absolute balance.
      * Used for income statement — period amounts represent activity during the period.
      */
-    public function extractPeriodBalancesByAccountCode(Company $company, string $fromDate, string $toDate): array
+    public function extractPeriodAccountBalances(Company $company, string $fromDate, string $toDate): array
     {
         try {
             $trialBalance = $this->ifrsAdapter->getTrialBalanceSixColumn($company, $fromDate, $toDate);
@@ -475,61 +483,59 @@ class AopReportService
             return [];
         }
 
-        $codeBalances = [];
+        $accounts = [];
         foreach ($trialBalance['accounts'] as $account) {
-            $code = (string) $account['code'];
-            // For IS accounts, use the larger side as the period amount
             $periodDebit = $account['period_debit'] ?? 0;
             $periodCredit = $account['period_credit'] ?? 0;
-            $balance = round(max($periodDebit, $periodCredit), 2);
-            $codeBalances[$code] = ($codeBalances[$code] ?? 0) + $balance;
+            $accounts[] = [
+                'code' => (string) ($account['code'] ?? ''),
+                'type' => $account['account_type'] ?? '',
+                'balance' => round(max($periodDebit, $periodCredit), 2),
+            ];
         }
 
-        return $codeBalances;
+        return $accounts;
     }
 
     /**
-     * Distribute per-account-code balances to AOP codes.
+     * Distribute per-account balances to AOP codes using code-first, type-fallback strategy.
      *
-     * 1. For each account code with a mapping, add its balance to the target AOP.
-     * 2. Track which IFRS types were distributed via code mapping.
-     * 3. Remaining type-level balances go through the ifrs_to_aop_fallback.
+     * For each account:
+     * 1. If account code found in $codeToAopMap → add balance to that AOP
+     * 2. Else if IFRS type found in $typeToAopFallback → add balance to that AOP
+     * 3. Else → skip (unmapped account)
      *
-     * Returns: ['047' => 3000, '049' => 1200, ...] keyed by AOP code.
+     * Returns: ['047' => 3000, '049' => 1200, ...] keyed by AOP code, all values absolute.
      */
     public function distributeToAopCodes(
-        array $codeBalances,
-        array $typeBalances,
+        array $accounts,
         array $codeToAopMap,
         array $typeToAopFallback
     ): array {
         $aopBalances = [];
-        $distributedByType = []; // Track how much was distributed per IFRS type
 
-        if (empty($codeBalances)) {
-            // No per-code data — fall through to type-level only
-            foreach ($typeToAopFallback as $ifrsType => $aop) {
-                if (isset($typeBalances[$ifrsType]) && $typeBalances[$ifrsType] != 0) {
-                    $aopBalances[$aop] = ($aopBalances[$aop] ?? 0) + abs($typeBalances[$ifrsType]);
-                }
+        foreach ($accounts as $account) {
+            $code = $account['code'] ?? '';
+            $type = $account['type'] ?? '';
+            $balance = $account['balance'] ?? 0;
+
+            if ($balance == 0) {
+                continue;
             }
 
-            return $aopBalances;
-        }
-
-        // Step 1: Distribute per-code balances to AOP codes
-        $distributedCodes = [];
-        foreach ($codeBalances as $code => $balance) {
-            if (isset($codeToAopMap[$code])) {
+            if ($code !== '' && isset($codeToAopMap[$code])) {
+                // Code-based mapping (MK 3-digit codes like 100, 240, 941)
                 $aop = $codeToAopMap[$code];
-                // Use absolute value — the AOP form shows positive amounts
-                // Contra-accounts (009, 019, etc.) have negative balances which correctly subtract
                 $aopBalances[$aop] = ($aopBalances[$aop] ?? 0) + $balance;
-                $distributedCodes[$code] = true;
+            } elseif ($type !== '' && isset($typeToAopFallback[$type])) {
+                // Type-based fallback (IFRS default codes like 1000, 2000, 3000)
+                $aop = $typeToAopFallback[$type];
+                $aopBalances[$aop] = ($aopBalances[$aop] ?? 0) + $balance;
             }
         }
 
-        // Make all AOP balances positive (the form shows absolute values)
+        // Make all AOP balances absolute (the form shows positive amounts)
+        // Contra-accounts naturally subtract via signed addition before abs
         foreach ($aopBalances as $aop => $val) {
             $aopBalances[$aop] = abs(round($val, 2));
         }
@@ -614,6 +620,39 @@ class AopReportService
             ]);
 
             return [];
+        }
+    }
+
+    /**
+     * Inject current year net income into equity AOP 077 (profit) or 078 (loss).
+     * The balance sheet requires net P&L in equity for Assets = Liabilities + Equity.
+     */
+    protected function injectNetIncome(array &$aopBalances, Company $company, int $year): void
+    {
+        try {
+            $is = $this->ifrsAdapter->getIncomeStatement(
+                $company, "{$year}-01-01", "{$year}-12-31"
+            );
+        } catch (\Exception $e) {
+            return;
+        }
+
+        if (isset($is['error'])) {
+            return;
+        }
+
+        $totalRevenue = $is['income_statement']['totals']['revenue'] ?? 0;
+        $totalExpenses = $is['income_statement']['totals']['expenses'] ?? 0;
+        $netIncome = $totalRevenue - $totalExpenses;
+
+        if (abs($netIncome) < 0.01) {
+            return;
+        }
+
+        if ($netIncome >= 0) {
+            $aopBalances['077'] = ($aopBalances['077'] ?? 0) + abs($netIncome);
+        } else {
+            $aopBalances['078'] = ($aopBalances['078'] ?? 0) + abs($netIncome);
         }
     }
 

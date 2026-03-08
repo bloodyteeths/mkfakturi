@@ -8,6 +8,8 @@ use App\Http\Controllers\V1\Admin\Report\IncomeStatementReportController;
 use App\Http\Controllers\V1\Admin\Report\ItemSalesReportController;
 use App\Http\Controllers\V1\Admin\Report\ProfitLossReportController;
 use App\Http\Controllers\V1\Admin\Report\TaxSummaryReportController;
+use App\Http\Controllers\V1\Admin\Report\CashFlowReportController;
+use App\Http\Controllers\V1\Admin\Report\EquityChangesReportController;
 use App\Http\Controllers\V1\Admin\Report\TrialBalanceReportController;
 use App\Http\Controllers\V1\Customer\Auth\LoginController as CustomerLoginController;
 use App\Http\Controllers\V1\Customer\EstimatePdfController as CustomerEstimatePdfController;
@@ -99,6 +101,8 @@ Route::middleware('auth:sanctum')->prefix('reports')->group(function () {
     Route::get('/trial-balance/{hash}', TrialBalanceReportController::class);
     Route::get('/balance-sheet/{hash}', BalanceSheetReportController::class);
     Route::get('/income-statement/{hash}', IncomeStatementReportController::class);
+    Route::get('/cash-flow/{hash}', CashFlowReportController::class);
+    Route::get('/equity-changes/{hash}', EquityChangesReportController::class);
 
     // download expense receipt
     // -------------------------------------------------

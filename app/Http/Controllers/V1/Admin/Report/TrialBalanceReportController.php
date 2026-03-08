@@ -46,7 +46,7 @@ class TrialBalanceReportController extends Controller
             ? $request->as_of_date
             : now()->toDateString();
 
-        $trialBalance = $adapter->getTrialBalance($company, $asOfDate);
+        $trialBalance = $adapter->getTrialBalanceSixColumn($company, '2020-01-01', $asOfDate);
 
         // Handle errors from adapter
         if (isset($trialBalance['error'])) {
