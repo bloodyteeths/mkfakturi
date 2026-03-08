@@ -49,7 +49,7 @@ class ReportExportController extends Controller
         $format = $request->format;
 
         if ($format === 'csv') {
-            $adapter = new IfrsAdapter();
+            $adapter = app(IfrsAdapter::class);
             $balanceSheet = $adapter->getBalanceSheet($company, $asOfDate);
             if (isset($balanceSheet['error'])) {
                 abort(400, $balanceSheet['error']);
@@ -92,7 +92,7 @@ class ReportExportController extends Controller
         $format = $request->format;
 
         if ($format === 'csv') {
-            $adapter = new IfrsAdapter();
+            $adapter = app(IfrsAdapter::class);
             $incomeStatement = $adapter->getIncomeStatement($company, $fromDate, $toDate);
             if (isset($incomeStatement['error'])) {
                 abort(400, $incomeStatement['error']);
@@ -129,7 +129,7 @@ class ReportExportController extends Controller
         $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
         App::setLocale($locale);
 
-        $adapter = new IfrsAdapter();
+        $adapter = app(IfrsAdapter::class);
         $asOfDate = $request->as_of_date;
         $trialBalance = $adapter->getTrialBalance($company, $asOfDate);
 

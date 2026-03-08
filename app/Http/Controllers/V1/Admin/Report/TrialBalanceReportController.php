@@ -41,7 +41,7 @@ class TrialBalanceReportController extends Controller
         App::setLocale($locale);
 
         // Get trial balance data via IfrsAdapter
-        $adapter = new IfrsAdapter;
+        $adapter = app(IfrsAdapter::class);
         $asOfDate = $request->has('as_of_date')
             ? $request->as_of_date
             : now()->toDateString();

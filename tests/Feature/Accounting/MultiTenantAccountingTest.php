@@ -64,7 +64,7 @@ class MultiTenantAccountingTest extends TestCase
         // Enable accounting feature
         config(['ifrs.enabled' => true]);
 
-        $this->adapter = new IfrsAdapter;
+        $this->adapter = app(IfrsAdapter::class);
 
         // Create App Currency for users (separate from IFRS Currency)
         $this->appCurrency = AppCurrency::create([

@@ -57,7 +57,7 @@ class IfrsAdapterTest extends TestCase
             $this->markTestSkipped('IFRS tables are not available in this environment.');
         }
 
-        $this->adapter = new IfrsAdapter;
+        $this->adapter = app(IfrsAdapter::class);
 
         // Create test entity
         $this->entity = Entity::create([
