@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Admin\AccountsPayable;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BillPaymentResource;
 use App\Models\BillPayment;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class BillPaymentListController extends Controller
@@ -39,5 +40,39 @@ class BillPaymentListController extends Controller
                 'bill_payment_total_count' => $totalCount,
             ]]);
     }
+
+    /**
+     * Delete one or more bill payments by IDs.
+     */
+    public function delete(Request $request): JsonResponse
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer',
+        ]);
+
+        $companyId = $request->header('company');
+
+        $payments = BillPayment::where('company_id', $companyId)
+            ->whereIn('id', $request->ids)
+            ->get();
+
+        $affectedBillIds = $payments->pluck('bill_id')->unique()->filter();
+
+        foreach ($payments as $payment) {
+            $payment->delete();
+        }
+
+        // Update paid status for all affected bills
+        foreach ($affectedBillIds as $billId) {
+            $bill = \App\Models\Bill::find($billId);
+            if ($bill) {
+                $bill->updatePaidStatus();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
 }
-// CLAUDE-CHECKPOINT

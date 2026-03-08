@@ -50,7 +50,24 @@
 
         <!-- Actions for Bill Payments tab -->
         <template v-if="activeTab === 'bill_payments'">
-          <router-link to="/admin/payment-orders/create">
+          <BaseButton
+            v-show="billPaymentTotalCount > 0"
+            variant="primary-outline"
+            @click="toggleBillPaymentFilter"
+          >
+            {{ $t('general.filter') }}
+
+            <template #right="slotProps">
+              <BaseIcon
+                v-if="!showBillPaymentFilters"
+                :class="slotProps.class"
+                name="FunnelIcon"
+              />
+              <BaseIcon v-else name="XMarkIcon" :class="slotProps.class" />
+            </template>
+          </BaseButton>
+
+          <router-link to="/admin/payment-orders/create" class="ml-4">
             <BaseButton variant="primary">
               <template #left="slotProps">
                 <BaseIcon name="PlusIcon" :class="slotProps.class" />
@@ -252,144 +269,164 @@
 
     <!-- ==================== BILL PAYMENTS TAB ==================== -->
     <template v-if="activeTab === 'bill_payments'">
-      <!-- Search filter -->
-      <div class="mb-4">
-        <BaseInput
-          v-model="billPaymentSearch"
-          :placeholder="bp('search_placeholder')"
-        >
-          <template #left="slotProps">
-            <BaseIcon name="MagnifyingGlassIcon" :class="slotProps.class" />
-          </template>
-        </BaseInput>
-      </div>
+      <BaseFilterWrapper :show="showBillPaymentFilters" class="mt-3" @clear="clearBillPaymentFilter">
+        <BaseInputGroup :label="bp('supplier')">
+          <BaseSupplierSelectInput
+            v-model="bpFilters.supplier_id"
+            :placeholder="$t('bills.type_or_click')"
+            value-prop="id"
+            label="name"
+          />
+        </BaseInputGroup>
 
-      <!-- Loading state -->
-      <div v-if="isFetchingBillPayments" class="rounded-lg bg-white shadow p-6">
-        <div v-for="i in 5" :key="i" class="mb-4 flex animate-pulse space-x-4">
-          <div class="h-4 w-24 rounded bg-gray-200"></div>
-          <div class="h-4 w-20 rounded bg-gray-200"></div>
-          <div class="h-4 w-32 rounded bg-gray-200"></div>
-          <div class="h-4 w-20 rounded bg-gray-200"></div>
-          <div class="h-4 w-16 rounded bg-gray-200"></div>
-        </div>
-      </div>
+        <BaseInputGroup :label="bp('payment_method')">
+          <BaseMultiselect
+            v-model="bpFilters.payment_method_id"
+            value-prop="id"
+            track-by="name"
+            :filter-results="false"
+            label="name"
+            resolve-on-load
+            :delay="500"
+            searchable
+            :options="searchPaymentMethod"
+          />
+        </BaseInputGroup>
 
-      <!-- Empty state -->
-      <div
-        v-else-if="billPayments.length === 0 && !isFetchingBillPayments"
-        class="rounded-lg bg-white shadow p-12 text-center"
+        <BaseInputGroup :label="bp('payment_number')">
+          <BaseInput v-model="bpFilters.search">
+            <template #left="slotProps">
+              <BaseIcon name="HashtagIcon" :class="slotProps.class" />
+            </template>
+          </BaseInput>
+        </BaseInputGroup>
+      </BaseFilterWrapper>
+
+      <!-- Empty State -->
+      <BaseEmptyPlaceholder
+        v-if="showBillPaymentEmptyScreen"
+        :title="bp('no_bill_payments')"
+        :description="bp('no_bill_payments_description')"
       >
-        <BaseIcon name="BanknotesIcon" class="mx-auto h-12 w-12 text-gray-400" />
-        <h3 class="mt-2 text-sm font-medium text-gray-900">{{ bp('no_bill_payments') }}</h3>
-        <p class="mt-1 text-sm text-gray-500">{{ bp('no_bill_payments_description') }}</p>
-        <div class="mt-4">
+        <BaseIcon name="BanknotesIcon" class="mx-auto mt-5 mb-4 h-12 w-12 text-gray-400" />
+
+        <template #actions>
           <router-link to="/admin/payment-orders/create">
-            <BaseButton variant="primary">
+            <BaseButton variant="primary-outline">
               <template #left="slotProps">
                 <BaseIcon name="PlusIcon" :class="slotProps.class" />
               </template>
               {{ bp('create_payment_order') }}
             </BaseButton>
           </router-link>
-        </div>
-      </div>
+        </template>
+      </BaseEmptyPlaceholder>
 
-      <!-- Bill Payments Table -->
-      <div v-else class="rounded-lg bg-white shadow overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  {{ bp('date') }}
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  {{ bp('payment_number') }}
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  {{ bp('bill_number') }}
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  {{ bp('supplier') }}
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  {{ bp('payment_method') }}
-                </th>
-                <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
-                  {{ bp('amount') }}
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  {{ bp('notes') }}
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr
-                v-for="payment in billPayments"
-                :key="payment.id"
-                class="hover:bg-gray-50"
+      <div v-show="!showBillPaymentEmptyScreen" class="relative table-container">
+        <!-- Bulk Actions -->
+        <div class="relative flex items-center justify-end h-5">
+          <BaseDropdown v-if="selectedBillPaymentIds.length">
+            <template #activator>
+              <span
+                class="
+                  flex
+                  text-sm
+                  font-medium
+                  cursor-pointer
+                  select-none
+                  text-primary-400
+                "
               >
-                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
-                  {{ payment.formatted_payment_date }}
-                </td>
-                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-primary-600">
-                  {{ payment.payment_number }}
-                </td>
-                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
-                  <router-link
-                    v-if="payment.bill"
-                    :to="`/admin/bills/${payment.bill_id}/view`"
-                    class="text-primary-500 hover:text-primary-700"
-                  >
-                    {{ payment.bill.bill_number }}
-                  </router-link>
-                  <span v-else class="text-gray-400">-</span>
-                </td>
-                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
-                  {{ payment.bill?.supplier?.name || '-' }}
-                </td>
-                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
-                  {{ payment.payment_method?.name || '-' }}
-                </td>
-                <td class="whitespace-nowrap px-4 py-3 text-sm text-right font-medium text-gray-900">
-                  {{ formatBillPaymentAmount(payment) }}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">
-                  {{ payment.notes || '-' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                {{ $t('general.actions') }}
+                <BaseIcon name="ChevronDownIcon" />
+              </span>
+            </template>
+            <BaseDropdownItem @click="removeMultipleBillPayments">
+              <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
+              {{ $t('general.delete') }}
+            </BaseDropdownItem>
+          </BaseDropdown>
         </div>
 
-        <!-- Pagination -->
-        <div
-          v-if="billPaymentPagination.totalPages > 1"
-          class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3"
+        <BaseTable
+          ref="billPaymentTableRef"
+          :data="fetchBillPaymentData"
+          :columns="billPaymentColumns"
+          :placeholder-count="billPaymentTotalCount >= 20 ? 10 : 5"
+          class="mt-3"
         >
-          <div class="text-sm text-gray-700">
-            {{ billPaymentPagination.currentPage }} / {{ billPaymentPagination.totalPages }}
-          </div>
-          <div class="flex gap-2">
-            <BaseButton
-              variant="primary-outline"
-              size="sm"
-              :disabled="billPaymentPagination.currentPage <= 1"
-              @click="loadBillPayments(billPaymentPagination.currentPage - 1)"
+          <!-- Select All Checkbox -->
+          <template #header>
+            <div class="absolute items-center left-6 top-2.5 select-none">
+              <BaseCheckbox
+                v-model="selectAllBillPaymentsField"
+                variant="primary"
+                @change="toggleSelectAllBillPayments"
+              />
+            </div>
+          </template>
+
+          <template #cell-status="{ row }">
+            <div class="relative block">
+              <BaseCheckbox
+                :id="row.id"
+                v-model="selectedBillPaymentIds"
+                :value="row.data.id"
+                variant="primary"
+              />
+            </div>
+          </template>
+
+          <template #cell-payment_date="{ row }">
+            {{ row.data.formatted_payment_date }}
+          </template>
+
+          <template #cell-payment_number="{ row }">
+            <router-link
+              v-if="row.data.bill"
+              :to="`/admin/bills/${row.data.bill_id}/view`"
+              class="font-medium text-primary-500"
             >
-              &larr;
-            </BaseButton>
-            <BaseButton
-              variant="primary-outline"
-              size="sm"
-              :disabled="billPaymentPagination.currentPage >= billPaymentPagination.totalPages"
-              @click="loadBillPayments(billPaymentPagination.currentPage + 1)"
+              {{ row.data.payment_number }}
+            </router-link>
+            <span v-else class="font-medium text-gray-900">
+              {{ row.data.payment_number }}
+            </span>
+          </template>
+
+          <template #cell-bill_number="{ row }">
+            <router-link
+              v-if="row.data.bill"
+              :to="`/admin/bills/${row.data.bill_id}/view`"
+              class="text-primary-500 hover:text-primary-700"
             >
-              &rarr;
-            </BaseButton>
-          </div>
-        </div>
+              {{ row.data.bill?.bill_number }}
+            </router-link>
+            <span v-else class="text-gray-400">-</span>
+          </template>
+
+          <template #cell-supplier="{ row }">
+            {{ row.data.bill?.supplier?.name || '-' }}
+          </template>
+
+          <template #cell-payment_mode="{ row }">
+            {{ row.data.payment_method?.name || '-' }}
+          </template>
+
+          <template #cell-amount="{ row }">
+            <span class="font-medium">
+              {{ formatBillPaymentAmount(row.data) }}
+            </span>
+          </template>
+
+          <template #cell-actions="{ row }">
+            <BillPaymentIndexDropdown
+              :row="row.data"
+              :table="billPaymentTableRef"
+              @deleted="refreshBillPaymentTable"
+            />
+          </template>
+        </BaseTable>
       </div>
     </template>
   </BasePage>
@@ -398,10 +435,11 @@
 <script setup>
 import { debouncedWatch } from '@vueuse/core'
 
-import { ref, reactive, computed, onUnmounted, watch } from 'vue'
+import { ref, reactive, computed, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDialogStore } from '@/scripts/stores/dialog'
+import { useNotificationStore } from '@/scripts/stores/notification'
 import { usePaymentStore } from '@/scripts/admin/stores/payment'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useUserStore } from '@/scripts/admin/stores/user'
@@ -409,6 +447,7 @@ import abilities from '@/scripts/admin/stub/abilities'
 import CapsuleIcon from '@/scripts/components/icons/empty/CapsuleIcon.vue'
 import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 import PaymentDropdown from '@/scripts/admin/components/dropdowns/PaymentIndexDropdown.vue'
+import BillPaymentIndexDropdown from '@/scripts/admin/components/dropdowns/BillPaymentIndexDropdown.vue'
 import SendPaymentModal from '@/scripts/admin/components/modal-components/SendPaymentModal.vue'
 import bpMessages from '@/scripts/admin/i18n/bill-payments.js'
 
@@ -443,6 +482,7 @@ const filters = reactive({
 const paymentStore = usePaymentStore()
 const companyStore = useCompanyStore()
 const dialogStore = useDialogStore()
+const notificationStore = useNotificationStore()
 const userStore = useUserStore()
 
 const showEmptyScreen = computed(() => {
@@ -597,49 +637,157 @@ function removeMultiplePayments() {
 
 // ==================== BILL PAYMENTS TAB ====================
 
-const billPayments = ref([])
+const billPaymentTableRef = ref(null)
 const billPaymentTotalCount = ref(0)
-const isFetchingBillPayments = ref(false)
-const billPaymentSearch = ref('')
-const billPaymentPagination = ref({
-  currentPage: 1,
-  totalPages: 1,
+const isBillPaymentFirstLoad = ref(true)
+const showBillPaymentFilters = ref(false)
+const currentPageBillPaymentIds = ref([])
+
+// Selection
+const selectedBillPaymentIds = ref([])
+const selectAllBillPaymentsField = ref(false)
+
+// Filters
+const bpFilters = reactive({
+  supplier_id: '',
+  payment_method_id: '',
+  search: '',
 })
 
-function switchTab(tab) {
-  activeTab.value = tab
-  if (tab === 'bill_payments' && billPayments.value.length === 0 && !isFetchingBillPayments.value) {
-    loadBillPayments(1)
+const billPaymentColumns = computed(() => {
+  return [
+    {
+      key: 'status',
+      sortable: false,
+      thClass: 'extra w-10',
+      tdClass: 'text-left text-sm font-medium extra',
+    },
+    {
+      key: 'payment_date',
+      label: bp('date'),
+      thClass: 'extra',
+      tdClass: 'font-medium text-gray-900',
+    },
+    { key: 'payment_number', label: bp('payment_number') },
+    { key: 'bill_number', label: bp('bill_number'), sortable: false },
+    { key: 'supplier', label: bp('supplier'), sortable: false },
+    { key: 'payment_mode', label: bp('payment_method'), sortable: false },
+    { key: 'amount', label: bp('amount') },
+    {
+      key: 'actions',
+      label: '',
+      tdClass: 'text-right text-sm font-medium',
+      sortable: false,
+    },
+  ]
+})
+
+const showBillPaymentEmptyScreen = computed(() => {
+  return billPaymentTotalCount.value === 0 && !isBillPaymentFirstLoad.value
+})
+
+async function fetchBillPaymentData({ page, filter, sort }) {
+  const params = {
+    page,
+    limit: 10,
+    orderByField: sort.fieldName || 'payment_date',
+    orderBy: sort.order || 'desc',
+    supplier_id: bpFilters.supplier_id || '',
+    payment_method_id: bpFilters.payment_method_id || '',
+    search: bpFilters.search || '',
+  }
+
+  const response = await window.axios.get('/bill-payments', { params })
+  const result = response.data
+
+  billPaymentTotalCount.value = result.meta?.bill_payment_total_count || 0
+  isBillPaymentFirstLoad.value = false
+
+  // Track current page IDs for select-all
+  currentPageBillPaymentIds.value = (result.data || []).map(p => p.id)
+
+  return {
+    data: result.data || [],
+    pagination: {
+      totalPages: result.meta?.last_page || 1,
+      currentPage: page,
+      totalCount: result.meta?.total || 0,
+      limit: 10,
+    },
   }
 }
 
-async function loadBillPayments(page = 1) {
-  isFetchingBillPayments.value = true
-  try {
-    const params = {
-      page,
-      limit: 10,
-      orderByField: 'payment_date',
-      orderBy: 'desc',
-    }
-    if (billPaymentSearch.value) {
-      params.search = billPaymentSearch.value
-    }
-    const response = await window.axios.get('/bill-payments', { params })
-    const result = response.data
-    billPayments.value = result.data || []
-    billPaymentTotalCount.value = result.meta?.bill_payment_total_count || 0
-    billPaymentPagination.value = {
-      currentPage: result.meta?.current_page || page,
-      totalPages: result.meta?.last_page || 1,
-    }
-  } catch (error) {
-    console.error('Failed to load bill payments:', error)
-    billPayments.value = []
-  } finally {
-    isFetchingBillPayments.value = false
+function toggleSelectAllBillPayments() {
+  if (selectAllBillPaymentsField.value) {
+    selectedBillPaymentIds.value = [...currentPageBillPaymentIds.value]
+  } else {
+    selectedBillPaymentIds.value = []
   }
 }
+
+function refreshBillPaymentTable() {
+  selectedBillPaymentIds.value = []
+  selectAllBillPaymentsField.value = false
+  billPaymentTableRef.value && billPaymentTableRef.value.refresh()
+}
+
+function removeMultipleBillPayments() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: bp('confirm_delete_multiple'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        try {
+          await window.axios.post('/bill-payments/delete', {
+            ids: selectedBillPaymentIds.value,
+          })
+          notificationStore.showNotification({
+            type: 'success',
+            message: bp('deleted_multiple_message'),
+          })
+          refreshBillPaymentTable()
+        } catch (err) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: err.response?.data?.message || bp('delete_failed'),
+          })
+        }
+      }
+    })
+}
+
+async function searchPaymentMethod(search) {
+  let res = await paymentStore.fetchPaymentModes({ search })
+  return res.data.data
+}
+
+function clearBillPaymentFilter() {
+  bpFilters.supplier_id = ''
+  bpFilters.payment_method_id = ''
+  bpFilters.search = ''
+}
+
+function toggleBillPaymentFilter() {
+  if (showBillPaymentFilters.value) {
+    clearBillPaymentFilter()
+  }
+  showBillPaymentFilters.value = !showBillPaymentFilters.value
+}
+
+debouncedWatch(
+  bpFilters,
+  () => {
+    refreshBillPaymentTable()
+  },
+  { debounce: 500 }
+)
 
 function formatBillPaymentAmount(payment) {
   const amount = payment.amount || 0
@@ -653,20 +801,7 @@ function formatBillPaymentAmount(payment) {
   return sign + formatted + (currencySymbol ? ' ' + currencySymbol : '')
 }
 
-// Debounced search for bill payments
-debouncedWatch(
-  billPaymentSearch,
-  () => {
-    if (activeTab.value === 'bill_payments') {
-      loadBillPayments(1)
-    }
-  },
-  { debounce: 500 }
-)
-
-// If tab=bill_payments in query, load immediately
-if (activeTab.value === 'bill_payments') {
-  loadBillPayments(1)
+function switchTab(tab) {
+  activeTab.value = tab
 }
 </script>
-<!-- CLAUDE-CHECKPOINT -->

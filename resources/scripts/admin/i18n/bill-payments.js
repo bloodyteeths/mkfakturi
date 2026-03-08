@@ -22,6 +22,13 @@ export const billPaymentsTranslations = {
       search_placeholder: 'Пребарај по број на плаќање или сметка...',
       filter: 'Филтер',
       loading: 'Вчитување...',
+      view_bill: 'Прегледај сметка',
+      confirm_delete: 'Дали сте сигурни дека сакате да го избришете ова плаќање?',
+      confirm_delete_multiple: 'Дали сте сигурни дека сакате да ги избришете избраните плаќања?',
+      deleted_message: 'Плаќањето е успешно избришано',
+      deleted_multiple_message: 'Плаќањата се успешно избришани',
+      delete_failed: 'Грешка при бришење на плаќањето',
+      actions: 'Акции',
     },
   },
   en: {
@@ -42,6 +49,13 @@ export const billPaymentsTranslations = {
       search_placeholder: 'Search by payment or bill number...',
       filter: 'Filter',
       loading: 'Loading...',
+      view_bill: 'View Bill',
+      confirm_delete: 'Are you sure you want to delete this payment?',
+      confirm_delete_multiple: 'Are you sure you want to delete the selected payments?',
+      deleted_message: 'Payment deleted successfully',
+      deleted_multiple_message: 'Payments deleted successfully',
+      delete_failed: 'Failed to delete payment',
+      actions: 'Actions',
     },
   },
   tr: {
@@ -62,6 +76,13 @@ export const billPaymentsTranslations = {
       search_placeholder: 'Odeme veya fatura numarasina gore ara...',
       filter: 'Filtre',
       loading: 'Yukleniyor...',
+      view_bill: 'Faturayi Goruntule',
+      confirm_delete: 'Bu odemeyi silmek istediginizden emin misiniz?',
+      confirm_delete_multiple: 'Secili odemeleri silmek istediginizden emin misiniz?',
+      deleted_message: 'Odeme basariyla silindi',
+      deleted_multiple_message: 'Odemeler basariyla silindi',
+      delete_failed: 'Odeme silinemedi',
+      actions: 'Islemler',
     },
   },
   sq: {
@@ -82,9 +103,15 @@ export const billPaymentsTranslations = {
       search_placeholder: 'Kerko sipas numrit te pageses ose fatures...',
       filter: 'Filtro',
       loading: 'Duke ngarkuar...',
+      view_bill: 'Shiko Faturen',
+      confirm_delete: 'A jeni te sigurt qe doni ta fshini kete pagese?',
+      confirm_delete_multiple: 'A jeni te sigurt qe doni ti fshini pagesat e zgjedhura?',
+      deleted_message: 'Pagesa u fshi me sukses',
+      deleted_multiple_message: 'Pagesat u fshin me sukses',
+      delete_failed: 'Deshtoi fshirja e pageses',
+      actions: 'Veprime',
     },
   },
 }
 
 export default billPaymentsTranslations
-// CLAUDE-CHECKPOINT

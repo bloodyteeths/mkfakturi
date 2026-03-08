@@ -172,6 +172,12 @@ class BillPayment extends Model
             $query->whereSearch($search);
         })->when($filters['bill_id'] ?? null, function ($query, $billId) {
             $query->whereBill($billId);
+        })->when($filters['supplier_id'] ?? null, function ($query, $supplierId) {
+            $query->whereHas('bill', function ($q) use ($supplierId) {
+                $q->where('supplier_id', $supplierId);
+            });
+        })->when($filters['payment_method_id'] ?? null, function ($query, $methodId) {
+            $query->where('payment_method_id', $methodId);
         })->when(($filters['from_date'] ?? null) && ($filters['to_date'] ?? null), function ($query) use ($filters) {
             $start = Carbon::parse($filters['from_date']);
             $end = Carbon::parse($filters['to_date']);
