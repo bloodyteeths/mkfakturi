@@ -150,12 +150,12 @@ class PartnerUjpFormController extends Controller
     }
 
     /**
-     * Generate and download PDF for a client company.
+     * Generate and return raw PDF binary for a client company.
      *
-     * Uses step-by-step generation: render blade → HTML string → DomPDF → output.
-     * Each step is logged independently for diagnostics.
+     * Returns raw application/pdf binary (NOT base64 JSON) to avoid
+     * Railway proxy truncation of large (~198KB) JSON responses.
      */
-    public function generatePdf(Request $request, $company, string $formCode): JsonResponse
+    public function generatePdf(Request $request, $company, string $formCode): Response|JsonResponse
     {
         $company = (int) $company;
         $partner = $this->getPartnerFromRequest($request);
@@ -180,14 +180,11 @@ class PartnerUjpFormController extends Controller
 
         $year = $validated['year'];
         $companyModel = Company::findOrFail($company);
-        $debug = ['form' => $formCode, 'company_id' => $company, 'year' => $year];
 
-        // Capture any stray output (DomPDF warnings, PHP notices) that would
-        // corrupt the JSON response body and make it unparseable by axios
+        // Capture stray output (DomPDF warnings) that would corrupt the response
         ob_start();
 
         try {
-            // Step 1: Collect form data
             $data = $service->collect(
                 $companyModel,
                 $year,
@@ -195,99 +192,52 @@ class PartnerUjpFormController extends Controller
                 $validated['quarter'] ?? null,
                 $validated['overrides'] ?? []
             );
-            $debug['step1_collect'] = 'ok';
-            $debug['data_keys'] = array_keys($data);
 
-            // Step 2: Build view data
             $viewName = 'app.pdf.reports.ujp.' . $formCode;
             $viewData = $this->buildPdfViewData($service, $companyModel, $data, $formCode, $year);
-            $debug['step2_viewdata'] = 'ok';
-            $debug['view_name'] = $viewName;
-            $debug['view_exists'] = view()->exists($viewName);
-
-            // Step 3: Render blade template to HTML string
             $html = view($viewName, $viewData)->render();
-            $debug['step3_html_length'] = strlen($html);
 
             if (empty($html)) {
                 throw new \RuntimeException('Blade template rendered to empty HTML');
             }
 
-            // Step 4: Generate PDF from HTML string (bypasses loadView entirely)
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
             $pdf->setPaper('A4', 'portrait');
             $content = $pdf->output();
-            $debug['step4_pdf_length'] = strlen($content ?: '');
 
             if (empty($content)) {
-                // Fallback: try via loadView + output directly
-                $pdf2 = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, $viewData);
-                $pdf2->setPaper('A4', 'portrait');
-                $content = $pdf2->output();
-                $debug['step4_fallback_pdf_length'] = strlen($content ?: '');
+                throw new \RuntimeException('DomPDF produced empty output');
             }
 
-            if (empty($content)) {
-                throw new \RuntimeException(
-                    "DomPDF produced empty output (html_length={$debug['step3_html_length']})"
-                );
+            if (substr($content, 0, 5) !== '%PDF-') {
+                throw new \RuntimeException('Generated content is not valid PDF');
             }
 
-            // Step 5: Validate PDF magic bytes
-            $magic = substr($content, 0, 5);
-            $debug['step5_magic'] = $magic;
-
-            if ($magic !== '%PDF-') {
-                throw new \RuntimeException('Generated content is not valid PDF (magic: ' . bin2hex($magic) . ')');
-            }
+            // Discard stray output
+            ob_get_clean();
 
             $filename = $formCode . '_' . $year . '.pdf';
 
-            // Capture and discard any stray output that leaked during rendering
-            $strayOutput = ob_get_clean();
-            if ($strayOutput) {
-                $debug['stray_output'] = substr($strayOutput, 0, 500);
-                $debug['stray_output_length'] = strlen($strayOutput);
-                \Illuminate\Support\Facades\Log::warning('UJP PDF: stray output captured', [
-                    'form' => $formCode,
-                    'output_length' => strlen($strayOutput),
-                    'output_preview' => substr($strayOutput, 0, 1000),
-                ]);
-            }
-
-            return response()->json([
-                '_v' => '2026-03-08c',
-                'pdf' => base64_encode($content),
-                'filename' => $filename,
-                'size' => strlen($content),
-                'debug' => $debug,
+            return response($content, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Length' => strlen($content),
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
             ]);
         } catch (\Throwable $e) {
-            // Clean up output buffer
             if (ob_get_level()) {
-                $strayOutput = ob_get_clean();
-                if ($strayOutput) {
-                    $debug['stray_output'] = substr($strayOutput, 0, 500);
-                    $debug['stray_output_length'] = strlen($strayOutput);
-                }
+                ob_get_clean();
             }
-
-            $debug['error'] = $e->getMessage();
-            $debug['error_location'] = basename($e->getFile()) . ':' . $e->getLine();
 
             \Illuminate\Support\Facades\Log::error('UJP PDF generation failed', [
                 'form' => $formCode,
                 'company' => $company,
-                'debug' => $debug,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                '_v' => '2026-03-08c',
                 'error' => 'Failed to generate PDF',
                 'message' => $e->getMessage(),
-                'debug' => $debug,
             ], 500);
         }
     }
