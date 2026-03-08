@@ -160,6 +160,8 @@ class UjpFormController extends Controller
         Gate::authorize('view', $company);
 
         try {
+            $prevReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
+
             $data = $service->collect(
                 $company,
                 $validated['year'],
@@ -168,8 +170,25 @@ class UjpFormController extends Controller
                 $validated['overrides'] ?? []
             );
 
-            return $service->toPdf($company, $data, $validated['year']);
+            $pdfResponse = $service->toPdf($company, $data, $validated['year']);
+            $pdfContent = $pdfResponse->getContent();
+
+            error_reporting($prevReporting);
+
+            if (ob_get_length() > 0) {
+                ob_clean();
+            }
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Length' => strlen($pdfContent),
+                'Content-Disposition' => 'inline; filename="' . $formCode . '_' . $validated['year'] . '.pdf"',
+            ]);
         } catch (\Exception $e) {
+            if (isset($prevReporting)) {
+                error_reporting($prevReporting);
+            }
+
             return response()->json([
                 'error' => 'Failed to generate PDF',
                 'message' => $e->getMessage(),

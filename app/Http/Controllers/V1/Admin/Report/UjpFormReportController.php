@@ -25,16 +25,25 @@ class UjpFormReportController extends Controller
         $year = (int) $request->query('year', date('Y'));
         $month = $request->query('month') ? (int) $request->query('month') : null;
 
+        $prevReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
+
         $data = $service->collect($company, $year, $month);
+        $pdfResponse = $service->toPdf($company, $data, $year);
+        $pdfContent = $pdfResponse->getContent();
 
-        if ($request->has('download')) {
-            $pdf = $service->toPdf($company, $data, $year);
-            $pdf->headers->set('Content-Disposition', 'attachment; filename="' . $formCode . '_' . $year . '.pdf"');
+        error_reporting($prevReporting);
 
-            return $pdf;
+        if (ob_get_length() > 0) {
+            ob_clean();
         }
 
-        return $service->toPdf($company, $data, $year);
+        $disposition = $request->has('download') ? 'attachment' : 'inline';
+
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Length' => strlen($pdfContent),
+            'Content-Disposition' => $disposition . '; filename="' . $formCode . '_' . $year . '.pdf"',
+        ]);
     }
 }
 
