@@ -37,6 +37,10 @@ class PartnerBiDashboardController extends Controller
             return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
         }
 
+        if (! $this->service->isInitialized($company)) {
+            return response()->json(['success' => true, 'data' => null, 'message' => 'accounting_not_initialized']);
+        }
+
         $date = $request->query('date', Carbon::now()->endOfMonth()->toDateString());
 
         try {
@@ -59,6 +63,14 @@ class PartnerBiDashboardController extends Controller
         $partner = $this->getPartnerFromRequest($request);
         if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
             return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        if (! $this->service->isInitialized($company)) {
+            return response()->json([
+                'success' => true,
+                'data' => ['ratio_type' => $request->query('ratio_type', 'current_ratio'), 'months' => 12, 'trends' => []],
+                'message' => 'accounting_not_initialized',
+            ]);
         }
 
         $ratioType = $request->query('ratio_type', 'current_ratio');
@@ -94,18 +106,25 @@ class PartnerBiDashboardController extends Controller
             return response()->json(['success' => false, 'message' => 'Access denied'], 403);
         }
 
+        if (! $this->service->isInitialized($company)) {
+            return response()->json(['success' => true, 'data' => null, 'message' => 'accounting_not_initialized']);
+        }
+
         $date = $request->query('date', Carbon::now()->endOfMonth()->toDateString());
 
         try {
-            $ratios = $this->service->computeAllRatios($company, $date);
-            $healthIndicators = $this->buildHealthIndicators($ratios);
+            $allData = $this->service->computeAllRatios($company, $date);
+            $raw = $allData['raw'] ?? [];
+            unset($allData['raw']);
+            $healthIndicators = $this->buildHealthIndicators($allData);
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'date' => $date,
-                    'ratios' => $ratios,
+                    'ratios' => $allData,
                     'health' => $healthIndicators,
+                    'raw' => $raw,
                 ],
             ]);
         } catch (\Exception $e) {

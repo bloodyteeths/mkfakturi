@@ -28,6 +28,14 @@ class BiDashboardController extends Controller
             return response()->json(['error' => 'Company header required'], 400);
         }
 
+        if (! $this->service->isInitialized($companyId)) {
+            return response()->json([
+                'success' => true,
+                'data' => null,
+                'message' => 'accounting_not_initialized',
+            ]);
+        }
+
         $date = $request->query('date', Carbon::now()->endOfMonth()->toDateString());
 
         try {
@@ -51,6 +59,14 @@ class BiDashboardController extends Controller
 
         if (! $companyId) {
             return response()->json(['error' => 'Company header required'], 400);
+        }
+
+        if (! $this->service->isInitialized($companyId)) {
+            return response()->json([
+                'success' => true,
+                'data' => ['ratio_type' => $request->query('ratio_type', 'current_ratio'), 'months' => 12, 'trends' => []],
+                'message' => 'accounting_not_initialized',
+            ]);
         }
 
         $ratioType = $request->query('ratio_type', 'current_ratio');
@@ -87,20 +103,30 @@ class BiDashboardController extends Controller
             return response()->json(['error' => 'Company header required'], 400);
         }
 
+        if (! $this->service->isInitialized($companyId)) {
+            return response()->json([
+                'success' => true,
+                'data' => null,
+                'message' => 'accounting_not_initialized',
+            ]);
+        }
+
         $date = $request->query('date', Carbon::now()->endOfMonth()->toDateString());
 
         try {
-            $ratios = $this->service->computeAllRatios($companyId, $date);
+            $allData = $this->service->computeAllRatios($companyId, $date);
+            $raw = $allData['raw'] ?? [];
+            unset($allData['raw']);
 
-            // Build health indicators
-            $healthIndicators = $this->buildHealthIndicators($ratios);
+            $healthIndicators = $this->buildHealthIndicators($allData);
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'date' => $date,
-                    'ratios' => $ratios,
+                    'ratios' => $allData,
                     'health' => $healthIndicators,
+                    'raw' => $raw,
                 ],
             ]);
         } catch (\Exception $e) {
@@ -119,19 +145,30 @@ class BiDashboardController extends Controller
             return response()->json(['error' => 'Company header required'], 400);
         }
 
+        if (! $this->service->isInitialized($companyId)) {
+            return response()->json([
+                'success' => true,
+                'data' => null,
+                'message' => 'accounting_not_initialized',
+            ]);
+        }
+
         $date = $request->query('date', Carbon::now()->endOfMonth()->toDateString());
 
         try {
             $this->service->cacheRatios($companyId, $date);
-            $ratios = $this->service->computeAllRatios($companyId, $date);
-            $healthIndicators = $this->buildHealthIndicators($ratios);
+            $allData = $this->service->computeAllRatios($companyId, $date);
+            $raw = $allData['raw'] ?? [];
+            unset($allData['raw']);
+            $healthIndicators = $this->buildHealthIndicators($allData);
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'date' => $date,
-                    'ratios' => $ratios,
+                    'ratios' => $allData,
                     'health' => $healthIndicators,
+                    'raw' => $raw,
                 ],
                 'message' => 'Ratios refreshed successfully.',
             ]);

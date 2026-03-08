@@ -1366,24 +1366,12 @@ export default [
         component: () => import('@/scripts/admin/views/travel-orders/View.vue'),
       },
 
-      // F9: BI Dashboards
+      // F9: BI Dashboard (single page)
       {
         path: 'bi-dashboard',
         name: 'bi-dashboard.index',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
         component: () => import('@/scripts/admin/views/bi-dashboard/Index.vue'),
-      },
-      {
-        path: 'bi-dashboard/ratios',
-        name: 'bi-dashboard.ratios',
-        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
-        component: () => import('@/scripts/admin/views/bi-dashboard/Ratios.vue'),
-      },
-      {
-        path: 'bi-dashboard/trends',
-        name: 'bi-dashboard.trends',
-        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
-        component: () => import('@/scripts/admin/views/bi-dashboard/Trends.vue'),
       },
 
       // F11: Custom Reports

@@ -2,6 +2,7 @@
 
 namespace Modules\Mk\Services;
 
+use App\Models\Company;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -9,6 +10,29 @@ use Modules\Mk\Models\FinancialRatioCache;
 
 class FinancialRatioService
 {
+    /** @var array<int, int|null> Cache of company_id => entity_id lookups */
+    private array $entityIdCache = [];
+
+    /**
+     * Get the IFRS entity_id for a company. Cached per request.
+     */
+    private function getEntityId(int $companyId): ?int
+    {
+        if (!array_key_exists($companyId, $this->entityIdCache)) {
+            $this->entityIdCache[$companyId] = Company::where('id', $companyId)->value('ifrs_entity_id');
+        }
+
+        return $this->entityIdCache[$companyId];
+    }
+
+    /**
+     * Check if a company has IFRS accounting initialized.
+     */
+    public function isInitialized(int $companyId): bool
+    {
+        return $this->getEntityId($companyId) !== null;
+    }
+
     /**
      * Compute all ratios for a given date.
      *
@@ -21,6 +45,7 @@ class FinancialRatioService
         $solvency = $this->getSolvencyRatios($companyId, $date);
         $activity = $this->getActivityRatios($companyId, $date);
         $altmanZ = $this->getAltmanZScore($companyId, $date);
+        $rawAmounts = $this->getRawAmounts($companyId, $date);
 
         return [
             'date' => $date,
@@ -29,6 +54,21 @@ class FinancialRatioService
             'solvency' => $solvency,
             'activity' => $activity,
             'altman_z' => $altmanZ,
+            'raw' => $rawAmounts,
+        ];
+    }
+
+    /**
+     * Get raw monetary amounts for dashboard cards.
+     */
+    public function getRawAmounts(int $companyId, string $date): array
+    {
+        $revenue = $this->sumByAccountTypes($companyId, $date, ['OPERATING_REVENUE'], true);
+        $cash = $this->sumByAccountTypes($companyId, $date, ['BANK']);
+
+        return [
+            'revenue' => round($revenue, 2),
+            'cash' => round($cash, 2),
         ];
     }
 
@@ -419,12 +459,18 @@ class FinancialRatioService
      */
     protected function sumByAccountTypes(int $companyId, string $date, array $accountTypes, bool $creditPositive = false): float
     {
+        $entityId = $this->getEntityId($companyId);
+
+        if ($entityId === null) {
+            return 0;
+        }
+
         $query = DB::table('ifrs_ledgers as l')
             ->join('ifrs_accounts as a', function ($join) {
                 $join->on('l.post_account', '=', 'a.id')
                     ->on('l.entity_id', '=', 'a.entity_id');
             })
-            ->where('a.entity_id', $companyId)
+            ->where('a.entity_id', $entityId)
             ->whereIn('a.account_type', $accountTypes)
             ->where('l.posting_date', '<=', $date)
             ->whereNull('l.deleted_at')
