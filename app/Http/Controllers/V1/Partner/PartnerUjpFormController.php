@@ -182,6 +182,10 @@ class PartnerUjpFormController extends Controller
         $companyModel = Company::findOrFail($company);
         $debug = ['form' => $formCode, 'company_id' => $company, 'year' => $year];
 
+        // Capture any stray output (DomPDF warnings, PHP notices) that would
+        // corrupt the JSON response body and make it unparseable by axios
+        ob_start();
+
         try {
             // Step 1: Collect form data
             $data = $service->collect(
@@ -204,7 +208,6 @@ class PartnerUjpFormController extends Controller
             // Step 3: Render blade template to HTML string
             $html = view($viewName, $viewData)->render();
             $debug['step3_html_length'] = strlen($html);
-            $debug['step3_html_preview'] = substr(strip_tags($html), 0, 300);
 
             if (empty($html)) {
                 throw new \RuntimeException('Blade template rendered to empty HTML');
@@ -218,7 +221,6 @@ class PartnerUjpFormController extends Controller
 
             if (empty($content)) {
                 // Fallback: try via loadView + output directly
-                \Illuminate\Support\Facades\Log::warning('UJP PDF: loadHTML produced empty, trying loadView', $debug);
                 $pdf2 = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, $viewData);
                 $pdf2->setPaper('A4', 'portrait');
                 $content = $pdf2->output();
@@ -241,21 +243,35 @@ class PartnerUjpFormController extends Controller
 
             $filename = $formCode . '_' . $year . '.pdf';
 
-            \Illuminate\Support\Facades\Log::info('UJP PDF generated successfully', [
-                'form' => $formCode,
-                'company' => $company,
-                'html_length' => $debug['step3_html_length'],
-                'pdf_length' => strlen($content),
-            ]);
+            // Capture and discard any stray output that leaked during rendering
+            $strayOutput = ob_get_clean();
+            if ($strayOutput) {
+                $debug['stray_output'] = substr($strayOutput, 0, 500);
+                $debug['stray_output_length'] = strlen($strayOutput);
+                \Illuminate\Support\Facades\Log::warning('UJP PDF: stray output captured', [
+                    'form' => $formCode,
+                    'output_length' => strlen($strayOutput),
+                    'output_preview' => substr($strayOutput, 0, 1000),
+                ]);
+            }
 
             return response()->json([
-                '_v' => '2026-03-08b',
+                '_v' => '2026-03-08c',
                 'pdf' => base64_encode($content),
                 'filename' => $filename,
                 'size' => strlen($content),
                 'debug' => $debug,
             ]);
         } catch (\Throwable $e) {
+            // Clean up output buffer
+            if (ob_get_level()) {
+                $strayOutput = ob_get_clean();
+                if ($strayOutput) {
+                    $debug['stray_output'] = substr($strayOutput, 0, 500);
+                    $debug['stray_output_length'] = strlen($strayOutput);
+                }
+            }
+
             $debug['error'] = $e->getMessage();
             $debug['error_location'] = basename($e->getFile()) . ':' . $e->getLine();
 
@@ -268,7 +284,7 @@ class PartnerUjpFormController extends Controller
             ]);
 
             return response()->json([
-                '_v' => '2026-03-08b',
+                '_v' => '2026-03-08c',
                 'error' => 'Failed to generate PDF',
                 'message' => $e->getMessage(),
                 'debug' => $debug,
