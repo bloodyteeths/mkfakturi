@@ -1007,7 +1007,7 @@ class IfrsAdapter
      *
      * @param  int|null  $companyId  Optional company ID to check company-specific setting
      */
-    protected function isEnabled(?int $companyId = null): bool
+    public function isEnabled(?int $companyId = null): bool
     {
         // First check global feature flag
         $globalEnabled = config('ifrs.enabled', false) ||
