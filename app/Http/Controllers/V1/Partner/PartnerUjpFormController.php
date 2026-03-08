@@ -150,10 +150,9 @@ class PartnerUjpFormController extends Controller
     }
 
     /**
-     * Generate and return raw PDF binary for a client company.
+     * Generate and stream PDF for a client company.
      *
-     * Returns raw application/pdf binary (NOT base64 JSON) to avoid
-     * Railway proxy truncation of large (~198KB) JSON responses.
+     * Uses $service->toPdf() — same approach as the admin UjpFormController.
      */
     public function generatePdf(Request $request, $company, string $formCode): Response|JsonResponse
     {
@@ -178,63 +177,19 @@ class PartnerUjpFormController extends Controller
             'overrides' => 'nullable|array',
         ]);
 
-        $year = $validated['year'];
         $companyModel = Company::findOrFail($company);
-
-        // Capture stray output (DomPDF warnings) that would corrupt the response
-        ob_start();
 
         try {
             $data = $service->collect(
                 $companyModel,
-                $year,
+                $validated['year'],
                 $validated['month'] ?? null,
                 $validated['quarter'] ?? null,
                 $validated['overrides'] ?? []
             );
 
-            $viewName = 'app.pdf.reports.ujp.' . $formCode;
-            $viewData = $this->buildPdfViewData($service, $companyModel, $data, $formCode, $year);
-            $html = view($viewName, $viewData)->render();
-
-            if (empty($html)) {
-                throw new \RuntimeException('Blade template rendered to empty HTML');
-            }
-
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
-            $pdf->setPaper('A4', 'portrait');
-            $content = $pdf->output();
-
-            if (empty($content)) {
-                throw new \RuntimeException('DomPDF produced empty output');
-            }
-
-            if (substr($content, 0, 5) !== '%PDF-') {
-                throw new \RuntimeException('Generated content is not valid PDF');
-            }
-
-            // Discard stray output
-            ob_get_clean();
-
-            $filename = $formCode . '_' . $year . '.pdf';
-
-            return response($content, 200, [
-                'Content-Type' => 'application/pdf',
-                'Content-Length' => strlen($content),
-                'Content-Disposition' => 'inline; filename="' . $filename . '"',
-                'Cache-Control' => 'no-cache, no-store, must-revalidate',
-            ]);
-        } catch (\Throwable $e) {
-            if (ob_get_level()) {
-                ob_get_clean();
-            }
-
-            \Illuminate\Support\Facades\Log::error('UJP PDF generation failed', [
-                'form' => $formCode,
-                'company' => $company,
-                'error' => $e->getMessage(),
-            ]);
-
+            return $service->toPdf($companyModel, $data, $validated['year']);
+        } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to generate PDF',
                 'message' => $e->getMessage(),
@@ -353,48 +308,6 @@ class PartnerUjpFormController extends Controller
             ->exists();
     }
 
-    /**
-     * Build view data array for a given form code (used by generatePdf).
-     */
-    protected function buildPdfViewData(TaxFormService $service, Company $company, array $data, string $formCode, int $year): array
-    {
-        $config = config('ujp_forms.' . str_replace('-', '_', $formCode)) ?? [];
-
-        $viewData = [
-            'company' => $company,
-            'year' => $year,
-            'formCode' => $service->formCode(),
-            'formTitle' => $service->formTitle(),
-            'formSubtitle' => '',
-            'sluzhbenVesnik' => $config['sluzhben_vesnik'] ?? '',
-            'periodStart' => sprintf('01.01.%d', $year),
-            'periodEnd' => sprintf('31.12.%d', $year),
-        ];
-
-        if ($formCode === 'obrazec-36') {
-            $viewData['aktiva'] = $data['aktiva'] ?? [];
-            $viewData['pasiva'] = $data['pasiva'] ?? [];
-            $viewData['totalAktiva'] = $data['total_aktiva'] ?? 0;
-            $viewData['totalPasiva'] = $data['total_pasiva'] ?? 0;
-            $viewData['isBalanced'] = $data['is_balanced'] ?? false;
-        } elseif ($formCode === 'obrazec-37') {
-            $viewData['prihodi'] = $data['prihodi'] ?? [];
-            $viewData['rashodi'] = $data['rashodi'] ?? [];
-            $viewData['rezultat'] = $data['rezultat'] ?? [];
-        } elseif ($formCode === 'db') {
-            $viewData['aop'] = $data['aop'] ?? [];
-            $viewData['config'] = $config;
-        } elseif ($formCode === 'ddv-04') {
-            $viewData['data'] = $data;
-            $viewData['fields'] = $data['fields'] ?? [];
-            $viewData['overrides'] = $data['overrides'] ?? [];
-            $viewData['periodStart'] = $data['period_start'] ?? '';
-            $viewData['periodEnd'] = $data['period_end'] ?? '';
-            $viewData['currency'] = $company->currency ?? null;
-        }
-
-        return $viewData;
-    }
 }
 
 // CLAUDE-CHECKPOINT
