@@ -3,9 +3,12 @@
 /**
  * UJP AOP Code Mapping for Macedonian Financial Reports
  *
- * Maps IFRS account types to official AOP (Аналитичка Ознака на Позиција) codes
- * used in Образец 36 (Balance Sheet), Образец 37 (Income Statement),
- * and Образец 38 (Cash Flow Statement).
+ * @deprecated The obrazec_36 and obrazec_37 sections are DEPRECATED.
+ *             Use config/ujp_forms/obrazec_36.php and config/ujp_forms/obrazec_37.php instead.
+ *             Those configs have the full 112+44 AOP codes with account_code_to_aop mappings.
+ *             AopReportService now reads from ujp_forms configs as of 2026-03-08.
+ *
+ * Only obrazec_38 (Cash Flow) remains active in this file.
  *
  * Each row: aop code, Macedonian label, IFRS types that contribute, hierarchy.
  * Subtotal rows have 'sum_of' pointing to child AOP codes.

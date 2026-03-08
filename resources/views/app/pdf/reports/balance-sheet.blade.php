@@ -141,6 +141,10 @@
             padding-left: 30px !important;
         }
 
+        .indent-3 {
+            padding-left: 45px !important;
+        }
+
         .balance-check {
             margin-top: 12px;
             padding: 8px 12px;
@@ -188,7 +192,7 @@
                 @foreach($aopData['aktiva'] as $row)
                 <tr class="aop-row {{ $row['is_total'] ? 'total-row' : '' }}">
                     <td class="aop-code">{{ $row['aop'] }}</td>
-                    <td class="aop-label {{ $row['indent'] == 1 ? 'indent-1' : ($row['indent'] == 2 ? 'indent-2' : '') }}">
+                    <td class="aop-label {{ $row['indent'] >= 3 ? 'indent-3' : ($row['indent'] == 2 ? 'indent-2' : ($row['indent'] == 1 ? 'indent-1' : '')) }}">
                         {{ $row['label'] }}
                     </td>
                     <td class="aop-amount">
@@ -217,7 +221,7 @@
                 @foreach($aopData['pasiva'] as $row)
                 <tr class="aop-row {{ $row['is_total'] ? 'total-row' : '' }}">
                     <td class="aop-code">{{ $row['aop'] }}</td>
-                    <td class="aop-label {{ $row['indent'] == 1 ? 'indent-1' : ($row['indent'] == 2 ? 'indent-2' : '') }}">
+                    <td class="aop-label {{ $row['indent'] >= 3 ? 'indent-3' : ($row['indent'] == 2 ? 'indent-2' : ($row['indent'] == 1 ? 'indent-1' : '')) }}">
                         {{ $row['label'] }}
                     </td>
                     <td class="aop-amount">

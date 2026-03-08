@@ -133,6 +133,10 @@
             padding-left: 15px !important;
         }
 
+        .indent-2 {
+            padding-left: 30px !important;
+        }
+
         .result-table {
             width: 100%;
             margin-top: 20px;
@@ -202,7 +206,7 @@
                 @foreach($aopData['prihodi'] as $row)
                 <tr class="aop-row {{ $row['is_total'] ? 'total-row' : '' }}">
                     <td class="aop-code">{{ $row['aop'] }}</td>
-                    <td class="aop-label {{ ($row['indent'] ?? 0) == 1 ? 'indent-1' : '' }}">
+                    <td class="aop-label {{ ($row['indent'] ?? 0) >= 2 ? 'indent-2' : (($row['indent'] ?? 0) == 1 ? 'indent-1' : '') }}">
                         {{ $row['label'] }}
                     </td>
                     <td class="aop-amount">
@@ -231,7 +235,7 @@
                 @foreach($aopData['rashodi'] as $row)
                 <tr class="aop-row {{ $row['is_total'] ? 'total-row' : '' }}">
                     <td class="aop-code">{{ $row['aop'] }}</td>
-                    <td class="aop-label {{ ($row['indent'] ?? 0) == 1 ? 'indent-1' : '' }}">
+                    <td class="aop-label {{ ($row['indent'] ?? 0) >= 2 ? 'indent-2' : (($row['indent'] ?? 0) == 1 ? 'indent-1' : '') }}">
                         {{ $row['label'] }}
                     </td>
                     <td class="aop-amount">
@@ -249,8 +253,8 @@
         <table class="result-table">
             @foreach($aopData['rezultat'] as $row)
             @php
-                $isNetResult = in_array($row['aop'], ['255', '256']);
-                $isLoss = in_array($row['aop'], ['245', '249', '256']);
+                $isNetResult = in_array($row['aop'], ['233', '234']);
+                $isLoss = in_array($row['aop'], ['226', '230', '234']);
                 $valueClass = $isLoss ? 'profit-negative' : 'profit-positive';
             @endphp
             <tr class="{{ $isNetResult ? 'result-highlight' : 'result-row' }}">
