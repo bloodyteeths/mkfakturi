@@ -1915,7 +1915,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/list', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'list']);
         Route::get('/{formCode}/preview', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'preview']);
         Route::post('/{formCode}/xml', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'generateXml']);
-        Route::post('/{formCode}/pdf', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'generatePdf']);
+        Route::match(['get', 'post'], '/{formCode}/pdf', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'generatePdf']);
         Route::post('/{formCode}/file', [\App\Http\Controllers\V1\Partner\PartnerUjpFormController::class, 'file']);
     });
 
