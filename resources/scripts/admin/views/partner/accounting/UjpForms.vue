@@ -274,7 +274,7 @@ function closePreview() {
   expandedForm.value = null
 }
 
-// PDF Generation
+// PDF Generation — uses base64 JSON response to avoid binary blob issues
 async function handleGeneratePdf(formCode) {
   if (!selectedCompanyId.value) return
 
@@ -285,35 +285,29 @@ async function handleGeneratePdf(formCode) {
     const params = buildParams(formCode)
     const response = await window.axios.post(
       `/partner/companies/${selectedCompanyId.value}/ujp-forms/${formCode}/pdf`,
-      params,
-      { responseType: 'blob' }
+      params
     )
 
-    const blob = response.data
+    const { pdf, filename, size } = response.data
 
-    // Debug: log blob details to diagnose PDF viewer issues
-    console.log('[UJP PDF]', formCode, 'blob:', blob.size, 'bytes, type:', blob.type)
-    const headerSlice = await blob.slice(0, 20).text()
-    console.log('[UJP PDF]', formCode, 'header:', JSON.stringify(headerSlice))
-
-    // Check empty response
-    if (!blob || blob.size === 0) {
-      throw new Error('Server returned empty PDF (0 bytes)')
+    if (!pdf) {
+      throw new Error('Server returned empty PDF response')
     }
 
-    // Check if the response is actually a PDF (not a JSON error wrapped in 200)
-    if (blob.type && !blob.type.includes('pdf')) {
-      const text = await blob.text()
-      let parsed = null
-      try { parsed = JSON.parse(text) } catch (_) {}
-      throw new Error(parsed?.message || parsed?.error || 'Server returned ' + blob.type + ' instead of PDF')
+    console.log('[UJP PDF]', formCode, 'received base64:', size, 'bytes, filename:', filename)
+
+    // Decode base64 to binary
+    const binaryStr = atob(pdf)
+    const bytes = new Uint8Array(binaryStr.length)
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i)
     }
+    const blob = new Blob([bytes], { type: 'application/pdf' })
 
     // Verify PDF magic bytes
-    if (!headerSlice.startsWith('%PDF')) {
-      console.error('[UJP PDF]', formCode, 'INVALID: content does not start with %PDF')
-      const preview = await blob.slice(0, 200).text()
-      console.error('[UJP PDF]', formCode, 'first 200 bytes:', preview)
+    const header = String.fromCharCode(...bytes.slice(0, 5))
+    if (!header.startsWith('%PDF')) {
+      console.error('[UJP PDF]', formCode, 'INVALID: content does not start with %PDF, got:', header)
       throw new Error('Server returned invalid PDF content')
     }
 
@@ -322,20 +316,7 @@ async function handleGeneratePdf(formCode) {
     pdfPreviewTitle.value = `${t(`forms.${formCode}.title`)} — ${t(`forms.${formCode}.name`)}`
     showPdfPreview.value = true
   } catch (error) {
-    let message = 'Error generating PDF'
-    if (error.response?.data instanceof Blob) {
-      try {
-        const text = await error.response.data.text()
-        const json = JSON.parse(text)
-        message = json.message || json.error || message
-      } catch (_) {
-        // Blob couldn't be parsed as JSON
-      }
-    } else if (error.response?.data?.message) {
-      message = error.response.data.message
-    } else if (error.message) {
-      message = error.message
-    }
+    const message = error.response?.data?.message || error.response?.data?.error || error.message || 'Error generating PDF'
     console.error('PDF generation error:', formCode, error)
     notificationStore.showNotification({ type: 'error', message })
   } finally {

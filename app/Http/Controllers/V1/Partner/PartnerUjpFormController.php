@@ -152,7 +152,7 @@ class PartnerUjpFormController extends Controller
     /**
      * Generate and download PDF for a client company.
      */
-    public function generatePdf(Request $request, $company, string $formCode): Response|JsonResponse
+    public function generatePdf(Request $request, $company, string $formCode): JsonResponse
     {
         $company = (int) $company;
         $partner = $this->getPartnerFromRequest($request);
@@ -187,14 +187,19 @@ class PartnerUjpFormController extends Controller
             );
 
             $pdfResponse = $service->toPdf($companyModel, $data, $validated['year']);
-
-            // Ensure Content-Length is set to prevent chunked transfer issues
             $content = $pdfResponse->getContent();
-            $pdfResponse->headers->set('Content-Length', (string) strlen($content));
-            $pdfResponse->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
+            $filename = $pdfResponse->headers->get('Content-Disposition', '');
+            preg_match('/filename="?([^"]+)"?/', $filename, $m);
+            $filename = $m[1] ?? ($formCode . '_' . $validated['year'] . '.pdf');
 
-            return $pdfResponse;
-        } catch (\Exception $e) {
+            // Return PDF as base64 JSON to avoid binary response issues
+            // through Railway's edge proxy
+            return response()->json([
+                'pdf' => base64_encode($content),
+                'filename' => $filename,
+                'size' => strlen($content),
+            ]);
+        } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('UJP PDF generation failed', [
                 'form' => $formCode,
                 'company' => $company,
