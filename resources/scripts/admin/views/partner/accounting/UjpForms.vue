@@ -300,23 +300,36 @@ async function handleGeneratePdf(formCode) {
       dataPreview: rawType === 'string' ? response.data.substring(0, 500) : null,
     })
 
-    // If response.data is a string (axios failed to parse JSON), try manual parse
+    // If response.data is a string (axios failed to auto-parse large JSON), extract PDF
     let data = response.data
+    let b64pdf = null
+
     if (typeof data === 'string') {
+      // Axios failed to auto-parse — likely large JSON string (~200KB).
+      // Try JSON.parse first, fallback to regex extraction of base64 PDF.
       try {
         data = JSON.parse(data)
-        console.log('[UJP PDF]', formCode, 'manually parsed JSON, keys:', Object.keys(data))
+        console.log('[UJP PDF]', formCode, 'manually parsed JSON ok')
       } catch (parseErr) {
-        console.error('[UJP PDF]', formCode, 'response is NOT JSON. First 500 chars:', data.substring(0, 500))
-        throw new Error('Server returned non-JSON response (Content-Type: ' + contentType + ', length: ' + data.length + ')')
+        console.warn('[UJP PDF]', formCode, 'JSON.parse failed:', parseErr.message, '— extracting PDF via regex')
+        // Extract base64 PDF directly from JSON string: "pdf":"<base64>"
+        const match = data.match(/"pdf":"([A-Za-z0-9+/=]+)"/)
+        if (match && match[1]) {
+          b64pdf = match[1]
+          console.log('[UJP PDF]', formCode, 'regex extracted PDF, length:', b64pdf.length)
+        } else {
+          console.error('[UJP PDF]', formCode, 'could not extract PDF from response')
+          throw new Error('Failed to parse server response (length: ' + data.length + ')')
+        }
       }
     }
 
-    const { pdf, filename, size, debug, _v } = data
-    console.log('[UJP PDF]', formCode, 'parsed:', { size, filename, pdfLength: pdf?.length, _v, debug })
+    const pdf = b64pdf || data?.pdf
+    const filename = data?.filename || formCode + '.pdf'
+    console.log('[UJP PDF]', formCode, 'pdf length:', pdf?.length, '_v:', data?._v, 'debug:', data?.debug)
 
     if (!pdf) {
-      throw new Error('Server returned empty PDF (size=' + size + ', debug=' + JSON.stringify(debug) + ')')
+      throw new Error('Server returned empty PDF (debug=' + JSON.stringify(data?.debug) + ')')
     }
 
     // Decode base64 to binary
