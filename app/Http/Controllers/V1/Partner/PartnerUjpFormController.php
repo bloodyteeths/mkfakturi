@@ -186,18 +186,29 @@ class PartnerUjpFormController extends Controller
                 $validated['overrides'] ?? []
             );
 
+            // Generate PDF using output() directly instead of going through
+            // Response->getContent() which can return false for binary data
             $pdfResponse = $service->toPdf($companyModel, $data, $validated['year']);
             $content = $pdfResponse->getContent();
-            $filename = $pdfResponse->headers->get('Content-Disposition', '');
-            preg_match('/filename="?([^"]+)"?/', $filename, $m);
-            $filename = $m[1] ?? ($formCode . '_' . $validated['year'] . '.pdf');
 
-            // Return PDF as base64 JSON to avoid binary response issues
-            // through Railway's edge proxy
+            // Fallback: if getContent() returned false/empty, use output buffering
+            if (empty($content)) {
+                ob_start();
+                $pdfResponse->sendContent();
+                $content = ob_get_clean();
+            }
+
+            // Last resort: regenerate directly via DomPDF output()
+            if (empty($content)) {
+                $content = $this->regeneratePdfDirect($service, $companyModel, $data, $validated['year'], $formCode);
+            }
+
+            $filename = $formCode . '_' . $validated['year'] . '.pdf';
+
             return response()->json([
-                'pdf' => base64_encode($content),
+                'pdf' => base64_encode((string) $content),
                 'filename' => $filename,
-                'size' => strlen($content),
+                'size' => strlen((string) $content),
             ]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('UJP PDF generation failed', [
@@ -323,6 +334,63 @@ class PartnerUjpFormController extends Controller
             ->where('companies.id', $companyId)
             ->where('partner_company_links.is_active', true)
             ->exists();
+    }
+
+    /**
+     * Regenerate PDF directly using DomPDF output() as fallback.
+     */
+    protected function regeneratePdfDirect(TaxFormService $service, Company $company, array $data, int $year, string $formCode): string
+    {
+        // Map form code to blade view name
+        $viewMap = [
+            'ddv-04' => 'ddv-04',
+            'db' => 'db',
+            'obrazec-36' => 'obrazec-36',
+            'obrazec-37' => 'obrazec-37',
+        ];
+
+        $viewName = 'app.pdf.reports.ujp.' . ($viewMap[$formCode] ?? $formCode);
+        $config = config('ujp_forms.' . str_replace('-', '_', $formCode)) ?? [];
+
+        // Build view data based on form code
+        $viewData = [
+            'company' => $company,
+            'year' => $year,
+            'formCode' => $service->formCode(),
+            'formTitle' => $service->formTitle(),
+            'formSubtitle' => '',
+            'sluzhbenVesnik' => $config['sluzhben_vesnik'] ?? '',
+            'periodStart' => sprintf('01.01.%d', $year),
+            'periodEnd' => sprintf('31.12.%d', $year),
+        ];
+
+        // Add form-specific data
+        if ($formCode === 'obrazec-36') {
+            $viewData['aktiva'] = $data['aktiva'] ?? [];
+            $viewData['pasiva'] = $data['pasiva'] ?? [];
+            $viewData['totalAktiva'] = $data['total_aktiva'] ?? 0;
+            $viewData['totalPasiva'] = $data['total_pasiva'] ?? 0;
+            $viewData['isBalanced'] = $data['is_balanced'] ?? false;
+        } elseif ($formCode === 'obrazec-37') {
+            $viewData['prihodi'] = $data['prihodi'] ?? [];
+            $viewData['rashodi'] = $data['rashodi'] ?? [];
+            $viewData['rezultat'] = $data['rezultat'] ?? [];
+        } elseif ($formCode === 'db') {
+            $viewData['aop'] = $data['aop'] ?? [];
+            $viewData['config'] = $config;
+        } elseif ($formCode === 'ddv-04') {
+            $viewData['data'] = $data;
+            $viewData['fields'] = $data['fields'] ?? [];
+            $viewData['overrides'] = $data['overrides'] ?? [];
+            $viewData['periodStart'] = $data['period_start'] ?? '';
+            $viewData['periodEnd'] = $data['period_end'] ?? '';
+            $viewData['currency'] = $company->currency ?? null;
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, $viewData);
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf->output();
     }
 }
 

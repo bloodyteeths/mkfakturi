@@ -288,13 +288,13 @@ async function handleGeneratePdf(formCode) {
       params
     )
 
-    const { pdf, filename, size } = response.data
+    const { pdf, filename, size, debug } = response.data
+
+    console.log('[UJP PDF]', formCode, 'response:', { size, filename, pdfLength: pdf?.length, debug })
 
     if (!pdf) {
-      throw new Error('Server returned empty PDF response')
+      throw new Error('Server returned empty PDF (size=' + size + ', keys=' + Object.keys(response.data).join(',') + ')')
     }
-
-    console.log('[UJP PDF]', formCode, 'received base64:', size, 'bytes, filename:', filename)
 
     // Decode base64 to binary
     const binaryStr = atob(pdf)
