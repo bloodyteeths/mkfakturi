@@ -8,6 +8,7 @@ use App\Models\Company;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use IFRS\Models\Account as IfrsAccount;
+use IFRS\Models\Transaction;
 
 /**
  * Journal Import Service
@@ -134,11 +135,12 @@ class JournalImportService
         $nalozi = [];
         $accounts = [];
         $firms = [];
+        $parseWarnings = [];
         $currentNalog = null;
         $currentItems = [];
         $currentItem = [];
 
-        foreach ($lines as $line) {
+        foreach ($lines as $lineNum => $line) {
             $line = trim($line);
             if ($line === '') {
                 continue;
@@ -180,6 +182,16 @@ class JournalImportService
                 if (!empty($currentItem) && isset($currentItem['konto'])) {
                     $currentItems[] = $this->finalizeItem($currentItem);
                 }
+                // Warn about empty konto
+                if (trim((string) $value) === '') {
+                    $nalogId = $currentNalog['id'] ?? '?';
+                    $parseWarnings[] = [
+                        'type' => 'empty_konto',
+                        'nalog' => $nalogId,
+                        'line' => $lineNum + 1,
+                        'message' => "Налог {$nalogId}: празно конто на линија " . ($lineNum + 1),
+                    ];
+                }
                 $currentItem = ['konto' => $value];
             } elseif ($key === 'data') {
                 $currentItem['date'] = $this->parseDate($value);
@@ -195,8 +207,8 @@ class JournalImportService
                 $currentItem['vvrska'] = $value;
             }
 
-            // Track unique accounts
-            if ($key === 'konto' && !isset($accounts[$value])) {
+            // Track unique accounts (skip empty codes)
+            if ($key === 'konto' && trim((string) $value) !== '' && !isset($accounts[$value])) {
                 $accounts[$value] = $this->guessAccountName($value);
             }
 
@@ -218,6 +230,7 @@ class JournalImportService
             'nalozi' => $nalozi,
             'accounts' => $accounts,
             'firms' => array_keys($firms),
+            'parse_warnings' => $parseWarnings,
             'format' => 'pantheon_txt',
         ];
     }
@@ -352,6 +365,20 @@ class JournalImportService
             ->pluck('code')
             ->toArray();
 
+        // Collect all imported account codes for similar-code detection
+        $importedCodes = [];
+        foreach ($nalozi as $nalog) {
+            foreach ($nalog['line_items'] as $item) {
+                $code = $item['account_code'];
+                if (trim($code) !== '') {
+                    $importedCodes[$code] = true;
+                }
+            }
+        }
+
+        // Check for duplicate nalozi (already imported to this company's IFRS entity)
+        $existingReferences = $this->getExistingNalogReferences($companyId);
+
         foreach ($nalozi as $i => $nalog) {
             if (!$nalog['balanced']) {
                 $diff = abs($nalog['total_debit'] - $nalog['total_credit']);
@@ -362,19 +389,100 @@ class JournalImportService
                 ];
             }
 
+            // Duplicate detection
+            if (in_array($nalog['nalog_id'], $existingReferences)) {
+                $warnings[] = [
+                    'nalog' => $nalog['nalog_id'],
+                    'type' => 'duplicate',
+                    'message' => "Налог {$nalog['nalog_id']} веќе е внесен",
+                ];
+            }
+
             foreach ($nalog['line_items'] as $item) {
                 $code = $item['account_code'];
+
+                // Skip empty codes (already warned in parser)
+                if (trim($code) === '') {
+                    continue;
+                }
+
                 if (!in_array($code, $existingCodes) && !isset($missingAccounts[$code])) {
                     $missingAccounts[$code] = $item['account_name'];
+
+                    // Similar code detection — warn if a close match exists
+                    $similar = $this->findSimilarCodes($code, $existingCodes, array_keys($importedCodes));
+                    if ($similar) {
+                        $warnings[] = [
+                            'nalog' => $nalog['nalog_id'],
+                            'type' => 'similar_code',
+                            'message' => "Конто {$code} не постои — дали мислевте на {$similar}?",
+                            'account_code' => $code,
+                            'similar_to' => $similar,
+                        ];
+                    }
                 }
             }
         }
 
         return [
-            'valid' => empty($warnings),
+            'valid' => empty(array_filter($warnings, fn($w) => $w['type'] === 'unbalanced')),
             'warnings' => $warnings,
             'missing_accounts' => $missingAccounts,
         ];
+    }
+
+    /**
+     * Get existing nalog references (transaction references) for a company's IFRS entity.
+     */
+    protected function getExistingNalogReferences(int $companyId): array
+    {
+        $entityId = DB::table('companies')
+            ->where('id', $companyId)
+            ->value('ifrs_entity_id');
+
+        if (!$entityId) {
+            return [];
+        }
+
+        return Transaction::where('entity_id', $entityId)
+            ->where('transaction_type', Transaction::JN)
+            ->whereNotNull('reference')
+            ->pluck('reference')
+            ->toArray();
+    }
+
+    /**
+     * Find similar account codes using prefix matching and Levenshtein distance.
+     */
+    protected function findSimilarCodes(string $code, array $existingCodes, array $importedCodes): ?string
+    {
+        $allCodes = array_unique(array_merge($existingCodes, $importedCodes));
+        $bestMatch = null;
+        $bestDistance = PHP_INT_MAX;
+
+        foreach ($allCodes as $candidate) {
+            if ($candidate === $code || trim($candidate) === '') {
+                continue;
+            }
+
+            // Check Levenshtein distance (catches typos like 740001 vs 74010)
+            $distance = levenshtein($code, (string) $candidate);
+            if ($distance <= 2 && $distance < $bestDistance) {
+                $bestMatch = $candidate;
+                $bestDistance = $distance;
+            }
+
+            // Check if one is a prefix of the other (catches truncation errors)
+            if (str_starts_with($code, (string) $candidate) || str_starts_with((string) $candidate, $code)) {
+                $lenDiff = abs(strlen($code) - strlen((string) $candidate));
+                if ($lenDiff <= 2 && $lenDiff < $bestDistance) {
+                    $bestMatch = $candidate;
+                    $bestDistance = $lenDiff;
+                }
+            }
+        }
+
+        return $bestMatch;
     }
 
     /**
@@ -501,8 +609,10 @@ class JournalImportService
      */
     public function mapCodeToTypes(string $code): array
     {
-        // Check specific prefix matches first (longer prefix = more specific)
-        foreach (self::SPECIFIC_IFRS_TYPES as $prefix => $ifrsType) {
+        // Check specific prefix matches (longest prefix first for correct matching)
+        $prefixes = self::SPECIFIC_IFRS_TYPES;
+        uksort($prefixes, fn($a, $b) => strlen($b) - strlen($a));
+        foreach ($prefixes as $prefix => $ifrsType) {
             if (str_starts_with($code, $prefix)) {
                 $digit = (int) substr($code, 0, 1);
                 $appType = self::ACCOUNT_TYPE_MAP[$digit]['app'] ?? Account::TYPE_EXPENSE;
@@ -539,6 +649,42 @@ class JournalImportService
         ];
     }
 
+    /**
+     * Parse a Pantheon firms file (firmi.txt) to build firma_id => name map.
+     *
+     * Format: key:type:value pairs. firma:i:ID / ime:s:Name
+     */
+    public function parseFirmsFile(string $content): array
+    {
+        $content = $this->normalizeEncoding($content);
+        $lines = preg_split('/\r?\n/', $content);
+        $firms = [];
+        $currentId = null;
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            if (!preg_match('/^([a-z_]+):([a-z]):(.*)$/i', $line, $m)) {
+                continue;
+            }
+
+            $key = strtolower($m[1]);
+            $value = $m[3];
+
+            if ($key === 'firma') {
+                $currentId = (int) $value;
+            } elseif ($key === 'ime' && $currentId > 0) {
+                $firms[$currentId] = trim($value);
+                $currentId = null;
+            }
+        }
+
+        return $firms;
+    }
+
     // ===================================================================
     // INTERNAL HELPERS
     // ===================================================================
@@ -562,6 +708,12 @@ class JournalImportService
             $dolguva = $item['dolguva'] ?? 0;
             $pobaruva = $item['pobaruva'] ?? 0;
             $code = $item['konto'] ?? '';
+
+            // Skip items with empty konto (already warned in parser)
+            if (trim($code) === '') {
+                continue;
+            }
+
             $name = $this->guessAccountName($code);
             $description = $item['opis'] ?? '';
             $reference = $item['vvrska'] ?? '';

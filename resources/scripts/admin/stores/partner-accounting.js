@@ -852,13 +852,16 @@ export const usePartnerAccountingStore = defineStore('partnerAccounting', {
     /**
      * Preview journal import — upload file, parse, validate (no DB writes)
      */
-    async previewJournalImport(companyId, file) {
+    async previewJournalImport(companyId, file, firmsFile = null) {
       this.isLoading = true
       this.error = null
 
       try {
         const formData = new FormData()
         formData.append('file', file)
+        if (firmsFile) {
+          formData.append('firms_file', firmsFile)
+        }
 
         const response = await axios.post(
           `/partner/companies/${companyId}/journal/import/preview`,

@@ -153,6 +153,43 @@
             </div>
           </BaseInputGroup>
 
+          <!-- Firms File (optional) -->
+          <BaseInputGroup
+            :label="$t('partner.accounting.journal_import.firms_file', 'Фајл со фирми (опционално)')"
+          >
+            <div
+              v-if="!firmsFile"
+              class="mt-1 cursor-pointer rounded-lg border-2 border-dashed border-gray-200 p-3 text-center transition-colors hover:border-gray-300"
+              @click="$refs.firmsFileInput.click()"
+            >
+              <p class="text-xs text-gray-500">
+                {{ $t('partner.accounting.journal_import.firms_file_hint', 'Додајте firmi.txt за автоматско поврзување на контрапартии') }}
+              </p>
+              <input
+                ref="firmsFileInput"
+                type="file"
+                accept=".txt"
+                class="hidden"
+                @change="onFirmsFileSelected"
+              />
+            </div>
+            <div
+              v-else
+              class="mt-1 flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-4 py-2"
+            >
+              <div class="flex items-center gap-2">
+                <BaseIcon name="DocumentTextIcon" class="h-4 w-4 text-blue-600" />
+                <p class="text-xs font-medium text-blue-900">{{ firmsFile.name }}</p>
+              </div>
+              <button
+                class="text-xs text-blue-700 hover:text-blue-900"
+                @click="firmsFile = null"
+              >
+                {{ $t('general.remove') }}
+              </button>
+            </div>
+          </BaseInputGroup>
+
           <!-- Parse Error -->
           <div v-if="parseError" class="rounded-md bg-red-50 p-4">
             <div class="flex">
@@ -215,13 +252,61 @@
         </div>
 
         <!-- Warnings -->
-        <div v-if="previewData?.validation?.warnings?.length" class="mb-4 rounded-md bg-yellow-50 p-4">
-          <div class="flex">
-            <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-yellow-400" />
-            <div class="ml-3">
-              <p class="text-sm font-medium text-yellow-800">
-                {{ $t('partner.accounting.journal_import.warning_unbalanced') }}
-              </p>
+        <div v-if="allWarnings.length" class="mb-4 space-y-2">
+          <!-- Unbalanced -->
+          <div v-if="unbalancedWarnings.length" class="rounded-md bg-red-50 p-4">
+            <div class="flex">
+              <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-red-400" />
+              <div class="ml-3">
+                <p class="text-sm font-medium text-red-800">
+                  {{ $t('partner.accounting.journal_import.warning_unbalanced') }}
+                </p>
+                <ul class="mt-1 list-disc pl-5 text-sm text-red-700">
+                  <li v-for="w in unbalancedWarnings" :key="w.nalog">{{ w.message }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- Duplicates -->
+          <div v-if="duplicateWarnings.length" class="rounded-md bg-orange-50 p-4">
+            <div class="flex">
+              <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-orange-400" />
+              <div class="ml-3">
+                <p class="text-sm font-medium text-orange-800">
+                  {{ $t('partner.accounting.journal_import.warning_duplicate', 'Дупликат налози (веќе внесени)') }}
+                </p>
+                <ul class="mt-1 list-disc pl-5 text-sm text-orange-700">
+                  <li v-for="w in duplicateWarnings" :key="w.nalog">{{ w.message }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- Similar codes -->
+          <div v-if="similarCodeWarnings.length" class="rounded-md bg-yellow-50 p-4">
+            <div class="flex">
+              <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-yellow-400" />
+              <div class="ml-3">
+                <p class="text-sm font-medium text-yellow-800">
+                  {{ $t('partner.accounting.journal_import.warning_similar_codes', 'Слични конта — можни грешки') }}
+                </p>
+                <ul class="mt-1 list-disc pl-5 text-sm text-yellow-700">
+                  <li v-for="w in similarCodeWarnings" :key="w.account_code">{{ w.message }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- Empty konto (from parse warnings) -->
+          <div v-if="emptyKontoWarnings.length" class="rounded-md bg-gray-100 p-4">
+            <div class="flex">
+              <BaseIcon name="InformationCircleIcon" class="h-5 w-5 text-gray-400" />
+              <div class="ml-3">
+                <p class="text-sm font-medium text-gray-700">
+                  {{ $t('partner.accounting.journal_import.warning_empty_konto', 'Празни конта (ставките ќе бидат прескокнати)') }}
+                </p>
+                <ul class="mt-1 list-disc pl-5 text-sm text-gray-600">
+                  <li v-for="w in emptyKontoWarnings" :key="w.line">{{ w.message }}</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -340,7 +425,7 @@
 
                 <!-- Expanded Line Items -->
                 <tr v-if="expandedRows[idx]">
-                  <td colspan="8" class="bg-gray-50 px-6 py-3">
+                  <td :colspan="hasCounterparties ? 9 : 8" class="bg-gray-50 px-6 py-3">
                     <table class="min-w-full">
                       <thead>
                         <tr>
@@ -349,6 +434,9 @@
                           </th>
                           <th class="px-2 py-1 text-left text-xs font-medium text-gray-400">
                             {{ $t('partner.accounting.journal_import.account_name') }}
+                          </th>
+                          <th v-if="hasCounterparties" class="px-2 py-1 text-left text-xs font-medium text-gray-400">
+                            {{ $t('partner.accounting.journal_import.counterparty', 'Контрапартија') }}
                           </th>
                           <th class="px-2 py-1 text-right text-xs font-medium text-gray-400">
                             {{ $t('partner.accounting.journal_import.debit') }}
@@ -369,6 +457,9 @@
                           </td>
                           <td class="px-2 py-1 text-xs text-gray-600">
                             {{ item.account_name }}
+                          </td>
+                          <td v-if="hasCounterparties" class="px-2 py-1 text-xs text-gray-500">
+                            {{ item.counterparty_name || '' }}
                           </td>
                           <td class="px-2 py-1 text-right text-xs font-mono"
                               :class="!item.credited ? 'text-gray-900 font-medium' : 'text-gray-300'"
@@ -524,6 +615,7 @@ const selectedNalozi = ref({})
 const expandedRows = ref({})
 const autoCreateAccounts = ref(true)
 const fileInput = ref(null)
+const firmsFile = ref(null)
 const isDragOver = ref(false)
 
 const importForm = reactive({
@@ -549,6 +641,32 @@ const missingAccountCount = computed(() => {
   return missing ? Object.keys(missing).length : 0
 })
 
+const allWarnings = computed(() => [
+  ...(previewData.value?.validation?.warnings || []),
+  ...(previewData.value?.parse_warnings || []),
+])
+
+const unbalancedWarnings = computed(() =>
+  (previewData.value?.validation?.warnings || []).filter(w => w.type === 'unbalanced')
+)
+
+const duplicateWarnings = computed(() =>
+  (previewData.value?.validation?.warnings || []).filter(w => w.type === 'duplicate')
+)
+
+const similarCodeWarnings = computed(() =>
+  (previewData.value?.validation?.warnings || []).filter(w => w.type === 'similar_code')
+)
+
+const emptyKontoWarnings = computed(() =>
+  (previewData.value?.parse_warnings || []).filter(w => w.type === 'empty_konto')
+)
+
+const hasCounterparties = computed(() => {
+  const nalozi = previewData.value?.nalozi || []
+  return nalozi.some(n => n.line_items?.some(i => i.counterparty_name))
+})
+
 // Methods
 function onFileSelected(event) {
   const file = event.target.files[0]
@@ -564,6 +682,14 @@ function handleDrop(event) {
   if (file) {
     validateAndSetFile(file)
   }
+}
+
+function onFirmsFileSelected(event) {
+  const file = event.target.files[0]
+  if (file) {
+    firmsFile.value = file
+  }
+  event.target.value = ''
 }
 
 function validateAndSetFile(file) {
@@ -593,7 +719,8 @@ async function parseFile() {
   try {
     const response = await partnerAccountingStore.previewJournalImport(
       importForm.company_id,
-      selectedFile.value
+      selectedFile.value,
+      firmsFile.value
     )
 
     if (response.success) {
@@ -689,6 +816,7 @@ function resetWizard() {
   selectedNalozi.value = {}
   expandedRows.value = {}
   selectedFile.value = null
+  firmsFile.value = null
   parseError.value = null
 }
 

@@ -40,6 +40,7 @@ class PartnerJournalImportController extends Controller
 
         $request->validate([
             'file' => 'required|file|mimes:txt,csv|max:10240', // 10MB
+            'firms_file' => 'nullable|file|mimes:txt|max:5120', // Optional firms file, 5MB
         ]);
 
         try {
@@ -48,6 +49,14 @@ class PartnerJournalImportController extends Controller
             $filename = $file->getClientOriginalName();
 
             $service = new JournalImportService();
+
+            // Parse optional firms file for counterparty name resolution
+            if ($request->hasFile('firms_file')) {
+                $firmsContent = file_get_contents($request->file('firms_file')->getRealPath());
+                $firmsMap = $service->parseFirmsFile($firmsContent);
+                $service->setFirmsMap($firmsMap);
+            }
+
             $parsed = $service->parseFile($content, $filename);
             $validation = $service->validateNalozi($parsed['nalozi'], $company);
 
@@ -58,6 +67,7 @@ class PartnerJournalImportController extends Controller
                     'nalozi' => $parsed['nalozi'],
                     'accounts' => $parsed['accounts'],
                     'firms' => $parsed['firms'],
+                    'parse_warnings' => $parsed['parse_warnings'] ?? [],
                     'validation' => $validation,
                     'summary' => [
                         'total_nalozi' => count($parsed['nalozi']),

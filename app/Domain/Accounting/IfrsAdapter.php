@@ -3286,13 +3286,14 @@ class IfrsAdapter
             ];
         }
 
-        // Use compound mode: first line item becomes the main account,
-        // remaining items become line items. This avoids the postBasic() bug
-        // where the main account gets phantom contra-entries for EVERY line item.
-        $mainItem = array_shift($lineItemsData);
+        // Compound mode with ALL items as line items.
+        // The main account is required by IFRS package but set to amount=0
+        // so it doesn't distort any account balance. All actual amounts
+        // go through line items, preserving counterparty_name on every entry.
+        $mainAccount = $lineItemsData[0]['account'];
 
         $transaction = Transaction::create([
-            'account_id' => $mainItem['account']->id,
+            'account_id' => $mainAccount->id,
             'transaction_date' => Carbon::parse($entry['date']),
             'narration' => $entry['narration'],
             'reference' => $entry['reference'] ?? null,
@@ -3300,8 +3301,8 @@ class IfrsAdapter
             'currency_id' => $currencyId,
             'entity_id' => $entity->id,
             'compound' => true,
-            'main_account_amount' => $mainItem['amount'],
-            'credited' => $mainItem['credited'],
+            'main_account_amount' => 0,
+            'credited' => false,
         ]);
 
         foreach ($lineItemsData as $item) {
@@ -3311,7 +3312,6 @@ class IfrsAdapter
                 'amount' => $item['amount'],
                 'quantity' => 1,
                 'credited' => $item['credited'],
-
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -3331,6 +3331,24 @@ class IfrsAdapter
     /**
      * Find an IFRS Account by code, or create it.
      */
+    /**
+     * Specific IFRS type overrides by account code prefix (longest-first).
+     */
+    protected const IFRS_PREFIX_TYPES = [
+        '0192' => Account::CONTRA_ASSET,
+        '019'  => Account::CONTRA_ASSET,
+        '100'  => Account::BANK,
+        '120'  => Account::RECEIVABLE,
+        '130'  => Account::RECEIVABLE,
+        '162'  => Account::RECEIVABLE,
+        '220'  => Account::PAYABLE,
+        '230'  => Account::CURRENT_LIABILITY,
+        '234'  => Account::CURRENT_LIABILITY,
+        '240'  => Account::CURRENT_LIABILITY,
+        '242'  => Account::CURRENT_LIABILITY,
+        '351'  => Account::NON_OPERATING_REVENUE,
+    ];
+
     protected function findAccountByCode(int $entityId, string $code, string $name): Account
     {
         // Handle range codes like "600-699"
@@ -3344,19 +3362,32 @@ class IfrsAdapter
             return $account;
         }
 
-        $prefix = (int) substr($accountCode, 0, 1);
-        $accountType = match ($prefix) {
-            0, 9 => Account::EQUITY,
-            1 => Account::NON_CURRENT_ASSET,
-            2 => Account::RECEIVABLE,
-            3 => Account::CURRENT_ASSET,
-            4 => Account::CURRENT_LIABILITY,
-            5 => Account::DIRECT_EXPENSE,
-            6 => Account::OPERATING_REVENUE,
-            7 => Account::OPERATING_EXPENSE,
-            8 => Account::OPERATING_REVENUE,
-            default => Account::OPERATING_EXPENSE,
-        };
+        // Check specific prefix overrides first (longest prefix wins)
+        $accountType = null;
+        foreach (self::IFRS_PREFIX_TYPES as $prefix => $type) {
+            if (str_starts_with($accountCode, $prefix)) {
+                $accountType = $type;
+                break;
+            }
+        }
+
+        // Fallback: Macedonian chart of accounts first-digit mapping
+        if ($accountType === null) {
+            $digit = (int) substr($accountCode, 0, 1);
+            $accountType = match ($digit) {
+                0 => Account::NON_CURRENT_ASSET,
+                1 => Account::CURRENT_ASSET,
+                2 => Account::CURRENT_LIABILITY,
+                3 => Account::OPERATING_REVENUE,
+                4 => Account::OPERATING_EXPENSE,
+                5 => Account::DIRECT_EXPENSE,
+                6 => Account::DIRECT_EXPENSE,
+                7 => Account::OPERATING_REVENUE,
+                8 => Account::OPERATING_REVENUE,
+                9 => Account::EQUITY,
+                default => Account::OPERATING_EXPENSE,
+            };
+        }
 
         return Account::create([
             'entity_id' => $entityId,
