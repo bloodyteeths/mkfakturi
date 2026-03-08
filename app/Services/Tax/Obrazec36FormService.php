@@ -48,6 +48,10 @@ class Obrazec36FormService extends TaxFormService
 
     /**
      * Collect official Образец 36 data (112 AOP fields).
+     * Delegates to AopReportService::getBalanceSheetAop() which handles:
+     * - Per-account code-to-AOP distribution
+     * - Proper sign convention for contra-balances
+     * - P&L injection into equity (AOP 075/076/077/078)
      */
     public function collect(
         Company $company,
@@ -56,30 +60,13 @@ class Obrazec36FormService extends TaxFormService
         ?int $quarter = null,
         array $overrides = []
     ): array {
-        $config = config('ujp_forms.obrazec_36');
-        $fallback = $config['ifrs_to_aop_fallback'];
-        $endDate = "{$year}-12-31";
-
-        // Get IFRS balance sheet data
-        try {
-            $current = $this->ifrsAdapter->getBalanceSheet($company, $endDate);
-            $currentBalances = $this->aopService->extractBalanceSheetByType($current);
-        } catch (\Exception $e) {
-            $currentBalances = [];
-        }
-
-        // Get previous year
-        $previousBalances = $this->aopService->getPreviousYearBalanceSheet($company, $year - 1);
-
-        // Build AOP rows
-        $aktiva = $this->aopService->buildAopRows($config['aktiva'], $currentBalances, $previousBalances, $fallback);
-        $pasiva = $this->aopService->buildAopRows($config['pasiva'], $currentBalances, $previousBalances, $fallback);
+        $result = $this->aopService->getBalanceSheetAop($company, $year);
 
         // Apply manual overrides
-        $aktiva = $this->applyOverrides($aktiva, $overrides);
-        $pasiva = $this->applyOverrides($pasiva, $overrides);
+        $aktiva = $this->applyOverrides($result['aktiva'], $overrides);
+        $pasiva = $this->applyOverrides($result['pasiva'], $overrides);
 
-        // Find totals
+        // Recalculate totals after overrides
         $totalAktiva = $this->findAopValue($aktiva, '063');
         $totalPasiva = $this->findAopValue($pasiva, '111');
 
