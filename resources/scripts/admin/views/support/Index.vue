@@ -165,7 +165,8 @@
           <div
             v-for="contact in previousContacts"
             :key="contact.id"
-            class="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
+            class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer hover:border-primary-300 transition-colors"
+            @click="openDetail(contact)"
           >
             <div class="flex items-start justify-between mb-2">
               <div class="flex-1 min-w-0">
@@ -180,13 +181,6 @@
               </span>
             </div>
             <p class="text-sm text-gray-600 mb-2 line-clamp-2">{{ contact.message }}</p>
-            <!-- Admin Reply -->
-            <div v-if="contact.admin_reply" class="bg-blue-50 border border-blue-100 rounded-md p-3 mb-3">
-              <p class="text-xs font-medium text-blue-700 mb-1">{{ t('admin_reply') }}
-                <span class="text-blue-400 font-normal ml-1">{{ formatDate(contact.admin_replied_at) }}</span>
-              </p>
-              <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ contact.admin_reply }}</p>
-            </div>
             <div class="flex items-center justify-between text-xs text-gray-500">
               <div class="flex items-center space-x-2">
                 <span
@@ -197,7 +191,10 @@
                 </span>
                 <span class="capitalize">{{ categoryLabel(contact.category) }}</span>
               </div>
-              <span>{{ formatDate(contact.created_at) }}</span>
+              <div class="flex items-center space-x-2">
+                <BaseIcon v-if="contact.admin_reply" name="ChatBubbleLeftEllipsisIcon" class="h-4 w-4 text-green-500" />
+                <span>{{ formatDate(contact.created_at) }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -210,11 +207,21 @@
             class="mt-3"
           >
             <template #cell-reference_number="{ row }">
-              <span class="font-mono text-sm text-gray-700">{{ row.data.reference_number }}</span>
+              <span
+                class="font-mono text-sm text-primary-600 hover:text-primary-800 cursor-pointer underline"
+                @click="openDetail(row.data)"
+              >
+                {{ row.data.reference_number }}
+              </span>
             </template>
 
             <template #cell-subject="{ row }">
-              <span class="font-medium text-gray-900">{{ row.data.subject }}</span>
+              <span
+                class="font-medium text-gray-900 hover:text-primary-600 cursor-pointer"
+                @click="openDetail(row.data)"
+              >
+                {{ row.data.subject }}
+              </span>
             </template>
 
             <template #cell-category="{ row }">
@@ -240,34 +247,132 @@
             </template>
 
             <template #cell-reply="{ row }">
-              <span v-if="row.data.admin_reply" class="text-green-600 cursor-pointer" :title="t('click_to_view')" @click="expandedId = expandedId === row.data.id ? null : row.data.id">
+              <span v-if="row.data.admin_reply" class="text-green-600">
                 <BaseIcon name="ChatBubbleLeftEllipsisIcon" class="h-5 w-5" />
               </span>
-              <span v-else class="text-gray-300">—</span>
+              <span v-else class="text-gray-300">&mdash;</span>
             </template>
 
             <template #cell-created_at="{ row }">
               <span class="text-sm text-gray-600">{{ formatDate(row.data.created_at) }}</span>
             </template>
           </BaseTable>
-
-          <!-- Expanded Reply Row -->
-          <div v-if="expandedContact" class="bg-blue-50 border border-blue-100 rounded-md p-4 mt-2 mb-4">
-            <div class="flex items-start justify-between">
-              <div>
-                <p class="text-xs font-medium text-blue-700 mb-1">{{ t('admin_reply') }}
-                  <span class="text-blue-400 font-normal ml-1">{{ formatDate(expandedContact.admin_replied_at) }}</span>
-                </p>
-                <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ expandedContact.admin_reply }}</p>
-              </div>
-              <button class="text-gray-400 hover:text-gray-600 ml-4" @click="expandedId = null">
-                <BaseIcon name="XMarkIcon" class="h-4 w-4" />
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
+
+    <!-- ==================== TICKET DETAIL MODAL ==================== -->
+    <BaseModal :show="showDetailModal" @close="showDetailModal = false">
+      <template #header>
+        <div class="flex items-center justify-between w-full">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">{{ selectedContact?.subject }}</h3>
+            <p class="text-sm text-gray-500 font-mono mt-0.5">{{ selectedContact?.reference_number }}</p>
+          </div>
+          <span
+            v-if="selectedContact"
+            :class="statusClass(selectedContact.status)"
+            class="px-3 py-1 text-xs font-medium rounded-full"
+          >
+            {{ statusLabel(selectedContact.status) }}
+          </span>
+        </div>
+      </template>
+
+      <div v-if="selectedContact" class="space-y-5 p-1">
+        <!-- Ticket Info -->
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="text-gray-500">{{ t('category') }}</p>
+            <p class="font-medium text-gray-900 capitalize">{{ categoryLabel(selectedContact.category) }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">{{ t('priority') }}</p>
+            <span
+              :class="priorityClass(selectedContact.priority)"
+              class="px-2 py-0.5 text-xs font-medium rounded-full capitalize"
+            >
+              {{ priorityLabel(selectedContact.priority) }}
+            </span>
+          </div>
+          <div>
+            <p class="text-gray-500">{{ t('col_date') }}</p>
+            <p class="font-medium text-gray-900">{{ formatDate(selectedContact.created_at) }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">{{ t('email') }}</p>
+            <p class="font-medium text-gray-900">{{ selectedContact.email }}</p>
+          </div>
+        </div>
+
+        <!-- Original Message -->
+        <div>
+          <h4 class="text-sm font-medium text-gray-700 mb-2">{{ t('your_message') }}</h4>
+          <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-800 whitespace-pre-wrap">{{ selectedContact.message }}</div>
+        </div>
+
+        <!-- Attachments -->
+        <div v-if="selectedContact.attachments && selectedContact.attachments.length">
+          <h4 class="text-sm font-medium text-gray-700 mb-2">{{ t('attachments') }}</h4>
+          <div class="space-y-1">
+            <div
+              v-for="(att, i) in selectedContact.attachments"
+              :key="i"
+              class="flex items-center bg-gray-50 rounded px-3 py-2 text-sm"
+            >
+              <BaseIcon name="PaperClipIcon" class="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+              <span class="text-gray-700 truncate">{{ att.name }}</span>
+              <span v-if="att.size" class="text-gray-400 ml-2 text-xs">({{ att.size }})</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Reply -->
+        <div v-if="selectedContact.admin_reply">
+          <h4 class="text-sm font-medium text-green-700 mb-2">
+            <BaseIcon name="ChatBubbleLeftEllipsisIcon" class="h-4 w-4 inline mr-1" />
+            {{ t('admin_reply') }}
+          </h4>
+          <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ selectedContact.admin_reply }}</p>
+            <p v-if="selectedContact.admin_replied_at" class="text-xs text-green-600 mt-3">
+              {{ formatDate(selectedContact.admin_replied_at) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- No Reply Yet -->
+        <div v-else class="bg-yellow-50 border border-yellow-100 rounded-lg p-4 text-center">
+          <BaseIcon name="ClockIcon" class="h-6 w-6 text-yellow-500 mx-auto mb-1" />
+          <p class="text-sm text-yellow-700">{{ t('awaiting_reply') }}</p>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="flex items-center justify-between w-full">
+          <BaseButton
+            v-if="selectedContact && selectedContact.status !== 'resolved'"
+            variant="danger-outline"
+            size="sm"
+            :loading="isClosing"
+            @click="closeTicket"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="XCircleIcon" :class="slotProps.class" />
+            </template>
+            {{ t('close_ticket') }}
+          </BaseButton>
+          <span v-else-if="selectedContact && selectedContact.status === 'resolved'" class="text-sm text-green-600 font-medium">
+            {{ t('ticket_closed') }}
+          </span>
+          <span v-else></span>
+
+          <BaseButton variant="primary-outline" @click="showDetailModal = false">
+            {{ t('close_modal') }}
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
   </BasePage>
 </template>
 
@@ -326,7 +431,12 @@ const messages = {
     col_date: 'Date',
     col_reply: 'Reply',
     admin_reply: 'Support Response',
-    click_to_view: 'Click to view reply',
+    your_message: 'Your Message',
+    awaiting_reply: 'Awaiting response from support team...',
+    close_ticket: 'Close Ticket',
+    ticket_closed: 'This ticket has been resolved',
+    close_modal: 'Close',
+    ticket_closed_success: 'Ticket closed successfully.',
   },
   mk: {
     title: 'Поддршка',
@@ -375,7 +485,12 @@ const messages = {
     col_date: 'Датум',
     col_reply: 'Одговор',
     admin_reply: 'Одговор од поддршка',
-    click_to_view: 'Кликнете за преглед',
+    your_message: 'Ваша порака',
+    awaiting_reply: 'Чекање на одговор од тимот за поддршка...',
+    close_ticket: 'Затвори тикет',
+    ticket_closed: 'Овој тикет е решен',
+    close_modal: 'Затвори',
+    ticket_closed_success: 'Тикетот е успешно затворен.',
   },
   sq: {
     title: 'Mbeshtetja',
@@ -424,7 +539,12 @@ const messages = {
     col_date: 'Data',
     col_reply: 'Pergjigje',
     admin_reply: 'Pergjigja e mbeshtetjes',
-    click_to_view: 'Klikoni per te pare',
+    your_message: 'Mesazhi juaj',
+    awaiting_reply: 'Duke pritur pergjigje nga ekipi i mbeshtetjes...',
+    close_ticket: 'Mbyll tiketen',
+    ticket_closed: 'Kjo tikete eshte zgjidhur',
+    close_modal: 'Mbyll',
+    ticket_closed_success: 'Tiketa u mbyll me sukses.',
   },
   tr: {
     title: 'Destek',
@@ -473,7 +593,12 @@ const messages = {
     col_date: 'Tarih',
     col_reply: 'Yanit',
     admin_reply: 'Destek yaniti',
-    click_to_view: 'Goruntlemek icin tiklayin',
+    your_message: 'Mesajiniz',
+    awaiting_reply: 'Destek ekibinden yanit bekleniyor...',
+    close_ticket: 'Tiketi kapat',
+    ticket_closed: 'Bu tiket cozulmustur',
+    close_modal: 'Kapat',
+    ticket_closed_success: 'Tiket basariyla kapatildi.',
   },
 }
 
@@ -487,16 +612,13 @@ const submitted = ref(false)
 const referenceNumber = ref('')
 const isSubmitting = ref(false)
 const isLoading = ref(true)
+const isClosing = ref(false)
 const errors = ref({})
 const serverError = ref('')
 const previousContacts = ref([])
 const fileInput = ref(null)
-const expandedId = ref(null)
-
-const expandedContact = computed(() => {
-  if (!expandedId.value) return null
-  return previousContacts.value.find(c => c.id === expandedId.value)
-})
+const showDetailModal = ref(false)
+const selectedContact = ref(null)
 
 const form = ref({
   name: '',
@@ -539,6 +661,28 @@ const handleFiles = (e) => {
 
 const removeFile = (index) => {
   form.value.attachments.splice(index, 1)
+}
+
+const openDetail = (contact) => {
+  selectedContact.value = { ...contact }
+  showDetailModal.value = true
+}
+
+const closeTicket = async () => {
+  if (!selectedContact.value) return
+  isClosing.value = true
+  try {
+    await axios.post(`/support/contact/${selectedContact.value.id}/close`)
+    selectedContact.value.status = 'resolved'
+    const idx = previousContacts.value.findIndex(c => c.id === selectedContact.value.id)
+    if (idx !== -1) {
+      previousContacts.value[idx].status = 'resolved'
+    }
+  } catch {
+    // silently fail
+  } finally {
+    isClosing.value = false
+  }
 }
 
 const submitForm = async () => {

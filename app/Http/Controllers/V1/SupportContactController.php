@@ -95,6 +95,28 @@ class SupportContactController extends Controller
     }
 
     /**
+     * User closes their own ticket.
+     */
+    public function close(Request $request, SupportContact $supportContact): JsonResponse
+    {
+        $user = $request->user();
+        if ((int) $supportContact->user_id !== (int) $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $supportContact->update([
+            'status' => 'resolved',
+            'resolved_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ticket closed.',
+            'data' => $supportContact,
+        ]);
+    }
+
+    /**
      * Admin listing of ALL support contacts (cross-tenant).
      */
     public function indexAll(Request $request): JsonResponse
