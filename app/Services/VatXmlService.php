@@ -407,15 +407,10 @@ class VatXmlService
                     ->with(['taxes.taxType', 'items.taxes.taxType'])
                     ->get();
 
-                // Check if any invoices were found
+                // If no invoices were found, return zeroed VAT data
+                // so a zero return can still be generated.
                 if ($invoices->isEmpty()) {
-                    throw new Exception(
-                        sprintf(
-                            'No invoices found for period %s to %s. Please ensure you have invoices with payments within this period.',
-                            $this->periodStart->format('Y-m-d'),
-                            $this->periodEnd->format('Y-m-d')
-                        )
-                    );
+                    return $vatData;
                 }
 
                 foreach ($invoices as $invoice) {

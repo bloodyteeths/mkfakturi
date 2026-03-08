@@ -44,14 +44,14 @@ class AopReportService
         $currentAccounts = $this->extractAccountBalances($company, '2020-01-01', $endDate);
         $currentAopBalances = $this->distributeToAopCodes($currentAccounts, $codeToAop, $fallback);
 
-        // Inject current year net income into equity AOP 077 (profit) or 078 (loss)
-        $this->injectNetIncome($currentAopBalances, $company, $year);
+        // Inject accumulated P&L into equity AOPs (075/076 prior years, 077/078 current year)
+        $this->injectNetIncome($currentAopBalances, $company, $year, $currentAccounts);
 
         // Get previous year data
         $previousBalances = $this->getPreviousYearBalanceSheet($company, $year - 1);
         $prevAccounts = $this->extractAccountBalances($company, '2020-01-01', ($year - 1) . '-12-31');
         $prevAopBalances = $this->distributeToAopCodes($prevAccounts, $codeToAop, $fallback);
-        $this->injectNetIncome($prevAopBalances, $company, $year - 1);
+        $this->injectNetIncome($prevAopBalances, $company, $year - 1, $prevAccounts);
 
         // Build AOP rows for АКТИВА (official 112-row config)
         $aktivaConfig = config('ujp_forms.obrazec_36.aktiva', []);
@@ -505,13 +505,23 @@ class AopReportService
      * 2. Else if IFRS type found in $typeToAopFallback → add balance to that AOP
      * 3. Else → skip (unmapped account)
      *
-     * Returns: ['047' => 3000, '049' => 1200, ...] keyed by AOP code, all values absolute.
+     * Sign convention: Trial balance stores balance as (closing_debit - closing_credit).
+     * Credit-normal accounts (liabilities, equity) have negative balances.
+     * We negate credit-normal types so they display as positive on the pasiva side.
+     * Asset-side contra-balances (credit in a debit-normal account) remain negative,
+     * correctly reducing the asset total via sum_of in buildAopRows.
      */
     public function distributeToAopCodes(
         array $accounts,
         array $codeToAopMap,
         array $typeToAopFallback
     ): array {
+        // Credit-normal account types: negate so credits become positive for pasiva display
+        $creditNormalTypes = [
+            'PAYABLE', 'CURRENT_LIABILITY', 'NON_CURRENT_LIABILITY',
+            'CONTROL', 'RECONCILIATION', 'EQUITY',
+        ];
+
         $aopBalances = [];
 
         foreach ($accounts as $account) {
@@ -523,21 +533,23 @@ class AopReportService
                 continue;
             }
 
+            // Negate credit-normal types so credits display as positive on pasiva side
+            if (in_array($type, $creditNormalTypes)) {
+                $balance = -$balance;
+            }
+
             if ($code !== '' && isset($codeToAopMap[$code])) {
-                // Code-based mapping (MK 3-digit codes like 100, 240, 941)
                 $aop = $codeToAopMap[$code];
                 $aopBalances[$aop] = ($aopBalances[$aop] ?? 0) + $balance;
             } elseif ($type !== '' && isset($typeToAopFallback[$type])) {
-                // Type-based fallback (IFRS default codes like 1000, 2000, 3000)
                 $aop = $typeToAopFallback[$type];
                 $aopBalances[$aop] = ($aopBalances[$aop] ?? 0) + $balance;
             }
         }
 
-        // Make all AOP balances absolute (the form shows positive amounts)
-        // Contra-accounts naturally subtract via signed addition before abs
+        // Round values (preserve sign — contra-balances are naturally negative)
         foreach ($aopBalances as $aop => $val) {
-            $aopBalances[$aop] = abs(round($val, 2));
+            $aopBalances[$aop] = round($val, 2);
         }
 
         return $aopBalances;
@@ -624,35 +636,68 @@ class AopReportService
     }
 
     /**
-     * Inject current year net income into equity AOP 077 (profit) or 078 (loss).
-     * The balance sheet requires net P&L in equity for Assets = Liabilities + Equity.
+     * Inject accumulated P&L into equity AOP codes per Macedonian standards.
+     *
+     * AOP 075/076: Prior years' accumulated profit/loss (акумулирана добивка / пренесена загуба)
+     * AOP 077/078: Current year profit/loss (добивка / загуба за деловната година)
+     *
+     * Calculates total unbooked P&L from trial balance accounts, then splits
+     * into current year (from income statement) and prior years (remainder).
      */
-    protected function injectNetIncome(array &$aopBalances, Company $company, int $year): void
+    protected function injectNetIncome(array &$aopBalances, Company $company, int $year, array $extractedAccounts = []): void
     {
+        // P&L account types that are NOT mapped to balance sheet AOP codes
+        $plTypes = [
+            'OPERATING_REVENUE', 'NON_OPERATING_REVENUE',
+            'OPERATING_EXPENSE', 'DIRECT_EXPENSE', 'OVERHEAD_EXPENSE', 'OTHER_EXPENSE',
+        ];
+
+        // Calculate total accumulated unbooked P&L from trial balance.
+        // Revenue accounts have negative balance (credits > debits), expenses positive.
+        // Net income = -(sum of all P&L balances): positive = profit, negative = loss.
+        $totalPnL = 0;
+        if (! empty($extractedAccounts)) {
+            foreach ($extractedAccounts as $account) {
+                if (in_array($account['type'] ?? '', $plTypes)) {
+                    $totalPnL -= $account['balance'] ?? 0;
+                }
+            }
+        }
+
+        // Try to get current year P&L from income statement
+        $currentYearPnL = 0;
         try {
             $is = $this->ifrsAdapter->getIncomeStatement(
                 $company, "{$year}-01-01", "{$year}-12-31"
             );
+            if (! isset($is['error'])) {
+                $totalRevenue = $is['income_statement']['totals']['revenue'] ?? 0;
+                $totalExpenses = $is['income_statement']['totals']['expenses'] ?? 0;
+                $currentYearPnL = $totalRevenue - $totalExpenses;
+            }
         } catch (\Exception $e) {
-            return;
+            // If income statement fails, treat all P&L as prior years
         }
 
-        if (isset($is['error'])) {
-            return;
+        // Prior years P&L = total accumulated - current year
+        $priorYearsPnL = $totalPnL - $currentYearPnL;
+
+        // Inject prior years P&L into AOP 075 (accumulated profit) or 076 (carried-forward loss)
+        if (abs($priorYearsPnL) >= 0.01) {
+            if ($priorYearsPnL >= 0) {
+                $aopBalances['075'] = ($aopBalances['075'] ?? 0) + abs($priorYearsPnL);
+            } else {
+                $aopBalances['076'] = ($aopBalances['076'] ?? 0) + abs($priorYearsPnL);
+            }
         }
 
-        $totalRevenue = $is['income_statement']['totals']['revenue'] ?? 0;
-        $totalExpenses = $is['income_statement']['totals']['expenses'] ?? 0;
-        $netIncome = $totalRevenue - $totalExpenses;
-
-        if (abs($netIncome) < 0.01) {
-            return;
-        }
-
-        if ($netIncome >= 0) {
-            $aopBalances['077'] = ($aopBalances['077'] ?? 0) + abs($netIncome);
-        } else {
-            $aopBalances['078'] = ($aopBalances['078'] ?? 0) + abs($netIncome);
+        // Inject current year P&L into AOP 077 (profit) or 078 (loss)
+        if (abs($currentYearPnL) >= 0.01) {
+            if ($currentYearPnL >= 0) {
+                $aopBalances['077'] = ($aopBalances['077'] ?? 0) + abs($currentYearPnL);
+            } else {
+                $aopBalances['078'] = ($aopBalances['078'] ?? 0) + abs($currentYearPnL);
+            }
         }
     }
 
