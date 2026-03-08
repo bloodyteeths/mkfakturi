@@ -78,6 +78,9 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
             ]);
 
+            // Get or create 0% VAT rate (required by IFRS line items)
+            $vatId = $this->getOrCreateExemptVat($entity);
+
             // Line Item: Debit Accounts Receivable
             // Use DB::table to bypass Eloquent global scopes that may interfere
             DB::table('ifrs_line_items')->insert([
@@ -86,6 +89,7 @@ class IfrsAdapter
                 'amount' => $invoice->total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -98,6 +102,7 @@ class IfrsAdapter
                 'amount' => $invoice->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -112,6 +117,7 @@ class IfrsAdapter
                     'amount' => $invoice->tax / 100,
                     'quantity' => 1,
                     'credited' => true, // Credit entry
+                    'vat_id' => $vatId,
                     'entity_id' => $entity->id,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -185,6 +191,9 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
             ]);
 
+            // Get or create 0% VAT rate (required by IFRS line items)
+            $vatId = $this->getOrCreateExemptVat($entity);
+
             // Line Item: Debit Cash
             // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
             DB::table('ifrs_line_items')->insert([
@@ -193,6 +202,7 @@ class IfrsAdapter
                 'amount' => $payment->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -205,6 +215,7 @@ class IfrsAdapter
                 'amount' => $payment->amount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -275,6 +286,9 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
             ]);
 
+            // Get or create 0% VAT rate (required by IFRS line items)
+            $vatId = $this->getOrCreateExemptVat($entity);
+
             // Line Item: Debit Fee Expense
             // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
             DB::table('ifrs_line_items')->insert([
@@ -283,6 +297,7 @@ class IfrsAdapter
                 'amount' => $fee / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -295,6 +310,7 @@ class IfrsAdapter
                 'amount' => $fee / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -384,6 +400,9 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
             ]);
 
+            // Get or create 0% VAT rate (required by IFRS line items)
+            $vatId = $this->getOrCreateExemptVat($entity);
+
             // Line Item: Credit Accounts Receivable (reduce asset)
             // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
             DB::table('ifrs_line_items')->insert([
@@ -392,6 +411,7 @@ class IfrsAdapter
                 'amount' => $creditNote->total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -404,6 +424,7 @@ class IfrsAdapter
                 'amount' => $creditNote->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -418,6 +439,7 @@ class IfrsAdapter
                     'amount' => $creditNote->tax / 100,
                     'quantity' => 1,
                     'credited' => false, // Debit to reduce liability
+                    'vat_id' => $vatId,
                     'entity_id' => $entity->id,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -1573,6 +1595,9 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
             ]);
 
+            // Get or create 0% VAT rate (required by IFRS line items)
+            $vatId = $this->getOrCreateExemptVat($entity);
+
             // Line Item: Debit Expense Account
             // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
             DB::table('ifrs_line_items')->insert([
@@ -1581,6 +1606,7 @@ class IfrsAdapter
                 'amount' => $expense->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -1593,6 +1619,7 @@ class IfrsAdapter
                 'amount' => $expense->amount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -2484,6 +2511,9 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
             ]);
 
+            // Get or create 0% VAT rate (required by IFRS line items)
+            $vatId = $this->getOrCreateExemptVat($entity);
+
             // Line Item: Debit Expense Account
             // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
             DB::table('ifrs_line_items')->insert([
@@ -2492,6 +2522,7 @@ class IfrsAdapter
                 'amount' => $bill->sub_total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -2506,6 +2537,7 @@ class IfrsAdapter
                     'amount' => $bill->tax / 100,
                     'quantity' => 1,
                     'credited' => false, // Debit entry
+                    'vat_id' => $vatId,
                     'entity_id' => $entity->id,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -2519,6 +2551,7 @@ class IfrsAdapter
                 'amount' => $bill->total / 100, // Total includes tax
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -2610,6 +2643,9 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
             ]);
 
+            // Get or create 0% VAT rate (required by IFRS line items)
+            $vatId = $this->getOrCreateExemptVat($entity);
+
             // Line Item: Debit Accounts Payable (reduce liability)
             // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
             DB::table('ifrs_line_items')->insert([
@@ -2618,6 +2654,7 @@ class IfrsAdapter
                 'amount' => $billPayment->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -2630,6 +2667,7 @@ class IfrsAdapter
                 'amount' => $billPayment->amount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -2816,6 +2854,9 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
             ]);
 
+            // Get or create 0% VAT rate (required by IFRS line items)
+            $vatId = $this->getOrCreateExemptVat($entity);
+
             // Line Item: Debit
             DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
@@ -2823,6 +2864,7 @@ class IfrsAdapter
                 'amount' => $amount,
                 'quantity' => 1,
                 'credited' => false,
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -2835,6 +2877,7 @@ class IfrsAdapter
                 'amount' => $amount,
                 'quantity' => 1,
                 'credited' => true,
+                'vat_id' => $vatId,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -3070,6 +3113,9 @@ class IfrsAdapter
             'entity_id' => $entity->id,
         ]);
 
+        // Get or create 0% VAT rate (required by IFRS line items)
+        $vatId = $this->getOrCreateExemptVat($entity);
+
         // Use DB::table to bypass Eloquent global scopes (proven pattern from invoice posting)
         DB::table('ifrs_line_items')->insert([
             'transaction_id' => $transaction->id,
@@ -3077,6 +3123,7 @@ class IfrsAdapter
             'amount' => $entry['amount'],
             'quantity' => 1,
             'credited' => false,
+            'vat_id' => $vatId,
             'entity_id' => $entity->id,
             'created_at' => now(),
             'updated_at' => now(),
@@ -3088,6 +3135,7 @@ class IfrsAdapter
             'amount' => $entry['amount'],
             'quantity' => 1,
             'credited' => true,
+            'vat_id' => $vatId,
             'entity_id' => $entity->id,
             'created_at' => now(),
             'updated_at' => now(),

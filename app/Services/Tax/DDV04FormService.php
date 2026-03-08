@@ -76,6 +76,7 @@ class DDV04FormService extends TaxFormService
 
         return [
             'fields' => $fields,
+            'overrides' => $overrides,
             'output_vat' => $outputVat,
             'input_vat' => $inputVat,
             'period_start' => $periodStart->format('d.m.Y'),
@@ -96,12 +97,12 @@ class DDV04FormService extends TaxFormService
         $warnings = [];
         $f = $data['fields'] ?? [];
 
-        // Field 10 should equal sum of fields 1-9
-        $sumOutputVat = ($f[1] ?? 0) + ($f[2] ?? 0) + ($f[3] ?? 0) + ($f[4] ?? 0)
-            + ($f[5] ?? 0) + ($f[6] ?? 0) + ($f[7] ?? 0) + ($f[8] ?? 0) + ($f[9] ?? 0);
+        // Field 10 = total output VAT = sum of VAT amounts (fields 2, 4, 7, 8, 9)
+        // Fields 1, 3, 5, 6 are taxable bases, not VAT amounts
+        $sumOutputVat = ($f[2] ?? 0) + ($f[4] ?? 0) + ($f[7] ?? 0) + ($f[8] ?? 0) + ($f[9] ?? 0);
         if (abs(($f[10] ?? 0) - $sumOutputVat) > 0.01) {
             $errors[] = sprintf(
-                'Поле 10 (%.2f) не е еднакво на збир од полиња 1-9 (%.2f)',
+                'Поле 10 (%.2f) не е еднакво на збир од ДДВ полиња 2+4+7+8+9 (%.2f)',
                 $f[10] ?? 0,
                 $sumOutputVat
             );
@@ -171,6 +172,7 @@ class DDV04FormService extends TaxFormService
             'company' => $company,
             'data' => $data,
             'fields' => $data['fields'] ?? [],
+            'overrides' => $data['overrides'] ?? [],
             'year' => $year,
             'periodStart' => $data['period_start'] ?? '',
             'periodEnd' => $data['period_end'] ?? '',

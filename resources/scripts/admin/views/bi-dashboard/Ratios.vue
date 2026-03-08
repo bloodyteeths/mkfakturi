@@ -24,6 +24,16 @@
       <p class="text-sm text-gray-500">{{ $t('general.loading') }}...</p>
     </div>
 
+    <!-- Not Initialized -->
+    <div v-else-if="notInitialized" class="text-center py-16 bg-white rounded-lg shadow">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <p class="text-sm text-gray-500 max-w-md mx-auto px-4">{{ t('not_initialized') }}</p>
+    </div>
+
     <!-- No Data -->
     <div v-else-if="!ratiosData" class="text-center py-12 bg-white rounded-lg shadow">
       <p class="text-sm text-gray-500">{{ t('no_data') }}</p>
@@ -194,6 +204,7 @@ function t(key) {
 
 const isLoading = ref(false)
 const ratiosData = ref(null)
+const notInitialized = ref(false)
 const selectedPeriod = ref('this_month')
 const selectedTrendKey = ref(null)
 const trendData = ref([])
@@ -291,11 +302,17 @@ function trendBarHeight(value) {
 
 async function loadRatios() {
   isLoading.value = true
+  notInitialized.value = false
   try {
     const { data } = await axios.get('/bi-dashboard/ratios', {
       params: { date: getPeriodDate() },
     })
-    ratiosData.value = data.data || null
+    if (data.message === 'accounting_not_initialized') {
+      notInitialized.value = true
+      ratiosData.value = null
+    } else {
+      ratiosData.value = data.data || null
+    }
   } catch (e) {
     notificationStore.showNotification({ type: 'error', message: t('error_loading_ratios') })
     ratiosData.value = null

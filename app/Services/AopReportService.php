@@ -49,9 +49,9 @@ class AopReportService
         $pasivaConfig = config('ujp_aop.obrazec_36.pasiva', []);
         $pasiva = $this->buildAopRows($pasivaConfig, $currentBalances, $previousBalances);
 
-        // Check balance
-        $totalAktiva = $this->findAopValue($aktiva, '001');
-        $totalPasiva = $this->findAopValue($pasiva, '060');
+        // Check balance (063 = ВКУПНА АКТИВА, 111 = ВКУПНА ПАСИВА)
+        $totalAktiva = $this->findAopValue($aktiva, '063');
+        $totalPasiva = $this->findAopValue($pasiva, '111');
 
         return [
             'aktiva' => $aktiva,
@@ -221,37 +221,50 @@ class AopReportService
             ];
         }
 
-        // Second pass: compute subtotals (bottom-up)
-        // We need to resolve sum_of references
+        // Second pass: compute subtotals via multi-pass iteration.
+        // Nested hierarchies (up to 4 levels: grand total → section → subsection → leaf)
+        // require multiple passes since parent totals depend on child totals.
         $rowsByAop = [];
         foreach ($rows as &$row) {
             $rowsByAop[$row['aop']] = &$row;
         }
         unset($row);
 
-        // Process totals in reverse order so children are ready before parents
         $totalRows = array_filter($rows, fn ($r) => $r['is_total'] && $r['sum_of']);
-        $totalRows = array_reverse($totalRows, true);
+        $maxPasses = 10;
 
-        foreach ($totalRows as $idx => $totalRow) {
-            $currentSum = 0;
-            $previousSum = 0;
-            foreach ($totalRow['sum_of'] as $childRef) {
-                $sign = 1;
-                $childAop = (string) $childRef;
-                if (is_string($childRef) && str_starts_with($childRef, '-')) {
-                    $sign = -1;
-                    $childAop = substr($childRef, 1);
-                } elseif (is_string($childRef) && str_starts_with($childRef, '+')) {
-                    $childAop = substr($childRef, 1);
+        for ($pass = 0; $pass < $maxPasses; $pass++) {
+            $changed = false;
+            foreach ($totalRows as $totalRow) {
+                $currentSum = 0;
+                $previousSum = 0;
+                foreach ($totalRow['sum_of'] as $childRef) {
+                    $sign = 1;
+                    $childAop = (string) $childRef;
+                    if (is_string($childRef) && str_starts_with($childRef, '-')) {
+                        $sign = -1;
+                        $childAop = substr($childRef, 1);
+                    } elseif (is_string($childRef) && str_starts_with($childRef, '+')) {
+                        $childAop = substr($childRef, 1);
+                    }
+                    if (isset($rowsByAop[$childAop])) {
+                        $currentSum += $sign * $rowsByAop[$childAop]['current'];
+                        $previousSum += $sign * $rowsByAop[$childAop]['previous'];
+                    }
                 }
-                if (isset($rowsByAop[$childAop])) {
-                    $currentSum += $sign * $rowsByAop[$childAop]['current'];
-                    $previousSum += $sign * $rowsByAop[$childAop]['previous'];
+                $newCurrent = round($currentSum, 2);
+                $newPrevious = round($previousSum, 2);
+
+                if ($rowsByAop[$totalRow['aop']]['current'] !== $newCurrent
+                    || $rowsByAop[$totalRow['aop']]['previous'] !== $newPrevious) {
+                    $rowsByAop[$totalRow['aop']]['current'] = $newCurrent;
+                    $rowsByAop[$totalRow['aop']]['previous'] = $newPrevious;
+                    $changed = true;
                 }
             }
-            $rowsByAop[$totalRow['aop']]['current'] = round($currentSum, 2);
-            $rowsByAop[$totalRow['aop']]['previous'] = round($previousSum, 2);
+            if (! $changed) {
+                break;
+            }
         }
 
         // Clean up internal fields
