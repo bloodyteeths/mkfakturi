@@ -26,7 +26,22 @@ class BillPaymentResource extends JsonResource
                 return new PaymentMethodResource($this->paymentMethod);
             }),
             'bill' => $this->whenLoaded('bill', function () {
-                return new BillResource($this->bill);
+                $bill = $this->bill;
+                $supplier = $bill->relationLoaded('supplier') ? $bill->supplier : null;
+
+                return [
+                    'id' => $bill->id,
+                    'bill_number' => $bill->bill_number,
+                    'supplier' => $supplier ? [
+                        'id' => $supplier->id,
+                        'name' => $supplier->name,
+                        'currency' => $supplier->relationLoaded('currency') && $supplier->currency ? [
+                            'id' => $supplier->currency->id,
+                            'symbol' => $supplier->currency->symbol,
+                            'code' => $supplier->currency->code,
+                        ] : null,
+                    ] : null,
+                ];
             }),
         ];
     }

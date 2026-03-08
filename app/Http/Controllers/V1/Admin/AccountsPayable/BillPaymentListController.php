@@ -24,7 +24,10 @@ class BillPaymentListController extends Controller
 
         $payments = $query
             ->with([
-                'bill:id,bill_number,supplier_id',
+                'bill' => function ($q) {
+                    $q->select('id', 'bill_number', 'supplier_id')
+                      ->without('supplier', 'currency', 'company');
+                },
                 'bill.supplier:id,name,currency_id',
                 'bill.supplier.currency',
                 'paymentMethod:id,name',
