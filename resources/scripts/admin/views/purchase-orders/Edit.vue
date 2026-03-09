@@ -65,6 +65,39 @@
             />
           </BaseInputGroup>
 
+          <!-- Cost Center -->
+          <BaseInputGroup :label="t('cost_center')">
+            <BaseMultiselect
+              v-model="form.cost_center_id"
+              :options="costCenters"
+              :searchable="true"
+              label="name"
+              value-prop="id"
+              :placeholder="t('select_cost_center')"
+            >
+              <template #singlelabel="{ value }">
+                <div class="flex items-center px-2">
+                  <span
+                    v-if="value.color"
+                    class="w-3 h-3 rounded-full mr-2 flex-shrink-0"
+                    :style="{ backgroundColor: value.color }"
+                  />
+                  <span class="text-sm">{{ value.code ? `${value.code} — ${value.name}` : value.name }}</span>
+                </div>
+              </template>
+              <template #option="{ option }">
+                <div class="flex items-center">
+                  <span
+                    v-if="option.color"
+                    class="w-3 h-3 rounded-full mr-2 flex-shrink-0"
+                    :style="{ backgroundColor: option.color }"
+                  />
+                  <span>{{ option.code ? `${option.code} — ${option.name}` : option.name }}</span>
+                </div>
+              </template>
+            </BaseMultiselect>
+          </BaseInputGroup>
+
           <!-- Notes -->
           <div class="md:col-span-2">
             <BaseInputGroup :label="t('notes')">
@@ -243,12 +276,14 @@ const isLoadingSuppliers = ref(false)
 const suppliers = ref([])
 const warehouses = ref([])
 const inventoryItems = ref([])
+const costCenters = ref([])
 
 const form = reactive({
   supplier_id: null,
   po_date: '',
   expected_delivery_date: null,
   warehouse_id: null,
+  cost_center_id: null,
   notes: '',
   items: [],
 })
@@ -330,6 +365,7 @@ async function fetchPo() {
     form.po_date = po.po_date
     form.expected_delivery_date = po.expected_delivery_date
     form.warehouse_id = po.warehouse_id
+    form.cost_center_id = po.cost_center_id
     form.notes = po.notes || ''
     form.items = (po.items || []).map(item => ({
       item_id: item.item_id,
@@ -383,6 +419,15 @@ async function fetchItems() {
   }
 }
 
+async function fetchCostCenters() {
+  try {
+    const response = await window.axios.get('/cost-centers', { params: { limit: 'all' } })
+    costCenters.value = response.data?.data || []
+  } catch {
+    costCenters.value = []
+  }
+}
+
 async function updatePurchaseOrder() {
   isSaving.value = true
   try {
@@ -391,6 +436,7 @@ async function updatePurchaseOrder() {
       po_date: form.po_date,
       expected_delivery_date: form.expected_delivery_date,
       warehouse_id: form.warehouse_id,
+      cost_center_id: form.cost_center_id,
       notes: form.notes,
       items: form.items.map(item => ({
         item_id: item.item_id,
@@ -425,6 +471,7 @@ onMounted(() => {
   fetchSuppliers()
   fetchWarehouses()
   fetchItems()
+  fetchCostCenters()
 })
 </script>
 

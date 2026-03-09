@@ -284,13 +284,37 @@
             </table>
         @endif
 
-        {{-- Warehouse --}}
-        @if($po->warehouse)
+        {{-- Warehouse & Cost Center --}}
+        @if($po->warehouse || $po->costCenter)
             <table class="meta-table" style="margin-top: 4px;">
+                @if($po->warehouse)
                 <tr>
                     <td class="meta-label">Магацин / Warehouse:</td>
                     <td class="meta-value">{{ $po->warehouse->name }}</td>
+                    @if($po->costCenter)
+                        <td class="meta-label">Центар на трошок / Cost Center:</td>
+                        <td class="meta-value">
+                            @if($po->costCenter->color)
+                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: {{ $po->costCenter->color }}; margin-right: 4px;"></span>
+                            @endif
+                            {{ $po->costCenter->code ? $po->costCenter->code . ' — ' . $po->costCenter->name : $po->costCenter->name }}
+                        </td>
+                    @else
+                        <td class="meta-label">&nbsp;</td>
+                        <td>&nbsp;</td>
+                    @endif
                 </tr>
+                @elseif($po->costCenter)
+                <tr>
+                    <td class="meta-label">Центар на трошок / Cost Center:</td>
+                    <td class="meta-value" colspan="3">
+                        @if($po->costCenter->color)
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: {{ $po->costCenter->color }}; margin-right: 4px;"></span>
+                        @endif
+                        {{ $po->costCenter->code ? $po->costCenter->code . ' — ' . $po->costCenter->name : $po->costCenter->name }}
+                    </td>
+                </tr>
+                @endif
             </table>
         @endif
 

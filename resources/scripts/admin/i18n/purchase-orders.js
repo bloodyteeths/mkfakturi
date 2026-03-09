@@ -103,6 +103,8 @@ export default {
       not_found: 'Нарачката не е пронајдена',
       download_pdf: 'Преземи PDF',
       error_downloading: 'Грешка при преземање на PDF',
+      cost_center: 'Центар на трошок',
+      select_cost_center: 'Изберете центар на трошок',
     }
   },
   en: {
@@ -209,6 +211,8 @@ export default {
       not_found: 'Purchase order not found',
       download_pdf: 'Download PDF',
       error_downloading: 'Error downloading PDF',
+      cost_center: 'Cost Center',
+      select_cost_center: 'Select Cost Center',
     }
   },
   tr: {
@@ -315,6 +319,8 @@ export default {
       not_found: 'Sipariş bulunamadı',
       download_pdf: 'PDF İndir',
       error_downloading: 'PDF indirme hatası',
+      cost_center: 'Maliyet Merkezi',
+      select_cost_center: 'Maliyet Merkezi Seçin',
     }
   },
   sq: {
@@ -421,6 +427,8 @@ export default {
       not_found: 'Porosia nuk u gjet',
       download_pdf: 'Shkarko PDF',
       error_downloading: 'Gabim në shkarkimin e PDF',
+      cost_center: 'Qendra e Kostos',
+      select_cost_center: 'Zgjidhni Qendrën e Kostos',
     }
   }
 }

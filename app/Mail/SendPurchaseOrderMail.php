@@ -43,6 +43,15 @@ class SendPurchaseOrderMail extends Mailable
                 $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
             });
 
+        // Attach the PDF if provided
+        if (!empty($this->data['pdf_content']) && !empty($this->data['pdf_filename'])) {
+            $mail->attachData(
+                $this->data['pdf_content'],
+                $this->data['pdf_filename'],
+                ['mime' => 'application/pdf']
+            );
+        }
+
         return $mail;
     }
 }

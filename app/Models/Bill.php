@@ -96,7 +96,7 @@ class Bill extends Model implements HasMedia
      */
     public function getFormattedCreatedAtAttribute()
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
@@ -106,7 +106,7 @@ class Bill extends Model implements HasMedia
      */
     public function getFormattedBillDateAttribute()
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->bill_date)->translatedFormat($dateFormat);
     }
@@ -119,7 +119,7 @@ class Bill extends Model implements HasMedia
         if (! $this->due_date) {
             return null;
         }
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->due_date)->translatedFormat($dateFormat);
     }

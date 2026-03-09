@@ -8,6 +8,7 @@ use App\Models\Currency;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Warehouse;
+use Modules\Mk\Models\CostCenter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -31,6 +32,7 @@ class PurchaseOrder extends Model
         'total',
         'currency_id',
         'warehouse_id',
+        'cost_center_id',
         'converted_bill_id',
         'notes',
         'created_by',
@@ -105,6 +107,11 @@ class PurchaseOrder extends Model
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
+    }
+
+    public function costCenter(): BelongsTo
+    {
+        return $this->belongsTo(CostCenter::class);
     }
 
     public function goodsReceipts(): HasMany

@@ -165,6 +165,20 @@
               </p>
             </div>
             <div>
+              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('cost_center') }}</p>
+              <p class="text-sm font-medium text-gray-900 mt-1">
+                <template v-if="po.cost_center">
+                  <span
+                    v-if="po.cost_center.color"
+                    class="inline-block w-3 h-3 rounded-full mr-1.5 align-middle"
+                    :style="{ backgroundColor: po.cost_center.color }"
+                  />
+                  <span class="align-middle">{{ po.cost_center.code ? `${po.cost_center.code} — ${po.cost_center.name}` : po.cost_center.name }}</span>
+                </template>
+                <template v-else>-</template>
+              </p>
+            </div>
+            <div>
               <p class="text-xs text-gray-500 uppercase font-medium">{{ t('created_by') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-1">
                 {{ po.created_by_user?.name || po.created_by?.name || '-' }}

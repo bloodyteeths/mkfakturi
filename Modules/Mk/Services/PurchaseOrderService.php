@@ -6,6 +6,7 @@ use App\Mail\SendPurchaseOrderMail;
 use App\Models\Bill;
 use App\Models\Company;
 use App\Models\CompanySetting;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +24,7 @@ class PurchaseOrderService
     public function list(int $companyId, array $filters): array
     {
         $query = PurchaseOrder::forCompany($companyId)
-            ->with(['supplier:id,name', 'createdBy:id,name', 'currency:id,name,code,symbol', 'items'])
+            ->with(['supplier:id,name', 'createdBy:id,name', 'currency:id,name,code,symbol', 'costCenter:id,name,code,color', 'items'])
             ->orderBy('po_date', 'desc');
 
         if (!empty($filters['status'])) {
@@ -108,6 +109,7 @@ class PurchaseOrderService
                 'total' => $total,
                 'currency_id' => $currencyId,
                 'warehouse_id' => $data['warehouse_id'] ?? null,
+                'cost_center_id' => $data['cost_center_id'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'created_by' => $userId,
             ]);
@@ -153,6 +155,7 @@ class PurchaseOrderService
                 'expected_delivery_date' => $data['expected_delivery_date'] ?? $po->expected_delivery_date,
                 'currency_id' => $data['currency_id'] ?? $po->currency_id,
                 'warehouse_id' => $data['warehouse_id'] ?? $po->warehouse_id,
+                'cost_center_id' => array_key_exists('cost_center_id', $data) ? $data['cost_center_id'] : $po->cost_center_id,
                 'notes' => $data['notes'] ?? $po->notes,
             ]);
 
@@ -206,7 +209,7 @@ class PurchaseOrderService
             throw new \InvalidArgumentException('Only draft purchase orders can be sent.');
         }
 
-        $po->load(['items', 'supplier']);
+        $po->load(['items', 'supplier', 'warehouse', 'createdBy', 'currency', 'company.address', 'costCenter']);
         $po->update(['status' => 'sent']);
 
         $emailSentTo = null;
@@ -217,12 +220,21 @@ class PurchaseOrderService
                 $company = Company::find($po->company_id);
                 $companyName = $company?->name ?? 'Facturino';
 
+                // Generate PDF to attach
+                $pdfInstance = Pdf::loadView('app.pdf.reports.purchase-order', [
+                    'po' => $po,
+                    'company' => $company,
+                ]);
+                $pdfInstance->setPaper('A4', 'portrait');
+                $pdfContent = $pdfInstance->output();
+                $pdfFilename = "nabavka-{$po->po_number}.pdf";
+
                 $mailData = [
                     'to' => $supplierEmail,
                     'from' => $company?->email ?? config('mail.from.address'),
-                    'subject' => "Purchase Order {$po->po_number} — {$companyName}",
-                    'body' => "<p>Purchase Order <strong>{$po->po_number}</strong> from <strong>{$companyName}</strong>.</p>"
-                        . ($po->expected_delivery_date ? "<p>Expected delivery: {$po->expected_delivery_date}</p>" : ''),
+                    'subject' => "Набавка / Purchase Order {$po->po_number} — {$companyName}",
+                    'body' => "<p>Набавка / Purchase Order <strong>{$po->po_number}</strong> од / from <strong>{$companyName}</strong>.</p>"
+                        . ($po->expected_delivery_date ? "<p>Очекувана испорака / Expected delivery: {$po->expected_delivery_date->format('d.m.Y')}</p>" : ''),
                     'company' => [
                         'name' => $companyName,
                         'logo' => $company?->logo ?? null,
@@ -241,12 +253,14 @@ class PurchaseOrderService
                         ])->toArray(),
                     ],
                     'labels' => [
-                        'item' => 'Item',
-                        'qty' => 'Qty',
-                        'price' => 'Price',
-                        'total' => 'Total',
-                        'notes' => 'Notes',
+                        'item' => 'Ставка / Item',
+                        'qty' => 'Кол. / Qty',
+                        'price' => 'Цена / Price',
+                        'total' => 'Вкупно / Total',
+                        'notes' => 'Забелешки / Notes',
                     ],
+                    'pdf_content' => $pdfContent,
+                    'pdf_filename' => $pdfFilename,
                 ];
 
                 Mail::to($supplierEmail)->send(new SendPurchaseOrderMail($mailData));
