@@ -204,6 +204,73 @@ test.describe('Interest Feature Audit', () => {
     console.log(`  /calculate: ${body.data.length} calculations, rate=${body.annual_rate}%`);
   });
 
+  // ─── GENERATE NOTE (PDF) TESTS ────────────────
+
+  test('POST /interest/generate-note returns PDF when calculations exist', async () => {
+    // First, calculate to ensure there are fresh 'calculated' records
+    const calcResp = await page.request.post(`${BASE}/api/v1/interest/calculate`, {
+      headers: h(), data: {},
+    });
+    expect(calcResp.status()).toBe(200);
+    const calcBody = await calcResp.json();
+    console.log(`  Pre-generate: ${calcBody.data.length} calculations from /calculate`);
+
+    // Get calculated OR invoiced records (both are eligible for note generation)
+    const listResp = await page.request.get(`${BASE}/api/v1/interest?limit=all`, { headers: h() });
+    const listBody = await listResp.json();
+    const eligible = (listBody.data || []).filter(c => c.status === 'calculated' || c.status === 'invoiced');
+    console.log(`  Found ${eligible.length} eligible records (calculated+invoiced)`);
+
+    if (eligible.length === 0) {
+      console.log('  SKIP: No eligible records to test generate-note with');
+      return;
+    }
+
+    // Group by customer_id and pick the first customer's calculations
+    const firstCustomerId = eligible[0].customer_id;
+    const customerCalcs = eligible.filter(c => c.customer_id === firstCustomerId);
+    const ids = customerCalcs.map(c => c.id);
+
+    console.log(`  Testing generate-note with customer_id=${firstCustomerId}, ${ids.length} calculation(s)`);
+
+    const resp = await page.request.post(`${BASE}/api/v1/interest/generate-note`, {
+      headers: {
+        'Authorization': `Bearer ${TOKEN}`,
+        'company': '2',
+      },
+      data: {
+        customer_id: firstCustomerId,
+        calculation_ids: ids,
+      },
+    });
+
+    // Should return 200 with PDF content-type
+    expect(resp.status()).toBe(200);
+    const contentType = resp.headers()['content-type'] || '';
+    expect(contentType).toContain('pdf');
+    const body = await resp.body();
+    expect(body.length).toBeGreaterThan(100);
+    console.log(`  generate-note: ${resp.status()}, content-type=${contentType}, size=${body.length} bytes`);
+  });
+
+  test('POST /interest/send-note validates required fields', async () => {
+    const resp = await page.request.post(`${BASE}/api/v1/interest/send-note`, {
+      headers: h(), data: {},
+    });
+    expect(resp.status()).toBe(422);
+  });
+
+  test('POST /interest/send-note rejects non-existent customer', async () => {
+    const resp = await page.request.post(`${BASE}/api/v1/interest/send-note`, {
+      headers: h(),
+      data: { customer_id: 999999, calculation_ids: [1] },
+    });
+    // 422 because no matching calculations or no email
+    expect(resp.status()).toBe(422);
+    const body = await resp.json();
+    console.log(`  send-note reject: ${body.message}`);
+  });
+
   // ─── PAGES LOAD WITHOUT 500 ────────────────
   test('Admin page responds (no 500)', async () => {
     const resp = await page.request.get(`${BASE}/admin/interest`);

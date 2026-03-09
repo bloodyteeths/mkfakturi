@@ -136,13 +136,16 @@ class InterestCalculationService
                 ->first();
 
             if ($existing) {
-                // Update existing calculation with new amounts
-                $existing->update([
-                    'principal_amount' => $calc['principal_amount'],
-                    'days_overdue' => $calc['days_overdue'],
-                    'annual_rate' => $calc['annual_rate'],
-                    'interest_amount' => $calc['interest_amount'],
-                ]);
+                // Only update records still in 'calculated' status.
+                // Finalized records (invoiced/paid/waived) should not be overwritten.
+                if ($existing->status === 'calculated') {
+                    $existing->update([
+                        'principal_amount' => $calc['principal_amount'],
+                        'days_overdue' => $calc['days_overdue'],
+                        'annual_rate' => $calc['annual_rate'],
+                        'interest_amount' => $calc['interest_amount'],
+                    ]);
+                }
                 $saved[] = $existing;
 
                 continue;
@@ -175,7 +178,7 @@ class InterestCalculationService
         $calculations = InterestCalculation::forCompany($companyId)
             ->where('customer_id', $customerId)
             ->whereIn('id', $calculationIds)
-            ->where('status', 'calculated')
+            ->whereIn('status', ['calculated', 'invoiced'])
             ->with(['invoice:id,invoice_number,due_date,total,due_amount'])
             ->get();
 

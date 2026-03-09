@@ -297,7 +297,7 @@
                 >
                   <td class="px-4 py-4">
                     <input
-                      v-if="calc.status === 'calculated'"
+                      v-if="calc.status === 'calculated' || calc.status === 'invoiced'"
                       type="checkbox"
                       class="rounded border-gray-300"
                       :value="calc.id"
@@ -338,7 +338,7 @@
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap text-right text-sm">
                     <BaseButton
-                      v-if="calc.status === 'calculated'"
+                      v-if="calc.status === 'calculated' || calc.status === 'invoiced'"
                       variant="danger-outline"
                       size="sm"
                       @click="waiveCalculation(calc.id)"
@@ -469,8 +469,8 @@ const statusOptions = [
 ]
 
 const allSelected = computed(() => {
-  const calculatedItems = calculations.value.filter(c => c.status === 'calculated')
-  return calculatedItems.length > 0 && selectedIds.value.length === calculatedItems.length
+  const selectableItems = calculations.value.filter(c => c.status === 'calculated' || c.status === 'invoiced')
+  return selectableItems.length > 0 && selectedIds.value.length === selectableItems.length
 })
 
 // Helpers
@@ -505,7 +505,7 @@ function statusLabel(status) {
 function toggleSelectAll(event) {
   if (event.target.checked) {
     selectedIds.value = calculations.value
-      .filter(c => c.status === 'calculated')
+      .filter(c => c.status === 'calculated' || c.status === 'invoiced')
       .map(c => c.id)
   } else {
     selectedIds.value = []
