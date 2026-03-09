@@ -23,7 +23,7 @@ class PaymentReminder extends Mailable
 
     public string $level;
 
-    public string $locale;
+    public string $contentLocale;
 
     /**
      * Create a new message instance.
@@ -33,13 +33,13 @@ class PaymentReminder extends Mailable
         Customer $customer,
         ReminderTemplate $template,
         string $level,
-        string $locale = 'mk'
+        string $contentLocale = 'mk'
     ) {
         $this->invoice = $invoice;
         $this->customer = $customer;
         $this->template = $template;
         $this->level = $level;
-        $this->locale = $locale;
+        $this->contentLocale = $contentLocale;
     }
 
     /**
@@ -57,8 +57,8 @@ class PaymentReminder extends Mailable
         $this->invoice->loadMissing('currency');
 
         // Resolve subject and body for locale
-        $subject = $this->resolveTemplate($this->template->getSubjectForLocale($this->locale));
-        $body = $this->resolveTemplate($this->template->getBodyForLocale($this->locale));
+        $subject = $this->resolveTemplate($this->template->getSubjectForLocale($this->contentLocale));
+        $body = $this->resolveTemplate($this->template->getBodyForLocale($this->contentLocale));
 
         // Calculate days overdue
         $dueDate = $this->invoice->due_date instanceof \DateTimeInterface
@@ -73,7 +73,7 @@ class PaymentReminder extends Mailable
                 'company' => $company,
                 'body' => $body,
                 'level' => $this->level,
-                'locale' => $this->locale,
+                'locale' => $this->contentLocale,
                 'daysOverdue' => $dueDate->diffInDays(Carbon::today()),
                 'currencySymbol' => $this->invoice->currency->symbol ?? 'ден.',
             ])

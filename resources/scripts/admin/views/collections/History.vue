@@ -40,6 +40,23 @@
       </div>
     </div>
 
+    <!-- Date Range Filters -->
+    <div class="p-4 bg-white rounded-lg shadow mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <BaseInputGroup :label="t('from_date')">
+          <BaseInput v-model="filters.from_date" type="date" />
+        </BaseInputGroup>
+        <BaseInputGroup :label="t('to_date')">
+          <BaseInput v-model="filters.to_date" type="date" />
+        </BaseInputGroup>
+        <div class="flex items-end">
+          <BaseButton variant="primary-outline" @click="loadHistory">
+            {{ $t('general.filter') }}
+          </BaseButton>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading -->
     <div v-if="isLoading" class="bg-white rounded-lg shadow overflow-hidden">
       <div class="p-6 space-y-4">
@@ -89,13 +106,23 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination -->
+        <div v-if="pagination && pagination.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
+          <p class="text-sm text-gray-500">{{ pagination.total }} {{ t('total_sent').toLowerCase() }}</p>
+          <div class="flex items-center gap-2">
+            <BaseButton size="sm" variant="primary-outline" :disabled="pagination.page <= 1" @click="goToPage(pagination.page - 1)">&laquo;</BaseButton>
+            <span class="text-sm text-gray-700">{{ pagination.page }} / {{ pagination.last_page }}</span>
+            <BaseButton size="sm" variant="primary-outline" :disabled="pagination.page >= pagination.last_page" @click="goToPage(pagination.page + 1)">&raquo;</BaseButton>
+          </div>
+        </div>
       </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import collectionMessages from '@/scripts/admin/i18n/collections.js'
 
@@ -113,7 +140,14 @@ const fmtLocale = localeMap[locale] || 'mk-MK'
 
 const history = ref([])
 const effectiveness = ref(null)
+const pagination = ref(null)
 const isLoading = ref(false)
+
+const filters = reactive({
+  from_date: '',
+  to_date: '',
+  page: 1,
+})
 
 const effectivenessTotalSent = computed(() => {
   if (!effectiveness.value?.by_level) return 0
@@ -160,14 +194,25 @@ function sentViaLabel(via) {
   return via || '-'
 }
 
+function goToPage(page) {
+  filters.page = page
+  loadHistory()
+}
+
 async function loadHistory() {
   isLoading.value = true
   try {
+    const params = {}
+    if (filters.from_date) params.from_date = filters.from_date
+    if (filters.to_date) params.to_date = filters.to_date
+    params.page = filters.page
+
     const [histRes, effRes] = await Promise.all([
-      window.axios.get('/collections/history'),
+      window.axios.get('/collections/history', { params }),
       window.axios.get('/collections/effectiveness'),
     ])
     history.value = histRes.data.data || []
+    pagination.value = histRes.data.pagination || null
     effectiveness.value = effRes.data.data || null
   } catch (e) {
     console.error('Failed to load history', e)
@@ -183,7 +228,6 @@ async function loadHistory() {
 onMounted(() => {
   loadHistory()
 })
-// CLAUDE-CHECKPOINT
 </script>
 
 <!-- CLAUDE-CHECKPOINT -->

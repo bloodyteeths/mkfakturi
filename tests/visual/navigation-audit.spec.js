@@ -8,6 +8,8 @@
  * - Button clicks respond
  */
 import { test, expect } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 
 const BASE_URL = 'https://app.facturino.mk';
 const EMAIL = 'your-email@example.com';
@@ -380,8 +382,7 @@ test.describe('i18n Feature Page Titles', () => {
   // since changing language mid-session requires settings change
 
   test('all i18n files have 4 language keys', async () => {
-    const fs = require('fs');
-    const path = require('path');
+    // fs and path imported at top
     const i18nDir = path.join(process.cwd(), 'resources/scripts/admin/i18n');
 
     const files = fs.readdirSync(i18nDir).filter((f) => f.endsWith('.js'));
@@ -415,8 +416,7 @@ test.describe('i18n Feature Page Titles', () => {
   });
 
   test('Hub pages have 4 language keys', async () => {
-    const fs = require('fs');
-    const path = require('path');
+    // fs and path imported at top
 
     console.log(`\n=== Hub Pages i18n Audit ===`);
 
@@ -446,8 +446,7 @@ test.describe('i18n Feature Page Titles', () => {
   });
 
   test('lang/mk.json and lang/en.json have hub navigation keys', async () => {
-    const fs = require('fs');
-    const path = require('path');
+    // fs and path imported at top
 
     console.log(`\n=== Navigation Keys Audit ===`);
 
