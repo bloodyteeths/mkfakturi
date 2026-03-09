@@ -511,6 +511,16 @@ async function onCompanyChange() {
   filters.date_from = null
   filters.date_to = null
 
+  // Auto-calculate on company change so overdue invoices show immediately
+  isCalculating.value = true
+  try {
+    await window.axios.post(partnerApi('/calculate'), {})
+  } catch {
+    // Silent — first load may have zero overdue invoices
+  } finally {
+    isCalculating.value = false
+  }
+
   await Promise.all([
     fetchCalculations(1),
     fetchSummary(),

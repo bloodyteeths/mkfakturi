@@ -690,7 +690,17 @@ async function waiveCalculation(id) {
 }
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
+  // Auto-calculate on page load so overdue invoices show immediately
+  isCalculating.value = true
+  try {
+    await window.axios.post('/interest/calculate', {})
+  } catch {
+    // Silent — may have zero overdue invoices
+  } finally {
+    isCalculating.value = false
+  }
+
   fetchCalculations(1)
   fetchSummary()
   fetchCustomers()
