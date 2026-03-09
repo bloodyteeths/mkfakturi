@@ -2,7 +2,9 @@
 
 namespace Modules\Mk\Services;
 
+use App\Models\Company;
 use App\Models\CompanySetting;
+use App\Models\Customer;
 use App\Models\Invoice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -165,52 +167,42 @@ class InterestCalculationService
     }
 
     /**
-     * Generate an interest note (special invoice) for a customer's interest charges.
-     * Marks the source calculations as 'invoiced'.
-     *
-     * @param int $companyId
-     * @param int $customerId
-     * @param array $calculationIds Array of InterestCalculation IDs to include
-     * @return array Summary of the generated note
+     * Get data for rendering the interest note PDF.
+     * Does NOT update status — the caller (controller) does that after successful PDF generation.
      */
-    public function generateInterestNote(int $companyId, int $customerId, array $calculationIds): array
+    public function getInterestNoteData(int $companyId, int $customerId, array $calculationIds): array
     {
         $calculations = InterestCalculation::forCompany($companyId)
             ->where('customer_id', $customerId)
             ->whereIn('id', $calculationIds)
             ->where('status', 'calculated')
+            ->with(['invoice:id,invoice_number,due_date,total,due_amount'])
             ->get();
 
         if ($calculations->isEmpty()) {
             throw new \InvalidArgumentException('No eligible calculations found for interest note generation.');
         }
 
-        $totalInterest = $calculations->sum('interest_amount');
+        $company = Company::with('address')->find($companyId);
+        $customer = Customer::with('billingAddress')->find($customerId);
 
-        // Build line items description
-        $lines = [];
-        foreach ($calculations as $calc) {
-            $invoice = Invoice::find($calc->invoice_id);
-            $invoiceNum = $invoice ? $invoice->invoice_number : 'N/A';
-            $lines[] = sprintf(
-                'Камата за фактура %s (%d дена, %.2f%%): %s',
-                $invoiceNum,
-                $calc->days_overdue,
-                $calc->annual_rate,
-                number_format($calc->interest_amount / 100, 2, '.', ',')
-            );
-        }
+        $totalPrincipal = (int) $calculations->sum('principal_amount');
+        $totalInterest = (int) $calculations->sum('interest_amount');
 
-        // Mark calculations as invoiced
-        InterestCalculation::whereIn('id', $calculations->pluck('id'))
-            ->update(['status' => 'invoiced']);
+        $currency = $calculations->first()->invoice?->currency ?? null;
+        $currencySymbol = $currency->symbol ?? 'ден.';
 
         return [
-            'company_id' => $companyId,
-            'customer_id' => $customerId,
+            'company' => $company,
+            'customer' => $customer,
+            'calculations' => $calculations,
+            'currency_symbol' => $currencySymbol,
+            'total_principal' => $totalPrincipal,
             'total_interest' => $totalInterest,
-            'calculation_count' => $calculations->count(),
-            'line_items' => $lines,
+            'grand_total' => $totalPrincipal + $totalInterest,
+            'annual_rate' => $this->getAnnualRate($companyId),
+            'today' => Carbon::today()->format('d.m.Y'),
+            'note_number' => 'КН-' . $customerId . '-' . time(),
             'calculation_ids' => $calculations->pluck('id')->toArray(),
         ];
     }

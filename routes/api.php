@@ -736,6 +736,7 @@ Route::prefix('/v1')->group(function () {
             Route::post('/bills/{bill}/mark-as-viewed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsViewed']);
             Route::post('/bills/{bill}/mark-as-completed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsCompleted']);
             Route::get('/bills/{bill}/download-pdf', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'downloadPdf']);
+            Route::get('/bills/{bill}/pp30', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'pp30Pdf']);
             Route::post('/bills/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'delete']);
             Route::apiResource('bills', \App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class);
 
@@ -1041,6 +1042,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{id}/export', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'export']);
                 Route::post('/{id}/confirm', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'confirm']);
                 Route::post('/{id}/cancel', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'cancel']);
+                Route::get('/{id}/pp30', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'pp30Pdf']);
             });
 
             // F3: Cost Centers - Standard+ tier
@@ -1073,6 +1075,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/rate', [\Modules\Mk\Http\Controllers\InterestController::class, 'updateRate']);
                 Route::delete('/rate', [\Modules\Mk\Http\Controllers\InterestController::class, 'resetRate']);
                 Route::post('/generate-note', [\Modules\Mk\Http\Controllers\InterestController::class, 'generateNote']);
+                Route::post('/send-note', [\Modules\Mk\Http\Controllers\InterestController::class, 'sendNote']);
                 Route::get('/{id}', [\Modules\Mk\Http\Controllers\InterestController::class, 'show']);
                 Route::post('/{id}/waive', [\Modules\Mk\Http\Controllers\InterestController::class, 'waive']);
             });
@@ -1801,6 +1804,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::get('/{id}/export', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'export']);
             Route::post('/{id}/confirm', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'confirm']);
             Route::post('/{id}/cancel', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'cancel']);
+            Route::get('/{id}/pp30', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'pp30Pdf']);
         });
 
         // F3: Cost Centers (Partner)
@@ -1830,6 +1834,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::delete('/rate', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'resetRate']);
             Route::get('/customers', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'customers']);
             Route::post('/generate-note', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'generateNote']);
+            Route::post('/send-note', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'sendNote']);
             Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'show']);
             Route::post('/{id}/waive', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'waive']);
         });

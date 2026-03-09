@@ -195,14 +195,30 @@
         <span class="text-sm text-amber-800">
           {{ selectedIds.length }} {{ t('select_for_note') }}
         </span>
-        <BaseButton
-          variant="primary"
-          size="sm"
-          :loading="isGenerating"
-          @click="generateNote"
-        >
-          {{ t('generate_note') }}
-        </BaseButton>
+        <div class="flex gap-2">
+          <BaseButton
+            variant="primary"
+            size="sm"
+            :loading="isGenerating"
+            @click="generateNote"
+          >
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="DocumentArrowDownIcon" />
+            </template>
+            {{ t('generate_note') }}
+          </BaseButton>
+          <BaseButton
+            variant="primary-outline"
+            size="sm"
+            :loading="isSending"
+            @click="sendNote"
+          >
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="EnvelopeIcon" />
+            </template>
+            {{ t('send_note') }}
+          </BaseButton>
+        </div>
       </div>
 
       <div class="bg-white rounded-lg shadow overflow-hidden" :class="{ 'rounded-t-none': selectedIds.length > 0 }">
@@ -392,6 +408,7 @@ const customers = ref([])
 const isLoading = ref(false)
 const isCalculating = ref(false)
 const isGenerating = ref(false)
+const isSending = ref(false)
 const selectedIds = ref([])
 const asOfDate = ref(null)
 
@@ -625,34 +642,95 @@ async function batchCalculate() {
   }
 }
 
-async function generateNote() {
-  if (selectedIds.value.length === 0) return
-
+function getSelectedCustomerPayload() {
   const selectedCalcs = calculations.value.filter(c => selectedIds.value.includes(c.id))
-  if (selectedCalcs.length === 0) return
+  if (selectedCalcs.length === 0) return null
 
-  // Validate all selected are for the same customer
   const customerIds = [...new Set(selectedCalcs.map(c => c.customer_id))]
   if (customerIds.length > 1) {
     notificationStore.showNotification({
       type: 'error',
       message: t('mixed_customers_warning'),
     })
-    return
+    return null
   }
 
-  const firstCalc = selectedCalcs[0]
+  return {
+    customer_id: selectedCalcs[0].customer_id,
+    calculation_ids: selectedIds.value,
+    customer_name: selectedCalcs[0].customer?.name || '',
+  }
+}
+
+async function generateNote() {
+  if (selectedIds.value.length === 0) return
+  const payload = getSelectedCustomerPayload()
+  if (!payload) return
 
   isGenerating.value = true
   try {
     const response = await window.axios.post('/interest/generate-note', {
-      customer_id: firstCalc.customer_id,
-      calculation_ids: selectedIds.value,
-    })
+      customer_id: payload.customer_id,
+      calculation_ids: payload.calculation_ids,
+    }, { responseType: 'blob' })
+
+    if (response.data.type && !response.data.type.includes('pdf')) {
+      const text = await response.data.text()
+      const err = JSON.parse(text)
+      notificationStore.showNotification({ type: 'error', message: err.message || t('error_generating') })
+      return
+    }
+
+    const url = URL.createObjectURL(response.data)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `kamatna-nota-${payload.customer_name || 'note'}.pdf`
+    a.click()
+    URL.revokeObjectURL(url)
 
     notificationStore.showNotification({
       type: 'success',
-      message: response.data.message || t('note_generated'),
+      message: t('note_generated'),
+    })
+
+    selectedIds.value = []
+    fetchCalculations(1)
+    fetchSummary()
+  } catch (error) {
+    let msg = t('error_generating')
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const err = JSON.parse(text)
+        msg = err.message || msg
+      } catch (_) {}
+    }
+    notificationStore.showNotification({ type: 'error', message: msg })
+  } finally {
+    isGenerating.value = false
+  }
+}
+
+async function sendNote() {
+  if (selectedIds.value.length === 0) return
+  const payload = getSelectedCustomerPayload()
+  if (!payload) return
+
+  const confirmMsg = t('send_note_confirm')
+    .replace('{name}', payload.customer_name)
+  if (!confirm(confirmMsg)) return
+
+  isSending.value = true
+  try {
+    const response = await window.axios.post('/interest/send-note', {
+      customer_id: payload.customer_id,
+      calculation_ids: payload.calculation_ids,
+    })
+
+    const email = response.data.email || ''
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('note_sent').replace('{email}', email),
     })
 
     selectedIds.value = []
@@ -661,10 +739,10 @@ async function generateNote() {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_generating'),
+      message: error.response?.data?.message || t('error_sending_note'),
     })
   } finally {
-    isGenerating.value = false
+    isSending.value = false
   }
 }
 

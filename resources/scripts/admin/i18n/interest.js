@@ -63,6 +63,10 @@ export default {
       export_csv: 'Извези CSV',
       mixed_customers_warning: 'Избраните пресметки се за различни купувачи. Каматна нота може да се генерира само за еден купувач.',
       confirm_high_rate: 'Стапката од {rate}% е невообичаена. Дали сте сигурни?',
+      send_note: 'Испрати на купувач',
+      note_sent: 'Каматната нота е испратена на {email}.',
+      send_note_confirm: 'Испрати каматна нота на {name}?',
+      error_sending_note: 'Грешка при испраќање на каматна нота',
     }
   },
   en: {
@@ -129,6 +133,10 @@ export default {
       export_csv: 'Export CSV',
       mixed_customers_warning: 'Selected calculations are for different customers. An interest note can only be generated for one customer at a time.',
       confirm_high_rate: 'A rate of {rate}% is unusual. Are you sure?',
+      send_note: 'Send to Customer',
+      note_sent: 'Interest note sent to {email}.',
+      send_note_confirm: 'Send interest note to {name}?',
+      error_sending_note: 'Error sending interest note',
     }
   },
   tr: {
@@ -195,6 +203,10 @@ export default {
       export_csv: 'CSV Aktar',
       mixed_customers_warning: 'Secilen hesaplamalar farkli musteriler icin. Faiz notu ayni anda yalnizca bir musteri icin olusturulabilir.',
       confirm_high_rate: '%{rate} orani olagan disi. Emin misiniz?',
+      send_note: 'Musteriye Gonder',
+      note_sent: 'Faiz notu {email} adresine gonderildi.',
+      send_note_confirm: '{name} musterisine faiz notu gonder?',
+      error_sending_note: 'Faiz notu gonderme hatasi',
     }
   },
   sq: {
@@ -261,6 +273,10 @@ export default {
       export_csv: 'Eksporto CSV',
       mixed_customers_warning: 'Llogaritjet e zgjedhura jane per kliente te ndryshem. Nota e interesit mund te gjenerohet vetem per nje klient.',
       confirm_high_rate: 'Norma prej {rate}% eshte e pazakonte. Jeni te sigurt?',
+      send_note: 'Dergo Klientit',
+      note_sent: 'Nota e interesit u dergua ne {email}.',
+      send_note_confirm: 'Dergo noten e interesit per {name}?',
+      error_sending_note: 'Gabim ne dergimin e notes se interesit',
     }
   }
 }

@@ -3,9 +3,12 @@
 namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Mail\InterestNoteMail;
 use App\Models\CompanySetting;
+use App\Models\Customer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Modules\Mk\Models\InterestCalculation;
 use Modules\Mk\Services\InterestCalculationService;
 
@@ -117,9 +120,9 @@ class InterestController extends Controller
     }
 
     /**
-     * Generate interest note (invoice) for selected calculations.
+     * Generate interest note PDF for selected calculations.
      */
-    public function generateNote(Request $request): JsonResponse
+    public function generateNote(Request $request)
     {
         $companyId = (int) $request->header('company');
 
@@ -130,16 +133,73 @@ class InterestController extends Controller
         ]);
 
         try {
-            $result = $this->service->generateInterestNote(
+            $data = $this->service->getInterestNoteData(
                 $companyId,
                 (int) $request->input('customer_id'),
                 $request->input('calculation_ids')
             );
 
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('app.pdf.reports.interest-note', $data);
+            $pdf->setPaper('A4', 'portrait');
+
+            // Mark as invoiced after successful PDF generation
+            InterestCalculation::whereIn('id', $data['calculation_ids'])
+                ->where('status', 'calculated')
+                ->update(['status' => 'invoiced']);
+
+            return $pdf->download("kamatna-nota-{$data['note_number']}.pdf");
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Send interest note PDF via email to the customer.
+     */
+    public function sendNote(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $request->validate([
+            'customer_id' => 'required|integer',
+            'calculation_ids' => 'required|array|min:1',
+            'calculation_ids.*' => 'integer',
+        ]);
+
+        try {
+            $customerId = (int) $request->input('customer_id');
+            $customer = Customer::find($customerId);
+
+            if (! $customer || ! $customer->email) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer has no email address.',
+                ], 422);
+            }
+
+            $data = $this->service->getInterestNoteData(
+                $companyId,
+                $customerId,
+                $request->input('calculation_ids')
+            );
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('app.pdf.reports.interest-note', $data);
+            $pdf->setPaper('A4', 'portrait');
+
+            Mail::to($customer->email)->send(new InterestNoteMail($data, $pdf));
+
+            // Mark as invoiced after successful send
+            InterestCalculation::whereIn('id', $data['calculation_ids'])
+                ->where('status', 'calculated')
+                ->update(['status' => 'invoiced']);
+
             return response()->json([
                 'success' => true,
-                'data' => $result,
-                'message' => 'Interest note generated successfully.',
+                'message' => "Interest note sent to {$customer->email}.",
+                'email' => $customer->email,
             ]);
         } catch (\Exception $e) {
             return response()->json([
