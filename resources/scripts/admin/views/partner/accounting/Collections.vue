@@ -3,11 +3,34 @@
     <BasePageHeader :title="t('title')">
       <template #actions>
         <BaseButton
-          v-if="selectedCompanyId"
           variant="primary-outline"
-          @click="activeTab = activeTab === 'history' ? 'overdue' : 'history'"
+          @click="activeTab = 'templates'"
+          v-if="selectedCompanyId && activeTab !== 'templates'"
         >
-          {{ activeTab === 'history' ? t('total_overdue') : t('history') }}
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="DocumentTextIcon" />
+          </template>
+          {{ t('templates') }}
+        </BaseButton>
+        <BaseButton
+          variant="primary-outline"
+          @click="activeTab = 'history'"
+          v-if="selectedCompanyId && activeTab !== 'history'"
+        >
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="ClockIcon" />
+          </template>
+          {{ t('history') }}
+        </BaseButton>
+        <BaseButton
+          variant="primary"
+          @click="activeTab = 'overdue'"
+          v-if="selectedCompanyId && activeTab !== 'overdue'"
+        >
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="ExclamationTriangleIcon" />
+          </template>
+          {{ t('total_overdue') }}
         </BaseButton>
       </template>
     </BasePageHeader>
@@ -68,7 +91,35 @@
       <template v-else>
         <!-- Overdue Tab -->
         <div v-if="activeTab === 'overdue'">
-          <div v-if="overdueInvoices.length === 0" class="text-center py-12 bg-white rounded-lg shadow">
+          <!-- Filters -->
+          <div class="p-4 bg-white rounded-lg shadow mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <BaseInputGroup :label="t('filter_level')">
+                <BaseMultiselect
+                  v-model="filters.escalation_level"
+                  :options="levelOptions"
+                  :searchable="false"
+                  label="label"
+                  value-prop="value"
+                  :placeholder="$t('general.all')"
+                />
+              </BaseInputGroup>
+              <BaseInputGroup :label="t('customer')">
+                <BaseInput
+                  v-model="filters.search"
+                  :placeholder="t('search_placeholder')"
+                  type="text"
+                />
+              </BaseInputGroup>
+              <div class="flex items-end">
+                <BaseButton variant="primary-outline" @click="loadOverdue">
+                  {{ $t('general.filter') }}
+                </BaseButton>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="overdueInvoices.length === 0" class="text-center py-16 bg-white rounded-lg shadow">
             <BaseIcon name="CheckCircleIcon" class="h-12 w-12 text-green-400 mx-auto mb-4" />
             <h3 class="text-lg font-medium text-gray-900">{{ t('no_overdue') }}</h3>
             <p class="text-sm text-gray-500 mt-1">{{ t('no_overdue_description') }}</p>
@@ -84,6 +135,7 @@
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('amount_due') }}</th>
                   <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('days_overdue') }}</th>
                   <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('escalation') }}</th>
+                  <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('reminders_sent') }}</th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('general.actions') }}</th>
                 </tr>
               </thead>
@@ -92,7 +144,7 @@
                   <td class="px-4 py-3 text-sm text-gray-900">{{ inv.customer_name }}</td>
                   <td class="px-4 py-3 text-sm text-gray-600">{{ inv.invoice_number }}</td>
                   <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(inv.due_date) }}</td>
-                  <td class="px-4 py-3 text-sm text-right font-medium">{{ formatMoney(inv.due_amount) }}</td>
+                  <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">{{ formatMoney(inv.due_amount) }}</td>
                   <td class="px-4 py-3 text-center">
                     <span :class="daysClass(inv.days_overdue)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">
                       {{ inv.days_overdue }}
@@ -103,8 +155,9 @@
                       {{ t(inv.escalation_level) }}
                     </span>
                   </td>
+                  <td class="px-4 py-3 text-center text-sm text-gray-500">{{ inv.reminder_count || 0 }}</td>
                   <td class="px-4 py-3 text-right">
-                    <BaseButton size="sm" variant="primary" @click="sendReminder(inv)">
+                    <BaseButton size="sm" variant="primary" @click="openSendDialog(inv)">
                       {{ t('send_reminder') }}
                     </BaseButton>
                   </td>
@@ -114,8 +167,86 @@
           </div>
         </div>
 
+        <!-- Templates Tab -->
+        <div v-if="activeTab === 'templates'">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900">{{ t('templates') }}</h3>
+            <BaseButton variant="primary" size="sm" @click="openTemplateForm(null)">
+              {{ $t('general.add') }}
+            </BaseButton>
+          </div>
+
+          <div v-if="templates.length === 0" class="text-center py-12 bg-white rounded-lg shadow">
+            <p class="text-sm text-gray-500">{{ $t('general.no_data') }}</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              v-for="tpl in templates"
+              :key="tpl.id"
+              class="bg-white rounded-lg shadow p-4 border-l-4"
+              :class="levelBorderClass(tpl.escalation_level)"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <span :class="levelClass(tpl.escalation_level)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">
+                  {{ t(tpl.escalation_level) }}
+                </span>
+                <span v-if="tpl.is_active" class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                  {{ t('active') }}
+                </span>
+              </div>
+              <p class="text-sm font-medium text-gray-900 mb-1">{{ tpl.subject_mk || tpl.subject_en }}</p>
+              <p class="text-xs text-gray-500 mb-3">{{ t('days_after_due') }}: {{ tpl.days_after_due }}</p>
+              <div class="flex justify-end gap-2">
+                <BaseButton size="sm" variant="primary-outline" @click="openTemplateForm(tpl)">
+                  {{ t('edit_template') }}
+                </BaseButton>
+                <BaseButton size="sm" variant="danger-outline" @click="deleteTemplate(tpl.id)">
+                  {{ t('delete_template') }}
+                </BaseButton>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- History Tab -->
         <div v-if="activeTab === 'history'">
+          <!-- Effectiveness Summary -->
+          <div v-if="effectiveness" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow p-4">
+              <p class="text-xs text-gray-500 uppercase">{{ t('total_sent') }}</p>
+              <p class="text-2xl font-bold text-gray-900">{{ effectivenessTotalSent }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+              <p class="text-xs text-gray-500 uppercase">{{ t('paid_percentage') }}</p>
+              <p class="text-2xl font-bold text-green-600">{{ effectivenessPaidPct }}%</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+              <p class="text-xs text-gray-500 uppercase">{{ t('avg_days_to_pay') }}</p>
+              <p class="text-2xl font-bold text-amber-600">{{ effectivenessAvgDays }}</p>
+            </div>
+          </div>
+
+          <!-- Effectiveness by Level -->
+          <div v-if="effectiveness && effectiveness.by_level" class="bg-white rounded-lg shadow p-4 mb-6">
+            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ t('effectiveness_chart') }}</h4>
+            <div class="space-y-3">
+              <div v-for="level in ['friendly', 'firm', 'final', 'legal']" :key="level" class="flex items-center gap-3">
+                <span class="text-xs font-medium text-gray-600 w-20">{{ t(level) }}</span>
+                <div class="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
+                  <div
+                    :class="levelBarClass(level)"
+                    class="h-full rounded-full transition-all"
+                    :style="{ width: (effectiveness.by_level[level]?.paid_percentage || 0) + '%' }"
+                  ></div>
+                </div>
+                <span class="text-xs text-gray-500 w-12 text-right">
+                  {{ effectiveness.by_level[level]?.paid_percentage || 0 }}%
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div v-if="history.length === 0" class="text-center py-12 bg-white rounded-lg shadow">
             <h3 class="text-lg font-medium text-gray-900">{{ t('no_history') }}</h3>
             <p class="text-sm text-gray-500 mt-1">{{ t('no_history_description') }}</p>
@@ -127,8 +258,8 @@
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('customer') }}</th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('invoice_number') }}</th>
                   <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('escalation') }}</th>
+                  <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('sent_via') }}</th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('reminder_sent') }}</th>
-                  <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('opened') }}</th>
                   <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('paid') }}</th>
                 </tr>
               </thead>
@@ -141,11 +272,8 @@
                       {{ t(item.escalation_level) }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(item.sent_at) }}</td>
-                  <td class="px-4 py-3 text-center">
-                    <BaseIcon v-if="item.opened_at" name="CheckCircleIcon" class="h-4 w-4 text-green-500 mx-auto" />
-                    <span v-else class="text-gray-300">-</span>
-                  </td>
+                  <td class="px-4 py-3 text-center text-sm text-gray-500">{{ sentViaLabel(item.sent_via) }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-600">{{ formatDateTime(item.sent_at) }}</td>
                   <td class="px-4 py-3 text-center">
                     <BaseIcon v-if="item.paid_at" name="CheckCircleIcon" class="h-4 w-4 text-green-500 mx-auto" />
                     <span v-else class="text-gray-300">-</span>
@@ -157,11 +285,92 @@
         </div>
       </template>
     </template>
+
+    <!-- Send Reminder Dialog -->
+    <BaseModal :show="showSendDialog" @close="showSendDialog = false">
+      <template #header>
+        <h3 class="text-lg font-medium">{{ t('confirm_send_title') }}</h3>
+      </template>
+      <div v-if="selectedInvoice" class="space-y-4">
+        <p class="text-sm text-gray-600">{{ t('confirm_send') }}</p>
+        <div class="bg-gray-50 rounded p-3">
+          <p class="text-sm"><strong>{{ t('customer') }}:</strong> {{ selectedInvoice.customer_name }}</p>
+          <p class="text-sm"><strong>{{ t('invoice_number') }}:</strong> {{ selectedInvoice.invoice_number }}</p>
+          <p class="text-sm"><strong>{{ t('amount_due') }}:</strong> {{ formatMoney(selectedInvoice.due_amount) }}</p>
+        </div>
+        <BaseInputGroup :label="t('escalation')">
+          <BaseMultiselect
+            v-model="sendLevel"
+            :options="sendLevelOptions"
+            label="label"
+            value-prop="value"
+          />
+        </BaseInputGroup>
+      </div>
+      <template #footer>
+        <BaseButton variant="primary-outline" @click="showSendDialog = false">{{ $t('general.cancel') }}</BaseButton>
+        <BaseButton variant="primary" :loading="isSending" @click="confirmSend">{{ t('send_reminder') }}</BaseButton>
+      </template>
+    </BaseModal>
+
+    <!-- Template Form Modal -->
+    <BaseModal :show="showTemplateForm" @close="showTemplateForm = false">
+      <template #header>
+        <h3 class="text-lg font-medium">{{ editingTemplate ? t('edit_template') : t('save_template') }}</h3>
+      </template>
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <BaseInputGroup :label="t('escalation')">
+            <BaseMultiselect
+              v-model="templateForm.escalation_level"
+              :options="sendLevelOptions"
+              label="label"
+              value-prop="value"
+            />
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('days_after_due')">
+            <BaseInput v-model="templateForm.days_after_due" type="number" min="1" />
+          </BaseInputGroup>
+        </div>
+        <BaseInputGroup :label="t('template_subject') + ' (MK)'">
+          <BaseInput v-model="templateForm.subject_mk" />
+        </BaseInputGroup>
+        <BaseInputGroup :label="t('template_body') + ' (MK)'">
+          <BaseTextarea v-model="templateForm.body_mk" rows="4" />
+        </BaseInputGroup>
+        <BaseInputGroup :label="t('template_subject') + ' (EN)'">
+          <BaseInput v-model="templateForm.subject_en" />
+        </BaseInputGroup>
+        <BaseInputGroup :label="t('template_body') + ' (EN)'">
+          <BaseTextarea v-model="templateForm.body_en" rows="4" />
+        </BaseInputGroup>
+        <BaseInputGroup :label="t('subject_tr')">
+          <BaseInput v-model="templateForm.subject_tr" />
+        </BaseInputGroup>
+        <BaseInputGroup :label="t('body_tr')">
+          <BaseTextarea v-model="templateForm.body_tr" rows="4" />
+        </BaseInputGroup>
+        <BaseInputGroup :label="t('subject_sq')">
+          <BaseInput v-model="templateForm.subject_sq" />
+        </BaseInputGroup>
+        <BaseInputGroup :label="t('body_sq')">
+          <BaseTextarea v-model="templateForm.body_sq" rows="4" />
+        </BaseInputGroup>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" v-model="templateForm.is_active" class="rounded border-gray-300" />
+          <span class="text-sm text-gray-700">{{ t('active') }}</span>
+        </label>
+      </div>
+      <template #footer>
+        <BaseButton variant="primary-outline" @click="showTemplateForm = false">{{ $t('general.cancel') }}</BaseButton>
+        <BaseButton variant="primary" :loading="isSavingTemplate" @click="saveTemplate">{{ t('save_template') }}</BaseButton>
+      </template>
+    </BaseModal>
   </BasePage>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import collectionMessages from '@/scripts/admin/i18n/collections.js'
@@ -183,9 +392,70 @@ const companies = computed(() => consoleStore.managedCompanies || [])
 const selectedCompanyId = ref(null)
 const overdueInvoices = ref([])
 const history = ref([])
+const templates = ref([])
+const effectiveness = ref(null)
 const summary = ref(null)
 const isLoading = ref(false)
 const activeTab = ref('overdue')
+
+// Send dialog
+const showSendDialog = ref(false)
+const selectedInvoice = ref(null)
+const sendLevel = ref('friendly')
+const isSending = ref(false)
+
+// Template form
+const showTemplateForm = ref(false)
+const editingTemplate = ref(null)
+const isSavingTemplate = ref(false)
+const templateForm = reactive({
+  escalation_level: 'friendly',
+  days_after_due: 7,
+  subject_mk: '', subject_en: '', subject_tr: '', subject_sq: '',
+  body_mk: '', body_en: '', body_tr: '', body_sq: '',
+  is_active: true,
+})
+
+const levelOptions = [
+  { value: null, label: t('level_all') || 'All' },
+  { value: 'friendly', label: t('level_friendly') || 'Friendly' },
+  { value: 'firm', label: t('level_firm') || 'Firm' },
+  { value: 'final', label: t('level_final') || 'Final' },
+  { value: 'legal', label: t('level_legal') || 'Legal' },
+]
+
+const sendLevelOptions = [
+  { value: 'friendly', label: t('level_friendly') || 'Friendly' },
+  { value: 'firm', label: t('level_firm') || 'Firm' },
+  { value: 'final', label: t('level_final') || 'Final' },
+  { value: 'legal', label: t('level_legal') || 'Legal' },
+]
+
+const filters = reactive({
+  escalation_level: null,
+  search: '',
+})
+
+// Computed effectiveness aggregates
+const effectivenessTotalSent = computed(() => {
+  if (!effectiveness.value?.by_level) return 0
+  return Object.values(effectiveness.value.by_level).reduce((sum, l) => sum + (l.total_sent || 0), 0)
+})
+
+const effectivenessPaidPct = computed(() => {
+  if (!effectiveness.value?.by_level) return 0
+  const totalSent = effectivenessTotalSent.value
+  if (totalSent === 0) return 0
+  const totalPaid = Object.values(effectiveness.value.by_level).reduce((sum, l) => sum + (l.total_paid || 0), 0)
+  return Math.round((totalPaid / totalSent) * 100)
+})
+
+const effectivenessAvgDays = computed(() => {
+  if (!effectiveness.value?.by_level) return 0
+  const levels = Object.values(effectiveness.value.by_level).filter(l => l.avg_days_to_pay !== null)
+  if (levels.length === 0) return 0
+  return Math.round(levels.reduce((sum, l) => sum + l.avg_days_to_pay, 0) / levels.length)
+})
 
 function formatMoney(cents) {
   if (cents === null || cents === undefined) return '0.00'
@@ -197,10 +467,16 @@ function formatDate(d) {
   return new Date(d).toLocaleDateString(fmtLocale, { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
+function formatDateTime(d) {
+  if (!d) return '-'
+  return new Date(d).toLocaleDateString(fmtLocale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
 function daysClass(days) {
   if (days > 60) return 'bg-red-100 text-red-800'
   if (days > 30) return 'bg-orange-100 text-orange-800'
-  return 'bg-yellow-100 text-yellow-800'
+  if (days > 7) return 'bg-yellow-100 text-yellow-800'
+  return 'bg-gray-100 text-gray-800'
 }
 
 function levelClass(level) {
@@ -213,29 +489,50 @@ function levelClass(level) {
   return map[level] || 'bg-gray-100 text-gray-800'
 }
 
+function levelBorderClass(level) {
+  const map = { friendly: 'border-blue-400', firm: 'border-yellow-400', final: 'border-orange-400', legal: 'border-red-400' }
+  return map[level] || 'border-gray-400'
+}
+
+function levelBarClass(level) {
+  const map = { friendly: 'bg-blue-400', firm: 'bg-yellow-400', final: 'bg-orange-400', legal: 'bg-red-400' }
+  return map[level] || 'bg-gray-400'
+}
+
+function sentViaLabel(via) {
+  if (via === 'email') return t('sent_via_email') || 'Email'
+  if (via === 'sms') return t('sent_via_sms') || 'SMS'
+  return via || '-'
+}
+
 function partnerApi(path) {
   return `/partner/companies/${selectedCompanyId.value}/accounting/collections${path}`
 }
 
-async function loadCompanies() {
-  await consoleStore.fetchCompanies()
-}
-
 async function onCompanyChange() {
   if (!selectedCompanyId.value) return
+  activeTab.value = 'overdue'
   loadData()
 }
 
 async function loadData() {
   isLoading.value = true
   try {
-    const [overdueRes, histRes] = await Promise.all([
-      window.axios.get(partnerApi('/overdue')),
+    const params = {}
+    if (filters.escalation_level) params.escalation_level = filters.escalation_level
+    if (filters.search) params.search = filters.search
+
+    const [overdueRes, histRes, effRes, tplRes] = await Promise.all([
+      window.axios.get(partnerApi('/overdue'), { params }),
       window.axios.get(partnerApi('/history')),
+      window.axios.get(partnerApi('/effectiveness')),
+      window.axios.get(partnerApi('/templates')),
     ])
     overdueInvoices.value = overdueRes.data.data || []
     summary.value = overdueRes.data.summary || null
     history.value = histRes.data.data || []
+    effectiveness.value = effRes.data.data || null
+    templates.value = tplRes.data.data || []
   } catch (e) {
     console.error('Failed to load collections data', e)
     notificationStore.showNotification({
@@ -247,13 +544,42 @@ async function loadData() {
   }
 }
 
-async function sendReminder(inv) {
-  if (!confirm(t('confirm_send_reminder') || 'Are you sure you want to send this reminder?')) return
+async function loadOverdue() {
+  isLoading.value = true
+  try {
+    const params = {}
+    if (filters.escalation_level) params.escalation_level = filters.escalation_level
+    if (filters.search) params.search = filters.search
+    const { data } = await window.axios.get(partnerApi('/overdue'), { params })
+    overdueInvoices.value = data.data || []
+    summary.value = data.summary || null
+  } catch (e) {
+    console.error('Failed to load overdue invoices', e)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('error_loading') || 'Failed to load overdue invoices',
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// --- Send Reminder ---
+function openSendDialog(inv) {
+  selectedInvoice.value = inv
+  sendLevel.value = inv.escalation_level || 'friendly'
+  showSendDialog.value = true
+}
+
+async function confirmSend() {
+  if (!selectedInvoice.value) return
+  isSending.value = true
   try {
     await window.axios.post(partnerApi('/send-reminder'), {
-      invoice_id: inv.id,
-      level: inv.escalation_level || 'friendly',
+      invoice_id: selectedInvoice.value.id,
+      level: sendLevel.value,
     })
+    showSendDialog.value = false
     notificationStore.showNotification({
       type: 'success',
       message: t('reminder_sent_success') || 'Reminder sent successfully.',
@@ -261,17 +587,84 @@ async function sendReminder(inv) {
     loadData()
   } catch (e) {
     console.error('Failed to send reminder', e)
+    const msg = e.response?.data?.message || t('error_sending') || 'Failed to send reminder'
+    notificationStore.showNotification({ type: 'error', message: msg })
+  } finally {
+    isSending.value = false
+  }
+}
+
+// --- Template CRUD ---
+function openTemplateForm(tpl) {
+  editingTemplate.value = tpl
+  if (tpl) {
+    Object.assign(templateForm, {
+      escalation_level: tpl.escalation_level,
+      days_after_due: tpl.days_after_due,
+      subject_mk: tpl.subject_mk || '', subject_en: tpl.subject_en || '',
+      subject_tr: tpl.subject_tr || '', subject_sq: tpl.subject_sq || '',
+      body_mk: tpl.body_mk || '', body_en: tpl.body_en || '',
+      body_tr: tpl.body_tr || '', body_sq: tpl.body_sq || '',
+      is_active: tpl.is_active,
+    })
+  } else {
+    Object.assign(templateForm, {
+      escalation_level: 'friendly', days_after_due: 7,
+      subject_mk: '', subject_en: '', subject_tr: '', subject_sq: '',
+      body_mk: '', body_en: '', body_tr: '', body_sq: '',
+      is_active: true,
+    })
+  }
+  showTemplateForm.value = true
+}
+
+async function saveTemplate() {
+  isSavingTemplate.value = true
+  try {
+    if (editingTemplate.value) {
+      await window.axios.put(partnerApi(`/templates/${editingTemplate.value.id}`), templateForm)
+    } else {
+      await window.axios.post(partnerApi('/templates'), templateForm)
+    }
+    showTemplateForm.value = false
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('template_saved') || 'Template saved.',
+    })
+    // Reload templates
+    const { data } = await window.axios.get(partnerApi('/templates'))
+    templates.value = data.data || []
+  } catch (e) {
+    console.error('Failed to save template', e)
     notificationStore.showNotification({
       type: 'error',
-      message: t('error_sending') || 'Failed to send reminder',
+      message: t('error_saving') || 'Failed to save template',
+    })
+  } finally {
+    isSavingTemplate.value = false
+  }
+}
+
+async function deleteTemplate(id) {
+  if (!confirm(t('delete_template') + '?')) return
+  try {
+    await window.axios.delete(partnerApi(`/templates/${id}`))
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('template_deleted') || 'Template deleted.',
+    })
+    const { data } = await window.axios.get(partnerApi('/templates'))
+    templates.value = data.data || []
+  } catch (e) {
+    console.error('Failed to delete template', e)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('error_deleting') || 'Failed to delete template',
     })
   }
 }
 
 onMounted(() => {
-  loadCompanies()
+  consoleStore.fetchCompanies()
 })
-// CLAUDE-CHECKPOINT
 </script>
-
-<!-- CLAUDE-CHECKPOINT -->

@@ -46,6 +46,10 @@ class VatXmlService
 
     protected string $periodType;
 
+    protected ?array $cachedOutputVat = null;
+
+    protected ?array $cachedInputVat = null;
+
     /**
      * Initialize service properties for a period.
      * Allows external callers (DDV04FormService) to set up without reflection.
@@ -56,6 +60,8 @@ class VatXmlService
         $this->periodStart = $periodStart;
         $this->periodEnd = $periodEnd;
         $this->periodType = $periodType;
+        $this->cachedOutputVat = null;
+        $this->cachedInputVat = null;
 
         return $this;
     }
@@ -73,6 +79,8 @@ class VatXmlService
         $this->periodStart = $periodStart;
         $this->periodEnd = $periodEnd;
         $this->periodType = $periodType;
+        $this->cachedOutputVat = null;
+        $this->cachedInputVat = null;
 
         // Create XML document
         $dom = new DOMDocument('1.0', 'UTF-8');
@@ -377,6 +385,10 @@ class VatXmlService
      */
     public function calculateVatForPeriod(): array
     {
+        if ($this->cachedOutputVat !== null) {
+            return $this->cachedOutputVat;
+        }
+
         $vatData = [
             'standard' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'reduced' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
@@ -399,7 +411,6 @@ class VatXmlService
         if (isset($this->company->id) && class_exists('App\Models\Invoice') && $hasDatabase) {
             try {
                 $invoices = Invoice::where('company_id', $this->company->id)
-                    ->whereIn('paid_status', [Invoice::STATUS_PAID, Invoice::STATUS_PARTIALLY_PAID])
                     ->whereBetween('invoice_date', [
                         $this->periodStart->format('Y-m-d'),
                         $this->periodEnd->format('Y-m-d'),
@@ -445,6 +456,8 @@ class VatXmlService
             throw new Exception('Cannot calculate VAT: Company not properly initialized or database not accessible');
         }
 
+        $this->cachedOutputVat = $vatData;
+
         return $vatData;
     }
 
@@ -456,6 +469,10 @@ class VatXmlService
      */
     public function calculateInputVatForPeriod(): array
     {
+        if ($this->cachedInputVat !== null) {
+            return $this->cachedInputVat;
+        }
+
         $vatData = [
             'standard' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'reduced' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
@@ -469,7 +486,6 @@ class VatXmlService
 
         try {
             $bills = Bill::where('company_id', $this->company->id)
-                ->whereIn('paid_status', [Bill::PAID_STATUS_PAID, Bill::PAID_STATUS_PARTIALLY_PAID])
                 ->whereBetween('bill_date', [
                     $this->periodStart->format('Y-m-d'),
                     $this->periodEnd->format('Y-m-d'),
@@ -502,9 +518,11 @@ class VatXmlService
                 }
             }
         } catch (Exception $e) {
-            // Bills may not exist for all companies — return zeros gracefully
-            return $vatData;
+            \Log::error('Failed to calculate input VAT from bills: ' . $e->getMessage());
+            throw $e;
         }
+
+        $this->cachedInputVat = $vatData;
 
         return $vatData;
     }
@@ -530,6 +548,9 @@ class VatXmlService
         } elseif ($rate >= 3) {
             $vatData['reduced']['vat_amount'] += $amount;
             $vatData['reduced']['taxable_base'] += $taxableBase;
+        } elseif ($this->isExemptTax($tax)) {
+            $vatData['exempt']['vat_amount'] += $amount;
+            $vatData['exempt']['taxable_base'] += $taxableBase;
         } else {
             $vatData['zero']['vat_amount'] += $amount;
             $vatData['zero']['taxable_base'] += $taxableBase;
@@ -550,7 +571,7 @@ class VatXmlService
             }
         }
 
-        return $rates->isEmpty() ? 0 : $rates->mode()[0] ?? $rates->first();
+        return $rates->isEmpty() ? 0 : $rates->max();
     }
 
     /**
@@ -583,6 +604,18 @@ class VatXmlService
     }
 
     /**
+     * Check if a tax represents an exempt supply (vs zero-rate)
+     */
+    protected function isExemptTax(Tax $tax): bool
+    {
+        $name = mb_strtolower($tax->taxType->name ?? '', 'UTF-8');
+
+        return str_contains($name, 'exempt')
+            || str_contains($name, 'ослободен')
+            || str_contains($name, 'ослободено');
+    }
+
+    /**
      * Categorize VAT amount by rate
      */
     protected function categorizeVatAmount(Tax $tax, array &$vatData): void
@@ -607,7 +640,10 @@ class VatXmlService
         } elseif ($rate >= 3) { // Reduced rate (5%)
             $vatData['reduced']['vat_amount'] += $amount;
             $vatData['reduced']['taxable_base'] += $taxableBase;
-        } else { // Zero or exempt
+        } elseif ($this->isExemptTax($tax)) {
+            $vatData['exempt']['vat_amount'] += $amount;
+            $vatData['exempt']['taxable_base'] += $taxableBase;
+        } else {
             $vatData['zero']['vat_amount'] += $amount;
             $vatData['zero']['taxable_base'] += $taxableBase;
         }

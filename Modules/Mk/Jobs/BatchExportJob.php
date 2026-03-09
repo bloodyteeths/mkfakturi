@@ -54,7 +54,7 @@ class BatchExportJob implements ShouldQueue
                     $dateTo
                 );
 
-                $companyName = preg_replace('/[^a-zA-Z0-9]/', '_', $company->name);
+                $companyName = preg_replace('/[^\p{L}\p{N}]+/u', '_', $company->name);
                 $filename = sprintf(
                     'batch_exports/%s_%s_%s_%s.%s',
                     $reportType,
@@ -98,11 +98,59 @@ class BatchExportJob implements ShouldQueue
         string $dateTo
     ): array {
         return match ($reportType) {
-            'trial_balance' => $ifrsAdapter->trialBalance($company->id, $dateFrom, $dateTo),
-            'general_ledger' => $ifrsAdapter->generalLedger($company->id, $dateFrom, $dateTo),
-            'journal_entries' => $ifrsAdapter->journalEntries($company->id, $dateFrom, $dateTo),
+            'trial_balance' => $this->extractRows(
+                $ifrsAdapter->getTrialBalanceSixColumn($company, $dateFrom, $dateTo)
+            ),
+            'general_ledger', 'journal_entries' => $this->extractRows(
+                $ifrsAdapter->getJournalEntries($company, $dateFrom, $dateTo)
+            ),
             default => throw new \InvalidArgumentException("Unsupported report type: {$reportType}"),
         };
+    }
+
+    /**
+     * Extract flat rows from adapter response (skip error/meta keys).
+     */
+    protected function extractRows(array $result): array
+    {
+        if (isset($result['error'])) {
+            throw new \RuntimeException($result['error']);
+        }
+
+        // Trial balance returns ['accounts' => [...], 'totals' => [...]]
+        if (isset($result['accounts'])) {
+            return $result['accounts'];
+        }
+
+        // Journal entries returns ['entries' => [...]] or flat array
+        if (isset($result['entries'])) {
+            return $this->flattenJournalEntries($result['entries']);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Flatten journal entries (with nested line_items) into CSV-friendly rows.
+     */
+    protected function flattenJournalEntries(array $entries): array
+    {
+        $rows = [];
+        foreach ($entries as $entry) {
+            $lines = $entry['line_items'] ?? $entry['lines'] ?? [];
+            foreach ($lines as $line) {
+                $rows[] = [
+                    'transaction_date' => $entry['transaction_date'] ?? $entry['date'] ?? '',
+                    'transaction_no' => $entry['transaction_no'] ?? $entry['reference'] ?? '',
+                    'narration' => $entry['narration'] ?? $entry['description'] ?? '',
+                    'account_code' => $line['account_code'] ?? '',
+                    'account_name' => $line['account_name'] ?? '',
+                    'debit' => $line['debit'] ?? 0,
+                    'credit' => $line['credit'] ?? 0,
+                ];
+            }
+        }
+        return $rows;
     }
 
     /**

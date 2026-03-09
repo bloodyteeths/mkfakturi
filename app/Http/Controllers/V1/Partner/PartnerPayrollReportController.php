@@ -56,7 +56,7 @@ class PartnerPayrollReportController extends Controller
         $runs = $query->with('lines')->get();
 
         $summary = [
-            'period' => $month ? sprintf('%s %d', date('F', mktime(0, 0, 0, $month, 1)), $year) : "Year $year",
+            'period' => $month ? sprintf('%s %d', $this->mkMonthName($month), $year) : "Година $year",
             'year' => $year,
             'month' => $month,
             'total_gross' => 0,
@@ -130,6 +130,7 @@ class PartnerPayrollReportController extends Controller
                 PayrollRun::STATUS_POSTED,
                 PayrollRun::STATUS_PAID,
             ])
+            ->withCount('lines')
             ->first();
 
         $ytdRuns = PayrollRun::forCompany($company)
@@ -152,7 +153,7 @@ class PartnerPayrollReportController extends Controller
                 'status' => $currentMonthRun ? $currentMonthRun->status : 'not_created',
                 'total_gross' => $currentMonthRun ? $currentMonthRun->total_gross : 0,
                 'total_net' => $currentMonthRun ? $currentMonthRun->total_net : 0,
-                'employee_count' => $currentMonthRun ? $currentMonthRun->lines()->count() : 0,
+                'employee_count' => $currentMonthRun ? $currentMonthRun->lines_count : 0,
             ],
             'year_to_date' => [
                 'year' => $currentYear,
@@ -194,6 +195,7 @@ class PartnerPayrollReportController extends Controller
                 PayrollRun::STATUS_POSTED,
                 PayrollRun::STATUS_PAID,
             ])
+            ->withCount('lines')
             ->orderBy('period_month')
             ->get();
 
@@ -202,13 +204,13 @@ class PartnerPayrollReportController extends Controller
             $run = $runs->firstWhere('period_month', $month);
             $monthlyData[] = [
                 'month' => $month,
-                'month_name' => date('F', mktime(0, 0, 0, $month, 1)),
+                'month_name' => $this->mkMonthName($month),
                 'has_payroll' => $run !== null,
                 'total_gross' => $run ? $run->total_gross : 0,
                 'total_net' => $run ? $run->total_net : 0,
                 'total_employer_tax' => $run ? $run->total_employer_tax : 0,
                 'total_employee_tax' => $run ? $run->total_employee_tax : 0,
-                'employee_count' => $run ? $run->lines()->count() : 0,
+                'employee_count' => $run ? $run->lines_count : 0,
                 'status' => $run ? $run->status : null,
             ];
         }
@@ -226,6 +228,170 @@ class PartnerPayrollReportController extends Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Get per-employee breakdown for a period.
+     */
+    public function employeeBreakdown(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $validated = $request->validate([
+            'year' => 'required|integer|min:2020|max:2100',
+            'month' => 'nullable|integer|min:1|max:12',
+        ]);
+
+        $year = $validated['year'];
+        $month = $validated['month'] ?? null;
+
+        $query = PayrollRun::forCompany($company)
+            ->where('period_year', $year)
+            ->whereIn('status', [
+                PayrollRun::STATUS_CALCULATED,
+                PayrollRun::STATUS_APPROVED,
+                PayrollRun::STATUS_POSTED,
+                PayrollRun::STATUS_PAID,
+            ]);
+
+        if ($month) {
+            $query->where('period_month', $month);
+        }
+
+        $runs = $query->with(['lines.employee'])->get();
+
+        // Aggregate per employee
+        $employees = [];
+        foreach ($runs as $run) {
+            foreach ($run->lines as $line) {
+                $empId = $line->employee_id;
+                if (!isset($employees[$empId])) {
+                    $employees[$empId] = [
+                        'employee_id' => $empId,
+                        'full_name' => $line->employee->full_name ?? '',
+                        'embg' => $line->employee->embg ?? '',
+                        'gross_salary' => 0,
+                        'net_salary' => 0,
+                        'income_tax' => 0,
+                        'total_employee_contributions' => 0,
+                        'total_employer_contributions' => 0,
+                        'employer_cost' => 0,
+                    ];
+                }
+                $employees[$empId]['gross_salary'] += $line->gross_salary;
+                $employees[$empId]['net_salary'] += $line->net_salary;
+                $employees[$empId]['income_tax'] += $line->income_tax_amount;
+                $empContribs = ($line->pension_contribution_employee ?? 0) +
+                    ($line->health_contribution_employee ?? 0) +
+                    ($line->unemployment_contribution ?? 0) +
+                    ($line->additional_contribution ?? 0);
+                $emplerContribs = ($line->pension_contribution_employer ?? 0) +
+                    ($line->health_contribution_employer ?? 0);
+                $employees[$empId]['total_employee_contributions'] += $empContribs;
+                $employees[$empId]['total_employer_contributions'] += $emplerContribs;
+                $employees[$empId]['employer_cost'] += $line->gross_salary + $emplerContribs;
+            }
+        }
+
+        // Sort by name
+        $result = array_values($employees);
+        usort($result, fn($a, $b) => strcmp($a['full_name'], $b['full_name']));
+
+        return response()->json(['data' => $result]);
+    }
+
+    /**
+     * Export tax summary as CSV.
+     */
+    public function exportCsv(Request $request, int $company)
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $validated = $request->validate([
+            'year' => 'required|integer|min:2020|max:2100',
+            'month' => 'nullable|integer|min:1|max:12',
+        ]);
+
+        $year = $validated['year'];
+        $month = $validated['month'] ?? null;
+
+        $query = PayrollRun::forCompany($company)
+            ->where('period_year', $year)
+            ->whereIn('status', [
+                PayrollRun::STATUS_APPROVED,
+                PayrollRun::STATUS_POSTED,
+                PayrollRun::STATUS_PAID,
+            ]);
+
+        if ($month) {
+            $query->where('period_month', $month);
+        }
+
+        $runs = $query->with(['lines.employee'])->get();
+
+        $filename = sprintf('payroll_tax_summary_%s.csv', $month ? "{$year}_{$month}" : $year);
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function () use ($runs) {
+            $file = fopen('php://output', 'w');
+            // UTF-8 BOM for Excel
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, [
+                'Број',
+                'ЕМБГ',
+                'Име и Презиме',
+                'Период',
+                'Бруто плата',
+                'Пензиско (вработен)',
+                'Пензиско (работодавач)',
+                'Здравствено (вработен)',
+                'Здравствено (работодавач)',
+                'Невработеност',
+                'Дополнителен',
+                'Данок на доход',
+                'Нето плата',
+            ]);
+
+            foreach ($runs as $run) {
+                foreach ($run->lines as $line) {
+                    fputcsv($file, [
+                        $line->employee->employee_number ?? '',
+                        $line->employee->embg ?? '',
+                        $line->employee->full_name ?? '',
+                        $run->period_name,
+                        number_format(($line->gross_salary ?? 0) / 100, 2, '.', ''),
+                        number_format(($line->pension_contribution_employee ?? 0) / 100, 2, '.', ''),
+                        number_format(($line->pension_contribution_employer ?? 0) / 100, 2, '.', ''),
+                        number_format(($line->health_contribution_employee ?? 0) / 100, 2, '.', ''),
+                        number_format(($line->health_contribution_employer ?? 0) / 100, 2, '.', ''),
+                        number_format(($line->unemployment_contribution ?? 0) / 100, 2, '.', ''),
+                        number_format(($line->additional_contribution ?? 0) / 100, 2, '.', ''),
+                        number_format(($line->income_tax_amount ?? 0) / 100, 2, '.', ''),
+                        number_format(($line->net_salary ?? 0) / 100, 2, '.', ''),
+                    ]);
+                }
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
@@ -377,6 +543,20 @@ class PartnerPayrollReportController extends Controller
             ->where('companies.id', $companyId)
             ->where('partner_company_links.is_active', true)
             ->exists();
+    }
+
+    /**
+     * Get Macedonian month name.
+     */
+    private function mkMonthName(int $month): string
+    {
+        $months = [
+            1 => 'Јануари', 2 => 'Февруари', 3 => 'Март', 4 => 'Април',
+            5 => 'Мај', 6 => 'Јуни', 7 => 'Јули', 8 => 'Август',
+            9 => 'Септември', 10 => 'Октомври', 11 => 'Ноември', 12 => 'Декември',
+        ];
+
+        return $months[$month] ?? "Month {$month}";
     }
 }
 

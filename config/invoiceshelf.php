@@ -733,7 +733,7 @@ return [
             'feature_flag' => 'accounting_backbone',
         ],
         [
-            'title' => 'partner.accounting.journal_import',
+            'title' => 'partner.accounting.journal_import.title',
             'group' => 'partner.accounting',
             'submenu' => 'setup',
             'link' => '/admin/partner/accounting/journal-import',

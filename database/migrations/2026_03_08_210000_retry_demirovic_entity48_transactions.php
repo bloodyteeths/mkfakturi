@@ -48,10 +48,16 @@ return new class extends Migration
         $exchangeRateId = $exchangeRate->id;
 
         // Set user context for IFRS EntityScope
-        $user = DB::table('users')->where('email', 'smetkovoditel0881@gmail.com')->first();
-        if ($user) {
-            auth()->loginUsingId($user->id);
+        // User must have entity_id set for EntityScope to include lineItems
+        $user = \App\Models\User::where('email', 'smetkovoditel0881@gmail.com')->first();
+        if (! $user) {
+            Log::warning('Demirovic retry: user not found');
+            return;
         }
+        $originalEntityId = $user->entity_id;
+        $user->entity_id = $entity->id;
+        $user->saveQuietly();
+        auth()->loginUsingId($user->id);
 
         // Build account cache from existing IFRS accounts for this entity
         $accountCache = [];
@@ -324,6 +330,12 @@ return new class extends Migration
             $dateParts = explode('-', $dataKn);
             $bookingDate = sprintf('%04d-%02d-%02d', (int) $dateParts[2], (int) $dateParts[1], (int) $dateParts[0]);
 
+            // IFRS package rejects transactions on the first day of the reporting period
+            // (requires Balance objects instead). Shift opening balance by 1 day.
+            if ($bookingDate === '2026-01-01') {
+                $bookingDate = '2026-01-02';
+            }
+
             $narration = "Налог {$nalogId} ({$nalogType})";
             $firstKonto = $entries[0][0];
             $primaryAccountId = $accountCache[$firstKonto] ?? null;
@@ -403,6 +415,10 @@ return new class extends Migration
                 Log::error("Demirovic retry: failed nalog {$nalogId}: {$e->getMessage()}");
             }
         }
+
+        // Restore user's original entity_id
+        $user->entity_id = $originalEntityId;
+        $user->saveQuietly();
 
         Log::info("Demirovic retry: imported {$created}/14 nalozi to entity {$entity->id}");
     }

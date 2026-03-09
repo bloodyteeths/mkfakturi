@@ -15,13 +15,14 @@ use Modules\Mk\Models\ReminderTemplate;
 class CollectionService
 {
     /**
-     * Get all overdue invoices for a company, enriched with escalation level.
-     *
-     * Escalation levels by days overdue:
-     *  - <7 days: friendly
-     *  - 7-30 days: firm
-     *  - 30-60 days: final
-     *  - >60 days: legal
+     * Default Macedonian statutory interest rate:
+     * NBRM reference rate (5.25%) + 8% penalty = 13.25%
+     * Per Закон за облигациони односи
+     */
+    private const DEFAULT_ANNUAL_RATE = 13.25;
+
+    /**
+     * Get all overdue invoices for a company, enriched with escalation level and interest.
      */
     public function getOverdueInvoices(int $companyId, array $filters = []): array
     {
@@ -69,11 +70,74 @@ class CollectionService
             });
         }
 
-        $invoices = $query->orderBy('due_date', 'asc')->get();
+        // Pagination
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $perPage = min(100, max(10, (int) ($filters['per_page'] ?? 50)));
+
+        $allInvoices = $query->orderBy('due_date', 'asc')->get();
+        $total = $allInvoices->count();
+        $invoices = $allInvoices->forPage($page, $perPage);
 
         $today = Carbon::today();
+        $annualRate = $this->getInterestRate($companyId);
 
-        return $invoices->map(function ($invoice) use ($today, $companyId) {
+        // Prefetch reminder history to avoid N+1 queries
+        $invoiceIds = $allInvoices->pluck('id')->toArray();
+        $reminderCounts = [];
+        $lastReminders = [];
+
+        if (! empty($invoiceIds)) {
+            $reminderCounts = ReminderHistory::forCompany($companyId)
+                ->whereIn('invoice_id', $invoiceIds)
+                ->select('invoice_id', DB::raw('COUNT(*) as cnt'))
+                ->groupBy('invoice_id')
+                ->pluck('cnt', 'invoice_id')
+                ->toArray();
+
+            $latestIds = ReminderHistory::forCompany($companyId)
+                ->whereIn('invoice_id', $invoiceIds)
+                ->select('invoice_id', DB::raw('MAX(id) as max_id'))
+                ->groupBy('invoice_id')
+                ->pluck('max_id')
+                ->toArray();
+
+            if (! empty($latestIds)) {
+                $lastReminders = ReminderHistory::whereIn('id', $latestIds)
+                    ->get()
+                    ->keyBy('invoice_id');
+            }
+        }
+
+        // Build aging buckets from ALL invoices (not just current page)
+        $aging = ['0_30' => 0, '31_60' => 0, '61_90' => 0, '90_plus' => 0];
+        $totalInterest = 0;
+
+        $allMapped = $allInvoices->map(function ($invoice) use ($today, $annualRate, &$aging, &$totalInterest) {
+            $dueDate = $invoice->due_date instanceof \DateTimeInterface
+                ? Carbon::parse($invoice->due_date)
+                : Carbon::parse((string) $invoice->due_date);
+            $daysOverdue = $dueDate->diffInDays($today);
+            $dueAmount = (int) $invoice->due_amount;
+
+            // Aging buckets
+            if ($daysOverdue <= 30) {
+                $aging['0_30'] += $dueAmount;
+            } elseif ($daysOverdue <= 60) {
+                $aging['31_60'] += $dueAmount;
+            } elseif ($daysOverdue <= 90) {
+                $aging['61_90'] += $dueAmount;
+            } else {
+                $aging['90_plus'] += $dueAmount;
+            }
+
+            // Interest: principal * (rate/100/365) * days
+            $interest = (int) round($dueAmount * ($annualRate / 100 / 365) * $daysOverdue);
+            $totalInterest += $interest;
+
+            return null; // Only for side-effects on aging/interest
+        });
+
+        $data = $invoices->map(function ($invoice) use ($today, $annualRate, $reminderCounts, $lastReminders) {
             $dueDate = $invoice->due_date instanceof \DateTimeInterface
                 ? Carbon::parse($invoice->due_date)
                 : Carbon::parse((string) $invoice->due_date);
@@ -91,11 +155,17 @@ class CollectionService
                 $escalation = 'friendly';
             }
 
-            // Get last reminder sent for this invoice
-            $lastReminder = ReminderHistory::forCompany($companyId)
-                ->forInvoice($invoice->id)
-                ->orderBy('sent_at', 'desc')
-                ->first();
+            $lastReminder = $lastReminders[$invoice->id] ?? null;
+
+            // Interest calculation
+            $dueAmount = (int) $invoice->due_amount;
+            $interest = (int) round($dueAmount * ($annualRate / 100 / 365) * $daysOverdue);
+
+            // Cooldown: can send if no reminder in last 24h
+            $canSend = true;
+            if ($lastReminder && $lastReminder->sent_at) {
+                $canSend = $lastReminder->sent_at->lt(now()->subHours(24));
+            }
 
             return [
                 'id' => $invoice->id,
@@ -105,7 +175,9 @@ class CollectionService
                     : (string) $invoice->invoice_date,
                 'due_date' => $dueDate->format('Y-m-d'),
                 'total' => (int) $invoice->total,
-                'due_amount' => (int) $invoice->due_amount,
+                'due_amount' => $dueAmount,
+                'interest' => $interest,
+                'total_with_interest' => $dueAmount + $interest,
                 'days_overdue' => $daysOverdue,
                 'escalation_level' => $escalation,
                 'customer_id' => $invoice->customer_id,
@@ -113,11 +185,23 @@ class CollectionService
                 'customer_email' => $invoice->customer?->email,
                 'last_reminder_at' => $lastReminder?->sent_at?->format('Y-m-d H:i'),
                 'last_reminder_level' => $lastReminder?->escalation_level,
-                'reminder_count' => ReminderHistory::forCompany($companyId)
-                    ->forInvoice($invoice->id)
-                    ->count(),
+                'reminder_count' => $reminderCounts[$invoice->id] ?? 0,
+                'can_send' => $canSend,
             ];
-        })->toArray();
+        })->values()->toArray();
+
+        return [
+            'invoices' => $data,
+            'aging' => $aging,
+            'interest_rate' => $annualRate,
+            'total_interest' => $totalInterest,
+            'pagination' => [
+                'total' => $total,
+                'page' => $page,
+                'per_page' => $perPage,
+                'last_page' => (int) ceil($total / $perPage),
+            ],
+        ];
     }
 
     /**
@@ -125,6 +209,16 @@ class CollectionService
      */
     public function sendReminder(int $companyId, int $invoiceId, string $level): array
     {
+        // Rate limit: max 1 reminder per invoice per 24 hours
+        $recentReminder = ReminderHistory::forCompany($companyId)
+            ->forInvoice($invoiceId)
+            ->where('sent_at', '>=', now()->subHours(24))
+            ->first();
+
+        if ($recentReminder) {
+            throw new \InvalidArgumentException('A reminder was already sent for this invoice in the last 24 hours.');
+        }
+
         $invoice = Invoice::where('company_id', $companyId)
             ->where('id', $invoiceId)
             ->with('customer', 'company')
@@ -267,7 +361,6 @@ class CollectionService
         ];
 
         foreach ($defaults as $tpl) {
-            // Only create if not already exists for this company+level
             $existing = ReminderTemplate::forCompany($companyId)
                 ->where('escalation_level', $tpl['escalation_level'])
                 ->first();
@@ -279,9 +372,9 @@ class CollectionService
     }
 
     /**
-     * Get reminder history with optional customer filter.
+     * Get reminder history with optional filters.
      */
-    public function getHistory(int $companyId, ?int $customerId = null): array
+    public function getHistory(int $companyId, array $filters = []): array
     {
         $query = ReminderHistory::forCompany($companyId)
             ->with([
@@ -291,11 +384,37 @@ class CollectionService
             ])
             ->orderBy('sent_at', 'desc');
 
-        if ($customerId) {
-            $query->forCustomer($customerId);
+        if (! empty($filters['customer_id'])) {
+            $query->forCustomer((int) $filters['customer_id']);
         }
 
-        return $query->limit(200)->get()->toArray();
+        if (! empty($filters['from_date'])) {
+            $query->where('sent_at', '>=', $filters['from_date'] . ' 00:00:00');
+        }
+
+        if (! empty($filters['to_date'])) {
+            $query->where('sent_at', '<=', $filters['to_date'] . ' 23:59:59');
+        }
+
+        // Pagination
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $perPage = min(100, max(10, (int) ($filters['per_page'] ?? 50)));
+        $total = (clone $query)->count();
+
+        $data = $query->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get()
+            ->toArray();
+
+        return [
+            'items' => $data,
+            'pagination' => [
+                'total' => $total,
+                'page' => $page,
+                'per_page' => $perPage,
+                'last_page' => (int) ceil($total / $perPage),
+            ],
+        ];
     }
 
     /**
@@ -366,6 +485,66 @@ class CollectionService
                 'unique_customers' => $uniqueCustomers,
             ],
         ];
+    }
+
+    /**
+     * Get data for Опомена (formal dunning letter) PDF.
+     */
+    public function getOpomenaData(int $companyId, int $invoiceId): array
+    {
+        $invoice = Invoice::where('company_id', $companyId)
+            ->where('id', $invoiceId)
+            ->with(['customer', 'company', 'currency'])
+            ->first();
+
+        if (! $invoice) {
+            throw new \InvalidArgumentException('Invoice not found.');
+        }
+
+        $dueDate = $invoice->due_date instanceof \DateTimeInterface
+            ? Carbon::parse($invoice->due_date)
+            : Carbon::parse((string) $invoice->due_date);
+
+        $today = Carbon::today();
+        $daysOverdue = $dueDate->diffInDays($today);
+        $dueAmount = (int) $invoice->due_amount;
+        $annualRate = $this->getInterestRate($companyId);
+        $interest = (int) round($dueAmount * ($annualRate / 100 / 365) * $daysOverdue);
+
+        // Count previous reminders
+        $reminderCount = ReminderHistory::forCompany($companyId)
+            ->forInvoice($invoiceId)
+            ->count();
+
+        return [
+            'invoice' => $invoice,
+            'company' => $invoice->company,
+            'customer' => $invoice->customer,
+            'currency_symbol' => $invoice->currency->symbol ?? 'ден.',
+            'due_date' => $dueDate->format('d.m.Y'),
+            'days_overdue' => $daysOverdue,
+            'due_amount' => $dueAmount,
+            'interest_rate' => $annualRate,
+            'interest_amount' => $interest,
+            'total_with_interest' => $dueAmount + $interest,
+            'today' => $today->format('d.m.Y'),
+            'reminder_count' => $reminderCount,
+        ];
+    }
+
+    /**
+     * Get interest rate for a company.
+     */
+    protected function getInterestRate(?int $companyId = null): float
+    {
+        if ($companyId) {
+            $customRate = CompanySetting::getSetting('interest_annual_rate', $companyId);
+            if ($customRate !== null && $customRate !== '') {
+                return (float) $customRate;
+            }
+        }
+
+        return self::DEFAULT_ANNUAL_RATE;
     }
 }
 

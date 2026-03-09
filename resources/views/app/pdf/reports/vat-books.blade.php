@@ -149,6 +149,54 @@
             font-weight: bold;
         }
 
+        .summary-table {
+            margin-top: 15px;
+            width: 60%;
+            border: 1px solid #cbd5e0;
+        }
+
+        .summary-header {
+            background: #edf2f7;
+            border-bottom: 1px solid #a0aec0;
+        }
+
+        .summary-label {
+            padding: 4px 6px;
+            font-weight: bold;
+            font-size: 9px;
+            color: #2d3748;
+        }
+
+        .summary-cell {
+            padding: 4px 6px;
+            font-size: 9px;
+            text-align: right;
+            color: #2d3748;
+        }
+
+        .summary-total-row {
+            background: #e2e8f0;
+            border-top: 1px solid #a0aec0;
+        }
+
+        .credit-note-row {
+            background: #fff5f5;
+        }
+
+        .credit-note-badge {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 1px 3px;
+            border-radius: 2px;
+            font-size: 6px;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+
+        .negative-amount {
+            color: #c53030;
+        }
+
         .signature-section {
             margin-top: 30px;
             width: 100%;
@@ -182,16 +230,16 @@
             <thead>
                 <tr class="table-header">
                     <th style="width: 4%;"><p class="th-text">Р.бр.</p></th>
-                    <th style="width: 10%;"><p class="th-text" style="text-align: left;">Датум</p></th>
-                    <th style="width: 10%;"><p class="th-text" style="text-align: left;">Бр. факт.</p></th>
-                    <th style="width: 22%;"><p class="th-text" style="text-align: left;">
+                    <th style="width: 9%;"><p class="th-text" style="text-align: left;">Датум</p></th>
+                    <th style="width: 9%;"><p class="th-text" style="text-align: left;">Бр. факт.</p></th>
+                    <th style="width: 18%;"><p class="th-text" style="text-align: left;">
                         @if($bookType === 'input')
                             Добавувач
                         @else
                             Купувач
                         @endif
                     </p></th>
-                    <th style="width: 10%;"><p class="th-text">ЕДБ</p></th>
+                    <th style="width: 12%;"><p class="th-text">ЕДБ</p></th>
                     <th style="width: 12%;"><p class="th-text">Основица</p></th>
                     <th style="width: 6%;"><p class="th-text">Стапка</p></th>
                     <th style="width: 12%;"><p class="th-text">ДДВ</p></th>
@@ -203,41 +251,56 @@
                     $totalBase = 0;
                     $totalVat = 0;
                     $totalAmount = 0;
+                    $byRate = [];
                 @endphp
 
                 @foreach($entries as $index => $entry)
                 @php
-                    $totalBase += $entry['taxable_base'] ?? 0;
-                    $totalVat += $entry['vat_amount'] ?? 0;
-                    $totalAmount += $entry['total'] ?? 0;
+                    $base = $entry['taxable_base'] ?? 0;
+                    $vat = $entry['vat_amount'] ?? 0;
+                    $total = $entry['total'] ?? 0;
+                    $rate = $entry['vat_rate'] ?? 0;
+                    $rateKey = (string) $rate;
+                    $isCreditNote = ($entry['doc_type'] ?? '') === 'credit_note';
+
+                    $totalBase += $base;
+                    $totalVat += $vat;
+                    $totalAmount += $total;
+
+                    if (!isset($byRate[$rateKey])) {
+                        $byRate[$rateKey] = ['rate' => $rate, 'count' => 0, 'taxable_base' => 0, 'vat_amount' => 0, 'total' => 0];
+                    }
+                    $byRate[$rateKey]['count']++;
+                    $byRate[$rateKey]['taxable_base'] += $base;
+                    $byRate[$rateKey]['vat_amount'] += $vat;
+                    $byRate[$rateKey]['total'] += $total;
                 @endphp
-                <tr class="entry-row">
+                <tr class="{{ $isCreditNote ? 'credit-note-row' : 'entry-row' }}">
                     <td><p class="cell-center">{{ $index + 1 }}</p></td>
                     <td><p class="cell">{{ $entry['date'] ?? '' }}</p></td>
-                    <td><p class="cell">{{ $entry['number'] ?? '' }}</p></td>
+                    <td><p class="cell">{{ $entry['number'] ?? '' }}@if($isCreditNote)<span class="credit-note-badge">КН</span>@endif</p></td>
                     <td><p class="cell">{{ $entry['party_name'] ?? '' }}</p></td>
-                    <td><p class="cell-center">{{ $entry['party_tax_id'] ?? '' }}</p></td>
+                    <td><p class="cell-center" style="font-size: 7px;">{{ $entry['party_tax_id'] ?? '' }}</p></td>
                     <td>
-                        <p class="cell-amount">
-                            {!! format_money_pdf($entry['taxable_base'] ?? 0, $currency) !!}
+                        <p class="cell-amount {{ $isCreditNote ? 'negative-amount' : '' }}">
+                            {!! format_money_pdf($base, $currency) !!}
                         </p>
                     </td>
                     <td>
                         <p class="cell-center">
-                            @php $rate = $entry['vat_rate'] ?? 18; @endphp
                             <span class="{{ $rate >= 18 ? 'rate-18' : ($rate >= 5 ? 'rate-5' : 'rate-0') }}">
                                 {{ $rate }}%
                             </span>
                         </p>
                     </td>
                     <td>
-                        <p class="cell-amount">
-                            {!! format_money_pdf($entry['vat_amount'] ?? 0, $currency) !!}
+                        <p class="cell-amount {{ $isCreditNote ? 'negative-amount' : '' }}">
+                            {!! format_money_pdf($vat, $currency) !!}
                         </p>
                     </td>
                     <td>
-                        <p class="cell-amount">
-                            {!! format_money_pdf($entry['total'] ?? 0, $currency) !!}
+                        <p class="cell-amount {{ $isCreditNote ? 'negative-amount' : '' }}">
+                            {!! format_money_pdf($total, $currency) !!}
                         </p>
                     </td>
                 </tr>
@@ -253,6 +316,46 @@
                 </tr>
             </tfoot>
         </table>
+
+        {{-- Rate Summary / Рекапитулација --}}
+        @if(count($byRate) > 0)
+        @php
+            // Sort by rate descending
+            usort($byRate, function($a, $b) { return $b['rate'] <=> $a['rate']; });
+        @endphp
+        <p style="font-weight: bold; font-size: 10px; margin-top: 15px; color: #333;">Рекапитулација по стапка на ДДВ</p>
+        <table class="summary-table">
+            <thead>
+                <tr class="summary-header">
+                    <th style="width: 15%;"><p class="th-text" style="text-align: left;">Стапка</p></th>
+                    <th style="width: 10%;"><p class="th-text">Бр.</p></th>
+                    <th style="width: 25%;"><p class="th-text">Основица</p></th>
+                    <th style="width: 25%;"><p class="th-text">ДДВ</p></th>
+                    <th style="width: 25%;"><p class="th-text">Вкупно</p></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($byRate as $rateSummary)
+                <tr class="entry-row">
+                    <td><p class="summary-label">{{ $rateSummary['rate'] }}%</p></td>
+                    <td><p class="cell-center">{{ $rateSummary['count'] }}</p></td>
+                    <td><p class="summary-cell">{!! format_money_pdf($rateSummary['taxable_base'], $currency) !!}</p></td>
+                    <td><p class="summary-cell">{!! format_money_pdf($rateSummary['vat_amount'], $currency) !!}</p></td>
+                    <td><p class="summary-cell">{!! format_money_pdf($rateSummary['total'], $currency) !!}</p></td>
+                </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr class="summary-total-row">
+                    <td><p class="summary-label">Вкупно</p></td>
+                    <td><p class="cell-center">{{ count($entries) }}</p></td>
+                    <td><p class="summary-cell" style="font-weight: bold;">{!! format_money_pdf($totalBase, $currency) !!}</p></td>
+                    <td><p class="summary-cell" style="font-weight: bold;">{!! format_money_pdf($totalVat, $currency) !!}</p></td>
+                    <td><p class="summary-cell" style="font-weight: bold;">{!! format_money_pdf($totalAmount, $currency) !!}</p></td>
+                </tr>
+            </tfoot>
+        </table>
+        @endif
 
         <table class="signature-section">
             <tr>

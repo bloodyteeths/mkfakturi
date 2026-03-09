@@ -83,6 +83,31 @@ class CompanyPolicy
     }
 
     /**
+     * Determine if the user can manage (file tax returns, close periods, etc.) for the company.
+     * Owners, super admins, and company members can manage.
+     */
+    public function manage(User $user, Company $company): bool
+    {
+        if ($user->role === 'super admin' || $user->is_super_admin) {
+            return true;
+        }
+
+        if ($user->id == $company->owner_id) {
+            return true;
+        }
+
+        if ($user->companies && $user->companies->contains($company)) {
+            return true;
+        }
+
+        if ($user->isOwner()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Determine if the user can view reports for the company.
      * Same logic as viewing company - owners and company members can view reports.
      */

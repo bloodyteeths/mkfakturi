@@ -93,6 +93,13 @@ class TaxReportPeriod extends Model
     ];
 
     /**
+     * Accessors to append to the model's array/JSON form.
+     */
+    protected $appends = [
+        'period_name',
+    ];
+
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>

@@ -558,75 +558,115 @@ class PartnerAccountingReportsController extends Controller
         $fromDate = $request->input('from_date');
         $toDate = $request->input('to_date');
 
+        // Validate dates
+        if (!$fromDate || !$toDate) {
+            return response()->json(['error' => 'Потребни се и почетен и краен датум.', 'message' => 'Потребни се и почетен и краен датум.'], 422);
+        }
+        if ($fromDate > $toDate) {
+            return response()->json(['error' => 'Почетниот датум не може да биде после крајниот.', 'message' => 'Почетниот датум не може да биде после крајниот.'], 422);
+        }
+
         // Output book - Sales invoices
         $invoicesQuery = \App\Models\Invoice::where('company_id', $company)
             ->whereNotIn('status', ['DRAFT'])
-            ->with(['customer', 'taxes']);
-
-        if ($fromDate) {
-            $invoicesQuery->where('invoice_date', '>=', $fromDate);
-        }
-        if ($toDate) {
-            $invoicesQuery->where('invoice_date', '<=', $toDate);
-        }
+            ->with(['customer', 'taxes', 'items.taxes'])
+            ->where('invoice_date', '>=', $fromDate)
+            ->where('invoice_date', '<=', $toDate);
 
         $invoices = $invoicesQuery->orderBy('invoice_date')->get();
 
         $outputEntries = $invoices->map(function ($invoice) {
-            $taxTotal = $invoice->taxes->sum('amount') ?? $invoice->tax_total ?? 0;
-            $subTotal = $invoice->sub_total ?? ($invoice->total - $taxTotal);
-            $vatRate = $invoice->taxes->first()?->percent ?? 18;
+            $taxTotal = (int) ($invoice->tax ?? 0);
+            $subTotal = (int) ($invoice->sub_total ?? ($invoice->total - $taxTotal));
+            $vatRate = $this->resolveVatRate($invoice);
 
             return [
                 'id' => $invoice->id,
+                'doc_type' => 'invoice',
                 'date' => $invoice->invoice_date instanceof \DateTimeInterface ? $invoice->invoice_date->format('Y-m-d') : ($invoice->invoice_date ?? ''),
                 'number' => $invoice->invoice_number ?? '',
                 'party_name' => $invoice->customer?->name ?? '',
-                'party_tax_id' => $invoice->customer?->tax_identification_number ?? '',
+                'party_tax_id' => $invoice->customer?->vat_number ?? $invoice->customer?->tax_id ?? '',
                 'total' => (int) ($invoice->total ?? 0),
-                'taxable_base' => (int) $subTotal,
-                'vat_amount' => (int) $taxTotal,
+                'taxable_base' => $subTotal,
+                'vat_amount' => $taxTotal,
                 'vat_rate' => (float) $vatRate,
             ];
-        })->values()->toArray();
+        })->values();
+
+        // Credit notes reduce output VAT (shown as negative entries)
+        $creditNotesQuery = \App\Models\CreditNote::where('company_id', $company)
+            ->whereNotIn('status', ['DRAFT'])
+            ->with(['customer', 'taxes', 'items.taxes'])
+            ->where('credit_note_date', '>=', $fromDate)
+            ->where('credit_note_date', '<=', $toDate);
+
+        $creditNotes = $creditNotesQuery->orderBy('credit_note_date')->get();
+
+        $creditNoteEntries = $creditNotes->map(function ($cn) {
+            $taxTotal = (int) ($cn->tax ?? 0);
+            $subTotal = (int) ($cn->sub_total ?? ($cn->total - $taxTotal));
+            $vatRate = $this->resolveVatRate($cn);
+
+            return [
+                'id' => 'cn_' . $cn->id,
+                'doc_type' => 'credit_note',
+                'date' => $cn->credit_note_date instanceof \DateTimeInterface ? $cn->credit_note_date->format('Y-m-d') : ($cn->credit_note_date ?? ''),
+                'number' => $cn->credit_note_number ?? '',
+                'party_name' => $cn->customer?->name ?? '',
+                'party_tax_id' => $cn->customer?->vat_number ?? $cn->customer?->tax_id ?? '',
+                'total' => -abs((int) ($cn->total ?? 0)),
+                'taxable_base' => -abs($subTotal),
+                'vat_amount' => -abs($taxTotal),
+                'vat_rate' => (float) $vatRate,
+            ];
+        })->values();
+
+        // Merge invoices + credit notes, sort by date
+        $allOutput = $outputEntries->concat($creditNoteEntries)
+            ->sortBy('date')
+            ->values()
+            ->toArray();
 
         // Input book - Bills (purchases)
         $billsQuery = \App\Models\Bill::where('company_id', $company)
             ->whereNotIn('status', ['DRAFT'])
-            ->with(['supplier', 'taxes']);
-
-        if ($fromDate) {
-            $billsQuery->where('bill_date', '>=', $fromDate);
-        }
-        if ($toDate) {
-            $billsQuery->where('bill_date', '<=', $toDate);
-        }
+            ->with(['supplier', 'taxes', 'items.taxes'])
+            ->where('bill_date', '>=', $fromDate)
+            ->where('bill_date', '<=', $toDate);
 
         $bills = $billsQuery->orderBy('bill_date')->get();
 
         $inputEntries = $bills->map(function ($bill) {
-            $taxTotal = $bill->taxes->sum('amount') ?? $bill->tax_total ?? 0;
-            $subTotal = $bill->sub_total ?? ($bill->total - $taxTotal);
-            $vatRate = $bill->taxes->first()?->percent ?? 18;
+            $taxTotal = (int) ($bill->tax ?? 0);
+            $subTotal = (int) ($bill->sub_total ?? ($bill->total - $taxTotal));
+            $vatRate = $this->resolveVatRate($bill);
 
             return [
                 'id' => $bill->id,
+                'doc_type' => 'bill',
                 'date' => $bill->bill_date instanceof \DateTimeInterface ? $bill->bill_date->format('Y-m-d') : ($bill->bill_date ?? ''),
                 'number' => $bill->bill_number ?? '',
                 'party_name' => $bill->supplier?->name ?? '',
-                'party_tax_id' => $bill->supplier?->tax_identification_number ?? '',
+                'party_tax_id' => $bill->supplier?->vat_number ?? $bill->supplier?->tax_id ?? '',
                 'total' => (int) ($bill->total ?? 0),
-                'taxable_base' => (int) $subTotal,
-                'vat_amount' => (int) $taxTotal,
+                'taxable_base' => $subTotal,
+                'vat_amount' => $taxTotal,
                 'vat_rate' => (float) $vatRate,
             ];
         })->values()->toArray();
 
+        // Build summary by VAT rate
+        $outputByRate = $this->summarizeByRate($allOutput);
+        $inputByRate = $this->summarizeByRate($inputEntries);
+
         return response()->json([
             'success' => true,
             'data' => [
-                'output' => $outputEntries,
+                'output' => $allOutput,
                 'input' => $inputEntries,
+                'output_by_rate' => $outputByRate,
+                'input_by_rate' => $inputByRate,
                 'period' => [
                     'from_date' => $fromDate,
                     'to_date' => $toDate,
@@ -897,5 +937,67 @@ class PartnerAccountingReportsController extends Controller
             ->where('partner_company_links.is_active', true)
             ->exists();
     }
+
+    /**
+     * Resolve the VAT rate for an invoice or bill.
+     * Checks invoice-level taxes first, then item-level taxes.
+     * Returns 0 if no taxes found (not a misleading 18% default).
+     */
+    protected function resolveVatRate($document): float
+    {
+        // Check document-level taxes first
+        if ($document->taxes->isNotEmpty()) {
+            // If multiple rates, return the most common one
+            $rates = $document->taxes->pluck('percent')->filter()->countBy();
+            if ($rates->isNotEmpty()) {
+                return (float) $rates->sortDesc()->keys()->first();
+            }
+        }
+
+        // Check item-level taxes (tax_per_item = YES)
+        if ($document->relationLoaded('items') && $document->items->isNotEmpty()) {
+            $itemRates = $document->items->flatMap(function ($item) {
+                return $item->taxes->pluck('percent');
+            })->filter()->countBy();
+            if ($itemRates->isNotEmpty()) {
+                return (float) $itemRates->sortDesc()->keys()->first();
+            }
+        }
+
+        // If tax > 0 but no tax relations found, compute from amounts
+        $tax = (int) ($document->tax ?? 0);
+        $subTotal = (int) ($document->sub_total ?? 0);
+        if ($tax > 0 && $subTotal > 0) {
+            $computed = round(($tax / $subTotal) * 100, 1);
+            // Snap to nearest standard MK rate
+            if ($computed >= 16 && $computed <= 20) return 18.0;
+            if ($computed >= 4 && $computed <= 6) return 5.0;
+            return $computed;
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * Build a summary breakdown by VAT rate.
+     */
+    protected function summarizeByRate(array $entries): array
+    {
+        $byRate = [];
+        foreach ($entries as $entry) {
+            $rate = (string) ($entry['vat_rate'] ?? 0);
+            if (!isset($byRate[$rate])) {
+                $byRate[$rate] = ['rate' => (float) $rate, 'count' => 0, 'taxable_base' => 0, 'vat_amount' => 0, 'total' => 0];
+            }
+            $byRate[$rate]['count']++;
+            $byRate[$rate]['taxable_base'] += $entry['taxable_base'];
+            $byRate[$rate]['vat_amount'] += $entry['vat_amount'];
+            $byRate[$rate]['total'] += $entry['total'];
+        }
+        // Sort by rate descending (18 first, then 5, then 0)
+        usort($byRate, fn($a, $b) => $b['rate'] <=> $a['rate']);
+        return array_values($byRate);
+    }
 }
+// CLAUDE-CHECKPOINT
 

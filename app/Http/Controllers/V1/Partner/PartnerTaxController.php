@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -69,7 +70,12 @@ class PartnerTaxController extends Controller
 
             $this->validatePeriodLength($periodStart, $periodEnd, $validated['period_type']);
 
-            $vatData = $this->calculateVatSummary($companyModel, $periodStart, $periodEnd);
+            $this->vatService->initForPeriod($companyModel, $periodStart, $periodEnd, $validated['period_type']);
+            $vatData = $this->vatService->calculateVatForPeriod();
+            $inputVatData = $this->vatService->calculateInputVatForPeriod();
+
+            $totalOutputVat = $vatData['standard']['vat_amount'] + $vatData['reduced']['vat_amount'];
+            $totalInputVat = $inputVatData['standard']['vat_amount'] + $inputVatData['reduced']['vat_amount'];
 
             return response()->json([
                 'data' => [
@@ -87,7 +93,9 @@ class PartnerTaxController extends Controller
                     'reduced' => $vatData['reduced'],
                     'zero' => $vatData['zero'],
                     'exempt' => $vatData['exempt'],
-                    'total_output_vat' => $vatData['standard']['vat_amount'] + $vatData['reduced']['vat_amount'],
+                    'total_output_vat' => $totalOutputVat,
+                    'total_input_vat' => $totalInputVat,
+                    'net_vat_due' => $totalOutputVat - $totalInputVat,
                     'total_transactions' => array_sum(array_column($vatData, 'transaction_count')),
                 ],
             ]);
@@ -182,7 +190,8 @@ class PartnerTaxController extends Controller
             'period_start' => 'required|date',
             'period_end' => 'required|date|after_or_equal:period_start',
             'period_type' => 'required|string|in:MONTHLY,QUARTERLY',
-            'xml_content' => 'required|string',
+            'xml_content' => 'nullable|string',
+            'generate_xml' => 'nullable|boolean',
             'receipt_number' => 'nullable|string',
         ]);
 
@@ -194,56 +203,69 @@ class PartnerTaxController extends Controller
 
             $this->validatePeriodLength($periodStart, $periodEnd, $validated['period_type']);
 
-            $period = TaxReportPeriod::firstOrCreate(
-                [
-                    'company_id' => $companyModel->id,
-                    'period_type' => strtolower($validated['period_type']),
-                    'year' => $periodStart->year,
-                    'month' => strtolower($validated['period_type']) === TaxReportPeriod::PERIOD_MONTHLY ? $periodStart->month : null,
-                    'quarter' => strtolower($validated['period_type']) === TaxReportPeriod::PERIOD_QUARTERLY ? $periodStart->quarter : null,
-                ],
-                [
-                    'start_date' => $periodStart,
-                    'end_date' => $periodEnd,
-                    'due_date' => $periodEnd->copy()->addDays(25),
-                    'status' => TaxReportPeriod::STATUS_OPEN,
-                ]
-            );
-
-            $taxReturn = TaxReturn::create([
-                'company_id' => $companyModel->id,
-                'period_id' => $period->id,
-                'return_type' => TaxReturn::TYPE_VAT,
-                'status' => TaxReturn::STATUS_DRAFT,
-                'return_data' => [
-                    'xml_content' => $validated['xml_content'],
-                    'period_start' => $periodStart->toDateString(),
-                    'period_end' => $periodEnd->toDateString(),
-                    'period_type' => $validated['period_type'],
-                ],
-            ]);
-
-            $taxReturn->file(
-                Auth::id(),
-                $validated['receipt_number'] ?? null
-            );
-
-            if ($period->status === TaxReportPeriod::STATUS_OPEN) {
-                $period->status = TaxReportPeriod::STATUS_CLOSED;
-                $period->locked_at = now();
-                $period->locked_by = Auth::id();
-                $period->save();
+            // Generate XML server-side if requested or not provided
+            $xmlContent = $validated['xml_content'] ?? null;
+            if (empty($xmlContent) || ($validated['generate_xml'] ?? false)) {
+                $xmlContent = $this->vatService->generateVatReturn(
+                    $companyModel,
+                    $periodStart,
+                    $periodEnd,
+                    $validated['period_type']
+                );
             }
 
-            return response()->json([
-                'message' => 'Tax return filed successfully',
-                'data' => [
-                    'tax_return_id' => $taxReturn->id,
+            return DB::transaction(function () use ($validated, $companyModel, $periodStart, $periodEnd, $xmlContent) {
+                $period = TaxReportPeriod::firstOrCreate(
+                    [
+                        'company_id' => $companyModel->id,
+                        'period_type' => strtolower($validated['period_type']),
+                        'year' => $periodStart->year,
+                        'month' => strtolower($validated['period_type']) === TaxReportPeriod::PERIOD_MONTHLY ? $periodStart->month : null,
+                        'quarter' => strtolower($validated['period_type']) === TaxReportPeriod::PERIOD_QUARTERLY ? $periodStart->quarter : null,
+                    ],
+                    [
+                        'start_date' => $periodStart,
+                        'end_date' => $periodEnd,
+                        'due_date' => $periodEnd->copy()->addDays(25),
+                        'status' => TaxReportPeriod::STATUS_OPEN,
+                    ]
+                );
+
+                $taxReturn = TaxReturn::create([
+                    'company_id' => $companyModel->id,
                     'period_id' => $period->id,
-                    'receipt_number' => $taxReturn->receipt_number,
-                    'submitted_at' => $taxReturn->submitted_at,
-                ],
-            ], 201);
+                    'return_type' => TaxReturn::TYPE_VAT,
+                    'status' => TaxReturn::STATUS_DRAFT,
+                    'return_data' => [
+                        'xml_content' => $xmlContent,
+                        'period_start' => $periodStart->toDateString(),
+                        'period_end' => $periodEnd->toDateString(),
+                        'period_type' => $validated['period_type'],
+                    ],
+                ]);
+
+                $taxReturn->file(
+                    Auth::id(),
+                    $validated['receipt_number'] ?? null
+                );
+
+                if ($period->status === TaxReportPeriod::STATUS_OPEN) {
+                    $period->status = TaxReportPeriod::STATUS_CLOSED;
+                    $period->locked_at = now();
+                    $period->locked_by = Auth::id();
+                    $period->save();
+                }
+
+                return response()->json([
+                    'message' => 'Tax return filed successfully',
+                    'data' => [
+                        'tax_return_id' => $taxReturn->id,
+                        'period_id' => $period->id,
+                        'receipt_number' => $taxReturn->receipt_number,
+                        'submitted_at' => $taxReturn->submitted_at,
+                    ],
+                ], 201);
+            });
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to file tax return',
@@ -668,6 +690,7 @@ class PartnerTaxController extends Controller
      */
     protected function validatePeriodLength(Carbon $start, Carbon $end, string $type): void
     {
+        $type = strtoupper($type);
         $diffInDays = $start->diffInDays($end);
 
         if ($type === 'MONTHLY' && ($diffInDays < 27 || $diffInDays > 31)) {
@@ -682,27 +705,13 @@ class PartnerTaxController extends Controller
     }
 
     /**
-     * Calculate VAT summary using VatXmlService via reflection.
+     * Calculate VAT summary using VatXmlService public API.
      */
     protected function calculateVatSummary(Company $company, Carbon $periodStart, Carbon $periodEnd): array
     {
-        $reflection = new \ReflectionClass($this->vatService);
-        $method = $reflection->getMethod('calculateVatForPeriod');
-        $method->setAccessible(true);
+        $this->vatService->initForPeriod($company, $periodStart, $periodEnd);
 
-        $companyProperty = $reflection->getProperty('company');
-        $companyProperty->setAccessible(true);
-        $companyProperty->setValue($this->vatService, $company);
-
-        $periodStartProperty = $reflection->getProperty('periodStart');
-        $periodStartProperty->setAccessible(true);
-        $periodStartProperty->setValue($this->vatService, $periodStart);
-
-        $periodEndProperty = $reflection->getProperty('periodEnd');
-        $periodEndProperty->setAccessible(true);
-        $periodEndProperty->setValue($this->vatService, $periodEnd);
-
-        return $method->invoke($this->vatService);
+        return $this->vatService->calculateVatForPeriod();
     }
 
     /**

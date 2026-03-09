@@ -16,7 +16,7 @@
     </BasePageHeader>
 
     <!-- Summary Cards -->
-    <div v-if="summary" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div v-if="summary" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-white rounded-lg shadow p-4">
         <p class="text-xs text-gray-500 uppercase">{{ t('total_interest') }}</p>
         <p class="text-2xl font-bold text-gray-900">{{ formatMoney(summary.total_interest) }}</p>
@@ -24,12 +24,74 @@
       <div class="bg-white rounded-lg shadow p-4">
         <p class="text-xs text-gray-500 uppercase">{{ t('pending') }}</p>
         <p class="text-2xl font-bold text-amber-600">{{ formatMoney(summary.calculated?.amount || 0) }}</p>
-        <p class="text-xs text-gray-400">{{ summary.calculated?.count || 0 }} {{ t('title').toLowerCase() }}</p>
+        <p class="text-xs text-gray-400">{{ summary.calculated?.count || 0 }} {{ t('items') }}</p>
       </div>
       <div class="bg-white rounded-lg shadow p-4">
         <p class="text-xs text-gray-500 uppercase">{{ t('invoiced') }}</p>
         <p class="text-2xl font-bold text-blue-600">{{ formatMoney(summary.invoiced?.amount || 0) }}</p>
-        <p class="text-xs text-gray-400">{{ summary.invoiced?.count || 0 }} {{ t('title').toLowerCase() }}</p>
+        <p class="text-xs text-gray-400">{{ summary.invoiced?.count || 0 }} {{ t('items') }}</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <p class="text-xs text-gray-500 uppercase">{{ t('status_paid') }}</p>
+        <p class="text-2xl font-bold text-green-600">{{ formatMoney(summary.paid?.amount || 0) }}</p>
+        <p class="text-xs text-gray-400">{{ summary.paid?.count || 0 }} {{ t('items') }}</p>
+      </div>
+    </div>
+
+    <!-- Rate Override Card -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div>
+            <p class="text-sm font-medium text-gray-700">{{ t('annual_rate') }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ t('rate_help') }}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <BaseInput
+              v-model="customRate"
+              type="number"
+              step="0.01"
+              min="0"
+              max="100"
+              class="w-28"
+              :disabled="isSavingRate"
+            >
+              <template #right>
+                <span class="text-gray-400 text-sm">%</span>
+              </template>
+            </BaseInput>
+            <span
+              v-if="isCustomRate"
+              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 whitespace-nowrap"
+            >
+              {{ t('custom') }}
+            </span>
+            <span
+              v-else
+              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 whitespace-nowrap"
+            >
+              {{ t('statutory') }}
+            </span>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <BaseButton
+            size="sm"
+            variant="primary"
+            :loading="isSavingRate"
+            @click="saveRate"
+          >
+            {{ $t('general.save') }}
+          </BaseButton>
+          <BaseButton
+            v-if="isCustomRate"
+            size="sm"
+            variant="primary-outline"
+            @click="resetRate"
+          >
+            {{ t('reset_to_default') }}
+          </BaseButton>
+        </div>
       </div>
     </div>
 
@@ -43,15 +105,17 @@
 
     <!-- Filters -->
     <div class="p-4 bg-white rounded-lg shadow mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <BaseInputGroup :label="t('status')">
           <BaseMultiselect
             v-model="filters.status"
             :options="statusOptions"
             :searchable="false"
+            :can-deselect="true"
+            :can-clear="true"
             label="label"
             value-prop="value"
-            :placeholder="$t('general.select_a_status')"
+            :placeholder="t('all')"
           />
         </BaseInputGroup>
 
@@ -60,24 +124,34 @@
             v-model="filters.customer_id"
             :options="customers"
             :searchable="true"
+            :can-deselect="true"
+            :can-clear="true"
             label="name"
             value-prop="id"
             placeholder="..."
           />
         </BaseInputGroup>
 
-        <BaseInputGroup :label="t('as_of_date')">
+        <BaseInputGroup :label="t('date_from')">
           <BaseDatePicker
-            v-model="asOfDate"
+            v-model="filters.date_from"
             :calendar-button="true"
             calendar-button-icon="CalendarDaysIcon"
           />
         </BaseInputGroup>
 
-        <div class="flex items-end">
+        <BaseInputGroup :label="t('date_to')">
+          <BaseDatePicker
+            v-model="filters.date_to"
+            :calendar-button="true"
+            calendar-button-icon="CalendarDaysIcon"
+          />
+        </BaseInputGroup>
+
+        <div class="flex items-end gap-2">
           <BaseButton
             variant="primary"
-            class="w-full"
+            class="flex-1"
             :loading="isLoading"
             @click="fetchCalculations(1)"
           >
@@ -85,6 +159,13 @@
               <BaseIcon :class="slotProps.class" name="MagnifyingGlassIcon" />
             </template>
             {{ $t('reports.update_report') }}
+          </BaseButton>
+          <BaseButton
+            v-if="calculations.length > 0"
+            variant="primary-outline"
+            @click="exportCsv"
+          >
+            CSV
           </BaseButton>
         </div>
       </div>
@@ -105,9 +186,12 @@
     </div>
 
     <!-- Table -->
-    <div v-else-if="calculations.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
+    <template v-else-if="calculations.length > 0">
       <!-- Generate Note Action Bar -->
-      <div v-if="selectedIds.length > 0" class="bg-amber-50 border-b border-amber-200 px-6 py-3 flex items-center justify-between">
+      <div
+        v-if="selectedIds.length > 0"
+        class="bg-amber-50 border border-amber-200 rounded-t-lg px-6 py-3 flex items-center justify-between"
+      >
         <span class="text-sm text-amber-800">
           {{ selectedIds.length }} {{ t('select_for_note') }}
         </span>
@@ -121,115 +205,129 @@
         </BaseButton>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">
-                <input
-                  type="checkbox"
-                  class="rounded border-gray-300"
-                  @change="toggleSelectAll"
-                  :checked="allSelected"
-                />
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('customer') }}
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('invoice_number') }}
-              </th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('principal') }}
-              </th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('days_overdue') }}
-              </th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('rate') }}
-              </th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('interest_amount') }}
-              </th>
-              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('status') }}
-              </th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('actions') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr
-              v-for="calc in calculations"
-              :key="calc.id"
-              class="hover:bg-gray-50"
-            >
-              <td class="px-4 py-4">
-                <input
-                  v-if="calc.status === 'calculated'"
-                  type="checkbox"
-                  class="rounded border-gray-300"
-                  :value="calc.id"
-                  v-model="selectedIds"
-                />
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ calc.customer?.name || '-' }}
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-primary-500">
-                {{ calc.invoice?.invoice_number || '-' }}
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                {{ formatMoney(calc.principal_amount) }}
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap text-sm text-right text-red-600 font-medium">
-                {{ calc.days_overdue }}
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                {{ calc.annual_rate }}%
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap text-sm text-right font-bold text-gray-900">
-                {{ formatMoney(calc.interest_amount) }}
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap text-center">
-                <span :class="statusBadgeClass(calc.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-                  {{ statusLabel(calc.status) }}
-                </span>
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap text-right text-sm">
-                <BaseButton
-                  v-if="calc.status === 'calculated'"
-                  variant="danger-outline"
-                  size="sm"
-                  @click="waiveCalculation(calc.id)"
-                >
-                  {{ t('waive') }}
-                </BaseButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <div class="bg-white rounded-lg shadow overflow-hidden" :class="{ 'rounded-t-none': selectedIds.length > 0 }">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">
+                  <input
+                    type="checkbox"
+                    class="rounded border-gray-300"
+                    :checked="allSelected"
+                    @change="toggleSelectAll"
+                  />
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ t('customer') }}
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ t('invoice_number') }}
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ t('due_date') }}
+                </th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ t('principal') }}
+                </th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ t('days_overdue') }}
+                </th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ t('rate') }}
+                </th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ t('interest_amount') }}
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ t('calculation_date') }}
+                </th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ t('status') }}
+                </th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ t('actions') }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr
+                v-for="calc in calculations"
+                :key="calc.id"
+                class="hover:bg-gray-50"
+              >
+                <td class="px-4 py-4">
+                  <input
+                    v-if="calc.status === 'calculated'"
+                    type="checkbox"
+                    class="rounded border-gray-300"
+                    :value="calc.id"
+                    v-model="selectedIds"
+                  />
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {{ calc.customer?.name || '-' }}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-primary-500">
+                  {{ calc.invoice?.invoice_number || '-' }}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ calc.invoice?.due_date || '-' }}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-right text-gray-900">
+                  {{ formatMoney(calc.principal_amount) }}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-right text-red-600 font-medium">
+                  {{ calc.days_overdue }}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-right text-gray-500">
+                  {{ calc.annual_rate }}%
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-right font-bold text-gray-900">
+                  {{ formatMoney(calc.interest_amount) }}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ calc.calculation_date || '-' }}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-center">
+                  <span :class="statusBadgeClass(calc.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                    {{ statusLabel(calc.status) }}
+                  </span>
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-right text-sm">
+                  <BaseButton
+                    v-if="calc.status === 'calculated'"
+                    variant="danger-outline"
+                    size="sm"
+                    @click="waiveCalculation(calc.id)"
+                  >
+                    {{ t('waive') }}
+                  </BaseButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <!-- Pagination -->
-      <div v-if="meta && meta.last_page > 1" class="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
-        <p class="text-sm text-gray-500">
-          {{ meta.total }} {{ t('title').toLowerCase() }}
-        </p>
-        <div class="flex space-x-1">
-          <BaseButton
-            v-for="page in meta.last_page"
-            :key="page"
-            :variant="page === meta.current_page ? 'primary' : 'primary-outline'"
-            size="sm"
-            @click="fetchCalculations(page)"
-          >
-            {{ page }}
-          </BaseButton>
+        <!-- Pagination -->
+        <div v-if="meta && meta.last_page > 1" class="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+          <p class="text-sm text-gray-500">
+            {{ meta.total }} {{ t('items') }}
+          </p>
+          <div class="flex space-x-1">
+            <BaseButton
+              v-for="page in meta.last_page"
+              :key="page"
+              :variant="page === meta.current_page ? 'primary' : 'primary-outline'"
+              size="sm"
+              @click="fetchCalculations(page)"
+            >
+              {{ page }}
+            </BaseButton>
+          </div>
         </div>
       </div>
-    </div>
+    </template>
 
     <!-- Empty State -->
     <div
@@ -297,9 +395,16 @@ const isGenerating = ref(false)
 const selectedIds = ref([])
 const asOfDate = ref(null)
 
+// Rate override state
+const customRate = ref(13.25)
+const isCustomRate = ref(false)
+const isSavingRate = ref(false)
+
 const filters = reactive({
   status: null,
   customer_id: null,
+  date_from: null,
+  date_to: null,
 })
 
 const statusOptions = [
@@ -356,20 +461,24 @@ function toggleSelectAll(event) {
   }
 }
 
+// Data loading
 async function fetchCalculations(page = 1) {
   isLoading.value = true
   try {
     const params = { page, limit: 15 }
     if (filters.status) params.status = filters.status
     if (filters.customer_id) params.customer_id = filters.customer_id
+    if (filters.date_from) params.date_from = filters.date_from
+    if (filters.date_to) params.date_to = filters.date_to
 
     const response = await window.axios.get('/interest', { params })
     calculations.value = response.data.data || []
     meta.value = response.data.meta || null
+    selectedIds.value = []
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_loading') || 'Failed to load interest calculations',
+      message: error.response?.data?.message || t('error_loading'),
     })
   } finally {
     isLoading.value = false
@@ -380,6 +489,12 @@ async function fetchSummary() {
   try {
     const response = await window.axios.get('/interest/summary')
     summary.value = response.data.data || null
+
+    // Sync rate from summary
+    if (summary.value) {
+      customRate.value = summary.value.annual_rate ?? 13.25
+      isCustomRate.value = summary.value.is_custom_rate ?? false
+    }
   } catch {
     // Silently fail
   }
@@ -394,6 +509,97 @@ async function fetchCustomers() {
   }
 }
 
+// Rate override
+async function saveRate() {
+  const rate = parseFloat(customRate.value)
+  if (isNaN(rate) || rate < 0 || rate > 100) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('error_saving_rate'),
+    })
+    return
+  }
+
+  // Warn on unusual rates
+  if (rate > 30 || rate < 1) {
+    const msg = t('confirm_high_rate').replace('{rate}', rate)
+    if (!confirm(msg)) return
+  }
+
+  isSavingRate.value = true
+  try {
+    await window.axios.post('/interest/rate', { annual_rate: rate })
+    isCustomRate.value = true
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('rate_saved'),
+    })
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('error_saving_rate'),
+    })
+  } finally {
+    isSavingRate.value = false
+  }
+}
+
+async function resetRate() {
+  isSavingRate.value = true
+  try {
+    await window.axios.delete('/interest/rate')
+    customRate.value = 13.25
+    isCustomRate.value = false
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('rate_reset'),
+    })
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('error_saving_rate'),
+    })
+  } finally {
+    isSavingRate.value = false
+  }
+}
+
+// CSV Export
+function exportCsv() {
+  if (calculations.value.length === 0) return
+
+  const headers = [
+    t('customer'), t('invoice_number'), t('due_date'),
+    t('principal'), t('days_overdue'), t('rate'),
+    t('interest_amount'), t('status'), t('calculation_date')
+  ]
+
+  const rows = calculations.value.map(calc => [
+    calc.customer?.name || '',
+    calc.invoice?.invoice_number || '',
+    calc.invoice?.due_date || '',
+    (calc.principal_amount / 100).toFixed(2),
+    calc.days_overdue,
+    calc.annual_rate,
+    (calc.interest_amount / 100).toFixed(2),
+    statusLabel(calc.status),
+    calc.calculation_date || '',
+  ])
+
+  const csvContent = [headers, ...rows]
+    .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `interest-${new Date().toISOString().slice(0,10)}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+// Actions
 async function batchCalculate() {
   isCalculating.value = true
   try {
@@ -404,7 +610,7 @@ async function batchCalculate() {
 
     notificationStore.showNotification({
       type: 'success',
-      message: response.data.message || t('calculated_success') || 'Interest calculated successfully.',
+      message: response.data.message || t('calculated_success'),
     })
 
     fetchCalculations(1)
@@ -412,7 +618,7 @@ async function batchCalculate() {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_calculating') || 'Calculation failed',
+      message: error.response?.data?.message || t('error_calculating'),
     })
   } finally {
     isCalculating.value = false
@@ -422,9 +628,20 @@ async function batchCalculate() {
 async function generateNote() {
   if (selectedIds.value.length === 0) return
 
-  // Get customer_id from first selected
-  const firstCalc = calculations.value.find(c => selectedIds.value.includes(c.id))
-  if (!firstCalc) return
+  const selectedCalcs = calculations.value.filter(c => selectedIds.value.includes(c.id))
+  if (selectedCalcs.length === 0) return
+
+  // Validate all selected are for the same customer
+  const customerIds = [...new Set(selectedCalcs.map(c => c.customer_id))]
+  if (customerIds.length > 1) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('mixed_customers_warning'),
+    })
+    return
+  }
+
+  const firstCalc = selectedCalcs[0]
 
   isGenerating.value = true
   try {
@@ -435,7 +652,7 @@ async function generateNote() {
 
     notificationStore.showNotification({
       type: 'success',
-      message: response.data.message || t('note_generated') || 'Interest note generated.',
+      message: response.data.message || t('note_generated'),
     })
 
     selectedIds.value = []
@@ -444,7 +661,7 @@ async function generateNote() {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_generating') || 'Failed to generate interest note',
+      message: error.response?.data?.message || t('error_generating'),
     })
   } finally {
     isGenerating.value = false
@@ -459,7 +676,7 @@ async function waiveCalculation(id) {
 
     notificationStore.showNotification({
       type: 'success',
-      message: t('waived_success') || 'Interest waived.',
+      message: t('waived_success'),
     })
 
     fetchCalculations(meta.value?.current_page || 1)
@@ -467,7 +684,7 @@ async function waiveCalculation(id) {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_waiving') || 'Failed to waive interest',
+      message: error.response?.data?.message || t('error_waiving'),
     })
   }
 }

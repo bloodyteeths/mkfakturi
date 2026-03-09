@@ -8,15 +8,15 @@
     <div v-if="effectiveness" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div class="bg-white rounded-lg shadow p-4">
         <p class="text-xs text-gray-500 uppercase">{{ t('total_sent') }}</p>
-        <p class="text-2xl font-bold text-gray-900">{{ effectiveness.total_sent || 0 }}</p>
+        <p class="text-2xl font-bold text-gray-900">{{ effectivenessTotalSent }}</p>
       </div>
       <div class="bg-white rounded-lg shadow p-4">
         <p class="text-xs text-gray-500 uppercase">{{ t('paid_percentage') }}</p>
-        <p class="text-2xl font-bold text-green-600">{{ effectiveness.paid_percentage || 0 }}%</p>
+        <p class="text-2xl font-bold text-green-600">{{ effectivenessPaidPct }}%</p>
       </div>
       <div class="bg-white rounded-lg shadow p-4">
         <p class="text-xs text-gray-500 uppercase">{{ t('avg_days_to_pay') }}</p>
-        <p class="text-2xl font-bold text-amber-600">{{ effectiveness.avg_days_to_pay || 0 }}</p>
+        <p class="text-2xl font-bold text-amber-600">{{ effectivenessAvgDays }}</p>
       </div>
     </div>
 
@@ -30,11 +30,11 @@
             <div
               :class="levelBarClass(level)"
               class="h-full rounded-full transition-all"
-              :style="{ width: (effectiveness.by_level[level]?.paid_pct || 0) + '%' }"
+              :style="{ width: (effectiveness.by_level[level]?.paid_percentage || 0) + '%' }"
             ></div>
           </div>
           <span class="text-xs text-gray-500 w-12 text-right">
-            {{ effectiveness.by_level[level]?.paid_pct || 0 }}%
+            {{ effectiveness.by_level[level]?.paid_percentage || 0 }}%
           </span>
         </div>
       </div>
@@ -68,7 +68,6 @@
               <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('escalation') }}</th>
               <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('sent_via') }}</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('reminder_sent') }}</th>
-              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('opened') }}</th>
               <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('paid') }}</th>
             </tr>
           </thead>
@@ -84,10 +83,6 @@
               <td class="px-4 py-3 text-center text-sm text-gray-500">{{ sentViaLabel(item.sent_via) }}</td>
               <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(item.sent_at) }}</td>
               <td class="px-4 py-3 text-center">
-                <BaseIcon v-if="item.opened_at" name="CheckCircleIcon" class="h-4 w-4 text-green-500 mx-auto" />
-                <span v-else class="text-gray-300">-</span>
-              </td>
-              <td class="px-4 py-3 text-center">
                 <BaseIcon v-if="item.paid_at" name="CheckCircleIcon" class="h-4 w-4 text-green-500 mx-auto" />
                 <span v-else class="text-gray-300">-</span>
               </td>
@@ -100,7 +95,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import collectionMessages from '@/scripts/admin/i18n/collections.js'
 
@@ -119,6 +114,25 @@ const fmtLocale = localeMap[locale] || 'mk-MK'
 const history = ref([])
 const effectiveness = ref(null)
 const isLoading = ref(false)
+
+const effectivenessTotalSent = computed(() => {
+  if (!effectiveness.value?.by_level) return 0
+  return Object.values(effectiveness.value.by_level).reduce((sum, l) => sum + (l.total_sent || 0), 0)
+})
+
+const effectivenessPaidPct = computed(() => {
+  const totalSent = effectivenessTotalSent.value
+  if (totalSent === 0) return 0
+  const totalPaid = Object.values(effectiveness.value.by_level).reduce((sum, l) => sum + (l.total_paid || 0), 0)
+  return Math.round((totalPaid / totalSent) * 100 * 10) / 10
+})
+
+const effectivenessAvgDays = computed(() => {
+  if (!effectiveness.value?.by_level) return 0
+  const levels = Object.values(effectiveness.value.by_level).filter(l => l.avg_days_to_pay !== null)
+  if (levels.length === 0) return 0
+  return Math.round(levels.reduce((sum, l) => sum + l.avg_days_to_pay, 0) / levels.length)
+})
 
 function levelBadgeClass(level) {
   const map = {

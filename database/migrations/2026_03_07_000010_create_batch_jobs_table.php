@@ -15,7 +15,7 @@ return new class extends Migration
                 $table->collation = 'utf8mb4_unicode_ci';
 
                 $table->id();
-                $table->unsignedBigInteger('partner_id');
+                $table->unsignedBigInteger('partner_id')->nullable();
                 $table->string('operation_type', 50);
                 $table->json('company_ids');
                 $table->json('parameters')->nullable();

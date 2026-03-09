@@ -36,9 +36,6 @@
               {{ t(tpl.escalation_level) }}
             </span>
             <div class="flex items-center gap-2">
-              <span v-if="tpl.auto_send" class="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">
-                {{ t('auto_send') }}
-              </span>
               <span v-if="tpl.is_active" class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
                 {{ t('active') }}
               </span>
@@ -103,16 +100,10 @@
           <BaseTextarea v-model="form.body_sq" rows="4" />
         </BaseInputGroup>
 
-        <div class="grid grid-cols-2 gap-4">
-          <label class="flex items-center gap-2">
-            <input type="checkbox" v-model="form.is_active" class="rounded border-gray-300" />
-            <span class="text-sm text-gray-700">{{ t('active') }}</span>
-          </label>
-          <label class="flex items-center gap-2">
-            <input type="checkbox" v-model="form.auto_send" class="rounded border-gray-300" />
-            <span class="text-sm text-gray-700">{{ t('auto_send') }}</span>
-          </label>
-        </div>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" v-model="form.is_active" class="rounded border-gray-300" />
+          <span class="text-sm text-gray-700">{{ t('active') }}</span>
+        </label>
       </div>
       <template #footer>
         <BaseButton variant="primary-outline" @click="showForm = false">{{ $t('general.cancel') }}</BaseButton>

@@ -35,12 +35,15 @@ class PartnerCollectionController extends Controller
             'customer_id' => $request->query('customer_id'),
             'escalation_level' => $request->query('escalation_level'),
             'search' => $request->query('search'),
+            'page' => $request->query('page', 1),
+            'per_page' => $request->query('per_page', 50),
         ];
 
-        $invoices = $this->service->getOverdueInvoices($company, $filters);
+        $result = $this->service->getOverdueInvoices($company, $filters);
+        $invoices = $result['invoices'];
 
         $totalOverdue = array_sum(array_column($invoices, 'due_amount'));
-        $customerCount = count(array_unique(array_column($invoices, 'customer_id')));
+        $customerCount = count(array_unique(array_filter(array_column($invoices, 'customer_id'))));
         $avgDays = count($invoices) > 0
             ? round(array_sum(array_column($invoices, 'days_overdue')) / count($invoices))
             : 0;
@@ -50,10 +53,14 @@ class PartnerCollectionController extends Controller
             'data' => $invoices,
             'summary' => [
                 'total_overdue_amount' => $totalOverdue,
-                'invoice_count' => count($invoices),
+                'invoice_count' => $result['pagination']['total'],
                 'customer_count' => $customerCount,
                 'avg_days_overdue' => $avgDays,
+                'total_interest' => $result['total_interest'],
+                'interest_rate' => $result['interest_rate'],
             ],
+            'aging' => $result['aging'],
+            'pagination' => $result['pagination'],
         ]);
     }
 
@@ -253,12 +260,20 @@ class PartnerCollectionController extends Controller
             return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
         }
 
-        $customerId = $request->query('customer_id') ? (int) $request->query('customer_id') : null;
-        $history = $this->service->getHistory($company, $customerId);
+        $filters = [
+            'customer_id' => $request->query('customer_id'),
+            'from_date' => $request->query('from_date'),
+            'to_date' => $request->query('to_date'),
+            'page' => $request->query('page', 1),
+            'per_page' => $request->query('per_page', 50),
+        ];
+
+        $result = $this->service->getHistory($company, $filters);
 
         return response()->json([
             'success' => true,
-            'data' => $history,
+            'data' => $result['items'],
+            'pagination' => $result['pagination'],
         ]);
     }
 
@@ -281,6 +296,36 @@ class PartnerCollectionController extends Controller
             'success' => true,
             'data' => $effectiveness,
         ]);
+    }
+
+    /**
+     * Generate Опомена (formal dunning letter) PDF.
+     */
+    public function opomena(Request $request, int $company, int $invoiceId)
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        try {
+            $data = $this->service->getOpomenaData($company, $invoiceId);
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('app.pdf.reports.opomena', $data);
+            $pdf->setPaper('A4', 'portrait');
+
+            $filename = "opomena-{$data['invoice']->invoice_number}.pdf";
+
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
     // ---- Partner access helpers ----

@@ -3,6 +3,7 @@
 namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\CompanySetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Mk\Models\InterestCalculation;
@@ -191,6 +192,67 @@ class InterestController extends Controller
         return response()->json([
             'success' => true,
             'data' => $summary,
+        ]);
+    }
+
+    /**
+     * Get the current interest rate for this company.
+     */
+    public function getRate(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $customRate = CompanySetting::getSetting('interest_annual_rate', $companyId);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'annual_rate' => $this->service->getAnnualRate($companyId),
+                'is_custom' => $customRate !== null && $customRate !== '',
+                'default_rate' => 13.25,
+            ],
+        ]);
+    }
+
+    /**
+     * Update the interest rate for this company.
+     */
+    public function updateRate(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $request->validate([
+            'annual_rate' => 'required|numeric|min:0|max:100',
+        ]);
+
+        CompanySetting::setSettings([
+            'interest_annual_rate' => $request->input('annual_rate'),
+        ], $companyId);
+
+        return response()->json([
+            'success' => true,
+            'data' => ['annual_rate' => (float) $request->input('annual_rate')],
+            'message' => 'Interest rate updated.',
+        ]);
+    }
+
+    /**
+     * Reset the interest rate to statutory default.
+     */
+    public function resetRate(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        CompanySetting::where('company_id', $companyId)
+            ->where('option', 'interest_annual_rate')
+            ->delete();
+
+        // Clear the specific cache key (works for all drivers including file)
+        \Illuminate\Support\Facades\Cache::forget("company:{$companyId}:setting:interest_annual_rate");
+
+        return response()->json([
+            'success' => true,
+            'data' => ['annual_rate' => 13.25],
+            'message' => 'Rate reset to statutory default.',
         ]);
     }
 }

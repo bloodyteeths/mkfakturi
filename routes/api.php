@@ -1069,8 +1069,11 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/', [\Modules\Mk\Http\Controllers\InterestController::class, 'index']);
                 Route::post('/calculate', [\Modules\Mk\Http\Controllers\InterestController::class, 'calculate']);
                 Route::get('/summary', [\Modules\Mk\Http\Controllers\InterestController::class, 'summary']);
+                Route::get('/rate', [\Modules\Mk\Http\Controllers\InterestController::class, 'getRate']);
+                Route::post('/rate', [\Modules\Mk\Http\Controllers\InterestController::class, 'updateRate']);
+                Route::delete('/rate', [\Modules\Mk\Http\Controllers\InterestController::class, 'resetRate']);
+                Route::post('/generate-note', [\Modules\Mk\Http\Controllers\InterestController::class, 'generateNote']);
                 Route::get('/{id}', [\Modules\Mk\Http\Controllers\InterestController::class, 'show']);
-                Route::post('/{id}/generate-note', [\Modules\Mk\Http\Controllers\InterestController::class, 'generateNote']);
                 Route::post('/{id}/waive', [\Modules\Mk\Http\Controllers\InterestController::class, 'waive']);
             });
 
@@ -1086,6 +1089,7 @@ Route::prefix('/v1')->group(function () {
                 Route::delete('/templates/{id}', [\Modules\Mk\Http\Controllers\CollectionController::class, 'deleteTemplate']);
                 Route::get('/history', [\Modules\Mk\Http\Controllers\CollectionController::class, 'history']);
                 Route::get('/effectiveness', [\Modules\Mk\Http\Controllers\CollectionController::class, 'effectiveness']);
+                Route::get('/opomena/{invoiceId}', [\Modules\Mk\Http\Controllers\CollectionController::class, 'opomena']);
             });
 
             // ----------------------------------
@@ -1821,8 +1825,12 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'index']);
             Route::post('/calculate', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'calculate']);
             Route::get('/summary', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'summary']);
+            Route::get('/rate', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'getRate']);
+            Route::post('/rate', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'updateRate']);
+            Route::delete('/rate', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'resetRate']);
+            Route::get('/customers', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'customers']);
+            Route::post('/generate-note', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'generateNote']);
             Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'show']);
-            Route::post('/{id}/generate-note', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'generateNote']);
             Route::post('/{id}/waive', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'waive']);
         });
 
@@ -1831,8 +1839,12 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::get('/overdue', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'overdueInvoices']);
             Route::post('/send-reminder', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'sendReminder']);
             Route::get('/templates', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'templates']);
+            Route::post('/templates', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'storeTemplate']);
+            Route::put('/templates/{id}', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'updateTemplate']);
+            Route::delete('/templates/{id}', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'deleteTemplate']);
             Route::get('/history', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'history']);
             Route::get('/effectiveness', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'effectiveness']);
+            Route::get('/opomena/{invoiceId}', [\App\Http\Controllers\V1\Partner\PartnerCollectionController::class, 'opomena']);
         });
 
         // F6: Purchase Orders (Partner)
@@ -1924,6 +1936,8 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/tax-summary', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'taxSummary']);
         Route::get('/statistics', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'statistics']);
         Route::get('/monthly-comparison', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'monthlyComparison']);
+        Route::get('/employee-breakdown', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'employeeBreakdown']);
+        Route::get('/export-csv', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'exportCsv']);
         Route::get('/download-mpin-xml', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'downloadMpinXml']);
         Route::get('/download-ddv04-xml', [\App\Http\Controllers\V1\Partner\PartnerPayrollReportController::class, 'downloadDdv04Xml']);
     });
@@ -1964,6 +1978,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerBatchOperationController::class, 'show']);
         Route::post('/{id}/cancel', [\App\Http\Controllers\V1\Partner\PartnerBatchOperationController::class, 'cancel']);
         Route::get('/{id}/progress', [\App\Http\Controllers\V1\Partner\PartnerBatchOperationController::class, 'progress']);
+        Route::get('/{id}/download/{companyId}', [\App\Http\Controllers\V1\Partner\PartnerBatchOperationController::class, 'download']);
     });
 
     // F12: Financial Consolidation (Partner)

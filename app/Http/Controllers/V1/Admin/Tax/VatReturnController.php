@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -47,23 +48,10 @@ class VatReturnController extends Controller
         Gate::authorize('view', $company);
 
         try {
-            // Log company VAT info for debugging
-            \Log::info('VatReturnController::preview - Company VAT Check', [
-                'company_id' => $company->id,
-                'company_name' => $company->name,
-                'vat_number' => $company->vat_number,
-                'vat_id' => $company->vat_id,
-                'tax_id' => $company->tax_id,
-                'vat_number_empty' => empty($company->vat_number),
-                'vat_number_is_null' => is_null($company->vat_number),
-            ]);
-
             // Validate VAT number is set
             if (empty($company->vat_number)) {
                 \Log::warning('VatReturnController::preview - VAT number missing', [
                     'company_id' => $company->id,
-                    'vat_number' => $company->vat_number,
-                    'vat_id' => $company->vat_id,
                 ]);
 
                 return response()->json([
@@ -82,6 +70,11 @@ class VatReturnController extends Controller
 
             // Get VAT data summary without generating full XML
             $vatData = $this->calculateVatSummary($company, $periodStart, $periodEnd);
+            $this->vatService->initForPeriod($company, $periodStart, $periodEnd, $validated['period_type']);
+            $inputVatData = $this->vatService->calculateInputVatForPeriod();
+
+            $totalOutputVat = $vatData['standard']['vat_amount'] + $vatData['reduced']['vat_amount'];
+            $totalInputVat = $inputVatData['standard']['vat_amount'] + $inputVatData['reduced']['vat_amount'];
 
             return response()->json([
                 'data' => [
@@ -99,7 +92,9 @@ class VatReturnController extends Controller
                     'reduced' => $vatData['reduced'],
                     'zero' => $vatData['zero'],
                     'exempt' => $vatData['exempt'],
-                    'total_output_vat' => $vatData['standard']['vat_amount'] + $vatData['reduced']['vat_amount'],
+                    'total_output_vat' => $totalOutputVat,
+                    'total_input_vat' => $totalInputVat,
+                    'net_vat_due' => $totalOutputVat - $totalInputVat,
                     'total_transactions' => array_sum(array_column($vatData, 'transaction_count')),
                 ],
             ]);
@@ -119,12 +114,6 @@ class VatReturnController extends Controller
      */
     public function generate(Request $request): Response|JsonResponse
     {
-        \Log::info('VatReturnController::generate - START', [
-            'request_all' => $request->all(),
-            'method' => $request->method(),
-            'url' => $request->fullUrl(),
-        ]);
-
         $validated = $request->validate([
             'company_id' => 'required|integer|exists:companies,id',
             'period_start' => 'required|date',
@@ -133,20 +122,8 @@ class VatReturnController extends Controller
             'validate_xml' => 'boolean',
         ]);
 
-        \Log::info('VatReturnController::generate - Validation passed', [
-            'validated' => $validated,
-        ]);
-
         // Get company and authorize access
         $company = Company::findOrFail($validated['company_id']);
-
-        \Log::info('VatReturnController::generate - Company loaded', [
-            'company_id' => $company->id,
-            'company_name' => $company->name,
-            'vat_number' => $company->vat_number,
-            'vat_id' => $company->vat_id,
-        ]);
-
         Gate::authorize('view', $company);
 
         try {
@@ -166,16 +143,8 @@ class VatReturnController extends Controller
             $periodEnd = Carbon::parse($validated['period_end']);
             $periodType = strtolower($validated['period_type']);
 
-            \Log::info('VatReturnController::generate - Dates parsed', [
-                'period_start' => $periodStart->format('Y-m-d'),
-                'period_end' => $periodEnd->format('Y-m-d'),
-                'period_type' => $periodType,
-            ]);
-
             // Validate period length
             $this->validatePeriodLength($periodStart, $periodEnd, $periodType);
-
-            \Log::info('VatReturnController::generate - Period length validated, calling VatXmlService');
 
             // Generate VAT return XML
             $xml = $this->vatService->generateVatReturn(
@@ -184,11 +153,6 @@ class VatReturnController extends Controller
                 $periodEnd,
                 $periodType
             );
-
-            \Log::info('VatReturnController::generate - XML generated', [
-                'xml_length' => strlen($xml),
-                'xml_preview' => substr($xml, 0, 200),
-            ]);
 
             // Validate XML if requested
             if ($validated['validate_xml'] ?? true) {
@@ -216,11 +180,6 @@ class VatReturnController extends Controller
                 $periodStart->format('Y-m-d'),
                 $periodEnd->format('Y-m-d')
             );
-
-            \Log::info('VatReturnController::generate - Returning XML download', [
-                'filename' => $filename,
-                'xml_length' => strlen($xml),
-            ]);
 
             // Return XML file as download
             return response($xml, 200, [
@@ -257,6 +216,7 @@ class VatReturnController extends Controller
      */
     protected function validatePeriodLength(Carbon $start, Carbon $end, string $type): void
     {
+        $type = strtoupper($type);
         $diffInDays = $start->diffInDays($end);
 
         if ($type === 'MONTHLY') {
@@ -281,26 +241,8 @@ class VatReturnController extends Controller
      */
     protected function calculateVatSummary(Company $company, Carbon $periodStart, Carbon $periodEnd): array
     {
-        // Use VatXmlService's protected method through reflection for consistent data
-        $reflection = new \ReflectionClass($this->vatService);
-        $method = $reflection->getMethod('calculateVatForPeriod');
-        $method->setAccessible(true);
-
-        // Set the service properties
-        $companyProperty = $reflection->getProperty('company');
-        $companyProperty->setAccessible(true);
-        $companyProperty->setValue($this->vatService, $company);
-
-        $periodStartProperty = $reflection->getProperty('periodStart');
-        $periodStartProperty->setAccessible(true);
-        $periodStartProperty->setValue($this->vatService, $periodStart);
-
-        $periodEndProperty = $reflection->getProperty('periodEnd');
-        $periodEndProperty->setAccessible(true);
-        $periodEndProperty->setValue($this->vatService, $periodEnd);
-
-        // Get the VAT calculation data
-        return $method->invoke($this->vatService);
+        $this->vatService->initForPeriod($company, $periodStart, $periodEnd);
+        return $this->vatService->calculateVatForPeriod();
     }
 
     /**
@@ -312,7 +254,7 @@ class VatReturnController extends Controller
 
         try {
             $now = now();
-            $currentMonth = $now->startOfMonth();
+            $currentMonth = $now->copy()->startOfMonth();
             $complianceAlerts = [];
 
             // Check if VAT number is set
@@ -337,8 +279,8 @@ class VatReturnController extends Controller
                 ->orderBy('end_date', 'desc')
                 ->first();
 
-            // Calculate next deadline (assume monthly, 15th of following month)
-            $nextDeadline = $currentMonth->copy()->addMonth()->day(15)->endOfDay();
+            // Calculate next deadline (assume monthly, 25th of following month per Article 41)
+            $nextDeadline = $currentMonth->copy()->addMonth()->day(25)->endOfDay();
 
             // Determine compliance status
             $currentStatus = 'unknown';
@@ -401,7 +343,8 @@ class VatReturnController extends Controller
             'period_start' => 'required|date',
             'period_end' => 'required|date|after_or_equal:period_start',
             'period_type' => 'required|string|in:monthly,MONTHLY,quarterly,QUARTERLY',
-            'xml_content' => 'required|string',
+            'xml_content' => 'nullable|string',
+            'generate_xml' => 'nullable|boolean',
             'receipt_number' => 'nullable|string',
             'response_data' => 'nullable|array',
         ]);
@@ -419,59 +362,74 @@ class VatReturnController extends Controller
             // Validate period length
             $this->validatePeriodLength($periodStart, $periodEnd, $periodType);
 
-            // Find or create tax report period
-            $period = TaxReportPeriod::firstOrCreate(
-                [
-                    'company_id' => $company->id,
-                    'period_type' => $periodType,
-                    'year' => $periodStart->year,
-                    'month' => $periodType === TaxReportPeriod::PERIOD_MONTHLY ? $periodStart->month : null,
-                    'quarter' => $periodType === TaxReportPeriod::PERIOD_QUARTERLY ? $periodStart->quarter : null,
-                ],
-                [
-                    'start_date' => $periodStart,
-                    'end_date' => $periodEnd,
-                    'due_date' => $periodEnd->copy()->addDays(25),
-                    'status' => TaxReportPeriod::STATUS_OPEN,
-                ]
-            );
-
-            // Create tax return with XML content
-            $taxReturn = TaxReturn::create([
-                'company_id' => $company->id,
-                'period_id' => $period->id,
-                'return_type' => TaxReturn::TYPE_VAT,
-                'status' => TaxReturn::STATUS_DRAFT,
-                'return_data' => [
-                    'xml_content' => $validated['xml_content'],
-                    'period_start' => $periodStart->toDateString(),
-                    'period_end' => $periodEnd->toDateString(),
-                    'period_type' => $periodType,
-                ],
-            ]);
-
-            // File the tax return
-            $taxReturn->file(
-                Auth::id(),
-                $validated['receipt_number'] ?? null,
-                $validated['response_data'] ?? null
-            );
-
-            // Lock the period if this is the first filing
-            if ($period->status === TaxReportPeriod::STATUS_OPEN) {
-                $period->status = TaxReportPeriod::STATUS_CLOSED;
-                $period->locked_at = now();
-                $period->locked_by = Auth::id();
-                $period->save();
+            // Generate XML server-side if requested or not provided
+            $xmlContent = $validated['xml_content'] ?? null;
+            if (empty($xmlContent) || ($validated['generate_xml'] ?? false)) {
+                $xmlContent = $this->vatService->generateVatReturn(
+                    $company,
+                    $periodStart,
+                    $periodEnd,
+                    $periodType
+                );
             }
+
+            $result = DB::transaction(function () use ($validated, $company, $periodStart, $periodEnd, $periodType, $xmlContent) {
+                // Find or create tax report period
+                $period = TaxReportPeriod::firstOrCreate(
+                    [
+                        'company_id' => $company->id,
+                        'period_type' => $periodType,
+                        'year' => $periodStart->year,
+                        'month' => $periodType === TaxReportPeriod::PERIOD_MONTHLY ? $periodStart->month : null,
+                        'quarter' => $periodType === TaxReportPeriod::PERIOD_QUARTERLY ? $periodStart->quarter : null,
+                    ],
+                    [
+                        'start_date' => $periodStart,
+                        'end_date' => $periodEnd,
+                        'due_date' => $periodEnd->copy()->addDays(25),
+                        'status' => TaxReportPeriod::STATUS_OPEN,
+                    ]
+                );
+
+                // Create tax return with XML content
+                $taxReturn = TaxReturn::create([
+                    'company_id' => $company->id,
+                    'period_id' => $period->id,
+                    'return_type' => TaxReturn::TYPE_VAT,
+                    'status' => TaxReturn::STATUS_DRAFT,
+                    'return_data' => [
+                        'xml_content' => $xmlContent,
+                        'period_start' => $periodStart->toDateString(),
+                        'period_end' => $periodEnd->toDateString(),
+                        'period_type' => $periodType,
+                    ],
+                ]);
+
+                // File the tax return
+                $taxReturn->file(
+                    Auth::id(),
+                    $validated['receipt_number'] ?? null,
+                    $validated['response_data'] ?? null
+                );
+
+                // Lock the period if this is the first filing
+                if ($period->status === TaxReportPeriod::STATUS_OPEN) {
+                    $period->status = TaxReportPeriod::STATUS_CLOSED;
+                    $period->locked_at = now();
+                    $period->locked_by = Auth::id();
+                    $period->save();
+                }
+
+                return ['taxReturn' => $taxReturn, 'period' => $period];
+            });
 
             return response()->json([
                 'message' => 'Tax return filed successfully',
                 'data' => [
-                    'tax_return_id' => $taxReturn->id,
-                    'period_id' => $period->id,
-                    'receipt_number' => $taxReturn->receipt_number,
-                    'submitted_at' => $taxReturn->submitted_at,
+                    'tax_return_id' => $result['taxReturn']->id,
+                    'period_id' => $result['period']->id,
+                    'receipt_number' => $result['taxReturn']->receipt_number,
+                    'submitted_at' => $result['taxReturn']->submitted_at,
                 ],
             ], 201);
 
@@ -574,7 +532,7 @@ class VatReturnController extends Controller
                             'id' => $return->amendmentOf->id,
                             'receipt_number' => $return->amendmentOf->receipt_number,
                         ] : null,
-                        'xml_download_url' => route('api.v1.tax.vat-returns.download-xml', ['id' => $return->id]),
+                        'xml_download_url' => '/api/v1/tax/vat-return/' . $return->id . '/download-xml',
                         'created_at' => $return->created_at,
                     ];
                 });
@@ -684,7 +642,7 @@ class VatReturnController extends Controller
     /**
      * Download XML for a specific tax return
      */
-    public function downloadXml(int $id): Response
+    public function downloadXml(int $id): Response|JsonResponse
     {
         // Find the tax return
         $taxReturn = TaxReturn::findOrFail($id);

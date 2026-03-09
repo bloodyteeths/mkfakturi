@@ -53,6 +53,9 @@ class PaymentReminder extends Mailable
         $companyName = $company->name ?? config('mail.from.name');
         $fromName = $companyName . ' преку Facturino';
 
+        // Load currency for amount formatting
+        $this->invoice->loadMissing('currency');
+
         // Resolve subject and body for locale
         $subject = $this->resolveTemplate($this->template->getSubjectForLocale($this->locale));
         $body = $this->resolveTemplate($this->template->getBodyForLocale($this->locale));
@@ -70,7 +73,9 @@ class PaymentReminder extends Mailable
                 'company' => $company,
                 'body' => $body,
                 'level' => $this->level,
+                'locale' => $this->locale,
                 'daysOverdue' => $dueDate->diffInDays(Carbon::today()),
+                'currencySymbol' => $this->invoice->currency->symbol ?? 'ден.',
             ])
             ->withSymfonyMessage(function ($message) {
                 $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
@@ -88,14 +93,16 @@ class PaymentReminder extends Mailable
 
         $daysOverdue = $dueDate->diffInDays(Carbon::today());
 
+        $currencySymbol = $this->invoice->currency->symbol ?? 'ден.';
+
         $replacements = [
             '{INVOICE_NUMBER}' => $this->invoice->invoice_number ?? '',
-            '{AMOUNT_DUE}' => number_format(($this->invoice->due_amount ?? 0) / 100, 2, '.', ','),
+            '{AMOUNT_DUE}' => number_format(($this->invoice->due_amount ?? 0) / 100, 2, '.', ',') . ' ' . $currencySymbol,
             '{DUE_DATE}' => $dueDate->format('d.m.Y'),
             '{DAYS_OVERDUE}' => (string) $daysOverdue,
             '{CUSTOMER_NAME}' => $this->customer->name ?? '',
             '{COMPANY_NAME}' => $this->invoice->company->name ?? '',
-            '{TOTAL}' => number_format(($this->invoice->total ?? 0) / 100, 2, '.', ','),
+            '{TOTAL}' => number_format(($this->invoice->total ?? 0) / 100, 2, '.', ',') . ' ' . $currencySymbol,
         ];
 
         return strtr($text, $replacements);

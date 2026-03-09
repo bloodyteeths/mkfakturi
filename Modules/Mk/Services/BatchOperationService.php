@@ -5,6 +5,7 @@ namespace Modules\Mk\Services;
 use App\Models\Partner;
 use Modules\Mk\Jobs\BatchDailyCloseJob;
 use Modules\Mk\Jobs\BatchExportJob;
+use Modules\Mk\Jobs\BatchFinancialStatementExportJob;
 use Modules\Mk\Jobs\BatchPeriodLockJob;
 use Modules\Mk\Jobs\BatchVatReturnJob;
 use Modules\Mk\Models\BatchJob;
@@ -20,24 +21,35 @@ class BatchOperationService
         'trial_balance_export' => BatchExportJob::class,
         'period_lock' => BatchPeriodLockJob::class,
         'journal_export' => BatchExportJob::class,
+        'balance_sheet_export' => BatchFinancialStatementExportJob::class,
+        'income_statement_export' => BatchFinancialStatementExportJob::class,
     ];
 
     /**
      * Create a new batch job and dispatch it.
+     * Accepts Partner object or partner ID. For super admin, pass the fake Partner object.
      */
-    public function createJob(int $partnerId, string $operationType, array $companyIds, array $parameters = []): BatchJob
+    public function createJob(int|Partner $partnerOrId, string $operationType, array $companyIds, array $parameters = []): BatchJob
     {
         if (!array_key_exists($operationType, $this->operationJobs)) {
             throw new \InvalidArgumentException("Invalid operation type: {$operationType}");
         }
 
-        // Validate all companies belong to partner
-        $partner = Partner::findOrFail($partnerId);
+        // Resolve partner
+        if ($partnerOrId instanceof Partner) {
+            $partner = $partnerOrId;
+        } else {
+            $partner = Partner::findOrFail($partnerOrId);
+        }
+
         $this->validateCompanyAccess($partner, $companyIds);
+
+        // For super admin (fake partner id=0), store null partner_id
+        $storedPartnerId = ($partner->id > 0) ? $partner->id : null;
 
         // Create the batch job record
         $batchJob = BatchJob::create([
-            'partner_id' => $partnerId,
+            'partner_id' => $storedPartnerId,
             'operation_type' => $operationType,
             'company_ids' => $companyIds,
             'parameters' => $parameters,
@@ -57,11 +69,16 @@ class BatchOperationService
 
     /**
      * List batch jobs for a partner with optional filters.
+     * Partner ID 0 = super admin — sees all jobs.
      */
     public function getJobs(int $partnerId, array $filters = []): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        $query = BatchJob::forPartner($partnerId)
-            ->orderBy('created_at', 'desc');
+        $query = BatchJob::orderBy('created_at', 'desc');
+
+        // Super admin sees all jobs; regular partners only see their own
+        if ($partnerId > 0) {
+            $query->forPartner($partnerId);
+        }
 
         if (!empty($filters['status'])) {
             $query->byStatus($filters['status']);
@@ -81,8 +98,11 @@ class BatchOperationService
      */
     public function getJob(int $partnerId, int $jobId): BatchJob
     {
-        return BatchJob::forPartner($partnerId)
-            ->findOrFail($jobId);
+        $query = BatchJob::query();
+        if ($partnerId > 0) {
+            $query->forPartner($partnerId);
+        }
+        return $query->findOrFail($jobId);
     }
 
     /**
@@ -90,8 +110,11 @@ class BatchOperationService
      */
     public function cancelJob(int $partnerId, int $jobId): BatchJob
     {
-        $batchJob = BatchJob::forPartner($partnerId)
-            ->findOrFail($jobId);
+        $query = BatchJob::query();
+        if ($partnerId > 0) {
+            $query->forPartner($partnerId);
+        }
+        $batchJob = $query->findOrFail($jobId);
 
         if ($batchJob->status !== 'queued') {
             throw new \RuntimeException('Only queued jobs can be cancelled.');
@@ -146,6 +169,20 @@ class BatchOperationService
                 'description' => 'Export journal entries for selected companies.',
                 'icon' => 'ArrowDownTrayIcon',
                 'requires_params' => ['date_from', 'date_to', 'format'],
+            ],
+            [
+                'key' => 'balance_sheet_export',
+                'label' => 'Balance Sheet Export',
+                'description' => 'Export balance sheet for selected companies.',
+                'icon' => 'ScaleIcon',
+                'requires_params' => ['as_of_date', 'format'],
+            ],
+            [
+                'key' => 'income_statement_export',
+                'label' => 'Income Statement Export',
+                'description' => 'Export income statement for selected companies.',
+                'icon' => 'ChartBarIcon',
+                'requires_params' => ['as_of_date', 'format'],
             ],
         ];
     }

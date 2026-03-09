@@ -269,7 +269,12 @@ class InterestCalculationService
                 ];
             });
 
+        $customRate = CompanySetting::getSetting('interest_annual_rate', $companyId);
+
         return [
+            'annual_rate' => $this->getAnnualRate($companyId),
+            'is_custom_rate' => $customRate !== null && $customRate !== '',
+            'default_rate' => self::DEFAULT_ANNUAL_RATE,
             'total_interest' => (int) ($totals->where('status', '<>', 'waived')->sum('total_amount') ?? 0),
             'calculated' => [
                 'count' => (int) ($totals->get('calculated')?->count ?? 0),

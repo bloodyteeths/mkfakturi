@@ -6,6 +6,7 @@
           v-if="selectedOperation && selectedCompanyIds.length > 0"
           variant="primary"
           :loading="isSubmitting"
+          :disabled="isSubmitting || !isFormValid"
           @click="confirmStartBatch"
         >
           <template #left="slotProps">
@@ -19,9 +20,10 @@
     <!-- Step 1: Operation Selector -->
     <div class="mb-6">
       <h3 class="text-sm font-medium text-gray-700 mb-3">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-1.5">1</span>
         {{ t('batch_operations.select_operation') }}
       </h3>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <div
           v-for="op in operations"
           :key="op.key"
@@ -57,6 +59,7 @@
     <div v-if="selectedOperation" class="mb-6">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-sm font-medium text-gray-700">
+          <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-1.5">2</span>
           {{ t('batch_operations.select_companies') }}
         </h3>
         <div class="flex gap-2">
@@ -69,13 +72,23 @@
         </div>
       </div>
 
+      <!-- Search filter for companies -->
+      <div v-if="companies.length > 10" class="mb-3">
+        <input
+          v-model="companySearch"
+          type="text"
+          :placeholder="t('batch_operations.search_companies')"
+          class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+        />
+      </div>
+
       <div class="rounded-lg border border-gray-200 bg-white p-4 max-h-64 overflow-y-auto">
         <div v-if="companies.length === 0" class="text-sm text-gray-500 text-center py-4">
-          {{ t('batch_operations.select_companies') }}
+          {{ t('batch_operations.no_companies_available') }}
         </div>
         <div v-else class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <label
-            v-for="company in companies"
+            v-for="company in filteredCompanies"
             :key="company.id"
             class="flex items-center gap-2 rounded p-2 hover:bg-gray-50 cursor-pointer"
           >
@@ -101,12 +114,13 @@
       class="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4"
     >
       <h3 class="text-sm font-medium text-gray-700 mb-3">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-xs font-bold mr-1.5">3</span>
         {{ t('batch_operations.parameters') }}
       </h3>
 
       <!-- Daily Close params -->
       <div v-if="selectedOperation === 'daily_close'" class="grid gap-4 md:grid-cols-2">
-        <BaseInputGroup :label="t('batch_operations.date')">
+        <BaseInputGroup :label="t('batch_operations.date')" :error="validationErrors.date">
           <BaseDatePicker
             v-model="params.date"
             :calendar-button="true"
@@ -148,14 +162,14 @@
             value-prop="id"
           />
         </BaseInputGroup>
-        <BaseInputGroup :label="t('batch_operations.date_from')">
+        <BaseInputGroup :label="t('batch_operations.date_from')" :error="validationErrors.date_from">
           <BaseDatePicker
             v-model="params.date_from"
             :calendar-button="true"
             calendar-button-icon="CalendarDaysIcon"
           />
         </BaseInputGroup>
-        <BaseInputGroup :label="t('batch_operations.date_to')">
+        <BaseInputGroup :label="t('batch_operations.date_to')" :error="validationErrors.date_to">
           <BaseDatePicker
             v-model="params.date_to"
             :calendar-button="true"
@@ -175,14 +189,14 @@
 
       <!-- Period Lock params -->
       <div v-if="selectedOperation === 'period_lock'" class="grid gap-4 md:grid-cols-2">
-        <BaseInputGroup :label="t('batch_operations.period_start')">
+        <BaseInputGroup :label="t('batch_operations.period_start')" :error="validationErrors.period_start">
           <BaseDatePicker
             v-model="params.period_start"
             :calendar-button="true"
             calendar-button-icon="CalendarDaysIcon"
           />
         </BaseInputGroup>
-        <BaseInputGroup :label="t('batch_operations.period_end')">
+        <BaseInputGroup :label="t('batch_operations.period_end')" :error="validationErrors.period_end">
           <BaseDatePicker
             v-model="params.period_end"
             :calendar-button="true"
@@ -190,19 +204,63 @@
           />
         </BaseInputGroup>
       </div>
+
+      <!-- Balance Sheet / Income Statement Export params -->
+      <div v-if="selectedOperation === 'balance_sheet_export' || selectedOperation === 'income_statement_export'" class="grid gap-4 md:grid-cols-2">
+        <BaseInputGroup :label="t('batch_operations.as_of_date')" :error="validationErrors.as_of_date">
+          <BaseDatePicker
+            v-model="params.as_of_date"
+            :calendar-button="true"
+            calendar-button-icon="CalendarDaysIcon"
+          />
+        </BaseInputGroup>
+        <BaseInputGroup :label="t('batch_operations.format')">
+          <BaseMultiselect
+            v-model="params.format"
+            :options="formatOptions"
+            :searchable="false"
+            label="name"
+            value-prop="id"
+          />
+        </BaseInputGroup>
+      </div>
+
+      <!-- Validation summary -->
+      <p v-if="!isFormValid" class="mt-3 text-xs text-red-500">
+        {{ t('batch_operations.fill_required_params') }}
+      </p>
     </div>
 
     <!-- Active/Recent Jobs Table -->
     <div class="mt-8">
-      <h3 class="text-sm font-medium text-gray-700 mb-3">
-        {{ t('batch_operations.recent_jobs') }}
-      </h3>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-medium text-gray-700">
+          {{ t('batch_operations.recent_jobs') }}
+        </h3>
+        <!-- Status filter -->
+        <div class="flex items-center gap-2">
+          <select
+            v-model="jobStatusFilter"
+            class="rounded-md border-gray-300 text-xs shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200"
+          >
+            <option value="">{{ t('batch_operations.all_statuses') }}</option>
+            <option value="queued">{{ t('batch_operations.status_queued') }}</option>
+            <option value="running">{{ t('batch_operations.status_running') }}</option>
+            <option value="completed">{{ t('batch_operations.status_completed') }}</option>
+            <option value="failed">{{ t('batch_operations.status_failed') }}</option>
+            <option value="partially_failed">{{ t('batch_operations.status_partially_failed') }}</option>
+          </select>
+          <BaseButton variant="gray" size="sm" @click="fetchJobs">
+            <BaseIcon name="ArrowPathIcon" class="h-4 w-4" />
+          </BaseButton>
+        </div>
+      </div>
 
       <div v-if="isLoadingJobs" class="flex items-center justify-center py-12">
         <div class="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600"></div>
       </div>
 
-      <div v-else-if="jobs.length === 0" class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 py-12">
+      <div v-else-if="filteredJobs.length === 0" class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 py-12">
         <BaseIcon name="QueueListIcon" class="h-12 w-12 text-gray-400" />
         <h3 class="mt-2 text-sm font-medium text-gray-900">
           {{ t('batch_operations.no_jobs') }}
@@ -214,7 +272,7 @@
 
       <div v-else class="space-y-3">
         <div
-          v-for="job in jobs"
+          v-for="job in filteredJobs"
           :key="job.id"
           class="rounded-lg border border-gray-200 bg-white overflow-hidden"
         >
@@ -243,7 +301,7 @@
 
               <!-- Company count -->
               <span class="text-xs text-gray-500">
-                {{ job.total_items }} {{ t('batch_operations.total_items').toLowerCase() }}
+                {{ job.total_items }} {{ t('batch_operations.companies_count') }}
               </span>
             </div>
 
@@ -304,6 +362,8 @@
                   <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                     {{ t('batch_operations.result_message') }}
                   </th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -321,6 +381,16 @@
                   </td>
                   <td class="px-4 py-2 text-sm text-gray-500">
                     {{ result.message }}
+                  </td>
+                  <td class="px-4 py-2">
+                    <button
+                      v-if="result.file_path && result.status === 'success'"
+                      class="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-800"
+                      @click.stop="downloadFile(job.id, result.company_id)"
+                    >
+                      <BaseIcon name="ArrowDownTrayIcon" class="h-3.5 w-3.5" />
+                      {{ t('batch_operations.download') }}
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -351,7 +421,6 @@ const fmtLocale = localeMap[locale] || 'mk-MK'
 
 function t(key, params = {}) {
   const keys = key.split('.')
-  // Support both 'batch_operations.xyz' and 'general.xyz' fallback
   const ns = keys[0]
   const k = keys.slice(1).join('.')
 
@@ -361,11 +430,9 @@ function t(key, params = {}) {
       || batchMessages['en']?.batch_operations?.[k]
       || key
   } else {
-    // For general.* and errors.* keys, just return the key as fallback
     return key
   }
 
-  // Simple template interpolation for {count} etc
   if (typeof value === 'string' && params) {
     Object.keys(params).forEach(p => {
       value = value.replace(`{${p}}`, params[p])
@@ -382,9 +449,10 @@ const isSubmitting = ref(false)
 const isLoadingJobs = ref(false)
 const jobs = ref([])
 const expandedJobIds = ref([])
+const companySearch = ref('')
+const jobStatusFilter = ref('')
 let pollingInterval = null
 
-// Helper function to format date in local timezone
 function formatDateToLocalYMD(date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -400,6 +468,7 @@ const params = reactive({
   month: now.getMonth() + 1,
   date_from: formatDateToLocalYMD(new Date(now.getFullYear(), 0, 1)),
   date_to: formatDateToLocalYMD(now),
+  as_of_date: formatDateToLocalYMD(now),
   period_start: formatDateToLocalYMD(new Date(now.getFullYear(), now.getMonth(), 1)),
   period_end: formatDateToLocalYMD(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
   report_type: 'trial_balance',
@@ -411,6 +480,9 @@ const operations = [
   { key: 'daily_close', icon: 'CalendarIcon' },
   { key: 'vat_return', icon: 'DocumentTextIcon' },
   { key: 'trial_balance_export', icon: 'ArrowDownTrayIcon' },
+  { key: 'journal_export', icon: 'DocumentArrowDownIcon' },
+  { key: 'balance_sheet_export', icon: 'ScaleIcon' },
+  { key: 'income_statement_export', icon: 'ChartBarIcon' },
   { key: 'period_lock', icon: 'LockClosedIcon' },
 ]
 
@@ -424,10 +496,20 @@ const yearOptions = computed(() => {
   return years
 })
 
+const MK_MONTHS = [
+  'Јануари', 'Февруари', 'Март', 'Април', 'Мај', 'Јуни',
+  'Јули', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'
+]
+const EN_MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+]
+
 const monthOptions = computed(() => {
+  const names = locale === 'mk' ? MK_MONTHS : EN_MONTHS
   return Array.from({ length: 12 }, (_, i) => ({
     id: i + 1,
-    name: String(i + 1).padStart(2, '0'),
+    name: `${String(i + 1).padStart(2, '0')} - ${names[i]}`,
   }))
 })
 
@@ -447,6 +529,49 @@ const companies = computed(() => {
   return consoleStore.managedCompanies || []
 })
 
+const filteredCompanies = computed(() => {
+  if (!companySearch.value) return companies.value
+  const q = companySearch.value.toLowerCase()
+  return companies.value.filter(c => c.name.toLowerCase().includes(q))
+})
+
+const filteredJobs = computed(() => {
+  if (!jobStatusFilter.value) return jobs.value
+  return jobs.value.filter(j => j.status === jobStatusFilter.value)
+})
+
+// Client-side validation
+const validationErrors = computed(() => {
+  const errors = {}
+  const op = selectedOperation.value
+
+  if (op === 'daily_close' && !params.date) {
+    errors.date = t('batch_operations.field_required')
+  }
+  if ((op === 'trial_balance_export' || op === 'journal_export')) {
+    if (!params.date_from) errors.date_from = t('batch_operations.field_required')
+    if (!params.date_to) errors.date_to = t('batch_operations.field_required')
+    if (params.date_from && params.date_to && params.date_from > params.date_to) {
+      errors.date_to = t('batch_operations.date_to_after_from')
+    }
+  }
+  if (op === 'period_lock') {
+    if (!params.period_start) errors.period_start = t('batch_operations.field_required')
+    if (!params.period_end) errors.period_end = t('batch_operations.field_required')
+    if (params.period_start && params.period_end && params.period_start > params.period_end) {
+      errors.period_end = t('batch_operations.date_to_after_from')
+    }
+  }
+  if ((op === 'balance_sheet_export' || op === 'income_statement_export') && !params.as_of_date) {
+    errors.as_of_date = t('batch_operations.field_required')
+  }
+  return errors
+})
+
+const isFormValid = computed(() => {
+  return Object.keys(validationErrors.value).length === 0
+})
+
 // Lifecycle
 onMounted(async () => {
   try {
@@ -460,7 +585,6 @@ onMounted(async () => {
 
   await fetchJobs()
 
-  // Start polling for running jobs
   pollingInterval = setInterval(() => {
     pollRunningJobs()
   }, 3000)
@@ -497,7 +621,7 @@ function toggleJobExpanded(jobId) {
 
 function getCompanyName(companyId) {
   const company = companies.value.find(c => c.id === companyId)
-  return company ? company.name : `Company #${companyId}`
+  return company ? company.name : `#${companyId}`
 }
 
 function getProgressPercentage(job) {
@@ -571,6 +695,9 @@ function buildParams() {
   } else if (op === 'period_lock') {
     p.period_start = params.period_start
     p.period_end = params.period_end
+  } else if (op === 'balance_sheet_export' || op === 'income_statement_export') {
+    p.as_of_date = params.as_of_date
+    p.format = params.format
   }
 
   return p
@@ -601,7 +728,6 @@ async function pollRunningJobs() {
         if (idx >= 0) {
           jobs.value[idx] = { ...jobs.value[idx], ...updated }
 
-          // If job just completed, refetch to get full results
           if (updated.status !== 'running' && updated.status !== 'queued') {
             const fullResponse = await axios.get(`/partner/batch-operations/${job.id}`)
             if (fullResponse.data?.data) {
@@ -617,9 +743,17 @@ async function pollRunningJobs() {
 }
 
 async function confirmStartBatch() {
+  if (!isFormValid.value || isSubmitting.value) return
+
+  const opLabel = t('batch_operations.' + selectedOperation.value)
+  const msg = t('batch_operations.confirm_start_detail', {
+    operation: opLabel,
+    count: selectedCompanyIds.value.length,
+  })
+
   const confirmed = await dialogStore.openDialog({
     title: t('batch_operations.confirm_start_title'),
-    message: t('batch_operations.confirm_start'),
+    message: msg,
     yesLabel: t('batch_operations.start_batch'),
     noLabel: t('batch_operations.cancel'),
     variant: 'primary',
@@ -642,14 +776,18 @@ async function confirmStartBatch() {
       message: t('batch_operations.job_created'),
     })
 
-    // Reset selection
     selectedOperation.value = null
     selectedCompanyIds.value = []
 
-    // Refresh jobs list
     await fetchJobs()
   } catch (error) {
-    const errorMessage = error.response?.data?.message || t('batch_operations.error_generic')
+    const data = error.response?.data
+    let errorMessage = data?.message || t('batch_operations.error_generic')
+    // Show field-level validation errors from backend
+    if (data?.errors) {
+      const fieldErrors = Object.values(data.errors).flat().join(', ')
+      errorMessage = fieldErrors
+    }
     notificationStore.showNotification({
       type: 'error',
       message: errorMessage,
@@ -663,8 +801,8 @@ async function confirmCancelJob(job) {
   const confirmed = await dialogStore.openDialog({
     title: t('batch_operations.confirm_cancel_title'),
     message: t('batch_operations.confirm_cancel'),
-    yesLabel: t('batch_operations.cancel'),
-    noLabel: t('batch_operations.cancel'),
+    yesLabel: t('batch_operations.confirm_yes'),
+    noLabel: t('batch_operations.confirm_no'),
     variant: 'danger',
     hideNoButton: false,
     size: 'lg',
@@ -689,6 +827,30 @@ async function confirmCancelJob(job) {
     })
   }
 }
-</script>
 
-<!-- CLAUDE-CHECKPOINT -->
+async function downloadFile(jobId, companyId) {
+  try {
+    const response = await axios.get(`/partner/batch-operations/${jobId}/download/${companyId}`, {
+      responseType: 'blob',
+    })
+
+    const contentDisposition = response.headers['content-disposition'] || ''
+    const filenameMatch = contentDisposition.match(/filename="?([^";\n]+)"?/)
+    const filename = filenameMatch ? filenameMatch[1] : `export_${jobId}_${companyId}`
+
+    const url = URL.createObjectURL(response.data)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('batch_operations.error_generic'),
+    })
+  }
+}
+</script>

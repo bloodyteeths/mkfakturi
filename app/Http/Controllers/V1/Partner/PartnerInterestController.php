@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\V1\Partner;
 
 use App\Http\Controllers\Controller;
+use App\Models\CompanySetting;
+use App\Models\Customer;
 use App\Models\Partner;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Modules\Mk\Models\InterestCalculation;
 use Modules\Mk\Services\InterestCalculationService;
 
@@ -229,6 +232,110 @@ class PartnerInterestController extends Controller
         return response()->json([
             'success' => true,
             'data' => $summary,
+        ]);
+    }
+
+    /**
+     * Get the current interest rate for a company.
+     */
+    public function getRate(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $customRate = CompanySetting::getSetting('interest_annual_rate', $company);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'annual_rate' => $this->service->getAnnualRate($company),
+                'is_custom' => $customRate !== null && $customRate !== '',
+                'default_rate' => 13.25,
+            ],
+        ]);
+    }
+
+    /**
+     * Update the interest rate for a company.
+     */
+    public function updateRate(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $request->validate([
+            'annual_rate' => 'required|numeric|min:0|max:100',
+        ]);
+
+        CompanySetting::setSettings([
+            'interest_annual_rate' => $request->input('annual_rate'),
+        ], $company);
+
+        return response()->json([
+            'success' => true,
+            'data' => ['annual_rate' => (float) $request->input('annual_rate')],
+            'message' => 'Interest rate updated.',
+        ]);
+    }
+
+    /**
+     * Reset the interest rate to statutory default.
+     */
+    public function resetRate(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        CompanySetting::where('company_id', $company)
+            ->where('option', 'interest_annual_rate')
+            ->delete();
+
+        // Clear the specific cache key (works for all drivers including file)
+        Cache::forget("company:{$company}:setting:interest_annual_rate");
+
+        return response()->json([
+            'success' => true,
+            'data' => ['annual_rate' => 13.25],
+            'message' => 'Rate reset to statutory default.',
+        ]);
+    }
+
+    /**
+     * Get customers for a company (for filter dropdown).
+     */
+    public function customers(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $customers = Customer::where('company_id', $company)
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $customers,
         ]);
     }
 
