@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Domain\Accounting\IfrsAdapter;
 use App\Models\Company;
 use App\Models\FiscalYear;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -32,69 +31,6 @@ class AopReportService
      * @return array{aktiva: array, pasiva: array, is_balanced: bool}
      */
     public function getBalanceSheetAop(Company $company, int $year): array
-    {
-        // Year-end closing entries transfer P&L to retained earnings via summary
-        // accounts (600→800→941). But injectNetIncome() independently calculates
-        // P&L from individual accounts. If both are present, amounts are distorted.
-        // Hide all closing entries so the trial balance shows clean pre-closing state.
-        $closingIds = $this->getClosingTransactionIds($company, $year);
-
-        if (! empty($closingIds)) {
-            DB::beginTransaction();
-            try {
-                DB::table('ifrs_ledgers')->whereIn('transaction_id', $closingIds)->delete();
-                DB::table('ifrs_line_items')->whereIn('transaction_id', $closingIds)->delete();
-                DB::table('ifrs_transactions')->whereIn('id', $closingIds)->delete();
-
-                $result = $this->computeBalanceSheetAop($company, $year);
-
-                return $result;
-            } finally {
-                DB::rollBack();
-            }
-        }
-
-        return $this->computeBalanceSheetAop($company, $year);
-    }
-
-    /**
-     * Find year-end closing transaction IDs for current and previous year.
-     *
-     * Closing entries match narration pattern "[Year-End {year}]%".
-     * Also checks FiscalYear notes for tracked IDs from partial runs.
-     */
-    protected function getClosingTransactionIds(Company $company, int $year): array
-    {
-        $closingIds = [];
-
-        foreach ([$year, $year - 1] as $closingYear) {
-            // Check fiscal year notes for tracked IDs
-            $fiscalYear = FiscalYear::where('company_id', $company->id)
-                ->where('year', $closingYear)
-                ->first();
-
-            if ($fiscalYear && $fiscalYear->notes) {
-                $notes = json_decode($fiscalYear->notes, true);
-                $closingIds = array_merge($closingIds, $notes['closing_transaction_ids'] ?? []);
-            }
-
-            // Also find orphaned closing entries by narration pattern
-            $orphanedIds = DB::table('ifrs_transactions')
-                ->where('narration', 'LIKE', "[Year-End {$closingYear}]%")
-                ->whereNull('deleted_at')
-                ->pluck('id')
-                ->toArray();
-
-            $closingIds = array_merge($closingIds, $orphanedIds);
-        }
-
-        return array_values(array_unique($closingIds));
-    }
-
-    /**
-     * Compute the actual balance sheet AOP data (called with or without closing entries hidden).
-     */
-    protected function computeBalanceSheetAop(Company $company, int $year): array
     {
         $endDate = "{$year}-12-31";
         $fallback = config('ujp_forms.obrazec_36.ifrs_to_aop_fallback', []);
@@ -291,12 +227,14 @@ class AopReportService
             $previous = 0;
 
             if (! $isTotal && isset($rowConfig['ifrs_types'])) {
-                if ($hasAopBalances && isset($currentAopBalances[$aop])) {
-                    // Use pre-distributed per-account-code balances (more precise)
+                if ($hasAopBalances) {
+                    // Use pre-distributed per-account-code balances (more precise).
+                    // Missing AOP = 0: all amounts are fully distributed, so type-level
+                    // fallback would double-count amounts already mapped to other AOPs.
                     $current = $currentAopBalances[$aop] ?? 0;
                     $previous = $previousAopBalances[$aop] ?? 0;
                 } else {
-                    // Fallback: IFRS type-level balances
+                    // Fallback: IFRS type-level balances (only when no per-account data)
                     foreach ($rowConfig['ifrs_types'] as $ifrsType) {
                         $fallbackAop = $fallback[$ifrsType] ?? null;
                         if ($fallbackAop === $aop) {
@@ -396,7 +334,7 @@ class AopReportService
         foreach ($config as $rowConfig) {
             if (isset($rowConfig['ifrs_types']) && ! empty($rowConfig['ifrs_types'])) {
                 $aop = $rowConfig['aop'];
-                if ($hasAopBalances && isset($currentAopBalances[$aop])) {
+                if ($hasAopBalances) {
                     $current = $currentAopBalances[$aop] ?? 0;
                     $previous = $previousAopBalances[$aop] ?? 0;
                 } else {
