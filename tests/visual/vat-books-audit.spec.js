@@ -411,10 +411,11 @@ test.describe('VAT Books Audit', () => {
       const count = await rateButtons.count();
       console.log('Rate option buttons:', count);
 
-      if (count >= 3) {
+      if (count >= 4) {
         const labels = await rateButtons.allTextContents();
         console.log('Rate labels:', labels);
         expect(labels.join(' ')).toContain('18%');
+        expect(labels.join(' ')).toContain('10%');
         expect(labels.join(' ')).toContain('5%');
         expect(labels.join(' ')).toContain('0%');
       }

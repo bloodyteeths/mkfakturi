@@ -969,8 +969,9 @@ class PartnerAccountingReportsController extends Controller
         $subTotal = (int) ($document->sub_total ?? 0);
         if ($tax > 0 && $subTotal > 0) {
             $computed = round(($tax / $subTotal) * 100, 1);
-            // Snap to nearest standard MK rate
+            // Snap to nearest standard MK rate (18%, 10%, 5%)
             if ($computed >= 16 && $computed <= 20) return 18.0;
+            if ($computed >= 8 && $computed <= 12) return 10.0;
             if ($computed >= 4 && $computed <= 6) return 5.0;
             return $computed;
         }

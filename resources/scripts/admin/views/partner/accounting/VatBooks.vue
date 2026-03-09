@@ -696,6 +696,7 @@ const EditableRate = defineComponent({
 
     function rateClass(rate) {
       if (rate === 18) return 'bg-blue-100 text-blue-700'
+      if (rate === 10) return 'bg-purple-100 text-purple-700'
       if (rate === 5) return 'bg-green-100 text-green-700'
       if (rate === 0) return 'bg-gray-100 text-gray-700'
       return 'bg-amber-100 text-amber-700'
@@ -712,7 +713,7 @@ const EditableRate = defineComponent({
     <div class="relative inline-block">
       <div v-if="editing" class="flex space-x-1">
         <button
-          v-for="rate in [18, 5, 0]"
+          v-for="rate in [18, 10, 5, 0]"
           :key="rate"
           class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium cursor-pointer border"
           :class="[rateClass(rate), value === rate ? 'ring-2 ring-primary-400' : 'opacity-70 hover:opacity-100']"
