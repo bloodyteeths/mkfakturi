@@ -310,23 +310,14 @@
                     {{ statusLabel(calc.status) }}
                   </span>
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-right text-sm space-x-1">
-                  <BaseButton
-                    v-if="calc.status === 'calculated' || calc.status === 'invoiced'"
-                    variant="danger-outline"
-                    size="sm"
-                    @click="waiveCalculation(calc.id)"
-                  >
-                    {{ t('waive') }}
-                  </BaseButton>
-                  <BaseButton
-                    v-if="calc.status === 'invoiced' || calc.status === 'waived'"
-                    variant="primary-outline"
-                    size="sm"
-                    @click="revertCalculation(calc.id)"
-                  >
-                    {{ t('revert') }}
-                  </BaseButton>
+                <td class="px-4 py-4 whitespace-nowrap text-right text-sm">
+                  <InterestActionDropdown
+                    v-if="calc.status !== 'paid'"
+                    :row="calc"
+                    @generate="onDropdownGenerate"
+                    @waive="onDropdownWaive"
+                    @revert="onDropdownRevert"
+                  />
                 </td>
               </tr>
             </tbody>
@@ -398,6 +389,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import interestMessages from '@/scripts/admin/i18n/interest.js'
+import InterestActionDropdown from '@/scripts/admin/components/dropdowns/InterestActionDropdown.vue'
 
 const notificationStore = useNotificationStore()
 
@@ -794,6 +786,20 @@ async function revertCalculation(id) {
       message: error.response?.data?.message || t('error_reverting'),
     })
   }
+}
+
+// Dropdown handlers
+function onDropdownGenerate(row) {
+  selectedIds.value = [row.id]
+  generateNote()
+}
+
+function onDropdownWaive(row) {
+  waiveCalculation(row.id)
+}
+
+function onDropdownRevert(row) {
+  revertCalculation(row.id)
 }
 
 // Lifecycle
