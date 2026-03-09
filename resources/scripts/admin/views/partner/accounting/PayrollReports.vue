@@ -477,17 +477,8 @@ async function exportCsv() {
   }
 }
 
-const statusLabels = {
-  paid: 'Исплатено',
-  posted: 'Книжено',
-  approved: 'Одобрено',
-  calculated: 'Пресметано',
-  draft: 'Нацрт',
-  not_created: 'Не е креирано',
-}
-
 function statusLabel(status) {
-  return statusLabels[status] || status
+  return t(`payroll.status.${status}`, status)
 }
 
 function statusClass(status) {
