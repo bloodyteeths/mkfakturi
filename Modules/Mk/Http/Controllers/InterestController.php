@@ -241,6 +241,37 @@ class InterestController extends Controller
     }
 
     /**
+     * Revert an interest calculation back to 'calculated' status.
+     */
+    public function revert(Request $request, int $id): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $calculation = InterestCalculation::forCompany($companyId)
+            ->where('id', $id)
+            ->first();
+
+        if (! $calculation) {
+            return response()->json(['success' => false, 'message' => 'Interest calculation not found'], 404);
+        }
+
+        try {
+            $reverted = $this->service->revert($calculation);
+
+            return response()->json([
+                'success' => true,
+                'data' => $reverted,
+                'message' => 'Interest calculation reverted to calculated.',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
      * Get summary statistics.
      */
     public function summary(Request $request): JsonResponse

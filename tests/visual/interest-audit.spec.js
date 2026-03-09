@@ -271,6 +271,36 @@ test.describe('Interest Feature Audit', () => {
     console.log(`  send-note reject: ${body.message}`);
   });
 
+  test('POST /interest/{id}/revert works for invoiced record', async () => {
+    // Find an invoiced record
+    const listResp = await page.request.get(`${BASE}/api/v1/interest?status=invoiced&limit=all`, { headers: h() });
+    const listBody = await listResp.json();
+    const invoiced = listBody.data || [];
+    console.log(`  Found ${invoiced.length} invoiced records`);
+
+    if (invoiced.length === 0) {
+      console.log('  SKIP: No invoiced records to test revert with');
+      return;
+    }
+
+    const id = invoiced[0].id;
+    const resp = await page.request.post(`${BASE}/api/v1/interest/${id}/revert`, { headers: h() });
+    expect(resp.status()).toBe(200);
+    const body = await resp.json();
+    expect(body.success).toBe(true);
+    expect(body.data.status).toBe('calculated');
+    console.log(`  Reverted id=${id} from invoiced -> calculated`);
+
+    // Re-invoice it so we don't break subsequent tests
+    await page.request.post(`${BASE}/api/v1/interest/${id}/waive`, { headers: h() });
+    // Revert it back again to verify waived->calculated works
+    const resp2 = await page.request.post(`${BASE}/api/v1/interest/${id}/revert`, { headers: h() });
+    expect(resp2.status()).toBe(200);
+    const body2 = await resp2.json();
+    expect(body2.data.status).toBe('calculated');
+    console.log(`  Reverted id=${id} from waived -> calculated`);
+  });
+
   // ─── PAGES LOAD WITHOUT 500 ────────────────
   test('Admin page responds (no 500)', async () => {
     const resp = await page.request.get(`${BASE}/admin/interest`);

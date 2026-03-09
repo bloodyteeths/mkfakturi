@@ -1078,6 +1078,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/send-note', [\Modules\Mk\Http\Controllers\InterestController::class, 'sendNote']);
                 Route::get('/{id}', [\Modules\Mk\Http\Controllers\InterestController::class, 'show']);
                 Route::post('/{id}/waive', [\Modules\Mk\Http\Controllers\InterestController::class, 'waive']);
+                Route::post('/{id}/revert', [\Modules\Mk\Http\Controllers\InterestController::class, 'revert']);
             });
 
             // ----------------------------------
@@ -1837,6 +1838,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::post('/send-note', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'sendNote']);
             Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'show']);
             Route::post('/{id}/waive', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'waive']);
+            Route::post('/{id}/revert', [\App\Http\Controllers\V1\Partner\PartnerInterestController::class, 'revert']);
         });
 
         // F5: Collections (Partner)

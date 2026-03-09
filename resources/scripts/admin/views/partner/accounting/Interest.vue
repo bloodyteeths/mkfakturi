@@ -336,7 +336,7 @@
                       {{ statusLabel(calc.status) }}
                     </span>
                   </td>
-                  <td class="px-4 py-4 whitespace-nowrap text-right text-sm">
+                  <td class="px-4 py-4 whitespace-nowrap text-right text-sm space-x-1">
                     <BaseButton
                       v-if="calc.status === 'calculated' || calc.status === 'invoiced'"
                       variant="danger-outline"
@@ -344,6 +344,14 @@
                       @click="waiveCalculation(calc.id)"
                     >
                       {{ t('waive') }}
+                    </BaseButton>
+                    <BaseButton
+                      v-if="calc.status === 'invoiced' || calc.status === 'waived'"
+                      variant="primary-outline"
+                      size="sm"
+                      @click="revertCalculation(calc.id)"
+                    >
+                      {{ t('revert') }}
                     </BaseButton>
                   </td>
                 </tr>
@@ -830,6 +838,27 @@ async function waiveCalculation(id) {
     notificationStore.showNotification({
       type: 'error',
       message: error.response?.data?.message || t('error_waiving'),
+    })
+  }
+}
+
+async function revertCalculation(id) {
+  if (!confirm(t('confirm_revert'))) return
+
+  try {
+    await window.axios.post(partnerApi(`/${id}/revert`))
+
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('reverted_success'),
+    })
+
+    fetchCalculations(meta.value?.current_page || 1)
+    fetchSummary()
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('error_reverting'),
     })
   }
 }

@@ -280,6 +280,43 @@ class PartnerInterestController extends Controller
     }
 
     /**
+     * Revert an interest calculation back to 'calculated' status.
+     */
+    public function revert(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $calculation = InterestCalculation::forCompany($company)
+            ->where('id', $id)
+            ->first();
+
+        if (! $calculation) {
+            return response()->json(['success' => false, 'message' => 'Interest calculation not found'], 404);
+        }
+
+        try {
+            $reverted = $this->service->revert($calculation);
+
+            return response()->json([
+                'success' => true,
+                'data' => $reverted,
+                'message' => 'Interest calculation reverted to calculated.',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
      * Summary statistics.
      */
     public function summary(Request $request, int $company): JsonResponse

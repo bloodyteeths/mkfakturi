@@ -215,15 +215,29 @@ class InterestCalculationService
      */
     public function waive(InterestCalculation $calc): InterestCalculation
     {
-        if ($calc->status === 'invoiced') {
-            throw new \InvalidArgumentException('Cannot waive an already-invoiced interest calculation.');
-        }
-
         if ($calc->status === 'paid') {
             throw new \InvalidArgumentException('Cannot waive an already-paid interest calculation.');
         }
 
         $calc->update(['status' => 'waived']);
+
+        return $calc->fresh();
+    }
+
+    /**
+     * Revert an interest calculation back to 'calculated' status.
+     */
+    public function revert(InterestCalculation $calc): InterestCalculation
+    {
+        if ($calc->status === 'paid') {
+            throw new \InvalidArgumentException('Cannot revert a paid interest calculation.');
+        }
+
+        if ($calc->status === 'calculated') {
+            throw new \InvalidArgumentException('Calculation is already in calculated status.');
+        }
+
+        $calc->update(['status' => 'calculated']);
 
         return $calc->fresh();
     }
