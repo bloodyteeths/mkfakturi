@@ -226,10 +226,12 @@
         <p class="text-sm text-gray-600">{{ t('confirm_send') }}</p>
         <div class="bg-gray-50 rounded p-3">
           <p class="text-sm"><strong>{{ t('customer') }}:</strong> {{ selectedInvoice.customer_name }}</p>
+          <p class="text-sm"><strong>Email:</strong> {{ selectedInvoice.customer_email || '-' }}</p>
           <p class="text-sm"><strong>{{ t('invoice_number') }}:</strong> {{ selectedInvoice.invoice_number }}</p>
           <p class="text-sm"><strong>{{ t('amount_due') }}:</strong> {{ formatMoney(selectedInvoice.due_amount) }}</p>
           <p class="text-sm"><strong>{{ t('interest') }}:</strong> {{ formatMoney(selectedInvoice.interest) }}</p>
           <p class="text-sm font-bold"><strong>{{ t('total_with_interest') }}:</strong> {{ formatMoney(selectedInvoice.total_with_interest) }}</p>
+          <p v-if="!selectedInvoice.customer_email" class="text-xs text-red-600 mt-2">{{ t('error_sending') }}: No email address</p>
         </div>
         <BaseInputGroup :label="t('escalation')">
           <BaseMultiselect
