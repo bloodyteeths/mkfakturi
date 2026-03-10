@@ -85,6 +85,14 @@ export default {
       cooldown_active: 'Потсетник е испратен во последните 24ч',
       from_date: 'Од датум',
       to_date: 'До датум',
+      placeholder_legend_title: 'Достапни плејсхолдери (автоматски се заменуваат)',
+      ph_invoice_number: 'Број на фактура',
+      ph_amount_due: 'Износ за наплата',
+      ph_due_date: 'Датум на достасување',
+      ph_days_overdue: 'Дена задоцнување',
+      ph_customer_name: 'Име на купувачот',
+      ph_company_name: 'Име на фирмата',
+      ph_total: 'Вкупен износ',
     }
   },
   en: {
@@ -173,6 +181,14 @@ export default {
       cooldown_active: 'Reminder sent in the last 24h',
       from_date: 'From Date',
       to_date: 'To Date',
+      placeholder_legend_title: 'Available placeholders (auto-replaced)',
+      ph_invoice_number: 'Invoice number',
+      ph_amount_due: 'Amount due',
+      ph_due_date: 'Due date',
+      ph_days_overdue: 'Days overdue',
+      ph_customer_name: 'Customer name',
+      ph_company_name: 'Company name',
+      ph_total: 'Total amount',
     }
   },
   tr: {
@@ -261,6 +277,14 @@ export default {
       cooldown_active: 'Son 24 saatte hatirlatma gonderildi',
       from_date: 'Baslangic Tarihi',
       to_date: 'Bitis Tarihi',
+      placeholder_legend_title: 'Mevcut yer tutucular (otomatik degistirilir)',
+      ph_invoice_number: 'Fatura numarasi',
+      ph_amount_due: 'Odenmesi gereken tutar',
+      ph_due_date: 'Vade tarihi',
+      ph_days_overdue: 'Gecikme gunu',
+      ph_customer_name: 'Musteri adi',
+      ph_company_name: 'Sirket adi',
+      ph_total: 'Toplam tutar',
     }
   },
   sq: {
@@ -349,6 +373,14 @@ export default {
       cooldown_active: 'Kujtesa u dergua ne 24 oret e fundit',
       from_date: 'Nga Data',
       to_date: 'Deri ne Date',
+      placeholder_legend_title: 'Mbajtesit e disponueshem (zevendesohen automatikisht)',
+      ph_invoice_number: 'Numri i fatures',
+      ph_amount_due: 'Shuma per pagese',
+      ph_due_date: 'Data e afatit',
+      ph_days_overdue: 'Dite vonese',
+      ph_customer_name: 'Emri i klientit',
+      ph_company_name: 'Emri i kompanise',
+      ph_total: 'Shuma totale',
     }
   }
 }

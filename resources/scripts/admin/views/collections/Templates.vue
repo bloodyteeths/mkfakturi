@@ -41,8 +41,9 @@
               </span>
             </div>
           </div>
-          <p class="text-sm font-medium text-gray-900 mb-1">{{ tpl.subject_mk || tpl.subject_en }}</p>
-          <p class="text-xs text-gray-500 mb-3">{{ t('days_after_due') }}: {{ tpl.days_after_due }}</p>
+          <p class="text-sm font-medium text-gray-900 mb-1">{{ humanize(tpl.subject_mk || tpl.subject_en) }}</p>
+          <p class="text-xs text-gray-500 mb-2">{{ t('days_after_due') }}: {{ tpl.days_after_due }}</p>
+          <div class="text-xs text-gray-600 mb-3 border rounded p-2 bg-gray-50 max-h-20 overflow-hidden" v-html="humanize(tpl.body_mk || tpl.body_en)"></div>
           <div class="flex justify-end gap-2">
             <BaseButton size="sm" variant="primary-outline" @click="openForm(tpl)">
               {{ t('edit_template') }}
@@ -75,12 +76,35 @@
           </BaseInputGroup>
         </div>
 
+        <!-- Placeholder Legend -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p class="text-xs font-medium text-blue-800 mb-2">{{ t('placeholder_legend_title') }}</p>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+            <div v-for="ph in placeholders" :key="ph.token" class="flex items-center gap-2 text-xs">
+              <code class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-mono text-[10px]">{{ ph.token }}</code>
+              <span class="text-gray-600">{{ ph.label }}</span>
+            </div>
+          </div>
+        </div>
+
         <BaseInputGroup :label="t('template_subject') + ' (MK)'">
           <BaseInput v-model="form.subject_mk" />
         </BaseInputGroup>
         <BaseInputGroup :label="t('template_body') + ' (MK)'">
           <BaseTextarea v-model="form.body_mk" rows="4" />
         </BaseInputGroup>
+
+        <!-- Live Preview -->
+        <div v-if="form.subject_mk || form.body_mk" class="border rounded-lg overflow-hidden">
+          <div class="bg-gray-100 px-3 py-2 border-b">
+            <p class="text-xs font-medium text-gray-500 uppercase">{{ t('preview') }}</p>
+          </div>
+          <div class="p-3 bg-white">
+            <p class="text-sm font-medium text-gray-900 mb-2">{{ humanize(form.subject_mk) }}</p>
+            <div class="text-sm text-gray-700 prose prose-sm max-w-none" v-html="humanize(form.body_mk)"></div>
+          </div>
+        </div>
+
         <BaseInputGroup :label="t('template_subject') + ' (EN)'">
           <BaseInput v-model="form.subject_en" />
         </BaseInputGroup>
@@ -146,8 +170,38 @@ const form = reactive({
   subject_mk: '', subject_en: '', subject_tr: '', subject_sq: '',
   body_mk: '', body_en: '', body_tr: '', body_sq: '',
   is_active: true,
-  auto_send: false,
 })
+
+// Sample data for preview — replaces {PLACEHOLDERS} with realistic values
+const sampleData = {
+  '{INVOICE_NUMBER}': 'ФАК-2026-0042',
+  '{AMOUNT_DUE}': '24,500.00 ден.',
+  '{DUE_DATE}': '15.02.2026',
+  '{DAYS_OVERDUE}': '23',
+  '{CUSTOMER_NAME}': 'ДООЕЛ Пример',
+  '{COMPANY_NAME}': 'Мојата Фирма ДООЕЛ',
+  '{TOTAL}': '28,900.00 ден.',
+}
+
+// Placeholder legend labels
+const placeholders = [
+  { token: '{INVOICE_NUMBER}', label: t('ph_invoice_number') },
+  { token: '{AMOUNT_DUE}', label: t('ph_amount_due') },
+  { token: '{DUE_DATE}', label: t('ph_due_date') },
+  { token: '{DAYS_OVERDUE}', label: t('ph_days_overdue') },
+  { token: '{CUSTOMER_NAME}', label: t('ph_customer_name') },
+  { token: '{COMPANY_NAME}', label: t('ph_company_name') },
+  { token: '{TOTAL}', label: t('ph_total') },
+]
+
+function humanize(text) {
+  if (!text) return ''
+  let result = text
+  for (const [token, value] of Object.entries(sampleData)) {
+    result = result.replaceAll(token, value)
+  }
+  return result
+}
 
 function levelBorderClass(level) {
   const map = { friendly: 'border-blue-400', firm: 'border-yellow-400', final: 'border-orange-400', legal: 'border-red-400' }
@@ -190,14 +244,14 @@ function openForm(tpl) {
       subject_tr: tpl.subject_tr || '', subject_sq: tpl.subject_sq || '',
       body_mk: tpl.body_mk || '', body_en: tpl.body_en || '',
       body_tr: tpl.body_tr || '', body_sq: tpl.body_sq || '',
-      is_active: tpl.is_active, auto_send: tpl.auto_send,
+      is_active: tpl.is_active,
     })
   } else {
     Object.assign(form, {
       escalation_level: 'friendly', days_after_due: 7,
       subject_mk: '', subject_en: '', subject_tr: '', subject_sq: '',
       body_mk: '', body_en: '', body_tr: '', body_sq: '',
-      is_active: true, auto_send: false,
+      is_active: true,
     })
   }
   showForm.value = true
@@ -249,7 +303,6 @@ async function deleteTemplate(id) {
 onMounted(() => {
   loadTemplates()
 })
-// CLAUDE-CHECKPOINT
 </script>
 
 <!-- CLAUDE-CHECKPOINT -->
