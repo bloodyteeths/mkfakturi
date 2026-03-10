@@ -527,10 +527,21 @@ class CollectionService
             ->forInvoice($invoiceId)
             ->count();
 
+        // Get logo - prefer full URL for cloud storage, fall back to local path
+        $company = $invoice->company;
+        $logo = $company->logo;
+        if (! $logo) {
+            $logoPath = $company->logo_path;
+            if ($logoPath && (str_starts_with($logoPath, '/') || filter_var($logoPath, FILTER_VALIDATE_URL))) {
+                $logo = $logoPath;
+            }
+        }
+
         return [
             'invoice' => $invoice,
-            'company' => $invoice->company,
+            'company' => $company,
             'customer' => $invoice->customer,
+            'logo' => $logo,
             'currency_symbol' => $invoice->currency->symbol ?? 'ден.',
             'due_date' => $dueDate->format('d.m.Y'),
             'days_overdue' => $daysOverdue,

@@ -3,28 +3,31 @@
 <head>
     <meta charset="utf-8">
     <style>
-        @page { margin: 30px 40px; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #333; line-height: 1.5; }
-        .header-table { width: 100%; margin-bottom: 20px; }
+        @page { margin: 20px 30px; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #333; line-height: 1.4; }
+        .header-table { width: 100%; margin-bottom: 10px; }
         .header-table td { vertical-align: top; }
-        .company-name { font-size: 14px; font-weight: bold; margin: 0 0 3px 0; }
+        .company-logo { height: 40px; margin-bottom: 4px; }
+        .company-name { font-size: 13px; font-weight: bold; margin: 0 0 2px 0; }
         .company-detail { font-size: 10px; color: #555; margin: 1px 0; }
-        .title { font-size: 18px; font-weight: bold; text-align: center; margin: 25px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
-        .subtitle { font-size: 11px; text-align: center; color: #555; margin: 0 0 25px 0; }
-        .recipient { margin: 20px 0; padding: 12px 15px; border: 1px solid #ddd; background: #fafafa; }
-        .recipient p { margin: 2px 0; }
-        .recipient-label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; margin-bottom: 5px; }
-        .body-text { margin: 15px 0; text-align: justify; }
-        .invoice-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        .invoice-table th { background: #f0f0f0; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; border: 1px solid #ccc; }
-        .invoice-table td { padding: 8px 10px; border: 1px solid #ccc; }
+        .title { font-size: 16px; font-weight: bold; text-align: center; margin: 10px 0 4px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .subtitle { font-size: 10px; text-align: center; color: #555; margin: 0 0 10px 0; }
+        .recipient { margin: 8px 0; padding: 8px 12px; border: 1px solid #ddd; background: #fafafa; }
+        .recipient p { margin: 1px 0; }
+        .recipient-label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; margin-bottom: 3px; }
+        .body-text { margin: 8px 0; text-align: justify; }
+        .body-text p { margin: 3px 0; }
+        .invoice-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+        .invoice-table th { background: #f0f0f0; padding: 5px 8px; text-align: left; font-size: 10px; text-transform: uppercase; border: 1px solid #ccc; }
+        .invoice-table td { padding: 5px 8px; border: 1px solid #ccc; }
         .invoice-table .right { text-align: right; }
         .total-row { font-weight: bold; background: #f8f8f8; }
         .interest-row { color: #c00; }
-        .legal-text { font-size: 10px; color: #555; margin: 20px 0; padding: 10px; border-left: 3px solid #c00; background: #fff5f5; }
-        .signature-area { margin-top: 40px; }
-        .signature-line { width: 200px; border-top: 1px solid #333; margin-top: 40px; padding-top: 5px; font-size: 10px; color: #555; }
-        .footer { margin-top: 30px; font-size: 9px; color: #999; text-align: center; border-top: 1px solid #ddd; padding-top: 10px; }
+        .legal-text { font-size: 10px; color: #555; margin: 10px 0; padding: 8px; border-left: 3px solid #c00; background: #fff5f5; }
+        .legal-text p { margin: 0; }
+        .signature-area { margin-top: 20px; }
+        .signature-line { width: 200px; border-top: 1px solid #333; margin-top: 25px; padding-top: 4px; font-size: 10px; color: #555; }
+        .footer { margin-top: 15px; font-size: 9px; color: #999; text-align: center; border-top: 1px solid #ddd; padding-top: 6px; }
     </style>
 </head>
 <body>
@@ -32,6 +35,9 @@
     <table class="header-table">
         <tr>
             <td style="width: 60%;">
+                @if($logo)
+                    <img class="company-logo" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="Лого">
+                @endif
                 <p class="company-name">{{ $company->name }}</p>
                 @if($company->address)
                     @if($company->address->address_street_1)

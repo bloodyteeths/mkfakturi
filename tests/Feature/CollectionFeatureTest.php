@@ -570,6 +570,7 @@ class CollectionFeatureTest extends TestCase
         $this->assertArrayHasKey('total_with_interest', $data);
         $this->assertArrayHasKey('today', $data);
         $this->assertArrayHasKey('reminder_count', $data);
+        $this->assertArrayHasKey('logo', $data);
 
         $this->assertEquals(30, $data['days_overdue']);
         $this->assertEquals(500000, $data['due_amount']);
