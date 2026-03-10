@@ -218,56 +218,94 @@
     </div>
 
     <!-- Send Reminder Dialog -->
-    <BaseModal :show="showSendDialog" @close="showSendDialog = false">
+    <BaseModal :show="showSendDialog" @close="closeSendDialog">
       <template #header>
         <h3 class="text-lg font-medium">{{ t('confirm_send_title') }}</h3>
       </template>
-      <div v-if="selectedInvoice" class="space-y-4">
+      <div v-if="selectedInvoice" class="p-6 space-y-5">
         <p class="text-sm text-gray-600">{{ t('confirm_send') }}</p>
-        <div class="bg-gray-50 rounded p-3">
-          <p class="text-sm"><strong>{{ t('customer') }}:</strong> {{ selectedInvoice.customer_name }}</p>
-          <p class="text-sm"><strong>Email:</strong> {{ selectedInvoice.customer_email || '-' }}</p>
-          <p class="text-sm"><strong>{{ t('invoice_number') }}:</strong> {{ selectedInvoice.invoice_number }}</p>
-          <p class="text-sm"><strong>{{ t('amount_due') }}:</strong> {{ formatMoney(selectedInvoice.due_amount) }}</p>
-          <p class="text-sm"><strong>{{ t('interest') }}:</strong> {{ formatMoney(selectedInvoice.interest) }}</p>
-          <p class="text-sm font-bold"><strong>{{ t('total_with_interest') }}:</strong> {{ formatMoney(selectedInvoice.total_with_interest) }}</p>
-          <p v-if="!selectedInvoice.customer_email" class="text-xs text-red-600 mt-2">{{ t('error_sending') }}: No email address</p>
+
+        <div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+          <div class="grid grid-cols-2 divide-x divide-gray-200">
+            <div class="p-4">
+              <p class="text-xs text-gray-500 uppercase mb-1">{{ t('customer') }}</p>
+              <p class="text-sm font-semibold text-gray-900">{{ selectedInvoice.customer_name }}</p>
+            </div>
+            <div class="p-4">
+              <p class="text-xs text-gray-500 uppercase mb-1">{{ t('invoice_number') }}</p>
+              <p class="text-sm font-semibold text-gray-900">{{ selectedInvoice.invoice_number }}</p>
+            </div>
+          </div>
+          <div class="border-t border-gray-200 grid grid-cols-3 divide-x divide-gray-200">
+            <div class="p-4">
+              <p class="text-xs text-gray-500 uppercase mb-1">{{ t('amount_due') }}</p>
+              <p class="text-sm font-bold text-gray-900">{{ formatMoney(selectedInvoice.due_amount) }}</p>
+            </div>
+            <div class="p-4">
+              <p class="text-xs text-gray-500 uppercase mb-1">{{ t('interest') }}</p>
+              <p class="text-sm font-bold text-red-600">{{ formatMoney(selectedInvoice.interest) }}</p>
+            </div>
+            <div class="p-4">
+              <p class="text-xs text-gray-500 uppercase mb-1">{{ t('total_with_interest') }}</p>
+              <p class="text-sm font-bold text-red-700">{{ formatMoney(selectedInvoice.total_with_interest) }}</p>
+            </div>
+          </div>
         </div>
-        <BaseInputGroup :label="t('escalation')">
-          <BaseMultiselect
-            v-model="sendLevel"
-            :options="levelOptions.filter(l => l.value)"
-            label="label"
-            value-prop="value"
-          />
-        </BaseInputGroup>
+
+        <div class="grid grid-cols-2 gap-4">
+          <BaseInputGroup label="Email">
+            <BaseInput v-model="sendEmail" type="email" placeholder="email@example.com" />
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('escalation')">
+            <BaseMultiselect
+              v-model="sendLevel"
+              :options="levelOptions.filter(l => l.value)"
+              label="label"
+              value-prop="value"
+            />
+          </BaseInputGroup>
+        </div>
+
+        <div v-if="!sendEmail" class="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-red-500 flex-shrink-0" />
+          <p class="text-sm text-red-700">{{ t('error_sending') }}: Email is required</p>
+        </div>
       </div>
       <template #footer>
-        <BaseButton variant="primary-outline" @click="showSendDialog = false">{{ $t('general.cancel') }}</BaseButton>
-        <BaseButton variant="primary" :loading="isSending" @click="confirmSend">{{ t('send_reminder') }}</BaseButton>
+        <BaseButton variant="primary-outline" @click="closeSendDialog">{{ $t('general.cancel') }}</BaseButton>
+        <BaseButton variant="primary" :loading="isSending" :disabled="!sendEmail" @click="confirmSend">
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="PaperAirplaneIcon" />
+          </template>
+          {{ t('send_reminder') }}
+        </BaseButton>
       </template>
     </BaseModal>
   </BasePage>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useModalStore } from '@/scripts/stores/modal'
 import collectionMessages from '@/scripts/admin/i18n/collections.js'
 import CollectionTemplates from './Templates.vue'
 import CollectionHistory from './History.vue'
 
+const { locale } = useI18n()
 const notificationStore = useNotificationStore()
+const modalStore = useModalStore()
 
-const locale = document.documentElement.lang || 'mk'
 function t(key) {
-  return collectionMessages[locale]?.collections?.[key]
+  const loc = locale.value || 'mk'
+  return collectionMessages[loc]?.collections?.[key]
     || collectionMessages['en']?.collections?.[key]
     || key
 }
 
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const fmtLocale = localeMap[locale] || 'mk-MK'
+const fmtLocale = computed(() => localeMap[locale.value] || 'mk-MK')
 
 const activeTab = ref('overdue')
 const isLoading = ref(false)
@@ -279,6 +317,7 @@ const pagination = ref(null)
 const showSendDialog = ref(false)
 const selectedInvoice = ref(null)
 const sendLevel = ref('friendly')
+const sendEmail = ref('')
 
 const filters = reactive({
   escalation_level: null,
@@ -306,12 +345,12 @@ function debouncedLoadOverdue() {
 
 function formatMoney(cents) {
   if (cents === null || cents === undefined) return '0.00'
-  return (cents / 100).toLocaleString(fmtLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return (cents / 100).toLocaleString(fmtLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 function formatDate(d) {
   if (!d) return '-'
-  return new Date(d).toLocaleDateString(fmtLocale, { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return new Date(d).toLocaleDateString(fmtLocale.value, { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 function daysOverdueClass(days) {
@@ -360,20 +399,28 @@ function goToPage(page) {
 }
 
 function openSendDialog(inv) {
+  modalStore.size = 'md'
   selectedInvoice.value = inv
   sendLevel.value = inv.escalation_level || 'friendly'
+  sendEmail.value = inv.customer_email || ''
   showSendDialog.value = true
 }
 
+function closeSendDialog() {
+  showSendDialog.value = false
+  modalStore.size = 'sm'
+}
+
 async function confirmSend() {
-  if (!selectedInvoice.value) return
+  if (!selectedInvoice.value || !sendEmail.value) return
   isSending.value = true
   try {
     await window.axios.post('/collections/send-reminder', {
       invoice_id: selectedInvoice.value.id,
       level: sendLevel.value,
+      email: sendEmail.value,
     })
-    showSendDialog.value = false
+    closeSendDialog()
     notificationStore.showNotification({
       type: 'success',
       message: t('reminder_sent_success') || 'Reminder sent successfully.',

@@ -394,7 +394,7 @@ class CollectionFeatureTest extends TestCase
         ]);
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('no email');
+        $this->expectExceptionMessage('No email address provided');
         $this->service->sendReminder($this->company->id, $invoice->id, 'friendly');
     }
 

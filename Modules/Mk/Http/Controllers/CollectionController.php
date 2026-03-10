@@ -68,13 +68,15 @@ class CollectionController extends Controller
         $request->validate([
             'invoice_id' => 'required|integer',
             'level' => 'required|in:friendly,firm,final,legal',
+            'email' => 'nullable|email|max:255',
         ]);
 
         try {
             $result = $this->service->sendReminder(
                 $companyId,
                 (int) $request->input('invoice_id'),
-                $request->input('level')
+                $request->input('level'),
+                $request->input('email')
             );
 
             return response()->json([

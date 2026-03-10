@@ -139,14 +139,16 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import collectionMessages from '@/scripts/admin/i18n/collections.js'
 
+const { locale } = useI18n()
 const notificationStore = useNotificationStore()
 
-const locale = document.documentElement.lang || 'mk'
 function t(key) {
-  return collectionMessages[locale]?.collections?.[key]
+  const loc = locale.value || 'mk'
+  return collectionMessages[loc]?.collections?.[key]
     || collectionMessages['en']?.collections?.[key]
     || key
 }

@@ -123,20 +123,22 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import collectionMessages from '@/scripts/admin/i18n/collections.js'
 
+const { locale } = useI18n()
 const notificationStore = useNotificationStore()
 
-const locale = document.documentElement.lang || 'mk'
 function t(key) {
-  return collectionMessages[locale]?.collections?.[key]
+  const loc = locale.value || 'mk'
+  return collectionMessages[loc]?.collections?.[key]
     || collectionMessages['en']?.collections?.[key]
     || key
 }
 
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const fmtLocale = localeMap[locale] || 'mk-MK'
+const fmtLocale = computed(() => localeMap[locale.value] || 'mk-MK')
 
 const history = ref([])
 const effectiveness = ref(null)
@@ -185,7 +187,7 @@ function levelBarClass(level) {
 
 function formatDate(d) {
   if (!d) return '-'
-  return new Date(d).toLocaleDateString(fmtLocale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return new Date(d).toLocaleDateString(fmtLocale.value, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 function sentViaLabel(via) {

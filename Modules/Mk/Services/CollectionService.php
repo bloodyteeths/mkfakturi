@@ -207,7 +207,7 @@ class CollectionService
     /**
      * Send a payment reminder for a specific invoice.
      */
-    public function sendReminder(int $companyId, int $invoiceId, string $level): array
+    public function sendReminder(int $companyId, int $invoiceId, string $level, ?string $email = null): array
     {
         // Rate limit: max 1 reminder per invoice per 24 hours
         $recentReminder = ReminderHistory::forCompany($companyId)
@@ -228,8 +228,10 @@ class CollectionService
             throw new \InvalidArgumentException('Invoice not found.');
         }
 
-        if (! $invoice->customer || ! $invoice->customer->email) {
-            throw new \InvalidArgumentException('Customer has no email address.');
+        // Use provided email or fall back to customer email
+        $recipientEmail = $email ?: ($invoice->customer?->email);
+        if (! $recipientEmail) {
+            throw new \InvalidArgumentException('No email address provided.');
         }
 
         // Get template for this level
@@ -259,7 +261,7 @@ class CollectionService
         }
 
         // Send the email
-        Mail::to($invoice->customer->email)
+        Mail::to($recipientEmail)
             ->send(new PaymentReminder($invoice, $invoice->customer, $template, $level, $locale));
 
         // Record in history
@@ -277,7 +279,7 @@ class CollectionService
         return [
             'success' => true,
             'history_id' => $history->id,
-            'sent_to' => $invoice->customer->email,
+            'sent_to' => $recipientEmail,
             'level' => $level,
             'invoice_number' => $invoice->invoice_number,
         ];
