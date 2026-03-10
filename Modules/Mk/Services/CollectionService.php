@@ -207,7 +207,7 @@ class CollectionService
     /**
      * Send a payment reminder for a specific invoice.
      */
-    public function sendReminder(int $companyId, int $invoiceId, string $level, ?string $email = null): array
+    public function sendReminder(int $companyId, int $invoiceId, string $level, ?string $email = null, bool $attachOpomena = false): array
     {
         // Rate limit: max 1 reminder per invoice per 24 hours
         $recentReminder = ReminderHistory::forCompany($companyId)
@@ -260,9 +260,18 @@ class CollectionService
             $locale = 'mk';
         }
 
+        // Generate Опомена PDF if requested
+        $opomenaPdfContent = null;
+        if ($attachOpomena) {
+            $opomenaData = $this->getOpomenaData($companyId, $invoiceId);
+            $opomenaPdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('app.pdf.reports.opomena', $opomenaData);
+            $opomenaPdf->setPaper('A4', 'portrait');
+            $opomenaPdfContent = $opomenaPdf->output();
+        }
+
         // Send the email
         Mail::to($recipientEmail)
-            ->send(new PaymentReminder($invoice, $invoice->customer, $template, $level, $locale));
+            ->send(new PaymentReminder($invoice, $invoice->customer, $template, $level, $locale, $opomenaPdfContent));
 
         // Record in history
         $history = ReminderHistory::create([

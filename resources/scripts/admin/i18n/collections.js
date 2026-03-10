@@ -93,6 +93,7 @@ export default {
       ph_customer_name: 'Име на купувачот',
       ph_company_name: 'Име на фирмата',
       ph_total: 'Вкупен износ',
+      attach_opomena: 'Прикачи опомена (PDF)',
     }
   },
   en: {
@@ -189,6 +190,7 @@ export default {
       ph_customer_name: 'Customer name',
       ph_company_name: 'Company name',
       ph_total: 'Total amount',
+      attach_opomena: 'Attach demand letter (PDF)',
     }
   },
   tr: {
@@ -285,6 +287,7 @@ export default {
       ph_customer_name: 'Musteri adi',
       ph_company_name: 'Sirket adi',
       ph_total: 'Toplam tutar',
+      attach_opomena: 'Ihtar mektubu ekle (PDF)',
     }
   },
   sq: {
@@ -381,6 +384,7 @@ export default {
       ph_customer_name: 'Emri i klientit',
       ph_company_name: 'Emri i kompanise',
       ph_total: 'Shuma totale',
+      attach_opomena: 'Bashkangjit letren e kerkeses (PDF)',
     }
   }
 }

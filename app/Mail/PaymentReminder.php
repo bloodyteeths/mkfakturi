@@ -25,6 +25,8 @@ class PaymentReminder extends Mailable
 
     public string $contentLocale;
 
+    protected ?string $opomenaPdf;
+
     /**
      * Create a new message instance.
      */
@@ -33,13 +35,15 @@ class PaymentReminder extends Mailable
         Customer $customer,
         ReminderTemplate $template,
         string $level,
-        string $contentLocale = 'mk'
+        string $contentLocale = 'mk',
+        ?string $opomenaPdf = null
     ) {
         $this->invoice = $invoice;
         $this->customer = $customer;
         $this->template = $template;
         $this->level = $level;
         $this->contentLocale = $contentLocale;
+        $this->opomenaPdf = $opomenaPdf;
     }
 
     /**
@@ -65,7 +69,7 @@ class PaymentReminder extends Mailable
             ? Carbon::parse($this->invoice->due_date)
             : Carbon::parse((string) $this->invoice->due_date);
 
-        return $this->from(config('mail.from.address'), $fromName)
+        $mail = $this->from(config('mail.from.address'), $fromName)
             ->subject($subject)
             ->view('emails.payment-reminder', [
                 'invoice' => $this->invoice,
@@ -80,6 +84,14 @@ class PaymentReminder extends Mailable
             ->withSymfonyMessage(function ($message) {
                 $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
             });
+
+        // Attach Опомена PDF
+        if ($this->opomenaPdf) {
+            $filename = 'Опомена-' . ($this->invoice->invoice_number ?? 'unknown') . '.pdf';
+            $mail->attachData($this->opomenaPdf, $filename, ['mime' => 'application/pdf']);
+        }
+
+        return $mail;
     }
 
     /**

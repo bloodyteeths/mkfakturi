@@ -81,6 +81,7 @@ class PartnerCollectionController extends Controller
             'invoice_id' => 'required|integer',
             'level' => 'required|in:friendly,firm,final,legal',
             'email' => 'nullable|email|max:255',
+            'attach_opomena' => 'nullable|boolean',
         ]);
 
         try {
@@ -88,7 +89,8 @@ class PartnerCollectionController extends Controller
                 $company,
                 (int) $request->input('invoice_id'),
                 $request->input('level'),
-                $request->input('email')
+                $request->input('email'),
+                (bool) $request->input('attach_opomena', false)
             );
 
             return response()->json([

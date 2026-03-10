@@ -267,6 +267,11 @@
           </BaseInputGroup>
         </div>
 
+        <label class="flex items-center gap-2">
+          <input type="checkbox" v-model="attachOpomena" class="rounded border-gray-300 text-primary-600" />
+          <span class="text-sm text-gray-700">{{ t('attach_opomena') }}</span>
+        </label>
+
         <div v-if="!sendEmail" class="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
           <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-red-500 flex-shrink-0" />
           <p class="text-sm text-red-700">{{ t('error_sending') }}: Email is required</p>
@@ -321,6 +326,7 @@ const showSendDialog = ref(false)
 const selectedInvoice = ref(null)
 const sendLevel = ref('friendly')
 const sendEmail = ref('')
+const attachOpomena = ref(true)
 
 const filters = reactive({
   escalation_level: null,
@@ -429,6 +435,7 @@ async function confirmSend() {
       invoice_id: selectedInvoice.value.id,
       level: sendLevel.value,
       email: sendEmail.value,
+      attach_opomena: attachOpomena.value,
     })
     closeSendDialog()
     notificationStore.showNotification({
