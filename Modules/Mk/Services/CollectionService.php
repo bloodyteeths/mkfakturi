@@ -527,15 +527,10 @@ class CollectionService
             ->forInvoice($invoiceId)
             ->count();
 
-        // Get logo - prefer full URL for cloud storage, fall back to local path
+        // Get logo directly from media record (accessors fail on cloud storage)
         $company = $invoice->company;
-        $logo = $company->logo;
-        if (! $logo) {
-            $logoPath = $company->logo_path;
-            if ($logoPath && (str_starts_with($logoPath, '/') || filter_var($logoPath, FILTER_VALIDATE_URL))) {
-                $logo = $logoPath;
-            }
-        }
+        $logoMedia = $company->getMedia('logo')->first();
+        $logo = $logoMedia ? $logoMedia->getFullUrl() : null;
 
         return [
             'invoice' => $invoice,
