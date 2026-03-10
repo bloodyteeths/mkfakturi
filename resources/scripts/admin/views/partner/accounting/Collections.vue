@@ -454,6 +454,7 @@
               :options="sendLevelOptions"
               label="label"
               value-prop="value"
+              open-direction="top"
             />
           </BaseInputGroup>
         </div>
@@ -464,13 +465,15 @@
         </div>
       </div>
       <template #footer>
-        <BaseButton variant="primary-outline" @click="closeSendDialog">{{ $t('general.cancel') }}</BaseButton>
-        <BaseButton variant="primary" :loading="isSending" :disabled="!sendEmail" @click="confirmSend">
-          <template #left="slotProps">
-            <BaseIcon :class="slotProps.class" name="PaperAirplaneIcon" />
-          </template>
-          {{ t('send_reminder') }}
-        </BaseButton>
+        <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
+          <BaseButton variant="primary-outline" @click="closeSendDialog">{{ $t('general.cancel') }}</BaseButton>
+          <BaseButton variant="primary" :loading="isSending" :disabled="!sendEmail" @click="confirmSend">
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="PaperAirplaneIcon" />
+            </template>
+            {{ t('send_reminder') }}
+          </BaseButton>
+        </div>
       </template>
     </BaseModal>
 
@@ -547,8 +550,10 @@
         </label>
       </div>
       <template #footer>
-        <BaseButton variant="primary-outline" @click="showTemplateForm = false">{{ $t('general.cancel') }}</BaseButton>
-        <BaseButton variant="primary" :loading="isSavingTemplate" @click="saveTemplate">{{ t('save_template') }}</BaseButton>
+        <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
+          <BaseButton variant="primary-outline" @click="showTemplateForm = false">{{ $t('general.cancel') }}</BaseButton>
+          <BaseButton variant="primary" :loading="isSavingTemplate" @click="saveTemplate">{{ t('save_template') }}</BaseButton>
+        </div>
       </template>
     </BaseModal>
   </BasePage>
@@ -616,20 +621,20 @@ const historyFilters = reactive({
   page: 1,
 })
 
-const levelOptions = [
-  { value: null, label: t('level_all') || 'All' },
-  { value: 'friendly', label: t('level_friendly') || 'Friendly' },
-  { value: 'firm', label: t('level_firm') || 'Firm' },
-  { value: 'final', label: t('level_final') || 'Final' },
-  { value: 'legal', label: t('level_legal') || 'Legal' },
-]
+const levelOptions = computed(() => [
+  { value: null, label: t('level_all') },
+  { value: 'friendly', label: t('level_friendly') },
+  { value: 'firm', label: t('level_firm') },
+  { value: 'final', label: t('level_final') },
+  { value: 'legal', label: t('level_legal') },
+])
 
-const sendLevelOptions = [
-  { value: 'friendly', label: t('level_friendly') || 'Friendly' },
-  { value: 'firm', label: t('level_firm') || 'Firm' },
-  { value: 'final', label: t('level_final') || 'Final' },
-  { value: 'legal', label: t('level_legal') || 'Legal' },
-]
+const sendLevelOptions = computed(() => [
+  { value: 'friendly', label: t('level_friendly') },
+  { value: 'firm', label: t('level_firm') },
+  { value: 'final', label: t('level_final') },
+  { value: 'legal', label: t('level_legal') },
+])
 
 // Sample data for preview — replaces {PLACEHOLDERS} with realistic values
 const sampleData = {

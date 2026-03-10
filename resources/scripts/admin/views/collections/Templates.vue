@@ -130,15 +130,17 @@
         </label>
       </div>
       <template #footer>
-        <BaseButton variant="primary-outline" @click="showForm = false">{{ $t('general.cancel') }}</BaseButton>
-        <BaseButton variant="primary" :loading="isSaving" @click="saveTemplate">{{ t('save_template') }}</BaseButton>
+        <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
+          <BaseButton variant="primary-outline" @click="showForm = false">{{ $t('general.cancel') }}</BaseButton>
+          <BaseButton variant="primary" :loading="isSaving" @click="saveTemplate">{{ t('save_template') }}</BaseButton>
+        </div>
       </template>
     </BaseModal>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import collectionMessages from '@/scripts/admin/i18n/collections.js'
@@ -159,12 +161,12 @@ const isSaving = ref(false)
 const showForm = ref(false)
 const editingTemplate = ref(null)
 
-const levelOptions = [
-  { value: 'friendly', label: t('level_friendly') || 'Friendly' },
-  { value: 'firm', label: t('level_firm') || 'Firm' },
-  { value: 'final', label: t('level_final') || 'Final' },
-  { value: 'legal', label: t('level_legal') || 'Legal' },
-]
+const levelOptions = computed(() => [
+  { value: 'friendly', label: t('level_friendly') },
+  { value: 'firm', label: t('level_firm') },
+  { value: 'final', label: t('level_final') },
+  { value: 'legal', label: t('level_legal') },
+])
 
 const form = reactive({
   escalation_level: 'friendly',
