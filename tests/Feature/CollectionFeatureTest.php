@@ -299,6 +299,36 @@ class CollectionFeatureTest extends TestCase
 
     // ---- Send Reminder Tests ----
 
+    public function test_payment_reminder_email_renders_without_error(): void
+    {
+        $invoice = $this->createOverdueInvoice(15);
+        $invoice->loadMissing('customer', 'company', 'currency');
+
+        $template = ReminderTemplate::create([
+            'company_id' => $this->company->id,
+            'escalation_level' => 'friendly',
+            'days_after_due' => 7,
+            'subject_mk' => 'Потсетник за {INVOICE_NUMBER}',
+            'body_mk' => '<p>Почитувани {CUSTOMER_NAME}, фактурата {INVOICE_NUMBER} од {AMOUNT_DUE} е задоцнета.</p>',
+            'subject_en' => 'Reminder for {INVOICE_NUMBER}',
+            'body_en' => '<p>Dear {CUSTOMER_NAME}, invoice {INVOICE_NUMBER} of {AMOUNT_DUE} is overdue.</p>',
+            'subject_tr' => 'Hatirlatma {INVOICE_NUMBER}',
+            'body_tr' => '<p>Hatirlatma</p>',
+            'subject_sq' => 'Kujtese {INVOICE_NUMBER}',
+            'body_sq' => '<p>Kujtese</p>',
+            'is_active' => true,
+        ]);
+
+        $mailable = new \App\Mail\PaymentReminder($invoice, $this->customer, $template, 'friendly', 'mk');
+
+        // This should render without "No hint path defined for [mail]" error
+        $html = $mailable->render();
+
+        $this->assertStringContainsString($invoice->invoice_number, $html);
+        $this->assertStringContainsString('Facturino', $html);
+        $this->assertStringNotContainsString('mail::', $html);
+    }
+
     public function test_send_reminder_creates_history_record(): void
     {
         Mail::fake();
