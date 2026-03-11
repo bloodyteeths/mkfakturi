@@ -3,7 +3,8 @@
     <BasePageHeader :title="t('title')">
       <template #actions>
         <BaseButton
-          v-if="selectedCompanyId && canCreate"
+          v-if="canCreate"
+          :disabled="!selectedCompanyId"
           variant="primary"
           @click="showCreateModal = true"
         >
@@ -163,10 +164,19 @@
                     </button>
                     <button
                       v-if="['exported', 'sent_to_bank'].includes(batch.status)"
-                      class="text-green-600 hover:text-green-800 text-xs font-medium"
+                      class="text-xs font-medium"
+                      :class="pendingAction?.batchId === batch.id && pendingAction?.type === 'confirm' ? 'text-green-800 font-bold' : 'text-green-600 hover:text-green-800'"
                       @click="confirmItem(batch.id)"
                     >
-                      {{ t('confirm_payment') }}
+                      {{ pendingAction?.batchId === batch.id && pendingAction?.type === 'confirm' ? t('confirm_warning_short', 'Sure?') : t('confirm_payment') }}
+                    </button>
+                    <button
+                      v-if="['draft', 'pending_approval', 'approved'].includes(batch.status)"
+                      class="text-xs font-medium"
+                      :class="pendingAction?.batchId === batch.id && pendingAction?.type === 'cancel' ? 'text-red-800 font-bold' : 'text-red-600 hover:text-red-800'"
+                      @click="cancelItem(batch.id)"
+                    >
+                      {{ pendingAction?.batchId === batch.id && pendingAction?.type === 'cancel' ? t('cancel_warning_short', 'Sure?') : t('cancel') }}
                     </button>
                   </div>
                 </td>
@@ -278,7 +288,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import poMessages from '@/scripts/admin/i18n/payment-orders.js'
@@ -286,13 +296,26 @@ import poMessages from '@/scripts/admin/i18n/payment-orders.js'
 const consoleStore = useConsoleStore()
 const notificationStore = useNotificationStore()
 
-const locale = document.documentElement.lang || 'mk'
+const currentLocale = ref(document.documentElement.lang || 'mk')
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const formattedLocale = localeMap[locale] || 'mk-MK'
+const formattedLocale = computed(() => localeMap[currentLocale.value] || 'mk-MK')
 
-function t(key) {
-  return poMessages[locale]?.payment_orders?.[key]
+const observer = new MutationObserver(() => {
+  currentLocale.value = document.documentElement.lang || 'mk'
+})
+onMounted(async () => {
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] })
+  await consoleStore.fetchCompanies()
+  if (companies.value.length === 1) {
+    selectedCompanyId.value = companies.value[0].id
+  }
+})
+onBeforeUnmount(() => observer.disconnect())
+
+function t(key, fallback) {
+  return poMessages[currentLocale.value]?.payment_orders?.[key]
     || poMessages['en']?.payment_orders?.[key]
+    || fallback
     || key
 }
 
@@ -305,6 +328,7 @@ const overdueSummary = ref({})
 const canCreate = ref(true)
 const showCreateModal = ref(false)
 const payableBills = ref([])
+const pendingAction = ref(null) // { type: 'approve'|'export'|'confirm'|'cancel', batchId: number } | null
 
 const filters = ref({ status: '' })
 
@@ -330,23 +354,22 @@ const createSelectedTotal = computed(() => {
 
 const apiBase = computed(() => `/partner/companies/${selectedCompanyId.value}/accounting/payment-orders`)
 
-onMounted(async () => {
-  await consoleStore.fetchCompanies()
-  if (companies.value.length === 1) {
-    selectedCompanyId.value = companies.value[0].id
-  }
-})
-
 watch(showCreateModal, (val) => {
   if (val && selectedCompanyId.value) {
     loadPayableBills()
     createForm.value.bill_ids = []
+  } else if (!val) {
+    createForm.value.bill_ids = []
+    payableBills.value = []
   }
 })
 
 function onCompanyChange() {
   batches.value = []
   overdueSummary.value = {}
+  payableBills.value = []
+  createForm.value.bill_ids = []
+  showCreateModal.value = false
   if (selectedCompanyId.value) {
     loadBatches()
     loadOverdueSummary()
@@ -413,13 +436,18 @@ async function submitCreate() {
   if (createForm.value.bill_ids.length === 0) return
   isCreating.value = true
   try {
-    await window.axios.post(apiBase.value, {
+    const response = await window.axios.post(apiBase.value, {
       batch_date: createForm.value.batch_date,
       format: createForm.value.format,
       notes: createForm.value.notes || null,
       bill_ids: createForm.value.bill_ids,
     })
-    notificationStore.showNotification({ type: 'success', message: t('created_success') || 'Payment order created' })
+    const warnings = response.data?.warnings
+    if (warnings && warnings.length > 0) {
+      notificationStore.showNotification({ type: 'warning', message: warnings.join(' ') })
+    } else {
+      notificationStore.showNotification({ type: 'success', message: t('created_success') || 'Payment order created' })
+    }
     showCreateModal.value = false
     await loadBatches()
     await loadOverdueSummary()
@@ -433,21 +461,31 @@ async function submitCreate() {
 async function approveItem(batchId) {
   try {
     await window.axios.post(`${apiBase.value}/${batchId}/approve`)
-    notificationStore.showNotification({ type: 'success', message: t('approved_success') || 'Approved' })
+    notificationStore.showNotification({ type: 'success', message: t('approved_success') })
     await loadBatches()
   } catch (error) {
-    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_approving') || 'Failed' })
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_approving') })
   }
 }
 
 async function exportItem(batchId) {
   try {
     const response = await window.axios.get(`${apiBase.value}/${batchId}/export`, { responseType: 'blob' })
+
+    // Check if response is actually an error (JSON wrapped in blob)
+    const blob = response.data
+    if (blob.type === 'application/json') {
+      const text = await blob.text()
+      const json = JSON.parse(text)
+      notificationStore.showNotification({ type: 'error', message: json.message || t('error_exporting') || 'Failed' })
+      return
+    }
+
     const contentDisposition = response.headers['content-disposition'] || ''
     const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
     const filename = filenameMatch ? filenameMatch[1].replace(/['"]/g, '') : 'payment_order.csv'
-    const blob = new Blob([response.data])
-    const url = window.URL.createObjectURL(blob)
+    const downloadBlob = new Blob([blob])
+    const url = window.URL.createObjectURL(downloadBlob)
     const link = document.createElement('a')
     link.href = url
     link.setAttribute('download', filename)
@@ -458,19 +496,48 @@ async function exportItem(batchId) {
     notificationStore.showNotification({ type: 'success', message: t('exported') || 'Exported' })
     await loadBatches()
   } catch (error) {
-    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_exporting') || 'Failed' })
+    let message = t('error_exporting') || 'Failed'
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        message = json.message || message
+      } catch { /* use default */ }
+    } else if (error.response?.data?.message) {
+      message = error.response.data.message
+    }
+    notificationStore.showNotification({ type: 'error', message })
   }
 }
 
 async function confirmItem(batchId) {
-  if (!window.confirm(t('confirm_warning', 'This will create bill payments. Continue?'))) return
+  if (!pendingAction.value || pendingAction.value.batchId !== batchId || pendingAction.value.type !== 'confirm') {
+    pendingAction.value = { type: 'confirm', batchId }
+    return
+  }
+  pendingAction.value = null
   try {
     await window.axios.post(`${apiBase.value}/${batchId}/confirm`)
-    notificationStore.showNotification({ type: 'success', message: t('confirmed_success') || 'Confirmed' })
+    notificationStore.showNotification({ type: 'success', message: t('confirmed_success') })
     await loadBatches()
     await loadOverdueSummary()
   } catch (error) {
-    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_confirming') || 'Failed' })
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_confirming') })
+  }
+}
+
+async function cancelItem(batchId) {
+  if (!pendingAction.value || pendingAction.value.batchId !== batchId || pendingAction.value.type !== 'cancel') {
+    pendingAction.value = { type: 'cancel', batchId }
+    return
+  }
+  pendingAction.value = null
+  try {
+    await window.axios.post(`${apiBase.value}/${batchId}/cancel`)
+    notificationStore.showNotification({ type: 'success', message: t('cancelled_success') })
+    await loadBatches()
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_cancelling') })
   }
 }
 
@@ -478,13 +545,13 @@ function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
   const value = Math.abs(amount) / 100
   const sign = amount < 0 ? '-' : ''
-  return sign + new Intl.NumberFormat(formattedLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' \u0434\u0435\u043d.'
+  return sign + new Intl.NumberFormat(formattedLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' \u0434\u0435\u043d.'
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
-  return d.toLocaleDateString(formattedLocale, { year: 'numeric', month: '2-digit', day: '2-digit' })
+  return d.toLocaleDateString(formattedLocale.value, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
 function formatFormatLabel(format) {

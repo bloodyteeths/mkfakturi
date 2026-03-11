@@ -77,6 +77,22 @@
           <option value="cancelled">{{ t('cancelled', 'Cancelled') }}</option>
         </select>
       </div>
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700">{{ t('search') }}:</label>
+        <input
+          v-model="filters.search"
+          type="text"
+          class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+          :placeholder="t('batch_number')"
+          @input="debouncedLoadBatches"
+        />
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700">{{ t('date') }}:</label>
+        <input v-model="filters.from_date" type="date" class="rounded-md border-gray-300 text-sm shadow-sm" @change="loadBatches" />
+        <span class="text-gray-400">&ndash;</span>
+        <input v-model="filters.to_date" type="date" class="rounded-md border-gray-300 text-sm shadow-sm" @change="loadBatches" />
+      </div>
     </div>
 
     <!-- Batches Table -->
@@ -173,7 +189,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import poMessages from '@/scripts/admin/i18n/payment-orders.js'
@@ -181,12 +197,21 @@ import poMessages from '@/scripts/admin/i18n/payment-orders.js'
 const router = useRouter()
 const notificationStore = useNotificationStore()
 
-const locale = document.documentElement.lang || 'mk'
+const currentLocale = ref(document.documentElement.lang || 'mk')
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const formattedLocale = localeMap[locale] || 'mk-MK'
+const formattedLocale = computed(() => localeMap[currentLocale.value] || 'mk-MK')
+
+// Watch for locale changes
+const observer = new MutationObserver(() => {
+  currentLocale.value = document.documentElement.lang || 'mk'
+})
+onMounted(() => {
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] })
+})
+onBeforeUnmount(() => observer.disconnect())
 
 function t(key) {
-  return poMessages[locale]?.payment_orders?.[key]
+  return poMessages[currentLocale.value]?.payment_orders?.[key]
     || poMessages['en']?.payment_orders?.[key]
     || key
 }
@@ -196,7 +221,16 @@ const batches = ref([])
 const overdueSummary = ref({})
 const filters = ref({
   status: '',
+  search: '',
+  from_date: '',
+  to_date: '',
 })
+
+let searchTimeout = null
+function debouncedLoadBatches() {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => loadBatches(), 300)
+}
 
 onMounted(() => {
   loadBatches()
@@ -207,16 +241,17 @@ async function loadBatches() {
   isLoading.value = true
   try {
     const params = {}
-    if (filters.value.status) {
-      params.status = filters.value.status
-    }
+    if (filters.value.status) params.status = filters.value.status
+    if (filters.value.search) params.search = filters.value.search
+    if (filters.value.from_date) params.from_date = filters.value.from_date
+    if (filters.value.to_date) params.to_date = filters.value.to_date
     const response = await window.axios.get('/payment-orders', { params })
     const result = response.data
     batches.value = result.data?.data || result.data || []
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_loading') || 'Failed to load payment orders',
+      message: error.response?.data?.message || t('error_loading'),
     })
   } finally {
     isLoading.value = false
@@ -240,13 +275,13 @@ function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
   const value = Math.abs(amount) / 100
   const sign = amount < 0 ? '-' : ''
-  return sign + new Intl.NumberFormat(formattedLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' \u0434\u0435\u043d.'
+  return sign + new Intl.NumberFormat(formattedLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' \u0434\u0435\u043d.'
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
-  return d.toLocaleDateString(formattedLocale, { year: 'numeric', month: '2-digit', day: '2-digit' })
+  return d.toLocaleDateString(formattedLocale.value, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
 function formatLabel(format) {

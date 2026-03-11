@@ -223,13 +223,18 @@ class SepaXmlBuilder
 
     /**
      * Sanitize text for XML output.
-     * Removes invalid XML characters and trims to SEPA 70-char limit.
+     * Preserves Cyrillic and Latin characters, removes only truly invalid XML chars.
+     * Trims to SEPA 70-char limit.
      */
     private function sanitizeForXml(string $text): string
     {
+        // Remove only invalid XML characters (preserves Cyrillic U+0400-U+04FF and all valid Unicode)
         $text = preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', $text);
 
-        return substr($text, 0, 70);
+        // Escape XML special characters (&, <, >, ", ')
+        $text = htmlspecialchars($text, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+
+        return mb_substr($text, 0, 70, 'UTF-8');
     }
 }
 

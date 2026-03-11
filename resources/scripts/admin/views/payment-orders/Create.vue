@@ -77,6 +77,9 @@
           class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
           :placeholder="t('search', 'Search...')"
         />
+        <span v-if="hiddenSelectionCount > 0" class="ml-2 text-xs text-amber-600">
+          (+ {{ hiddenSelectionCount }} {{ t('hidden_selected', 'hidden') }})
+        </span>
       </div>
     </div>
 
@@ -194,7 +197,7 @@
             {{ t('total') }}: {{ formatMoney(selectedTotal) }}
           </p>
         </div>
-        <BaseButton variant="primary" :loading="isCreating" @click="createBatch">
+        <BaseButton variant="primary" :loading="isCreating" :disabled="selectedBillIds.length === 0 || !form.batch_date" @click="createBatch">
           <template #left="slotProps">
             <BaseIcon name="BanknotesIcon" :class="slotProps.class" />
           </template>
@@ -206,7 +209,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import poMessages from '@/scripts/admin/i18n/payment-orders.js'
@@ -214,12 +217,23 @@ import poMessages from '@/scripts/admin/i18n/payment-orders.js'
 const router = useRouter()
 const notificationStore = useNotificationStore()
 
-const locale = document.documentElement.lang || 'mk'
+const currentLocale = ref(document.documentElement.lang || 'mk')
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const formattedLocale = localeMap[locale] || 'mk-MK'
+const formattedLocale = computed(() => localeMap[currentLocale.value] || 'mk-MK')
+
+// Watch for locale changes
+const observer = new MutationObserver(() => {
+  currentLocale.value = document.documentElement.lang || 'mk'
+})
+onMounted(() => {
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] })
+  loadPayableBills()
+  loadBankAccounts()
+})
+onBeforeUnmount(() => observer.disconnect())
 
 function t(key) {
-  return poMessages[locale]?.payment_orders?.[key]
+  return poMessages[currentLocale.value]?.payment_orders?.[key]
     || poMessages['en']?.payment_orders?.[key]
     || key
 }
@@ -259,9 +273,9 @@ const selectedTotal = computed(() => {
     .reduce((sum, b) => sum + (b.due_amount || 0), 0)
 })
 
-onMounted(() => {
-  loadPayableBills()
-  loadBankAccounts()
+const hiddenSelectionCount = computed(() => {
+  const visibleIds = new Set(filteredBills.value.map(b => b.id))
+  return selectedBillIds.value.filter(id => !visibleIds.has(id)).length
 })
 
 async function loadPayableBills() {
@@ -350,11 +364,19 @@ async function createBatch() {
 
     const response = await window.axios.post('/payment-orders', payload)
     const batch = response.data?.data
+    const warnings = response.data?.warnings
 
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('created_success', 'Payment order created successfully'),
-    })
+    if (warnings && warnings.length > 0) {
+      notificationStore.showNotification({
+        type: 'warning',
+        message: warnings.join(' '),
+      })
+    } else {
+      notificationStore.showNotification({
+        type: 'success',
+        message: t('created_success', 'Payment order created successfully'),
+      })
+    }
 
     router.push(`/admin/payment-orders/${batch.id}`)
   } catch (error) {
@@ -371,13 +393,13 @@ function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
   const value = Math.abs(amount) / 100
   const sign = amount < 0 ? '-' : ''
-  return sign + new Intl.NumberFormat(formattedLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' \u0434\u0435\u043d.'
+  return sign + new Intl.NumberFormat(formattedLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' \u0434\u0435\u043d.'
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
-  return d.toLocaleDateString(formattedLocale, { year: 'numeric', month: '2-digit', day: '2-digit' })
+  return d.toLocaleDateString(formattedLocale.value, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 </script>
 

@@ -4,11 +4,13 @@ namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\CompanyUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Modules\Mk\Models\PaymentBatch;
 use Modules\Mk\Services\PaymentOrderService;
+use Modules\Mk\Services\Pp30PdfService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -27,11 +29,47 @@ class PaymentOrderController extends Controller
     }
 
     /**
+     * Verify the authenticated user has access to the company.
+     */
+    protected function authorizeCompanyAccess(Request $request): int
+    {
+        $companyId = (int) $request->header('company');
+        $user = $request->user();
+
+        if (! $user) {
+            abort(401, 'Unauthenticated');
+        }
+
+        // Super admins can access any company
+        if ($user->role === 'super admin') {
+            return $companyId;
+        }
+
+        // Verify user belongs to this company
+        $hasAccess = CompanyUser::where('company_id', $companyId)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if (! $hasAccess) {
+            // Also check if user is the company owner
+            $isOwner = Company::where('id', $companyId)
+                ->where('owner_id', $user->id)
+                ->exists();
+
+            if (! $isOwner) {
+                abort(403, 'Access denied to this company');
+            }
+        }
+
+        return $companyId;
+    }
+
+    /**
      * List payment batches for the company.
      */
     public function index(Request $request): JsonResponse
     {
-        $companyId = (int) $request->header('company');
+        $companyId = $this->authorizeCompanyAccess($request);
 
         $query = PaymentBatch::forCompany($companyId)
             ->with(['createdBy:id,name', 'approvedBy:id,name'])
@@ -39,6 +77,10 @@ class PaymentOrderController extends Controller
 
         if ($request->filled('status')) {
             $query->byStatus($request->input('status'));
+        }
+
+        if ($request->filled('search')) {
+            $query->where('batch_number', 'like', '%' . $request->input('search') . '%');
         }
 
         if ($request->filled('from_date')) {
@@ -65,7 +107,7 @@ class PaymentOrderController extends Controller
      */
     public function show(Request $request, int $id): JsonResponse
     {
-        $companyId = (int) $request->header('company');
+        $companyId = $this->authorizeCompanyAccess($request);
 
         $batch = PaymentBatch::forCompany($companyId)
             ->with(['items.bill:id,bill_number,due_date,total', 'createdBy:id,name', 'approvedBy:id,name', 'bankAccount:id,account_name,iban'])
@@ -83,7 +125,7 @@ class PaymentOrderController extends Controller
      */
     public function payableBills(Request $request): JsonResponse
     {
-        $companyId = (int) $request->header('company');
+        $companyId = $this->authorizeCompanyAccess($request);
 
         $filters = $request->only(['supplier_id', 'due_before', 'due_after', 'min_amount', 'max_amount']);
         $bills = $this->service->getPayableBills($companyId, $filters);
@@ -108,18 +150,39 @@ class PaymentOrderController extends Controller
             'bill_ids.*' => 'integer|exists:bills,id',
         ]);
 
-        $companyId = (int) $request->header('company');
+        $companyId = $this->authorizeCompanyAccess($request);
 
         $data = $request->only(['batch_date', 'format', 'bank_account_id', 'notes', 'bill_ids']);
         $data['created_by'] = Auth::id();
 
-        $batch = $this->service->createBatch($companyId, $data);
+        try {
+            $result = $this->service->createBatch($companyId, $data, autoApprove: true);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
 
-        return response()->json([
+        $batch = $result['batch'];
+        $skippedBills = $result['skipped_bills'] ?? [];
+        $skippedInBatch = $result['skipped_in_batch'] ?? [];
+
+        $response = [
             'success' => true,
             'message' => 'Payment order created',
             'data' => $batch,
-        ], 201);
+        ];
+
+        // Report skipped bills to frontend
+        if (! empty($skippedBills)) {
+            $response['warnings'] = ['Skipped fully paid bills: '.implode(', ', $skippedBills)];
+        }
+        if (! empty($skippedInBatch)) {
+            $response['warnings'][] = count($skippedInBatch).' bill(s) already in active batches were excluded.';
+        }
+
+        return response()->json($response, 201);
     }
 
     /**
@@ -127,7 +190,7 @@ class PaymentOrderController extends Controller
      */
     public function approve(Request $request, int $id): JsonResponse
     {
-        $companyId = (int) $request->header('company');
+        $companyId = $this->authorizeCompanyAccess($request);
 
         $batch = PaymentBatch::forCompany($companyId)
             ->where('id', $id)
@@ -154,7 +217,7 @@ class PaymentOrderController extends Controller
      */
     public function export(Request $request, int $id): StreamedResponse|JsonResponse
     {
-        $companyId = (int) $request->header('company');
+        $companyId = $this->authorizeCompanyAccess($request);
 
         $batch = PaymentBatch::forCompany($companyId)
             ->where('id', $id)
@@ -181,7 +244,7 @@ class PaymentOrderController extends Controller
      */
     public function confirm(Request $request, int $id): JsonResponse
     {
-        $companyId = (int) $request->header('company');
+        $companyId = $this->authorizeCompanyAccess($request);
 
         $batch = PaymentBatch::forCompany($companyId)
             ->where('id', $id)
@@ -208,7 +271,7 @@ class PaymentOrderController extends Controller
      */
     public function cancel(Request $request, int $id): JsonResponse
     {
-        $companyId = (int) $request->header('company');
+        $companyId = $this->authorizeCompanyAccess($request);
 
         $batch = PaymentBatch::forCompany($companyId)
             ->where('id', $id)
@@ -235,13 +298,37 @@ class PaymentOrderController extends Controller
      */
     public function overdueSummary(Request $request): JsonResponse
     {
-        $companyId = (int) $request->header('company');
+        $companyId = $this->authorizeCompanyAccess($request);
         $summary = $this->service->getOverdueSummary($companyId);
 
         return response()->json([
             'success' => true,
             'data' => $summary,
         ]);
+    }
+
+    /**
+     * Generate PP30 payment slip PDF for a batch.
+     */
+    public function pp30Pdf(Request $request, int $id)
+    {
+        $companyId = $this->authorizeCompanyAccess($request);
+
+        $batch = PaymentBatch::forCompany($companyId)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        try {
+            $pp30Service = app(Pp30PdfService::class);
+            $pdf = $pp30Service->generateForBatch($batch);
+
+            return $pdf->download("PP30_{$batch->batch_number}.pdf");
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 }
 

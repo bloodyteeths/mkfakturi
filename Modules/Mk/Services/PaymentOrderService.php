@@ -33,12 +33,21 @@ class PaymentOrderService
      */
     public function getPayableBills(int $companyId, array $filters = []): Collection
     {
+        // Get bill IDs already in active (non-cancelled) batches
+        $billsInActiveBatches = PaymentBatchItem::whereHas('paymentBatch', function ($q) use ($companyId) {
+            $q->where('company_id', $companyId)
+                ->whereNotIn('status', [PaymentBatch::STATUS_CANCELLED, PaymentBatch::STATUS_CONFIRMED]);
+        })->whereNotNull('bill_id')->pluck('bill_id')->toArray();
+
         $query = Bill::where('company_id', $companyId)
             ->whereIn('paid_status', [
                 Bill::PAID_STATUS_UNPAID,
                 Bill::PAID_STATUS_PARTIALLY_PAID,
             ])
             ->whereNotIn('status', [Bill::STATUS_DRAFT])
+            ->when(! empty($billsInActiveBatches), function ($q) use ($billsInActiveBatches) {
+                $q->whereNotIn('id', $billsInActiveBatches);
+            })
             ->with(['supplier:id,name,email,iban,bic,bank_name', 'currency:id,code,symbol']);
 
         if (! empty($filters['supplier_id'])) {
@@ -103,9 +112,23 @@ class PaymentOrderService
      * @param array $data Keys: batch_date, format, bank_account_id, notes, bill_ids
      * @return PaymentBatch
      */
-    public function createBatch(int $companyId, array $data): PaymentBatch
+    public function createBatch(int $companyId, array $data, bool $autoApprove = false): array
     {
-        return DB::transaction(function () use ($companyId, $data) {
+        return DB::transaction(function () use ($companyId, $data, $autoApprove) {
+            $billIds = $data['bill_ids'] ?? [];
+
+            // Reject bills already in active (non-cancelled, non-confirmed) batches
+            $alreadyInBatch = PaymentBatchItem::whereHas('paymentBatch', function ($q) use ($companyId) {
+                $q->where('company_id', $companyId)
+                    ->whereNotIn('status', [PaymentBatch::STATUS_CANCELLED, PaymentBatch::STATUS_CONFIRMED]);
+            })->whereIn('bill_id', $billIds)->pluck('bill_id')->toArray();
+
+            $billIds = array_values(array_diff($billIds, $alreadyInBatch));
+
+            if (empty($billIds)) {
+                throw new \Exception('All selected bills are already in active payment batches.');
+            }
+
             $batch = PaymentBatch::create([
                 'company_id' => $companyId,
                 'batch_date' => $data['batch_date'] ?? now()->toDateString(),
@@ -118,11 +141,12 @@ class PaymentOrderService
 
             $totalAmount = 0;
             $itemCount = 0;
+            $skippedBills = [];
 
-            $billIds = $data['bill_ids'] ?? [];
             $bills = Bill::where('company_id', $companyId)
                 ->whereIn('id', $billIds)
                 ->with(['supplier:id,name,iban,bic,bank_name', 'currency:id,code'])
+                ->lockForUpdate()
                 ->get();
 
             foreach ($bills as $bill) {
@@ -130,6 +154,8 @@ class PaymentOrderService
                 $dueAmount = $bill->total - $paidAmount;
 
                 if ($dueAmount <= 0) {
+                    $skippedBills[] = $bill->bill_number ?? "Bill #{$bill->id}";
+
                     continue;
                 }
 
@@ -154,10 +180,23 @@ class PaymentOrderService
                 $itemCount++;
             }
 
+            if ($itemCount === 0) {
+                throw new \Exception('No payable bills — all selected bills are already fully paid.');
+            }
+
             $batch->update([
                 'total_amount' => $totalAmount,
                 'item_count' => $itemCount,
             ]);
+
+            // Auto-approve if requested (company owners skip manual approval)
+            if ($autoApprove && $batch->isApprovable()) {
+                $batch->update([
+                    'status' => PaymentBatch::STATUS_APPROVED,
+                    'approved_by' => $data['created_by'] ?? null,
+                    'approved_at' => now(),
+                ]);
+            }
 
             $batch->load('items');
 
@@ -166,9 +205,15 @@ class PaymentOrderService
                 'company_id' => $companyId,
                 'items' => $itemCount,
                 'total' => $totalAmount,
+                'skipped_fully_paid' => count($skippedBills),
+                'skipped_in_batch' => count($alreadyInBatch),
             ]);
 
-            return $batch;
+            return [
+                'batch' => $batch,
+                'skipped_bills' => $skippedBills,
+                'skipped_in_batch' => $alreadyInBatch,
+            ];
         });
     }
 
@@ -211,7 +256,7 @@ class PaymentOrderService
      */
     public function export(PaymentBatch $batch): array
     {
-        if (! $batch->isExportable() && $batch->status !== PaymentBatch::STATUS_APPROVED) {
+        if (! $batch->isExportable()) {
             throw new \Exception("Batch #{$batch->batch_number} cannot be exported in status '{$batch->status}'.");
         }
 
@@ -298,22 +343,55 @@ class PaymentOrderService
         return DB::transaction(function () use ($batch) {
             $batch->load('items');
 
+            $confirmedCount = 0;
+            $skippedCount = 0;
+
             foreach ($batch->items as $item) {
                 if (! $item->bill_id) {
                     $item->update(['status' => PaymentBatchItem::STATUS_CONFIRMED]);
+                    $confirmedCount++;
+
                     continue;
                 }
 
                 $bill = Bill::find($item->bill_id);
                 if (! $bill) {
                     $item->update(['status' => PaymentBatchItem::STATUS_FAILED]);
+                    $skippedCount++;
+
                     continue;
                 }
 
-                // Generate payment number
+                // Re-check: bill may have been paid since batch creation
+                $paidAmount = $bill->payments()->sum('amount');
+                $remainingDue = $bill->total - $paidAmount;
+
+                if ($remainingDue <= 0) {
+                    $item->update(['status' => PaymentBatchItem::STATUS_FAILED]);
+                    $skippedCount++;
+
+                    continue;
+                }
+
+                // Cap payment at remaining due amount (not the original batch item amount)
+                $paymentAmount = min($item->amount, (int) $remainingDue);
+
+                if ($paymentAmount < $item->amount) {
+                    Log::warning('Payment amount adjusted during confirmation', [
+                        'batch_id' => $batch->id,
+                        'item_id' => $item->id,
+                        'bill_id' => $item->bill_id,
+                        'original_amount' => $item->amount,
+                        'adjusted_amount' => $paymentAmount,
+                        'remaining_due' => $remainingDue,
+                    ]);
+                }
+
+                // Generate payment number with lock to prevent duplicates
                 $year = date('Y');
                 $sequence = BillPayment::where('company_id', $batch->company_id)
                     ->whereYear('created_at', $year)
+                    ->lockForUpdate()
                     ->count() + 1;
                 $paymentNumber = sprintf('BPAY-%d-%06d', $year, $sequence);
 
@@ -323,7 +401,7 @@ class PaymentOrderService
                     'company_id' => $batch->company_id,
                     'payment_number' => $paymentNumber,
                     'payment_date' => $batch->batch_date,
-                    'amount' => $item->amount,
+                    'amount' => $paymentAmount,
                     'notes' => "Payment order {$batch->batch_number}",
                 ]);
 
@@ -331,6 +409,7 @@ class PaymentOrderService
                 $bill->updatePaidStatus();
 
                 $item->update(['status' => PaymentBatchItem::STATUS_CONFIRMED]);
+                $confirmedCount++;
             }
 
             $batch->update([
@@ -339,7 +418,8 @@ class PaymentOrderService
 
             Log::info('Payment batch confirmed', [
                 'batch_id' => $batch->id,
-                'items_count' => $batch->items->count(),
+                'confirmed' => $confirmedCount,
+                'skipped' => $skippedCount,
             ]);
 
             return $batch->fresh(['items']);
@@ -390,6 +470,7 @@ class PaymentOrderService
             ])
             ->whereNotIn('status', [Bill::STATUS_DRAFT])
             ->whereNotNull('due_date')
+            ->with('payments:id,bill_id,amount')
             ->get();
 
         $overdue = ['count' => 0, 'total' => 0];
@@ -398,7 +479,7 @@ class PaymentOrderService
 
         foreach ($unpaidBills as $bill) {
             $dueDate = Carbon::parse($bill->due_date);
-            $paidAmount = $bill->payments()->sum('amount');
+            $paidAmount = $bill->payments->sum('amount');
             $dueAmount = (int) ($bill->total - $paidAmount);
 
             if ($dueAmount <= 0) {

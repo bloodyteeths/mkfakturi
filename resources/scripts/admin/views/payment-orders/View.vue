@@ -22,7 +22,7 @@
             {{ t('approve', 'Approve') }}
           </BaseButton>
 
-          <!-- Export Button -->
+          <!-- Export CSV/XML Button -->
           <BaseButton
             v-if="canExport"
             variant="primary"
@@ -33,6 +33,19 @@
               <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
             </template>
             {{ t('export_file') }}
+          </BaseButton>
+
+          <!-- Download PP30 PDF Button -->
+          <BaseButton
+            v-if="canExportPp30"
+            variant="primary-outline"
+            :loading="isDownloadingPp30"
+            @click="downloadPp30Pdf"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="PrinterIcon" :class="slotProps.class" />
+            </template>
+            {{ t('pp30_pdf') }}
           </BaseButton>
 
           <!-- Confirm Button -->
@@ -147,6 +160,28 @@
         </div>
       </div>
 
+      <!-- Confirmation Banner -->
+      <div v-if="pendingAction" class="mb-4 rounded-lg border-2 p-4" :class="pendingAction === 'confirm' ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-medium" :class="pendingAction === 'confirm' ? 'text-green-800' : 'text-red-800'">
+            {{ pendingAction === 'confirm' ? t('confirm_warning') : t('cancel_warning') }}
+          </p>
+          <div class="flex gap-2">
+            <BaseButton variant="primary-outline" size="sm" @click="dismissAction">
+              {{ t('cancel') }}
+            </BaseButton>
+            <BaseButton
+              :variant="pendingAction === 'confirm' ? 'success' : 'danger'"
+              size="sm"
+              :loading="pendingAction === 'confirm' ? isConfirming : isCancelling"
+              @click="pendingAction === 'confirm' ? confirmBatch() : cancelBatch()"
+            >
+              {{ pendingAction === 'confirm' ? t('confirm_payment') : t('cancel') }}
+            </BaseButton>
+          </div>
+        </div>
+      </div>
+
       <!-- Items Table -->
       <div class="rounded-lg bg-white shadow overflow-hidden">
         <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
@@ -213,7 +248,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import poMessages from '@/scripts/admin/i18n/payment-orders.js'
@@ -222,12 +257,21 @@ const route = useRoute()
 const router = useRouter()
 const notificationStore = useNotificationStore()
 
-const locale = document.documentElement.lang || 'mk'
+const currentLocale = ref(document.documentElement.lang || 'mk')
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const formattedLocale = localeMap[locale] || 'mk-MK'
+const formattedLocale = computed(() => localeMap[currentLocale.value] || 'mk-MK')
+
+const observer = new MutationObserver(() => {
+  currentLocale.value = document.documentElement.lang || 'mk'
+})
+onMounted(() => {
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] })
+  loadBatch()
+})
+onBeforeUnmount(() => observer.disconnect())
 
 function t(key) {
-  return poMessages[locale]?.payment_orders?.[key]
+  return poMessages[currentLocale.value]?.payment_orders?.[key]
     || poMessages['en']?.payment_orders?.[key]
     || key
 }
@@ -235,29 +279,38 @@ function t(key) {
 const isLoading = ref(false)
 const isApproving = ref(false)
 const isExporting = ref(false)
+const isDownloadingPp30 = ref(false)
 const isConfirming = ref(false)
 const isCancelling = ref(false)
 const batch = ref(null)
+const pendingAction = ref(null) // 'confirm' | 'cancel' | null
 
 const batchId = computed(() => route.params.id)
 
 const canApprove = computed(() => batch.value && ['draft', 'pending_approval'].includes(batch.value.status))
 const canExport = computed(() => batch.value && ['approved', 'exported'].includes(batch.value.status))
 const canConfirm = computed(() => batch.value && ['exported', 'sent_to_bank'].includes(batch.value.status))
-const canCancel = computed(() => batch.value && ['draft', 'pending_approval'].includes(batch.value.status))
+const canCancel = computed(() => batch.value && ['draft', 'pending_approval', 'approved'].includes(batch.value.status))
+const canExportPp30 = computed(() => batch.value && ['pp30', 'pp50'].includes(batch.value.format) && ['approved', 'exported', 'confirmed'].includes(batch.value.status))
 
-const statusPipeline = computed(() => [
-  { key: 'draft', label: t('status_draft') },
-  { key: 'approved', label: t('status_approved') },
-  { key: 'exported', label: t('status_exported') },
-  { key: 'confirmed', label: t('status_confirmed') },
-])
+const statusPipeline = computed(() => {
+  // Auto-approved batches show simplified 3-step pipeline
+  if (batch.value && !['draft', 'pending_approval'].includes(batch.value.status)) {
+    return [
+      { key: 'approved', label: t('status_approved') },
+      { key: 'exported', label: t('status_exported') },
+      { key: 'confirmed', label: t('status_confirmed') },
+    ]
+  }
+  return [
+    { key: 'draft', label: t('status_draft') },
+    { key: 'approved', label: t('status_approved') },
+    { key: 'exported', label: t('status_exported') },
+    { key: 'confirmed', label: t('status_confirmed') },
+  ]
+})
 
 const statusOrder = ['draft', 'pending_approval', 'approved', 'exported', 'sent_to_bank', 'confirmed']
-
-onMounted(() => {
-  loadBatch()
-})
 
 async function loadBatch() {
   isLoading.value = true
@@ -295,13 +348,26 @@ async function exportBatch() {
       responseType: 'blob',
     })
 
+    // Check if response is actually an error (JSON wrapped in blob)
+    const blob = response.data
+    if (blob.type === 'application/json') {
+      try {
+        const text = await blob.text()
+        const json = JSON.parse(text)
+        notificationStore.showNotification({ type: 'error', message: json.message || t('error_exporting') })
+      } catch {
+        notificationStore.showNotification({ type: 'error', message: t('error_exporting') })
+      }
+      return
+    }
+
     // Extract filename from content-disposition header
     const contentDisposition = response.headers['content-disposition'] || ''
     const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
     const filename = filenameMatch ? filenameMatch[1].replace(/['"]/g, '') : `payment_order_${batch.value.batch_number}.csv`
 
-    const blob = new Blob([response.data])
-    const url = window.URL.createObjectURL(blob)
+    const downloadBlob = new Blob([blob])
+    const url = window.URL.createObjectURL(downloadBlob)
     const link = document.createElement('a')
     link.href = url
     link.setAttribute('download', filename)
@@ -313,44 +379,108 @@ async function exportBatch() {
     notificationStore.showNotification({ type: 'success', message: t('exported') || 'File exported' })
     await loadBatch()
   } catch (error) {
-    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_exporting') || 'Failed to export' })
+    // When responseType is 'blob', error.response.data is a Blob — extract message
+    let message = t('error_exporting') || 'Failed to export'
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        message = json.message || message
+      } catch { /* use default message */ }
+    } else if (error.response?.data?.message) {
+      message = error.response.data.message
+    }
+    notificationStore.showNotification({ type: 'error', message })
   } finally {
     isExporting.value = false
   }
 }
 
+async function downloadPp30Pdf() {
+  isDownloadingPp30.value = true
+  try {
+    const response = await window.axios.get(`/payment-orders/${batchId.value}/pp30`, {
+      responseType: 'blob',
+    })
+
+    const blob = response.data
+
+    if (blob.type === 'application/json') {
+      try {
+        const text = await blob.text()
+        const json = JSON.parse(text)
+        notificationStore.showNotification({ type: 'error', message: json.message || t('error_exporting') })
+      } catch {
+        notificationStore.showNotification({ type: 'error', message: t('error_exporting') })
+      }
+      return
+    }
+
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `PP30_${batch.value.batch_number}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+
+    notificationStore.showNotification({ type: 'success', message: t('pp30_pdf') + ' ✓' })
+  } catch (error) {
+    let message = t('error_exporting') || 'Failed to generate PP30'
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        message = json.message || message
+      } catch { /* use default */ }
+    } else if (error.response?.data?.message) {
+      message = error.response.data.message
+    }
+    notificationStore.showNotification({ type: 'error', message })
+  } finally {
+    isDownloadingPp30.value = false
+  }
+}
+
 async function confirmBatch() {
-  if (!window.confirm(t('confirm_warning', 'This will create bill payments and mark bills as paid. Continue?'))) {
+  if (!pendingAction.value) {
+    pendingAction.value = 'confirm'
     return
   }
-
+  pendingAction.value = null
   isConfirming.value = true
   try {
     await window.axios.post(`/payment-orders/${batchId.value}/confirm`)
-    notificationStore.showNotification({ type: 'success', message: t('confirmed_success') || 'Payment confirmed' })
+    notificationStore.showNotification({ type: 'success', message: t('confirmed_success') })
     await loadBatch()
   } catch (error) {
-    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_confirming') || 'Failed to confirm' })
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_confirming') })
   } finally {
     isConfirming.value = false
   }
 }
 
 async function cancelBatch() {
-  if (!window.confirm(t('cancel_warning', 'Are you sure you want to cancel this payment order?'))) {
+  if (!pendingAction.value) {
+    pendingAction.value = 'cancel'
     return
   }
-
+  pendingAction.value = null
   isCancelling.value = true
   try {
     await window.axios.post(`/payment-orders/${batchId.value}/cancel`)
-    notificationStore.showNotification({ type: 'success', message: t('cancelled_success') || 'Cancelled' })
+    notificationStore.showNotification({ type: 'success', message: t('cancelled_success') })
     await loadBatch()
   } catch (error) {
-    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_cancelling') || 'Failed to cancel' })
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_cancelling') })
   } finally {
     isCancelling.value = false
   }
+}
+
+function dismissAction() {
+  pendingAction.value = null
 }
 
 function isStepActive(stepKey) {
@@ -371,13 +501,13 @@ function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
   const value = Math.abs(amount) / 100
   const sign = amount < 0 ? '-' : ''
-  return sign + new Intl.NumberFormat(formattedLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' \u0434\u0435\u043d.'
+  return sign + new Intl.NumberFormat(formattedLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' \u0434\u0435\u043d.'
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
-  return d.toLocaleDateString(formattedLocale, { year: 'numeric', month: '2-digit', day: '2-digit' })
+  return d.toLocaleDateString(formattedLocale.value, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
 function formatLabel(format) {

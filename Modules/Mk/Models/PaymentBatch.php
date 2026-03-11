@@ -113,7 +113,6 @@ class PaymentBatch extends Model
         $year = date('Y');
         $lastBatch = static::where('company_id', $companyId)
             ->whereYear('created_at', $year)
-            ->withTrashed()
             ->orderByDesc('id')
             ->first();
 
@@ -218,7 +217,7 @@ class PaymentBatch extends Model
      */
     public function isCancellable(): bool
     {
-        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_PENDING_APPROVAL]);
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_PENDING_APPROVAL, self::STATUS_APPROVED]);
     }
 }
 

@@ -108,30 +108,11 @@ class Pp30FileBuilder
 
     /**
      * Extract bank name from Macedonian IBAN based on bank code.
+     * Uses shared constant from Pp30PdfService.
      */
     private function extractBankNameFromIban(string $iban): string
     {
-        $iban = strtoupper(str_replace(' ', '', $iban));
-
-        if (! str_starts_with($iban, 'MK') || strlen($iban) < 7) {
-            return '';
-        }
-
-        $bankCode = substr($iban, 4, 3);
-
-        $banks = [
-            '210' => 'Комерцијална Банка',
-            '250' => 'НЛБ Банка',
-            '270' => 'Халк Банка',
-            '300' => 'Стопанска Банка',
-            '380' => 'УНИ Банка',
-            '500' => 'Шпаркасе Банка',
-            '530' => 'ПроКредит Банка',
-            '290' => 'Силк Роуд Банка',
-            '320' => 'ТТК Банка',
-        ];
-
-        return $banks[$bankCode] ?? '';
+        return (new Pp30PdfService())->getBankNameFromIban($iban);
     }
 }
 

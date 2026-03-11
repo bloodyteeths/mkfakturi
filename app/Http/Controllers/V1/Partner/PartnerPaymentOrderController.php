@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Mk\Models\PaymentBatch;
 use Modules\Mk\Services\PaymentOrderService;
+use Modules\Mk\Services\Pp30PdfService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -125,13 +126,33 @@ class PartnerPaymentOrderController extends Controller
         $data = $request->only(['batch_date', 'format', 'bank_account_id', 'notes', 'bill_ids']);
         $data['created_by'] = $request->user()?->id;
 
-        $batch = $this->service->createBatch($company, $data);
+        try {
+            $result = $this->service->createBatch($company, $data);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
 
-        return response()->json([
+        $batch = $result['batch'];
+        $skippedBills = $result['skipped_bills'] ?? [];
+        $skippedInBatch = $result['skipped_in_batch'] ?? [];
+
+        $response = [
             'success' => true,
             'message' => 'Payment order created',
             'data' => $batch,
-        ], 201);
+        ];
+
+        if (! empty($skippedBills)) {
+            $response['warnings'] = ['Skipped fully paid bills: '.implode(', ', $skippedBills)];
+        }
+        if (! empty($skippedInBatch)) {
+            $response['warnings'][] = count($skippedInBatch).' bill(s) already in active batches were excluded.';
+        }
+
+        return response()->json($response, 201);
     }
 
     /**
@@ -272,6 +293,33 @@ class PartnerPaymentOrderController extends Controller
         ]);
     }
 
+    /**
+     * Generate PP30 payment slip PDF for a batch.
+     */
+    public function pp30Pdf(Request $request, int $company, int $id)
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $batch = PaymentBatch::forCompany($company)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        try {
+            $pp30Service = app(Pp30PdfService::class);
+            $pdf = $pp30Service->generateForBatch($batch);
+
+            return $pdf->download("PP30_{$batch->batch_number}.pdf");
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
     // ----- Partner Access Helpers -----
 
     /**
@@ -285,14 +333,12 @@ class PartnerPaymentOrderController extends Controller
             return null;
         }
 
-        // Super admin gets a fake partner to pass validation
+        // Super admin bypasses partner check entirely
         if ($user->role === 'super admin') {
             $fakePartner = new Partner();
             $fakePartner->id = 0;
             $fakePartner->user_id = $user->id;
-            $fakePartner->name = 'Super Admin';
-            $fakePartner->email = $user->email;
-            $fakePartner->is_super_admin = true;
+            $fakePartner->forceFill(['name' => 'Super Admin', 'email' => $user->email]);
 
             return $fakePartner;
         }
@@ -306,7 +352,8 @@ class PartnerPaymentOrderController extends Controller
      */
     protected function hasCompanyAccess(Partner $partner, int $companyId): bool
     {
-        if ($partner->is_super_admin ?? false) {
+        // Super admins (id=0, created in getPartnerFromRequest) access all companies
+        if ($partner->id === 0) {
             return true;
         }
 
