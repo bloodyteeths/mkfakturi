@@ -334,22 +334,6 @@ class PartnerBatchOperationController extends Controller
         return Partner::where('user_id', $user->id)->first();
     }
 
-    /**
-     * Check if partner has access to a company.
-     * Super admin has access to all companies.
-     */
-    protected function hasCompanyAccess(Partner $partner, int $companyId): bool
-    {
-        // Super admin has access to all companies
-        if ($partner->is_super_admin ?? false) {
-            return true;
-        }
-
-        return $partner->companies()
-            ->where('companies.id', $companyId)
-            ->where('partner_company_links.is_active', true)
-            ->exists();
-    }
 }
 
 // CLAUDE-CHECKPOINT

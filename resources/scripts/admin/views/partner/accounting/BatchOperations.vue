@@ -385,10 +385,15 @@
                   <td class="px-4 py-2">
                     <button
                       v-if="result.file_path && result.status === 'success'"
-                      class="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-800"
+                      class="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-800 disabled:opacity-50"
+                      :disabled="downloadingKey === `${job.id}-${result.company_id}`"
                       @click.stop="downloadFile(job.id, result.company_id)"
                     >
-                      <BaseIcon name="ArrowDownTrayIcon" class="h-3.5 w-3.5" />
+                      <div
+                        v-if="downloadingKey === `${job.id}-${result.company_id}`"
+                        class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary-200 border-t-primary-600"
+                      ></div>
+                      <BaseIcon v-else name="ArrowDownTrayIcon" class="h-3.5 w-3.5" />
                       {{ t('batch_operations.download') }}
                     </button>
                   </td>
@@ -451,6 +456,7 @@ const jobs = ref([])
 const expandedJobIds = ref([])
 const companySearch = ref('')
 const jobStatusFilter = ref('')
+const downloadingKey = ref(null)
 let pollingInterval = null
 
 function formatDateToLocalYMD(date) {
@@ -496,17 +502,15 @@ const yearOptions = computed(() => {
   return years
 })
 
-const MK_MONTHS = [
-  'Јануари', 'Февруари', 'Март', 'Април', 'Мај', 'Јуни',
-  'Јули', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'
-]
-const EN_MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-]
+const MONTH_NAMES = {
+  mk: ['Јануари', 'Февруари', 'Март', 'Април', 'Мај', 'Јуни', 'Јули', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  tr: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+  sq: ['Janar', 'Shkurt', 'Mars', 'Prill', 'Maj', 'Qershor', 'Korrik', 'Gusht', 'Shtator', 'Tetor', 'Nëntor', 'Dhjetor'],
+}
 
 const monthOptions = computed(() => {
-  const names = locale === 'mk' ? MK_MONTHS : EN_MONTHS
+  const names = MONTH_NAMES[locale] || MONTH_NAMES['en']
   return Array.from({ length: 12 }, (_, i) => ({
     id: i + 1,
     name: `${String(i + 1).padStart(2, '0')} - ${names[i]}`,
@@ -620,8 +624,9 @@ function toggleJobExpanded(jobId) {
 }
 
 function getCompanyName(companyId) {
-  const company = companies.value.find(c => c.id === companyId)
-  return company ? company.name : `#${companyId}`
+  const id = Number(companyId)
+  const company = companies.value.find(c => Number(c.id) === id)
+  return company ? company.name : `Company #${companyId}`
 }
 
 function getProgressPercentage(job) {
@@ -829,6 +834,9 @@ async function confirmCancelJob(job) {
 }
 
 async function downloadFile(jobId, companyId) {
+  const key = `${jobId}-${companyId}`
+  if (downloadingKey.value === key) return
+  downloadingKey.value = key
   try {
     const response = await axios.get(`/partner/batch-operations/${jobId}/download/${companyId}`, {
       responseType: 'blob',
@@ -869,6 +877,8 @@ async function downloadFile(jobId, companyId) {
       type: 'error',
       message: errorMessage,
     })
+  } finally {
+    downloadingKey.value = null
   }
 }
 </script>

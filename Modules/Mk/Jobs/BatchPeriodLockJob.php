@@ -47,8 +47,8 @@ class BatchPeriodLockJob implements ShouldQueue
                 );
 
                 if ($overlapping->isNotEmpty()) {
-                    $this->batchJob->incrementFailed();
-                    $this->batchJob->addResult($companyId, 'failed', 'Period overlaps with an existing lock');
+                    $this->batchJob->incrementCompleted();
+                    $this->batchJob->addResult($companyId, 'skipped', 'Period already locked');
                     continue;
                 }
 

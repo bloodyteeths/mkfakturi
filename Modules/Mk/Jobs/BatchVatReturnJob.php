@@ -60,7 +60,7 @@ class BatchVatReturnJob implements ShouldQueue
                 );
 
                 // Store the generated XML
-                $companyName = preg_replace('/[^a-zA-Z0-9]/', '_', $company->name);
+                $companyName = preg_replace('/[^\p{L}\p{N}]+/u', '_', $company->name);
                 $filename = sprintf(
                     'batch_vat/DDV04_%s_%s_%s.xml',
                     $companyName,
@@ -68,7 +68,10 @@ class BatchVatReturnJob implements ShouldQueue
                     $periodEnd->format('Y-m-d')
                 );
 
-                Storage::put($filename, $xml);
+                $stored = Storage::disk('local')->put($filename, $xml);
+                if (!$stored) {
+                    throw new \RuntimeException('Failed to write file to storage: ' . $filename);
+                }
 
                 $this->batchJob->incrementCompleted();
                 $this->batchJob->addResult($companyId, 'success', 'VAT return generated', $filename);
