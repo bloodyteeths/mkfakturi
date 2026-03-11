@@ -22,6 +22,10 @@ window.VueRouter = VueRouter
 
 window.Facturino = new Facturino()
 
+// Register module i18n messages before start()
+import poMessages from '@/scripts/admin/i18n/purchase-orders.js'
+window.Facturino.addMessages(poMessages)
+
 // Register service worker for PWA support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

@@ -1,9 +1,9 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="po ? po.po_number : t('title')">
+    <BasePageHeader :title="po ? po.po_number : t('purchaseOrders.title')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem :title="t('title')" to="../purchase-orders" />
+        <BaseBreadcrumbItem :title="t('purchaseOrders.title')" to="../purchase-orders" />
         <BaseBreadcrumbItem
           :title="po ? po.po_number : '...'"
           to="#"
@@ -22,7 +22,7 @@
               <template #left="slotProps">
                 <BaseIcon name="PencilSquareIcon" :class="slotProps.class" />
               </template>
-              {{ t('edit_draft') }}
+              {{ t('purchaseOrders.edit_draft') }}
             </BaseButton>
           </router-link>
 
@@ -35,7 +35,7 @@
             <template #left="slotProps">
               <BaseIcon name="PaperAirplaneIcon" :class="slotProps.class" />
             </template>
-            {{ t('send_to_supplier') }}
+            {{ t('purchaseOrders.send_to_supplier') }}
           </BaseButton>
 
           <!-- Receive Goods (sent/acknowledged/partially_received) -->
@@ -47,7 +47,7 @@
             <template #left="slotProps">
               <BaseIcon name="TruckIcon" :class="slotProps.class" />
             </template>
-            {{ t('receive_goods') }}
+            {{ t('purchaseOrders.receive_goods') }}
           </BaseButton>
 
           <!-- Convert to Bill (fully_received/partially_received, not yet billed) -->
@@ -59,7 +59,7 @@
             <template #left="slotProps">
               <BaseIcon name="DocumentDuplicateIcon" :class="slotProps.class" />
             </template>
-            {{ t('convert_to_bill') }}
+            {{ t('purchaseOrders.convert_to_bill') }}
           </BaseButton>
 
           <!-- 3-Way Match -->
@@ -72,7 +72,7 @@
             <template #left="slotProps">
               <BaseIcon name="CheckBadgeIcon" :class="slotProps.class" />
             </template>
-            {{ t('three_way_match') }}
+            {{ t('purchaseOrders.three_way_match') }}
           </BaseButton>
 
           <!-- Download PDF -->
@@ -84,7 +84,7 @@
             <template #left="slotProps">
               <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
             </template>
-            {{ t('download_pdf') }}
+            {{ t('purchaseOrders.download_pdf') }}
           </BaseButton>
 
           <!-- Cancel (draft/sent only) -->
@@ -96,7 +96,7 @@
             <template #left="slotProps">
               <BaseIcon name="XMarkIcon" :class="slotProps.class" />
             </template>
-            {{ t('cancel_po') }}
+            {{ t('purchaseOrders.cancel_po') }}
           </BaseButton>
 
           <!-- Delete (draft only) -->
@@ -108,7 +108,7 @@
             <template #left="slotProps">
               <BaseIcon name="TrashIcon" :class="slotProps.class" />
             </template>
-            {{ t('delete_po') }}
+            {{ t('purchaseOrders.delete_po') }}
           </BaseButton>
         </div>
       </template>
@@ -144,7 +144,7 @@
         <div class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
-              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('supplier') }}</p>
+              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('purchaseOrders.supplier') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-1">
                 {{ po.supplier?.name || '-' }}
               </p>
@@ -153,19 +153,19 @@
               </p>
             </div>
             <div>
-              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('expected_delivery') }}</p>
+              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('purchaseOrders.expected_delivery') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-1">
                 {{ po.expected_delivery_date ? formatDate(po.expected_delivery_date) : '-' }}
               </p>
             </div>
             <div>
-              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('warehouse') }}</p>
+              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('purchaseOrders.warehouse') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-1">
                 {{ po.warehouse?.name || '-' }}
               </p>
             </div>
             <div>
-              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('cost_center') }}</p>
+              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('purchaseOrders.cost_center') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-1">
                 <template v-if="po.cost_center">
                   <span
@@ -179,9 +179,24 @@
               </p>
             </div>
             <div>
-              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('created_by') }}</p>
+              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('purchaseOrders.created_by') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-1">
                 {{ po.created_by_user?.name || po.created_by?.name || '-' }}
+              </p>
+            </div>
+            <!-- Email Status -->
+            <div v-if="po.email_status">
+              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('purchaseOrders.email_status') }}</p>
+              <p class="text-sm mt-1">
+                <span
+                  :class="emailStatusBadgeClass(po.email_status)"
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                >
+                  {{ emailStatusLabel(po.email_status) }}
+                </span>
+                <span v-if="po.email_sent_to" class="text-xs text-gray-500 ml-1">
+                  {{ po.email_sent_to }}
+                </span>
               </p>
             </div>
           </div>
@@ -191,15 +206,15 @@
       <!-- Total Summary -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-          <p class="text-xs text-blue-600 uppercase font-medium">{{ t('sub_total') }}</p>
+          <p class="text-xs text-blue-600 uppercase font-medium">{{ t('purchaseOrders.sub_total') }}</p>
           <p class="text-2xl font-bold text-blue-800">{{ formatMoney(po.sub_total) }}</p>
         </div>
         <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
-          <p class="text-xs text-amber-600 uppercase font-medium">{{ t('tax_amount') }}</p>
+          <p class="text-xs text-amber-600 uppercase font-medium">{{ t('purchaseOrders.tax_amount') }}</p>
           <p class="text-2xl font-bold text-amber-800">{{ formatMoney(po.tax) }}</p>
         </div>
         <div class="bg-green-50 rounded-lg p-4 border border-green-200">
-          <p class="text-xs text-green-600 uppercase font-medium">{{ t('total') }}</p>
+          <p class="text-xs text-green-600 uppercase font-medium">{{ t('purchaseOrders.total') }}</p>
           <p class="text-2xl font-bold text-green-800">{{ formatMoney(po.total) }}</p>
         </div>
       </div>
@@ -207,19 +222,19 @@
       <!-- Items Table -->
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
-          <h3 class="text-sm font-semibold text-gray-700">{{ t('items') }}</h3>
+          <h3 class="text-sm font-semibold text-gray-700">{{ t('purchaseOrders.items') }}</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('item_name') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('quantity_ordered') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('quantity_received') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('quantity_remaining') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('price') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('item_tax') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('item_total') }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.item_name') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_ordered') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_received') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_remaining') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.price') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.item_tax') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.item_total') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -251,7 +266,7 @@
       <!-- Goods Receipts -->
       <div v-if="po.goods_receipts && po.goods_receipts.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
-          <h3 class="text-sm font-semibold text-gray-700">{{ t('goods_receipts') }} ({{ po.goods_receipts.length }})</h3>
+          <h3 class="text-sm font-semibold text-gray-700">{{ t('purchaseOrders.goods_receipts') }} ({{ po.goods_receipts.length }})</h3>
         </div>
         <div class="divide-y divide-gray-100">
           <div
@@ -266,7 +281,7 @@
               </div>
               <div class="text-right">
                 <p class="text-xs text-gray-500">
-                  {{ receipt.items?.length || 0 }} {{ t('items').toLowerCase() }}
+                  {{ receipt.items?.length || 0 }} {{ t('purchaseOrders.items').toLowerCase() }}
                 </p>
               </div>
             </div>
@@ -277,9 +292,9 @@
                 :key="ri.id"
                 class="text-xs text-gray-500 py-0.5"
               >
-                {{ t('quantity_received') }}: {{ ri.quantity_received }}
-                <span v-if="ri.quantity_accepted !== null"> | {{ t('quantity_accepted') }}: {{ ri.quantity_accepted }}</span>
-                <span v-if="ri.quantity_rejected > 0" class="text-red-500"> | {{ t('quantity_rejected') }}: {{ ri.quantity_rejected }}</span>
+                {{ t('purchaseOrders.quantity_received') }}: {{ ri.quantity_received }}
+                <span v-if="ri.quantity_accepted !== null"> | {{ t('purchaseOrders.quantity_accepted') }}: {{ ri.quantity_accepted }}</span>
+                <span v-if="ri.quantity_rejected > 0" class="text-red-500"> | {{ t('purchaseOrders.quantity_rejected') }}: {{ ri.quantity_rejected }}</span>
               </div>
             </div>
           </div>
@@ -288,7 +303,7 @@
 
       <!-- Linked Bill -->
       <div v-if="po.converted_bill" class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ t('convert_to_bill') }}</h3>
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ t('purchaseOrders.convert_to_bill') }}</h3>
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-primary-500">{{ po.converted_bill.bill_number }}</p>
@@ -313,7 +328,7 @@
               class="h-5 w-5 mr-2"
             />
             <h3 :class="matchResult.matched ? 'text-green-800' : 'text-red-800'" class="text-sm font-semibold">
-              {{ t('match_result') }}: {{ matchResult.matched ? t('all_matched') : t('has_discrepancies') }}
+              {{ t('purchaseOrders.match_result') }}: {{ matchResult.matched ? t('purchaseOrders.all_matched') : t('purchaseOrders.has_discrepancies') }}
             </h3>
           </div>
         </div>
@@ -321,13 +336,13 @@
           <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('item_name') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('po_qty') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('received_qty') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('billed_qty') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('price') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('billed_price') }}</th>
-                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('status') }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.item_name') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.po_qty') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.received_qty') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.billed_qty') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.price') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.billed_price') }}</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.status') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -343,13 +358,13 @@
                     v-if="d.quantity_match && d.price_match"
                     class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
                   >
-                    {{ t('matched') }}
+                    {{ t('purchaseOrders.matched') }}
                   </span>
                   <span
                     v-else
                     class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
                   >
-                    {{ t('discrepancy') }}
+                    {{ t('purchaseOrders.discrepancy') }}
                   </span>
                 </td>
               </tr>
@@ -360,7 +375,7 @@
 
       <!-- Notes -->
       <div v-if="po.notes" class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ t('notes') }}</h3>
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ t('purchaseOrders.notes') }}</h3>
         <p class="text-sm text-gray-600 whitespace-pre-line">{{ po.notes }}</p>
       </div>
     </div>
@@ -368,7 +383,7 @@
     <!-- Not Found -->
     <div v-else class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 py-16">
       <BaseIcon name="ExclamationCircleIcon" class="h-12 w-12 text-gray-400" />
-      <p class="mt-2 text-sm text-gray-500">{{ t('not_found') }}</p>
+      <p class="mt-2 text-sm text-gray-500">{{ t('purchaseOrders.not_found') }}</p>
     </div>
 
     <!-- Receive Goods Modal -->
@@ -383,15 +398,15 @@
     <div v-if="showSendDialog" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="fixed inset-0 bg-black bg-opacity-50" @click="showSendDialog = false" />
       <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('send_title') }}</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('purchaseOrders.send_title') }}</h3>
 
         <!-- Supplier email info -->
         <div v-if="supplierEmail" class="mb-4">
-          <p class="text-sm text-gray-500 mb-2">{{ t('send_email_message') }}</p>
+          <p class="text-sm text-gray-500 mb-2">{{ t('purchaseOrders.send_email_message') }}</p>
           <div class="flex items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
             <BaseIcon name="EnvelopeIcon" class="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
             <div>
-              <p class="text-xs text-blue-600 font-medium">{{ t('supplier_email') }}</p>
+              <p class="text-xs text-blue-600 font-medium">{{ t('purchaseOrders.supplier_email') }}</p>
               <p class="text-sm font-medium text-blue-800">{{ supplierEmail }}</p>
             </div>
           </div>
@@ -399,19 +414,19 @@
         <div v-else class="mb-4">
           <div class="flex items-start bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
             <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-amber-500 mr-2 flex-shrink-0 mt-0.5" />
-            <p class="text-sm text-amber-700">{{ t('no_supplier_email') }}</p>
+            <p class="text-sm text-amber-700">{{ t('purchaseOrders.no_supplier_email') }}</p>
           </div>
         </div>
 
         <div class="flex justify-end space-x-3">
           <BaseButton variant="primary-outline" @click="showSendDialog = false">
-            {{ t('back') }}
+            {{ t('purchaseOrders.back') }}
           </BaseButton>
           <BaseButton variant="primary" :loading="isSending" @click="sendPo">
             <template #left="slotProps">
               <BaseIcon name="PaperAirplaneIcon" :class="slotProps.class" />
             </template>
-            {{ t('send_to_supplier') }}
+            {{ t('purchaseOrders.send_to_supplier') }}
           </BaseButton>
         </div>
       </div>
@@ -421,14 +436,14 @@
     <div v-if="showCancelDialog" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="fixed inset-0 bg-black bg-opacity-50" @click="showCancelDialog = false" />
       <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('cancel_title') }}</h3>
-        <p class="text-sm text-gray-500 mb-6">{{ t('cancel_message') }}</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('purchaseOrders.cancel_title') }}</h3>
+        <p class="text-sm text-gray-500 mb-6">{{ t('purchaseOrders.cancel_message') }}</p>
         <div class="flex justify-end space-x-3">
           <BaseButton variant="primary-outline" @click="showCancelDialog = false">
-            {{ t('back') }}
+            {{ t('purchaseOrders.back') }}
           </BaseButton>
           <BaseButton variant="danger" :loading="isCancelling" @click="cancelPo">
-            {{ t('cancel_po') }}
+            {{ t('purchaseOrders.cancel_po') }}
           </BaseButton>
         </div>
       </div>
@@ -438,14 +453,14 @@
     <div v-if="showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="fixed inset-0 bg-black bg-opacity-50" @click="showDeleteDialog = false" />
       <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('delete_title') }}</h3>
-        <p class="text-sm text-gray-500 mb-6">{{ t('delete_message') }}</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('purchaseOrders.delete_title') }}</h3>
+        <p class="text-sm text-gray-500 mb-6">{{ t('purchaseOrders.delete_message') }}</p>
         <div class="flex justify-end space-x-3">
           <BaseButton variant="primary-outline" @click="showDeleteDialog = false">
-            {{ t('back') }}
+            {{ t('purchaseOrders.back') }}
           </BaseButton>
           <BaseButton variant="danger" :loading="isDeleting" @click="deletePo">
-            {{ t('delete_po') }}
+            {{ t('purchaseOrders.delete_po') }}
           </BaseButton>
         </div>
       </div>
@@ -455,14 +470,14 @@
     <div v-if="showConvertDialog" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="fixed inset-0 bg-black bg-opacity-50" @click="showConvertDialog = false" />
       <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('convert_title') }}</h3>
-        <p class="text-sm text-gray-500 mb-6">{{ t('convert_message') }}</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('purchaseOrders.convert_title') }}</h3>
+        <p class="text-sm text-gray-500 mb-6">{{ t('purchaseOrders.convert_message') }}</p>
         <div class="flex justify-end space-x-3">
           <BaseButton variant="primary-outline" @click="showConvertDialog = false">
-            {{ t('back') }}
+            {{ t('purchaseOrders.back') }}
           </BaseButton>
           <BaseButton variant="primary" :loading="isConverting" @click="convertToBill">
-            {{ t('convert_to_bill') }}
+            {{ t('purchaseOrders.convert_to_bill') }}
           </BaseButton>
         </div>
       </div>
@@ -473,20 +488,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
-import poMessages from '@/scripts/admin/i18n/purchase-orders.js'
 import ReceiveGoods from './ReceiveGoods.vue'
 
 const route = useRoute()
 const router = useRouter()
 const notificationStore = useNotificationStore()
-
-const locale = document.documentElement.lang || 'mk'
-function t(key) {
-  return poMessages[locale]?.purchaseOrders?.[key]
-    || poMessages['en']?.purchaseOrders?.[key]
-    || key
-}
+const { t, locale } = useI18n()
 
 // Computed
 const supplierEmail = computed(() => po.value?.supplier?.email || null)
@@ -509,10 +518,10 @@ const showConvertDialog = ref(false)
 
 // Methods
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const fmtLocale = localeMap[locale] || 'mk-MK'
 
 function formatMoney(cents) {
   if (cents === null || cents === undefined) return '-'
+  const fmtLocale = localeMap[locale.value] || 'mk-MK'
   return new Intl.NumberFormat(fmtLocale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -522,6 +531,7 @@ function formatMoney(cents) {
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
+  const fmtLocale = localeMap[locale.value] || 'mk-MK'
   return d.toLocaleDateString(fmtLocale, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
@@ -540,8 +550,25 @@ function statusBadgeClass(status) {
 }
 
 function statusLabel(status) {
-  const key = 'status_' + status
-  return t(key)
+  return t('purchaseOrders.status_' + status)
+}
+
+function emailStatusBadgeClass(emailStatus) {
+  switch (emailStatus) {
+    case 'sent': return 'bg-green-100 text-green-800'
+    case 'failed': return 'bg-red-100 text-red-800'
+    case 'no_email': return 'bg-gray-100 text-gray-600'
+    default: return 'bg-gray-100 text-gray-600'
+  }
+}
+
+function emailStatusLabel(emailStatus) {
+  switch (emailStatus) {
+    case 'sent': return t('purchaseOrders.email_status_sent')
+    case 'failed': return t('purchaseOrders.email_status_failed')
+    case 'no_email': return t('purchaseOrders.email_status_no_email')
+    default: return emailStatus
+  }
 }
 
 async function fetchPo() {
@@ -555,7 +582,7 @@ async function fetchPo() {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_loading') || 'Failed to load purchase order',
+      message: error.response?.data?.message || t('purchaseOrders.error_loading'),
     })
   } finally {
     isLoading.value = false
@@ -571,8 +598,8 @@ async function sendPo() {
 
     const emailTo = response.data?.email_sent_to
     const msg = emailTo
-      ? `${t('sent_success')} — ${t('email_sent_to')}: ${emailTo}`
-      : (response.data?.message || t('sent_success'))
+      ? `${t('purchaseOrders.sent_success')} — ${t('purchaseOrders.email_sent_to')}: ${emailTo}`
+      : (response.data?.message || t('purchaseOrders.sent_success'))
 
     notificationStore.showNotification({
       type: 'success',
@@ -582,7 +609,7 @@ async function sendPo() {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_sending'),
+      message: error.response?.data?.message || t('purchaseOrders.error_sending'),
     })
   } finally {
     isSending.value = false
@@ -597,13 +624,13 @@ async function cancelPo() {
     showCancelDialog.value = false
     notificationStore.showNotification({
       type: 'success',
-      message: response.data?.message || t('cancelled_success') || 'Purchase order cancelled',
+      message: response.data?.message || t('purchaseOrders.cancelled_success'),
     })
     fetchPo()
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_cancelling') || 'Failed to cancel',
+      message: error.response?.data?.message || t('purchaseOrders.error_cancelling'),
     })
   } finally {
     isCancelling.value = false
@@ -617,13 +644,13 @@ async function deletePo() {
     showDeleteDialog.value = false
     notificationStore.showNotification({
       type: 'success',
-      message: t('deleted_success') || 'Purchase order deleted',
+      message: t('purchaseOrders.deleted_success'),
     })
     router.push({ path: '/admin/purchase-orders' })
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_deleting') || 'Failed to delete',
+      message: error.response?.data?.message || t('purchaseOrders.error_deleting'),
     })
   } finally {
     isDeleting.value = false
@@ -637,13 +664,13 @@ async function convertToBill() {
     showConvertDialog.value = false
     notificationStore.showNotification({
       type: 'success',
-      message: response.data?.message || t('converted_success') || 'Bill created from purchase order',
+      message: response.data?.message || t('purchaseOrders.converted_success'),
     })
     fetchPo()
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_converting') || 'Failed to convert',
+      message: error.response?.data?.message || t('purchaseOrders.error_converting'),
     })
   } finally {
     isConverting.value = false
@@ -659,7 +686,7 @@ async function runThreeWayMatch() {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_matching') || 'Failed to run match',
+      message: error.response?.data?.message || t('purchaseOrders.error_matching'),
     })
   } finally {
     isMatching.value = false
@@ -683,7 +710,7 @@ async function downloadPdf() {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: t('error_downloading') || 'Failed to download PDF',
+      message: t('purchaseOrders.error_downloading'),
     })
   } finally {
     isDownloading.value = false

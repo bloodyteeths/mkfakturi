@@ -27,6 +27,8 @@ class PurchaseOrder extends Model
         'po_date',
         'expected_delivery_date',
         'status',
+        'email_status',
+        'email_sent_to',
         'sub_total',
         'tax',
         'total',

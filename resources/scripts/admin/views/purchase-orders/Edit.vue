@@ -1,10 +1,10 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="t('edit_po')">
+    <BasePageHeader :title="t('purchaseOrders.edit_po')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem :title="t('title')" to="../../purchase-orders" />
-        <BaseBreadcrumbItem :title="t('edit_po')" to="#" active />
+        <BaseBreadcrumbItem :title="t('purchaseOrders.title')" to="../../purchase-orders" />
+        <BaseBreadcrumbItem :title="t('purchaseOrders.edit_po')" to="#" active />
       </BaseBreadcrumb>
     </BasePageHeader>
 
@@ -22,21 +22,17 @@
       <!-- Header Fields -->
       <div class="bg-white rounded-lg shadow p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Supplier -->
-          <BaseInputGroup :label="t('supplier')">
-            <BaseMultiselect
+          <!-- Supplier (with inline creation) -->
+          <BaseInputGroup :label="t('purchaseOrders.supplier')">
+            <BaseSupplierSelectInput
               v-model="form.supplier_id"
-              :options="suppliers"
-              :searchable="true"
-              label="name"
-              value-prop="id"
-              :placeholder="t('select_supplier')"
-              :loading="isLoadingSuppliers"
+              fetch-all
+              show-action
             />
           </BaseInputGroup>
 
           <!-- PO Date -->
-          <BaseInputGroup :label="t('date')" required>
+          <BaseInputGroup :label="t('purchaseOrders.date')" required>
             <BaseDatePicker
               v-model="form.po_date"
               :calendar-button="true"
@@ -45,7 +41,7 @@
           </BaseInputGroup>
 
           <!-- Expected Delivery -->
-          <BaseInputGroup :label="t('expected_delivery')">
+          <BaseInputGroup :label="t('purchaseOrders.expected_delivery')">
             <BaseDatePicker
               v-model="form.expected_delivery_date"
               :calendar-button="true"
@@ -54,26 +50,26 @@
           </BaseInputGroup>
 
           <!-- Warehouse -->
-          <BaseInputGroup :label="t('warehouse')">
+          <BaseInputGroup :label="t('purchaseOrders.warehouse')">
             <BaseMultiselect
               v-model="form.warehouse_id"
               :options="warehouses"
               :searchable="true"
               label="name"
               value-prop="id"
-              :placeholder="t('select_warehouse')"
+              :placeholder="t('purchaseOrders.select_warehouse')"
             />
           </BaseInputGroup>
 
           <!-- Cost Center -->
-          <BaseInputGroup :label="t('cost_center')">
+          <BaseInputGroup :label="t('purchaseOrders.cost_center')">
             <BaseMultiselect
               v-model="form.cost_center_id"
               :options="costCenters"
               :searchable="true"
               label="name"
               value-prop="id"
-              :placeholder="t('select_cost_center')"
+              :placeholder="t('purchaseOrders.select_cost_center')"
             >
               <template #singlelabel="{ value }">
                 <div class="flex items-center px-2">
@@ -100,12 +96,12 @@
 
           <!-- Notes -->
           <div class="md:col-span-2">
-            <BaseInputGroup :label="t('notes')">
+            <BaseInputGroup :label="t('purchaseOrders.notes')">
               <textarea
                 v-model="form.notes"
                 rows="2"
                 class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-sm"
-                :placeholder="t('notes_placeholder')"
+                :placeholder="t('purchaseOrders.notes_placeholder')"
               />
             </BaseInputGroup>
           </div>
@@ -115,12 +111,12 @@
       <!-- Items Table -->
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-          <h3 class="text-sm font-semibold text-gray-700">{{ t('items') }}</h3>
+          <h3 class="text-sm font-semibold text-gray-700">{{ t('purchaseOrders.items') }}</h3>
           <BaseButton variant="primary-outline" size="sm" @click="addItem">
             <template #left="slotProps">
               <BaseIcon name="PlusIcon" :class="slotProps.class" />
             </template>
-            {{ t('add_item') }}
+            {{ t('purchaseOrders.add_item') }}
           </BaseButton>
         </div>
 
@@ -129,11 +125,11 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-12">#</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('item_name') }}</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-28">{{ t('quantity') }}</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-32">{{ t('price') }}</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-28">{{ t('item_tax') }}</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-32">{{ t('item_total') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.item_name') }}</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-28">{{ t('purchaseOrders.quantity') }}</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-32">{{ t('purchaseOrders.price') }}</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-28">{{ t('purchaseOrders.item_tax') }}</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-32">{{ t('purchaseOrders.item_total') }}</th>
                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase w-16"></th>
               </tr>
             </thead>
@@ -148,14 +144,21 @@
                       :searchable="true"
                       label="name"
                       value-prop="id"
-                      :placeholder="t('select_item')"
+                      :placeholder="t('purchaseOrders.select_item')"
                       @update:model-value="onItemSelect(index, $event)"
-                    />
+                    >
+                      <template #action>
+                        <BaseSelectAction @click="openItemModal(index)">
+                          <BaseIcon name="PlusCircleIcon" class="h-4 mr-2 -ml-2 text-center text-primary-400" />
+                          {{ t('purchaseOrders.add_new_item') }}
+                        </BaseSelectAction>
+                      </template>
+                    </BaseMultiselect>
                     <input
                       v-model="item.name"
                       type="text"
                       class="w-full text-sm border-gray-300 rounded focus:ring-primary-500 focus:border-primary-500"
-                      :placeholder="t('item_name')"
+                      :placeholder="t('purchaseOrders.item_name')"
                     />
                   </div>
                 </td>
@@ -209,15 +212,15 @@
         <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
           <div class="flex justify-end space-x-8">
             <div class="text-right">
-              <p class="text-xs text-gray-500 uppercase">{{ t('sub_total') }}</p>
+              <p class="text-xs text-gray-500 uppercase">{{ t('purchaseOrders.sub_total') }}</p>
               <p class="text-sm font-medium text-gray-900">{{ formatMoney(computedSubTotal) }}</p>
             </div>
             <div class="text-right">
-              <p class="text-xs text-gray-500 uppercase">{{ t('tax_amount') }}</p>
+              <p class="text-xs text-gray-500 uppercase">{{ t('purchaseOrders.tax_amount') }}</p>
               <p class="text-sm font-medium text-gray-900">{{ formatMoney(computedTax) }}</p>
             </div>
             <div class="text-right">
-              <p class="text-xs text-gray-500 uppercase font-bold">{{ t('total') }}</p>
+              <p class="text-xs text-gray-500 uppercase font-bold">{{ t('purchaseOrders.total') }}</p>
               <p class="text-lg font-bold text-primary-600">{{ formatMoney(computedTotal) }}</p>
             </div>
           </div>
@@ -231,7 +234,7 @@
             <template #left="slotProps">
               <BaseIcon name="ArrowLeftIcon" :class="slotProps.class" />
             </template>
-            {{ t('back') }}
+            {{ t('purchaseOrders.back') }}
           </BaseButton>
         </router-link>
 
@@ -244,7 +247,7 @@
           <template #left="slotProps">
             <BaseIcon name="CheckIcon" :class="slotProps.class" />
           </template>
-          {{ t('update_draft') }}
+          {{ t('purchaseOrders.update_draft') }}
         </BaseButton>
       </div>
     </div>
@@ -254,29 +257,25 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
-import poMessages from '@/scripts/admin/i18n/purchase-orders.js'
+import { useModalStore } from '@/scripts/stores/modal'
+import BaseSupplierSelectInput from '@/scripts/components/base/BaseSupplierSelectInput.vue'
 
 const route = useRoute()
 const router = useRouter()
 const notificationStore = useNotificationStore()
-
-const locale = document.documentElement.lang || 'mk'
-function t(key) {
-  return poMessages[locale]?.purchaseOrders?.[key]
-    || poMessages['en']?.purchaseOrders?.[key]
-    || key
-}
+const modalStore = useModalStore()
+const { t, locale } = useI18n()
 
 // State
 const poId = route.params.id
 const isSaving = ref(false)
 const isLoadingPo = ref(true)
-const isLoadingSuppliers = ref(false)
-const suppliers = ref([])
 const warehouses = ref([])
 const inventoryItems = ref([])
 const costCenters = ref([])
+const lastItemModalIndex = ref(null)
 
 const form = reactive({
   supplier_id: null,
@@ -313,10 +312,10 @@ const canSave = computed(() => {
 
 // Methods
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const fmtLocale = localeMap[locale] || 'mk-MK'
 
 function formatMoney(cents) {
   if (cents === null || cents === undefined) return '-'
+  const fmtLocale = localeMap[locale.value] || 'mk-MK'
   return new Intl.NumberFormat(fmtLocale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -344,13 +343,30 @@ function onItemSelect(index, itemId) {
   }
 }
 
+function openItemModal(index) {
+  lastItemModalIndex.value = index
+  modalStore.openModal({
+    title: t('purchaseOrders.add_new_item'),
+    componentName: 'ItemModal',
+    refreshData: (newItem) => {
+      if (newItem && lastItemModalIndex.value !== null) {
+        const idx = lastItemModalIndex.value
+        form.items[idx].item_id = newItem.id
+        form.items[idx].name = newItem.name
+        form.items[idx].price = newItem.cost || newItem.price || 0
+      }
+      fetchItems()
+    },
+  })
+}
+
 async function fetchPo() {
   isLoadingPo.value = true
   try {
     const response = await window.axios.get(`/purchase-orders/${poId}`)
     const po = response.data?.data
     if (!po) {
-      notificationStore.showNotification({ type: 'error', message: t('not_found') })
+      notificationStore.showNotification({ type: 'error', message: t('purchaseOrders.not_found') })
       router.push({ path: '/admin/purchase-orders' })
       return
     }
@@ -381,23 +397,11 @@ async function fetchPo() {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_loading'),
+      message: error.response?.data?.message || t('purchaseOrders.error_loading'),
     })
     router.push({ path: '/admin/purchase-orders' })
   } finally {
     isLoadingPo.value = false
-  }
-}
-
-async function fetchSuppliers() {
-  isLoadingSuppliers.value = true
-  try {
-    const response = await window.axios.get('/suppliers', { params: { limit: 'all' } })
-    suppliers.value = response.data?.suppliers?.data || response.data?.data || []
-  } catch {
-    suppliers.value = []
-  } finally {
-    isLoadingSuppliers.value = false
   }
 }
 
@@ -451,14 +455,14 @@ async function updatePurchaseOrder() {
 
     notificationStore.showNotification({
       type: 'success',
-      message: response.data?.message || t('updated_success'),
+      message: response.data?.message || t('purchaseOrders.updated_success'),
     })
 
     router.push({ path: `/admin/purchase-orders/${poId}` })
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_updating'),
+      message: error.response?.data?.message || t('purchaseOrders.error_updating'),
     })
   } finally {
     isSaving.value = false
@@ -468,7 +472,6 @@ async function updatePurchaseOrder() {
 // Lifecycle
 onMounted(() => {
   fetchPo()
-  fetchSuppliers()
   fetchWarehouses()
   fetchItems()
   fetchCostCenters()

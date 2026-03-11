@@ -1,9 +1,9 @@
 <template>
   <BasePage>
-    <BasePageHeader :title="t('title')">
+    <BasePageHeader :title="t('purchaseOrders.title')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem :title="t('title')" to="#" active />
+        <BaseBreadcrumbItem :title="t('purchaseOrders.title')" to="#" active />
       </BaseBreadcrumb>
 
       <template #actions>
@@ -28,7 +28,7 @@
             <template #left="slotProps">
               <BaseIcon name="PlusIcon" :class="slotProps.class" />
             </template>
-            {{ t('new_po') }}
+            {{ t('purchaseOrders.new_po') }}
           </BaseButton>
         </router-link>
       </template>
@@ -63,14 +63,14 @@
       :row-on-xl="true"
       @clear="clearFilters"
     >
-      <BaseInputGroup :label="t('supplier')">
+      <BaseInputGroup :label="t('purchaseOrders.supplier')">
         <BaseMultiselect
           v-model="filters.supplier_id"
           :options="suppliers"
           :searchable="true"
           label="name"
           value-prop="id"
-          :placeholder="t('select_supplier')"
+          :placeholder="t('purchaseOrders.select_supplier')"
         />
       </BaseInputGroup>
 
@@ -94,7 +94,7 @@
         <BaseInput
           v-model="filters.search"
           type="text"
-          :placeholder="t('search_placeholder')"
+          :placeholder="t('purchaseOrders.search_placeholder')"
           @input="debouncedFetch"
         />
       </BaseInputGroup>
@@ -121,25 +121,25 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('po_number') }}
+                {{ t('purchaseOrders.po_number') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('date') }}
+                {{ t('purchaseOrders.date') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('supplier') }}
+                {{ t('purchaseOrders.supplier') }}
               </th>
               <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('items') }}
+                {{ t('purchaseOrders.items') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('total') }}
+                {{ t('purchaseOrders.total') }}
               </th>
               <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('status') }}
+                {{ t('purchaseOrders.status') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('expected_delivery') }}
+                {{ t('purchaseOrders.expected_delivery') }}
               </th>
             </tr>
           </thead>
@@ -184,7 +184,7 @@
       <!-- Pagination -->
       <div v-if="meta && meta.last_page > 1" class="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
         <p class="text-sm text-gray-500">
-          {{ meta.total }} {{ t('title').toLowerCase() }}
+          {{ meta.total }} {{ t('purchaseOrders.title').toLowerCase() }}
         </p>
         <div class="flex space-x-1">
           <BaseButton
@@ -204,10 +204,10 @@
     <div v-else class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 py-16">
       <BaseIcon name="ClipboardDocumentListIcon" class="h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
-        {{ t('no_purchase_orders') }}
+        {{ t('purchaseOrders.no_purchase_orders') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500">
-        {{ t('no_purchase_orders_description') }}
+        {{ t('purchaseOrders.no_purchase_orders_description') }}
       </p>
       <div class="mt-6">
         <router-link to="purchase-orders/create">
@@ -215,7 +215,7 @@
             <template #left="slotProps">
               <BaseIcon name="PlusIcon" :class="slotProps.class" />
             </template>
-            {{ t('new_po') }}
+            {{ t('purchaseOrders.new_po') }}
           </BaseButton>
         </router-link>
       </div>
@@ -224,21 +224,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { debounce } from 'lodash'
-import poMessages from '@/scripts/admin/i18n/purchase-orders.js'
 
 const router = useRouter()
 const notificationStore = useNotificationStore()
-
-const locale = document.documentElement.lang || 'mk'
-function t(key) {
-  return poMessages[locale]?.purchaseOrders?.[key]
-    || poMessages['en']?.purchaseOrders?.[key]
-    || key
-}
+const { t, locale } = useI18n()
 
 // State
 const purchaseOrders = ref([])
@@ -256,23 +250,23 @@ const filters = reactive({
   search: '',
 })
 
-const statusPipeline = [
-  { value: 'draft', label: t('status_draft'), dotClass: 'bg-gray-400', activeClass: 'bg-gray-100 text-gray-800 border-gray-400' },
-  { value: 'sent', label: t('status_sent'), dotClass: 'bg-blue-400', activeClass: 'bg-blue-100 text-blue-800 border-blue-400' },
-  { value: 'acknowledged', label: t('status_acknowledged'), dotClass: 'bg-indigo-400', activeClass: 'bg-indigo-100 text-indigo-800 border-indigo-400' },
-  { value: 'partially_received', label: t('status_partially_received'), dotClass: 'bg-yellow-400', activeClass: 'bg-yellow-100 text-yellow-800 border-yellow-400' },
-  { value: 'fully_received', label: t('status_fully_received'), dotClass: 'bg-green-400', activeClass: 'bg-green-100 text-green-800 border-green-400' },
-  { value: 'billed', label: t('status_billed'), dotClass: 'bg-purple-400', activeClass: 'bg-purple-100 text-purple-800 border-purple-400' },
-  { value: 'closed', label: t('status_closed'), dotClass: 'bg-gray-600', activeClass: 'bg-gray-200 text-gray-900 border-gray-600' },
-  { value: 'cancelled', label: t('status_cancelled'), dotClass: 'bg-red-400', activeClass: 'bg-red-100 text-red-800 border-red-400' },
-]
+const statusPipeline = computed(() => [
+  { value: 'draft', label: t('purchaseOrders.status_draft'), dotClass: 'bg-gray-400', activeClass: 'bg-gray-100 text-gray-800 border-gray-400' },
+  { value: 'sent', label: t('purchaseOrders.status_sent'), dotClass: 'bg-blue-400', activeClass: 'bg-blue-100 text-blue-800 border-blue-400' },
+  { value: 'acknowledged', label: t('purchaseOrders.status_acknowledged'), dotClass: 'bg-indigo-400', activeClass: 'bg-indigo-100 text-indigo-800 border-indigo-400' },
+  { value: 'partially_received', label: t('purchaseOrders.status_partially_received'), dotClass: 'bg-yellow-400', activeClass: 'bg-yellow-100 text-yellow-800 border-yellow-400' },
+  { value: 'fully_received', label: t('purchaseOrders.status_fully_received'), dotClass: 'bg-green-400', activeClass: 'bg-green-100 text-green-800 border-green-400' },
+  { value: 'billed', label: t('purchaseOrders.status_billed'), dotClass: 'bg-purple-400', activeClass: 'bg-purple-100 text-purple-800 border-purple-400' },
+  { value: 'closed', label: t('purchaseOrders.status_closed'), dotClass: 'bg-gray-600', activeClass: 'bg-gray-200 text-gray-900 border-gray-600' },
+  { value: 'cancelled', label: t('purchaseOrders.status_cancelled'), dotClass: 'bg-red-400', activeClass: 'bg-red-100 text-red-800 border-red-400' },
+])
 
 // Methods
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
-const fmtLocale = localeMap[locale] || 'mk-MK'
 
 function formatMoney(cents) {
   if (cents === null || cents === undefined) return '-'
+  const fmtLocale = localeMap[locale.value] || 'mk-MK'
   return new Intl.NumberFormat(fmtLocale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -282,6 +276,7 @@ function formatMoney(cents) {
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
+  const fmtLocale = localeMap[locale.value] || 'mk-MK'
   return d.toLocaleDateString(fmtLocale, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
@@ -300,8 +295,7 @@ function statusBadgeClass(status) {
 }
 
 function statusLabel(status) {
-  const key = 'status_' + status
-  return t(key)
+  return t('purchaseOrders.status_' + status)
 }
 
 function toggleStatusFilter(status) {
@@ -328,7 +322,7 @@ async function fetchPurchaseOrders(page = 1) {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_loading') || 'Failed to load purchase orders',
+      message: error.response?.data?.message || t('purchaseOrders.error_loading'),
     })
   } finally {
     isLoading.value = false

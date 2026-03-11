@@ -5,7 +5,7 @@
       <!-- Header -->
       <div class="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 flex items-center justify-between z-10">
         <div>
-          <h3 class="text-lg font-medium text-gray-900">{{ t('receive_goods') }}</h3>
+          <h3 class="text-lg font-medium text-gray-900">{{ t('purchaseOrders.receive_goods') }}</h3>
           <p class="text-sm text-gray-500">{{ po.po_number }}</p>
         </div>
         <button class="text-gray-400 hover:text-gray-600" @click="$emit('close')">
@@ -19,12 +19,12 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('item_name') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('quantity_ordered') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('quantity_received') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('quantity_remaining') }}</th>
-                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('quantity_accepted') }}</th>
-                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('quantity_rejected') }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.item_name') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_ordered') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_received') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_remaining') }}</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_accepted') }}</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_rejected') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -67,7 +67,7 @@
         <!-- Summary -->
         <div class="mt-4 p-3 bg-gray-50 rounded-lg">
           <p class="text-sm text-gray-600">
-            {{ t('items') }}: {{ receiveItems.filter(i => i.quantity_received > 0).length }} / {{ receiveItems.length }}
+            {{ t('purchaseOrders.items') }}: {{ receiveItems.filter(i => i.quantity_received > 0).length }} / {{ receiveItems.length }}
           </p>
         </div>
       </div>
@@ -75,7 +75,7 @@
       <!-- Footer -->
       <div class="sticky bottom-0 bg-white px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
         <BaseButton variant="primary-outline" @click="$emit('close')">
-          {{ t('back') }}
+          {{ t('purchaseOrders.back') }}
         </BaseButton>
         <BaseButton
           variant="primary"
@@ -86,7 +86,7 @@
           <template #left="slotProps">
             <BaseIcon name="CheckIcon" :class="slotProps.class" />
           </template>
-          {{ t('confirm_receive') }}
+          {{ t('purchaseOrders.confirm_receive') }}
         </BaseButton>
       </div>
     </div>
@@ -95,8 +95,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
-import poMessages from '@/scripts/admin/i18n/purchase-orders.js'
 
 const props = defineProps({
   po: {
@@ -107,13 +107,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'received'])
 const notificationStore = useNotificationStore()
-
-const locale = document.documentElement.lang || 'mk'
-function t(key) {
-  return poMessages[locale]?.purchaseOrders?.[key]
-    || poMessages['en']?.purchaseOrders?.[key]
-    || key
-}
+const { t } = useI18n()
 
 // State
 const isSubmitting = ref(false)
@@ -158,14 +152,14 @@ async function submitReceipt() {
 
     notificationStore.showNotification({
       type: 'success',
-      message: response.data?.message || t('goods_received') || 'Goods received successfully',
+      message: response.data?.message || t('purchaseOrders.goods_received'),
     })
 
     emit('received')
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.message || t('error_receiving') || 'Failed to receive goods',
+      message: error.response?.data?.message || t('purchaseOrders.error_receiving'),
     })
   } finally {
     isSubmitting.value = false

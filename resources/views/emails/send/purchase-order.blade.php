@@ -3,9 +3,13 @@
     @slot('header')
         @component('mail::header', ['url' => ''])
         @if($data['company']['logo'])
-            <img class="header-logo" src="{{asset($data['company']['logo'])}}" alt="{{$data['company']['name']}}">
+            @if(filter_var($data['company']['logo'], FILTER_VALIDATE_URL))
+                <img class="header-logo" src="{{ $data['company']['logo'] }}" alt="{{ $data['company']['name'] }}">
+            @else
+                <img class="header-logo" src="{{ asset($data['company']['logo']) }}" alt="{{ $data['company']['name'] }}">
+            @endif
         @else
-            {{$data['company']['name']}}
+            {{ $data['company']['name'] }}
         @endif
         @endcomponent
     @endslot

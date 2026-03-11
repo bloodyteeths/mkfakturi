@@ -5,11 +5,12 @@
  *  - Page loads without JS errors or API errors
  *  - Create PO form renders with all fields (including cost center)
  *  - Create PO with items, supplier, cost center
- *  - View PO shows cost center, supplier, items
+ *  - View PO shows cost center, supplier, items, email status
  *  - Edit PO preserves cost center
- *  - Send PO to supplier (status changes, PDF attached)
+ *  - Send PO to supplier (status changes, email_status tracked, PDF attached)
  *  - Download PDF
  *  - Cancel PO
+ *  - Over-receipt cap validation
  *  - Index page with status pipeline
  *  - i18n: no raw key paths visible
  *
@@ -356,7 +357,7 @@ test.describe('Purchase Orders Audit', () => {
   // ─────────────────────────────────────────────
   // SEND — Send PO (marks as sent, emails supplier with PDF attached)
   // ─────────────────────────────────────────────
-  test('Send PO changes status to sent', async () => {
+  test('Send PO changes status to sent and tracks email_status', async () => {
     expect(createdPoId, 'No PO was created').toBeTruthy();
 
     const sendResult = await page.evaluate(async (poId) => {
@@ -365,7 +366,8 @@ test.describe('Purchase Orders Audit', () => {
         return {
           success: true,
           status: resp.data?.data?.status,
-          emailSentTo: resp.data?.email_sent_to,
+          emailStatus: resp.data?.email_status || resp.data?.data?.email_status,
+          emailSentTo: resp.data?.email_sent_to || resp.data?.data?.email_sent_to,
           message: resp.data?.message,
         };
       } catch (e) {
@@ -381,7 +383,13 @@ test.describe('Purchase Orders Audit', () => {
     expect(sendResult.success, `Send PO failed: ${sendResult.message}`).toBeTruthy();
     expect(sendResult.status).toBe('sent');
 
-    // Reload view page to verify status change
+    // email_status should be one of: 'sent', 'failed', or 'no_email'
+    if (sendResult.emailStatus) {
+      expect(['sent', 'failed', 'no_email']).toContain(sendResult.emailStatus);
+      console.log('Email status:', sendResult.emailStatus, 'Sent to:', sendResult.emailSentTo || 'N/A');
+    }
+
+    // Reload view page to verify status change and email_status display
     await page.goto(`${BASE}/admin/purchase-orders/${createdPoId}`, {
       waitUntil: 'networkidle',
       timeout: 30000
@@ -393,9 +401,13 @@ test.describe('Purchase Orders Audit', () => {
       pageText.includes('Gönderildi') || pageText.includes('Dërguar');
     expect(isSent, 'Status should be Sent').toBeTruthy();
 
+    // Email status badge should be visible (sent, failed, or no_email)
+    const hasEmailStatusLabel =
+      pageText.includes('Статус на е-пошта') || pageText.includes('Email Status') ||
+      pageText.includes('E-posta Durumu') || pageText.includes('Statusi i E-mailit');
+    console.log('Email status label visible:', hasEmailStatusLabel);
+
     // Edit button should NOT be visible for sent POs
-    const hasEdit = pageText.includes('Измени') || pageText.includes('Edit Draft');
-    // "Edit" may appear in other contexts, check for edit button specifically
     const editButton = page.locator('a[href*="/edit"]');
     const editCount = await editButton.count();
     expect(editCount, 'Edit button should be hidden for sent POs').toBe(0);
@@ -459,6 +471,76 @@ test.describe('Purchase Orders Audit', () => {
 
     console.log('Delete PO result:', JSON.stringify(result));
     expect(result.success, `Delete PO failed: ${result.message}`).toBeTruthy();
+  });
+
+  // ─────────────────────────────────────────────
+  // OVER-RECEIPT CAP — Verify backend caps accepted qty
+  // ─────────────────────────────────────────────
+  test('Over-receipt is capped at remaining quantity', async () => {
+    test.setTimeout(20000);
+
+    const result = await page.evaluate(async () => {
+      try {
+        // 1. Create a PO with 3 items of qty 5
+        const createResp = await window.axios.post('/purchase-orders', {
+          po_date: new Date().toISOString().split('T')[0],
+          notes: 'Over-receipt cap test',
+          items: [
+            { name: 'Cap Test Item', quantity: 5, price: 10000, tax: 0 },
+          ],
+        });
+        const poId = createResp.data?.data?.id;
+        const itemId = createResp.data?.data?.items?.[0]?.id;
+        if (!poId) return { success: false, step: 'create', message: 'No PO ID' };
+
+        // 2. Send it
+        await window.axios.post(`/purchase-orders/${poId}/send`);
+
+        // 3. Receive 3 out of 5
+        await window.axios.post(`/purchase-orders/${poId}/receive-goods`, {
+          items: [{
+            purchase_order_item_id: itemId,
+            quantity_received: 3,
+            quantity_accepted: 3,
+            quantity_rejected: 0,
+          }],
+        });
+
+        // 4. Try to receive 10 more (only 2 remaining — should be capped)
+        const overResp = await window.axios.post(`/purchase-orders/${poId}/receive-goods`, {
+          items: [{
+            purchase_order_item_id: itemId,
+            quantity_received: 10,
+            quantity_accepted: 10,
+            quantity_rejected: 0,
+          }],
+        });
+
+        // Check the PO item: received_quantity should be 5 (3+2), not 13 (3+10)
+        const showResp = await window.axios.get(`/purchase-orders/${poId}`);
+        const poItem = showResp.data?.data?.items?.[0];
+        const receivedQty = poItem?.received_quantity;
+
+        return {
+          success: true,
+          poId,
+          receivedQty,
+          expectedMax: 5,
+          capped: receivedQty <= 5,
+        };
+      } catch (e) {
+        return {
+          success: false,
+          status: e.response?.status,
+          message: e.response?.data?.message || e.message,
+        };
+      }
+    });
+
+    console.log('Over-receipt cap result:', JSON.stringify(result));
+    expect(result.success, `Over-receipt test failed: ${result.message}`).toBeTruthy();
+    expect(result.capped, `Over-receipt NOT capped: received ${result.receivedQty}, expected max ${result.expectedMax}`).toBeTruthy();
+    expect(result.receivedQty).toBeLessThanOrEqual(result.expectedMax);
   });
 
   // ─────────────────────────────────────────────

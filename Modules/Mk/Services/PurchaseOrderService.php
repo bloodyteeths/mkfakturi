@@ -200,6 +200,7 @@ class PurchaseOrderService
 
     /**
      * Mark purchase order as sent and email supplier if they have an email.
+     * Status is updated AFTER email is sent successfully to avoid false "sent" state.
      *
      * @return array{po: PurchaseOrder, email_sent_to: string|null}
      */
@@ -210,15 +211,22 @@ class PurchaseOrderService
         }
 
         $po->load(['items', 'supplier', 'warehouse', 'createdBy', 'currency', 'company.address', 'costCenter']);
-        $po->update(['status' => 'sent']);
 
         $emailSentTo = null;
+        $emailStatus = 'no_email';
         $supplierEmail = $po->supplier?->email;
 
         if ($supplierEmail) {
             try {
                 $company = Company::find($po->company_id);
                 $companyName = $company?->name ?? 'Facturino';
+
+                // Get company logo via media record (works with R2/cloud storage)
+                $companyLogo = null;
+                if ($company) {
+                    $mediaItem = $company->getMedia('logo')->first();
+                    $companyLogo = $mediaItem ? $mediaItem->getFullUrl() : null;
+                }
 
                 // Generate PDF to attach
                 $pdfInstance = Pdf::loadView('app.pdf.reports.purchase-order', [
@@ -237,7 +245,7 @@ class PurchaseOrderService
                         . ($po->expected_delivery_date ? "<p>Очекувана испорака / Expected delivery: {$po->expected_delivery_date->format('d.m.Y')}</p>" : ''),
                     'company' => [
                         'name' => $companyName,
-                        'logo' => $company?->logo ?? null,
+                        'logo' => $companyLogo,
                     ],
                     'purchase_order' => [
                         'id' => $po->id,
@@ -265,18 +273,28 @@ class PurchaseOrderService
 
                 Mail::to($supplierEmail)->send(new SendPurchaseOrderMail($mailData));
                 $emailSentTo = $supplierEmail;
+                $emailStatus = 'sent';
             } catch (\Exception $e) {
                 Log::warning('Failed to send PO email', [
                     'po_id' => $po->id,
                     'supplier_email' => $supplierEmail,
                     'error' => $e->getMessage(),
                 ]);
+                $emailStatus = 'failed';
             }
         }
+
+        // Update status AFTER email attempt so we know the real outcome
+        $po->update([
+            'status' => 'sent',
+            'email_status' => $emailStatus,
+            'email_sent_to' => $emailSentTo,
+        ]);
 
         return [
             'po' => $po->fresh(['items', 'supplier']),
             'email_sent_to' => $emailSentTo,
+            'email_status' => $emailStatus,
         ];
     }
 
@@ -315,6 +333,12 @@ class PurchaseOrderService
                 $qtyReceived = (float) ($receivedItem['quantity_received'] ?? 0);
                 $qtyAccepted = (float) ($receivedItem['quantity_accepted'] ?? $qtyReceived);
                 $qtyRejected = (float) ($receivedItem['quantity_rejected'] ?? 0);
+
+                // Cap accepted quantity at remaining to prevent over-receipt
+                $remaining = max(0, $poItem->quantity - $poItem->received_quantity);
+                if ($qtyAccepted > $remaining) {
+                    $qtyAccepted = $remaining;
+                }
 
                 // Create goods receipt item
                 GoodsReceiptItem::create([
