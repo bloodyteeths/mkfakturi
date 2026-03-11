@@ -65,7 +65,11 @@ class BatchExportJob implements ShouldQueue
                 );
 
                 $content = $this->formatContent($data, $format, $reportType, $company->name);
-                Storage::put($filename, $content);
+
+                $stored = Storage::disk('local')->put($filename, $content);
+                if (!$stored) {
+                    throw new \RuntimeException('Failed to write file to storage: ' . $filename);
+                }
 
                 $generatedFiles[] = $filename;
 

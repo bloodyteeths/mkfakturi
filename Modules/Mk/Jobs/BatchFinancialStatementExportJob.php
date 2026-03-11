@@ -62,7 +62,11 @@ class BatchFinancialStatementExportJob implements ShouldQueue
                 );
 
                 $content = $this->formatContent($data, $format, $reportLabel, $company->name);
-                Storage::put($filename, $content);
+
+                $stored = Storage::disk('local')->put($filename, $content);
+                if (!$stored) {
+                    throw new \RuntimeException('Failed to write file to storage: ' . $filename);
+                }
 
                 $this->batchJob->incrementCompleted();
                 $this->batchJob->addResult($companyId, 'success', ucfirst(str_replace('_', ' ', $reportLabel)) . ' exported', $filename);

@@ -834,6 +834,13 @@ async function downloadFile(jobId, companyId) {
       responseType: 'blob',
     })
 
+    // Check if the response is actually an error (JSON returned as blob)
+    if (response.data?.type === 'application/json') {
+      const text = await response.data.text()
+      const json = JSON.parse(text)
+      throw new Error(json.message || t('batch_operations.error_generic'))
+    }
+
     const contentDisposition = response.headers['content-disposition'] || ''
     const filenameMatch = contentDisposition.match(/filename="?([^";\n]+)"?/)
     const filename = filenameMatch ? filenameMatch[1] : `export_${jobId}_${companyId}`
@@ -847,9 +854,20 @@ async function downloadFile(jobId, companyId) {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
   } catch (error) {
+    // Extract error message from blob response (axios wraps JSON errors as blobs)
+    let errorMessage = t('batch_operations.error_generic')
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        errorMessage = json.message || errorMessage
+      } catch (_) {}
+    } else if (error.message) {
+      errorMessage = error.message
+    }
     notificationStore.showNotification({
       type: 'error',
-      message: t('batch_operations.error_generic'),
+      message: errorMessage,
     })
   }
 }

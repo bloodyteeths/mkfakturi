@@ -275,25 +275,36 @@ class PartnerBatchOperationController extends Controller
         try {
             $batchJob = $this->batchService->getJob($partner->id, $id);
 
-            // Find the result for this company
+            // Find the result for this company (cast to int for safe comparison)
             $result = collect($batchJob->results ?? [])
-                ->firstWhere('company_id', $companyId);
+                ->first(fn($r) => (int) ($r['company_id'] ?? 0) === $companyId);
 
             if (!$result || empty($result['file_path'])) {
                 return response()->json(['success' => false, 'message' => 'No file available for this company.'], 404);
             }
 
             $filePath = $result['file_path'];
+            $disk = Storage::disk('local');
 
-            if (!Storage::exists($filePath)) {
+            if (!$disk->exists($filePath)) {
+                \Log::warning('BatchDownload: file not found', [
+                    'batch_job_id' => $id,
+                    'company_id' => $companyId,
+                    'file_path' => $filePath,
+                ]);
                 return response()->json(['success' => false, 'message' => 'File not found on storage.'], 404);
             }
 
             $filename = basename($filePath);
 
-            return Storage::download($filePath, $filename);
+            return $disk->download($filePath, $filename);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Batch job not found.'], 404);
+            \Log::error('BatchDownload error', [
+                'batch_job_id' => $id,
+                'company_id' => $companyId,
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json(['success' => false, 'message' => 'Download failed: ' . $e->getMessage()], 500);
         }
     }
 
