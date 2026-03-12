@@ -32,6 +32,11 @@
       </div>
     </div>
 
+    <!-- DEBUG: remove after inbox investigation -->
+    <div v-if="debugInfo" class="p-3 mb-4 text-xs font-mono bg-yellow-100 border border-yellow-300 rounded">
+      INBOX v3 | Bills received: {{ debugInfo.count }} | IDs: {{ debugInfo.ids }} | Total: {{ debugInfo.total }} | Pages: {{ debugInfo.pages }}
+    </div>
+
     <div class="relative">
       <BaseTable
         ref="table"
@@ -94,6 +99,7 @@ const table = ref(null)
 
 const inboundEmail = ref(null)
 const copied = ref(false)
+const debugInfo = ref(null)
 
 const columns = [
   { key: 'bill_date', label: t('bills.bill_date') },
@@ -131,13 +137,25 @@ async function fetchData({ page, sort }) {
     },
   })
 
+  const bills = response.data.data || []
+  const meta = response.data.meta || {}
+
+  // DEBUG: show what the browser actually receives
+  debugInfo.value = {
+    count: bills.length,
+    ids: bills.map(b => b.id).join(', '),
+    total: meta.total || 0,
+    pages: meta.last_page || 1,
+  }
+  console.log('[Inbox v3] fetchData response:', { bills, meta, rawResponse: response.data })
+
   return {
-    data: response.data.data,
+    data: bills,
     pagination: {
-      totalPages: response.data.meta?.last_page || 1,
-      currentPage: response.data.meta?.current_page || 1,
-      total: response.data.meta?.total || 0,
-      count: response.data.data?.length || 0,
+      totalPages: meta.last_page || 1,
+      currentPage: meta.current_page || 1,
+      totalCount: meta.total || 0,
+      limit: 10,
     },
   }
 }
