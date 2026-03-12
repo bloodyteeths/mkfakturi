@@ -55,6 +55,16 @@ class BillsController extends Controller
             ->with($this->billResourceRelations())
             ->paginateData($limit);
 
+        // Temporary debug logging for inbox investigation
+        if ($request->input('status') === 'DRAFT') {
+            \Log::info('BillsController::index DRAFT query', [
+                'company_header' => $request->header('company'),
+                'filters' => $request->all(),
+                'bill_count' => $bills instanceof \Illuminate\Pagination\LengthAwarePaginator ? $bills->total() : count($bills),
+                'bill_ids' => $bills instanceof \Illuminate\Pagination\LengthAwarePaginator ? $bills->pluck('id')->toArray() : collect($bills)->pluck('id')->toArray(),
+            ]);
+        }
+
         return (new BillCollection($bills))
             ->response();
     }
