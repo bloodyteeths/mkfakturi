@@ -166,10 +166,15 @@ class ParseInvoicePdfJob implements ShouldQueue
 
         $billData['supplier_id'] = $supplier->id;
 
+        // Generate fallback bill number when AI didn't extract one
+        if (empty($billData['bill_number'])) {
+            $billData['bill_number'] = 'INBOUND-'.strtoupper(substr(md5($this->filePath), 0, 8));
+        }
+
         // Ensure bill number uniqueness per company by suffixing on conflict
-        $originalNumber = $billData['bill_number'] ?? null;
+        $originalNumber = $billData['bill_number'];
         $counter = 1;
-        while ($billData['bill_number'] && Bill::where('company_id', $this->companyId)
+        while (Bill::where('company_id', $this->companyId)
             ->where('bill_number', $billData['bill_number'])
             ->exists()
         ) {
