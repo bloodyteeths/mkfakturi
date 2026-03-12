@@ -88,6 +88,7 @@ class Bill extends Model implements HasMedia
             'exchange_rate' => 'float',
             'due_amount' => 'integer',
             'posted_to_ifrs' => 'boolean',
+            'is_duplicate' => 'boolean',
         ];
     }
 

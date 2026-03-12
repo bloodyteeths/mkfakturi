@@ -212,8 +212,37 @@ class ParseInvoicePdfJob implements ShouldQueue
             $billData['bill_number'] = 'INBOUND-'.strtoupper(substr(md5($this->filePath), 0, 8));
         }
 
+        // Detect duplicate bills (same supplier + bill_number, or same supplier + total + date)
+        $duplicateOf = null;
+        $originalNumber = $billData['bill_number'] ?? '';
+
+        if ($originalNumber && ! str_starts_with($originalNumber, 'INBOUND-')) {
+            $duplicateOf = Bill::where('company_id', $this->companyId)
+                ->where('supplier_id', $supplier->id)
+                ->where('bill_number', $originalNumber)
+                ->first();
+        }
+
+        // Fallback: check by total + date (within same supplier)
+        if (! $duplicateOf && ! empty($billData['total']) && $billData['total'] > 0 && ! empty($billData['bill_date'])) {
+            $duplicateOf = Bill::where('company_id', $this->companyId)
+                ->where('supplier_id', $supplier->id)
+                ->where('total', $billData['total'])
+                ->where('bill_date', $billData['bill_date'])
+                ->first();
+        }
+
+        if ($duplicateOf) {
+            $billData['is_duplicate'] = true;
+            $billData['duplicate_of_id'] = $duplicateOf->id;
+            Log::info('ParseInvoicePdfJob: duplicate detected', [
+                'company_id' => $this->companyId,
+                'duplicate_of' => $duplicateOf->id,
+                'bill_number' => $originalNumber,
+            ]);
+        }
+
         // Ensure bill number uniqueness per company by suffixing on conflict
-        $originalNumber = $billData['bill_number'];
         $counter = 1;
         while (Bill::where('company_id', $this->companyId)
             ->where('bill_number', $billData['bill_number'])

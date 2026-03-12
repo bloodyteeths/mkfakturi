@@ -43,12 +43,21 @@
           {{ row.data.formatted_bill_date }}
         </template>
         <template #cell-bill_number="{ row }">
-          <router-link
-            :to="{ path: `/admin/bills/${row.data.id}/view` }"
-            class="font-medium text-primary-500"
-          >
-            {{ row.data.bill_number }}
-          </router-link>
+          <div class="flex items-center gap-2">
+            <router-link
+              :to="{ path: `/admin/bills/${row.data.id}/view` }"
+              class="font-medium text-primary-500"
+            >
+              {{ row.data.bill_number }}
+            </router-link>
+            <span
+              v-if="row.data.is_duplicate"
+              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
+              :title="t('bills.duplicate_warning_tooltip')"
+            >
+              {{ t('bills.duplicate_badge') }}
+            </span>
+          </div>
         </template>
         <template #cell-supplier="{ row }">
           {{ row.data.supplier?.name || '-' }}

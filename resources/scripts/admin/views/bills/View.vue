@@ -240,6 +240,26 @@ onMounted(() => {
       </template>
     </BasePageHeader>
 
+    <!-- Duplicate Warning Banner -->
+    <div
+      v-if="bill.is_duplicate"
+      class="mt-4 flex items-start gap-3 p-4 rounded-lg border border-amber-300 bg-amber-50"
+    >
+      <BaseIcon name="ExclamationTriangleIcon" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+      <div>
+        <p class="text-sm font-medium text-amber-800">
+          {{ $t('bills.duplicate_warning') }}
+        </p>
+        <router-link
+          v-if="bill.duplicate_of_id"
+          :to="{ path: `/admin/bills/${bill.duplicate_of_id}/view` }"
+          class="text-sm text-amber-700 underline hover:text-amber-900"
+        >
+          {{ $t('bills.view_original') }}
+        </router-link>
+      </div>
+    </div>
+
     <BaseCard class="mt-8">
       <BaseTabGroup>
         <!-- Details Tab -->
