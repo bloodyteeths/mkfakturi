@@ -55,16 +55,6 @@ class BillsController extends Controller
             ->with($this->billResourceRelations())
             ->paginateData($limit);
 
-        // Temporary debug logging for inbox investigation
-        if ($request->input('status') === 'DRAFT') {
-            \Log::info('BillsController::index DRAFT query', [
-                'company_header' => $request->header('company'),
-                'filters' => $request->all(),
-                'bill_count' => $bills instanceof \Illuminate\Pagination\LengthAwarePaginator ? $bills->total() : count($bills),
-                'bill_ids' => $bills instanceof \Illuminate\Pagination\LengthAwarePaginator ? $bills->pluck('id')->toArray() : collect($bills)->pluck('id')->toArray(),
-            ]);
-        }
-
         return (new BillCollection($bills))
             ->response();
     }
@@ -74,91 +64,58 @@ class BillsController extends Controller
      */
     public function store(BillRequest $request): JsonResponse
     {
-        \Log::info('BillsController::store - Starting bill creation', [
-            'user_id' => auth()->id(),
-            'company_id' => $request->header('company'),
-            'request_data' => $request->all(),
-        ]);
+        $this->authorize('create', Bill::class);
 
-        try {
-            $this->authorize('create', Bill::class);
-
-            // Check usage limit
-            $usageService = app(\App\Services\UsageLimitService::class);
-            $company = \App\Models\Company::find($request->header('company'));
-            if ($company && ! $usageService->canUse($company, 'bills_per_month')) {
-                return response()->json($usageService->buildLimitExceededResponse($company, 'bills_per_month'), 402);
-            }
-
-            \Log::info('BillsController::store - Authorization passed');
-
-            $billPayload = $request->getBillPayload();
-            \Log::info('BillsController::store - Bill payload prepared', ['payload' => $billPayload]);
-
-            $bill = Bill::create($billPayload);
-            \Log::info('BillsController::store - Bill created', ['bill_id' => $bill->id]);
-
-            if ($request->has('items')) {
-                \Log::info('BillsController::store - Processing items', ['item_count' => count($request->items)]);
-
-                // No need to delete items/taxes for a new bill - they don't exist yet
-                // Note: Stock movements are handled by StockBillItemObserver (registered in AppServiceProvider)
-                Bill::createItems($bill, $request->items);
-                \Log::info('BillsController::store - Items created');
-
-                if ($request->has('taxes') && (! empty($request->taxes))) {
-                    Bill::createTaxes($bill, $request->taxes);
-                    \Log::info('BillsController::store - Taxes created');
-                }
-            }
-
-            if ($request->customFields) {
-                \Log::info('BillsController::store - Adding custom fields');
-                $bill->addCustomFields($request->customFields);
-            }
-
-            // Attach scanned invoice file as media if provided
-            if ($request->scanned_receipt_path) {
-                try {
-                    $disk = config('filesystems.default', 'local');
-                    $storedPath = $request->scanned_receipt_path;
-
-                    if (Storage::disk($disk)->exists($storedPath)) {
-                        $bill->addMediaFromDisk($storedPath, $disk)
-                            ->toMediaCollection('scanned_invoice');
-                        \Log::info('BillsController::store - Scanned invoice attached as media', [
-                            'bill_id' => $bill->id,
-                            'path' => $storedPath,
-                        ]);
-                    }
-                } catch (\Throwable $e) {
-                    \Log::warning('BillsController::store - Failed to attach scanned invoice', [
-                        'bill_id' => $bill->id,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
-
-            $bill->load($this->billResourceRelations());
-            \Log::info('BillsController::store - Relationships loaded');
-
-            GenerateBillPdfJob::dispatchAfterResponse($bill->id);
-            \Log::info('BillsController::store - PDF generation job dispatched');
-
-            // Increment usage after successful creation
-            $usageService->incrementUsage($company, 'bills_per_month');
-
-            return (new BillResource($bill))
-                ->response()
-                ->setStatusCode(201);
-        } catch (\Exception $e) {
-            \Log::error('BillsController::store - Error creating bill', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => auth()->id(),
-            ]);
-            throw $e;
+        // Check usage limit
+        $usageService = app(\App\Services\UsageLimitService::class);
+        $company = \App\Models\Company::find($request->header('company'));
+        if ($company && ! $usageService->canUse($company, 'bills_per_month')) {
+            return response()->json($usageService->buildLimitExceededResponse($company, 'bills_per_month'), 402);
         }
+
+        $bill = Bill::create($request->getBillPayload());
+
+        if ($request->has('items')) {
+            // Note: Stock movements are handled by StockBillItemObserver (registered in AppServiceProvider)
+            Bill::createItems($bill, $request->items);
+
+            if ($request->has('taxes') && (! empty($request->taxes))) {
+                Bill::createTaxes($bill, $request->taxes);
+            }
+        }
+
+        if ($request->customFields) {
+            $bill->addCustomFields($request->customFields);
+        }
+
+        // Attach scanned invoice file as media if provided
+        if ($request->scanned_receipt_path) {
+            try {
+                $disk = env('FILESYSTEM_DISK', 'public');
+                $storedPath = $request->scanned_receipt_path;
+
+                if (Storage::disk($disk)->exists($storedPath)) {
+                    $bill->addMediaFromDisk($storedPath, $disk)
+                        ->toMediaCollection('scanned_invoice');
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('BillsController::store - Failed to attach scanned invoice', [
+                    'bill_id' => $bill->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        $bill->load($this->billResourceRelations());
+
+        GenerateBillPdfJob::dispatchAfterResponse($bill->id);
+
+        // Increment usage after successful creation
+        $usageService->incrementUsage($company, 'bills_per_month');
+
+        return (new BillResource($bill))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -295,29 +252,11 @@ class BillsController extends Controller
      */
     public function downloadPdf(Bill $bill)
     {
-        \Log::info('BillsController::downloadPdf - Starting', [
-            'bill_id' => $bill->id,
-            'bill_number' => $bill->bill_number,
-        ]);
+        $this->authorize('view', $bill);
 
-        try {
-            $this->authorize('view', $bill);
+        $pdf = $bill->getPDFData();
 
-            \Log::info('BillsController::downloadPdf - Authorization passed');
-
-            $pdf = $bill->getPDFData();
-
-            \Log::info('BillsController::downloadPdf - PDF generated successfully');
-
-            return $pdf->download("bill-{$bill->bill_number}.pdf");
-        } catch (\Exception $e) {
-            \Log::error('BillsController::downloadPdf - Error', [
-                'bill_id' => $bill->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            throw $e;
-        }
+        return $pdf->download("bill-{$bill->bill_number}.pdf");
     }
 
     /**
