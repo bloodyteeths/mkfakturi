@@ -188,15 +188,18 @@ class ParseInvoicePdfJob implements ShouldQueue
             $items = [];
         }
 
+        // Ensure supplier name is never null (DB constraint: NOT NULL)
+        $supplierName = $supplierData['name'] ?? $this->from ?? 'Unknown Supplier';
+
         $supplier = Supplier::updateOrCreate(
             [
                 'company_id' => $this->companyId,
                 'tax_id' => $supplierData['tax_id'] ?? null,
-                'name' => $supplierData['name'] ?? null,
+                'name' => $supplierName,
             ],
             [
                 'company_id' => $this->companyId,
-                'name' => $supplierData['name'] ?? null,
+                'name' => $supplierName,
                 'tax_id' => $supplierData['tax_id'] ?? null,
                 'email' => $supplierData['email'] ?? null,
             ]
