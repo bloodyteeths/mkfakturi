@@ -730,6 +730,7 @@ Route::prefix('/v1')->group(function () {
             Route::get('suppliers/match-by-tax-id', [CustomerMatchController::class, 'matchCustomer']);
             Route::apiResource('suppliers', \App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class);
 
+            Route::get('/bills/inbound-alias', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'inboundAlias']);
             Route::post('/bills/{bill}/send', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'send']);
             Route::post('/bills/{bill}/clone', CloneBillController::class);
             Route::post('/bills/{bill}/mark-as-sent', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsSent']);

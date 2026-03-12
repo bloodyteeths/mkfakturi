@@ -8,10 +8,13 @@ use App\Http\Requests\DeleteBillsRequest;
 use App\Http\Resources\BillCollection;
 use App\Http\Resources\BillResource;
 use App\Jobs\GenerateBillPdfJob;
+use App\Models\BankAccount;
 use App\Models\Bill;
+use App\Models\CompanyInboundAlias;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Modules\Mk\Services\Pp30PdfService;
 
 class BillsController extends Controller
 {
@@ -305,4 +308,58 @@ class BillsController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * Generate PP30 payment slip PDF for a single bill.
+     */
+    public function pp30Pdf(Request $request, Bill $bill)
+    {
+        $this->authorize('view', $bill);
+
+        $bill->load(['supplier', 'currency', 'company']);
+        $company = $bill->company;
+
+        if (empty($bill->supplier?->iban)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Добавувачот нема IBAN. Додајте IBAN во поставките на добавувачот.',
+            ], 422);
+        }
+
+        $bankAccountId = $request->query('bank_account_id');
+        $bankAccount = $bankAccountId ? BankAccount::find($bankAccountId) : null;
+
+        try {
+            $pp30Service = app(Pp30PdfService::class);
+            $pdf = $pp30Service->generateForBill($bill, $company, $bankAccount);
+
+            return $pdf->download("PP30_{$bill->bill_number}.pdf");
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Return the company's inbound email alias for supplier invoice forwarding.
+     */
+    public function inboundAlias(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        $alias = CompanyInboundAlias::where('company_id', $companyId)->first();
+
+        if (! $alias) {
+            return response()->json(['email' => null]);
+        }
+
+        $domain = config('services.postmark_inbound.domain', 'in.facturino.mk');
+
+        return response()->json([
+            'email' => $alias->alias.'@'.$domain,
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT

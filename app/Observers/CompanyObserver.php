@@ -3,8 +3,10 @@
 namespace App\Observers;
 
 use App\Models\Company;
+use App\Models\CompanyInboundAlias;
 use Database\Seeders\MacedonianChartOfAccountsSeeder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * Company Observer
@@ -28,7 +30,15 @@ class CompanyObserver
                 'company_id' => $company->id,
                 'error' => $e->getMessage(),
             ]);
-            // Don't throw - we don't want to block company creation
+        }
+
+        try {
+            $this->createInboundAlias($company);
+        } catch (\Exception $e) {
+            Log::error('CompanyObserver: Failed to create inbound alias', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -51,5 +61,34 @@ class CompanyObserver
             'company_id' => $company->id,
         ]);
     }
+
+    /**
+     * Create a unique inbound email alias for supplier invoice forwarding.
+     * Format: bills-{random8chars} → bills-a7f3x9kp@in.facturino.mk
+     */
+    protected function createInboundAlias(Company $company): void
+    {
+        if (CompanyInboundAlias::where('company_id', $company->id)->exists()) {
+            return;
+        }
+
+        $alias = 'bills-'.Str::lower(Str::random(8));
+
+        // Ensure uniqueness (collision extremely unlikely but guard anyway)
+        while (CompanyInboundAlias::where('alias', $alias)->exists()) {
+            $alias = 'bills-'.Str::lower(Str::random(8));
+        }
+
+        CompanyInboundAlias::create([
+            'company_id' => $company->id,
+            'alias' => $alias,
+        ]);
+
+        Log::info('CompanyObserver: Inbound alias created', [
+            'company_id' => $company->id,
+            'alias' => $alias,
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT
 

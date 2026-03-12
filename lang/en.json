@@ -597,6 +597,8 @@
         "inbox_empty": "No draft bills",
         "inbox_empty_description": "Draft bills created from email, imports and QR scans will appear here.",
         "inbox_title": "Bills Inbox",
+        "inbound_email_label": "Forward supplier invoices to this email:",
+        "inbound_email_description": "Invoices sent to this address are automatically scanned and added as draft bills.",
         "item": "Item",
         "item_description": "Description",
         "item_name": "Item Name",

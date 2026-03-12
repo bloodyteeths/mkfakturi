@@ -859,6 +859,8 @@
         "mark_viewed": "Озnëчdhe si shikimаnë",
         "mark_completed": "Озnëчdhe si përвршеnë",
         "inbox_title": "Влезно санpoче për llogaritë",
+        "inbound_email_label": "Dërgoni faturat e furnitorëve në këtë adresë:",
+        "inbound_email_description": "Faturat e dërguara në këtë adresë skanohen automatikisht dhe shtohen si fatura draft.",
         "inbox_empty": "Joма nëцрт llogaritë",
         "inbox_empty_description": "Nëцрт llogaritëте nga email, importodhe dhe QR скеi ridhe ќе се појават këtu.",
         "approve": "Ngaобрdhe",

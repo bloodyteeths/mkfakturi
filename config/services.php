@@ -152,6 +152,11 @@ return [
     // PSD2 banking config moved to config/mk.php (stopanska, nlb, komercijalna sections)
 
 
+    'postmark_inbound' => [
+        'domain' => env('POSTMARK_INBOUND_DOMAIN', 'in.facturino.mk'),
+        'token' => env('POSTMARK_INBOUND_TOKEN'),
+    ],
+
     'invoice_parser_driver' => env('INVOICE_PARSER_DRIVER', 'invoice2data'),
 
     'invoice2data' => [

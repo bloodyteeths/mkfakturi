@@ -3,9 +3,34 @@
     <BasePageHeader :title="$t('bills.inbox_title')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
+        <BaseBreadcrumbItem :title="$t('bills.title')" to="/admin/bills" />
         <BaseBreadcrumbItem :title="$t('bills.inbox_title')" to="#" active />
       </BaseBreadcrumb>
     </BasePageHeader>
+
+    <!-- Forwarding email address -->
+    <div
+      v-if="inboundEmail"
+      class="flex items-center gap-3 p-4 mb-6 rounded-lg border border-primary-200 bg-primary-50"
+    >
+      <BaseIcon name="EnvelopeIcon" class="w-5 h-5 text-primary-500 shrink-0" />
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-gray-700">
+          {{ $t('bills.inbound_email_label') }}
+        </p>
+        <p class="text-sm text-gray-500">
+          {{ $t('bills.inbound_email_description') }}
+        </p>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <code class="px-3 py-1.5 text-sm font-mono bg-white rounded border border-gray-200 text-primary-600">
+          {{ inboundEmail }}
+        </code>
+        <BaseButton variant="primary-outline" size="xs" @click="copyEmail">
+          <BaseIcon :name="copied ? 'CheckIcon' : 'ClipboardDocumentIcon'" class="w-4 h-4" />
+        </BaseButton>
+      </div>
+    </div>
 
     <BaseEmptyPlaceholder
       v-if="!inboxStore.totalDrafts && !inboxStore.isFetching"
@@ -69,16 +94,20 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useBillsInboxStore } from '@/scripts/admin/stores/bills-inbox'
 import { useBillsStore } from '@/scripts/admin/stores/bills'
+import axios from 'axios'
 
 const { t } = useI18n()
 const inboxStore = useBillsInboxStore()
 const billsStore = useBillsStore()
 const router = useRouter()
+
+const inboundEmail = ref(null)
+const copied = ref(false)
 
 const columns = [
   { key: 'bill_date', label: t('bills.bill_date') },
@@ -87,6 +116,23 @@ const columns = [
   { key: 'total', label: t('bills.total') },
   { key: 'actions', label: '', sortable: false, tdClass: 'text-right' },
 ]
+
+async function fetchInboundAlias() {
+  try {
+    const { data } = await axios.get('/api/v1/bills/inbound-alias')
+    inboundEmail.value = data.email
+  } catch {
+    // Silently fail — alias display is optional
+  }
+}
+
+function copyEmail() {
+  if (inboundEmail.value) {
+    navigator.clipboard.writeText(inboundEmail.value)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  }
+}
 
 function fetchData(params) {
   const query = {
@@ -118,5 +164,6 @@ function convertToExpense(id) {
 
 onMounted(() => {
   fetchData({ page: 1, limit: 10 })
+  fetchInboundAlias()
 })
 </script>

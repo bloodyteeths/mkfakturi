@@ -3979,6 +3979,8 @@
         "mark_viewed": "Озчve nasıl önizlemeа",
         "mark_completed": "Озчve nasıl içinврше",
         "inbox_title": "Gelen Kutusu için hesaplar",
+        "inbound_email_label": "Tedarikçi faturalarını bu adrese iletin:",
+        "inbound_email_description": "Bu adrese gönderilen faturalar otomatik olarak taranır ve taslak fatura olarak eklenir.",
         "inbox_empty": "Yok taslak hesaplar",
         "inbox_empty_description": "Taslak hesaplarте dan e-posta, veмпортve ve QR скеyeni olacak поват burada.",
         "approve": "Одобрve",
