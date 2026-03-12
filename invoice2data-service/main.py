@@ -1472,17 +1472,21 @@ Extract the following information and return it as a single JSON object:
 }
 
 STEPS:
-1. First read ALL column headers in the table to understand what each column represents
-2. Identify which column is description, which is quantity, which is unit price, which is tax, which is the line total
-3. Only map a column to "quantity" if its header clearly means quantity/count of items purchased (e.g. "количина", "qty", "кол.")
-4. Extract line item values according to the identified columns
+1. FIRST look for a payment slip / payment amount on the invoice. Look for "Износ за плаќање", "Износот за плаќање", "За плаќање", "Вкупно за плаќање", "Total due", or a prominent total amount, often on a tear-off payment slip section. This is the DEFINITIVE grand total — the actual amount the recipient must pay.
+2. Read ALL column headers in the table to understand what each column represents.
+3. Identify which column is description, which is quantity, which is unit price, which is tax, which is the line total.
+4. Only map a column to "quantity" if its header clearly means quantity/count of items PURCHASED (e.g. "количина", "qty", "кол."). Do NOT use columns like number of apartments/units (бр. на станари, единици), row numbers, codes, or allocation counts as quantity.
+5. If the table has multiple numeric columns, find the column whose values sum closest to the payment slip grand total. Use THAT column for line "total" values.
+6. Extract line item values according to the identified columns.
 
 IMPORTANT:
 - All monetary amounts must be numeric (e.g. 11800.00 not "11,800.00")
 - Amounts are in the smallest visible unit (if the invoice shows 11,800 MKD, return 11800.00)
+- European number format: dot (.) is thousands separator, comma (,) is decimal separator. "1.440,00" = 1440.00, "144,00" = 144.00
 - Extract ALL line items from the table
 - If no column header clearly indicates quantity, set quantity to 1 for all lines
-- CRITICAL: The sum of all line "total" values must approximately equal the "amount" (grand total). If the table has multiple amount columns, use the column whose values sum to the grand total.
+- CRITICAL: The "amount" (grand total) MUST be the payment slip amount — the actual amount the invoice recipient owes. For building management invoices (ХАБИДОМ, управител, одржување на зграда), this is the PER-APARTMENT amount, not the total for all apartments.
+- CRITICAL: The sum of all line "total" values must approximately equal the "amount" (grand total). If they don't match, you picked the wrong column — find the column whose values sum to the grand total.
 - Return ONLY the raw JSON object, no markdown code fences, no explanation
 - If a field is not visible, use null
 - Ensure all string values are properly escaped (no unescaped quotes or special characters)"""
