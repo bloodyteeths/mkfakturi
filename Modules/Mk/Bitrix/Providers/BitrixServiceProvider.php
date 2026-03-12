@@ -86,7 +86,7 @@ class BitrixServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/../routes/bitrix.php');
 
         // Load views
-        $this->loadViewsFrom(__DIR__ . '/../../../resources/views', 'bitrix');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'bitrix');
 
         // Publish config
         $this->publishes([
