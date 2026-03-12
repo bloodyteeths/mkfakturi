@@ -200,7 +200,13 @@ class ParseInvoicePdfJob implements ShouldQueue
         Log::info('ParseInvoicePdfJob created bill from parsed invoice', [
             'company_id' => $this->companyId,
             'bill_id' => $bill->id,
+            'bill_number' => $bill->bill_number,
+            'status' => $bill->status,
+            'bill_date' => $bill->bill_date,
+            'total' => $bill->total,
             'supplier_id' => $supplier->id,
+            'deleted_at' => $bill->deleted_at,
+            'currency_id' => $bill->currency_id,
         ]);
 
         // Notify company owner about the new inbound invoice

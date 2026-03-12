@@ -50,10 +50,50 @@ class BillsController extends Controller
 
         $limit = $request->input('limit', 10);
 
-        $bills = Bill::whereCompany()
-            ->applyFilters($request->all())
-            ->with($this->billResourceRelations())
+        $query = Bill::whereCompany()
+            ->applyFilters($request->all());
+
+        // Debug: log the SQL and results for DRAFT queries
+        if ($request->input('status') === 'DRAFT') {
+            $debugQuery = clone $query;
+            $allDraftIds = $debugQuery->pluck('id')->toArray();
+            \Log::info('BillsController::index DRAFT debug', [
+                'request_params' => $request->all(),
+                'company_header' => $request->header('company'),
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings(),
+                'all_matching_bill_ids' => $allDraftIds,
+                'total_matching' => count($allDraftIds),
+                'limit' => $limit,
+            ]);
+
+            // Check specifically for bill 37
+            $bill37 = \App\Models\Bill::withTrashed()->find(37);
+            \Log::info('BillsController::index bill #37 check', [
+                'exists' => $bill37 !== null,
+                'status' => $bill37?->status,
+                'company_id' => $bill37?->company_id,
+                'deleted_at' => $bill37?->deleted_at,
+                'bill_number' => $bill37?->bill_number,
+                'bill_date' => $bill37?->bill_date,
+            ]);
+        }
+
+        $bills = $query->with($this->billResourceRelations())
             ->paginateData($limit);
+
+        if ($request->input('status') === 'DRAFT') {
+            $pageIds = $bills instanceof \Illuminate\Pagination\LengthAwarePaginator
+                ? $bills->pluck('id')->toArray()
+                : collect($bills)->pluck('id')->toArray();
+            \Log::info('BillsController::index DRAFT paginated result', [
+                'page_bill_ids' => $pageIds,
+                'page_count' => count($pageIds),
+                'total' => $bills instanceof \Illuminate\Pagination\LengthAwarePaginator ? $bills->total() : count($bills),
+                'current_page' => $bills instanceof \Illuminate\Pagination\LengthAwarePaginator ? $bills->currentPage() : 1,
+                'last_page' => $bills instanceof \Illuminate\Pagination\LengthAwarePaginator ? $bills->lastPage() : 1,
+            ]);
+        }
 
         return (new BillCollection($bills))
             ->response();
