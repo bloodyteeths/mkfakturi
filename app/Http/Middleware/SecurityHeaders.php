@@ -31,8 +31,8 @@ class SecurityHeaders
             "img-src 'self' data: https:",
             "font-src 'self' data:",
             "connect-src 'self' https://api.postmarkapp.com wss:",
-            "frame-src 'self' blob:", // Allow frames from same origin and blob URLs for PDF preview
-            "object-src 'self' blob:", // Allow blob PDFs in embed/object (Chrome PDF viewer)
+            "frame-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com", // Allow PDF preview from R2 storage
+            "object-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com", // Allow blob PDFs + R2 in embed/object
             "worker-src 'self' blob:", // Allow blob workers (PDF.js, Vite HMR)
             "frame-ancestors 'self'", // Allow being framed by same origin
             "base-uri 'self'",
