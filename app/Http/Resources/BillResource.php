@@ -56,7 +56,15 @@ class BillResource extends JsonResource
                 $media = $this->getMedia('scanned_invoice')->first()
                     ?? $this->getMedia('bills')->first();
 
-                return $media?->getTemporaryUrl(now()->addMinutes(30)) ?? $media?->getFullUrl();
+                if (! $media) {
+                    return null;
+                }
+
+                try {
+                    return $media->getTemporaryUrl(now()->addMinutes(30));
+                } catch (\RuntimeException $e) {
+                    return $media->getFullUrl();
+                }
             }),
         ];
     }
