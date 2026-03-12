@@ -32,38 +32,6 @@
       </div>
     </div>
 
-    <!-- DEBUG: remove after inbox investigation -->
-    <div v-if="debugInfo" class="p-3 mb-4 text-xs font-mono bg-yellow-100 border border-yellow-300 rounded">
-      INBOX v3 | Bills received: {{ debugInfo.count }} | IDs: {{ debugInfo.ids }} | Total: {{ debugInfo.total }} | Pages: {{ debugInfo.pages }}
-    </div>
-
-    <!-- DEBUG: Raw bill list bypassing BaseTable -->
-    <div v-if="rawBills.length" class="mb-4 p-3 bg-green-50 border border-green-300 rounded">
-      <p class="text-xs font-bold mb-2">DEBUG RAW BILLS (bypassing BaseTable):</p>
-      <table class="w-full text-xs">
-        <thead>
-          <tr class="border-b">
-            <th class="text-left p-1">ID</th>
-            <th class="text-left p-1">Bill #</th>
-            <th class="text-left p-1">Date</th>
-            <th class="text-left p-1">Supplier</th>
-            <th class="text-left p-1">Total</th>
-            <th class="text-left p-1">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="bill in rawBills" :key="bill.id" class="border-b">
-            <td class="p-1">{{ bill.id }}</td>
-            <td class="p-1">{{ bill.bill_number }}</td>
-            <td class="p-1">{{ bill.formatted_bill_date || bill.bill_date }}</td>
-            <td class="p-1">{{ bill.supplier?.name || '-' }}</td>
-            <td class="p-1">{{ bill.total }}</td>
-            <td class="p-1">{{ bill.status }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
     <div class="relative">
       <BaseTable
         ref="table"
@@ -126,8 +94,6 @@ const table = ref(null)
 
 const inboundEmail = ref(null)
 const copied = ref(false)
-const debugInfo = ref(null)
-const rawBills = ref([])
 
 const columns = [
   { key: 'bill_date', label: t('bills.bill_date') },
@@ -167,16 +133,6 @@ async function fetchData({ page, sort }) {
 
   const bills = response.data.data || []
   const meta = response.data.meta || {}
-
-  // DEBUG: show what the browser actually receives
-  debugInfo.value = {
-    count: bills.length,
-    ids: bills.map(b => b.id).join(', '),
-    total: meta.total || 0,
-    pages: meta.last_page || 1,
-  }
-  rawBills.value = bills
-  console.log('[Inbox v3] fetchData response:', { bills, meta, rawResponse: response.data })
 
   return {
     data: bills,
