@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Bill;
 use App\Models\Company;
+use App\Models\CompanySetting;
 use App\Models\Supplier;
 use App\Notifications\InboundInvoiceNotification;
 use App\Services\InvoiceParsing\Invoice2DataServiceException;
@@ -123,6 +124,7 @@ class ParseInvoicePdfJob implements ShouldQueue
                 'email' => $this->from,
                 'tax_id' => null,
             ];
+            $currencyId = CompanySetting::getSetting('currency', $this->companyId);
             $billData = [
                 'company_id' => $this->companyId,
                 'bill_date' => now()->format('Y-m-d'),
@@ -130,10 +132,19 @@ class ParseInvoicePdfJob implements ShouldQueue
                 'bill_number' => 'INBOUND-'.strtoupper(substr(md5($this->filePath), 0, 8)),
                 'status' => 'DRAFT',
                 'paid_status' => 'UNPAID',
+                'currency_id' => $currencyId,
+                'exchange_rate' => 1,
                 'sub_total' => 0,
                 'total' => 0,
                 'tax' => 0,
                 'due_amount' => 0,
+                'base_total' => 0,
+                'base_sub_total' => 0,
+                'base_tax' => 0,
+                'base_due_amount' => 0,
+                'base_discount_val' => 0,
+                'discount' => 0,
+                'discount_val' => 0,
                 'notes' => "Auto-created from email: {$this->subject}\nFrom: {$this->from}\nFile: {$this->originalName}",
             ];
             $items = [];

@@ -4,6 +4,7 @@ namespace App\Services\InvoiceParsing;
 
 use App\Models\Bill;
 use App\Models\CompanySetting;
+use App\Models\Currency;
 
 class ParsedInvoiceMapper
 {
@@ -22,9 +23,18 @@ class ParsedInvoiceMapper
         $totals = $parsed['totals'] ?? [];
         $lineItems = $parsed['line_items'] ?? [];
 
-        $companyCurrency = CompanySetting::getSetting('currency', $companyId);
-        $invoiceCurrency = $invoice['currency'] ?? $companyCurrency;
-        $exchangeRate = $companyCurrency && $invoiceCurrency && $invoiceCurrency !== $companyCurrency
+        $companyCurrencyId = CompanySetting::getSetting('currency', $companyId);
+
+        // Resolve invoice currency: Gemini returns code ('MKD'), we need integer ID
+        $parsedCurrency = $invoice['currency'] ?? null;
+        if ($parsedCurrency && ! is_numeric($parsedCurrency)) {
+            $currencyId = Currency::where('code', strtoupper($parsedCurrency))->value('id');
+            $invoiceCurrencyId = $currencyId ?? $companyCurrencyId;
+        } else {
+            $invoiceCurrencyId = $parsedCurrency ?? $companyCurrencyId;
+        }
+
+        $exchangeRate = $companyCurrencyId && $invoiceCurrencyId && $invoiceCurrencyId != $companyCurrencyId
             ? (float) ($invoice['exchange_rate'] ?? 1)
             : 1.0;
 
@@ -46,7 +56,7 @@ class ParsedInvoiceMapper
             'tax' => $tax,
             'due_amount' => $total,
             'company_id' => $companyId,
-            'currency_id' => $invoiceCurrency,
+            'currency_id' => $invoiceCurrencyId,
             'exchange_rate' => $exchangeRate,
             'base_total' => $total * $exchangeRate,
             'base_discount_val' => $discountVal * $exchangeRate,
