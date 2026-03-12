@@ -667,7 +667,8 @@
         "view_all_payments": "View All Payments",
         "view_bill": "View Bill",
         "view_payments": "View Payments",
-        "viewed": "Viewed"
+        "viewed": "Viewed",
+        "scanned_invoice": "Scanned Invoice"
     },
     "certificates": {
         "algorithm": "Algorithm",

@@ -37,6 +37,7 @@ class BillsController extends Controller
             'taxes.currency',
             'fields.customField',
             'fields.company',
+            'media',
         ];
     }
 

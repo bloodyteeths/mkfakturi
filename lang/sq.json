@@ -813,6 +813,7 @@
         "new_bill": "Faturë e Re Hyrëse",
         "edit_bill": "Redakto Faturën Hyrëse",
         "view_bill": "Shiko Faturën Hyrëse",
+        "scanned_invoice": "Fatura e Skanuar",
         "bill_number": "Numri i Faturës",
         "bill_date": "Data e Faturës",
         "due_date": "Data e Afatit",

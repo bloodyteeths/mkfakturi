@@ -52,6 +52,12 @@ class BillResource extends JsonResource
             'creator' => $this->whenLoaded('creator', function () {
                 return new UserResource($this->creator);
             }),
+            'scanned_invoice_url' => $this->whenLoaded('media', function () {
+                $media = $this->getMedia('scanned_invoice')->first()
+                    ?? $this->getMedia('bills')->first();
+
+                return $media?->getTemporaryUrl(now()->addMinutes(30)) ?? $media?->getFullUrl();
+            }),
         ];
     }
 }

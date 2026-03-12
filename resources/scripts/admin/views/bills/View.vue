@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useBillsStore } from '@/scripts/admin/stores/bills'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useDialogStore } from '@/scripts/stores/dialog'
+import { useNotificationStore } from '@/scripts/stores/notification'
 
 import BillIndexDropdown from '@/scripts/admin/components/dropdowns/BillIndexDropdown.vue'
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
@@ -13,6 +14,7 @@ import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
 import abilities from '@/scripts/admin/stub/abilities'
 
 const dialogStore = useDialogStore()
+const notificationStore = useNotificationStore()
 const billsStore = useBillsStore()
 const userStore = useUserStore()
 const router = useRouter()
@@ -22,6 +24,7 @@ const route = useRoute()
 
 const isMarkAsSent = ref(false)
 const isLoading = ref(false)
+const isDownloadingPp30 = ref(false)
 
 const bill = computed(() => billsStore.selectedBill)
 const pageTitle = computed(() => bill.value?.bill_number || t('bills.view_bill'))
@@ -107,6 +110,50 @@ async function deletePayment(paymentId) {
     })
 }
 
+async function downloadPp30() {
+  isDownloadingPp30.value = true
+  try {
+    const response = await window.axios.get(`/bills/${bill.value.id}/pp30`, {
+      responseType: 'blob',
+    })
+
+    const blob = response.data
+
+    if (blob.type === 'application/json') {
+      const text = await blob.text()
+      const json = JSON.parse(text)
+      notificationStore.showNotification({
+        type: 'error',
+        message: json.message || t('payment_orders.supplier_no_iban', 'Supplier has no IBAN'),
+      })
+      return
+    }
+
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `PP30_${bill.value.bill_number || bill.value.id}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    let message = t('payment_orders.supplier_no_iban', 'Failed to generate PP30')
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        message = json.message || message
+      } catch { /* use default */ }
+    } else if (error.response?.data?.message) {
+      message = error.response.data.message
+    }
+    notificationStore.showNotification({ type: 'error', message })
+  } finally {
+    isDownloadingPp30.value = false
+  }
+}
+
 onMounted(() => {
   loadBill()
 })
@@ -172,6 +219,17 @@ onMounted(() => {
             {{ $t('bills.record_payment') }}
           </BaseButton>
         </router-link>
+
+        <!-- Print PP30 Button -->
+        <BaseButton
+          v-if="bill.paid_status !== 'PAID'"
+          variant="primary-outline"
+          class="mr-3"
+          :loading="isDownloadingPp30"
+          @click="downloadPp30"
+        >
+          {{ $t('payment_orders.print_pp30', 'Print PP30') }}
+        </BaseButton>
 
         <!-- Bill Dropdown -->
         <BillIndexDropdown
@@ -360,6 +418,40 @@ onMounted(() => {
               </div>
             </BaseCard>
           </div>
+        </BaseTab>
+
+        <!-- Scanned Invoice Tab -->
+        <BaseTab
+          v-if="bill.scanned_invoice_url"
+          tab-panel-container="py-4 mt-px"
+          :title="$t('bills.scanned_invoice', 'Scanned Invoice')"
+        >
+          <BaseCard>
+            <div class="p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">
+                  {{ $t('bills.scanned_invoice', 'Scanned Invoice') }}
+                </h3>
+                <a
+                  :href="bill.scanned_invoice_url"
+                  target="_blank"
+                  download
+                >
+                  <BaseButton variant="primary-outline">
+                    {{ $t('general.download') }}
+                  </BaseButton>
+                </a>
+              </div>
+              <div class="border rounded-lg overflow-hidden bg-gray-50">
+                <iframe
+                  :src="bill.scanned_invoice_url"
+                  class="w-full"
+                  style="height: 800px;"
+                  frameborder="0"
+                />
+              </div>
+            </div>
+          </BaseCard>
         </BaseTab>
 
         <!-- Payments Tab -->

@@ -3917,6 +3917,7 @@
         "add_bill": "Fatura ekle",
         "edit_bill": "Faturayı düzenle",
         "view_bill": "Faturayı görüntüle",
+        "scanned_invoice": "Taranan Fatura",
         "bill_number": "Fatura numarası",
         "bill_date": "Fatura tarihi",
         "due_date": "Son ödeme tarihi",

@@ -121,9 +121,10 @@ class ParseInvoicePdfJob implements ShouldQueue
             }
         }
 
-        $storedPath = Storage::disk($disk)->path($this->filePath);
-        if (file_exists($storedPath)) {
-            $bill->addMedia($storedPath)->preservingOriginal()->toMediaCollection('bills');
+        // Use addMediaFromDisk() to support S3/R2 storage (not just local filesystem)
+        if (Storage::disk($disk)->exists($this->filePath)) {
+            $bill->addMediaFromDisk($this->filePath, $disk)
+                ->toMediaCollection('scanned_invoice');
         }
 
         Log::info('ParseInvoicePdfJob created bill from parsed invoice', [
