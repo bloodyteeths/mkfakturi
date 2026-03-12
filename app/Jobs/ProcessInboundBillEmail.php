@@ -40,7 +40,20 @@ class ProcessInboundBillEmail implements ShouldQueue
 
     public function handle(): void
     {
+        Log::info('ProcessInboundBillEmail: starting', [
+            'company_id' => $this->companyId,
+            'from' => $this->from,
+            'subject' => $this->subject,
+            'attachment_count' => count($this->attachments),
+        ]);
+
         foreach ($this->attachments as $attachment) {
+            Log::info('ProcessInboundBillEmail: dispatching ParseInvoicePdfJob', [
+                'company_id' => $this->companyId,
+                'path' => $attachment['path'],
+                'name' => $attachment['original_name'],
+            ]);
+
             ParseInvoicePdfJob::dispatch(
                 $this->companyId,
                 $attachment['path'],
@@ -50,10 +63,5 @@ class ProcessInboundBillEmail implements ShouldQueue
                 $attachment['content_type'] ?? 'application/pdf'
             );
         }
-
-        Log::info('ProcessInboundBillEmail dispatched ParseInvoicePdfJob for attachments', [
-            'company_id' => $this->companyId,
-            'attachments' => $this->attachments,
-        ]);
     }
 }

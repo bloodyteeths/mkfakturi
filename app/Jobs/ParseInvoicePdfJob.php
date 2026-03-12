@@ -62,6 +62,13 @@ class ParseInvoicePdfJob implements ShouldQueue
 
     public function handle(InvoiceParserClient $client, ParsedInvoiceMapper $mapper): void
     {
+        Log::info('ParseInvoicePdfJob: starting', [
+            'company_id' => $this->companyId,
+            'file' => $this->originalName,
+            'path' => $this->filePath,
+            'attempt' => $this->attempts(),
+        ]);
+
         $disk = env('FILESYSTEM_DISK', 'public');
 
         $parsed = null;
@@ -110,14 +117,45 @@ class ParseInvoicePdfJob implements ShouldQueue
 
                 return;
             }
+        } catch (\Throwable $e) {
+            // Catch-all for unexpected exceptions (S3/R2 errors, filesystem issues, etc.)
+            // Don't retry — create a draft bill with just the attachment
+            Log::warning('ParseInvoicePdfJob: unexpected error during parsing, creating draft bill', [
+                'company_id' => $this->companyId,
+                'file' => $this->originalName,
+                'error' => $e->getMessage(),
+                'exception_class' => get_class($e),
+            ]);
+            // Fall through with $parsed = null
         }
 
+        $this->createBill($parsed, $mapper, $disk);
+    }
+
+    /**
+     * Create the bill from parsed data (or fallback draft).
+     *
+     * Separated so the entire bill creation is wrapped in error handling.
+     */
+    protected function createBill(?array $parsed, ParsedInvoiceMapper $mapper, string $disk): void
+    {
         if ($parsed) {
-            $components = $mapper->mapToBillComponents($this->companyId, $parsed);
-            $supplierData = $components['supplier'];
-            $billData = $components['bill'];
-            $items = $components['items'];
-        } else {
+            try {
+                $components = $mapper->mapToBillComponents($this->companyId, $parsed);
+                $supplierData = $components['supplier'];
+                $billData = $components['bill'];
+                $items = $components['items'];
+            } catch (\Throwable $e) {
+                Log::warning('ParseInvoicePdfJob: mapper failed, falling back to draft bill', [
+                    'company_id' => $this->companyId,
+                    'file' => $this->originalName,
+                    'error' => $e->getMessage(),
+                ]);
+                $parsed = null; // Fall through to draft creation below
+            }
+        }
+
+        if (! $parsed) {
             // Fallback: create a minimal draft bill when AI parsing fails
             $supplierData = [
                 'name' => $this->from,
@@ -191,22 +229,29 @@ class ParseInvoicePdfJob implements ShouldQueue
             }
         }
 
-        // Use addMediaFromDisk() to support S3/R2 storage (not just local filesystem)
-        if (Storage::disk($disk)->exists($this->filePath)) {
-            $bill->addMediaFromDisk($this->filePath, $disk)
-                ->toMediaCollection('scanned_invoice');
+        // Attach the original file as media
+        try {
+            if (Storage::disk($disk)->exists($this->filePath)) {
+                $bill->addMediaFromDisk($this->filePath, $disk)
+                    ->toMediaCollection('scanned_invoice');
+            }
+        } catch (\Throwable $e) {
+            Log::warning('ParseInvoicePdfJob: failed to attach media', [
+                'bill_id' => $bill->id,
+                'disk' => $disk,
+                'path' => $this->filePath,
+                'error' => $e->getMessage(),
+            ]);
         }
 
-        Log::info('ParseInvoicePdfJob created bill from parsed invoice', [
+        Log::info('ParseInvoicePdfJob: bill created successfully', [
             'company_id' => $this->companyId,
             'bill_id' => $bill->id,
             'bill_number' => $bill->bill_number,
             'status' => $bill->status,
-            'bill_date' => $bill->bill_date,
             'total' => $bill->total,
             'supplier_id' => $supplier->id,
-            'deleted_at' => $bill->deleted_at,
-            'currency_id' => $bill->currency_id,
+            'parsed' => $parsed !== null,
         ]);
 
         // Notify company owner about the new inbound invoice

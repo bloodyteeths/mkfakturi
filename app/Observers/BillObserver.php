@@ -56,7 +56,14 @@ class BillObserver
         }
 
         // Auto-assign cost center from rules (before ledger posting)
-        $this->costCenterAssigner->assignIfMatched($bill);
+        try {
+            $this->costCenterAssigner->assignIfMatched($bill);
+        } catch (\Throwable $e) {
+            Log::error('BillObserver: Failed to auto-assign cost center', [
+                'bill_id' => $bill->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Post to ledger only when bill is marked as COMPLETED
         if ($this->shouldPostToLedger($bill)) {
