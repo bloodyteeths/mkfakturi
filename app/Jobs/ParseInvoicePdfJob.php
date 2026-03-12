@@ -12,6 +12,7 @@ use App\Services\InvoiceParsing\ParsedInvoiceMapper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
@@ -34,13 +35,16 @@ class ParseInvoicePdfJob implements ShouldQueue
 
     public ?string $subject;
 
-    public function __construct(int $companyId, string $filePath, string $originalName, string $from, ?string $subject)
+    public string $contentType;
+
+    public function __construct(int $companyId, string $filePath, string $originalName, string $from, ?string $subject, string $contentType = 'application/pdf')
     {
         $this->companyId = $companyId;
         $this->filePath = $filePath;
         $this->originalName = $originalName;
         $this->from = $from;
         $this->subject = $subject;
+        $this->contentType = $contentType;
     }
 
     /**
@@ -59,6 +63,8 @@ class ParseInvoicePdfJob implements ShouldQueue
     {
         $disk = env('FILESYSTEM_DISK', 'public');
 
+        $parsed = null;
+
         try {
             $parsed = $client->parse(
                 $this->companyId,
@@ -75,17 +81,63 @@ class ParseInvoicePdfJob implements ShouldQueue
                 'error' => $e->getMessage(),
             ]);
 
-            // Release back to queue with backoff so it retries automatically
             $this->release($this->backoff[$this->attempts() - 1] ?? 300);
 
             return;
+        } catch (RequestException $e) {
+            $status = $e->response?->status();
+
+            // Non-retryable errors (4xx/5xx that won't resolve with retries)
+            if ($status && ($status === 422 || $status === 501 || $status >= 400 && $status < 500)) {
+                Log::warning('ParseInvoicePdfJob: AI parsing failed, creating draft bill without parsed data', [
+                    'company_id' => $this->companyId,
+                    'file' => $this->originalName,
+                    'status' => $status,
+                    'error' => $e->getMessage(),
+                ]);
+                // Fall through with $parsed = null to create a draft bill with just the attachment
+            } else {
+                // Server error — retry
+                Log::warning('ParseInvoicePdfJob: server error, will retry', [
+                    'company_id' => $this->companyId,
+                    'file' => $this->originalName,
+                    'status' => $status,
+                    'attempt' => $this->attempts(),
+                ]);
+
+                $this->release($this->backoff[$this->attempts() - 1] ?? 300);
+
+                return;
+            }
         }
 
-        $components = $mapper->mapToBillComponents($this->companyId, $parsed);
-
-        $supplierData = $components['supplier'];
-        $billData = $components['bill'];
-        $items = $components['items'];
+        if ($parsed) {
+            $components = $mapper->mapToBillComponents($this->companyId, $parsed);
+            $supplierData = $components['supplier'];
+            $billData = $components['bill'];
+            $items = $components['items'];
+        } else {
+            // Fallback: create a minimal draft bill when AI parsing fails
+            $supplierData = [
+                'name' => $this->from,
+                'email' => $this->from,
+                'tax_id' => null,
+            ];
+            $billData = [
+                'company_id' => $this->companyId,
+                'bill_date' => now()->format('Y-m-d'),
+                'due_date' => now()->addDays(30)->format('Y-m-d'),
+                'bill_number' => 'INBOUND-'.strtoupper(substr(md5($this->filePath), 0, 8)),
+                'status' => 'DRAFT',
+                'paid_status' => 'UNPAID',
+                'sub_total' => 0,
+                'total' => 0,
+                'tax' => 0,
+                'due_amount' => 0,
+                'notes' => "Auto-created from email: {$this->subject}\nFrom: {$this->from}\nFile: {$this->originalName}",
+            ];
+            $items = [];
+        }
 
         $supplier = Supplier::updateOrCreate(
             [

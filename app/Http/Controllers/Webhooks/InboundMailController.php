@@ -175,8 +175,15 @@ class InboundMailController extends Controller
             $name = $attachment['Name'] ?? $attachment['name'] ?? 'unknown.pdf';
             $content = $attachment['Content'] ?? $attachment['content'] ?? null;
 
-            if ($contentType !== 'application/pdf') {
-                Log::info('Inbound email attachment skipped (non-pdf)', [
+            $allowedTypes = [
+                'application/pdf',
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+            ];
+
+            if (! in_array($contentType, $allowedTypes, true)) {
+                Log::info('Inbound email attachment skipped (unsupported type)', [
                     'mime' => $contentType,
                     'name' => $name,
                 ]);
@@ -221,6 +228,7 @@ class InboundMailController extends Controller
             $valid[] = [
                 'path' => $storagePath,
                 'original_name' => $name,
+                'content_type' => $contentType,
             ];
         }
 

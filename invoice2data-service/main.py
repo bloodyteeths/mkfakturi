@@ -1844,23 +1844,25 @@ async def parse_invoice(file: UploadFile = File(...)) -> JSONResponse:
         is_image = content_type.startswith("image/") or filename.endswith((".jpg", ".jpeg", ".png"))
 
         if is_pdf:
-            if extract_data is None:
-                # Invoice2data is not available on this deployment; signal that
-                # PDF template parsing is not supported here.
-                raise HTTPException(
-                    status_code=501,
-                    detail="PDF template parsing (invoice2data) is not available on this deployment",
-                )
+            # Try template-based parsing first (if invoice2data is installed)
+            if extract_data is not None:
+                buffer = io.BytesIO(contents)
+                data = extract_data(buffer, templates=TEMPLATES if TEMPLATES else None)
+                if data:
+                    normalized = normalize_invoice_data(data)
+                    return JSONResponse(content=normalized)
 
-            # invoice2data expects a file-like object or path; we use BytesIO.
-            buffer = io.BytesIO(contents)
-            data = extract_data(buffer, templates=TEMPLATES if TEMPLATES else None)
+            # Fall back to Gemini Vision AI for PDF parsing
+            gemini_raw = await _extract_invoice_with_gemini(contents, "application/pdf")
+            if gemini_raw:
+                normalized = normalize_invoice_data(gemini_raw)
+                normalized["extraction_method"] = "gemini"
+                return JSONResponse(content=normalized)
 
-            if not data:
-                raise HTTPException(status_code=422, detail="No template matched invoice")
-
-            normalized = normalize_invoice_data(data)
-            return JSONResponse(content=normalized)
+            raise HTTPException(
+                status_code=422,
+                detail="Could not extract invoice data from PDF",
+            )
 
         if is_image:
             # Primary: try Gemini Vision for accurate extraction

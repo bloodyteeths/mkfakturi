@@ -83,7 +83,37 @@ test('postmark inbound with unknown alias returns 200 but no job', function () {
     Bus::assertNotDispatched(ProcessInboundBillEmail::class);
 });
 
-test('postmark inbound skips non-pdf attachments', function () {
+test('postmark inbound accepts image attachments (png, jpeg, webp)', function () {
+    $company = Company::firstOrFail();
+
+    CompanyInboundAlias::create([
+        'company_id' => $company->id,
+        'alias' => 'bills-test',
+    ]);
+
+    Bus::fake();
+    Storage::fake();
+
+    $response = postJson('/webhooks/email-inbound', makePostmarkPayload([
+        'Attachments' => [
+            [
+                'Name' => 'invoice-photo.png',
+                'Content' => base64_encode('fake png'),
+                'ContentType' => 'image/png',
+                'ContentLength' => 8,
+            ],
+        ],
+    ]));
+
+    $response->assertOk();
+    Bus::assertDispatched(ProcessInboundBillEmail::class, function ($job) {
+        return count($job->attachments) === 1
+            && $job->attachments[0]['original_name'] === 'invoice-photo.png'
+            && $job->attachments[0]['content_type'] === 'image/png';
+    });
+});
+
+test('postmark inbound skips unsupported attachments (txt, doc)', function () {
     $company = Company::firstOrFail();
 
     CompanyInboundAlias::create([
@@ -96,10 +126,10 @@ test('postmark inbound skips non-pdf attachments', function () {
     $response = postJson('/webhooks/email-inbound', makePostmarkPayload([
         'Attachments' => [
             [
-                'Name' => 'image.png',
-                'Content' => base64_encode('fake png'),
-                'ContentType' => 'image/png',
-                'ContentLength' => 8,
+                'Name' => 'notes.txt',
+                'Content' => base64_encode('hello'),
+                'ContentType' => 'text/plain',
+                'ContentLength' => 5,
             ],
         ],
     ]));
@@ -136,7 +166,7 @@ test('postmark inbound processes multiple pdf attachments', function () {
     });
 });
 
-test('postmark inbound filters mixed attachments (keeps pdf only)', function () {
+test('postmark inbound filters mixed attachments (keeps pdf and images, skips txt)', function () {
     $company = Company::firstOrFail();
 
     CompanyInboundAlias::create([
@@ -151,7 +181,7 @@ test('postmark inbound filters mixed attachments (keeps pdf only)', function () 
 
     $response = postJson('/webhooks/email-inbound', makePostmarkPayload([
         'Attachments' => [
-            ['Name' => 'logo.png', 'Content' => base64_encode('png'), 'ContentType' => 'image/png', 'ContentLength' => 3],
+            ['Name' => 'photo.jpeg', 'Content' => base64_encode('jpeg'), 'ContentType' => 'image/jpeg', 'ContentLength' => 4],
             ['Name' => 'invoice.pdf', 'Content' => $pdf, 'ContentType' => 'application/pdf', 'ContentLength' => strlen($pdf)],
             ['Name' => 'notes.txt', 'Content' => base64_encode('hello'), 'ContentType' => 'text/plain', 'ContentLength' => 5],
         ],
@@ -160,8 +190,9 @@ test('postmark inbound filters mixed attachments (keeps pdf only)', function () 
     $response->assertOk();
 
     Bus::assertDispatched(ProcessInboundBillEmail::class, function ($job) {
-        return count($job->attachments) === 1
-            && $job->attachments[0]['original_name'] === 'invoice.pdf';
+        return count($job->attachments) === 2
+            && $job->attachments[0]['original_name'] === 'photo.jpeg'
+            && $job->attachments[1]['original_name'] === 'invoice.pdf';
     });
 });
 

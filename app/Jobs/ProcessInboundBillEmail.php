@@ -46,7 +46,8 @@ class ProcessInboundBillEmail implements ShouldQueue
                 $attachment['path'],
                 $attachment['original_name'],
                 $this->from,
-                $this->subject
+                $this->subject,
+                $attachment['content_type'] ?? 'application/pdf'
             );
         }
 
