@@ -32,19 +32,12 @@
       </div>
     </div>
 
-    <BaseEmptyPlaceholder
-      v-if="!inboxStore.totalDrafts && !inboxStore.isFetching"
-      :title="$t('bills.inbox_empty')"
-      :description="$t('bills.inbox_empty_description')"
-    />
-
-    <div v-else class="relative table-container">
+    <div class="relative">
       <BaseTable
-        :data="inboxStore.drafts"
+        ref="table"
+        :data="fetchData"
         :columns="columns"
-        :meta="{ total: inboxStore.totalDrafts }"
-        :loading="inboxStore.isFetching"
-        @get-data="fetchData"
+        class="mt-6"
       >
         <template #cell-bill_date="{ row }">
           {{ row.data.formatted_bill_date }}
@@ -77,12 +70,6 @@
             <BaseDropdownItem @click="openBill(row.data.id)">
               {{ $t('general.view') }}
             </BaseDropdownItem>
-            <BaseDropdownItem @click="approveBill(row.data.id)">
-              {{ $t('bills.approve') }}
-            </BaseDropdownItem>
-            <BaseDropdownItem @click="convertToExpense(row.data.id)">
-              {{ $t('bills.convert_to_expense') }}
-            </BaseDropdownItem>
             <BaseDropdownItem @click="deleteBill(row.data.id)">
               {{ $t('general.delete') }}
             </BaseDropdownItem>
@@ -94,17 +81,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { useBillsInboxStore } from '@/scripts/admin/stores/bills-inbox'
 import { useBillsStore } from '@/scripts/admin/stores/bills'
 import axios from 'axios'
 
 const { t } = useI18n()
-const inboxStore = useBillsInboxStore()
 const billsStore = useBillsStore()
 const router = useRouter()
+const table = ref(null)
 
 const inboundEmail = ref(null)
 const copied = ref(false)
@@ -134,36 +120,39 @@ function copyEmail() {
   }
 }
 
-function fetchData(params) {
-  const query = {
-    page: params?.page ?? 1,
-    limit: params?.limit ?? 10,
+async function fetchData({ page, sort }) {
+  const response = await axios.get('/bills', {
+    params: {
+      status: 'DRAFT',
+      page: page || 1,
+      limit: 10,
+      orderByField: sort?.fieldName || 'bill_date',
+      orderBy: sort?.order || 'desc',
+    },
+  })
+
+  return {
+    data: response.data.data,
+    pagination: {
+      totalPages: response.data.meta?.last_page || 1,
+      currentPage: response.data.meta?.current_page || 1,
+      total: response.data.meta?.total || 0,
+      count: response.data.data?.length || 0,
+    },
   }
-  inboxStore.fetchDraftBills(query)
 }
 
 function openBill(id) {
   router.push(`/admin/bills/${id}/view`)
 }
 
-function approveBill(id) {
-  billsStore.markAsCompleted(id).then(() => {
-    fetchData({ page: 1, limit: 10 })
-  })
-}
-
 function deleteBill(id) {
   billsStore.deleteBills([id]).then(() => {
-    fetchData({ page: 1, limit: 10 })
+    table.value?.refresh()
   })
-}
-
-function convertToExpense(id) {
-  router.push(`/admin/expenses/create?source=bill&bill_id=${id}`)
 }
 
 onMounted(() => {
-  fetchData({ page: 1, limit: 10 })
   fetchInboundAlias()
 })
 </script>
