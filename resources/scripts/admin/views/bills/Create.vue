@@ -684,8 +684,8 @@ onMounted(async () => {
     }
   })
 
-  // Fetch all tax types
-  taxTypeStore.fetchTaxTypes({ limit: 'all' })
+  // Fetch all tax types (must complete before form hydration)
+  await taxTypeStore.fetchTaxTypes({ limit: 'all' })
 
   // Stock module: fetch warehouses if enabled
   if (stockEnabled.value) {

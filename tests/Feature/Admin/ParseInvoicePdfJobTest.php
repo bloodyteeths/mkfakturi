@@ -5,6 +5,8 @@ use App\Models\Bill;
 use App\Models\Company;
 use App\Models\CompanyInboundAlias;
 use App\Models\Supplier;
+use App\Models\Tax;
+use App\Models\TaxType;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -123,6 +125,55 @@ test('parse invoice deduplicates identical name and description', function () {
     expect($item->name)->toBe('Одржување на хигиена');
     expect($item->description)->toBeNull(); // deduplicated
     expect($item->price)->toBe(5000);
+});
+
+test('parse invoice creates tax records when matching tax type exists', function () {
+    $company = Company::firstOrFail();
+    $disk = config('filesystems.default', 'local');
+    Storage::fake($disk);
+
+    // Create an 18% VAT tax type for the company
+    $taxType = TaxType::create([
+        'name' => 'ДДВ 18%',
+        'percent' => 18,
+        'company_id' => $company->id,
+        'compound_tax' => 0,
+        'type' => 'general',
+    ]);
+
+    $filePath = 'inbound-bills/'.$company->id.'/test-tax.pdf';
+    Storage::disk($disk)->put($filePath, '%PDF-1.4 fake');
+
+    Http::fake([
+        '*' => Http::response([
+            'supplier' => ['name' => 'Tax Test Supplier', 'tax_id' => 'MK999'],
+            'invoice' => ['number' => 'TAX-001', 'date' => '2025-11-15', 'currency' => null],
+            'totals' => ['total' => 11800, 'subtotal' => 10000, 'tax' => 1800],
+            'line_items' => [
+                [
+                    'name' => 'Управувачки услуги',
+                    'quantity' => 1,
+                    'unit_price' => 10000,
+                    'tax' => 1800,
+                    'total' => 11800,
+                ],
+            ],
+        ], 200),
+    ]);
+
+    dispatch_sync(new ParseInvoicePdfJob(
+        $company->id, $filePath, 'tax-test.pdf', 'test@example.com', 'Tax Test'
+    ));
+
+    $bill = Bill::where('company_id', $company->id)->where('bill_number', 'TAX-001')->first();
+    expect($bill)->not()->toBeNull();
+
+    $item = $bill->items()->with('taxes.taxType')->first();
+    expect($item->tax)->toBe(1800);
+    expect($item->taxes)->toHaveCount(1);
+    expect($item->taxes->first()->percent)->toBe(18.0);
+    expect($item->taxes->first()->amount)->toBe(1800);
+    expect($item->taxes->first()->taxType)->not()->toBeNull();
 });
 
 test('parse pipeline respects tenant isolation via alias', function () {

@@ -6,6 +6,7 @@ use App\Models\Bill;
 use App\Models\Company;
 use App\Models\CompanySetting;
 use App\Models\Supplier;
+use App\Models\TaxType;
 use App\Notifications\InboundInvoiceNotification;
 use App\Services\InvoiceParsing\Invoice2DataServiceException;
 use App\Services\InvoiceParsing\InvoiceParserClient;
@@ -133,6 +134,66 @@ class ParseInvoicePdfJob implements ShouldQueue
     }
 
     /**
+     * For each item with a non-zero tax amount, resolve the TaxType and build the taxes array
+     * so that Bill::createItems() creates proper Tax records (visible on the edit page).
+     */
+    protected function attachTaxTypes(array &$items): void
+    {
+        // Standard MK VAT rates in descending order
+        $standardRates = [18, 10, 5];
+
+        // Cache company + global tax types (queried once)
+        $taxTypes = TaxType::where('company_id', $this->companyId)
+            ->orWhereNull('company_id')
+            ->get();
+
+        foreach ($items as &$item) {
+            $taxAmount = (int) ($item['tax'] ?? 0);
+            $price = (int) ($item['price'] ?? 0);
+
+            if ($taxAmount <= 0 || $price <= 0) {
+                continue;
+            }
+
+            // Calculate effective rate: tax / price * 100
+            $effectiveRate = ($taxAmount / $price) * 100;
+
+            // Snap to nearest standard rate (within 2% tolerance)
+            $snappedRate = null;
+            foreach ($standardRates as $rate) {
+                if (abs($effectiveRate - $rate) <= 2) {
+                    $snappedRate = $rate;
+                    break;
+                }
+            }
+
+            if ($snappedRate === null) {
+                continue;
+            }
+
+            // Find matching TaxType
+            $taxType = $taxTypes->first(function ($t) use ($snappedRate) {
+                return abs((float) $t->percent - $snappedRate) < 0.01;
+            });
+
+            if (! $taxType) {
+                continue;
+            }
+
+            $item['taxes'] = [
+                [
+                    'tax_type_id' => $taxType->id,
+                    'name' => $taxType->name,
+                    'percent' => (float) $taxType->percent,
+                    'amount' => $taxAmount,
+                    'compound_tax' => $taxType->compound_tax ?? 0,
+                ],
+            ];
+        }
+        unset($item);
+    }
+
+    /**
      * Create the bill from parsed data (or fallback draft).
      *
      * Separated so the entire bill creation is wrapped in error handling.
@@ -255,10 +316,8 @@ class ParseInvoicePdfJob implements ShouldQueue
         $bill = Bill::create($billData);
 
         if (! empty($items)) {
-            foreach ($items as $item) {
-                $item['company_id'] = $this->companyId;
-                $bill->items()->create($item);
-            }
+            $this->attachTaxTypes($items);
+            Bill::createItems($bill, $items);
         }
 
         // Attach the original file as media
