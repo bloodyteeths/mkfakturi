@@ -1666,14 +1666,22 @@ async def _extract_invoice_with_gemini(
             if result.get(field) is not None:
                 result[field] = int(float(result[field]) * 100)
 
-        # Normalize line items
+        # Normalize line items — convert to cents (same as main totals)
         lines = result.get("lines") or []
+        valid_lines = []
         for line in lines:
+            # Filter out truncated/corrupt items from JSON repair
+            if not line.get("description") and line.get("total") is None:
+                logger.info(f"Dropping corrupt line item (no description or total): {line}")
+                continue
             for field in ("unit_price", "tax", "total"):
                 if line.get(field) is not None:
-                    line[field] = float(line[field])
+                    line[field] = int(round(float(line[field]) * 100))
             if line.get("quantity") is not None:
                 line["quantity"] = float(line["quantity"])
+            valid_lines.append(line)
+        lines = valid_lines
+        result["lines"] = lines
 
         logger.info(
             f"Gemini invoice extracted: issuer={result.get('issuer')}, "

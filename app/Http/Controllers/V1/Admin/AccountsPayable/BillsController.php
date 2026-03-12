@@ -32,6 +32,8 @@ class BillsController extends Controller
             'creator',
             'items',
             'items.fields.customField',
+            'items.taxes',
+            'items.taxes.taxType',
             'payments',
             'taxes.taxType',
             'taxes.currency',

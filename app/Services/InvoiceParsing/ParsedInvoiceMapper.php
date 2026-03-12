@@ -67,21 +67,43 @@ class ParsedInvoiceMapper
 
         $items = [];
         foreach ($lineItems as $line) {
-            $qty = (float) ($line['quantity'] ?? 1);
-            $price = (float) ($line['unit_price'] ?? $line['total'] ?? 0);
-            $itemTotal = (int) ($line['total'] ?? ($qty * $price));
-            $itemTax = (int) ($line['tax'] ?? 0);
-            $itemDiscount = (int) ($line['discount'] ?? 0);
+            $qty = max((float) ($line['quantity'] ?? 1), 0.001);
+            $unitPrice = $line['unit_price'] ?? null;
+            $lineTotal = $line['total'] ?? null;
+
+            // Derive unit price: prefer explicit, fall back to total/qty
+            if ($unitPrice !== null) {
+                $price = (int) round((float) $unitPrice);
+            } elseif ($lineTotal !== null) {
+                $price = (int) round((float) $lineTotal / $qty);
+            } else {
+                $price = 0;
+            }
+
+            $itemTotal = (int) round((float) ($lineTotal ?? ($qty * $price)));
+            $itemTax = (int) round((float) ($line['tax'] ?? 0));
+            $itemDiscount = (int) round((float) ($line['discount'] ?? 0));
+
+            // Avoid duplicate display when name and description are identical
+            $name = $line['name'] ?? $line['description'] ?? 'Item';
+            $desc = $line['description'] ?? null;
+            if ($desc !== null && $desc === $name) {
+                $desc = null;
+            }
 
             $items[] = [
-                'name' => $line['name'] ?? $line['description'] ?? 'Item',
-                'description' => $line['description'] ?? null,
-                'quantity' => $qty,
+                'name' => $name,
+                'description' => $desc,
+                'quantity' => (float) ($line['quantity'] ?? 1),
                 'price' => $price,
                 'discount' => $itemDiscount,
                 'discount_val' => $itemDiscount,
                 'tax' => $itemTax,
                 'total' => $itemTotal,
+                'base_price' => (int) round($price * $exchangeRate),
+                'base_total' => (int) round($itemTotal * $exchangeRate),
+                'base_tax' => (int) round($itemTax * $exchangeRate),
+                'base_discount_val' => (int) round($itemDiscount * $exchangeRate),
             ];
         }
 
