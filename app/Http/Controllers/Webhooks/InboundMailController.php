@@ -196,7 +196,25 @@ class InboundMailController extends Controller
             }
 
             $storagePath = 'inbound-bills/'.$companyId.'/'.Str::uuid().'_'.$name;
-            Storage::disk($disk)->put($storagePath, $decoded);
+            $putResult = Storage::disk($disk)->put($storagePath, $decoded);
+
+            if (! $putResult) {
+                Log::error('Inbound email: Storage::put() failed', [
+                    'disk' => $disk,
+                    'path' => $storagePath,
+                    'name' => $name,
+                    'size' => strlen($decoded),
+                    'company_id' => $companyId,
+                ]);
+
+                continue;
+            }
+
+            Log::info('Inbound email attachment stored', [
+                'disk' => $disk,
+                'path' => $storagePath,
+                'size' => strlen($decoded),
+            ]);
 
             $valid[] = [
                 'path' => $storagePath,

@@ -18,7 +18,7 @@ class Invoice2DataClient implements InvoiceParserClient
     public function parse(int $companyId, string $filePath, string $originalName, string $from, ?string $subject): array
     {
         $disk = config('filesystems.default', 'local');
-        $fileContents = Storage::disk($disk)->get($filePath);
+        $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
 
         $baseUrl = rtrim(config('services.invoice2data.url'), '/');
         if (! str_starts_with($baseUrl, 'http://') && ! str_starts_with($baseUrl, 'https://')) {
@@ -65,7 +65,7 @@ class Invoice2DataClient implements InvoiceParserClient
     public function ocr(int $companyId, string $filePath, string $originalName): array
     {
         $disk = config('filesystems.default', 'local');
-        $fileContents = Storage::disk($disk)->get($filePath);
+        $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
 
         $baseUrl = rtrim(config('services.invoice2data.url'), '/');
         if (! str_starts_with($baseUrl, 'http://') && ! str_starts_with($baseUrl, 'https://')) {
@@ -100,6 +100,53 @@ class Invoice2DataClient implements InvoiceParserClient
                 $e
             );
         }
+    }
+
+    /**
+     * Read file from storage with null-safety and diagnostic logging.
+     *
+     * Storage::get() silently returns null when the S3/R2 disk doesn't have
+     * 'throw' => true and the read fails (permissions, missing file, etc.).
+     *
+     * @throws Invoice2DataServiceException
+     */
+    protected function readFileFromStorage(string $disk, string $filePath, string $originalName, int $companyId): string
+    {
+        $exists = Storage::disk($disk)->exists($filePath);
+
+        if (! $exists) {
+            Log::error('Invoice2DataClient: file does not exist in storage', [
+                'disk' => $disk,
+                'path' => $filePath,
+                'file' => $originalName,
+                'company_id' => $companyId,
+            ]);
+
+            throw new Invoice2DataServiceException(
+                "File not found in storage [{$disk}]: {$filePath}",
+                404
+            );
+        }
+
+        $fileContents = Storage::disk($disk)->get($filePath);
+
+        if ($fileContents === null || $fileContents === '') {
+            Log::error('Invoice2DataClient: Storage::get() returned null/empty despite file existing', [
+                'disk' => $disk,
+                'path' => $filePath,
+                'file' => $originalName,
+                'company_id' => $companyId,
+                'exists_check' => $exists,
+                'driver' => config("filesystems.disks.{$disk}.driver"),
+            ]);
+
+            throw new Invoice2DataServiceException(
+                "Failed to read file from storage [{$disk}]: {$filePath}. Storage::get() returned null.",
+                500
+            );
+        }
+
+        return $fileContents;
     } // CLAUDE-CHECKPOINT
 
     /**
@@ -119,7 +166,7 @@ class Invoice2DataClient implements InvoiceParserClient
             $fileContents = $rawContents;
         } else {
             $disk = config('filesystems.default', 'local');
-            $fileContents = Storage::disk($disk)->get($filePath);
+            $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
         }
 
         $readTime = round((microtime(true) - $start) * 1000);

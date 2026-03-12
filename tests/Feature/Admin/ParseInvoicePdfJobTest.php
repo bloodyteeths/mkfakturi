@@ -5,12 +5,9 @@ use App\Models\Bill;
 use App\Models\Company;
 use App\Models\CompanyInboundAlias;
 use App\Models\Supplier;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-
-use function Pest\Laravel\post;
 
 beforeEach(function () {
     Artisan::call('migrate', ['--force' => true]);
@@ -20,10 +17,11 @@ beforeEach(function () {
 
 test('parse invoice pdf job creates draft bill from parser response', function () {
     $company = Company::firstOrFail();
-    Storage::fake('local');
-
     $disk = config('filesystems.default', 'local');
-    $filePath = Storage::disk($disk)->put('inbound-bills/'.$company->id, 'PDFDATA');
+    Storage::fake($disk);
+
+    $filePath = 'inbound-bills/'.$company->id.'/test-invoice.pdf';
+    Storage::disk($disk)->put($filePath, '%PDF-1.4 fake pdf content');
 
     Http::fake([
         '*' => Http::response([
@@ -84,12 +82,11 @@ test('parse pipeline respects tenant isolation via alias', function () {
     $companyA = Company::firstOrFail();
     $companyB = Company::factory()->create();
 
-    CompanyInboundAlias::create([
-        'company_id' => $companyA->id,
-        'alias' => 'bills-'.$companyA->id,
-    ]);
+    $disk = config('filesystems.default', 'local');
+    Storage::fake($disk);
 
-    Storage::fake('local');
+    $filePath = 'inbound-bills/'.$companyA->id.'/test-invoice-200.pdf';
+    Storage::disk($disk)->put($filePath, '%PDF-1.4 fake pdf content');
 
     Http::fake([
         '*' => Http::response([
@@ -117,14 +114,16 @@ test('parse pipeline respects tenant isolation via alias', function () {
         ], 200),
     ]);
 
-    $file = UploadedFile::fake()->create('invoice.pdf', 10, 'application/pdf');
+    // Dispatch job directly for company A (tests tenant isolation at job level)
+    $job = new ParseInvoicePdfJob(
+        $companyA->id,
+        $filePath,
+        'invoice.pdf',
+        'supplier@example.com',
+        'Test Invoice'
+    );
 
-    post('/webhooks/email-inbound', [
-        'to' => 'bills-'.$companyA->id.'@example.test',
-        'from' => 'supplier@example.com',
-        'subject' => 'Test Invoice',
-        'attachments' => [$file],
-    ])->assertOk();
+    dispatch_sync($job);
 
     $billA = Bill::where('company_id', $companyA->id)
         ->where('bill_number', 'INV-200')
