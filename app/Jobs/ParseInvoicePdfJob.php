@@ -55,7 +55,7 @@ class ParseInvoicePdfJob implements ShouldQueue
 
     public function handle(InvoiceParserClient $client, ParsedInvoiceMapper $mapper): void
     {
-        $disk = config('filesystems.default', 'local');
+        $disk = env('FILESYSTEM_DISK', 'public');
 
         try {
             $parsed = $client->parse(

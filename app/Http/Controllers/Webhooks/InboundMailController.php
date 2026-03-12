@@ -166,7 +166,9 @@ class InboundMailController extends Controller
     protected function processAttachments(array $attachments, int $companyId): array
     {
         $valid = [];
-        $disk = config('filesystems.default', 'local');
+        // Use env() directly — config('filesystems.default') is unreliable
+        // because FileDisk::setFilesystem() overrides it to 'temp_local'.
+        $disk = env('FILESYSTEM_DISK', 'public');
 
         foreach ($attachments as $attachment) {
             $contentType = $attachment['ContentType'] ?? $attachment['content_type'] ?? null;

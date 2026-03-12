@@ -17,7 +17,7 @@ class Invoice2DataClient implements InvoiceParserClient
      */
     public function parse(int $companyId, string $filePath, string $originalName, string $from, ?string $subject): array
     {
-        $disk = config('filesystems.default', 'local');
+        $disk = env('FILESYSTEM_DISK', 'public');
         $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
 
         $baseUrl = rtrim(config('services.invoice2data.url'), '/');
@@ -64,7 +64,7 @@ class Invoice2DataClient implements InvoiceParserClient
      */
     public function ocr(int $companyId, string $filePath, string $originalName): array
     {
-        $disk = config('filesystems.default', 'local');
+        $disk = env('FILESYSTEM_DISK', 'public');
         $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
 
         $baseUrl = rtrim(config('services.invoice2data.url'), '/');
@@ -165,7 +165,7 @@ class Invoice2DataClient implements InvoiceParserClient
         if ($rawContents !== null) {
             $fileContents = $rawContents;
         } else {
-            $disk = config('filesystems.default', 'local');
+            $disk = env('FILESYSTEM_DISK', 'public');
             $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
         }
 

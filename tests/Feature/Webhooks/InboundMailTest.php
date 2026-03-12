@@ -215,6 +215,8 @@ test('postmark inbound accepts request with valid auth token via Basic header', 
 
 test('postmark inbound writes decoded pdf to storage', function () {
     $company = Company::firstOrFail();
+    $disk = env('FILESYSTEM_DISK', 'public');
+    Storage::fake($disk);
 
     CompanyInboundAlias::create([
         'company_id' => $company->id,
@@ -232,9 +234,9 @@ test('postmark inbound writes decoded pdf to storage', function () {
         ],
     ]));
 
-    Bus::assertDispatched(ProcessInboundBillEmail::class, function ($job) use ($pdfContent) {
+    Bus::assertDispatched(ProcessInboundBillEmail::class, function ($job) use ($pdfContent, $disk) {
         $path = $job->attachments[0]['path'];
-        $stored = Storage::disk(config('filesystems.default', 'local'))->get($path);
+        $stored = Storage::disk($disk)->get($path);
 
         return $stored === $pdfContent;
     });
