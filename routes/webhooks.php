@@ -81,6 +81,10 @@ Route::post('/webhooks/paddle', [WebhookController::class, 'paddle'])
 Route::post('/webhooks/cpay', [WebhookController::class, 'cpay'])
     ->name('webhooks.cpay');
 
+// Stripe Webhooks
+Route::post('/webhooks/stripe', [WebhookController::class, 'stripe'])
+    ->name('webhooks.stripe');
+
 // Bank Webhooks
 Route::post('/webhooks/bank/nlb', [WebhookController::class, 'bankNlb'])
     ->name('webhooks.bank.nlb');
