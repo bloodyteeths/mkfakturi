@@ -7171,5 +7171,11 @@
     },
     "E-Faktura": "E-Fatura",
     "Viber Notifications": "Viber Bildirimleri",
-    "WooCommerce": "WooCommerce"
+    "WooCommerce": "WooCommerce",
+    "bills.inbound_notification_subject": "Yeni fatura alındı: :number",
+    "bills.inbound_notification_greeting": "Yeni fatura alındı",
+    "bills.inbound_notification_line1": ":supplier firmasından yeni bir fatura (numara: :number) e-posta ile alındı ve taslak fatura olarak eklendi.",
+    "bills.inbound_notification_line2": "Lütfen taslak faturayı inceleyin ve onaylayın.",
+    "bills.inbound_notification_action": "Faturayı Görüntüle",
+    "bills.unknown_supplier": "Bilinmeyen tedarikçi"
 }

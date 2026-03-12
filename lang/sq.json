@@ -6527,5 +6527,11 @@
     },
     "E-Faktura": "E-Fatura",
     "Viber Notifications": "Njoftimet Viber",
-    "WooCommerce": "WooCommerce"
+    "WooCommerce": "WooCommerce",
+    "bills.inbound_notification_subject": "Faturë e re e pranuar: :number",
+    "bills.inbound_notification_greeting": "Faturë e re e pranuar",
+    "bills.inbound_notification_line1": "Një faturë e re nga :supplier (numri: :number) u pranua me email dhe u shtua si faturë e pafinalizuar.",
+    "bills.inbound_notification_line2": "Ju lutem rishikoni dhe miratoni faturën e pafinalizuar.",
+    "bills.inbound_notification_action": "Shiko faturën",
+    "bills.unknown_supplier": "Furnizues i panjohur"
 }

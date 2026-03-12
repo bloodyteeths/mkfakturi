@@ -6698,5 +6698,11 @@
         "type_mpin": "МПИН пријава",
         "type_vat_return": "ДДВ пријава",
         "upcoming": "Претстојни"
-    }
+    },
+    "bills.inbound_notification_subject": "Нова фактура пристигна: :number",
+    "bills.inbound_notification_greeting": "Нова фактура пристигна",
+    "bills.inbound_notification_line1": "Нова фактура од :supplier (број: :number) е примена преку е-пошта и додадена како нацрт сметка.",
+    "bills.inbound_notification_line2": "Ве молиме прегледајте ја и одобрете ја нацрт сметката.",
+    "bills.inbound_notification_action": "Прегледај сметка",
+    "bills.unknown_supplier": "Непознат добавувач"
 }

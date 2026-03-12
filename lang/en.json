@@ -7341,5 +7341,11 @@
         "type_mpin": "MPIN",
         "type_vat_return": "VAT Return",
         "upcoming": "Upcoming"
-    }
+    },
+    "bills.inbound_notification_subject": "New invoice received: :number",
+    "bills.inbound_notification_greeting": "New Invoice Received",
+    "bills.inbound_notification_line1": "A new invoice from :supplier (number: :number) has been received via email and added as a draft bill.",
+    "bills.inbound_notification_line2": "Please review and approve the draft bill.",
+    "bills.inbound_notification_action": "View Bill",
+    "bills.unknown_supplier": "Unknown Supplier"
 }

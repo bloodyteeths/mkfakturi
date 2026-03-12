@@ -3,7 +3,9 @@
 namespace App\Jobs;
 
 use App\Models\Bill;
+use App\Models\Company;
 use App\Models\Supplier;
+use App\Notifications\InboundInvoiceNotification;
 use App\Services\InvoiceParsing\Invoice2DataServiceException;
 use App\Services\InvoiceParsing\InvoiceParserClient;
 use App\Services\InvoiceParsing\ParsedInvoiceMapper;
@@ -132,5 +134,19 @@ class ParseInvoicePdfJob implements ShouldQueue
             'bill_id' => $bill->id,
             'supplier_id' => $supplier->id,
         ]);
+
+        // Notify company owner about the new inbound invoice
+        try {
+            $company = Company::find($this->companyId);
+            if ($company?->owner) {
+                $bill->load('supplier');
+                $company->owner->notify(new InboundInvoiceNotification($bill));
+            }
+        } catch (\Throwable $e) {
+            Log::warning('ParseInvoicePdfJob: failed to send notification', [
+                'bill_id' => $bill->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

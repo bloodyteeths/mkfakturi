@@ -119,7 +119,7 @@ const columns = [
 
 async function fetchInboundAlias() {
   try {
-    const { data } = await axios.get('/api/v1/bills/inbound-alias')
+    const { data } = await axios.get('/bills/inbound-alias')
     inboundEmail.value = data.email
   } catch {
     // Silently fail — alias display is optional
