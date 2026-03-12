@@ -44,7 +44,7 @@ class BillResource extends JsonResource
                 return BillPaymentResource::collection($this->payments);
             }),
             'currency' => $this->whenLoaded('currency', function () {
-                return new CurrencyResource($this->currency);
+                return $this->currency ? new CurrencyResource($this->currency) : null;
             }),
             'company' => $this->whenLoaded('company', function () {
                 return new CompanyResource($this->company);

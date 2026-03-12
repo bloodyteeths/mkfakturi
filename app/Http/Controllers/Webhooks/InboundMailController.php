@@ -204,6 +204,16 @@ class InboundMailController extends Controller
                 continue;
             }
 
+            // Compress images to reduce storage and speed up AI processing
+            if (str_starts_with($contentType, 'image/')) {
+                $compressed = $this->compressImage($decoded, $contentType);
+                if ($compressed !== $decoded) {
+                    $decoded = $compressed;
+                    $contentType = 'image/jpeg';
+                    $name = pathinfo($name, PATHINFO_FILENAME).'.jpg';
+                }
+            }
+
             $storagePath = 'inbound-bills/'.$companyId.'/'.Str::uuid().'_'.$name;
             $putResult = Storage::disk($disk)->put($storagePath, $decoded);
 
@@ -233,6 +243,55 @@ class InboundMailController extends Controller
         }
 
         return $valid;
+    }
+
+    /**
+     * Compress an image to max 1920px wide, 85% JPEG quality.
+     * Reduces 4MB phone photos to ~200-400KB for efficient storage and AI processing.
+     */
+    protected function compressImage(string $imageData, string $contentType): string
+    {
+        try {
+            $image = imagecreatefromstring($imageData);
+            if ($image === false) {
+                return $imageData;
+            }
+
+            $width = imagesx($image);
+            $height = imagesy($image);
+            $maxWidth = 1920;
+
+            if ($width > $maxWidth) {
+                $newHeight = (int) ($height * ($maxWidth / $width));
+                $resized = imagecreatetruecolor($maxWidth, $newHeight);
+                imagecopyresampled($resized, $image, 0, 0, 0, 0, $maxWidth, $newHeight, $width, $height);
+                imagedestroy($image);
+                $image = $resized;
+            }
+
+            ob_start();
+            imagejpeg($image, null, 85);
+            $compressed = ob_get_clean();
+            imagedestroy($image);
+
+            if ($compressed === false || strlen($compressed) === 0) {
+                return $imageData;
+            }
+
+            Log::info('Inbound email image compressed', [
+                'original_size' => strlen($imageData),
+                'compressed_size' => strlen($compressed),
+                'ratio' => round(strlen($compressed) / strlen($imageData) * 100).'%',
+            ]);
+
+            return $compressed;
+        } catch (\Throwable $e) {
+            Log::warning('Inbound email image compression failed, using original', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return $imageData;
+        }
     }
 }
 // CLAUDE-CHECKPOINT
