@@ -1453,7 +1453,7 @@ Extract the following information and return it as a single JSON object:
   "issuer": "company/person name that issued the invoice",
   "tax_id": "VAT/tax ID of the issuer (e.g. MK4030996116740)",
   "address": "issuer address",
-  "invoice_number": "invoice number/ID",
+  "invoice_number": "invoice number/ID (look for Фактура No, Фактура Бр., Број, Invoice No, F-number, etc.)",
   "date": "invoice date in YYYY-MM-DD format",
   "due_date": "payment due date in YYYY-MM-DD format, null if not visible",
   "currency": "currency code (MKD, EUR, USD, etc.)",
@@ -1677,6 +1677,7 @@ async def _extract_invoice_with_gemini(
 
         logger.info(
             f"Gemini invoice extracted: issuer={result.get('issuer')}, "
+            f"invoice_number={result.get('invoice_number')}, "
             f"total={result.get('amount')}, lines={len(lines)}"
         )
 
