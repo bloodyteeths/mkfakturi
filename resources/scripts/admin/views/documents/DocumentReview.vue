@@ -706,7 +706,8 @@ onMounted(async () => {
   try {
     const doc = await store.fetchDocument(id)
     document.value = doc
-    previewUrl.value = `/api/v1/client-documents/${id}/download`
+    const companyId = window.Ls?.get('selectedCompany') || doc.company_id
+    previewUrl.value = `/api/v1/client-documents/${id}/download?company=${companyId}`
 
     // Check if file exists on storage (server-side check)
     if (!doc.file_available) {

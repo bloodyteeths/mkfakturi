@@ -224,7 +224,8 @@ class ClientDocumentController extends Controller
     public function download(Request $request, int $id)
     {
         $user = $request->user();
-        $companyId = (int) $request->header('company');
+        // Accept company from header (axios) or query param (iframe/direct browser link)
+        $companyId = (int) ($request->header('company') ?: $request->query('company', 0));
 
         $document = ClientDocument::where('company_id', $companyId)->findOrFail($id);
 

@@ -522,8 +522,9 @@ const reprocessDoc = async (id) => {
 }
 
 const downloadDocument = (doc) => {
+  const companyId = window.Ls?.get('selectedCompany') || doc.company_id
   const link = document.createElement('a')
-  link.href = `/api/v1/client-documents/${doc.id}/download`
+  link.href = `/api/v1/client-documents/${doc.id}/download?company=${companyId}`
   link.download = doc.original_filename
   document.body.appendChild(link)
   link.click()
