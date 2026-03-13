@@ -166,9 +166,9 @@ class InboundMailController extends Controller
     protected function processAttachments(array $attachments, int $companyId): array
     {
         $valid = [];
-        // config('filesystems.default') is s3compat in production.
+        // config('filesystems.media_disk') is s3compat in production.
         // env() doesn't work on Railway (FILESYSTEM_DISK not in .env, only process env).
-        $disk = config('filesystems.default');
+        $disk = config('filesystems.media_disk');
 
         foreach ($attachments as $attachment) {
             $contentType = $attachment['ContentType'] ?? $attachment['content_type'] ?? null;

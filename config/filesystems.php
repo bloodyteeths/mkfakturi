@@ -4,6 +4,11 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'public'),
 
+    // Immutable copy of the default disk — FileDisk::setFilesystem()
+    // contaminates 'filesystems.default' at runtime, but cannot touch this key.
+    // Use config('filesystems.media_disk') for reliable file storage.
+    'media_disk' => env('FILESYSTEM_DISK', 'public'),
+
     'cloud' => env('FILESYSTEM_CLOUD', 's3'),
 
     'disks' => [

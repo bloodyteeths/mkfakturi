@@ -93,7 +93,7 @@ class BillsController extends Controller
         // Attach scanned invoice file as media if provided
         if ($request->scanned_receipt_path) {
             try {
-                $disk = config('filesystems.default');
+                $disk = config('filesystems.media_disk');
                 $storedPath = $request->scanned_receipt_path;
 
                 if (Storage::disk($disk)->exists($storedPath)) {

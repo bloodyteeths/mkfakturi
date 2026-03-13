@@ -70,7 +70,7 @@ class ParseInvoicePdfJob implements ShouldQueue
             'attempt' => $this->attempts(),
         ]);
 
-        $disk = config('filesystems.default');
+        $disk = config('filesystems.media_disk');
 
         $parsed = null;
 
