@@ -51,8 +51,9 @@ class ClientDocumentController extends Controller
         $path = "{$directory}/{$filename}";
 
         try {
-            // Store file
-            Storage::putFileAs($directory, $file, $filename);
+            // Store file — use explicit disk to avoid FileDisk contamination
+            $disk = env('FILESYSTEM_DISK', 'public');
+            Storage::disk($disk)->putFileAs($directory, $file, $filename);
 
             // Auto-assign partner_id from company's active partner link
             $partnerId = $this->getActivePartnerId($companyId);
@@ -88,8 +89,8 @@ class ClientDocumentController extends Controller
             ], 201);
         } catch (\Exception $e) {
             // Clean up file if it was stored
-            if (Storage::exists($path)) {
-                Storage::delete($path);
+            if (Storage::disk($disk)->exists($path)) {
+                Storage::disk($disk)->delete($path);
             }
 
             return response()->json([
@@ -199,8 +200,9 @@ class ClientDocumentController extends Controller
         }
 
         // Delete the physical file
-        if ($document->file_path && Storage::exists($document->file_path)) {
-            Storage::delete($document->file_path);
+        $disk = env('FILESYSTEM_DISK', 'public');
+        if ($document->file_path && Storage::disk($disk)->exists($document->file_path)) {
+            Storage::disk($disk)->delete($document->file_path);
         }
 
         $document->delete(); // Soft delete
@@ -228,14 +230,15 @@ class ClientDocumentController extends Controller
             ], 403);
         }
 
-        if (! $document->file_path || ! Storage::exists($document->file_path)) {
+        $disk = env('FILESYSTEM_DISK', 'public');
+        if (! $document->file_path || ! Storage::disk($disk)->exists($document->file_path)) {
             return response()->json([
                 'success' => false,
                 'message' => 'File not found.',
             ], 404);
         }
 
-        return Storage::download(
+        return Storage::disk($disk)->download(
             $document->file_path,
             $document->original_filename,
             ['Content-Type' => $document->mime_type]

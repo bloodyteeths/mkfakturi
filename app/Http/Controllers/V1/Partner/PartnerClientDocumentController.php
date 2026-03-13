@@ -193,14 +193,15 @@ class PartnerClientDocumentController extends Controller
 
         $document = ClientDocument::where('company_id', $companyId)->findOrFail($id);
 
-        if (! Storage::exists($document->file_path)) {
+        $disk = env('FILESYSTEM_DISK', 'public');
+        if (! Storage::disk($disk)->exists($document->file_path)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Document file not found.',
             ], 404);
         }
 
-        return Storage::download($document->file_path, $document->original_filename);
+        return Storage::disk($disk)->download($document->file_path, $document->original_filename);
     }
 
     /**
@@ -397,9 +398,10 @@ class PartnerClientDocumentController extends Controller
 
         $addedFiles = 0;
 
+        $disk = env('FILESYSTEM_DISK', 'public');
         foreach ($documents as $document) {
-            if (Storage::exists($document->file_path)) {
-                $fileContent = Storage::get($document->file_path);
+            if (Storage::disk($disk)->exists($document->file_path)) {
+                $fileContent = Storage::disk($disk)->get($document->file_path);
                 $entryName = $document->category.'/'.$document->original_filename;
 
                 // Ensure unique filename within ZIP
