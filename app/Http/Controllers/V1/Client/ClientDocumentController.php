@@ -403,6 +403,17 @@ class ClientDocumentController extends Controller
      */
     private function formatDocument(ClientDocument $document): array
     {
+        // Check if file exists on current storage disk
+        $fileAvailable = false;
+        if ($document->file_path) {
+            try {
+                $disk = config('filesystems.media_disk');
+                $fileAvailable = Storage::disk($disk)->exists($document->file_path);
+            } catch (\Throwable $e) {
+                $fileAvailable = false;
+            }
+        }
+
         return [
             'id' => $document->id,
             'company_id' => $document->company_id,
@@ -426,6 +437,7 @@ class ClientDocumentController extends Controller
             'notes' => $document->notes,
             'rejection_reason' => $document->rejection_reason,
             'metadata' => $document->metadata,
+            'file_available' => $fileAvailable,
             'created_at' => $document->created_at?->toIso8601String(),
             'updated_at' => $document->updated_at?->toIso8601String(),
             'uploader' => $document->relationLoaded('uploader') && $document->uploader ? [

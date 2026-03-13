@@ -279,6 +279,18 @@ class Invoice2DataClient implements InvoiceParserClient
      *
      * @throws \App\Services\InvoiceParsing\Invoice2DataServiceException
      */
+    /**
+     * Parse a bank statement and return structured transactions.
+     *
+     * @return array{transactions: array, bank_code: string, bank_name: string, account_number: string, transaction_count: int}
+     *
+     * @throws \App\Services\InvoiceParsing\Invoice2DataServiceException
+     */
+    public function parseBankStatement(int $companyId, string $filePath, string $originalName): array
+    {
+        return $this->callEndpoint('/parse-bank-statement', $companyId, $filePath, $originalName);
+    }
+
     public function parseProductList(int $companyId, string $filePath, string $originalName): array
     {
         return $this->callEndpoint('/parse-product-list', $companyId, $filePath, $originalName);

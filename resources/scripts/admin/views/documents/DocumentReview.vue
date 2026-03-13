@@ -369,7 +369,18 @@
           <div class="bg-white rounded-lg shadow p-4 mb-4">
             <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.bank_account', 'Bank Account') }}</h3>
             <p class="text-xs text-gray-500 mb-2">{{ $t('documents.bank_account_hint', 'Select the bank account to import transactions into') }}</p>
-            <input v-model="form.bankAccountId" type="number" :placeholder="$t('documents.bank_account_id', 'Bank Account ID')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+            <select
+              v-model="form.bankAccountId"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option :value="null" disabled>{{ $t('documents.select_bank_account', '-- Select bank account --') }}</option>
+              <option v-for="acc in bankAccounts" :key="acc.id" :value="acc.id">
+                {{ acc.bank_name }} — {{ acc.account_number }}
+              </option>
+            </select>
+            <p v-if="bankAccounts.length === 0" class="text-xs text-amber-600 mt-1">
+              {{ $t('documents.no_bank_accounts', 'No bank accounts found. Add one in Banking settings first.') }}
+            </p>
           </div>
 
           <div class="bg-white rounded-lg shadow p-4 mb-4">
@@ -623,6 +634,7 @@ const isSubmitting = ref(false)
 const previewUrl = ref('')
 const previewError = ref(false)
 const selectedEntityType = ref('bill')
+const bankAccounts = ref([])
 
 const form = reactive({
   supplier: { name: '', tax_id: '', address: '', email: '' },
@@ -696,11 +708,8 @@ onMounted(async () => {
     document.value = doc
     previewUrl.value = `/api/v1/client-documents/${id}/download`
 
-    // Check if preview is available
-    try {
-      const response = await window.axios.head(`/client-documents/${id}/download`)
-      if (response.status !== 200) previewError.value = true
-    } catch {
+    // Check if file exists on storage (server-side check)
+    if (!doc.file_available) {
       previewError.value = true
     }
 
@@ -710,6 +719,15 @@ onMounted(async () => {
     // Pre-fill form from extracted data
     if (doc.extracted_data) {
       prefillForm(doc.extracted_data, doc.ai_classification?.type)
+    }
+
+    // Fetch bank accounts for bank_transactions form
+    try {
+      const { data } = await window.axios.get('/banking/accounts')
+      bankAccounts.value = data.data || []
+    } catch {
+      // Banking accounts may not be available (requires Business tier)
+      bankAccounts.value = []
     }
   } catch {
     document.value = null

@@ -229,36 +229,69 @@ class ProcessClientDocumentJob implements ShouldQueue
     protected function extractBankStatementData(ClientDocument $doc, InvoiceParserClient $client): void
     {
         try {
-            $result = $client->ocr(
+            $result = $client->parseBankStatement(
                 $doc->company_id,
                 $doc->file_path,
                 $doc->original_filename
             );
 
+            $transactions = $result['transactions'] ?? [];
+
             $doc->update([
                 'extracted_data' => [
-                    'raw_text' => $result['text'] ?? '',
+                    'transactions' => $transactions,
+                    'bank_name' => $result['bank_name'] ?? '',
+                    'bank_code' => $result['bank_code'] ?? '',
+                    'account_number' => $result['account_number'] ?? '',
+                    'statement_date' => $result['statement_date'] ?? '',
+                    'transaction_count' => $result['transaction_count'] ?? count($transactions),
+                    'confidence' => $result['confidence'] ?? null,
+                    'raw_text' => $result['raw_text'] ?? '',
                     'summary' => $doc->ai_classification['summary'] ?? '',
                     'type' => 'bank_statement',
                 ],
-                'extraction_method' => 'bank_ocr',
+                'extraction_method' => $result['extraction_method'] ?? 'gemini_bank_statement',
                 'processing_status' => ClientDocument::PROCESSING_EXTRACTED,
             ]);
+
+            Log::info('ProcessClientDocumentJob: bank statement extracted', [
+                'document_id' => $doc->id,
+                'bank_name' => $result['bank_name'] ?? null,
+                'transaction_count' => count($transactions),
+            ]);
         } catch (\Throwable $e) {
-            // Fallback: store classification summary only
-            Log::warning('ProcessClientDocumentJob: bank statement OCR failed, using summary', [
+            // Fallback: try basic OCR
+            Log::warning('ProcessClientDocumentJob: bank statement parser failed, trying OCR fallback', [
                 'document_id' => $doc->id,
                 'error' => $e->getMessage(),
             ]);
 
-            $doc->update([
-                'extracted_data' => [
-                    'summary' => $doc->ai_classification['summary'] ?? '',
-                    'type' => 'bank_statement',
-                ],
-                'extraction_method' => 'classification_only',
-                'processing_status' => ClientDocument::PROCESSING_EXTRACTED,
-            ]);
+            try {
+                $ocrResult = $client->ocr(
+                    $doc->company_id,
+                    $doc->file_path,
+                    $doc->original_filename
+                );
+
+                $doc->update([
+                    'extracted_data' => [
+                        'raw_text' => $ocrResult['text'] ?? '',
+                        'summary' => $doc->ai_classification['summary'] ?? '',
+                        'type' => 'bank_statement',
+                    ],
+                    'extraction_method' => 'bank_ocr',
+                    'processing_status' => ClientDocument::PROCESSING_EXTRACTED,
+                ]);
+            } catch (\Throwable $e2) {
+                $doc->update([
+                    'extracted_data' => [
+                        'summary' => $doc->ai_classification['summary'] ?? '',
+                        'type' => 'bank_statement',
+                    ],
+                    'extraction_method' => 'classification_only',
+                    'processing_status' => ClientDocument::PROCESSING_EXTRACTED,
+                ]);
+            }
         }
     }
 

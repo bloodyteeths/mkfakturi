@@ -33,6 +33,13 @@ interface InvoiceParserClient
     public function classify(int $companyId, string $filePath, string $originalName): array;
 
     /**
+     * Parse a bank statement and return structured transactions.
+     *
+     * @return array{transactions: array, bank_code: string, bank_name: string, account_number: string, transaction_count: int}
+     */
+    public function parseBankStatement(int $companyId, string $filePath, string $originalName): array;
+
+    /**
      * Parse a product list / price catalog and return structured product data.
      *
      * @return array{products: array, currency: string, source_company: string|null}
