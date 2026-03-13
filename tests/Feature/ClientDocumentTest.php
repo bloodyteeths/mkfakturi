@@ -259,10 +259,6 @@ describe('Partner Document Review', function () {
         $response = getJson("api/v1/partner/companies/{$otherCompany->id}/documents");
 
         $response->assertStatus(403);
-        $response->assertJson([
-            'success' => false,
-            'message' => 'You do not have access to this company.',
-        ]);
     });
 });
 

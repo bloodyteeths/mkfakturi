@@ -21,11 +21,11 @@
             {{ $t('documents.reprocess', 'Reprocess') }}
           </button>
           <button
-            @click="confirmAndCreateBill"
+            @click="confirmEntity"
             :disabled="isSubmitting"
             class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-md text-sm font-medium disabled:opacity-50"
           >
-            {{ isSubmitting ? '...' : $t('documents.confirm_create_bill', 'Confirm & Create Bill') }}
+            {{ isSubmitting ? '...' : confirmButtonLabel }}
           </button>
         </div>
       </div>
@@ -75,116 +75,517 @@
               </span>
             </span>
           </div>
-          <p v-if="document.ai_classification?.summary" class="text-sm text-gray-600">{{ document.ai_classification.summary }}</p>
-        </div>
+          <p v-if="document.ai_classification?.summary" class="text-sm text-gray-600 mb-3">{{ document.ai_classification.summary }}</p>
 
-        <!-- Supplier Info -->
-        <div class="bg-white rounded-lg shadow p-4 mb-4">
-          <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.supplier', 'Supplier') }}</h3>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.supplier_name', 'Name') }}</label>
-              <input v-model="form.supplier.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.tax_id', 'Tax ID') }}</label>
-              <input v-model="form.supplier.tax_id" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.supplier_address', 'Address') }}</label>
-              <input v-model="form.supplier.address" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.supplier_email', 'Email') }}</label>
-              <input v-model="form.supplier.email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+          <!-- Entity Type Selector -->
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.create_as', 'Create as') }}</label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="et in availableEntityTypes"
+                :key="et.value"
+                @click="selectedEntityType = et.value"
+                :class="[
+                  'px-3 py-1.5 rounded-md text-sm font-medium border transition-colors',
+                  selectedEntityType === et.value
+                    ? 'bg-primary-500 text-white border-primary-500'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                ]"
+              >
+                {{ et.label }}
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Bill Info -->
-        <div class="bg-white rounded-lg shadow p-4 mb-4">
-          <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.bill_info', 'Bill Details') }}</h3>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.bill_number', 'Bill Number') }}</label>
-              <input v-model="form.bill.bill_number" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.bill_date', 'Date') }}</label>
-              <input v-model="form.bill.bill_date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.due_date', 'Due Date') }}</label>
-              <input v-model="form.bill.due_date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.currency', 'Currency') }}</label>
-              <input :value="'MKD'" disabled class="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-gray-50 text-gray-500" />
+        <!-- ===== BILL FORM ===== -->
+        <template v-if="selectedEntityType === 'bill'">
+          <!-- Supplier Info -->
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.supplier', 'Supplier') }}</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.supplier_name', 'Name') }}</label>
+                <input v-model="form.supplier.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.tax_id', 'Tax ID') }}</label>
+                <input v-model="form.supplier.tax_id" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.supplier_address', 'Address') }}</label>
+                <input v-model="form.supplier.address" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.supplier_email', 'Email') }}</label>
+                <input v-model="form.supplier.email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Line Items -->
-        <div class="bg-white rounded-lg shadow p-4 mb-4">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-medium text-gray-700">{{ $t('documents.line_items', 'Line Items') }}</h3>
-            <button @click="addItem" class="text-xs text-primary-600 hover:text-primary-800 font-medium">
-              + {{ $t('documents.add_item', 'Add Item') }}
-            </button>
+          <!-- Bill Info -->
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.bill_info', 'Bill Details') }}</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.bill_number', 'Bill Number') }}</label>
+                <input v-model="form.bill.bill_number" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.bill_date', 'Date') }}</label>
+                <input v-model="form.bill.bill_date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.due_date', 'Due Date') }}</label>
+                <input v-model="form.bill.due_date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.currency', 'Currency') }}</label>
+                <input :value="'MKD'" disabled class="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-gray-50 text-gray-500" />
+              </div>
+            </div>
           </div>
 
-          <div v-if="form.items.length === 0" class="text-center text-sm text-gray-500 py-4">
-            {{ $t('documents.no_items', 'No line items extracted') }}
+          <!-- Line Items -->
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-700">{{ $t('documents.line_items', 'Line Items') }}</h3>
+              <button @click="addBillItem" class="text-xs text-primary-600 hover:text-primary-800 font-medium">
+                + {{ $t('documents.add_item', 'Add Item') }}
+              </button>
+            </div>
+            <div v-if="form.items.length === 0" class="text-center text-sm text-gray-500 py-4">
+              {{ $t('documents.no_items', 'No line items extracted') }}
+            </div>
+            <div v-else class="space-y-3">
+              <div v-for="(item, idx) in form.items" :key="idx" class="border border-gray-200 rounded-md p-3">
+                <div class="flex items-start justify-between mb-2">
+                  <input v-model="item.name" type="text" :placeholder="$t('documents.item_name', 'Item name')" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-primary-500 focus:border-primary-500" />
+                  <button @click="form.items.splice(idx, 1)" class="ml-2 text-red-400 hover:text-red-600">
+                    <XMarkIcon class="h-4 w-4" />
+                  </button>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.qty', 'Qty') }}</label>
+                    <input v-model.number="item.quantity" type="number" step="0.01" min="0" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.price', 'Price') }}</label>
+                    <input :value="formatCents(item.price)" @input="item.price = parseCents($event.target.value)" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.tax', 'Tax') }}</label>
+                    <input :value="formatCents(item.tax)" @input="item.tax = parseCents($event.target.value)" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.total', 'Total') }}</label>
+                    <input :value="formatCents(item.total)" @input="item.total = parseCents($event.target.value)" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div v-else class="space-y-3">
-            <div v-for="(item, idx) in form.items" :key="idx" class="border border-gray-200 rounded-md p-3">
-              <div class="flex items-start justify-between mb-2">
-                <input v-model="item.name" type="text" :placeholder="$t('documents.item_name', 'Item name')" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-primary-500 focus:border-primary-500" />
-                <button @click="form.items.splice(idx, 1)" class="ml-2 text-red-400 hover:text-red-600">
+          <!-- Totals -->
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.totals', 'Totals') }}</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">{{ $t('documents.subtotal', 'Subtotal') }}</span>
+                <span class="font-medium">{{ formatCents(form.bill.sub_total) }}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">{{ $t('documents.tax_total', 'Tax') }}</span>
+                <span class="font-medium">{{ formatCents(form.bill.tax) }}</span>
+              </div>
+              <div class="flex justify-between text-sm font-semibold border-t pt-2">
+                <span>{{ $t('documents.grand_total', 'Total') }}</span>
+                <span class="text-primary-600">{{ formatCents(form.bill.total) }}</span>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- ===== EXPENSE FORM ===== -->
+        <template v-if="selectedEntityType === 'expense'">
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.supplier', 'Supplier') }}</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.supplier_name', 'Name') }}</label>
+                <input v-model="form.supplier.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.tax_id', 'Tax ID') }}</label>
+                <input v-model="form.supplier.tax_id" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.expense_details', 'Expense Details') }}</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.expense_date', 'Date') }}</label>
+                <input v-model="form.expense.expense_date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.expense_category', 'Category') }}</label>
+                <input v-model="form.expense.category" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.expense_amount', 'Amount') }}</label>
+                <input :value="formatCents(form.expense.amount)" @input="form.expense.amount = parseCents($event.target.value)" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.currency', 'Currency') }}</label>
+                <input :value="'MKD'" disabled class="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-gray-50 text-gray-500" />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.notes', 'Notes') }}</label>
+                <textarea v-model="form.expense.notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"></textarea>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- ===== INVOICE (OUTGOING) FORM ===== -->
+        <template v-if="selectedEntityType === 'invoice'">
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.customer', 'Customer') }}</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.customer_name', 'Name') }}</label>
+                <input v-model="form.customer.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.customer_email', 'Email') }}</label>
+                <input v-model="form.customer.email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.customer_phone', 'Phone') }}</label>
+                <input v-model="form.customer.phone" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.tax_id', 'Tax ID') }}</label>
+                <input v-model="form.customer.tax_id" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.invoice_details', 'Invoice Details') }}</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.invoice_number', 'Invoice Number') }}</label>
+                <input v-model="form.invoice.invoice_number" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.invoice_date', 'Date') }}</label>
+                <input v-model="form.invoice.invoice_date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.due_date', 'Due Date') }}</label>
+                <input v-model="form.invoice.due_date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.currency', 'Currency') }}</label>
+                <input :value="'MKD'" disabled class="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-gray-50 text-gray-500" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoice Line Items (same pattern as bill) -->
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-700">{{ $t('documents.line_items', 'Line Items') }}</h3>
+              <button @click="addBillItem" class="text-xs text-primary-600 hover:text-primary-800 font-medium">
+                + {{ $t('documents.add_item', 'Add Item') }}
+              </button>
+            </div>
+            <div v-if="form.items.length === 0" class="text-center text-sm text-gray-500 py-4">
+              {{ $t('documents.no_items', 'No line items extracted') }}
+            </div>
+            <div v-else class="space-y-3">
+              <div v-for="(item, idx) in form.items" :key="idx" class="border border-gray-200 rounded-md p-3">
+                <div class="flex items-start justify-between mb-2">
+                  <input v-model="item.name" type="text" :placeholder="$t('documents.item_name', 'Item name')" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" />
+                  <button @click="form.items.splice(idx, 1)" class="ml-2 text-red-400 hover:text-red-600">
+                    <XMarkIcon class="h-4 w-4" />
+                  </button>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.qty', 'Qty') }}</label>
+                    <input v-model.number="item.quantity" type="number" step="0.01" min="0" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.price', 'Price') }}</label>
+                    <input :value="formatCents(item.price)" @input="item.price = parseCents($event.target.value)" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.tax', 'Tax') }}</label>
+                    <input :value="formatCents(item.tax)" @input="item.tax = parseCents($event.target.value)" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.total', 'Total') }}</label>
+                    <input :value="formatCents(item.total)" @input="item.total = parseCents($event.target.value)" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoice Totals -->
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.totals', 'Totals') }}</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">{{ $t('documents.subtotal', 'Subtotal') }}</span>
+                <span class="font-medium">{{ formatCents(form.bill.sub_total) }}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">{{ $t('documents.tax_total', 'Tax') }}</span>
+                <span class="font-medium">{{ formatCents(form.bill.tax) }}</span>
+              </div>
+              <div class="flex justify-between text-sm font-semibold border-t pt-2">
+                <span>{{ $t('documents.grand_total', 'Total') }}</span>
+                <span class="text-primary-600">{{ formatCents(form.bill.total) }}</span>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- ===== BANK TRANSACTIONS FORM ===== -->
+        <template v-if="selectedEntityType === 'bank_transactions'">
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.bank_account', 'Bank Account') }}</h3>
+            <p class="text-xs text-gray-500 mb-2">{{ $t('documents.bank_account_hint', 'Select the bank account to import transactions into') }}</p>
+            <input v-model="form.bankAccountId" type="number" :placeholder="$t('documents.bank_account_id', 'Bank Account ID')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+          </div>
+
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-700">{{ $t('documents.transactions_preview', 'Transactions') }}</h3>
+              <span class="text-xs text-gray-500">{{ form.transactions.length }} {{ $t('documents.transactions_count', 'transactions') }}</span>
+            </div>
+            <div v-if="form.transactions.length === 0" class="text-center text-sm text-gray-500 py-4">
+              {{ $t('documents.no_transactions', 'No transactions extracted') }}
+            </div>
+            <div v-else class="space-y-2 max-h-96 overflow-auto">
+              <div v-for="(txn, idx) in form.transactions" :key="idx" class="border border-gray-200 rounded-md p-3 text-sm">
+                <div class="flex justify-between mb-1">
+                  <span class="font-medium text-gray-900">{{ txn.counterparty || txn.description || '-' }}</span>
+                  <span :class="txn.credit ? 'text-green-600' : 'text-red-600'" class="font-semibold">
+                    {{ txn.credit ? '+' : '-' }}{{ formatCents(txn.credit || txn.debit) }}
+                  </span>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500">
+                  <span>{{ txn.date }}</span>
+                  <span>{{ txn.reference || '' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- ===== ITEMS (PRODUCT LIST) FORM ===== -->
+        <template v-if="selectedEntityType === 'items'">
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-700">{{ $t('documents.items_preview', 'Products to Import') }}</h3>
+              <button @click="addProductItem" class="text-xs text-primary-600 hover:text-primary-800 font-medium">
+                + {{ $t('documents.add_product', 'Add Product') }}
+              </button>
+            </div>
+            <div v-if="form.products.length === 0" class="text-center text-sm text-gray-500 py-4">
+              {{ $t('documents.no_products', 'No products extracted') }}
+            </div>
+            <div v-else class="space-y-3">
+              <div v-for="(product, idx) in form.products" :key="idx" class="border border-gray-200 rounded-md p-3">
+                <div class="flex items-start justify-between mb-2">
+                  <input v-model="product.name" type="text" :placeholder="$t('documents.product_name', 'Product name')" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" />
+                  <button @click="form.products.splice(idx, 1)" class="ml-2 text-red-400 hover:text-red-600">
+                    <XMarkIcon class="h-4 w-4" />
+                  </button>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.product_code', 'Code/SKU') }}</label>
+                    <input v-model="product.code" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.product_unit', 'Unit') }}</label>
+                    <input v-model="product.unit" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.price', 'Price') }}</label>
+                    <input :value="formatCents(product.unit_price)" @input="product.unit_price = parseCents($event.target.value)" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400">{{ $t('documents.product_barcode', 'Barcode') }}</label>
+                    <input v-model="product.barcode" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-gray-500">
+              {{ form.products.length }} {{ $t('documents.products_to_import', 'products to import') }}
+            </div>
+          </div>
+        </template>
+
+        <!-- ===== TAX FORM (EDITABLE) ===== -->
+        <template v-if="selectedEntityType === 'tax_form'">
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-700">{{ $t('documents.tax_form_type', 'Tax Form') }}</h3>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                {{ form.taxForm.form_type || 'UJP' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Declarant -->
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.declarant', 'Declarant') }}</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.declarant_name', 'Name') }}</label>
+                <input v-model="form.taxForm.declarant.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.tax_id', 'Tax ID (EDB)') }}</label>
+                <input v-model="form.taxForm.declarant.tax_id" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.supplier_address', 'Address') }}</label>
+                <input v-model="form.taxForm.declarant.address" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Period -->
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.tax_period', 'Period') }}</h3>
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.tax_year', 'Year') }}</label>
+                <input v-model.number="form.taxForm.period.year" type="number" min="2020" max="2030" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.tax_month', 'Month') }}</label>
+                <input v-model.number="form.taxForm.period.month" type="number" min="1" max="12" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.tax_quarter', 'Quarter') }}</label>
+                <input v-model.number="form.taxForm.period.quarter" type="number" min="1" max="4" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Fields (key-value pairs) -->
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-700">{{ $t('documents.tax_fields', 'Form Fields') }}</h3>
+              <button @click="addTaxField" class="text-xs text-primary-600 hover:text-primary-800 font-medium">
+                + {{ $t('documents.add_field', 'Add Field') }}
+              </button>
+            </div>
+            <div class="space-y-2">
+              <div v-for="(field, idx) in form.taxForm.fieldsList" :key="idx" class="flex gap-2">
+                <input v-model="field.key" type="text" :placeholder="$t('documents.field_name', 'Field label')" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" />
+                <input v-model="field.value" type="text" :placeholder="$t('documents.field_value', 'Value')" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" />
+                <button @click="form.taxForm.fieldsList.splice(idx, 1)" class="text-red-400 hover:text-red-600">
                   <XMarkIcon class="h-4 w-4" />
                 </button>
               </div>
-              <div class="grid grid-cols-4 gap-2">
-                <div>
-                  <label class="block text-xs text-gray-400">{{ $t('documents.qty', 'Qty') }}</label>
-                  <input v-model.number="item.quantity" type="number" step="0.01" min="0" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-primary-500 focus:border-primary-500" />
-                </div>
-                <div>
-                  <label class="block text-xs text-gray-400">{{ $t('documents.price', 'Price') }}</label>
-                  <input :value="formatCents(item.price)" @input="item.price = parseCents($event.target.value)" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-primary-500 focus:border-primary-500" />
-                </div>
-                <div>
-                  <label class="block text-xs text-gray-400">{{ $t('documents.tax', 'Tax') }}</label>
-                  <input :value="formatCents(item.tax)" @input="item.tax = parseCents($event.target.value)" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-primary-500 focus:border-primary-500" />
-                </div>
-                <div>
-                  <label class="block text-xs text-gray-400">{{ $t('documents.total', 'Total') }}</label>
-                  <input :value="formatCents(item.total)" @input="item.total = parseCents($event.target.value)" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-primary-500 focus:border-primary-500" />
-                </div>
+            </div>
+          </div>
+
+          <!-- Totals -->
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.tax_totals', 'Totals') }}</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.total_income', 'Total Income') }}</label>
+                <input v-model="form.taxForm.totals.total_income" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.total_deductions', 'Total Deductions') }}</label>
+                <input v-model="form.taxForm.totals.total_deductions" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.total_tax', 'Total Tax') }}</label>
+                <input v-model="form.taxForm.totals.total_tax" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.total_to_pay', 'Amount to Pay') }}</label>
+                <input v-model="form.taxForm.totals.total_to_pay" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
               </div>
             </div>
           </div>
-        </div>
+        </template>
 
-        <!-- Totals -->
-        <div class="bg-white rounded-lg shadow p-4 mb-4">
-          <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.totals', 'Totals') }}</h3>
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-500">{{ $t('documents.subtotal', 'Subtotal') }}</span>
-              <span class="font-medium">{{ formatCents(form.bill.sub_total) }}</span>
+        <!-- ===== CONTRACT (EDITABLE) ===== -->
+        <template v-if="selectedEntityType === 'contract'">
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.contract_summary', 'Summary') }}</h3>
+            <textarea v-model="form.contract.summary" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"></textarea>
+          </div>
+
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.contract_parties', 'Parties') }}</h3>
+            <div v-for="(party, idx) in form.contract.parties" :key="idx" class="flex gap-2 mb-2">
+              <input v-model="party.name" type="text" :placeholder="$t('documents.party_name', 'Name')" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" />
+              <input v-model="party.role" type="text" :placeholder="$t('documents.party_role', 'Role')" class="w-32 px-2 py-1 border border-gray-300 rounded text-sm" />
+              <button @click="form.contract.parties.splice(idx, 1)" class="text-red-400 hover:text-red-600">
+                <XMarkIcon class="h-4 w-4" />
+              </button>
             </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-500">{{ $t('documents.tax_total', 'Tax') }}</span>
-              <span class="font-medium">{{ formatCents(form.bill.tax) }}</span>
-            </div>
-            <div class="flex justify-between text-sm font-semibold border-t pt-2">
-              <span>{{ $t('documents.grand_total', 'Total') }}</span>
-              <span class="text-primary-600">{{ formatCents(form.bill.total) }}</span>
+            <button @click="form.contract.parties.push({ name: '', role: '' })" class="text-xs text-primary-600 hover:text-primary-800 font-medium">
+              + {{ $t('documents.add_party', 'Add Party') }}
+            </button>
+          </div>
+
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.contract_dates', 'Dates') }}</h3>
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.start_date', 'Start Date') }}</label>
+                <input v-model="form.contract.dates.start" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.end_date', 'End Date') }}</label>
+                <input v-model="form.contract.dates.end" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.execution_date', 'Execution Date') }}</label>
+                <input v-model="form.contract.dates.execution" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
             </div>
           </div>
-        </div>
+
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.contract_amounts', 'Amounts') }}</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.contract_value', 'Value') }}</label>
+                <input v-model="form.contract.amounts.value" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ $t('documents.currency', 'Currency') }}</label>
+                <input v-model="form.contract.amounts.currency" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('documents.contract_notes', 'Notes') }}</h3>
+            <textarea v-model="form.contract.notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"></textarea>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -196,7 +597,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDocumentHubStore } from '@/scripts/admin/stores/document-hub'
@@ -213,11 +614,71 @@ const document = ref(null)
 const isLoading = ref(true)
 const isSubmitting = ref(false)
 const previewUrl = ref('')
+const selectedEntityType = ref('bill')
 
 const form = reactive({
   supplier: { name: '', tax_id: '', address: '', email: '' },
+  customer: { name: '', email: '', phone: '', tax_id: '' },
   bill: { bill_number: '', bill_date: '', due_date: '', currency_id: null, sub_total: 0, tax: 0, total: 0, discount: 0, discount_val: 0, due_amount: 0, exchange_rate: 1 },
+  invoice: { invoice_number: '', invoice_date: '', due_date: '' },
+  expense: { expense_date: '', category: '', amount: 0, notes: '' },
   items: [],
+  transactions: [],
+  products: [],
+  bankAccountId: null,
+  taxForm: {
+    form_type: '',
+    declarant: { name: '', tax_id: '', address: '' },
+    period: { year: null, month: null, quarter: null },
+    fieldsList: [],
+    totals: { total_income: null, total_deductions: null, total_tax: null, total_to_pay: null },
+  },
+  contract: {
+    summary: '',
+    parties: [],
+    dates: { start: '', end: '', execution: '' },
+    amounts: { value: '', currency: 'MKD' },
+    notes: '',
+  },
+})
+
+// Map AI classification to default entity type
+const inferEntityType = (doc) => {
+  const type = doc.ai_classification?.type || 'other'
+  const map = {
+    invoice: 'bill',
+    receipt: 'expense',
+    bank_statement: 'bank_transactions',
+    product_list: 'items',
+    tax_form: 'tax_form',
+    contract: 'contract',
+  }
+  return map[type] || 'bill'
+}
+
+// Available entity types for the selector
+const availableEntityTypes = computed(() => [
+  { value: 'bill', label: t('documents.confirm_as_bill', 'Bill') },
+  { value: 'expense', label: t('documents.confirm_as_expense', 'Expense') },
+  { value: 'invoice', label: t('documents.confirm_as_invoice', 'Invoice') },
+  { value: 'bank_transactions', label: t('documents.confirm_as_transactions', 'Transactions') },
+  { value: 'items', label: t('documents.confirm_as_items', 'Items') },
+  { value: 'tax_form', label: t('documents.confirm_as_tax_form', 'Tax Form') },
+  { value: 'contract', label: t('documents.confirm_as_contract', 'Contract') },
+])
+
+// Dynamic confirm button label
+const confirmButtonLabel = computed(() => {
+  const labels = {
+    bill: t('documents.confirm_create_bill', 'Confirm & Create Bill'),
+    expense: t('documents.confirm_create_expense', 'Confirm & Create Expense'),
+    invoice: t('documents.confirm_create_invoice', 'Confirm & Create Invoice'),
+    bank_transactions: t('documents.confirm_import_transactions', 'Confirm & Import'),
+    items: t('documents.confirm_import_items', 'Confirm & Import Items'),
+    tax_form: t('documents.save_tax_form', 'Save Tax Form'),
+    contract: t('documents.save_contract', 'Save Contract'),
+  }
+  return labels[selectedEntityType.value] || labels.bill
 })
 
 onMounted(async () => {
@@ -227,18 +688,12 @@ onMounted(async () => {
     document.value = doc
     previewUrl.value = `/api/v1/client-documents/${id}/download`
 
+    // Set default entity type from AI classification
+    selectedEntityType.value = inferEntityType(doc)
+
     // Pre-fill form from extracted data
     if (doc.extracted_data) {
-      const { supplier, bill, items } = doc.extracted_data
-      if (supplier) {
-        form.supplier = { ...form.supplier, ...supplier }
-      }
-      if (bill) {
-        form.bill = { ...form.bill, ...bill }
-      }
-      if (items) {
-        form.items = items.map((item) => ({ ...item }))
-      }
+      prefillForm(doc.extracted_data, doc.ai_classification?.type)
     }
   } catch {
     document.value = null
@@ -247,30 +702,141 @@ onMounted(async () => {
   }
 })
 
-const confirmAndCreateBill = async () => {
+const prefillForm = (data, aiType) => {
+  // Bill/Invoice common fields
+  if (data.supplier) {
+    form.supplier = { ...form.supplier, ...data.supplier }
+  }
+  if (data.bill) {
+    form.bill = { ...form.bill, ...data.bill }
+  }
+  if (data.items) {
+    form.items = data.items.map((item) => ({ ...item }))
+  }
+
+  // Customer (for outgoing invoice)
+  if (data.customer) {
+    form.customer = { ...form.customer, ...data.customer }
+  }
+  if (data.invoice) {
+    form.invoice = { ...form.invoice, ...data.invoice }
+  }
+
+  // Expense
+  if (data.expense) {
+    form.expense = { ...form.expense, ...data.expense }
+  } else if (aiType === 'receipt' && data.bill) {
+    // Map bill data to expense for receipts
+    form.expense.expense_date = data.bill.bill_date || ''
+    form.expense.amount = data.bill.total || 0
+    form.expense.category = data.summary || ''
+  }
+
+  // Bank transactions
+  if (data.transactions) {
+    form.transactions = data.transactions.map((t) => ({ ...t }))
+  }
+
+  // Products
+  if (data.products) {
+    form.products = data.products.map((p) => ({ ...p }))
+  }
+
+  // Tax form
+  if (data.form_type || data.declarant || data.fields) {
+    form.taxForm.form_type = data.form_type || ''
+    if (data.declarant) form.taxForm.declarant = { ...form.taxForm.declarant, ...data.declarant }
+    if (data.period) form.taxForm.period = { ...form.taxForm.period, ...data.period }
+    if (data.fields) {
+      form.taxForm.fieldsList = Object.entries(data.fields).map(([key, value]) => ({ key, value: String(value) }))
+    }
+    if (data.totals) form.taxForm.totals = { ...form.taxForm.totals, ...data.totals }
+  }
+
+  // Contract
+  if (data.summary !== undefined && (aiType === 'contract' || data.parties)) {
+    form.contract.summary = data.summary || ''
+    if (data.parties) form.contract.parties = data.parties.map((p) => ({ ...p }))
+    if (data.dates) form.contract.dates = { ...form.contract.dates, ...data.dates }
+    if (data.amounts) form.contract.amounts = { ...form.contract.amounts, ...data.amounts }
+    if (data.notes) form.contract.notes = data.notes
+  }
+}
+
+const confirmEntity = async () => {
   isSubmitting.value = true
   try {
-    const data = await store.confirmDocument(document.value.id, {
-      supplier: form.supplier,
-      bill: form.bill,
-      items: form.items,
-    })
+    let payload = {}
+
+    switch (selectedEntityType.value) {
+      case 'bill':
+        payload = { supplier: form.supplier, bill: form.bill, items: form.items }
+        break
+      case 'expense':
+        payload = { supplier: form.supplier, expense: form.expense }
+        break
+      case 'invoice':
+        payload = { customer: form.customer, invoice: form.invoice, bill: form.bill, items: form.items }
+        break
+      case 'bank_transactions':
+        payload = { bank_account_id: form.bankAccountId, transactions: form.transactions }
+        break
+      case 'items':
+        payload = { products: form.products, currency: 'MKD' }
+        break
+      case 'tax_form': {
+        // Convert fieldsList back to object
+        const fields = {}
+        form.taxForm.fieldsList.forEach((f) => { if (f.key) fields[f.key] = f.value })
+        payload = {
+          form_type: form.taxForm.form_type,
+          declarant: form.taxForm.declarant,
+          period: form.taxForm.period,
+          fields,
+          totals: form.taxForm.totals,
+        }
+        break
+      }
+      case 'contract':
+        payload = {
+          summary: form.contract.summary,
+          parties: form.contract.parties,
+          dates: form.contract.dates,
+          amounts: form.contract.amounts,
+          notes: form.contract.notes,
+        }
+        break
+    }
+
+    const data = await store.confirmDocument(document.value.id, payload, selectedEntityType.value)
 
     notificationStore.showNotification({
       type: 'success',
-      message: t('documents.bill_created', 'Bill created successfully!'),
+      message: t('documents.entity_created', 'Confirmed successfully!'),
     })
 
-    // Navigate to the created bill
-    if (data.data?.bill_id) {
-      router.push({ name: 'bills.view', params: { id: data.data.bill_id } })
+    // Navigate to destination
+    const result = data.data || {}
+    const routes = {
+      bill: result.bill_id ? { name: 'bills.view', params: { id: result.bill_id } } : null,
+      expense: result.expense_id ? { name: 'expenses.edit', params: { id: result.expense_id } } : null,
+      invoice: result.invoice_id ? { name: 'invoices.view', params: { id: result.invoice_id } } : null,
+      bank_transactions: { name: 'banking.transactions' },
+      items: { name: 'items.index' },
+    }
+
+    const dest = routes[selectedEntityType.value]
+    if (dest) {
+      router.push(dest)
     } else {
-      router.push({ name: 'client-documents' })
+      // tax_form / contract — stay on page with success
+      document.value.processing_status = 'confirmed'
+      document.value.status = 'reviewed'
     }
   } catch (err) {
     notificationStore.showNotification({
       type: 'error',
-      message: err?.response?.data?.message || 'Failed to create bill.',
+      message: err?.response?.data?.message || t('documents.confirm_failed', 'Confirmation failed.'),
     })
   } finally {
     isSubmitting.value = false
@@ -296,24 +862,21 @@ const reprocess = async () => {
   }
 }
 
-const addItem = () => {
+const addBillItem = () => {
   form.items.push({
-    name: '',
-    description: null,
-    quantity: 1,
-    price: 0,
-    tax: 0,
-    total: 0,
-    discount: 0,
-    discount_val: 0,
-    base_price: 0,
-    base_total: 0,
-    base_tax: 0,
-    base_discount_val: 0,
+    name: '', description: null, quantity: 1, price: 0, tax: 0, total: 0,
+    discount: 0, discount_val: 0, base_price: 0, base_total: 0, base_tax: 0, base_discount_val: 0,
   })
 }
 
-// Amounts stored in cents — display as decimal
+const addProductItem = () => {
+  form.products.push({ name: '', code: '', unit: '', unit_price: 0, quantity: null, barcode: '' })
+}
+
+const addTaxField = () => {
+  form.taxForm.fieldsList.push({ key: '', value: '' })
+}
+
 const formatCents = (cents) => {
   if (!cents && cents !== 0) return '0.00'
   return (Number(cents) / 100).toFixed(2)
@@ -331,6 +894,7 @@ const getCategoryLabel = (type) => {
     contract: t('documents.type_contract', 'Contract'),
     bank_statement: t('documents.type_bank_statement', 'Bank Statement'),
     tax_form: t('documents.type_tax_form', 'Tax Form'),
+    product_list: t('documents.type_product_list', 'Product List'),
     other: t('documents.type_other', 'Other'),
   }
   return labels[type] || type
@@ -343,6 +907,7 @@ const getCategoryBadgeClass = (type) => {
     contract: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800',
     bank_statement: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800',
     tax_form: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800',
+    product_list: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800',
     other: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800',
   }
   return classes[type] || classes.other

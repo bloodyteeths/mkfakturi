@@ -271,5 +271,76 @@ class Invoice2DataClient implements InvoiceParserClient
             );
         }
     }
-}
+
+    /**
+     * Parse a product list / price catalog using Gemini Vision.
+     *
+     * @return array{products: array, currency: string, source_company: string|null}
+     *
+     * @throws \App\Services\InvoiceParsing\Invoice2DataServiceException
+     */
+    public function parseProductList(int $companyId, string $filePath, string $originalName): array
+    {
+        return $this->callEndpoint('/parse-product-list', $companyId, $filePath, $originalName);
+    }
+
+    /**
+     * Parse a tax form (UJP) and return structured field data.
+     *
+     * @return array{form_type: string, declarant: array, period: array, fields: array, totals: array}
+     *
+     * @throws \App\Services\InvoiceParsing\Invoice2DataServiceException
+     */
+    public function parseTaxForm(int $companyId, string $filePath, string $originalName): array
+    {
+        return $this->callEndpoint('/parse-tax-form', $companyId, $filePath, $originalName);
+    }
+
+    /**
+     * Generic helper to call a FastAPI endpoint with file upload.
+     *
+     * @return array<string,mixed>
+     *
+     * @throws \App\Services\InvoiceParsing\Invoice2DataServiceException
+     */
+    protected function callEndpoint(string $endpoint, int $companyId, string $filePath, string $originalName): array
+    {
+        $disk = env('FILESYSTEM_DISK', 'public');
+        $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
+
+        $baseUrl = rtrim(config('services.invoice2data.url'), '/');
+        if (! str_starts_with($baseUrl, 'http://') && ! str_starts_with($baseUrl, 'https://')) {
+            $baseUrl = 'https://'.$baseUrl;
+        }
+
+        $timeout = (int) config('services.invoice2data.timeout', 90);
+
+        try {
+            $response = Http::timeout(max($timeout, 180))
+                ->connectTimeout(30)
+                ->attach('file', $fileContents, $originalName)
+                ->post($baseUrl.$endpoint, [
+                    'company_id' => $companyId,
+                    'request_id' => (string) Str::uuid(),
+                ]);
+
+            $response->throw();
+
+            return $response->json();
+        } catch (ConnectionException $e) {
+            Log::warning("invoice2data-service unreachable during {$endpoint}", [
+                'url' => $baseUrl.$endpoint,
+                'company_id' => $companyId,
+                'file' => $originalName,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw new Invoice2DataServiceException(
+                'Document processing service is currently unavailable. Please try again later.',
+                503,
+                $e
+            );
+        }
+    }
+} // CLAUDE-CHECKPOINT
 

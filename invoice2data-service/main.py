@@ -1713,6 +1713,7 @@ _GEMINI_CLASSIFY_PROMPT = """Analyze this document image. Classify it into exact
 - bank_statement: A bank statement / банкарски извод (transaction list, account summary)
 - contract: A contract / договор (legal text, signatures, terms and conditions)
 - tax_form: A tax form / даночен образец (UJP/DDV government forms, DDV-04, DB, Образец-36/37)
+- product_list: A product price list / ценовник / каталог (product names, codes, prices in a table)
 - other: None of the above (guides, manuals, correspondence, regulations)
 
 Return ONLY a raw JSON object (no markdown fences):
@@ -1722,7 +1723,8 @@ IMPORTANT:
 - confidence should be 0.0-1.0
 - summary should be concise (max 100 chars), in the document's language (Macedonian/Albanian/Turkish/English)
 - If the document is about regulations/guides/procedures for invoices or taxes but is NOT itself an invoice or tax form, classify as "other"
-- A tax form must be an actual fillable/filled government form, not a guide about tax forms"""
+- A tax form must be an actual fillable/filled government form, not a guide about tax forms
+- A product_list has rows of products with prices but NO invoice totals or VAT breakdown"""
 
 
 async def _classify_document_with_gemini(
@@ -1794,7 +1796,7 @@ async def _classify_document_with_gemini(
 
         # Validate required fields
         doc_type = result.get("type", "other")
-        valid_types = ["invoice", "receipt", "bank_statement", "contract", "tax_form", "other"]
+        valid_types = ["invoice", "receipt", "bank_statement", "contract", "tax_form", "product_list", "other"]
         if doc_type not in valid_types:
             doc_type = "other"
 
@@ -1883,6 +1885,236 @@ async def classify_document(file: UploadFile = File(...)) -> JSONResponse:
     except Exception as e:
         logger.error(f"Classification failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+_GEMINI_PRODUCT_LIST_PROMPT = """This is a product price list, catalog, or inventory document (possibly in Macedonian/Cyrillic).
+Extract ALL products/items from the table(s).
+
+Return a JSON object:
+{
+  "products": [
+    {
+      "code": "product code/SKU (null if not visible)",
+      "name": "product name/description",
+      "unit": "unit of measure (ком, кг, л, м, etc.)",
+      "unit_price": price as number,
+      "quantity": available quantity as number (null if not visible),
+      "barcode": "barcode if visible (null otherwise)"
+    }
+  ],
+  "currency": "MKD|EUR|USD",
+  "source_company": "company name from header if visible"
+}
+
+IMPORTANT:
+- All monetary amounts must be numeric (e.g. 1500.00 not "1,500.00")
+- European number format: dot (.) is thousands separator, comma (,) is decimal separator. "1.500,00" = 1500.00
+- Extract ALL products from the table, do not skip any rows
+- Return ONLY the raw JSON object, no markdown code fences, no explanation"""
+
+
+_GEMINI_TAX_FORM_PROMPT = """This is a Macedonian tax form (UJP/DDV). Extract ALL visible fields.
+
+Return a JSON object:
+{
+  "form_type": "DDV-04|DB|Obrazec-36|Obrazec-37|other",
+  "declarant": {
+    "name": "company/person name",
+    "tax_id": "tax identification number (EDB)",
+    "address": "address if visible"
+  },
+  "period": {
+    "year": 2025,
+    "month": 12,
+    "quarter": null
+  },
+  "fields": {
+    "field_label_or_number": "value as string"
+  },
+  "totals": {
+    "total_income": number or null,
+    "total_deductions": number or null,
+    "total_tax": number or null,
+    "total_to_pay": number or null
+  }
+}
+
+IMPORTANT:
+- Extract ALL fields with their labels/numbers as keys
+- Monetary amounts as numbers (European format: dot=thousands, comma=decimal)
+- Keep original Cyrillic field labels as keys where possible
+- Return ONLY the raw JSON object, no markdown code fences, no explanation"""
+
+
+async def _extract_with_gemini_prompt(
+    contents: bytes, mime_type: str, prompt: str
+) -> Optional[Dict[str, Any]]:
+    """Generic Gemini Vision extraction with a custom prompt."""
+    logger = logging.getLogger(__name__)
+
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        logger.info("GEMINI_API_KEY not set, skipping extraction")
+        return None
+
+    contents = _resize_image_for_gemini(contents)
+    if mime_type == "image/png" and not contents[:4] == b'\x89PNG':
+        mime_type = "image/jpeg"
+
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{model}:generateContent?key={api_key}"
+    )
+
+    img_b64 = base64.b64encode(contents).decode("utf-8")
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt},
+                    {
+                        "inline_data": {
+                            "mime_type": mime_type,
+                            "data": img_b64,
+                        }
+                    },
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.1,
+            "maxOutputTokens": 16384,
+            "responseMimeType": "application/json",
+        },
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(url, json=payload)
+            resp.raise_for_status()
+
+        data = resp.json()
+        text = (
+            data.get("candidates", [{}])[0]
+            .get("content", {})
+            .get("parts", [{}])[0]
+            .get("text", "")
+        )
+
+        if not text:
+            logger.warning("Gemini extraction returned empty text")
+            return None
+
+        text = _repair_json(text)
+        return json_module.loads(text)
+    except json_module.JSONDecodeError as e:
+        logger.warning(f"Gemini extraction JSON parse error: {e}")
+        return None
+    except httpx.TimeoutException:
+        logger.warning("Gemini extraction request timed out")
+        return None
+    except Exception as e:
+        logger.warning(f"Gemini extraction failed: {e}")
+        return None
+
+
+@app.post("/parse-product-list")
+async def parse_product_list(file: UploadFile = File(...)) -> JSONResponse:
+    """Extract products from a price list / catalog using Gemini Vision."""
+    logger = logging.getLogger(__name__)
+
+    try:
+        contents = await file.read()
+        if not contents:
+            raise HTTPException(status_code=400, detail="Empty file")
+
+        mime_type = file.content_type or "application/octet-stream"
+        image_contents = contents
+        image_mime = mime_type
+
+        if mime_type == "application/pdf" or (file.filename and file.filename.lower().endswith(".pdf")):
+            result = _pdf_first_page_to_image(contents)
+            if result:
+                image_contents, image_mime = result
+            else:
+                return JSONResponse(
+                    status_code=422,
+                    content={"error": "Could not convert PDF to image"},
+                )
+
+        extracted = await _extract_with_gemini_prompt(
+            image_contents, image_mime, _GEMINI_PRODUCT_LIST_PROMPT
+        )
+
+        if extracted is None:
+            return JSONResponse(
+                status_code=503,
+                content={"error": "Product list extraction service unavailable"},
+            )
+
+        # Normalize: ensure products array exists
+        products = extracted.get("products", [])
+        for p in products:
+            if p.get("unit_price") is not None:
+                p["unit_price"] = int(float(p["unit_price"]) * 100)  # Convert to cents
+
+        logger.info(f"Product list extracted: {file.filename} -> {len(products)} products")
+        return JSONResponse(content=extracted)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Product list extraction failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/parse-tax-form")
+async def parse_tax_form(file: UploadFile = File(...)) -> JSONResponse:
+    """Extract fields from a Macedonian tax form using Gemini Vision."""
+    logger = logging.getLogger(__name__)
+
+    try:
+        contents = await file.read()
+        if not contents:
+            raise HTTPException(status_code=400, detail="Empty file")
+
+        mime_type = file.content_type or "application/octet-stream"
+        image_contents = contents
+        image_mime = mime_type
+
+        if mime_type == "application/pdf" or (file.filename and file.filename.lower().endswith(".pdf")):
+            result = _pdf_first_page_to_image(contents)
+            if result:
+                image_contents, image_mime = result
+            else:
+                return JSONResponse(
+                    status_code=422,
+                    content={"error": "Could not convert PDF to image"},
+                )
+
+        extracted = await _extract_with_gemini_prompt(
+            image_contents, image_mime, _GEMINI_TAX_FORM_PROMPT
+        )
+
+        if extracted is None:
+            return JSONResponse(
+                status_code=503,
+                content={"error": "Tax form extraction service unavailable"},
+            )
+
+        logger.info(
+            f"Tax form extracted: {file.filename} -> type={extracted.get('form_type', 'unknown')}"
+        )
+        return JSONResponse(content=extracted)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Tax form extraction failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+# CLAUDE-CHECKPOINT
 
 
 @app.get("/health")

@@ -90,6 +90,17 @@ class InvoiceResource extends JsonResource
                 return CurrencyResource::make($this->currency);
             }),
             'profit' => $profit,
+            'source_document_url' => $this->whenLoaded('media', function () {
+                $media = $this->getMedia('source_document')->first();
+                if (! $media) {
+                    return null;
+                }
+                try {
+                    return $media->getTemporaryUrl(now()->addMinutes(30));
+                } catch (\RuntimeException $e) {
+                    return $media->getFullUrl();
+                }
+            }),
         ];
     }
 }

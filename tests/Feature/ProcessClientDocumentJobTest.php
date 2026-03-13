@@ -347,7 +347,7 @@ class ProcessClientDocumentJobTest extends TestCase
     }
 
     /** @test */
-    public function confirm_rejects_non_invoice_documents()
+    public function confirm_saves_contract_as_document()
     {
         $doc = ClientDocument::create([
             'company_id' => $this->company->id,
@@ -368,7 +368,12 @@ class ProcessClientDocumentJobTest extends TestCase
         $response = $this->withHeaders(['company' => (string) $this->company->id])
             ->postJson("/api/v1/client-documents/{$doc->id}/confirm");
 
-        $response->assertStatus(422);
-        $response->assertJsonPath('success', false);
+        $response->assertOk();
+        $response->assertJsonPath('success', true);
+        $response->assertJsonPath('data.entity_type', 'contract');
+
+        $doc->refresh();
+        $this->assertEquals(ClientDocument::PROCESSING_CONFIRMED, $doc->processing_status);
+        $this->assertEquals(ClientDocument::STATUS_REVIEWED, $doc->status);
     }
 } // CLAUDE-CHECKPOINT

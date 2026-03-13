@@ -580,6 +580,40 @@ onSearched = debounce(onSearched, 500)
             :currency="invoiceData.currency"
           />
         </BaseTab>
+
+        <!-- Source Document Tab (shown when original document was attached via AI Hub) -->
+        <BaseTab
+          v-if="invoiceData.source_document_url"
+          tab-panel-container="py-4 mt-px"
+          :title="$t('invoices.source_document', 'Source Document')"
+        >
+          <BaseCard>
+            <div class="p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">
+                  {{ $t('invoices.source_document', 'Source Document') }}
+                </h3>
+                <a
+                  :href="invoiceData.source_document_url"
+                  target="_blank"
+                  download
+                >
+                  <BaseButton variant="primary-outline">
+                    {{ $t('general.download') }}
+                  </BaseButton>
+                </a>
+              </div>
+              <div class="border rounded-lg overflow-hidden bg-gray-50">
+                <iframe
+                  :src="invoiceData.source_document_url"
+                  class="w-full"
+                  style="height: 800px;"
+                  frameborder="0"
+                />
+              </div>
+            </div>
+          </BaseCard>
+        </BaseTab>
       </BaseTabGroup>
     </BaseCard>
   </BasePage>

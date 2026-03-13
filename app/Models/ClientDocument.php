@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Bill;
 use App\Models\Expense;
+use App\Models\Invoice;
 
 class ClientDocument extends Model
 {
@@ -33,6 +34,8 @@ class ClientDocument extends Model
     const CATEGORY_OTHER = 'other';
 
     const CATEGORY_TAX_FORM = 'tax_form';
+
+    const CATEGORY_PRODUCT_LIST = 'product_list';
 
     // Processing status constants
     const PROCESSING_PENDING = 'pending';
@@ -78,6 +81,7 @@ class ClientDocument extends Model
         'extracted_data',
         'linked_bill_id',
         'linked_expense_id',
+        'linked_invoice_id',
         'extraction_method',
         'error_message',
         'reviewer_id',
@@ -248,6 +252,14 @@ class ClientDocument extends Model
     public function linkedExpense(): BelongsTo
     {
         return $this->belongsTo(Expense::class, 'linked_expense_id');
+    }
+
+    /**
+     * Get the linked invoice (created from extraction).
+     */
+    public function linkedInvoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'linked_invoice_id');
     }
 
     /**

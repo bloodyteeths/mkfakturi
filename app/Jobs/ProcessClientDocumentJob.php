@@ -177,8 +177,12 @@ class ProcessClientDocumentJob implements ShouldQueue
             $this->extractInvoiceData($doc, $client, $mapper);
         } elseif ($type === 'bank_statement') {
             $this->extractBankStatementData($doc, $client);
+        } elseif ($type === 'product_list') {
+            $this->extractProductListData($doc, $client);
+        } elseif ($type === 'tax_form') {
+            $this->extractTaxFormData($doc, $client);
         } else {
-            // contract, tax_form, other — store classification summary only
+            // contract, other — store classification summary only
             $doc->update([
                 'extracted_data' => [
                     'summary' => $doc->ai_classification['summary'] ?? '',
@@ -251,6 +255,97 @@ class ProcessClientDocumentJob implements ShouldQueue
                 'extracted_data' => [
                     'summary' => $doc->ai_classification['summary'] ?? '',
                     'type' => 'bank_statement',
+                ],
+                'extraction_method' => 'classification_only',
+                'processing_status' => ClientDocument::PROCESSING_EXTRACTED,
+            ]);
+        }
+    }
+
+    /**
+     * Extract product list data using the product list parser.
+     */
+    protected function extractProductListData(ClientDocument $doc, InvoiceParserClient $client): void
+    {
+        try {
+            $result = $client->parseProductList(
+                $doc->company_id,
+                $doc->file_path,
+                $doc->original_filename
+            );
+
+            $doc->update([
+                'extracted_data' => [
+                    'products' => $result['products'] ?? [],
+                    'currency' => $result['currency'] ?? 'MKD',
+                    'source_company' => $result['source_company'] ?? null,
+                    'type' => 'product_list',
+                ],
+                'extraction_method' => 'gemini_vision',
+                'processing_status' => ClientDocument::PROCESSING_EXTRACTED,
+            ]);
+
+            Log::info('ProcessClientDocumentJob: product list extracted', [
+                'document_id' => $doc->id,
+                'products_count' => count($result['products'] ?? []),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('ProcessClientDocumentJob: product list extraction failed, using summary', [
+                'document_id' => $doc->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            $doc->update([
+                'extracted_data' => [
+                    'summary' => $doc->ai_classification['summary'] ?? '',
+                    'type' => 'product_list',
+                ],
+                'extraction_method' => 'classification_only',
+                'processing_status' => ClientDocument::PROCESSING_EXTRACTED,
+            ]);
+        }
+    }
+
+    /**
+     * Extract tax form data using the tax form parser.
+     */
+    protected function extractTaxFormData(ClientDocument $doc, InvoiceParserClient $client): void
+    {
+        try {
+            $result = $client->parseTaxForm(
+                $doc->company_id,
+                $doc->file_path,
+                $doc->original_filename
+            );
+
+            $doc->update([
+                'extracted_data' => [
+                    'form_type' => $result['form_type'] ?? 'other',
+                    'declarant' => $result['declarant'] ?? [],
+                    'period' => $result['period'] ?? [],
+                    'fields' => $result['fields'] ?? [],
+                    'totals' => $result['totals'] ?? [],
+                    'type' => 'tax_form',
+                ],
+                'extraction_method' => 'gemini_vision',
+                'processing_status' => ClientDocument::PROCESSING_EXTRACTED,
+            ]);
+
+            Log::info('ProcessClientDocumentJob: tax form extracted', [
+                'document_id' => $doc->id,
+                'form_type' => $result['form_type'] ?? 'unknown',
+                'fields_count' => count($result['fields'] ?? []),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('ProcessClientDocumentJob: tax form extraction failed, using summary', [
+                'document_id' => $doc->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            $doc->update([
+                'extracted_data' => [
+                    'summary' => $doc->ai_classification['summary'] ?? '',
+                    'type' => 'tax_form',
                 ],
                 'extraction_method' => 'classification_only',
                 'processing_status' => ClientDocument::PROCESSING_EXTRACTED,

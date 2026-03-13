@@ -114,6 +114,8 @@ export const useDocumentHubStore = defineStore('documentHub', () => {
           extraction_method: status.extraction_method,
           error_message: status.error_message,
           linked_bill_id: status.linked_bill_id,
+          linked_expense_id: status.linked_expense_id,
+          linked_invoice_id: status.linked_invoice_id,
         }
       }
 
@@ -151,8 +153,14 @@ export const useDocumentHubStore = defineStore('documentHub', () => {
     pollingIntervals.value = {}
   }
 
-  async function confirmDocument(id, editedData = null) {
-    const payload = editedData ? { extracted_data: editedData } : {}
+  async function confirmDocument(id, editedData = null, entityType = null) {
+    const payload = {}
+    if (editedData) {
+      payload.extracted_data = editedData
+    }
+    if (entityType) {
+      payload.entity_type = entityType
+    }
     const { data } = await window.axios.post(
       `/client-documents/${id}/confirm`,
       payload

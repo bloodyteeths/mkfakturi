@@ -4,17 +4,15 @@ namespace App\Http\Controllers\V1\Partner;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessClientDocumentJob;
-use App\Models\Bill;
 use App\Models\ClientDocument;
-use App\Models\CompanySetting;
 use App\Models\Partner;
-use App\Models\Supplier;
-use App\Models\TaxType;
+use App\Services\DocumentConfirmationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use ZipArchive;
 
 class PartnerClientDocumentController extends Controller
@@ -227,12 +225,14 @@ class PartnerClientDocumentController extends Controller
                 'error_message' => $document->error_message,
                 'has_extracted_data' => ! empty($document->extracted_data),
                 'linked_bill_id' => $document->linked_bill_id,
+                'linked_expense_id' => $document->linked_expense_id,
+                'linked_invoice_id' => $document->linked_invoice_id,
             ],
         ]);
     }
 
     /**
-     * Confirm AI extraction and create a bill from extracted data (partner).
+     * Confirm AI extraction and create an entity from extracted data (partner).
      */
     public function confirm(Request $request, int $companyId, int $id): JsonResponse
     {
@@ -250,21 +250,23 @@ class PartnerClientDocumentController extends Controller
             ], 422);
         }
 
-        $type = $doc->ai_classification['type'] ?? 'other';
-        if (! in_array($type, ['invoice', 'receipt'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only invoice/receipt documents can be confirmed as bills.',
-            ], 422);
-        }
-
         $extractedData = $request->input('extracted_data', $doc->extracted_data);
+        $entityType = $request->input('entity_type', $this->inferEntityType($doc));
+
+        $service = app(DocumentConfirmationService::class);
 
         try {
-            $bill = $this->createBillFromExtraction($companyId, $extractedData, $doc);
+            $result = match ($entityType) {
+                'bill' => $service->confirmAsBill($doc, $extractedData, $companyId),
+                'expense' => $service->confirmAsExpense($doc, $extractedData, $companyId),
+                'invoice' => $service->confirmAsInvoice($doc, $extractedData, $companyId),
+                'bank_transactions' => $service->confirmAsBankTransactions($doc, $extractedData, $companyId),
+                'items' => $service->confirmAsItems($doc, $extractedData, $companyId),
+                'tax_form', 'contract' => $service->confirmAsDocument($doc, $extractedData),
+                default => throw ValidationException::withMessages(['entity_type' => 'Unsupported entity type.']),
+            };
 
             $doc->update([
-                'linked_bill_id' => $bill->id,
                 'processing_status' => ClientDocument::PROCESSING_CONFIRMED,
                 'status' => ClientDocument::STATUS_REVIEWED,
                 'reviewer_id' => $request->user()->id,
@@ -273,24 +275,43 @@ class PartnerClientDocumentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Bill created successfully from document.',
-                'data' => [
-                    'bill_id' => $bill->id,
-                    'bill_number' => $bill->bill_number,
-                    'document' => $this->formatDocument($doc->fresh()),
-                ],
+                'message' => 'Document confirmed successfully.',
+                'data' => array_merge(
+                    ['entity_type' => $entityType],
+                    $result,
+                    ['document' => $this->formatDocument($doc->fresh())]
+                ),
             ]);
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Throwable $e) {
             Log::error('Partner document confirm failed', [
                 'document_id' => $doc->id,
+                'entity_type' => $entityType,
                 'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create bill: '.$e->getMessage(),
+                'message' => 'Failed to confirm document: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Infer the entity type from the AI classification.
+     */
+    private function inferEntityType(ClientDocument $doc): string
+    {
+        return match ($doc->ai_classification['type'] ?? 'other') {
+            'invoice' => 'bill',
+            'receipt' => 'expense',
+            'bank_statement' => 'bank_transactions',
+            'product_list' => 'items',
+            'tax_form' => 'tax_form',
+            'contract' => 'contract',
+            default => 'bill',
+        };
     }
 
     /**
@@ -327,112 +348,6 @@ class PartnerClientDocumentController extends Controller
             'message' => 'Document reprocessing started.',
             'data' => $this->formatDocument($doc->fresh()),
         ]);
-    }
-
-    /**
-     * Create a Bill from extracted document data.
-     */
-    private function createBillFromExtraction(int $companyId, array $extractedData, ClientDocument $doc): Bill
-    {
-        $supplierData = $extractedData['supplier'] ?? [];
-        $billData = $extractedData['bill'] ?? [];
-        $items = $extractedData['items'] ?? [];
-
-        $supplierName = $supplierData['name'] ?? 'Unknown Supplier';
-
-        $supplier = Supplier::updateOrCreate(
-            ['company_id' => $companyId, 'name' => $supplierName],
-            [
-                'company_id' => $companyId,
-                'name' => $supplierName,
-                'tax_id' => $supplierData['tax_id'] ?? null,
-                'email' => $supplierData['email'] ?? null,
-            ]
-        );
-
-        $billData['supplier_id'] = $supplier->id;
-        $billData['company_id'] = $companyId;
-        $billData['status'] = Bill::STATUS_DRAFT;
-        $billData['paid_status'] = Bill::PAID_STATUS_UNPAID;
-
-        if (empty($billData['bill_number'])) {
-            $billData['bill_number'] = 'DOC-'.strtoupper(substr(md5($doc->file_path), 0, 8));
-        }
-
-        $originalNumber = $billData['bill_number'];
-        $counter = 1;
-        while (Bill::where('company_id', $companyId)->where('bill_number', $billData['bill_number'])->exists()) {
-            $billData['bill_number'] = $originalNumber.'-'.$counter;
-            $counter++;
-        }
-
-        if (empty($billData['currency_id'])) {
-            $billData['currency_id'] = CompanySetting::getSetting('currency', $companyId);
-        }
-
-        $bill = Bill::create($billData);
-
-        if (! empty($items)) {
-            $this->attachTaxTypes($companyId, $items);
-            Bill::createItems($bill, $items);
-        }
-
-        $disk = env('FILESYSTEM_DISK', 'public');
-        try {
-            if (Storage::disk($disk)->exists($doc->file_path)) {
-                $bill->addMediaFromDisk($doc->file_path, $disk)
-                    ->toMediaCollection('scanned_invoice');
-            }
-        } catch (\Throwable $e) {
-            Log::warning('Partner document confirm: failed to attach media', [
-                'bill_id' => $bill->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        return $bill;
-    }
-
-    /**
-     * Attach tax types to items based on MK VAT rates.
-     */
-    private function attachTaxTypes(int $companyId, array &$items): void
-    {
-        $standardRates = [18, 10, 5];
-        $taxTypes = TaxType::where('company_id', $companyId)
-            ->orWhereNull('company_id')
-            ->get();
-
-        foreach ($items as &$item) {
-            $taxAmount = (int) ($item['tax'] ?? 0);
-            $price = (int) ($item['price'] ?? 0);
-            if ($taxAmount <= 0 || $price <= 0) {
-                continue;
-            }
-            $effectiveRate = ($taxAmount / $price) * 100;
-            $snappedRate = null;
-            foreach ($standardRates as $rate) {
-                if (abs($effectiveRate - $rate) <= 2) {
-                    $snappedRate = $rate;
-                    break;
-                }
-            }
-            if ($snappedRate === null) {
-                continue;
-            }
-            $taxType = $taxTypes->first(fn ($t) => abs((float) $t->percent - $snappedRate) < 0.01);
-            if (! $taxType) {
-                continue;
-            }
-            $item['taxes'] = [[
-                'tax_type_id' => $taxType->id,
-                'name' => $taxType->name,
-                'percent' => (float) $taxType->percent,
-                'amount' => $taxAmount,
-                'compound_tax' => $taxType->compound_tax ?? 0,
-            ]];
-        }
-        unset($item);
     }
 
     /**
@@ -573,6 +488,7 @@ class PartnerClientDocumentController extends Controller
             'extracted_data' => $document->extracted_data,
             'linked_bill_id' => $document->linked_bill_id,
             'linked_expense_id' => $document->linked_expense_id,
+            'linked_invoice_id' => $document->linked_invoice_id,
             'extraction_method' => $document->extraction_method,
             'error_message' => $document->error_message,
             'reviewer_id' => $document->reviewer_id,
