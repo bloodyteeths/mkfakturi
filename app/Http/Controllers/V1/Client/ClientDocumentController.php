@@ -52,7 +52,7 @@ class ClientDocumentController extends Controller
 
         try {
             // Store file — use explicit disk to avoid FileDisk contamination
-            $disk = env('FILESYSTEM_DISK', 'public');
+            $disk = config('filesystems.default');
             Storage::disk($disk)->putFileAs($directory, $file, $filename);
 
             // Auto-assign partner_id from company's active partner link
@@ -200,7 +200,7 @@ class ClientDocumentController extends Controller
         }
 
         // Delete the physical file
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = config('filesystems.default');
         if ($document->file_path && Storage::disk($disk)->exists($document->file_path)) {
             Storage::disk($disk)->delete($document->file_path);
         }
@@ -230,7 +230,7 @@ class ClientDocumentController extends Controller
             ], 403);
         }
 
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = config('filesystems.default');
         if (! $document->file_path || ! Storage::disk($disk)->exists($document->file_path)) {
             return response()->json([
                 'success' => false,

@@ -502,7 +502,7 @@ class DocumentConfirmationService
      */
     private function attachMediaToEntity(ClientDocument $doc, $entity, string $collection): void
     {
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = config('filesystems.default');
 
         try {
             if (Storage::disk($disk)->exists($doc->file_path)) {

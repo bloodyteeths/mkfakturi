@@ -17,7 +17,7 @@ class Invoice2DataClient implements InvoiceParserClient
      */
     public function parse(int $companyId, string $filePath, string $originalName, string $from, ?string $subject): array
     {
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = config('filesystems.default');
         $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
 
         $baseUrl = rtrim(config('services.invoice2data.url'), '/');
@@ -64,7 +64,7 @@ class Invoice2DataClient implements InvoiceParserClient
      */
     public function ocr(int $companyId, string $filePath, string $originalName): array
     {
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = config('filesystems.default');
         $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
 
         $baseUrl = rtrim(config('services.invoice2data.url'), '/');
@@ -158,7 +158,7 @@ class Invoice2DataClient implements InvoiceParserClient
      */
     public function classify(int $companyId, string $filePath, string $originalName): array
     {
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = config('filesystems.default');
         $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
 
         $baseUrl = rtrim(config('services.invoice2data.url'), '/');
@@ -218,7 +218,7 @@ class Invoice2DataClient implements InvoiceParserClient
         if ($rawContents !== null) {
             $fileContents = $rawContents;
         } else {
-            $disk = env('FILESYSTEM_DISK', 'public');
+            $disk = config('filesystems.default');
             $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
         }
 
@@ -305,7 +305,7 @@ class Invoice2DataClient implements InvoiceParserClient
      */
     protected function callEndpoint(string $endpoint, int $companyId, string $filePath, string $originalName): array
     {
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = config('filesystems.default');
         $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
 
         $baseUrl = rtrim(config('services.invoice2data.url'), '/');

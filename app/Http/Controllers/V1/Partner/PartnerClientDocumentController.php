@@ -193,7 +193,7 @@ class PartnerClientDocumentController extends Controller
 
         $document = ClientDocument::where('company_id', $companyId)->findOrFail($id);
 
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = config('filesystems.default');
         if (! Storage::disk($disk)->exists($document->file_path)) {
             return response()->json([
                 'success' => false,
@@ -398,7 +398,7 @@ class PartnerClientDocumentController extends Controller
 
         $addedFiles = 0;
 
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = config('filesystems.default');
         foreach ($documents as $document) {
             if (Storage::disk($disk)->exists($document->file_path)) {
                 $fileContent = Storage::disk($disk)->get($document->file_path);
