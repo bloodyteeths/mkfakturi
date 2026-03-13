@@ -136,10 +136,21 @@ class DocumentConfirmationService
         $discount = $invoiceData['discount'] ?? 0;
         $discountVal = $invoiceData['discount_val'] ?? 0;
 
+        // Ensure invoice number uniqueness per company
+        $invoiceNumber = $invoiceData['bill_number'] ?? $invoiceData['invoice_number'] ?? null;
+        if ($invoiceNumber) {
+            $originalNumber = $invoiceNumber;
+            $counter = 1;
+            while (Invoice::where('company_id', $companyId)->where('invoice_number', $invoiceNumber)->exists()) {
+                $invoiceNumber = $originalNumber . '-' . $counter;
+                $counter++;
+            }
+        }
+
         $invoice = Invoice::create([
             'invoice_date' => $invoiceData['bill_date'] ?? $invoiceData['invoice_date'] ?? now()->format('Y-m-d'),
             'due_date' => $invoiceData['due_date'] ?? now()->addDays(30)->format('Y-m-d'),
-            'invoice_number' => $invoiceData['bill_number'] ?? $invoiceData['invoice_number'] ?? null,
+            'invoice_number' => $invoiceNumber,
             'customer_id' => $customer->id,
             'company_id' => $companyId,
             'status' => Invoice::STATUS_DRAFT,
