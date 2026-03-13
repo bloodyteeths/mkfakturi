@@ -7,7 +7,8 @@ return [
     // Immutable copy of the default disk — FileDisk::setFilesystem()
     // contaminates 'filesystems.default' at runtime, but cannot touch this key.
     // Use config('filesystems.media_disk') for reliable file storage.
-    'media_disk' => env('FILESYSTEM_DISK', 'public'),
+    // Fallback chain: FILESYSTEM_DISK → detect S3_COMPAT_ENDPOINT → 'public'
+    'media_disk' => env('FILESYSTEM_DISK') ?: (env('S3_COMPAT_ENDPOINT') ? 's3compat' : 'public'),
 
     'cloud' => env('FILESYSTEM_CLOUD', 's3'),
 
