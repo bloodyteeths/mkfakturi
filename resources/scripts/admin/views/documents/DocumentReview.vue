@@ -13,20 +13,37 @@
           </div>
         </div>
         <div class="flex items-center space-x-3">
-          <button
-            @click="reprocess"
-            :disabled="isSubmitting"
-            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md text-sm font-medium"
-          >
-            {{ $t('documents.reprocess', 'Reprocess') }}
-          </button>
-          <button
-            @click="confirmEntity"
-            :disabled="isSubmitting"
-            class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-md text-sm font-medium disabled:opacity-50"
-          >
-            {{ isSubmitting ? '...' : confirmButtonLabel }}
-          </button>
+          <!-- Already confirmed: show status + link to entity -->
+          <template v-if="isConfirmed">
+            <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-green-100 text-green-800">
+              &#10003; {{ $t('documents.already_confirmed', 'Confirmed') }}
+            </span>
+            <button
+              v-if="linkedEntityRoute"
+              @click="$router.push(linkedEntityRoute)"
+              class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-md text-sm font-medium"
+            >
+              {{ linkedEntityLabel }}
+            </button>
+          </template>
+          <!-- Not yet confirmed: show reprocess + confirm -->
+          <template v-else>
+            <button
+              @click="reprocess"
+              :disabled="isSubmitting"
+              class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md text-sm font-medium"
+            >
+              {{ $t('documents.reprocess', 'Reprocess') }}
+            </button>
+            <button
+              @click="confirmEntity"
+              :disabled="isSubmitting || !isExtracted"
+              class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-md text-sm font-medium disabled:opacity-50"
+              :title="!isExtracted ? $t('documents.not_extracted_yet', 'Document must be fully processed before confirming') : ''"
+            >
+              {{ isSubmitting ? '...' : confirmButtonLabel }}
+            </button>
+          </template>
         </div>
       </div>
     </div>
@@ -686,6 +703,29 @@ const availableEntityTypes = computed(() => [
   { value: 'tax_form', label: t('documents.confirm_as_tax_form', 'Tax Form') },
   { value: 'contract', label: t('documents.confirm_as_contract', 'Contract') },
 ])
+
+// State checks
+const isConfirmed = computed(() => document.value?.processing_status === 'confirmed')
+const isExtracted = computed(() => document.value?.processing_status === 'extracted')
+
+// Link to the created entity (for confirmed documents)
+const linkedEntityRoute = computed(() => {
+  const doc = document.value
+  if (!doc) return null
+  if (doc.linked_bill_id) return { name: 'bills.view', params: { id: doc.linked_bill_id } }
+  if (doc.linked_expense_id) return { name: 'expenses.edit', params: { id: doc.linked_expense_id } }
+  if (doc.linked_invoice_id) return { name: 'invoices.view', params: { id: doc.linked_invoice_id } }
+  return null
+})
+
+const linkedEntityLabel = computed(() => {
+  const doc = document.value
+  if (!doc) return ''
+  if (doc.linked_bill_id) return t('documents.view_bill', 'View Bill')
+  if (doc.linked_expense_id) return t('documents.view_expense', 'View Expense')
+  if (doc.linked_invoice_id) return t('documents.view_invoice', 'View Invoice')
+  return ''
+})
 
 // Dynamic confirm button label
 const confirmButtonLabel = computed(() => {
