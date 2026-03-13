@@ -350,15 +350,15 @@
             <div class="space-y-2">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">{{ $t('documents.subtotal', 'Subtotal') }}</span>
-                <span class="font-medium">{{ formatCents(form.bill.sub_total) }}</span>
+                <span class="font-medium">{{ formatCents(form.invoice.sub_total) }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">{{ $t('documents.tax_total', 'Tax') }}</span>
-                <span class="font-medium">{{ formatCents(form.bill.tax) }}</span>
+                <span class="font-medium">{{ formatCents(form.invoice.tax) }}</span>
               </div>
               <div class="flex justify-between text-sm font-semibold border-t pt-2">
                 <span>{{ $t('documents.grand_total', 'Total') }}</span>
-                <span class="text-primary-600">{{ formatCents(form.bill.total) }}</span>
+                <span class="text-primary-600">{{ formatCents(form.invoice.total) }}</span>
               </div>
             </div>
           </div>
@@ -394,14 +394,14 @@
             <div v-else class="space-y-2 max-h-96 overflow-auto">
               <div v-for="(txn, idx) in form.transactions" :key="idx" class="border border-gray-200 rounded-md p-3 text-sm">
                 <div class="flex justify-between mb-1">
-                  <span class="font-medium text-gray-900">{{ txn.counterparty || txn.description || '-' }}</span>
+                  <span class="font-medium text-gray-900">{{ txn.counterparty_name || txn.counterparty || txn.description || '-' }}</span>
                   <span :class="txn.credit ? 'text-green-600' : 'text-red-600'" class="font-semibold">
-                    {{ txn.credit ? '+' : '-' }}{{ formatCents(txn.credit || txn.debit) }}
+                    {{ txn.credit ? '+' : '-' }}{{ formatCents(txn.credit || txn.debit || 0) }}
                   </span>
                 </div>
                 <div class="flex justify-between text-xs text-gray-500">
                   <span>{{ txn.date }}</span>
-                  <span>{{ txn.reference || '' }}</span>
+                  <span>{{ txn.counterparty_account || txn.reference || '' }}</span>
                 </div>
               </div>
             </div>
@@ -640,7 +640,7 @@ const form = reactive({
   supplier: { name: '', tax_id: '', address: '', email: '' },
   customer: { name: '', email: '', phone: '', tax_id: '' },
   bill: { bill_number: '', bill_date: '', due_date: '', currency_id: null, sub_total: 0, tax: 0, total: 0, discount: 0, discount_val: 0, due_amount: 0, exchange_rate: 1 },
-  invoice: { invoice_number: '', invoice_date: '', due_date: '' },
+  invoice: { invoice_number: '', invoice_date: '', due_date: '', sub_total: 0, tax: 0, total: 0 },
   expense: { expense_date: '', category: '', amount: 0, notes: '' },
   items: [],
   transactions: [],
@@ -755,6 +755,12 @@ const prefillForm = (data, aiType) => {
   if (data.invoice) {
     form.invoice = { ...form.invoice, ...data.invoice }
   }
+  // When AI extracts as invoice, totals may be in data.bill — copy to form.invoice too
+  if (data.bill && !data.invoice?.sub_total) {
+    form.invoice.sub_total = data.bill.sub_total || 0
+    form.invoice.tax = data.bill.tax || 0
+    form.invoice.total = data.bill.total || 0
+  }
 
   // Expense
   if (data.expense) {
@@ -798,6 +804,15 @@ const prefillForm = (data, aiType) => {
 }
 
 const confirmEntity = async () => {
+  // Validate required fields per entity type
+  if (selectedEntityType.value === 'bank_transactions' && !form.bankAccountId) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('documents.select_bank_account_required', 'Please select a bank account before importing transactions.'),
+    })
+    return
+  }
+
   isSubmitting.value = true
   try {
     let payload = {}
@@ -810,7 +825,7 @@ const confirmEntity = async () => {
         payload = { supplier: form.supplier, expense: form.expense }
         break
       case 'invoice':
-        payload = { customer: form.customer, invoice: form.invoice, bill: form.bill, items: form.items }
+        payload = { customer: form.customer, invoice: form.invoice, items: form.items }
         break
       case 'bank_transactions':
         payload = { bank_account_id: form.bankAccountId, transactions: form.transactions }

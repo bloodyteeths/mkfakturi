@@ -132,6 +132,11 @@ class ClientDocumentController extends Controller
             $query->where('status', $request->input('status'));
         }
 
+        // Filter by processing status
+        if ($request->has('processing_status') && $request->input('processing_status')) {
+            $query->where('processing_status', $request->input('processing_status'));
+        }
+
         $documents = $query->paginate($request->input('per_page', 15));
 
         return response()->json([

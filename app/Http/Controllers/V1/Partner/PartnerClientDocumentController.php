@@ -47,6 +47,11 @@ class PartnerClientDocumentController extends Controller
             $query->where('status', $request->input('status'));
         }
 
+        // Filter by processing status
+        if ($request->has('processing_status') && $request->input('processing_status')) {
+            $query->where('processing_status', $request->input('processing_status'));
+        }
+
         $documents = $query->paginate($request->input('per_page', 15));
 
         // Count pending documents for notification badge
@@ -475,6 +480,16 @@ class PartnerClientDocumentController extends Controller
      */
     private function formatDocument(ClientDocument $document): array
     {
+        $fileAvailable = false;
+        if ($document->file_path) {
+            try {
+                $disk = config('filesystems.media_disk');
+                $fileAvailable = Storage::disk($disk)->exists($document->file_path);
+            } catch (\Throwable $e) {
+                $fileAvailable = false;
+            }
+        }
+
         return [
             'id' => $document->id,
             'company_id' => $document->company_id,
@@ -498,6 +513,7 @@ class PartnerClientDocumentController extends Controller
             'notes' => $document->notes,
             'rejection_reason' => $document->rejection_reason,
             'metadata' => $document->metadata,
+            'file_available' => $fileAvailable,
             'created_at' => $document->created_at?->toIso8601String(),
             'updated_at' => $document->updated_at?->toIso8601String(),
             'uploader' => $document->relationLoaded('uploader') && $document->uploader ? [

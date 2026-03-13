@@ -237,6 +237,14 @@ class ProcessClientDocumentJob implements ShouldQueue
 
             $transactions = $result['transactions'] ?? [];
 
+            // Convert amounts from floats to cents for consistent display
+            $transactions = array_map(function ($txn) {
+                $txn['debit'] = isset($txn['debit']) ? (int) round(floatval($txn['debit']) * 100) : 0;
+                $txn['credit'] = isset($txn['credit']) ? (int) round(floatval($txn['credit']) * 100) : 0;
+
+                return $txn;
+            }, $transactions);
+
             $doc->update([
                 'extracted_data' => [
                     'transactions' => $transactions,

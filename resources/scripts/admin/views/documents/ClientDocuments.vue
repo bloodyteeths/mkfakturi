@@ -60,6 +60,7 @@
               <option value="contract">{{ $t('documents.type_contract', 'Contract') }}</option>
               <option value="bank_statement">{{ $t('documents.type_bank_statement', 'Bank Statement') }}</option>
               <option value="tax_form">{{ $t('documents.type_tax_form', 'Tax Form') }}</option>
+              <option value="product_list">{{ $t('documents.type_product_list', 'Product List') }}</option>
               <option value="other">{{ $t('documents.type_other', 'Other') }}</option>
             </select>
           </div>
@@ -423,6 +424,7 @@ const loadDocuments = () => {
   const params = {}
   if (filterCategory.value) params.category = filterCategory.value
   if (filterStatus.value) params.status = filterStatus.value
+  if (filterProcessing.value) params.processing_status = filterProcessing.value
   store.fetchDocuments(params)
 }
 
@@ -555,6 +557,7 @@ const getCategoryLabel = (type) => {
     contract: t('documents.type_contract', 'Contract'),
     bank_statement: t('documents.type_bank_statement', 'Bank Statement'),
     tax_form: t('documents.type_tax_form', 'Tax Form'),
+    product_list: t('documents.type_product_list', 'Product List'),
     other: t('documents.type_other', 'Other'),
   }
   return labels[type] || type
@@ -567,6 +570,7 @@ const getCategoryBadgeClass = (type) => {
     contract: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800',
     bank_statement: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800',
     tax_form: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800',
+    product_list: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800',
     other: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800',
   }
   return classes[type] || classes.other
