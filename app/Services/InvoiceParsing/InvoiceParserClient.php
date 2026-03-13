@@ -24,4 +24,11 @@ interface InvoiceParserClient
      * @return array<string,mixed>
      */
     public function parseReceipt(int $companyId, string $filePath, string $originalName, ?string $rawContents = null): array;
+
+    /**
+     * Classify a document using AI vision (invoice, receipt, bank_statement, contract, tax_form, other).
+     *
+     * @return array{type: string, confidence: float, summary: string}
+     */
+    public function classify(int $companyId, string $filePath, string $originalName): array;
 } // CLAUDE-CHECKPOINT

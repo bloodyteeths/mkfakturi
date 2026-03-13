@@ -150,6 +150,59 @@ class Invoice2DataClient implements InvoiceParserClient
     } // CLAUDE-CHECKPOINT
 
     /**
+     * Classify a document using AI vision.
+     *
+     * @return array{type: string, confidence: float, summary: string}
+     *
+     * @throws \App\Services\InvoiceParsing\Invoice2DataServiceException
+     */
+    public function classify(int $companyId, string $filePath, string $originalName): array
+    {
+        $disk = env('FILESYSTEM_DISK', 'public');
+        $fileContents = $this->readFileFromStorage($disk, $filePath, $originalName, $companyId);
+
+        $baseUrl = rtrim(config('services.invoice2data.url'), '/');
+        if (! str_starts_with($baseUrl, 'http://') && ! str_starts_with($baseUrl, 'https://')) {
+            $baseUrl = 'https://'.$baseUrl;
+        }
+
+        $timeout = (int) config('services.invoice2data.timeout', 90);
+
+        try {
+            $response = Http::timeout($timeout)
+                ->connectTimeout(10)
+                ->attach('file', $fileContents, $originalName)
+                ->post($baseUrl.'/classify', [
+                    'company_id' => $companyId,
+                    'request_id' => (string) Str::uuid(),
+                ]);
+
+            $response->throw();
+
+            $data = $response->json();
+
+            return [
+                'type' => $data['type'] ?? 'other',
+                'confidence' => (float) ($data['confidence'] ?? 0.5),
+                'summary' => $data['summary'] ?? '',
+            ];
+        } catch (ConnectionException $e) {
+            Log::warning('invoice2data-service unreachable during classify', [
+                'url' => $baseUrl.'/classify',
+                'company_id' => $companyId,
+                'file' => $originalName,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw new Invoice2DataServiceException(
+                'Document classification service is currently unavailable. Please try again later.',
+                503,
+                $e
+            );
+        }
+    } // CLAUDE-CHECKPOINT
+
+    /**
      * Parse a receipt/invoice image and return structured invoice data.
      * Uses the /parse endpoint with Gemini Vision AI for accurate extraction.
      *

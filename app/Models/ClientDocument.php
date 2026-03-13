@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Bill;
+use App\Models\Expense;
 
 class ClientDocument extends Model
 {
@@ -29,6 +31,21 @@ class ClientDocument extends Model
     const CATEGORY_BANK_STATEMENT = 'bank_statement';
 
     const CATEGORY_OTHER = 'other';
+
+    const CATEGORY_TAX_FORM = 'tax_form';
+
+    // Processing status constants
+    const PROCESSING_PENDING = 'pending';
+
+    const PROCESSING_CLASSIFYING = 'classifying';
+
+    const PROCESSING_EXTRACTING = 'extracting';
+
+    const PROCESSING_EXTRACTED = 'extracted';
+
+    const PROCESSING_CONFIRMED = 'confirmed';
+
+    const PROCESSING_FAILED = 'failed';
 
     // File constraints
     const ALLOWED_MIMETYPES = [
@@ -56,6 +73,13 @@ class ClientDocument extends Model
         'file_size',
         'mime_type',
         'status',
+        'processing_status',
+        'ai_classification',
+        'extracted_data',
+        'linked_bill_id',
+        'linked_expense_id',
+        'extraction_method',
+        'error_message',
         'reviewer_id',
         'reviewed_at',
         'notes',
@@ -70,6 +94,8 @@ class ClientDocument extends Model
      */
     protected $casts = [
         'metadata' => 'array',
+        'ai_classification' => 'array',
+        'extracted_data' => 'array',
         'reviewed_at' => 'datetime',
         'file_size' => 'integer',
     ];
@@ -206,6 +232,65 @@ class ClientDocument extends Model
     public function scopeForPartner($query, int $partnerId)
     {
         return $query->where('partner_id', $partnerId);
+    }
+
+    /**
+     * Get the linked bill (created from extraction).
+     */
+    public function linkedBill(): BelongsTo
+    {
+        return $this->belongsTo(Bill::class, 'linked_bill_id');
+    }
+
+    /**
+     * Get the linked expense (created from extraction).
+     */
+    public function linkedExpense(): BelongsTo
+    {
+        return $this->belongsTo(Expense::class, 'linked_expense_id');
+    }
+
+    /**
+     * Scope: documents ready for accountant review.
+     */
+    public function scopeReadyForReview($query)
+    {
+        return $query->where('processing_status', self::PROCESSING_EXTRACTED);
+    }
+
+    /**
+     * Scope: documents currently being processed by AI.
+     */
+    public function scopeProcessing($query)
+    {
+        return $query->whereIn('processing_status', [
+            self::PROCESSING_CLASSIFYING,
+            self::PROCESSING_EXTRACTING,
+        ]);
+    }
+
+    /**
+     * Scope: documents that failed AI processing.
+     */
+    public function scopeFailed($query)
+    {
+        return $query->where('processing_status', self::PROCESSING_FAILED);
+    }
+
+    /**
+     * Check if the document has been processed by AI.
+     */
+    public function isExtracted(): bool
+    {
+        return $this->processing_status === self::PROCESSING_EXTRACTED;
+    }
+
+    /**
+     * Check if the document is confirmed (bill/expense created).
+     */
+    public function isConfirmed(): bool
+    {
+        return $this->processing_status === self::PROCESSING_CONFIRMED;
     }
 
     /**

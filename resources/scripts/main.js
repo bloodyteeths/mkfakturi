@@ -26,6 +26,9 @@ window.Facturino = new Facturino()
 import poMessages from '@/scripts/admin/i18n/purchase-orders.js'
 window.Facturino.addMessages(poMessages)
 
+import docMessages from '@/scripts/admin/i18n/documents.js'
+window.Facturino.addMessages(docMessages)
+
 // Register service worker for PWA support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

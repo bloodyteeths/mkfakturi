@@ -136,8 +136,9 @@ const InventoryDocumentsIndex = () => import('@/scripts/admin/views/stock/docume
 const InventoryDocumentCreate = () => import('@/scripts/admin/views/stock/documents/Create.vue')
 const InventoryDocumentView = () => import('@/scripts/admin/views/stock/documents/View.vue')
 
-// Client Documents (P8-01)
+// Client Documents (P8-01) + AI Document Hub
 const ClientDocuments = () => import('@/scripts/admin/views/documents/ClientDocuments.vue')
+const DocumentReview = () => import('@/scripts/admin/views/documents/DocumentReview.vue')
 
 // Bills (Accounts Payable)
 const BillsIndex = () => import('@/scripts/admin/views/bills/Index.vue')
@@ -513,12 +514,18 @@ export default [
         component: InventoryDocumentCreate,
       },
 
-      // Client Documents (P8-01)
+      // Client Documents (P8-01) + AI Document Hub
       {
         path: 'documents',
         name: 'client-documents',
         meta: { requiresAuth: true },
         component: ClientDocuments,
+      },
+      {
+        path: 'documents/:id/review',
+        name: 'documents.review',
+        meta: { requiresAuth: true },
+        component: DocumentReview,
       },
 
       // Company Deadlines (P8-02)

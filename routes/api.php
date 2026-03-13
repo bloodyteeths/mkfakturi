@@ -1008,12 +1008,15 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/undo', [\App\Http\Controllers\V1\Admin\Accounting\YearEndClosingController::class, 'undo']);
             });
 
-            // Client Document Upload Portal (P8-01)
+            // Client Document Upload Portal (P8-01) + AI Document Hub
             // ----------------------------------
             Route::prefix('client-documents')->group(function () {
                 Route::post('/upload', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'upload']);
                 Route::get('/', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'index']);
                 Route::get('/{id}/download', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'download']);
+                Route::get('/{id}/processing-status', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'processingStatus']);
+                Route::post('/{id}/confirm', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'confirm']);
+                Route::post('/{id}/reprocess', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'reprocess']);
                 Route::get('/{id}', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'show']);
                 Route::delete('/{id}', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'destroy']);
             });
@@ -1956,8 +1959,11 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'index']);
         Route::get('/download-all', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'bulkDownload']);
         Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'show']);
+        Route::get('/{id}/processing-status', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'processingStatus']);
         Route::post('/{id}/review', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'markReviewed']);
         Route::post('/{id}/reject', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'reject']);
+        Route::post('/{id}/confirm', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'confirm']);
+        Route::post('/{id}/reprocess', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'reprocess']);
         Route::get('/{id}/download', [\App\Http\Controllers\V1\Partner\PartnerClientDocumentController::class, 'download']);
     });
 

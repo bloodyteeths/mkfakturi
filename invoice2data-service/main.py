@@ -1707,6 +1707,184 @@ async def _extract_invoice_with_gemini(
 # CLAUDE-CHECKPOINT
 
 
+_GEMINI_CLASSIFY_PROMPT = """Analyze this document image. Classify it into exactly ONE of these types:
+- invoice: A supplier invoice / фактура (has line items, totals, VAT/DDV)
+- receipt: A fiscal receipt / фискална сметка (cash register receipt, POS slip)
+- bank_statement: A bank statement / банкарски извод (transaction list, account summary)
+- contract: A contract / договор (legal text, signatures, terms and conditions)
+- tax_form: A tax form / даночен образец (UJP/DDV government forms, DDV-04, DB, Образец-36/37)
+- other: None of the above (guides, manuals, correspondence, regulations)
+
+Return ONLY a raw JSON object (no markdown fences):
+{"type": "invoice", "confidence": 0.95, "summary": "Brief 1-line description of the document in its original language"}
+
+IMPORTANT:
+- confidence should be 0.0-1.0
+- summary should be concise (max 100 chars), in the document's language (Macedonian/Albanian/Turkish/English)
+- If the document is about regulations/guides/procedures for invoices or taxes but is NOT itself an invoice or tax form, classify as "other"
+- A tax form must be an actual fillable/filled government form, not a guide about tax forms"""
+
+
+async def _classify_document_with_gemini(
+    contents: bytes, mime_type: str = "image/jpeg"
+) -> Optional[Dict[str, Any]]:
+    """
+    Use Gemini Vision to classify a document.
+    Returns: {"type": str, "confidence": float, "summary": str} or None.
+    """
+    logger = logging.getLogger(__name__)
+
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        logger.info("GEMINI_API_KEY not set, skipping classification")
+        return None
+
+    contents = _resize_image_for_gemini(contents)
+    if mime_type == "image/png" and not contents[:4] == b'\x89PNG':
+        mime_type = "image/jpeg"
+
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{model}:generateContent?key={api_key}"
+    )
+
+    img_b64 = base64.b64encode(contents).decode("utf-8")
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": _GEMINI_CLASSIFY_PROMPT},
+                    {
+                        "inline_data": {
+                            "mime_type": mime_type,
+                            "data": img_b64,
+                        }
+                    },
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.1,
+            "maxOutputTokens": 2048,
+            "responseMimeType": "application/json",
+        },
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(url, json=payload)
+            resp.raise_for_status()
+
+        data = resp.json()
+        text = (
+            data.get("candidates", [{}])[0]
+            .get("content", {})
+            .get("parts", [{}])[0]
+            .get("text", "")
+        )
+
+        if not text:
+            logger.warning("Gemini classification returned empty text")
+            return None
+
+        text = _repair_json(text)
+        result = json_module.loads(text)
+
+        # Validate required fields
+        doc_type = result.get("type", "other")
+        valid_types = ["invoice", "receipt", "bank_statement", "contract", "tax_form", "other"]
+        if doc_type not in valid_types:
+            doc_type = "other"
+
+        return {
+            "type": doc_type,
+            "confidence": float(result.get("confidence", 0.5)),
+            "summary": str(result.get("summary", ""))[:200],
+        }
+    except json_module.JSONDecodeError as e:
+        logger.warning(f"Gemini classify JSON parse error: {e}")
+        return None
+    except httpx.TimeoutException:
+        logger.warning("Gemini classify request timed out")
+        return None
+    except Exception as e:
+        logger.warning(f"Gemini classification failed: {e}")
+        return None
+
+
+def _pdf_first_page_to_image(contents: bytes) -> Optional[Tuple[bytes, str]]:
+    """Convert first page of a PDF to a JPEG image for Gemini Vision."""
+    logger = logging.getLogger(__name__)
+    try:
+        import fitz  # PyMuPDF
+        doc = fitz.open(stream=contents, filetype="pdf")
+        if len(doc) == 0:
+            return None
+        page = doc[0]
+        pix = page.get_pixmap(dpi=200)
+        img_bytes = pix.tobytes("jpeg")
+        doc.close()
+        return img_bytes, "image/jpeg"
+    except ImportError:
+        logger.info("PyMuPDF not installed, cannot convert PDF to image for classification")
+        return None
+    except Exception as e:
+        logger.warning(f"PDF to image conversion failed: {e}")
+        return None
+
+
+@app.post("/classify")
+async def classify_document(file: UploadFile = File(...)) -> JSONResponse:
+    """
+    Classify a document using Gemini Vision AI.
+    Returns document type, confidence, and summary.
+    """
+    logger = logging.getLogger(__name__)
+
+    try:
+        contents = await file.read()
+        if not contents:
+            raise HTTPException(status_code=400, detail="Empty file")
+
+        mime_type = file.content_type or "application/octet-stream"
+        image_contents = contents
+        image_mime = mime_type
+
+        # If PDF, convert first page to image for Gemini
+        if mime_type == "application/pdf" or (file.filename and file.filename.lower().endswith(".pdf")):
+            result = _pdf_first_page_to_image(contents)
+            if result:
+                image_contents, image_mime = result
+            else:
+                return JSONResponse(
+                    status_code=422,
+                    content={"error": "Could not convert PDF to image for classification"},
+                )
+
+        classification = await _classify_document_with_gemini(image_contents, image_mime)
+
+        if classification is None:
+            return JSONResponse(
+                status_code=503,
+                content={"error": "Classification service unavailable"},
+            )
+
+        logger.info(
+            f"Document classified: {file.filename} -> {classification['type']} "
+            f"(confidence: {classification['confidence']:.2f})"
+        )
+
+        return JSONResponse(content=classification)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Classification failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/health")
 def health() -> Dict[str, Any]:
     """Health check endpoint."""

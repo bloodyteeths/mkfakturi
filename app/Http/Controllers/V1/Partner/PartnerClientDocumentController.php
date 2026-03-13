@@ -3,10 +3,16 @@
 namespace App\Http\Controllers\V1\Partner;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessClientDocumentJob;
+use App\Models\Bill;
 use App\Models\ClientDocument;
+use App\Models\CompanySetting;
 use App\Models\Partner;
+use App\Models\Supplier;
+use App\Models\TaxType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use ZipArchive;
@@ -200,6 +206,236 @@ class PartnerClientDocumentController extends Controller
     }
 
     /**
+     * Get the AI processing status of a document (for polling).
+     */
+    public function processingStatus(Request $request, int $companyId, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerOrFail($request);
+        if (! $this->partnerManagesCompany($partner, $companyId)) {
+            return response()->json(['success' => false, 'message' => 'Access denied.'], 403);
+        }
+
+        $document = ClientDocument::where('company_id', $companyId)->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $document->id,
+                'processing_status' => $document->processing_status,
+                'ai_classification' => $document->ai_classification,
+                'extraction_method' => $document->extraction_method,
+                'error_message' => $document->error_message,
+                'has_extracted_data' => ! empty($document->extracted_data),
+                'linked_bill_id' => $document->linked_bill_id,
+            ],
+        ]);
+    }
+
+    /**
+     * Confirm AI extraction and create a bill from extracted data (partner).
+     */
+    public function confirm(Request $request, int $companyId, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerOrFail($request);
+        if (! $this->partnerManagesCompany($partner, $companyId)) {
+            return response()->json(['success' => false, 'message' => 'Access denied.'], 403);
+        }
+
+        $doc = ClientDocument::where('company_id', $companyId)->findOrFail($id);
+
+        if ($doc->processing_status !== ClientDocument::PROCESSING_EXTRACTED) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Document must be in "extracted" state to confirm.',
+            ], 422);
+        }
+
+        $type = $doc->ai_classification['type'] ?? 'other';
+        if (! in_array($type, ['invoice', 'receipt'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only invoice/receipt documents can be confirmed as bills.',
+            ], 422);
+        }
+
+        $extractedData = $request->input('extracted_data', $doc->extracted_data);
+
+        try {
+            $bill = $this->createBillFromExtraction($companyId, $extractedData, $doc);
+
+            $doc->update([
+                'linked_bill_id' => $bill->id,
+                'processing_status' => ClientDocument::PROCESSING_CONFIRMED,
+                'status' => ClientDocument::STATUS_REVIEWED,
+                'reviewer_id' => $request->user()->id,
+                'reviewed_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Bill created successfully from document.',
+                'data' => [
+                    'bill_id' => $bill->id,
+                    'bill_number' => $bill->bill_number,
+                    'document' => $this->formatDocument($doc->fresh()),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Partner document confirm failed', [
+                'document_id' => $doc->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create bill: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Re-run AI processing on a document (partner).
+     */
+    public function reprocess(Request $request, int $companyId, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerOrFail($request);
+        if (! $this->partnerManagesCompany($partner, $companyId)) {
+            return response()->json(['success' => false, 'message' => 'Access denied.'], 403);
+        }
+
+        $doc = ClientDocument::where('company_id', $companyId)->findOrFail($id);
+
+        if ($doc->processing_status === ClientDocument::PROCESSING_CONFIRMED) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Confirmed documents cannot be reprocessed.',
+            ], 422);
+        }
+
+        $doc->update([
+            'processing_status' => ClientDocument::PROCESSING_PENDING,
+            'ai_classification' => null,
+            'extracted_data' => null,
+            'extraction_method' => null,
+            'error_message' => null,
+        ]);
+
+        ProcessClientDocumentJob::dispatch($doc->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Document reprocessing started.',
+            'data' => $this->formatDocument($doc->fresh()),
+        ]);
+    }
+
+    /**
+     * Create a Bill from extracted document data.
+     */
+    private function createBillFromExtraction(int $companyId, array $extractedData, ClientDocument $doc): Bill
+    {
+        $supplierData = $extractedData['supplier'] ?? [];
+        $billData = $extractedData['bill'] ?? [];
+        $items = $extractedData['items'] ?? [];
+
+        $supplierName = $supplierData['name'] ?? 'Unknown Supplier';
+
+        $supplier = Supplier::updateOrCreate(
+            ['company_id' => $companyId, 'name' => $supplierName],
+            [
+                'company_id' => $companyId,
+                'name' => $supplierName,
+                'tax_id' => $supplierData['tax_id'] ?? null,
+                'email' => $supplierData['email'] ?? null,
+            ]
+        );
+
+        $billData['supplier_id'] = $supplier->id;
+        $billData['company_id'] = $companyId;
+        $billData['status'] = Bill::STATUS_DRAFT;
+        $billData['paid_status'] = Bill::PAID_STATUS_UNPAID;
+
+        if (empty($billData['bill_number'])) {
+            $billData['bill_number'] = 'DOC-'.strtoupper(substr(md5($doc->file_path), 0, 8));
+        }
+
+        $originalNumber = $billData['bill_number'];
+        $counter = 1;
+        while (Bill::where('company_id', $companyId)->where('bill_number', $billData['bill_number'])->exists()) {
+            $billData['bill_number'] = $originalNumber.'-'.$counter;
+            $counter++;
+        }
+
+        if (empty($billData['currency_id'])) {
+            $billData['currency_id'] = CompanySetting::getSetting('currency', $companyId);
+        }
+
+        $bill = Bill::create($billData);
+
+        if (! empty($items)) {
+            $this->attachTaxTypes($companyId, $items);
+            Bill::createItems($bill, $items);
+        }
+
+        $disk = env('FILESYSTEM_DISK', 'public');
+        try {
+            if (Storage::disk($disk)->exists($doc->file_path)) {
+                $bill->addMediaFromDisk($doc->file_path, $disk)
+                    ->toMediaCollection('scanned_invoice');
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Partner document confirm: failed to attach media', [
+                'bill_id' => $bill->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $bill;
+    }
+
+    /**
+     * Attach tax types to items based on MK VAT rates.
+     */
+    private function attachTaxTypes(int $companyId, array &$items): void
+    {
+        $standardRates = [18, 10, 5];
+        $taxTypes = TaxType::where('company_id', $companyId)
+            ->orWhereNull('company_id')
+            ->get();
+
+        foreach ($items as &$item) {
+            $taxAmount = (int) ($item['tax'] ?? 0);
+            $price = (int) ($item['price'] ?? 0);
+            if ($taxAmount <= 0 || $price <= 0) {
+                continue;
+            }
+            $effectiveRate = ($taxAmount / $price) * 100;
+            $snappedRate = null;
+            foreach ($standardRates as $rate) {
+                if (abs($effectiveRate - $rate) <= 2) {
+                    $snappedRate = $rate;
+                    break;
+                }
+            }
+            if ($snappedRate === null) {
+                continue;
+            }
+            $taxType = $taxTypes->first(fn ($t) => abs((float) $t->percent - $snappedRate) < 0.01);
+            if (! $taxType) {
+                continue;
+            }
+            $item['taxes'] = [[
+                'tax_type_id' => $taxType->id,
+                'name' => $taxType->name,
+                'percent' => (float) $taxType->percent,
+                'amount' => $taxAmount,
+                'compound_tax' => $taxType->compound_tax ?? 0,
+            ]];
+        }
+        unset($item);
+    }
+
+    /**
      * Bulk download all pending documents for a company as a ZIP file.
      *
      * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
@@ -332,6 +568,13 @@ class PartnerClientDocumentController extends Controller
             'file_size' => $document->file_size,
             'mime_type' => $document->mime_type,
             'status' => $document->status,
+            'processing_status' => $document->processing_status,
+            'ai_classification' => $document->ai_classification,
+            'extracted_data' => $document->extracted_data,
+            'linked_bill_id' => $document->linked_bill_id,
+            'linked_expense_id' => $document->linked_expense_id,
+            'extraction_method' => $document->extraction_method,
+            'error_message' => $document->error_message,
             'reviewer_id' => $document->reviewer_id,
             'reviewed_at' => $document->reviewed_at?->toIso8601String(),
             'notes' => $document->notes,
@@ -351,5 +594,5 @@ class PartnerClientDocumentController extends Controller
             ] : null,
         ];
     }
-}
+} // CLAUDE-CHECKPOINT
 

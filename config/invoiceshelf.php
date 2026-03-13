@@ -447,6 +447,16 @@ return [
             'ability' => 'view-bill',
             'model' => Bill::class,
         ],
+        [
+            'title' => 'navigation.documents',
+            'group' => 2,
+            'link' => '/admin/documents',
+            'icon' => 'DocumentArrowUpIcon',
+            'name' => 'Documents',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+        ],
         // ── Operations (collapsible submenu) ──
         [
             'title' => 'navigation.compensations',
