@@ -44,17 +44,24 @@
       <!-- Left: Document Preview -->
       <div class="lg:w-1/2 p-4 overflow-auto border-r border-gray-200">
         <div class="bg-white rounded-lg shadow h-full">
+          <div v-if="previewError" class="flex flex-col items-center justify-center h-full text-gray-500 p-8">
+            <DocumentTextIcon class="h-16 w-16 text-gray-300 mb-4" />
+            <p class="text-sm font-medium text-gray-700 mb-1">{{ $t('documents.preview_unavailable', 'Preview unavailable') }}</p>
+            <p class="text-xs text-gray-400 text-center">{{ $t('documents.preview_unavailable_hint', 'The original file may have been stored on a different server. You can reprocess the document to re-upload it.') }}</p>
+          </div>
           <iframe
-            v-if="document.mime_type === 'application/pdf'"
+            v-else-if="document.mime_type === 'application/pdf'"
             :src="previewUrl"
             class="w-full h-full rounded-lg"
             style="min-height: 600px"
+            @error="previewError = true"
           />
           <img
             v-else-if="document.mime_type?.startsWith('image/')"
             :src="previewUrl"
             class="max-w-full mx-auto p-4"
             :alt="document.original_filename"
+            @error="previewError = true"
           />
           <div v-else class="flex items-center justify-center h-full text-gray-500">
             {{ $t('documents.no_preview', 'Preview not available for this file type') }}
@@ -602,7 +609,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDocumentHubStore } from '@/scripts/admin/stores/document-hub'
 import { useNotificationStore } from '@/scripts/stores/notification'
-import { ArrowLeftIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { ArrowLeftIcon, XMarkIcon, DocumentTextIcon } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
 const router = useRouter()
@@ -614,6 +621,7 @@ const document = ref(null)
 const isLoading = ref(true)
 const isSubmitting = ref(false)
 const previewUrl = ref('')
+const previewError = ref(false)
 const selectedEntityType = ref('bill')
 
 const form = reactive({
@@ -687,6 +695,14 @@ onMounted(async () => {
     const doc = await store.fetchDocument(id)
     document.value = doc
     previewUrl.value = `/api/v1/client-documents/${id}/download`
+
+    // Check if preview is available
+    try {
+      const response = await window.axios.head(`/client-documents/${id}/download`)
+      if (response.status !== 200) previewError.value = true
+    } catch {
+      previewError.value = true
+    }
 
     // Set default entity type from AI classification
     selectedEntityType.value = inferEntityType(doc)

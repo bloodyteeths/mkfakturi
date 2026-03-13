@@ -176,6 +176,9 @@ export default {
 
       // Source document
       source_document: 'Source Document',
+      view: 'View',
+      preview_unavailable: 'Preview unavailable',
+      preview_unavailable_hint: 'The original file may have been stored on a different server. You can reprocess the document to re-upload it.',
 
       // Delete
       delete_title: 'Delete Document',
@@ -362,6 +365,9 @@ export default {
       contract_notes: 'Забелешки',
 
       source_document: 'Изворен документ',
+      view: 'Погледни',
+      preview_unavailable: 'Прегледот не е достапен',
+      preview_unavailable_hint: 'Оригиналната датотека може да е зачувана на друг сервер. Обработете го документот повторно за повторно прикачување.',
 
       delete_title: 'Избриши документ',
       delete_confirm: 'Дали сте сигурни дека сакате да го избришете',
@@ -544,6 +550,9 @@ export default {
       contract_notes: 'Shenime',
 
       source_document: 'Dokumenti burimor',
+      view: 'Shiko',
+      preview_unavailable: 'Parashikimi nuk disponohet',
+      preview_unavailable_hint: 'Skedari origjinal mund te jete ruajtur ne nje server tjeter. Riperpunoni dokumentin per ta ringarkuar.',
 
       delete_title: 'Fshi dokumentin',
       delete_confirm: 'A jeni te sigurt qe doni te fshini',
@@ -726,6 +735,9 @@ export default {
       contract_notes: 'Notlar',
 
       source_document: 'Kaynak belge',
+      view: 'Goruntule',
+      preview_unavailable: 'Onizleme mevcut degil',
+      preview_unavailable_hint: 'Orijinal dosya farkli bir sunucuda saklanmis olabilir. Yeniden yuklemek icin belgeyi yeniden isleyin.',
 
       delete_title: 'Belge sil',
       delete_confirm: 'Silmek istediginizden emin misiniz',

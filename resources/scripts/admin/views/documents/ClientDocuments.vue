@@ -253,7 +253,7 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="doc in store.documents" :key="doc.id" class="hover:bg-gray-50">
+              <tr v-for="doc in store.documents" :key="doc.id" class="hover:bg-gray-50 cursor-pointer" @click="navigateToReview(doc)">
                 <!-- File Info -->
                 <td class="px-6 py-4">
                   <div class="flex items-center">
@@ -293,10 +293,10 @@
 
                 <!-- AI Summary -->
                 <td class="px-6 py-4">
-                  <div v-if="doc.ai_classification?.summary" class="text-sm text-gray-700 max-w-[250px] truncate" :title="doc.ai_classification.summary">
+                  <div v-if="doc.ai_classification?.summary" class="text-sm text-gray-700 max-w-[350px] line-clamp-3" :title="doc.ai_classification.summary">
                     {{ doc.ai_classification.summary }}
                   </div>
-                  <div v-else-if="doc.error_message" class="text-sm text-red-600 max-w-[250px] truncate" :title="doc.error_message">
+                  <div v-else-if="doc.error_message" class="text-sm text-red-600 max-w-[350px] line-clamp-2" :title="doc.error_message">
                     {{ doc.error_message }}
                   </div>
                   <span v-else class="text-xs text-gray-400">-</span>
@@ -311,6 +311,7 @@
                     <router-link
                       :to="{ name: 'bills.view', params: { id: doc.linked_bill_id } }"
                       class="text-xs text-primary-600 hover:text-primary-800"
+                      @click.stop
                     >
                       {{ $t('documents.view_bill', 'View Bill') }} #{{ doc.linked_bill_id }}
                     </router-link>
@@ -320,28 +321,35 @@
                 <!-- Actions -->
                 <td class="px-6 py-4 text-right text-sm space-x-1">
                   <button
-                    v-if="doc.processing_status === 'extracted' && ['invoice', 'receipt'].includes(doc.ai_classification?.type)"
-                    @click="$router.push({ name: 'documents.review', params: { id: doc.id } })"
+                    v-if="doc.processing_status === 'extracted'"
+                    @click.stop="$router.push({ name: 'documents.review', params: { id: doc.id } })"
                     class="inline-flex items-center px-2.5 py-1.5 bg-primary-50 text-primary-700 rounded text-xs font-medium hover:bg-primary-100"
                   >
                     {{ $t('documents.review', 'Review') }}
                   </button>
                   <button
+                    v-if="doc.processing_status === 'confirmed'"
+                    @click.stop="$router.push({ name: 'documents.review', params: { id: doc.id } })"
+                    class="inline-flex items-center px-2.5 py-1.5 bg-green-50 text-green-700 rounded text-xs font-medium hover:bg-green-100"
+                  >
+                    {{ $t('documents.view', 'View') }}
+                  </button>
+                  <button
                     v-if="doc.processing_status === 'failed'"
-                    @click="reprocessDoc(doc.id)"
+                    @click.stop="reprocessDoc(doc.id)"
                     class="inline-flex items-center px-2.5 py-1.5 bg-amber-50 text-amber-700 rounded text-xs font-medium hover:bg-amber-100"
                   >
                     {{ $t('documents.reprocess', 'Reprocess') }}
                   </button>
                   <button
-                    @click="downloadDocument(doc)"
+                    @click.stop="downloadDocument(doc)"
                     class="inline-flex items-center px-2.5 py-1.5 bg-gray-50 text-gray-700 rounded text-xs font-medium hover:bg-gray-100"
                   >
                     {{ $t('general.download', 'Download') }}
                   </button>
                   <button
                     v-if="doc.status === 'pending_review' && doc.processing_status !== 'confirmed'"
-                    @click="openDeleteModal(doc)"
+                    @click.stop="openDeleteModal(doc)"
                     class="inline-flex items-center px-2.5 py-1.5 bg-red-50 text-red-700 rounded text-xs font-medium hover:bg-red-100"
                   >
                     {{ $t('general.delete', 'Delete') }}
@@ -381,11 +389,13 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDocumentHubStore } from '@/scripts/admin/stores/document-hub'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { DocumentArrowUpIcon, DocumentTextIcon, PhotoIcon, TableCellsIcon } from '@heroicons/vue/24/outline'
 
+const router = useRouter()
 const { t } = useI18n()
 const store = useDocumentHubStore()
 const notificationStore = useNotificationStore()
@@ -521,6 +531,12 @@ const downloadDocument = (doc) => {
 const goToPage = (page) => {
   if (page < 1 || page > store.pagination.lastPage) return
   store.fetchDocuments({ page })
+}
+
+const navigateToReview = (doc) => {
+  if (['extracted', 'confirmed'].includes(doc.processing_status)) {
+    router.push({ name: 'documents.review', params: { id: doc.id } })
+  }
 }
 
 // Helpers
