@@ -145,6 +145,9 @@ class DocumentConfirmationService
                 $invoiceNumber = $originalNumber . '-' . $counter;
                 $counter++;
             }
+        } else {
+            // Temporary placeholder — will be replaced by SerialNumberFormatter below
+            $invoiceNumber = 'DOC-' . strtoupper(substr(md5($doc->file_path . now()), 0, 8));
         }
 
         $invoice = Invoice::create([
@@ -353,11 +356,8 @@ class DocumentConfirmationService
                 continue;
             }
 
-            // Convert price to cents if it looks like a whole number
-            $price = $product['unit_price'] ?? $product['price'] ?? 0;
-            if (is_float($price) && $price == floor($price) && $price < 100000) {
-                $price = (int) ($price * 100);
-            }
+            // Price arrives in cents from FastAPI (unit_price * 100) or Vue parseCents()
+            $price = (int) ($product['unit_price'] ?? $product['price'] ?? 0);
 
             $item = Item::create([
                 'name' => $name,
@@ -394,7 +394,7 @@ class DocumentConfirmationService
     public function confirmAsDocument(ClientDocument $doc, array $extractedData): array
     {
         $doc->update([
-            'extracted_data' => $extractedData,
+            'extracted_data' => array_merge(['type' => $doc->category], $extractedData),
         ]);
 
         return [
