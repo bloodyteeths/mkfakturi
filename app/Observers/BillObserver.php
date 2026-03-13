@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Domain\Accounting\IfrsAdapter;
 use App\Models\Bill;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Modules\Mk\Services\CostCenterAutoAssigner;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -88,7 +89,9 @@ class BillObserver
     {
         // Check if bill date falls within a locked tax period
         if ($this->isInLockedPeriod($bill)) {
-            throw new \Exception('Cannot edit bill. Tax period is locked.');
+            throw ValidationException::withMessages([
+                'bill_date' => __('bills.tax_period_locked'),
+            ]);
         }
 
         return true;
@@ -131,7 +134,9 @@ class BillObserver
     {
         // Check if bill date falls within a locked tax period
         if ($this->isInLockedPeriod($bill)) {
-            throw new \Exception('Cannot delete bill. Tax period is locked.');
+            throw ValidationException::withMessages([
+                'bill_date' => __('bills.tax_period_locked'),
+            ]);
         }
 
         return true;

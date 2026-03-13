@@ -931,7 +931,8 @@
         "created": "Llogariaта е me sukses креdheраnë",
         "updated": "Llogariaта е me sukses ажурdheраnë",
         "deleted": "Llogariaта е me sukses dheзбрdheшаnë",
-        "attachment": "Прdheлог"
+        "attachment": "Прdheлог",
+        "tax_period_locked": "Nuk mund të ruhet. Periudha tatimore për këtë datë është e bllokuar."
     },
     "stock": {
         "title": "Stoku",

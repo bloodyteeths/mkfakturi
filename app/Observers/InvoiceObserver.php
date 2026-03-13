@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Domain\Accounting\IfrsAdapter;
 use App\Models\Invoice;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Modules\Mk\Services\CostCenterAutoAssigner;
 
 /**
@@ -65,7 +66,9 @@ class InvoiceObserver
     {
         // Check if invoice date falls within a locked tax period
         if ($this->isInLockedPeriod($invoice)) {
-            throw new \Exception('Cannot edit invoice. Tax period is locked.');
+            throw ValidationException::withMessages([
+                'invoice_date' => __('bills.tax_period_locked'),
+            ]);
         }
 
         return true;
@@ -119,7 +122,9 @@ class InvoiceObserver
     {
         // Check if invoice date falls within a locked tax period
         if ($this->isInLockedPeriod($invoice)) {
-            throw new \Exception('Cannot delete invoice. Tax period is locked.');
+            throw ValidationException::withMessages([
+                'invoice_date' => __('bills.tax_period_locked'),
+            ]);
         }
 
         return true;

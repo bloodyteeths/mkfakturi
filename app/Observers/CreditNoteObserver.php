@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Domain\Accounting\IfrsAdapter;
 use App\Models\CreditNote;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 /**
  * CreditNote Observer
@@ -67,7 +68,9 @@ class CreditNoteObserver
     {
         // Check if credit note date falls within a locked tax period
         if ($this->isInLockedPeriod($creditNote)) {
-            throw new \Exception('Cannot edit credit note. Tax period is locked.');
+            throw ValidationException::withMessages([
+                'invoice_date' => __('bills.tax_period_locked'),
+            ]);
         }
 
         return true;
@@ -117,7 +120,9 @@ class CreditNoteObserver
     {
         // Check if credit note date falls within a locked tax period
         if ($this->isInLockedPeriod($creditNote)) {
-            throw new \Exception('Cannot delete credit note. Tax period is locked.');
+            throw ValidationException::withMessages([
+                'invoice_date' => __('bills.tax_period_locked'),
+            ]);
         }
 
         return true;

@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Domain\Accounting\IfrsAdapter;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Payment Observer
@@ -56,7 +57,9 @@ class PaymentObserver
     {
         // Check if payment date falls within a locked tax period
         if ($this->isInLockedPeriod($payment)) {
-            throw new \Exception('Cannot edit payment. Tax period is locked.');
+            throw ValidationException::withMessages([
+                'payment_date' => __('bills.tax_period_locked'),
+            ]);
         }
 
         return true;
@@ -101,7 +104,9 @@ class PaymentObserver
     {
         // Check if payment date falls within a locked tax period
         if ($this->isInLockedPeriod($payment)) {
-            throw new \Exception('Cannot delete payment. Tax period is locked.');
+            throw ValidationException::withMessages([
+                'payment_date' => __('bills.tax_period_locked'),
+            ]);
         }
 
         return true;
