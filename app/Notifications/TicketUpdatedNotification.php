@@ -53,7 +53,10 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
                 'oldStatus' => $this->oldStatus,
                 'newStatus' => $this->newStatus,
                 'notifiable' => $notifiable,
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
     }
 
     /**

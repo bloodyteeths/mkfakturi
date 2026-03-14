@@ -46,7 +46,10 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
                 'ticket' => $this->ticket,
                 'ticketUrl' => $ticketUrl,
                 'notifiable' => $notifiable,
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
     }
 
     /**

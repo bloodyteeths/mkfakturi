@@ -158,6 +158,9 @@ class ClawdStatusController extends Controller
             'new_tickets_24h' => DB::table('tickets')
                 ->where('created_at', '>=', $now->copy()->subDay())
                 ->count(),
+            'new_support_contacts_24h' => DB::table('support_contacts')
+                ->where('created_at', '>=', $now->copy()->subDay())
+                ->count(),
         ];
     }
 
@@ -213,6 +216,25 @@ class ClawdStatusController extends Controller
                 'email' => $ticket->email,
                 'subject' => $ticket->title,
                 'at' => Carbon::parse($ticket->created_at)->toIso8601String(),
+            ];
+        }
+
+        // Support contact form submissions (last 24h)
+        $contacts = DB::table('support_contacts')
+            ->where('created_at', '>=', $cutoff)
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get(['email', 'name', 'subject', 'category', 'priority', 'created_at']);
+
+        foreach ($contacts as $contact) {
+            $events[] = [
+                'type' => 'support_contact',
+                'email' => $contact->email,
+                'name' => $contact->name,
+                'subject' => $contact->subject,
+                'category' => $contact->category,
+                'priority' => $contact->priority,
+                'at' => Carbon::parse($contact->created_at)->toIso8601String(),
             ];
         }
 

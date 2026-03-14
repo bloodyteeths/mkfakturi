@@ -100,11 +100,15 @@ class TicketController extends Controller
         // Send notification to customer
         $user->notify(new TicketCreatedNotification($ticket));
 
-        // Send notification to admin emails
+        // Send notification to admin emails (fallback to super admins if not configured)
         $adminEmails = config('support.admin_notify_emails');
-        if ($adminEmails) {
+        $emailList = $adminEmails
+            ? array_filter(array_map('trim', explode(',', $adminEmails)))
+            : \App\Models\User::where('role', 'super admin')->pluck('email')->toArray();
+
+        if (! empty($emailList)) {
             $ticket->load('company');
-            foreach (array_filter(array_map('trim', explode(',', $adminEmails))) as $email) {
+            foreach ($emailList as $email) {
                 Notification::route('mail', $email)
                     ->notify(new AdminTicketCreatedNotification($ticket));
             }

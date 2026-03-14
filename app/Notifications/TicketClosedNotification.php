@@ -49,7 +49,10 @@ class TicketClosedNotification extends Notification implements ShouldQueue
                 'ticketUrl' => $ticketUrl,
                 'wasResolved' => $this->wasResolved,
                 'notifiable' => $notifiable,
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
     }
 
     /**

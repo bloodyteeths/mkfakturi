@@ -54,7 +54,10 @@ class TicketRepliedNotification extends Notification implements ShouldQueue
                 'ticketUrl' => $ticketUrl,
                 'isAgentReply' => $this->isAgentReply,
                 'notifiable' => $notifiable,
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
     }
 
     /**

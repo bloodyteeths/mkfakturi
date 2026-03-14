@@ -7,6 +7,7 @@ use App\Http\Requests\SupportContactRequest;
 use App\Mail\SupportContactConfirmation;
 use App\Mail\SupportContactNotification;
 use App\Models\SupportContact;
+use App\Services\ClawdNotifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -64,6 +65,15 @@ class SupportContactController extends Controller
         } catch (\Exception $e) {
             \Log::error('Failed to send support confirmation email: '.$e->getMessage());
         }
+
+        // Notify Clawd AI assistant in real-time
+        ClawdNotifier::push('support_contact', [
+            'email' => $contact->email,
+            'name' => $contact->name,
+            'subject' => $contact->subject,
+            'category' => $contact->category,
+            'priority' => $contact->priority,
+        ]);
 
         return response()->json([
             'success' => true,
