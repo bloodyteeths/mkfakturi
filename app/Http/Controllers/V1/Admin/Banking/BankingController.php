@@ -237,10 +237,12 @@ class BankingController extends Controller
                 });
             }
 
-            // Sorting
-            $orderBy = $request->get('orderBy', 'desc');
-            $orderByField = $request->get('orderByField', 'transaction_date');
-            $query->orderBy($orderByField, $orderBy);
+            // Sorting — whitelist allowed orderBy fields to prevent SQL injection
+            $allowedOrderFields = ['transaction_date', 'amount', 'description', 'status', 'created_at'];
+            $orderByField = in_array($request->get('orderByField'), $allowedOrderFields) ? $request->get('orderByField') : 'transaction_date';
+            $orderByDirection = in_array(strtolower($request->get('orderBy', 'desc')), ['asc', 'desc']) ? $request->get('orderBy', 'desc') : 'desc';
+            $query->orderBy($orderByField, $orderByDirection);
+            // CLAUDE-CHECKPOINT
 
             // Pagination
             $limit = $request->get('limit', 15);
@@ -271,7 +273,9 @@ class BankingController extends Controller
                         'matched_payment_id' => $transaction->matched_payment_id,
                         'matched_at' => $transaction->matched_at?->toIso8601String(),
                         'match_confidence' => $transaction->match_confidence,
-                        'category' => null,
+                        'category' => $transaction->category,
+                        'ai_category' => $transaction->ai_category,
+                        'ai_match_reason' => $transaction->ai_match_reason,
                     ];
                 } catch (\Throwable $e) {
                     Log::error('Failed to map transaction', [
