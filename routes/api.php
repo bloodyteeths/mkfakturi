@@ -1290,42 +1290,6 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/extract-invoice', [\App\Http\Controllers\V1\Admin\AiDocumentController::class, 'extractInvoice']);
                 Route::get('/monthly-trends', [\App\Http\Controllers\V1\Admin\AiDocumentController::class, 'monthlyTrends']);
 
-                // Debug endpoint to see raw data
-                Route::get('/debug/data', function (\Illuminate\Http\Request $request) {
-                    $company = \App\Models\Company::find($request->header('company'));
-                    if (! $company) {
-                        return response()->json(['error' => 'Company not found'], 404);
-                    }
-
-                    $dataProvider = app(\App\Services\McpDataProvider::class);
-
-                    // Get all invoices with details
-                    $allInvoices = \App\Models\Invoice::where('company_id', $company->id)
-                        ->get()
-                        ->map(function ($inv) {
-                            return [
-                                'id' => $inv->id,
-                                'number' => $inv->invoice_number,
-                                'status' => $inv->status,
-                                'paid_status' => $inv->paid_status ?? null,
-                                'total' => $inv->total,
-                                'due_amount' => $inv->due_amount,
-                                'date' => $inv->invoice_date,
-                            ];
-                        });
-
-                    return response()->json([
-                        'company' => [
-                            'id' => $company->id,
-                            'name' => $company->name,
-                        ],
-                        'raw_data' => [
-                            'all_invoices' => $allInvoices,
-                            'company_stats' => $dataProvider->getCompanyStats($company),
-                            'trial_balance' => $dataProvider->getTrialBalance($company),
-                        ],
-                    ]);
-                });
             });
 
             // Stock Management Module (Facturino)
@@ -1752,6 +1716,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/inventory', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryList']);
         Route::get('/valuation', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryValuation']);
         Route::get('/item-card/{item}', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'itemCard']);
+        Route::get('/movements', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'movements']);
     });
 
     // Partner Period Lock Management for Client Companies
@@ -1876,8 +1841,14 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         // F7: Budgets (Partner)
         Route::prefix('budgets')->group(function () {
             Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'store']);
+            Route::post('/prefill-actuals', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'prefillFromActuals']);
             Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'show']);
+            Route::put('/{id}', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'update']);
+            Route::post('/{id}/approve', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'approve']);
+            Route::post('/{id}/lock', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'lock']);
             Route::get('/{id}/vs-actual', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'budgetVsActual']);
+            Route::delete('/{id}', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'destroy']);
         });
 
         // F8: Travel Orders (Partner)

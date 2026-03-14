@@ -53,11 +53,21 @@
 
       <!-- Inventory List Tab -->
       <template v-if="activeTab === 'inventory'">
+        <!-- Search Bar -->
+        <div v-if="inventoryData.length > 0 || searchQuery" class="mb-4">
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+            :placeholder="$t('stock.search_placeholder', 'Search by name or SKU...')"
+          />
+        </div>
+
         <!-- Summary Cards -->
         <div v-if="inventoryData.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div class="rounded-lg bg-white shadow p-6">
             <p class="text-sm font-medium text-gray-500">{{ $t('stock.total_items', 'Total Items') }}</p>
-            <p class="mt-2 text-3xl font-bold text-blue-600">{{ inventoryData.length }}</p>
+            <p class="mt-2 text-3xl font-bold text-blue-600">{{ filteredAndSortedInventory.length }}</p>
           </div>
           <div class="rounded-lg bg-white shadow p-6">
             <p class="text-sm font-medium text-gray-500">{{ $t('stock.total_quantity', 'Total Quantity') }}</p>
@@ -70,22 +80,39 @@
         </div>
 
         <!-- Inventory Table -->
-        <div v-if="inventoryData.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
+        <div v-if="filteredAndSortedInventory.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('items.name', 'Name') }}</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('items.sku', 'SKU') }}</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.quantity', 'Quantity') }}</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.unit_cost', 'Unit Cost') }}</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.total_value', 'Total Value') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer select-none hover:text-gray-700" @click="toggleSort('name')">
+                    {{ $t('items.name', 'Name') }}
+                    <span v-if="sortKey === 'name'" class="ml-1">{{ sortDir === 'asc' ? '\u25B2' : '\u25BC' }}</span>
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer select-none hover:text-gray-700" @click="toggleSort('sku')">
+                    {{ $t('items.sku', 'SKU') }}
+                    <span v-if="sortKey === 'sku'" class="ml-1">{{ sortDir === 'asc' ? '\u25B2' : '\u25BC' }}</span>
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase cursor-pointer select-none hover:text-gray-700" @click="toggleSort('quantity')">
+                    {{ $t('stock.quantity', 'Quantity') }}
+                    <span v-if="sortKey === 'quantity'" class="ml-1">{{ sortDir === 'asc' ? '\u25B2' : '\u25BC' }}</span>
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase cursor-pointer select-none hover:text-gray-700" @click="toggleSort('unit_cost')">
+                    {{ $t('stock.unit_cost', 'Unit Cost') }}
+                    <span v-if="sortKey === 'unit_cost'" class="ml-1">{{ sortDir === 'asc' ? '\u25B2' : '\u25BC' }}</span>
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase cursor-pointer select-none hover:text-gray-700" @click="toggleSort('total_value')">
+                    {{ $t('stock.total_value', 'Total Value') }}
+                    <span v-if="sortKey === 'total_value'" class="ml-1">{{ sortDir === 'asc' ? '\u25B2' : '\u25BC' }}</span>
+                  </th>
                   <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ $t('stock.item_card_short', 'Card') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                <tr v-for="item in inventoryData" :key="item.item_id" class="hover:bg-gray-50">
-                  <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ item.name }}</td>
+                <tr v-for="item in filteredAndSortedInventory" :key="item.item_id" class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm font-medium text-primary-600 cursor-pointer hover:text-primary-800 hover:underline" @click="viewItemCard(item)">
+                    {{ item.name }}
+                  </td>
                   <td class="px-4 py-3 text-sm text-gray-500">{{ item.sku || '-' }}</td>
                   <td class="px-4 py-3 text-sm text-right" :class="item.quantity < 0 ? 'text-red-600 font-medium' : 'text-gray-900'">
                     {{ formatNumber(item.quantity) }}
@@ -101,10 +128,10 @@
               </tbody>
               <tfoot class="bg-gray-50">
                 <tr class="font-semibold">
-                  <td colspan="2" class="px-4 py-3 text-sm">{{ $t('general.total') }} ({{ inventoryData.length }})</td>
-                  <td class="px-4 py-3 text-sm text-right">{{ formatNumber(totalQuantity) }}</td>
+                  <td colspan="2" class="px-4 py-3 text-sm">{{ $t('general.total') }} ({{ filteredAndSortedInventory.length }})</td>
+                  <td class="px-4 py-3 text-sm text-right">{{ formatNumber(filteredTotalQuantity) }}</td>
                   <td class="px-4 py-3"></td>
-                  <td class="px-4 py-3 text-sm text-right">{{ formatMoney(totalValue) }}</td>
+                  <td class="px-4 py-3 text-sm text-right">{{ formatMoney(filteredTotalValue) }}</td>
                   <td></td>
                 </tr>
               </tfoot>
@@ -112,7 +139,13 @@
           </div>
         </div>
 
-        <!-- Empty State -->
+        <!-- Empty State (no results after search) -->
+        <div v-else-if="searchQuery && inventoryData.length > 0" class="bg-white rounded-lg shadow p-12 text-center">
+          <BaseIcon name="MagnifyingGlassIcon" class="mx-auto h-12 w-12 text-gray-400" />
+          <h3 class="mt-2 text-sm font-medium text-gray-900">{{ $t('general.no_results', 'No results found') }}</h3>
+        </div>
+
+        <!-- Empty State (no inventory) -->
         <div v-else-if="!isLoading && hasSearched" class="bg-white rounded-lg shadow p-12 text-center">
           <BaseIcon name="ArchiveBoxIcon" class="mx-auto h-12 w-12 text-gray-400" />
           <h3 class="mt-2 text-sm font-medium text-gray-900">{{ $t('stock.no_inventory', 'No inventory items') }}</h3>
@@ -120,7 +153,7 @@
         </div>
 
         <!-- Loading -->
-        <div v-if="isLoading" class="flex justify-center py-8">
+        <div v-else-if="isLoading" class="flex justify-center py-8">
           <BaseContentPlaceholders>
             <BaseContentPlaceholdersBox :rounded="true" class="w-full h-64" />
           </BaseContentPlaceholders>
@@ -239,15 +272,47 @@
         </div>
       </template>
 
-      <!-- Valuation Tab -->
-      <template v-if="activeTab === 'valuation'">
-        <div v-if="valuationData" class="bg-white rounded-lg shadow overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-            <div>
-              <h3 class="text-lg font-medium text-gray-900">{{ $t('stock.valuation_report', 'Inventory Valuation Report') }}</h3>
-              <p class="text-sm text-gray-500">{{ $t('stock.valuation_method', 'Method: Weighted Average Cost (WAC)') }}</p>
+      <!-- Stock Movements Log Tab -->
+      <template v-if="activeTab === 'movements'">
+        <!-- Filters -->
+        <div class="p-4 bg-white rounded-lg shadow mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <BaseInputGroup :label="$t('general.from_date', 'From Date')">
+              <BaseDatePicker v-model="logFromDate" :calendar-button="true" calendar-button-icon="CalendarDaysIcon" />
+            </BaseInputGroup>
+            <BaseInputGroup :label="$t('general.to_date', 'To Date')">
+              <BaseDatePicker v-model="logToDate" :calendar-button="true" calendar-button-icon="CalendarDaysIcon" />
+            </BaseInputGroup>
+            <BaseInputGroup :label="$t('stock.source_type_filter', 'Source Type')">
+              <select
+                v-model="logSourceType"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+              >
+                <option value="">{{ $t('stock.all_sources', 'All Sources') }}</option>
+                <option value="initial">{{ $t('stock.source_types.initial', 'Initial') }}</option>
+                <option value="bill">{{ $t('stock.source_types.bill', 'Purchase (Bill)') }}</option>
+                <option value="invoice">{{ $t('stock.source_types.invoice', 'Sale (Invoice)') }}</option>
+                <option value="adjustment">{{ $t('stock.source_types.adjustment', 'Adjustment') }}</option>
+                <option value="transfer_in">{{ $t('stock.source_types.transfer_in', 'Transfer In') }}</option>
+                <option value="transfer_out">{{ $t('stock.source_types.transfer_out', 'Transfer Out') }}</option>
+              </select>
+            </BaseInputGroup>
+            <div class="flex items-end">
+              <BaseButton variant="primary" :loading="isLoadingLog" @click="loadMovementsLog">
+                <template #left="slotProps">
+                  <BaseIcon :class="slotProps.class" name="MagnifyingGlassIcon" />
+                </template>
+                {{ $t('general.load', 'Load') }}
+              </BaseButton>
             </div>
-            <BaseButton variant="primary-outline" size="sm" @click="exportValuationCsv">
+          </div>
+        </div>
+
+        <!-- Movements Table -->
+        <div v-if="movementsLogData.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+            <h3 class="text-lg font-medium text-gray-900">{{ $t('stock.all_movements', 'All Movements') }} ({{ movementsLogData.length }})</h3>
+            <BaseButton variant="primary-outline" size="sm" @click="exportLogCsv">
               <BaseIcon name="ArrowDownTrayIcon" class="h-4 w-4 mr-1" />
               CSV
             </BaseButton>
@@ -256,43 +321,57 @@
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('items.name') }}</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('items.sku') }}</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.quantity') }}</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.unit_cost') }}</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.total_value') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('general.date') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('items.name', 'Item') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('stock.source', 'Source') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('general.description') }}</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.qty_in', 'In') }}</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.qty_out', 'Out') }}</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.unit_cost', 'Unit Cost') }}</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.balance_qty', 'Balance') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                <tr v-for="item in valuationData.items" :key="item.item_id" class="hover:bg-gray-50">
-                  <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ item.name }}</td>
-                  <td class="px-4 py-3 text-sm text-gray-500">{{ item.sku || '-' }}</td>
-                  <td class="px-4 py-3 text-sm text-right text-gray-900">{{ formatNumber(item.quantity) }}</td>
-                  <td class="px-4 py-3 text-sm text-right text-gray-900">{{ formatMoney(item.unit_cost) }}</td>
-                  <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">{{ formatMoney(item.total_value) }}</td>
+                <tr v-for="m in movementsLogData" :key="m.id" class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{{ m.date }}</td>
+                  <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ m.item_name }}</td>
+                  <td class="px-4 py-3 text-sm whitespace-nowrap">
+                    <span
+                      class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                      :class="sourceClass(m.source_type)"
+                    >
+                      {{ sourceLabel(m.source_type) }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">{{ m.description || m.reference || '-' }}</td>
+                  <td class="px-4 py-3 text-sm text-right text-green-600 font-medium">{{ m.quantity > 0 ? formatNumber(m.quantity) : '' }}</td>
+                  <td class="px-4 py-3 text-sm text-right text-red-600 font-medium">{{ m.quantity < 0 ? formatNumber(Math.abs(m.quantity)) : '' }}</td>
+                  <td class="px-4 py-3 text-sm text-right text-gray-900">{{ m.unit_cost ? formatMoney(m.unit_cost) : '-' }}</td>
+                  <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">{{ formatNumber(m.balance_quantity) }}</td>
                 </tr>
               </tbody>
-              <tfoot class="bg-primary-50">
-                <tr class="font-bold">
-                  <td colspan="2" class="px-4 py-3 text-sm text-primary-900">{{ $t('general.total') }}</td>
-                  <td class="px-4 py-3 text-sm text-right text-primary-900">{{ formatNumber(valuationData.total_quantity) }}</td>
-                  <td class="px-4 py-3"></td>
-                  <td class="px-4 py-3 text-sm text-right text-primary-900">{{ formatMoney(valuationData.total_value) }}</td>
-                </tr>
-              </tfoot>
             </table>
           </div>
         </div>
 
-        <div v-else-if="isLoading" class="flex justify-center py-8">
+        <!-- Loading -->
+        <div v-else-if="isLoadingLog" class="flex justify-center py-8">
           <BaseContentPlaceholders>
             <BaseContentPlaceholdersBox :rounded="true" class="w-full h-64" />
           </BaseContentPlaceholders>
         </div>
 
+        <!-- Empty State -->
+        <div v-else-if="hasSearchedLog" class="bg-white rounded-lg shadow p-12 text-center">
+          <BaseIcon name="ArrowsRightLeftIcon" class="mx-auto h-12 w-12 text-gray-400" />
+          <h3 class="mt-2 text-sm font-medium text-gray-900">{{ $t('stock.no_movements', 'No movements') }}</h3>
+        </div>
+
+        <!-- Initial State -->
         <div v-else class="bg-white rounded-lg shadow p-12 text-center">
-          <BaseIcon name="CubeIcon" class="mx-auto h-12 w-12 text-gray-400" />
-          <h3 class="mt-2 text-sm font-medium text-gray-900">{{ $t('stock.no_inventory', 'No inventory data') }}</h3>
+          <BaseIcon name="ArrowsRightLeftIcon" class="mx-auto h-12 w-12 text-gray-400" />
+          <h3 class="mt-2 text-sm font-medium text-gray-900">{{ $t('stock.all_movements', 'All Movements') }}</h3>
+          <p class="mt-1 text-sm text-gray-500">{{ $t('stock.select_item_prompt_message', 'Choose filters and click Load to view stock movements.') }}</p>
         </div>
       </template>
     </template>
@@ -320,6 +399,9 @@ const hasSearched = ref(false)
 
 // Inventory tab
 const inventoryData = ref([])
+const searchQuery = ref('')
+const sortKey = ref('name')
+const sortDir = ref('asc')
 
 // Item card tab
 const selectedItemId = ref(null)
@@ -327,19 +409,58 @@ const cardFromDate = ref(`${new Date().getFullYear()}-01-01`)
 const cardToDate = ref(todayStr())
 const itemCardData = ref(null)
 
-// Valuation tab
-const valuationData = ref(null)
+// Movements log tab
+const logFromDate = ref(`${new Date().getFullYear()}-01-01`)
+const logToDate = ref(todayStr())
+const logSourceType = ref('')
+const movementsLogData = ref([])
+const isLoadingLog = ref(false)
+const hasSearchedLog = ref(false)
 
 const companies = computed(() => consoleStore.managedCompanies || [])
+
+const selectedCompanyCurrency = computed(() => {
+  if (!selectedCompanyId.value) return 'MKD'
+  const company = companies.value.find(c => c.id === selectedCompanyId.value)
+  return company?.currency?.code || 'MKD'
+})
 
 const tabs = computed(() => [
   { key: 'inventory', label: t('stock.inventory_list', 'Inventory List') },
   { key: 'itemcard', label: t('stock.item_card', 'Item Card') },
-  { key: 'valuation', label: t('stock.valuation_report', 'Valuation Report') },
+  { key: 'movements', label: t('stock.movements_log', 'Stock Movements Log') },
 ])
+
+// Client-side filter + sort
+const filteredAndSortedInventory = computed(() => {
+  let result = inventoryData.value
+
+  // Search filter
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(item =>
+      (item.name || '').toLowerCase().includes(q) ||
+      (item.sku || '').toLowerCase().includes(q)
+    )
+  }
+
+  // Sort
+  const key = sortKey.value
+  const dir = sortDir.value === 'asc' ? 1 : -1
+  result = [...result].sort((a, b) => {
+    const aVal = a[key] ?? ''
+    const bVal = b[key] ?? ''
+    if (typeof aVal === 'string') return aVal.localeCompare(bVal) * dir
+    return (aVal - bVal) * dir
+  })
+
+  return result
+})
 
 const totalQuantity = computed(() => inventoryData.value.reduce((sum, item) => sum + (item.quantity || 0), 0))
 const totalValue = computed(() => inventoryData.value.reduce((sum, item) => sum + (item.total_value || 0), 0))
+const filteredTotalQuantity = computed(() => filteredAndSortedInventory.value.reduce((sum, item) => sum + (item.quantity || 0), 0))
+const filteredTotalValue = computed(() => filteredAndSortedInventory.value.reduce((sum, item) => sum + (item.total_value || 0), 0))
 
 onMounted(async () => {
   try {
@@ -357,9 +478,11 @@ onMounted(async () => {
 function onCompanyChange() {
   inventoryData.value = []
   itemCardData.value = null
-  valuationData.value = null
   selectedItemId.value = null
+  movementsLogData.value = []
   hasSearched.value = false
+  hasSearchedLog.value = false
+  searchQuery.value = ''
   if (selectedCompanyId.value) {
     loadInventory()
   }
@@ -370,13 +493,10 @@ async function loadInventory() {
   isLoading.value = true
   hasSearched.value = true
   try {
-    // Use valuation endpoint with group_by=item to get full data (name, sku, quantity, cost, value)
-    // The inventoryList endpoint is for physical counting and lacks unit_cost/total_value
     const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/stock-reports/valuation`, {
       params: { group_by: 'item' },
     })
     const data = response.data.data || response.data
-    // Normalize valuation items to flat inventory format
     inventoryData.value = (data.items || []).map(entry => ({
       item_id: entry.item?.id || entry.id,
       name: entry.item?.name || entry.name,
@@ -386,30 +506,10 @@ async function loadInventory() {
       unit_cost: entry.weighted_average_cost ?? entry.unit_cost ?? 0,
       total_value: entry.total_value ?? 0,
     }))
-    buildValuationFromInventory()
   } catch (error) {
     notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('stock.failed_to_load_inventory', 'Failed to load inventory') })
   } finally {
     isLoading.value = false
-  }
-}
-
-function buildValuationFromInventory() {
-  if (!inventoryData.value.length) {
-    valuationData.value = null
-    return
-  }
-  valuationData.value = {
-    items: inventoryData.value.map(item => ({
-      item_id: item.item_id,
-      name: item.name,
-      sku: item.sku,
-      quantity: item.quantity,
-      unit_cost: item.unit_cost,
-      total_value: item.total_value,
-    })),
-    total_quantity: totalQuantity.value,
-    total_value: totalValue.value,
   }
 }
 
@@ -429,10 +529,38 @@ async function loadItemCard() {
   }
 }
 
+async function loadMovementsLog() {
+  if (!selectedCompanyId.value) return
+  isLoadingLog.value = true
+  hasSearchedLog.value = true
+  try {
+    const params = {}
+    if (logFromDate.value) params.from_date = logFromDate.value
+    if (logToDate.value) params.to_date = logToDate.value
+    if (logSourceType.value) params.source_type = logSourceType.value
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/stock-reports/movements`, { params })
+    const data = response.data.data || response.data
+    movementsLogData.value = data.movements || []
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to load movements' })
+  } finally {
+    isLoadingLog.value = false
+  }
+}
+
 function viewItemCard(item) {
   selectedItemId.value = item.item_id
   activeTab.value = 'itemcard'
   loadItemCard()
+}
+
+function toggleSort(key) {
+  if (sortKey.value === key) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortKey.value = key
+    sortDir.value = 'asc'
+  }
 }
 
 function formatNumber(num) {
@@ -443,7 +571,7 @@ function formatNumber(num) {
 function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
   const value = amount / 100
-  return new Intl.NumberFormat('mk-MK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' ден.'
+  return new Intl.NumberFormat('mk-MK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' ' + selectedCompanyCurrency.value
 }
 
 function sourceClass(sourceType) {
@@ -467,9 +595,9 @@ function sourceLabel(sourceType) {
 }
 
 function exportCsv() {
-  if (!inventoryData.value.length) return
+  if (!filteredAndSortedInventory.value.length) return
   const headers = [t('items.name'), 'SKU', t('stock.quantity'), t('stock.unit_cost'), t('stock.total_value')]
-  const rows = inventoryData.value.map(item => [
+  const rows = filteredAndSortedInventory.value.map(item => [
     item.name, item.sku || '', item.quantity,
     item.unit_cost ? (item.unit_cost / 100).toFixed(2) : '0', item.total_value ? (item.total_value / 100).toFixed(2) : '0',
   ])
@@ -480,7 +608,7 @@ function exportCardCsv() {
   if (!itemCardData.value?.movements?.length) return
   const headers = [t('general.date'), t('stock.source'), t('general.description'), t('stock.qty_in'), t('stock.qty_out'), t('stock.unit_cost'), t('stock.balance_qty'), t('stock.balance_value')]
   const rows = itemCardData.value.movements.map(m => [
-    m.date, m.source_type, m.description || m.reference || '',
+    m.date, sourceLabel(m.source_type), m.description || m.reference || '',
     m.quantity > 0 ? m.quantity : '', m.quantity < 0 ? Math.abs(m.quantity) : '',
     m.unit_cost ? (m.unit_cost / 100).toFixed(2) : '', m.balance_quantity,
     m.balance_value ? (m.balance_value / 100).toFixed(2) : '',
@@ -488,14 +616,16 @@ function exportCardCsv() {
   downloadCsv(headers, rows, `item_card_${itemCardData.value.item?.sku || 'item'}`)
 }
 
-function exportValuationCsv() {
-  if (!valuationData.value?.items?.length) return
-  const headers = [t('items.name'), 'SKU', t('stock.quantity'), t('stock.unit_cost'), t('stock.total_value')]
-  const rows = valuationData.value.items.map(item => [
-    item.name, item.sku || '', item.quantity,
-    item.unit_cost ? (item.unit_cost / 100).toFixed(2) : '0', item.total_value ? (item.total_value / 100).toFixed(2) : '0',
+function exportLogCsv() {
+  if (!movementsLogData.value.length) return
+  const headers = [t('general.date'), t('items.name'), 'SKU', t('stock.source'), t('general.description'), t('stock.qty_in'), t('stock.qty_out'), t('stock.unit_cost'), t('stock.balance_qty')]
+  const rows = movementsLogData.value.map(m => [
+    m.date, m.item_name, m.item_sku || '',
+    sourceLabel(m.source_type), m.description || m.reference || '',
+    m.quantity > 0 ? m.quantity : '', m.quantity < 0 ? Math.abs(m.quantity) : '',
+    m.unit_cost ? (m.unit_cost / 100).toFixed(2) : '', m.balance_quantity,
   ])
-  downloadCsv(headers, rows, 'valuation_report')
+  downloadCsv(headers, rows, 'movements_log')
 }
 
 function downloadCsv(headers, rows, filename) {

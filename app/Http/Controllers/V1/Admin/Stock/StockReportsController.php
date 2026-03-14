@@ -398,6 +398,72 @@ class StockReportsController extends Controller
         ]);
     }
 
+    /**
+     * Stock Movements Log - All movements across items.
+     *
+     * GET /api/v1/stock/movements
+     * GET /api/v1/partner/companies/{company}/stock-reports/movements
+     */
+    public function movements(Request $request): JsonResponse
+    {
+        if ($error = $this->checkStockEnabled()) {
+            return $error;
+        }
+
+        $companyId = $request->header('company');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $sourceType = $request->input('source_type');
+        $limit = min((int) $request->input('limit', 200), 500);
+
+        $query = StockMovement::where('company_id', $companyId)
+            ->with(['item:id,name,sku', 'warehouse:id,name']);
+
+        if ($fromDate) {
+            $query->where('movement_date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->where('movement_date', '<=', $toDate);
+        }
+
+        if ($sourceType) {
+            $query->where('source_type', $sourceType);
+        }
+
+        $movements = $query
+            ->orderBy('movement_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->limit($limit)
+            ->get();
+
+        $formatted = $movements->map(function (StockMovement $m) {
+            return [
+                'id' => $m->id,
+                'date' => $m->movement_date->format('Y-m-d'),
+                'item_name' => $m->item?->name ?? '-',
+                'item_sku' => $m->item?->sku ?? '',
+                'warehouse_name' => $m->warehouse?->name ?? '-',
+                'source_type' => $this->getSourceTypeLabel($m->source_type),
+                'reference' => $this->getMovementReference($m),
+                'description' => $this->getMovementDescription($m),
+                'quantity' => (float) $m->quantity,
+                'unit_cost' => $m->unit_cost,
+                'total_cost' => $m->total_cost,
+                'balance_quantity' => (float) $m->balance_quantity,
+                'balance_value' => (int) $m->balance_value,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'movements' => $formatted,
+                'total' => $formatted->count(),
+            ],
+        ]);
+    }
+
     // ========================================
     // HELPER METHODS
     // ========================================
