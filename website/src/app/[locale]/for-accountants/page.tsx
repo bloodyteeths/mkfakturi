@@ -41,8 +41,8 @@ const copy = {
         },
         {
           icon: 'clock',
-          title: 'Рачно порамнување на банкарски изводи',
-          body: 'Секое порамнување е часови copy‑paste од PDF. Грешка во една цифра — и сметката не штима.',
+          title: 'Рачно внесување на секоја фактура',
+          body: 'Секоја влезна фактура — отвори PDF, препиши го бројот, износите, ставките, ДДВ... со часови на рачна работа. Грешка во една цифра — и сметката не штима.',
         },
         {
           icon: 'alert',
@@ -76,7 +76,7 @@ const copy = {
         },
         {
           title: 'AI асистент за побрзо затворање',
-          body: 'Предлози за конта, ДДВ стапки и книжења. Вие потврдувате, AI забрзува.',
+          body: 'Кажи „Фактура за Марков 3000 ден" и AI ја креира. Скенирај документ — AI го чита. Банковни изводи — AI ги порамнува. Предлози за конта и ДДВ стапки.',
           icon: 'ai',
         },
         {
@@ -111,6 +111,7 @@ const copy = {
         { feature: 'ДДВ правила за МК (5%, 18%)', facturino: true, others: false },
         { feature: 'Банкарски увоз (CSV/MT940/PDF)', facturino: true, others: false },
         { feature: 'е-Фактура подготвеност (UBL 2.1)', facturino: true, others: false },
+        { feature: 'AI скенирање на документи (PDF/слика → книжење)', facturino: true, others: false },
         { feature: 'AI контирање и предлози', facturino: true, others: false },
         { feature: 'IFRS извештаи', facturino: true, others: true },
         { feature: 'Мулти‑компанија од еден акаунт', facturino: true, others: false },
@@ -158,8 +159,8 @@ const copy = {
         },
         {
           icon: 'clock',
-          title: 'Pajtim manual i ekstrakteve bankare',
-          body: 'Çdo pajtim do të thotë orë copy‑paste nga PDF. Një gabim i vetëm — dhe llogaria nuk del.',
+          title: 'Futje manuale e çdo fature',
+          body: 'Çdo faturë hyrëse — hapni PDF, rishkruani numrin, shumat, zërat, TVSH... orë punë manuale. Një gabim i vetëm — dhe llogaria nuk del.',
         },
         {
           icon: 'alert',
@@ -193,7 +194,7 @@ const copy = {
         },
         {
           title: 'Asistent AI për mbyllje më të shpejtë',
-          body: 'Sugjerime për llogari, TVSH dhe regjistra. Ju konfirmoni, AI shpejton.',
+          body: 'Thuaj "Faturë për Markov 3000 den" dhe AI e krijon. Skanoni dokument — AI e lexon. Ekstrakte bankare — AI i pajton. Sugjerime për llogari dhe TVSH.',
           icon: 'ai',
         },
         {
@@ -228,6 +229,7 @@ const copy = {
         { feature: 'Rregulla TVSH për MK (5%, 18%)', facturino: true, others: false },
         { feature: 'Import bankar (CSV/MT940/PDF)', facturino: true, others: false },
         { feature: 'Gatishmëri e-Fatura (UBL 2.1)', facturino: true, others: false },
+        { feature: 'AI skanim dokumentesh (PDF/imazh → regjistrim)', facturino: true, others: false },
         { feature: 'Kontim dhe sugjerime me AI', facturino: true, others: false },
         { feature: 'Raporte IFRS', facturino: true, others: true },
         { feature: 'Shumë kompani nga një llogari', facturino: true, others: false },
@@ -275,8 +277,8 @@ const copy = {
         },
         {
           icon: 'clock',
-          title: 'Manuel banka ekstresi mutabakatı',
-          body: 'Her mutabakat saatlerce PDF\'den kopyala‑yapıştır demek. Bir hanede hata — ve hesap tutmuyor.',
+          title: 'Her faturayı elle girme',
+          body: 'Her gelen fatura — PDF\'yi açın, numarayı, tutarları, kalemleri, KDV\'yi kopyalayın... saatlerce elle çalışma. Bir hanede hata — ve hesap tutmuyor.',
         },
         {
           icon: 'alert',
@@ -310,7 +312,7 @@ const copy = {
         },
         {
           title: 'Daha hızlı kapanış için AI asistan',
-          body: 'Hesap, KDV oranı ve muhasebe kaydı önerileri. Siz onaylarsınız, AI hızlandırır.',
+          body: '"Markov için fatura 3000 den" yazın ve AI oluşturur. Belge tarayın — AI okur. Banka ekstreleri — AI mutabakat yapar. Hesap ve KDV önerileri.',
           icon: 'ai',
         },
         {
@@ -345,6 +347,7 @@ const copy = {
         { feature: 'MK KDV kuralları (5%, 18%)', facturino: true, others: false },
         { feature: 'Banka ithalatı (CSV/MT940/PDF)', facturino: true, others: false },
         { feature: 'e-Fatura hazırlığı (UBL 2.1)', facturino: true, others: false },
+        { feature: 'AI belge tarama (PDF/görsel → kayıt)', facturino: true, others: false },
         { feature: 'AI muhasebe kaydı ve öneriler', facturino: true, others: false },
         { feature: 'IFRS raporları', facturino: true, others: true },
         { feature: 'Tek hesaptan çok şirket', facturino: true, others: false },
@@ -392,8 +395,8 @@ const copy = {
         },
         {
           icon: 'clock',
-          title: 'Manual bank statement reconciliation',
-          body: 'Every reconciliation means hours of copy‑paste from PDFs. One wrong digit — and the account doesn\'t balance.',
+          title: 'Manually entering every invoice',
+          body: 'Every incoming invoice — open the PDF, retype the number, amounts, line items, VAT... hours of manual work. One wrong digit — and the account doesn\'t balance.',
         },
         {
           icon: 'alert',
@@ -427,7 +430,7 @@ const copy = {
         },
         {
           title: 'AI assistant for faster closing',
-          body: 'Suggestions for accounts, VAT rates, and journal entries. You confirm, AI accelerates.',
+          body: 'Say "Invoice for Markov 3000 MKD" and AI creates it. Scan a document — AI reads it. Bank statements — AI reconciles them. Account and VAT suggestions included.',
           icon: 'ai',
         },
         {
@@ -462,6 +465,7 @@ const copy = {
         { feature: 'MK VAT rules (5%, 18%)', facturino: true, others: false },
         { feature: 'Bank import (CSV/MT940/PDF)', facturino: true, others: false },
         { feature: 'e-Invoice readiness (UBL 2.1)', facturino: true, others: false },
+        { feature: 'AI document scanning (PDF/photo → entry)', facturino: true, others: false },
         { feature: 'AI journal entries and suggestions', facturino: true, others: false },
         { feature: 'IFRS reports', facturino: true, others: true },
         { feature: 'Multi-company from one account', facturino: true, others: false },

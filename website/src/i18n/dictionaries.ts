@@ -93,7 +93,7 @@ const mk: Dictionary = {
     claim:
       'Facturino е најнапредната AI сметководствена платформа во Македонија, подготвена за новиот систем за е‑Фактура.',
     onlyPlatform:
-      'Единствена локална платформа што комбинира AI, македонски сметководствени правила, подготвеност за е‑Фактура и банкарски увоз (CSV/MT940/PDF) – на едно место.'
+      'Единствена локална платформа што комбинира AI скенирање на документи, банкарски увоз (CSV/MT940/PDF), е‑Фактура и гласовни команди — прикачи фактура, AI ја чита и книжи за секунда.'
   },
   heroTagline: 'Сметководствениот софтвер што го очекувавте – конечно е тука.',
   aiSection: {
@@ -104,7 +104,9 @@ const mk: Dictionary = {
       { title: 'Разговарај со AI', desc: 'Прашај "Кој клиент ми должи најмногу?" или "Дали сум профитабилен?" — добиј одговор веднаш.' },
       { title: 'Рано предупредување за ризици', desc: 'AI те известува кога еден клиент станува преголем ризик или кога имаш задоцнети фактури.' },
       { title: 'Прогноза на готовина', desc: 'Гледај 90 дена напред — дали ќе имаш доволно пари на сметка следниот месец?' },
-      { title: 'Совети за профит', desc: '"Колку да ги зголемам цените за да имам 500.000 профит?" — добиј конкретен план по артикли.' }
+      { title: 'Совети за профит', desc: '"Колку да ги зголемам цените за да имам 500.000 профит?" — добиј конкретен план по артикли.' },
+      { title: 'Кажи и креирај', desc: 'Напиши „Фактура за Марков, 5 часа по 3000" — AI ја креира за секунда. Ти само потврди.' },
+      { title: 'Скенирај и внеси', desc: 'Прикачи PDF фактура — AI ја чита, ги извлекува ставките и ја внесува како сметка.' }
     ]
   },
   featureGrid: {
@@ -113,7 +115,7 @@ const mk: Dictionary = {
     features: [
       { title: 'Подготвено за е‑Фактура', desc: 'Целосно усогласено со новите владини прописи. Поврзете се веднаш кога ќе се отвори API.' },
       { title: 'Банкарски увоз', desc: 'Увезете банкарски изводи (CSV/MT940/PDF) и порамнете со фактури полуавтоматски.' },
-      { title: 'Безбедност на банкарско ниво', desc: 'Вашите податоци се енкриптирани и безбедно чувани во ЕУ дата центри.' },
+      { title: 'AI скенирање на документи', desc: 'Прикачи PDF или слика на фактура — AI ја чита, ги извлекува ставките, износите и ДДВ, и ја книжи автоматски.' },
       { title: 'Мулти‑клиент', desc: 'Совршено за сметководители кои управуваат со повеќе клиентски компании од едно место.' }
     ]
   },
@@ -121,7 +123,7 @@ const mk: Dictionary = {
   whyDifferent: {
     title: 'Зошто Facturino е различен од било кој софтвер во Македонија',
     cards: [
-      { title: 'AI фактурирање и книжење', body: 'Паметни предлози за ДДВ категории и сметки по ставка – вие потврдувате.' },
+      { title: 'AI скенирање на документи', body: 'Прикачи PDF/слика — AI ја чита фактурата, ги извлекува ставките, износите и ДДВ. Потврди со еден клик — книжењето е готово.' },
       { title: 'Е‑Фактура подготвен', body: 'Моделот веќе ги поддржува сите структури; поврзување штом UJP отвори продукциски API + QES.' },
       { title: 'Банкарски увоз', body: 'CSV/MT940/PDF увоз на изводи и полуавтоматско порамнување со фактури. PSD2 наскоро.' },
       { title: 'Мулти‑клиент за канцеларии', body: 'Едно најавување, многу компании, посебни сметки, извештаи и овластувања.' },
@@ -153,9 +155,9 @@ const mk: Dictionary = {
     title: 'Пакети',
     cta: 'Види ги цените',
     plans: [
-      { name: 'Starter', bullets: ['Е‑Фактура подготвено', '1 корисник', 'AI предлози (основно)'] },
-      { name: 'Pro', bullets: ['Мулти‑корисници/улоги', 'Увоз на изводи', 'Автоматизации'] },
-      { name: 'Business', bullets: ['Повеќе компании', 'API и напредни овластувања', 'SLA'] }
+      { name: 'Starter', bullets: ['Е‑Фактура подготвено', 'AI асистент', '25 AI прашања/месец'] },
+      { name: 'Pro', bullets: ['Мулти‑корисници', 'AI документ хаб', 'Автоматизации'] },
+      { name: 'Business', bullets: ['AI рекончилијација', 'Банкарски увоз', 'API и SLA'] }
     ]
   },
   testimonials: {
@@ -173,7 +175,9 @@ const mk: Dictionary = {
       { q: 'Дали сте подготвени за е‑Фактура?', a: 'Да, моделот е изграден околу е‑фактури и се поврзуваме штом UJP отвори продукциски API + QES.' },
       { q: 'Како функционира AI?', a: 'Предлага ДДВ/конта по ставка — човек секогаш потврдува/уредува.' },
       { q: 'Поддржувате ли банкарски увоз?', a: 'Да, CSV/MT940/PDF увоз на изводи и полуавтоматско порамнување. PSD2 директни конекции — наскоро.' },
-      { q: 'Што може да го прашам AI советникот?', a: 'Било што за твојот бизнис! "Кој ми должи?", "Дали сум профитабилен?", "Што ако го изгубам најголемиот клиент?", "Како да го зголемам профитот?" — AI ги анализира твоите податоци и дава конкретни одговори на македонски.' }
+      { q: 'Што може да го прашам AI советникот?', a: 'Било што за твојот бизнис! "Кој ми должи?", "Дали сум профитабилен?", "Што ако го изгубам најголемиот клиент?", "Како да го зголемам профитот?" — AI ги анализира твоите податоци и дава конкретни одговори на македонски.' },
+      { q: 'Што е AI Документ Хаб?', a: 'Прикачете PDF или слика — AI ја класифицира, ги извлекува ставките, и со еден клик се книжи. Поддржува сметки, фактури, трошоци, банкарски трансакции и даночни обрасци.' },
+      { q: 'Како работи AI Асистентот?', a: 'Напишете „Фактура за Марков 3000 ден" и AI ја креира за секунда. Поддржува фактури, сметки, трошоци и плаќања. AI го препознава клиентот и артиклите од вашата база.' }
     ]
   },
   cta: { title: 'Подготвени сте? Започнете бесплатно денес.', sub: 'Без кредитна картичка • 14-дневен бесплатен пробен период • Откажете во секое време', button: 'Започни бесплатно' },
@@ -190,6 +194,37 @@ const mk: Dictionary = {
           'Совети за оптимизација на цени и профит',
           'Анализа на старост на побарувања (AR Aging) со топ должници',
           'Што-ако сценарија: "Што ако го изгубам најголемиот клиент?"'
+        ]
+      },
+      {
+        title: 'AI Документ Хаб',
+        items: [
+          'Прикачи PDF или слика — AI автоматски ја класифицира (сметка, фактура, трошок, банкарски извод, даночен образец)',
+          'Извлекување на износи, датуми, ставки и ДДВ со Gemini Vision',
+          'Преглед и корекција пред книжење — со еден клик потврди',
+          'Поддржува 7 типови ентитети: сметки, фактури, трошоци, банкарски трансакции, артикли, даночни обрасци, договори',
+          'Документот останува прикачен кон креираниот ентитет за лесна ревизија'
+        ]
+      },
+      {
+        title: 'Кажи и креирај (AI Асистент)',
+        items: [
+          'Напиши „Фактура за Марков, 5 часа по 3000" — AI ја креира за секунда',
+          'Поддржува фактури, сметки, трошоци и плаќања на македонски и англиски',
+          'AI го препознава клиентот, добавувачот и артиклите од вашата база',
+          'Прашања како „Колку неплатени фактури имам?" добиваат одговор веднаш',
+          'Нацрт систем: прегледај и потврди пред книжење',
+          'Ако нешто е нејасно, AI бара појаснување — никогаш не креира погрешно'
+        ]
+      },
+      {
+        title: 'AI Банковно порамнување',
+        items: [
+          'Gemini AI ги споредува банкарските трансакции со фактури — вклучувајќи кирилични имиња',
+          'Детекција на делумни плаќања и споени трансакции (split detection)',
+          'Автоматска категоризација: плата, данок, кирија, добавувач, банкарска провизија и др.',
+          '4-слоен pipeline: правила → детерминистичко → AI подобрување → AI категоризација',
+          'Виолетови значки за AI совпаѓања — транспарентно и ревидибилно'
         ]
       },
       {
@@ -235,11 +270,11 @@ const mk: Dictionary = {
     recommendedBadge: 'Препорачано',
     includesPrevious: 'Вклучува сè од {plan}',
     companyPlans: [
-      { name: 'Free', price: '0 ден', period: '/засекогаш', bullets: ['3 фактури/месец', '1 корисник', 'PDF извоз', '2 AI прашања/месец'], popular: false },
-      { name: 'Starter', price: '740 ден', period: '/месец', bullets: ['30 фактури/месец', '1 корисник', 'Е‑Фактура (5/месец)', '5 AI прашања/месец'], popular: false },
-      { name: 'Standard', price: '2,400 ден', period: '/месец', bullets: ['60 фактури/месец', '3 корисници', 'Е‑Фактура + QES (неограничено)', '25 AI прашања/месец'], popular: true },
-      { name: 'Business', price: '3,630 ден', period: '/месец', bullets: ['150 фактури/месец', '5 корисници', 'Банкарски увоз (CSV/MT940/PDF)', 'Авто-рекончилијација', 'Повеќе валути'], popular: false },
-      { name: 'Max', price: '9,170 ден', period: '/месец', bullets: ['Неограничено фактури', 'Неограничено корисници', 'API пристап', 'Мулти-локации', 'IFRS извештаи'], popular: false }
+      { name: 'Free', price: '0 ден', period: '/засекогаш', bullets: ['3 фактури/месец', '1 корисник', 'PDF извоз', '10 AI прашања/месец'], popular: false },
+      { name: 'Starter', price: '740 ден', period: '/месец', bullets: ['30 фактури/месец', '1 корисник', 'Е‑Фактура (5/месец)', '25 AI прашања/месец', 'AI асистент'], popular: false },
+      { name: 'Standard', price: '2,400 ден', period: '/месец', bullets: ['60 фактури/месец', '3 корисници', 'Е‑Фактура + QES (неограничено)', '75 AI прашања/месец', 'AI документ хаб'], popular: true },
+      { name: 'Business', price: '3,630 ден', period: '/месец', bullets: ['150 фактури/месец', '5 корисници', 'Банкарски увоз (CSV/MT940/PDF)', '200 AI прашања/месец', 'AI рекончилијација'], popular: false },
+      { name: 'Max', price: '9,170 ден', period: '/месец', bullets: ['Неограничено фактури', 'Неограничено корисници', '500 AI прашања/месец', 'Сите AI функции', 'IFRS извештаи'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Бесплатно', period: '', bullets: ['Неограничено клиенти', 'Портфолио: додајте ги сите компании бесплатно', 'Партнер контролен панел', '3 месеци Standard за сите компании', 'Приоритетна поддршка'], popular: true },
@@ -257,7 +292,10 @@ const mk: Dictionary = {
         { feature: 'Клиенти', values: ['Неограничено', 'Неограничено', 'Неограничено', 'Неограничено', 'Неограничено'] },
         { feature: 'Е-Фактура (UJP)', values: [false, '5/месец', 'Неограничено', 'Неограничено', 'Неограничено'] },
         { feature: 'QES потпис', values: [false, false, true, true, true] },
-        { feature: 'AI Прашања/месец', values: ['2', '5', '25', '50', '100'] },
+        { feature: 'AI Прашања/месец', values: ['10', '25', '75', '200', '500'] },
+        { feature: 'AI Документ Хаб', values: ['Класификација', 'Извлекување', true, true, true] },
+        { feature: 'AI Асистент', values: [false, '5/месец', '25/месец', true, true] },
+        { feature: 'AI Порамнување', values: [false, false, 'Предлози', true, true] },
         { feature: 'Банкарски увоз (CSV/MT940/PDF)', values: [false, false, false, true, true] },
         { feature: 'Авто-рекончилијација', values: [false, false, false, true, true] },
         { feature: 'API Пристап', values: [false, false, false, true, true] },
@@ -298,7 +336,7 @@ const sq: Dictionary = {
     claim:
       'Facturino është platforma më e avancuar kontabiliteti me AI në Maqedoni, gati për sistemin e ri të e‑Faturës.',
     onlyPlatform:
-      'E vetmja platformë lokale që kombinon AI, rregullat kontabël maqedonase, gatishmërinë për e‑Faturë dhe import bankar (CSV/MT940/PDF) – në një vend.'
+      'E vetmja platformë lokale që kombinon AI skanim dokumentesh, import bankar (CSV/MT940/PDF), e‑Faturë dhe komanda zanore — bashkangjitni faturë, AI e lexon dhe e regjistron për një sekondë.'
   },
   heroTagline: 'Softueri i kontabilitetit që keni pritur – më në fund është këtu.',
   aiSection: {
@@ -309,7 +347,9 @@ const sq: Dictionary = {
       { title: 'Bisedoni me AI', desc: 'Pyesni "Cili klient më detyron më shumë?" ose "A jam profitabil?" — merrni përgjigje menjëherë.' },
       { title: 'Paralajmërim i hershëm për rreziqet', desc: 'AI ju njofton kur një klient bëhet rrezik i madh ose keni fatura të vonuara.' },
       { title: 'Parashikim i parasë', desc: 'Shikoni 90 ditë përpara — a do të keni mjaft para në llogari muajin e ardhshëm?' },
-      { title: 'Këshilla për profit', desc: '"Sa duhet t\'i rris çmimet për të pasur 500.000 profit?" — merrni plan konkret për çdo produkt.' }
+      { title: 'Këshilla për profit', desc: '"Sa duhet t\'i rris çmimet për të pasur 500.000 profit?" — merrni plan konkret për çdo produkt.' },
+      { title: 'Thuaj dhe krijo', desc: 'Shkruaj "Faturë për Markov, 5 orë nga 3000" — AI e krijon për një sekondë. Ju vetëm konfirmoni.' },
+      { title: 'Skanoni dhe regjistroni', desc: 'Bashkangjitni PDF faturë — AI e lexon, nxjerr zërat dhe e regjistron si llogari.' }
     ]
   },
   featureGrid: {
@@ -318,7 +358,7 @@ const sq: Dictionary = {
     features: [
       { title: 'Gati për e‑Faturë', desc: 'Plotësisht në përputhje me rregulloret e reja qeveritare. Lidhuni menjëherë kur të hapet API.' },
       { title: 'Import bankar', desc: 'Importoni ekstrakte bankare (CSV/MT940/PDF) dhe pajtoni me fatura gjysmë-automatikisht.' },
-      { title: 'Siguri në nivel bankar', desc: 'Të dhënat tuaja janë të enkriptuara dhe ruhen në mënyrë të sigurt në qendrat e të dhënave të BE-së.' },
+      { title: 'AI skanim dokumentesh', desc: 'Bashkangjitni PDF ose imazh fature — AI e lexon, nxjerr zërat, shumat dhe TVSH, dhe e regjistron automatikisht.' },
       { title: 'Multi-klient', desc: 'Perfekt për kontabilistët që menaxhojnë kompani të shumta klientësh nga një vend.' }
     ]
   },
@@ -326,7 +366,7 @@ const sq: Dictionary = {
   whyDifferent: {
     title: 'Pse Facturino është ndryshe nga çdo softuer tjetër në Maqedoni',
     cards: [
-      { title: 'Faturim & kodim me AI', body: 'Sugjerime të mençura për TVSH dhe llogari për çdo rresht – ju konfirmoni.' },
+      { title: 'AI skanim dokumentesh', body: 'Bashkangjitni PDF/imazh — AI lexon faturën, nxjerr zërat, shumat dhe TVSH. Konfirmoni me një klik — regjistrimi është gati.' },
       { title: 'Gati për e‑Faturë', body: 'Modeli mbështet të gjithë strukturën; lidhemi sapo UJP hapë API + QES.' },
       { title: 'Import bankar', body: 'CSV/MT940/PDF import i ekstrakteve dhe pajtim gjysmë‑automatik. PSD2 së shpejti.' },
       { title: 'Shumë‑klientë për zyra', body: 'Një hyrje, shumë kompani, llogari/raporte/rollet të ndara.' },
@@ -358,9 +398,9 @@ const sq: Dictionary = {
     title: 'Planet',
     cta: 'Shiko çmimet',
     plans: [
-      { name: 'Starter', bullets: ['Gati për e‑Faturë', '1 përdorues', 'AI (bazë)'] },
-      { name: 'Pro', bullets: ['Shumë përdorues/role', 'Import ekstraktesh', 'Automatizime'] },
-      { name: 'Business', bullets: ['Shumë kompani', 'API & leje të avancuara', 'SLA'] }
+      { name: 'Starter', bullets: ['Gati për e‑Faturë', 'Asistent AI', '25 pyetje AI/muaj'] },
+      { name: 'Pro', bullets: ['Shumë përdorues', 'AI dokument hub', 'Automatizime'] },
+      { name: 'Business', bullets: ['AI rekonçilim', 'Import bankar', 'API dhe SLA'] }
     ]
   },
   testimonials: {
@@ -378,7 +418,9 @@ const sq: Dictionary = {
       { q: 'A jeni gati për e‑Faturë?', a: 'Po, modeli është ndërtuar mbi e‑faturë dhe lidhemi sapo UJP hap API + QES.' },
       { q: 'Si punon AI?', a: 'Sugjeron TVSH/llogari për çdo rresht — njeriu gjithmonë konfirmon.' },
       { q: 'A mbështesni import bankar?', a: 'Po, CSV/MT940/PDF import i ekstrakteve dhe pajtim gjysmë‑automatik. PSD2 lidhje direkte — së shpejti.' },
-      { q: 'Çfarë mund të pyes këshilltarin AI?', a: 'Çdo gjë për biznesin tuaj! "Kush më detyron?", "A jam profitabil?", "Çfarë nëse humb klientin më të madh?", "Si ta rris profitin?" — AI analizon të dhënat tuaja dhe jep përgjigje konkrete.' }
+      { q: 'Çfarë mund të pyes këshilltarin AI?', a: 'Çdo gjë për biznesin tuaj! "Kush më detyron?", "A jam profitabil?", "Çfarë nëse humb klientin më të madh?", "Si ta rris profitin?" — AI analizon të dhënat tuaja dhe jep përgjigje konkrete.' },
+      { q: 'Çfarë është AI Dokument Hub?', a: 'Bashkangjitni PDF ose imazh — AI e klasifikon, nxjerr zërat, dhe me një klik regjistrohet. Mbështet fatura, shpenzime, transaksione bankare dhe formularë tatimorë.' },
+      { q: 'Si punon Asistenti AI?', a: 'Shkruaj "Faturë për Markov 3000 den" dhe AI e krijon për një sekondë. Mbështet fatura, llogari, shpenzime dhe pagesa. AI njeh klientin dhe artikujt nga baza juaj.' }
     ]
   },
   cta: { title: 'Gati? Fillo falas sot.', sub: 'Pa kartë krediti • Provë falas 14 ditë • Anulo në çdo kohë', button: 'Fillo falas' },
@@ -395,6 +437,37 @@ const sq: Dictionary = {
           'Këshilla për optimizim të çmimeve dhe profitit',
           'Analizë e moshës së borxheve (AR Aging) me debitorët kryesorë',
           'Skenarë çfarë-nëse: "Çfarë nëse humb klientin më të madh?"'
+        ]
+      },
+      {
+        title: 'AI Dokument Hub',
+        items: [
+          'Bashkangjitni PDF ose imazh — AI e klasifikon automatikisht (faturë, shpenzim, transaksion bankar, formular tatimor)',
+          'Nxjerrje e shumave, datave, zërave dhe TVSH me Gemini Vision',
+          'Rishikim dhe korrigjim para regjistrimit — konfirmoni me një klik',
+          'Mbështet 7 lloje entitetesh: fatura, shpenzime, transaksione bankare, artikuj, formularë tatimorë, kontrata',
+          'Dokumenti qëndron i bashkangjitur me entitetin e krijuar për revizion të lehtë'
+        ]
+      },
+      {
+        title: 'Thuaj dhe krijo (Asistent AI)',
+        items: [
+          'Shkruaj "Faturë për Markov, 5 orë nga 3000" — AI e krijon për një sekondë',
+          'Mbështet fatura, llogari, shpenzime dhe pagesa në maqedonisht dhe anglisht',
+          'AI njeh klientin, furnizuesin dhe artikujt nga baza juaj',
+          'Pyetje si "Sa fatura të papaguara kam?" marrin përgjigje menjëherë',
+          'Sistem drafti: rishikoni dhe konfirmoni para regjistrimit',
+          'Nëse diçka është e paqartë, AI kërkon sqarim — nuk krijon gabimisht'
+        ]
+      },
+      {
+        title: 'AI Rekonçilim Bankar',
+        items: [
+          'Gemini AI krahason transaksionet bankare me fatura — përfshirë emra cirilike',
+          'Detektim i pagesave të pjesshme dhe transaksioneve të bashkuara (split detection)',
+          'Kategorizim automatik: pagë, tatim, qira, furnizues, komision bankar etj.',
+          'Pipeline 4-shtresore: rregulla → deterministik → përmirësim AI → kategorizim AI',
+          'Shenja vjollcë për përputhje AI — transparente dhe e auditueshme'
         ]
       },
       {
@@ -440,11 +513,11 @@ const sq: Dictionary = {
     recommendedBadge: 'I rekomanduar',
     includesPrevious: 'Përfshin gjithçka në {plan}',
     companyPlans: [
-      { name: 'Free', price: '0 den', period: '/përgjithmonë', bullets: ['3 fatura/muaj', '1 përdorues', 'Eksport PDF', '2 pyetje AI/muaj'], popular: false },
-      { name: 'Starter', price: '740 den', period: '/muaj', bullets: ['30 fatura/muaj', '1 përdorues', 'e‑Faturë (5/muaj)', '5 pyetje AI/muaj'], popular: false },
-      { name: 'Standard', price: '2,400 den', period: '/muaj', bullets: ['60 fatura/muaj', '3 përdorues', 'e‑Faturë + QES (pa limit)', '25 pyetje AI/muaj'], popular: true },
-      { name: 'Business', price: '3,630 den', period: '/muaj', bullets: ['150 fatura/muaj', '5 përdorues', 'Import bankar (CSV/MT940/PDF)', 'Auto-rekonçilim', 'Shumë monedha'], popular: false },
-      { name: 'Max', price: '9,170 den', period: '/muaj', bullets: ['Fatura pa limit', 'Përdorues pa limit', 'Qasje API', 'Multi-lokacione', 'Raporte IFRS'], popular: false }
+      { name: 'Free', price: '0 den', period: '/përgjithmonë', bullets: ['3 fatura/muaj', '1 përdorues', 'Eksport PDF', '10 pyetje AI/muaj'], popular: false },
+      { name: 'Starter', price: '740 den', period: '/muaj', bullets: ['30 fatura/muaj', '1 përdorues', 'e‑Faturë (5/muaj)', '25 pyetje AI/muaj', 'Asistent AI'], popular: false },
+      { name: 'Standard', price: '2,400 den', period: '/muaj', bullets: ['60 fatura/muaj', '3 përdorues', 'e‑Faturë + QES (pa limit)', '75 pyetje AI/muaj', 'AI dokument hub'], popular: true },
+      { name: 'Business', price: '3,630 den', period: '/muaj', bullets: ['150 fatura/muaj', '5 përdorues', 'Import bankar (CSV/MT940/PDF)', '200 pyetje AI/muaj', 'AI rekonçilim'], popular: false },
+      { name: 'Max', price: '9,170 den', period: '/muaj', bullets: ['Fatura pa limit', 'Përdorues pa limit', '500 pyetje AI/muaj', 'Të gjitha funksionet AI', 'Raporte IFRS'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Falas', period: '', bullets: ['Klientë të pakufizuar', 'Portofol: shtoni të gjitha kompanitë falas', 'Paneli i kontrollit të partnerit', '3 muaj Standard për të gjitha kompanitë', 'Mbështetje me prioritet'], popular: true },
@@ -462,7 +535,10 @@ const sq: Dictionary = {
         { feature: 'Klientë', values: ['Pa limit', 'Pa limit', 'Pa limit', 'Pa limit', 'Pa limit'] },
         { feature: 'e-Faturë (UJP)', values: [false, '5/muaj', 'Pa limit', 'Pa limit', 'Pa limit'] },
         { feature: 'QES nënshkrim', values: [false, false, true, true, true] },
-        { feature: 'Pyetje AI/muaj', values: ['2', '5', '25', '50', '100'] },
+        { feature: 'Pyetje AI/muaj', values: ['10', '25', '75', '200', '500'] },
+        { feature: 'AI Dokument Hub', values: ['Klasifikim', 'Nxjerrje', true, true, true] },
+        { feature: 'Asistent AI', values: [false, '5/muaj', '25/muaj', true, true] },
+        { feature: 'AI Rekonçilim', values: [false, false, 'Sugjerime', true, true] },
         { feature: 'Import bankar (CSV/MT940/PDF)', values: [false, false, false, true, true] },
         { feature: 'Auto-rekonçilim', values: [false, false, false, true, true] },
         { feature: 'Qasje API', values: [false, false, false, true, true] },
@@ -503,7 +579,7 @@ const tr: Dictionary = {
     claim:
       'Facturino, Makedonya için özel geliştirilmiş, en gelişmiş yapay zekâ destekli ve e‑Fatura’ya hazır muhasebe platformudur.',
     onlyPlatform:
-      'Yapay zekâ, Makedonya muhasebe kuralları, e‑Fatura hazırlığı ve banka ekstresi içe aktarma (CSV/MT940/PDF) tek çatı altında birleştiren tek yerel platform.'
+      'AI belge tarama, banka ekstresi içe aktarma (CSV/MT940/PDF), e‑Fatura ve sesli komutları tek çatıda birleştiren tek yerel platform — fatura ekleyin, AI okur ve bir saniyede kaydeder.'
   },
   heroTagline: 'Beklediğiniz muhasebe yazılımı – nihayet burada.',
   aiSection: {
@@ -514,7 +590,9 @@ const tr: Dictionary = {
       { title: 'AI ile Sohbet', desc: '"En çok borcu olan müşteri kim?" veya "Kârlı mıyım?" diye sorun — anında cevap alın.' },
       { title: 'Erken Risk Uyarısı', desc: 'AI, bir müşteri çok büyük risk haline geldiğinde veya gecikmiş faturalarınız olduğunda sizi bilgilendirir.' },
       { title: 'Nakit Tahmin', desc: '90 gün ileriye bakın — gelecek ay hesabınızda yeterli paranız olacak mı?' },
-      { title: 'Kâr Tavsiyeleri', desc: '"500.000 kâr için fiyatları ne kadar artırmalıyım?" — ürün bazında somut plan alın.' }
+      { title: 'Kâr Tavsiyeleri', desc: '"500.000 kâr için fiyatları ne kadar artırmalıyım?" — ürün bazında somut plan alın.' },
+      { title: 'Söyle ve oluştur', desc: '"Markov için fatura, 5 saat 3000\'den" yazın — AI bir saniyede oluşturur. Siz sadece onaylayın.' },
+      { title: 'Tara ve kaydet', desc: 'PDF fatura ekleyin — AI okur, kalemleri çıkarır ve fatura olarak kaydeder.' }
     ]
   },
   featureGrid: {
@@ -523,7 +601,7 @@ const tr: Dictionary = {
     features: [
       { title: 'e-Fatura hazır', desc: 'Yeni hükümet düzenlemelerine tam uyumlu. API açıldığında anında bağlanın.' },
       { title: 'Banka içe aktarma', desc: 'Banka ekstrelerini (CSV/MT940/PDF) içe aktarın ve faturalarla yarı otomatik eşleştirin.' },
-      { title: 'Banka seviyesinde güvenlik', desc: 'Verileriniz şifrelenir ve AB merkezli veri merkezlerinde güvenle saklanır.' },
+      { title: 'AI belge tarama', desc: 'PDF veya fatura görseli ekleyin — AI okur, kalemleri, tutarları ve KDV\'yi çıkarır ve otomatik kaydeder.' },
       { title: 'Çoklu kiracı', desc: 'Birden fazla müşteri şirketini tek yerden yöneten muhasebeciler için mükemmel.' }
     ]
   },
@@ -531,7 +609,7 @@ const tr: Dictionary = {
   whyDifferent: {
     title: 'Facturino neden Makedonya’daki diğer yazılımlardan farklı',
     cards: [
-      { title: 'AI faturalama ve kodlama', body: 'Her satır için KDV ve hesap önerileri – onay sizde.' },
+      { title: 'AI belge tarama', body: 'PDF/görsel ekleyin — AI faturayı okur, kalemleri, tutarları ve KDV\'yi çıkarır. Tek tıkla onaylayın — kayıt hazır.' },
       { title: 'e‑Fatura hazır', body: 'Model tüm yapıyı destekler; UJP üretim API + QES açılır açılmaz bağlanırız.' },
       { title: 'Banka içe aktarma', body: 'CSV/MT940/PDF ekstre içe aktarma ve yarı otomatik mutabakat. PSD2 yakında.' },
       { title: 'Muhasebe ofisleri için çoklu müşteri', body: 'Tek giriş, çok şirket, ayrı hesaplar/raporlar/yetkiler.' },
@@ -563,9 +641,9 @@ const tr: Dictionary = {
     title: 'Paketler',
     cta: 'Fiyatları gör',
     plans: [
-      { name: 'Starter', bullets: ['e‑Fatura hazır', '1 kullanıcı', 'AI (temel)'] },
-      { name: 'Pro', bullets: ['Çoklu kullanıcı/roller', 'Ekstre içe aktarma', 'Otomasyonlar'] },
-      { name: 'Business', bullets: ['Çok şirket', 'API ve gelişmiş yetkiler', 'SLA'] }
+      { name: 'Starter', bullets: ['e‑Fatura hazır', 'AI asistan', '25 AI soru/ay'] },
+      { name: 'Pro', bullets: ['Çoklu kullanıcı', 'AI belge merkezi', 'Otomasyonlar'] },
+      { name: 'Business', bullets: ['AI mutabakat', 'Banka içe aktarma', 'API ve SLA'] }
     ]
   },
   testimonials: {
@@ -583,7 +661,9 @@ const tr: Dictionary = {
       { q: "e‑Fatura'ya hazır mısınız?", a: 'Evet, model e‑fatura verileriyle kurulu; UJP üretim API + QES açılınca bağlanıyoruz.' },
       { q: 'AI nasıl çalışır?', a: 'Her satır için KDV/hesap önerir — onay sizde.' },
       { q: 'Banka içe aktarma destekliyor musunuz?', a: 'Evet, CSV/MT940/PDF ekstre içe aktarma ve yarı otomatik mutabakat. PSD2 doğrudan bağlantılar — yakında.' },
-      { q: 'AI danışmana ne sorabilirim?', a: 'İşinizle ilgili her şey! "Kim borçlu?", "Kârlı mıyım?", "En büyük müşteriyi kaybedersem ne olur?", "Kârı nasıl artırabilirim?" — AI verilerinizi analiz eder ve somut cevaplar verir.' }
+      { q: 'AI danışmana ne sorabilirim?', a: 'İşinizle ilgili her şey! "Kim borçlu?", "Kârlı mıyım?", "En büyük müşteriyi kaybedersem ne olur?", "Kârı nasıl artırabilirim?" — AI verilerinizi analiz eder ve somut cevaplar verir.' },
+      { q: 'AI Belge Merkezi nedir?', a: 'PDF veya görsel ekleyin — AI sınıflandırır, kalemleri çıkarır ve tek tıkla kaydeder. Faturalar, giderler, banka işlemleri ve vergi formlarını destekler.' },
+      { q: 'AI Asistan nasıl çalışır?', a: '"Markov için fatura 3000 den" yazın ve AI bir saniyede oluşturur. Fatura, gider ve ödemeleri destekler. AI müşteriyi ve ürünleri veritabanınızdan tanır.' }
     ]
   },
   cta: { title: 'Hazır mısınız? Bugün ücretsiz başlayın.', sub: 'Kredi kartı gerekmez • 14 gün ücretsiz deneme • İstediğiniz zaman iptal edin', button: 'Ücretsiz başla' },
@@ -600,6 +680,37 @@ const tr: Dictionary = {
           'Fiyat ve kâr optimizasyonu tavsiyeleri',
           'Alacak yaşlandırma analizi (AR Aging) ile en büyük borçlular',
           'Ya olursa senaryoları: "En büyük müşteriyi kaybedersem ne olur?"'
+        ]
+      },
+      {
+        title: 'AI Belge Merkezi',
+        items: [
+          'PDF veya görsel ekleyin — AI otomatik sınıflandırır (fatura, gider, banka ekstresi, vergi formu)',
+          'Gemini Vision ile tutar, tarih, kalem ve KDV çıkarma',
+          'Kayıt öncesi gözden geçirme ve düzeltme — tek tıkla onaylayın',
+          '7 varlık türünü destekler: faturalar, giderler, banka işlemleri, ürünler, vergi formları, sözleşmeler',
+          'Belge oluşturulan varlığa bağlı kalır — kolay denetim'
+        ]
+      },
+      {
+        title: 'Söyle ve Oluştur (AI Asistan)',
+        items: [
+          '"Markov için fatura, 5 saat 3000\'den" yazın — AI bir saniyede oluşturur',
+          'Fatura, gider ve ödemeler Makedonca ve İngilizce desteklenir',
+          'AI müşteriyi, tedarikçiyi ve ürünleri veritabanınızdan tanır',
+          '"Kaç ödenmemiş faturam var?" gibi sorulara anında cevap',
+          'Taslak sistemi: kayıt öncesi gözden geçirip onaylayın',
+          'Belirsiz bir durum olursa AI açıklama ister — yanlış oluşturmaz'
+        ]
+      },
+      {
+        title: 'AI Banka Mutabakatı',
+        items: [
+          'Gemini AI banka işlemlerini faturalarla karşılaştırır — Kiril adları dahil',
+          'Kısmi ödemeler ve birleştirilmiş işlemlerin tespiti (split detection)',
+          'Otomatik kategorizasyon: maaş, vergi, kira, tedarikçi, banka komisyonu vb.',
+          '4 katmanlı pipeline: kurallar → deterministik → AI iyileştirme → AI kategorizasyon',
+          'AI eşleşmeleri için mor rozetler — şeffaf ve denetlenebilir'
         ]
       },
       {
@@ -645,11 +756,11 @@ const tr: Dictionary = {
     recommendedBadge: 'Önerilen',
     includesPrevious: '{plan} paketindeki her şey dahil',
     companyPlans: [
-      { name: 'Free', price: '0 den', period: '/süresiz', bullets: ['3 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', '2 AI soru/ay'], popular: false },
-      { name: 'Starter', price: '740 den', period: '/ay', bullets: ['30 fatura/ay', '1 kullanıcı', 'e‑Fatura (5/ay)', '5 AI soru/ay'], popular: false },
-      { name: 'Standard', price: '2,400 den', period: '/ay', bullets: ['60 fatura/ay', '3 kullanıcı', 'e‑Fatura + QES (sınırsız)', '25 AI soru/ay'], popular: true },
-      { name: 'Business', price: '3,630 den', period: '/ay', bullets: ['150 fatura/ay', '5 kullanıcı', 'Banka içe aktarma (CSV/MT940/PDF)', 'Otomatik eşleştirme', 'Çoklu para birimi'], popular: false },
-      { name: 'Max', price: '9,170 den', period: '/ay', bullets: ['Sınırsız fatura', 'Sınırsız kullanıcı', 'API erişimi', 'Çoklu lokasyon', 'IFRS raporları'], popular: false }
+      { name: 'Free', price: '0 den', period: '/süresiz', bullets: ['3 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', '10 AI soru/ay'], popular: false },
+      { name: 'Starter', price: '740 den', period: '/ay', bullets: ['30 fatura/ay', '1 kullanıcı', 'e‑Fatura (5/ay)', '25 AI soru/ay', 'AI asistan'], popular: false },
+      { name: 'Standard', price: '2,400 den', period: '/ay', bullets: ['60 fatura/ay', '3 kullanıcı', 'e‑Fatura + QES (sınırsız)', '75 AI soru/ay', 'AI belge merkezi'], popular: true },
+      { name: 'Business', price: '3,630 den', period: '/ay', bullets: ['150 fatura/ay', '5 kullanıcı', 'Banka içe aktarma (CSV/MT940/PDF)', '200 AI soru/ay', 'AI mutabakat'], popular: false },
+      { name: 'Max', price: '9,170 den', period: '/ay', bullets: ['Sınırsız fatura', 'Sınırsız kullanıcı', '500 AI soru/ay', 'Tüm AI özellikleri', 'IFRS raporları'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Ücretsiz', period: '', bullets: ['Sınırsız müşteri', 'Portföy: tüm şirketleri ücretsiz ekleyin', 'Partner kontrol paneli', 'Tüm şirketler için 3 ay Standard', 'Öncelikli destek'], popular: true },
@@ -667,7 +778,10 @@ const tr: Dictionary = {
         { feature: 'Müşteri', values: ['Sınırsız', 'Sınırsız', 'Sınırsız', 'Sınırsız', 'Sınırsız'] },
         { feature: 'e-Fatura (UJP)', values: [false, '5/ay', 'Sınırsız', 'Sınırsız', 'Sınırsız'] },
         { feature: 'QES imza', values: [false, false, true, true, true] },
-        { feature: 'AI Soru/ay', values: ['2', '5', '25', '50', '100'] },
+        { feature: 'AI Soru/ay', values: ['10', '25', '75', '200', '500'] },
+        { feature: 'AI Belge Merkezi', values: ['Sınıflandırma', 'Çıkarma', true, true, true] },
+        { feature: 'AI Asistan', values: [false, '5/ay', '25/ay', true, true] },
+        { feature: 'AI Mutabakat', values: [false, false, 'Öneriler', true, true] },
         { feature: 'Banka içe aktarma (CSV/MT940/PDF)', values: [false, false, false, true, true] },
         { feature: 'Otomatik eşleştirme', values: [false, false, false, true, true] },
         { feature: 'API Erişimi', values: [false, false, false, true, true] },
@@ -708,7 +822,7 @@ const en: Dictionary = {
     claim:
       'Facturino is the most advanced AI accounting platform in Macedonia, ready for the new e-Invoice system.',
     onlyPlatform:
-      'The only local platform that combines AI, Macedonian accounting rules, e-Invoice readiness, and bank statement import (CSV/MT940/PDF) — all in one place.'
+      'The only local platform with AI document scanning, bank import (CSV/MT940/PDF), e-Invoice, and voice commands — upload an invoice, AI reads it and records it in seconds.'
   },
   heroTagline: 'The accounting software you have been waiting for — is finally here.',
   aiSection: {
@@ -719,7 +833,9 @@ const en: Dictionary = {
       { title: 'Chat with AI', desc: 'Ask "Which client owes me the most?" or "Am I profitable?" — get an answer instantly.' },
       { title: 'Early Risk Warning', desc: 'AI notifies you when a client becomes too high-risk or when you have overdue invoices.' },
       { title: 'Cash Flow Forecast', desc: 'Look 90 days ahead — will you have enough money in your account next month?' },
-      { title: 'Profit Advice', desc: '"How much should I raise prices to achieve 500,000 profit?" — get a concrete plan by product.' }
+      { title: 'Profit Advice', desc: '"How much should I raise prices to achieve 500,000 profit?" — get a concrete plan by product.' },
+      { title: 'Say it, create it', desc: 'Type "Invoice for Markov, 5 hours at 3000" — AI creates it in seconds. You just review and send.' },
+      { title: 'Scan & record', desc: 'Upload a PDF invoice — AI reads it, extracts line items, and records it as a bill.' }
     ]
   },
   featureGrid: {
@@ -728,7 +844,7 @@ const en: Dictionary = {
     features: [
       { title: 'e-Invoice Ready', desc: 'Fully compliant with new government regulations. Connect immediately when the API opens.' },
       { title: 'Bank Import', desc: 'Import bank statements (CSV/MT940/PDF) and semi-automatically reconcile with invoices.' },
-      { title: 'Bank-Level Security', desc: 'Your data is encrypted and securely stored in EU data centers.' },
+      { title: 'AI Document Scanning', desc: 'Upload a PDF or photo of any invoice — AI reads it, extracts line items, amounts and VAT, and records it automatically.' },
       { title: 'Multi-Client', desc: 'Perfect for accountants managing multiple client companies from one place.' }
     ]
   },
@@ -736,7 +852,7 @@ const en: Dictionary = {
   whyDifferent: {
     title: 'Why Facturino is different from any software in Macedonia',
     cards: [
-      { title: 'AI Invoicing & Coding', body: 'Smart suggestions for VAT categories and accounts per line item — you confirm.' },
+      { title: 'AI Document Scanning', body: 'Upload a PDF or photo — AI reads the invoice, extracts line items, amounts and VAT. Confirm with one click — the entry is done.' },
       { title: 'e-Invoice Ready', body: 'The model already supports all structures; connecting as soon as UJP opens production API + QES.' },
       { title: 'Bank Import', body: 'CSV/MT940/PDF statement import with semi-automatic reconciliation. PSD2 coming soon.' },
       { title: 'Multi-Client for Offices', body: 'One login, many companies, separate accounts, reports, and permissions.' },
@@ -768,9 +884,9 @@ const en: Dictionary = {
     title: 'Plans',
     cta: 'View Pricing',
     plans: [
-      { name: 'Starter', bullets: ['e-Invoice Ready', '1 user', 'AI suggestions (basic)'] },
-      { name: 'Pro', bullets: ['Multi-users/roles', 'Statement import', 'Automations'] },
-      { name: 'Business', bullets: ['Multiple companies', 'API and advanced permissions', 'SLA'] }
+      { name: 'Starter', bullets: ['e-Invoice Ready', 'AI Assistant', '25 AI queries/month'] },
+      { name: 'Pro', bullets: ['Multi-users', 'AI Document Hub', 'Automations'] },
+      { name: 'Business', bullets: ['AI Reconciliation', 'Bank Import', 'API & SLA'] }
     ]
   },
   testimonials: {
@@ -788,7 +904,9 @@ const en: Dictionary = {
       { q: 'Are you ready for e-Invoice?', a: 'Yes, the model is built around e-invoices and we connect as soon as UJP opens production API + QES.' },
       { q: 'How does AI work?', a: 'It suggests VAT/accounts per line item — a human always confirms/edits.' },
       { q: 'Do you support bank import?', a: 'Yes, CSV/MT940/PDF statement import with semi-automatic reconciliation. PSD2 direct connections — coming soon.' },
-      { q: 'What can I ask the AI advisor?', a: 'Anything about your business! "Who owes me?", "Am I profitable?", "What if I lose my biggest client?", "How do I increase profit?" — AI analyzes your data and provides concrete answers.' }
+      { q: 'What can I ask the AI advisor?', a: 'Anything about your business! "Who owes me?", "Am I profitable?", "What if I lose my biggest client?", "How do I increase profit?" — AI analyzes your data and provides concrete answers.' },
+      { q: 'What is the AI Document Hub?', a: 'Upload a PDF or image — AI classifies it, extracts line items, and records it with one click. Supports bills, invoices, expenses, bank transactions, and tax forms.' },
+      { q: 'How does the AI Assistant work?', a: 'Type "Invoice for Markov 3000 MKD" and AI creates it in seconds. Supports invoices, bills, expenses and payments. AI recognizes customers and items from your database.' }
     ]
   },
   cta: { title: 'Ready? Start free today.', sub: 'No credit card required • 14-day free trial • Cancel anytime', button: 'Start Free' },
@@ -805,6 +923,37 @@ const en: Dictionary = {
           'Price and profit optimization advice',
           'Accounts receivable aging analysis (AR Aging) with top debtors',
           'What-if scenarios: "What if I lose my biggest client?"'
+        ]
+      },
+      {
+        title: 'AI Document Hub',
+        items: [
+          'Upload a PDF or image — AI automatically classifies it (bill, invoice, expense, bank statement, tax form)',
+          'Extract amounts, dates, line items and VAT using Gemini Vision',
+          'Review and correct before posting — confirm with one click',
+          'Supports 7 entity types: bills, invoices, expenses, bank transactions, items, tax forms, contracts',
+          'Document stays attached to the created entity for easy auditing'
+        ]
+      },
+      {
+        title: 'Say It, Create It (AI Assistant)',
+        items: [
+          'Type "Invoice for Markov, 5 hours at 3000" — AI creates it in seconds',
+          'Supports invoices, bills, expenses and payments in Macedonian and English',
+          'AI recognizes customers, suppliers and items from your database',
+          'Questions like "How many unpaid invoices do I have?" get instant answers',
+          'Draft system: review and confirm before posting',
+          'If something is unclear, AI asks for clarification — never creates incorrectly'
+        ]
+      },
+      {
+        title: 'AI Bank Reconciliation',
+        items: [
+          'Gemini AI compares bank transactions with invoices — including Cyrillic names',
+          'Partial payment and merged transaction detection (split detection)',
+          'Auto-categorization: salary, tax, rent, supplier, bank fee, and more',
+          '4-layer pipeline: rules → deterministic → AI enhancement → AI categorization',
+          'Purple badges for AI matches — transparent and auditable'
         ]
       },
       {
@@ -850,11 +999,11 @@ const en: Dictionary = {
     recommendedBadge: 'Recommended',
     includesPrevious: 'Includes everything in {plan}',
     companyPlans: [
-      { name: 'Free', price: '0 MKD', period: '/forever', bullets: ['3 invoices/month', '1 user', 'PDF export', '2 AI questions/month'], popular: false },
-      { name: 'Starter', price: '740 MKD', period: '/month', bullets: ['30 invoices/month', '1 user', 'e-Invoice (5/month)', '5 AI questions/month'], popular: false },
-      { name: 'Standard', price: '2,400 MKD', period: '/month', bullets: ['60 invoices/month', '3 users', 'Unlimited e-Invoice + QES', '25 AI questions/month'], popular: true },
-      { name: 'Business', price: '3,630 MKD', period: '/month', bullets: ['150 invoices/month', '5 users', 'Bank import (CSV/MT940/PDF)', 'Auto-reconciliation', 'Multi-currency'], popular: false },
-      { name: 'Max', price: '9,170 MKD', period: '/month', bullets: ['Unlimited invoices', 'Unlimited users', 'API access', 'Multi-locations', 'IFRS reports'], popular: false }
+      { name: 'Free', price: '0 MKD', period: '/forever', bullets: ['3 invoices/month', '1 user', 'PDF export', '10 AI queries/month'], popular: false },
+      { name: 'Starter', price: '740 MKD', period: '/month', bullets: ['30 invoices/month', '1 user', 'e-Invoice (5/month)', '25 AI queries/month', 'AI Assistant'], popular: false },
+      { name: 'Standard', price: '2,400 MKD', period: '/month', bullets: ['60 invoices/month', '3 users', 'Unlimited e-Invoice + QES', '75 AI queries/month', 'AI Document Hub'], popular: true },
+      { name: 'Business', price: '3,630 MKD', period: '/month', bullets: ['150 invoices/month', '5 users', 'Bank import (CSV/MT940/PDF)', '200 AI queries/month', 'AI Reconciliation'], popular: false },
+      { name: 'Max', price: '9,170 MKD', period: '/month', bullets: ['Unlimited invoices', 'Unlimited users', '500 AI queries/month', 'All AI features', 'IFRS reports'], popular: false }
     ],
     partnerPlans: [
       { name: 'Partner', price: 'Free', period: '', bullets: ['Unlimited clients', 'Portfolio: add all companies for free', 'Partner dashboard', '3 months Standard for all companies', 'Priority support'], popular: true },
@@ -872,7 +1021,10 @@ const en: Dictionary = {
         { feature: 'Clients', values: ['Unlimited', 'Unlimited', 'Unlimited', 'Unlimited', 'Unlimited'] },
         { feature: 'e-Invoice (UJP)', values: [false, '5/month', 'Unlimited', 'Unlimited', 'Unlimited'] },
         { feature: 'QES Signing', values: [false, false, true, true, true] },
-        { feature: 'AI Questions/month', values: ['2', '5', '25', '50', '100'] },
+        { feature: 'AI Questions/month', values: ['10', '25', '75', '200', '500'] },
+        { feature: 'AI Document Hub', values: ['Classify', 'Extract', true, true, true] },
+        { feature: 'AI Assistant', values: [false, '5/month', '25/month', true, true] },
+        { feature: 'AI Reconciliation', values: [false, false, 'Suggestions', true, true] },
         { feature: 'Bank Import (CSV/MT940/PDF)', values: [false, false, false, true, true] },
         { feature: 'Auto-Reconciliation', values: [false, false, false, true, true] },
         { feature: 'API Access', values: [false, false, false, true, true] },

@@ -33,7 +33,7 @@ const copy = {
     hero: {
       title: 'Функции што го прават вашиот бизнис подобар',
       subtitle:
-        'Најнапредната AI сметководствена платформа во Македонија — е-Фактура, увоз на банкарски изводи, IFRS извештаи и AI финансиски советник на едно место.',
+        'Прикачи фактура — AI ја чита и книжи. Најнапредната AI сметководствена платформа во Македонија — скенирање на документи, е-Фактура, банкарски увоз и AI советник на едно место.',
       cta: 'Започни бесплатно',
     },
     sections: [
@@ -63,6 +63,69 @@ const copy = {
           {
             title: 'Анализа на старост на побарувања',
             desc: 'AR Aging извештај со топ должници, групиран по 30/60/90 дена, со препораки за наплата.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F4C4}',
+        badge: 'Ново',
+        title: 'AI Документ Хаб',
+        subtitle:
+          'Прикачи PDF или слика — AI ја класифицира, ги извлекува ставките и со еден клик се книжи.',
+        features: [
+          {
+            title: 'Автоматска класификација',
+            desc: 'AI препознава 7 типови: сметка, фактура, трошок, банкарски извод, артикли, даночен образец, договор.',
+          },
+          {
+            title: 'Извлекување со Gemini Vision',
+            desc: 'Износи, датуми, ставки и ДДВ — автоматски извлечени од скенираниот документ.',
+          },
+          {
+            title: 'Преглед и потврди',
+            desc: 'Прегледајте ги извлечените податоци, корегирајте ако треба и потврдете со еден клик.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F4AC}',
+        badge: 'Ново',
+        title: 'Кажи и креирај (AI Асистент)',
+        subtitle:
+          'Напишете „Фактура за Марков, 5 часа по 3000" — AI ја креира за секунда. Поддржува македонски и англиски.',
+        features: [
+          {
+            title: 'Природен јазик → Документ',
+            desc: 'Опишете ја фактурата, сметката или трошокот со зборови — AI го разбира и креира нацрт.',
+          },
+          {
+            title: 'Препознавање од базата',
+            desc: 'AI го препознава клиентот, добавувачот и артиклите од вашата постоечка база на податоци.',
+          },
+          {
+            title: 'Прашања и одговори',
+            desc: '"Колку неплатени фактури имам?" — добијте одговор веднаш, без да отворате извештаи.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F3E6}',
+        badge: 'Ново',
+        title: 'AI Банковно порамнување',
+        subtitle:
+          'Gemini AI ги споредува банкарските трансакции со фактури — вклучувајќи кирилични имиња и делумни плаќања.',
+        features: [
+          {
+            title: 'Кирилично совпаѓање',
+            desc: 'AI ги споредува имињата на кирилица и латиница — „МАРКОВ ДООЕЛ" се совпаѓа со „Markov".',
+          },
+          {
+            title: 'Детекција на делумни плаќања',
+            desc: 'AI детектира кога една уплата покрива две фактури, или кога фактурата е платена делумно.',
+          },
+          {
+            title: 'Автоматска категоризација',
+            desc: 'Плата, данок, кирија, добавувач, банкарска провизија — AI ги категоризира автоматски.',
           },
         ],
       },
@@ -219,7 +282,7 @@ const copy = {
     hero: {
       title: 'Vecorite qe e bejne biznesin tuaj me te mire',
       subtitle:
-        'Platforma me e avancuar kontabiliteti me AI ne Maqedoni — e-Fature, import i ekstrakteve bankare, raporte IFRS dhe keshilltar financiar AI ne nje vend.',
+        'Bashkangjitni faturen — AI e lexon dhe e regjistron. Platforma me e avancuar me AI ne Maqedoni — skanim dokumentesh, e-Fature, import bankar dhe keshilltar AI ne nje vend.',
       cta: 'Fillo falas',
     },
     sections: [
@@ -249,6 +312,69 @@ const copy = {
           {
             title: 'Analize e moshes se borxheve',
             desc: 'Raport AR Aging me debitoret kryesore, i grupuar 30/60/90 dite, me rekomandime per arketim.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F4C4}',
+        badge: 'E re',
+        title: 'AI Dokument Hub',
+        subtitle:
+          'Bashkangjitni PDF ose imazh — AI e klasifikon, nxjerr zerat dhe me nje klik regjistrohet.',
+        features: [
+          {
+            title: 'Klasifikim automatik',
+            desc: 'AI njeh 7 lloje: fature, shpenzim, transaksion bankar, artikuj, formular tatimor, kontrate.',
+          },
+          {
+            title: 'Nxjerrje me Gemini Vision',
+            desc: 'Shuma, data, zera dhe TVSH — te nxjerra automatikisht nga dokumenti i skanuar.',
+          },
+          {
+            title: 'Rishikim dhe konfirmim',
+            desc: 'Rishikoni te dhenat e nxjerra, korrigjoni nese duhet dhe konfirmoni me nje klik.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F4AC}',
+        badge: 'E re',
+        title: 'Thuaj dhe krijo (Asistent AI)',
+        subtitle:
+          'Shkruaj "Fature per Markov, 5 ore nga 3000" — AI e krijon per nje sekonde. Mbeshtetet maqedonisht dhe anglisht.',
+        features: [
+          {
+            title: 'Gjuhe natyrale → Dokument',
+            desc: 'Pershkruani faturen, llogarite ose shpenzimet me fjale — AI kupton dhe krijon draft.',
+          },
+          {
+            title: 'Njohje nga baza',
+            desc: 'AI njeh klientin, furnizuesin dhe artikujt nga baza juaj ekzistuese e te dhenave.',
+          },
+          {
+            title: 'Pyetje dhe pergjigje',
+            desc: '"Sa fatura te papaguara kam?" — merrni pergjigje menjehere, pa hapur raporte.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F3E6}',
+        badge: 'E re',
+        title: 'AI Rekoncilim Bankar',
+        subtitle:
+          'Gemini AI krahason transaksionet bankare me fatura — perfshire emra cirilike dhe pagesa te pjesshme.',
+        features: [
+          {
+            title: 'Perputhje cirilike',
+            desc: 'AI krahason emrat ne cirilike dhe latine — "MARKOV SHPK" perputhet me "Markov".',
+          },
+          {
+            title: 'Detektim i pagesave te pjesshme',
+            desc: 'AI detekton kur nje pagese mbulon dy fatura, ose kur fatura eshte paguar pjeserisht.',
+          },
+          {
+            title: 'Kategorizim automatik',
+            desc: 'Page, tatim, qira, furnizues, komision bankar — AI i kategorizon automatikisht.',
           },
         ],
       },
@@ -405,7 +531,7 @@ const copy = {
     hero: {
       title: 'Isinizi daha iyi yapan ozellikler',
       subtitle:
-        "Makedonya'daki en gelismis AI muhasebe platformu — e-Fatura, banka ekstresi aktarimi, IFRS raporlari ve AI mali danisman tek catida.",
+        "Fatura ekleyin — AI okur ve kaydeder. Makedonya'daki en gelismis AI muhasebe platformu — belge tarama, e-Fatura, banka aktarimi ve AI danisman tek catida.",
       cta: 'Ucretsiz basla',
     },
     sections: [
@@ -435,6 +561,69 @@ const copy = {
           {
             title: 'Alacak yaslandirma analizi',
             desc: 'AR Aging raporu: en buyuk borcluler, 30/60/90 gun gruplamasi, tahsilat tavsiyeleri.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F4C4}',
+        badge: 'Yeni',
+        title: 'AI Belge Merkezi',
+        subtitle:
+          'PDF veya gorsel ekleyin — AI siniflandirir, kalemleri cikarir ve tek tikla kaydeder.',
+        features: [
+          {
+            title: 'Otomatik siniflandirma',
+            desc: 'AI 7 tur tanir: fatura, gider, banka ekstresi, urunler, vergi formu, sozlesme.',
+          },
+          {
+            title: 'Gemini Vision ile cikarma',
+            desc: 'Tutarlar, tarihler, kalemler ve KDV — taranan belgeden otomatik cikarilir.',
+          },
+          {
+            title: 'Inceleme ve onay',
+            desc: 'Cikarilan verileri inceleyin, gerekirse duzeltin ve tek tikla onaylayin.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F4AC}',
+        badge: 'Yeni',
+        title: 'Soyle ve Olustur (AI Asistan)',
+        subtitle:
+          '"Markov icin fatura, 5 saat 3000\'den" yazin — AI bir saniyede olusturur. Makedonca ve Ingilizce destekler.',
+        features: [
+          {
+            title: 'Dogal dil → Belge',
+            desc: 'Faturayi, gideri veya masrafi kelimelerle tanimlayin — AI anlar ve taslak olusturur.',
+          },
+          {
+            title: 'Veritabanindan tanimlama',
+            desc: 'AI musteriyi, tedarikcivi ve urunleri mevcut veritabaninizdan tanir.',
+          },
+          {
+            title: 'Soru ve cevap',
+            desc: '"Kac odenmemis faturam var?" — rapor acmadan aninda cevap alin.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F3E6}',
+        badge: 'Yeni',
+        title: 'AI Banka Mutabakati',
+        subtitle:
+          'Gemini AI banka islemlerini faturalarla karsilastirir — Kiril adlari ve kismi odemeler dahil.',
+        features: [
+          {
+            title: 'Kiril eslesmesi',
+            desc: 'AI Kiril ve Latin adlarini karsilastirir — "MARKOV DOOЕЛ" ile "Markov" eslesir.',
+          },
+          {
+            title: 'Kismi odeme tespiti',
+            desc: 'AI bir odemenin iki faturayi kapsadigini veya faturanin kismi odendigini tespit eder.',
+          },
+          {
+            title: 'Otomatik kategorizasyon',
+            desc: 'Maas, vergi, kira, tedarikci, banka komisyonu — AI otomatik olarak kategorize eder.',
           },
         ],
       },
@@ -591,7 +780,7 @@ const copy = {
     hero: {
       title: 'Features That Make Your Business Better',
       subtitle:
-        'The most advanced AI accounting platform in Macedonia — e-Invoice, bank statement import, IFRS reports, and an AI financial advisor all in one place.',
+        'Upload an invoice — AI reads it and records it. The most advanced AI accounting platform in Macedonia — document scanning, e-Invoice, bank import, and AI advisor all in one place.',
       cta: 'Start Free',
     },
     sections: [
@@ -621,6 +810,69 @@ const copy = {
           {
             title: 'Accounts Receivable Aging',
             desc: 'AR Aging report with top debtors, grouped by 30/60/90 days, with collection recommendations.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F4C4}',
+        badge: 'New',
+        title: 'AI Document Hub',
+        subtitle:
+          'Upload a PDF or image — AI classifies it, extracts line items, and records it with one click.',
+        features: [
+          {
+            title: 'Automatic Classification',
+            desc: 'AI recognizes 7 types: bill, invoice, expense, bank statement, items, tax form, contract.',
+          },
+          {
+            title: 'Extraction with Gemini Vision',
+            desc: 'Amounts, dates, line items, and VAT — automatically extracted from the scanned document.',
+          },
+          {
+            title: 'Review and Confirm',
+            desc: 'Review extracted data, make corrections if needed, and confirm with a single click.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F4AC}',
+        badge: 'New',
+        title: 'Say It, Create It (AI Assistant)',
+        subtitle:
+          'Type "Invoice for Markov, 5 hours at 3000" — AI creates it in seconds. Supports Macedonian and English.',
+        features: [
+          {
+            title: 'Natural Language → Document',
+            desc: 'Describe the invoice, bill, or expense in words — AI understands and creates a draft.',
+          },
+          {
+            title: 'Recognition from Database',
+            desc: 'AI recognizes customers, suppliers, and items from your existing database.',
+          },
+          {
+            title: 'Questions & Answers',
+            desc: '"How many unpaid invoices do I have?" — get an instant answer without opening reports.',
+          },
+        ],
+      },
+      {
+        icon: '\u{1F3E6}',
+        badge: 'New',
+        title: 'AI Bank Reconciliation',
+        subtitle:
+          'Gemini AI compares bank transactions with invoices — including Cyrillic names and partial payments.',
+        features: [
+          {
+            title: 'Cyrillic Matching',
+            desc: 'AI compares Cyrillic and Latin names — "MARKOV DOOEL" matches "Markov".',
+          },
+          {
+            title: 'Partial Payment Detection',
+            desc: 'AI detects when one payment covers two invoices, or when an invoice is partially paid.',
+          },
+          {
+            title: 'Auto-Categorization',
+            desc: 'Salary, tax, rent, supplier, bank fee — AI categorizes transactions automatically.',
           },
         ],
       },
