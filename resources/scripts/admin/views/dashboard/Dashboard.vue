@@ -9,6 +9,7 @@ import UnpaidSummaryWidget from './widgets/UnpaidSummaryWidget.vue'
 import RecentPaymentsWidget from './widgets/RecentPaymentsWidget.vue'
 import StockSummaryWidget from './widgets/StockSummaryWidget.vue'
 import DeadlinesWidget from './widgets/DeadlinesWidget.vue'
+import OnboardingChecklistWidget from './widgets/OnboardingChecklistWidget.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { onMounted, computed } from 'vue'
@@ -55,6 +56,9 @@ onMounted(() => {
 
 <template>
   <BasePage>
+    <!-- Onboarding Checklist (shown for new companies) -->
+    <OnboardingChecklistWidget />
+
     <!-- Top Stats Cards (always visible) -->
     <DashboardStats />
 

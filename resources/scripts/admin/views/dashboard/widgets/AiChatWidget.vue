@@ -78,11 +78,22 @@
           <!-- User messages: plain text -->
           <p v-if="message.role === 'user'" class="text-sm whitespace-pre-wrap">{{ message.content }}</p>
           <!-- Assistant messages: render markdown -->
+          <!-- CLAUDE-CHECKPOINT: sanitized v-html (AI response) -->
           <div
             v-else
             class="text-sm prose prose-sm prose-indigo max-w-none ai-markdown"
-            v-html="renderMarkdown(message.content)"
+            v-html="sanitizeHtml(renderMarkdown(message.content))"
           ></div>
+          <!-- Action button when AI created a draft -->
+          <div v-if="message.draftId && message.redirectUrl" class="mt-3">
+            <button
+              @click="navigateToDraft(message.redirectUrl)"
+              class="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <DocumentPlusIcon class="w-4 h-4" />
+              <span>{{ getDraftButtonLabel(message.entityType) }}</span>
+            </button>
+          </div>
           <div class="flex items-center justify-between mt-2">
             <span
               :class="[
@@ -147,15 +158,20 @@
 <script setup>
 import { ref, nextTick, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import { sanitizeHtml } from '@/scripts/helpers/utilities'
 import axios from 'axios'
 import {
   ChatBubbleLeftRightIcon,
   PaperAirplaneIcon,
   TrashIcon,
   PlusCircleIcon,
-  ClipboardDocumentIcon
+  ClipboardDocumentIcon,
+  DocumentPlusIcon
 } from '@heroicons/vue/24/outline'
+
+const router = useRouter()
 
 const { t } = useI18n()
 const companyStore = useCompanyStore()
@@ -191,34 +207,61 @@ async function sendMessage() {
   await nextTick()
   scrollToBottom()
 
-  // Send to API
+  // Send to API — try NL assistant first, fall back to regular chat
   isLoading.value = true
   try {
-    console.log('[AI Chat] Sending message:', messageToSend)
-    console.log('[AI Chat] Conversation ID:', conversationId.value)
+    let assistantMessage = null
 
-    const requestData = {
-      message: messageToSend
+    // Try the NL assistant endpoint first (for commands like "Фактура за...")
+    try {
+      const nlResponse = await axios.post('/ai/assistant', { message: messageToSend })
+      const nlData = nlResponse.data
+
+      if (nlData.draft_id && nlData.redirect_url) {
+        // AI created a draft — show action button
+        assistantMessage = {
+          role: 'assistant',
+          content: nlData.message || t('ai.chat.no_response'),
+          timestamp: new Date(),
+          draftId: nlData.draft_id,
+          redirectUrl: nlData.redirect_url,
+          entityType: nlData.intent
+        }
+      } else if (nlData.intent === 'question' && nlData.message) {
+        // AI answered a question — fall through to regular chat for richer answers
+        assistantMessage = null
+      } else if (nlData.clarification_needed) {
+        // AI needs clarification
+        assistantMessage = {
+          role: 'assistant',
+          content: nlData.clarification_needed,
+          timestamp: new Date()
+        }
+      }
+    } catch (nlErr) {
+      // NL assistant unavailable (tier gated or error) — fall through to regular chat
+      console.debug('[AI Chat] NL assistant unavailable, using regular chat')
     }
 
-    // Include conversation_id if exists
-    if (conversationId.value) {
-      requestData.conversation_id = conversationId.value
-    }
+    // Fall back to regular chat if NL assistant didn't produce a result
+    if (!assistantMessage) {
+      const requestData = { message: messageToSend }
+      if (conversationId.value) {
+        requestData.conversation_id = conversationId.value
+      }
 
-    const response = await axios.post('/ai/insights/chat', requestData)
-    console.log('[AI Chat] Chat response:', response.data)
+      const response = await axios.post('/ai/insights/chat', requestData)
 
-    // Store conversation_id from response
-    if (response.data.conversation_id) {
-      conversationId.value = response.data.conversation_id
-      saveConversationId()
-    }
+      if (response.data.conversation_id) {
+        conversationId.value = response.data.conversation_id
+        saveConversationId()
+      }
 
-    const assistantMessage = {
-      role: 'assistant',
-      content: response.data.response || response.data.message || t('ai.chat.no_response'),
-      timestamp: new Date()
+      assistantMessage = {
+        role: 'assistant',
+        content: response.data.response || response.data.message || t('ai.chat.no_response'),
+        timestamp: new Date()
+      }
     }
 
     messages.value.push(assistantMessage)
@@ -283,6 +326,26 @@ function showNotification(message) {
       document.body.removeChild(toast)
     }, 300)
   }, 2000)
+}
+
+/**
+ * Navigate to a draft form page
+ */
+function navigateToDraft(redirectUrl) {
+  router.push(redirectUrl)
+}
+
+/**
+ * Get button label based on entity type
+ */
+function getDraftButtonLabel(entityType) {
+  const labels = {
+    'create_invoice': t('ai.assistant.review_invoice', 'Review Invoice'),
+    'create_bill': t('ai.assistant.review_bill', 'Review Bill'),
+    'create_expense': t('ai.assistant.review_expense', 'Review Expense'),
+    'record_payment': t('ai.assistant.review_payment', 'Review Payment')
+  }
+  return labels[entityType] || t('ai.assistant.review_draft', 'Review Draft')
 }
 
 function scrollToBottom() {

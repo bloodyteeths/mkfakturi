@@ -26,6 +26,16 @@ class GotenbergPDFResponse
         ]);
     }
 
+    public function download(string $filename = 'document.pdf'): Response
+    {
+        $output = $this->response->getBody();
+
+        return new Response($output, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
     public function output(): string
     {
         return $this->response->getBody()->getContents();

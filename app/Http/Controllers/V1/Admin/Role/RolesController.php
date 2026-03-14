@@ -27,8 +27,14 @@ class RolesController extends Controller
             BouncerFacade::scope()->to($companyId);
         }
 
-        $roles = Role::when($request->has('orderByField'), function ($query) use ($request) {
-            return $query->orderBy($request['orderByField'], $request['orderBy']);
+        // Whitelist allowed orderBy fields to prevent SQL injection
+        $allowedOrderFields = ['name', 'created_at', 'updated_at'];
+        $orderByField = in_array($request->get('orderByField'), $allowedOrderFields) ? $request->get('orderByField') : 'created_at';
+        $orderByDirection = in_array(strtolower($request->get('orderBy', 'asc')), ['asc', 'desc']) ? $request->get('orderBy') : 'asc';
+        // CLAUDE-CHECKPOINT
+
+        $roles = Role::when($request->has('orderByField'), function ($query) use ($orderByField, $orderByDirection) {
+            return $query->orderBy($orderByField, $orderByDirection);
         })
             ->when($companyId, function ($query) use ($companyId) {
                 return $query->where('scope', $companyId);

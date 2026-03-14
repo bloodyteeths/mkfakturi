@@ -3,6 +3,25 @@ const { global } = i18n
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { isArray } from 'lodash'
 
+// Simple HTML sanitizer - strips dangerous tags and attributes
+// CLAUDE-CHECKPOINT
+export function sanitizeHtml(html) {
+  if (!html) return ''
+  const div = document.createElement('div')
+  div.innerHTML = html
+  // Remove script tags and other dangerous elements
+  div.querySelectorAll('script, iframe, object, embed, form').forEach(el => el.remove())
+  // Remove event handlers and javascript: URLs
+  div.querySelectorAll('*').forEach(el => {
+    for (const attr of [...el.attributes]) {
+      if (attr.name.startsWith('on') || attr.name === 'href' && attr.value.startsWith('javascript:')) {
+        el.removeAttribute(attr.name)
+      }
+    }
+  })
+  return div.innerHTML
+}
+
 export default {
   isImageFile(fileType) {
     const validImageTypes = ['image/gif', 'image/jpeg', 'image/png']

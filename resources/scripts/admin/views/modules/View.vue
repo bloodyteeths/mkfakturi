@@ -169,9 +169,10 @@
         </div>
 
         <!-- Module Description  -->
+        <!-- CLAUDE-CHECKPOINT: sanitized v-html -->
         <div
           class="prose prose-sm max-w-none text-gray-500 text-sm my-10"
-          v-html="moduleData.long_description"
+          v-html="sanitizeHtml(moduleData.long_description)"
         />
 
         <!-- Module Pricing -->
@@ -333,9 +334,10 @@
             {{ $t('modules.what_you_get') }}
           </h3>
           <div class="mt-4 prose prose-sm max-w-none text-gray-500">
+            <!-- CLAUDE-CHECKPOINT: sanitized v-html -->
             <div
               class="prose prose-sm max-w-none text-gray-500 text-sm"
-              v-html="moduleData.highlights"
+              v-html="sanitizeHtml(moduleData.highlights)"
             />
           </div>
         </div>
@@ -574,9 +576,10 @@
                       <BaseRating :rating="review.rating" />
                     </div>
 
+                    <!-- CLAUDE-CHECKPOINT: sanitized v-html (user content) -->
                     <div
                       class="mt-4 prose prose-sm max-w-none text-gray-500"
-                      v-html="review.feedback"
+                      v-html="sanitizeHtml(review.feedback)"
                     />
                   </div>
                 </div>
@@ -606,9 +609,10 @@
             <TabPanel class="pt-10">
               <h3 class="sr-only">License</h3>
 
+              <!-- CLAUDE-CHECKPOINT: sanitized v-html -->
               <div
                 class="prose prose-sm max-w-none text-gray-500"
-                v-html="moduleData.license"
+                v-html="sanitizeHtml(moduleData.license)"
               />
             </TabPanel>
           </TabPanels>
@@ -678,6 +682,7 @@ import ModulePlaceholder from './partials/ModulePlaceholder.vue'
 import RecentModuleCard from './partials/RecentModuleCard.vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
+import { sanitizeHtml } from '@/scripts/helpers/utilities'
 const globalStore = useGlobalStore()
 
 const moduleStore = useModuleStore()

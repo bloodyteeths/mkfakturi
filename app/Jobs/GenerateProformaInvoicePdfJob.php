@@ -19,6 +19,12 @@ class GenerateProformaInvoicePdfJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
 
+    public $timeout = 300;  // 5 minutes
+
+    public $tries = 3;
+
+    public $backoff = [30, 60, 120];
+
     /**
      * The proforma invoice ID
      */
@@ -55,5 +61,15 @@ class GenerateProformaInvoicePdfJob implements ShouldQueue
 
         return 0;
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Log::error('PDF generation failed', [
+            'job' => static::class,
+            'id' => $this->proformaInvoiceId ?? null,
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT
 

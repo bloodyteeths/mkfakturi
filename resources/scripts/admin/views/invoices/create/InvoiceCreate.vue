@@ -405,10 +405,61 @@ const stopScanWatch = watch(
           })
         }
       }
+      // Also check for AI draft pre-fill
+      if (!scannedData && route.query.draft_id) {
+        loadAiDraft(route.query.draft_id)
+      }
       stopScanWatch()
     }
   }
 )
+
+/**
+ * Load AI-generated draft data to pre-fill the invoice form.
+ */
+async function loadAiDraft(draftId) {
+  try {
+    const { data } = await (await import('axios')).default.get(`/ai/drafts/${draftId}`)
+    const d = data.entity_data || {}
+
+    // Pre-fill customer
+    if (d.customer_id) {
+      invoiceStore.selectCustomer(d.customer_id)
+    } else if (d.customer_name) {
+      const customerStore = useCustomerStore()
+      await customerStore.fetchCustomers({ display_name: d.customer_name })
+      if (customerStore.customers.length > 0) {
+        invoiceStore.selectCustomer(customerStore.customers[0].id)
+      }
+    }
+
+    // Pre-fill dates
+    if (d.date) invoiceStore.newInvoice.invoice_date = d.date
+    if (d.due_date) invoiceStore.newInvoice.due_date = d.due_date
+    if (d.notes) invoiceStore.newInvoice.notes = d.notes
+
+    // Pre-fill items
+    if (d.items?.length > 0) {
+      invoiceStore.newInvoice.items = d.items.map((item) => ({
+        ...invoiceItemStub,
+        id: Guid.raw(),
+        item_id: item.item_id || null,
+        name: item.name || '',
+        description: item.description || '',
+        quantity: item.quantity || 1,
+        price: item.unit_price || 0, // Already in cents from AI
+        taxes: [{ ...TaxStub, id: Guid.raw() }],
+      }))
+    }
+
+    // Mark draft as used
+    try {
+      await (await import('axios')).default.post(`/ai/drafts/${draftId}/use`)
+    } catch (e) { /* non-critical */ }
+  } catch (err) {
+    console.error('[AI Draft] Failed to load draft:', err)
+  }
+}
 
 async function submitForm() {
   v$.value.$touch()

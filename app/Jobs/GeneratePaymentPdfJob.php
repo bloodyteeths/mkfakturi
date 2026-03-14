@@ -14,6 +14,12 @@ class GeneratePaymentPdfJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
 
+    public $timeout = 300;  // 5 minutes
+
+    public $tries = 3;
+
+    public $backoff = [30, 60, 120];
+
     public function __construct(
         public int $paymentId,
         public bool $deleteExistingFile = false
@@ -36,4 +42,14 @@ class GeneratePaymentPdfJob implements ShouldQueue
 
         return 0;
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Log::error('PDF generation failed', [
+            'job' => static::class,
+            'id' => $this->paymentId ?? null,
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT

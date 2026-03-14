@@ -667,6 +667,16 @@ return [
             'feature_flag' => 'accounting_backbone',
         ],
         [
+            'title' => 'navigation.setup_wizard',
+            'group' => 3,
+            'link' => '/admin/onboarding',
+            'icon' => 'SparklesIcon',
+            'name' => 'Setup Wizard',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'navigation.migration_wizard',
             'group' => 3,
             'link' => '/admin/imports',
@@ -730,6 +740,18 @@ return [
             'model' => '',
         ],
         // ── Setup (Подготовка) ──
+        [
+            'title' => 'partner.accounting.onboarding_wizard',
+            'group' => 'partner.accounting',
+            'submenu' => 'setup',
+            'link' => '/admin/partner/onboarding',
+            'icon' => 'SparklesIcon',
+            'name' => 'partner.accounting.onboarding-wizard',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
         [
             'title' => 'partner.accounting.chart_of_accounts',
             'group' => 'partner.accounting',

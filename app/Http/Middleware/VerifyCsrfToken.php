@@ -23,11 +23,36 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'login',
-        'webhooks/*', // All webhook routes (Paddle, CPAY, Bank webhooks)
-        'webhooks/postmark', // Postmark email event webhooks
-        'payment/cpay/callback', // CPAY payment callback
-        'api/webhooks/*', // API webhook endpoints
-        'api/bitrix/*', // Bitrix24 CRM integration webhooks
+
+        // Payment gateway webhooks (routes/webhooks.php)
+        'webhooks/paddle',
+        'webhooks/stripe',
+        'webhooks/cpay',
+        'webhooks/cpay/callback',
+        'webhooks/bank/nlb',
+        'webhooks/bank/stopanska',
+
+        // Inbound email webhook (routes/webhooks.php)
+        'webhooks/email-inbound',
+
+        // Postmark email event webhook (routes/bitrix.php)
+        'webhooks/postmark',
+
+        // CPAY payment callback (routes/web.php)
+        'payment/cpay/callback',
+
+        // API webhook endpoints (routes/api.php)
+        'api/webhooks/paddle',
+        'api/webhooks/paddle/subscription',
+        'api/webhooks/cpay',
+        'api/webhooks/cpay/subscription',
+        'api/webhooks/stripe',
+        'api/webhooks/bank/nlb',
+        'api/webhooks/bank/stopanska',
+
+        // Legacy Bitrix24 CRM integration (routes/bitrix.php)
+        'api/bitrix/events',
+        'api/bitrix/create-partner',
     ];
+    // CLAUDE-CHECKPOINT: CSRF exemptions narrowed from wildcards to explicit routes
 }
-// CLAUDE-CHECKPOINT: CSRF protection configured - webhooks properly exempted

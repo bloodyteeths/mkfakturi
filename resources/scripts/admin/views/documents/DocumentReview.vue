@@ -637,6 +637,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDocumentHubStore } from '@/scripts/admin/stores/document-hub'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useDialogStore } from '@/scripts/stores/dialog'
 import { ArrowLeftIcon, XMarkIcon, DocumentTextIcon } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -644,6 +645,7 @@ const router = useRouter()
 const { t } = useI18n()
 const store = useDocumentHubStore()
 const notificationStore = useNotificationStore()
+const dialogStore = useDialogStore()
 
 const document = ref(null)
 const isLoading = ref(true)
@@ -934,6 +936,18 @@ const confirmEntity = async () => {
 }
 
 const reprocess = async () => {
+  const confirmed = await dialogStore.openDialog({
+    title: t('general.are_you_sure'),
+    message: t('documents.confirm_reprocess', 'This will reset all extracted data and re-run AI processing. Continue?'),
+    yesLabel: t('general.ok'),
+    noLabel: t('general.cancel'),
+    variant: 'primary',
+    hideNoButton: false,
+    size: 'lg',
+  })
+
+  if (!confirmed) return
+
   isSubmitting.value = true
   try {
     await store.reprocessDocument(document.value.id)
@@ -945,12 +959,13 @@ const reprocess = async () => {
   } catch (err) {
     notificationStore.showNotification({
       type: 'error',
-      message: err?.response?.data?.message || 'Reprocess failed.',
+      message: err?.response?.data?.message || t('documents.reprocess_failed', 'Reprocess failed.'),
     })
   } finally {
     isSubmitting.value = false
   }
 }
+// CLAUDE-CHECKPOINT
 
 const addBillItem = () => {
   form.items.push({

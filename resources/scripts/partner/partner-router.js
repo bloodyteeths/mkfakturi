@@ -53,6 +53,12 @@ export default [
         meta: { isPartner: true }
       },
       {
+        path: 'onboarding',
+        name: 'partner.onboarding',
+        component: () => import('@/scripts/admin/views/partner/onboarding/PartnerOnboardingWizard.vue'),
+        meta: { isPartner: true }
+      },
+      {
         path: 'portfolio',
         name: 'partner.portfolio',
         component: () => import('@/scripts/partner/views/portfolio/PortfolioDashboard.vue'),

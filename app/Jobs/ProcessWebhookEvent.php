@@ -396,13 +396,17 @@ class ProcessWebhookEvent implements ShouldQueue
                 // Determine status: if subscription has a trial, mark as trial
                 $status = ! empty($session['subscription_data']['trial_period_days']) ? 'trial' : 'active';
 
+                // Extract actual amount from checkout session
+                $checkoutAmountCents = $session['amount_total'] ?? null;
+                $checkoutCurrency = $session['currency'] ?? null;
+
                 // Create or update CompanySubscription
                 CompanySubscription::updateOrCreate(
                     ['company_id' => $company->id, 'provider' => 'stripe'],
                     [
                         'plan' => $tier,
                         'provider_subscription_id' => $subscriptionId,
-                        'price_monthly' => $this->getTierPrice($tier),
+                        'price_monthly' => $this->getTierPrice($tier, $checkoutAmountCents, $checkoutCurrency),
                         'status' => $status,
                         'started_at' => now(),
                         'trial_ends_at' => $status === 'trial' ? now()->addDays(14) : null,
@@ -565,9 +569,13 @@ class ProcessWebhookEvent implements ShouldQueue
         if ($newPriceId) {
             $newTier = $this->tierFromStripePriceId($newPriceId);
             if ($newTier && $newTier !== $companySub->plan) {
+                // Extract actual unit amount from the subscription's price object
+                $priceAmountCents = $subscription['items']['data'][0]['price']['unit_amount'] ?? null;
+                $priceCurrency = $subscription['items']['data'][0]['price']['currency'] ?? null;
+
                 $companySub->update([
                     'plan' => $newTier,
-                    'price_monthly' => $this->getTierPrice($newTier),
+                    'price_monthly' => $this->getTierPrice($newTier, $priceAmountCents, $priceCurrency),
                 ]);
                 $company?->update(['subscription_tier' => $newTier]);
 
@@ -629,10 +637,16 @@ class ProcessWebhookEvent implements ShouldQueue
     }
 
     /**
-     * Get tier price from tier name
+     * Get tier monthly price, preferring actual Stripe amount over hardcoded defaults
      */
-    protected function getTierPrice(string $tier): float
+    protected function getTierPrice(string $tier, ?int $stripeAmountCents = null, ?string $currency = null): float
     {
+        // If we have the actual Stripe amount, use it
+        if ($stripeAmountCents !== null) {
+            return $stripeAmountCents / 100;
+        }
+
+        // Fallback to EUR defaults
         return match ($tier) {
             'starter' => 12,
             'standard' => 39,
@@ -641,6 +655,7 @@ class ProcessWebhookEvent implements ShouldQueue
             default => 0,
         };
     }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Resolve tier name from Stripe price ID
@@ -660,8 +675,15 @@ class ProcessWebhookEvent implements ShouldQueue
             }
         }
 
+        Log::warning('Stripe price ID not found in config — subscription tier may not update', [
+            'price_id' => $priceId,
+            'configured_prices' => config('services.stripe.prices'),
+            'configured_prices_eur' => config('services.stripe.prices_eur'),
+        ]);
+
         return null;
     }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Handle Stripe invoice.paid event (for subscriptions)

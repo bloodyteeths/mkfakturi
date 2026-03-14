@@ -91,6 +91,7 @@
           {{ updateData.version }}
         </div>
 
+        <!-- CLAUDE-CHECKPOINT: sanitized v-html -->
         <div
           class="
             pl-5
@@ -103,9 +104,10 @@
           "
           style="white-space: pre-wrap; max-width: 480px"
           v-if="description"
-          v-html="description"
+          v-html="sanitizeHtml(description)"
         ></div>
 
+        <!-- CLAUDE-CHECKPOINT: sanitized v-html -->
         <div
           class="
             pl-5
@@ -118,7 +120,7 @@
           "
           style="white-space: pre-wrap; max-width: 480px"
           v-if="changelog"
-          v-html="changelog"
+          v-html="sanitizeHtml(changelog)"
         ></div>
 
         <label class="text-sm not-italic font-medium input-label">
@@ -211,6 +213,7 @@ import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useExchangeRateStore } from '@/scripts/admin/stores/exchange-rate'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import BaseCheckbox from "@/scripts/components/base/BaseCheckbox.vue";
+import { sanitizeHtml } from '@/scripts/helpers/utilities'
 
 const notificationStore = useNotificationStore()
 const dialogStore = useDialogStore()

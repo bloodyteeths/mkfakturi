@@ -16,6 +16,12 @@ class GenerateBillPdfJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
+    public $timeout = 300;  // 5 minutes
+
+    public $tries = 3;
+
+    public $backoff = [30, 60, 120];
+
     public int $billId;
 
     public bool $regenerate;
@@ -36,4 +42,14 @@ class GenerateBillPdfJob implements ShouldQueue
 
         $bill->getPDFData();
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Log::error('PDF generation failed', [
+            'job' => static::class,
+            'id' => $this->billId ?? null,
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT

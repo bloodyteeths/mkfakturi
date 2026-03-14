@@ -1,0 +1,170 @@
+nalog:s:ТН-001
+data_kn:s:15.01.2025
+konto:s:120
+data:s:15.01.2025
+firma:i:1
+opis:s:Фактура бр. 001/2025 - ДАТА КОНСАЛТИНГ ДООЕЛ
+dolguva:f:59000
+pobaruva:f:0
+vvrska:s:001/2025
+konto:s:700
+data:s:15.01.2025
+firma:i:1
+opis:s:Приход од услуги - консалтинг
+dolguva:f:0
+pobaruva:f:50000
+vvrska:s:001/2025
+konto:s:470
+data:s:15.01.2025
+firma:i:0
+opis:s:ДДВ 18% на фактура 001/2025
+dolguva:f:0
+pobaruva:f:9000
+vvrska:s:001/2025
+nalog:s:ТН-002
+data_kn:s:18.01.2025
+konto:s:220
+data:s:18.01.2025
+firma:i:2
+opis:s:Влезна фактура бр. ВФ-045 - ТИМ ЕЛЕКТРОНИКС ДООЕЛ
+dolguva:f:0
+pobaruva:f:35400
+vvrska:s:ВФ-045
+konto:s:501
+data:s:18.01.2025
+firma:i:2
+opis:s:Набавка на канцелариски материјали
+dolguva:f:30000
+pobaruva:f:0
+vvrska:s:ВФ-045
+konto:s:271
+data:s:18.01.2025
+firma:i:0
+opis:s:Претходен ДДВ 18%
+dolguva:f:5400
+pobaruva:f:0
+vvrska:s:ВФ-045
+nalog:s:ТН-003
+data_kn:s:20.01.2025
+konto:s:100
+data:s:20.01.2025
+firma:i:1
+opis:s:Наплата по фактура 001/2025 - ДАТА КОНСАЛТИНГ ДООЕЛ
+dolguva:f:59000
+pobaruva:f:0
+vvrska:s:001/2025
+konto:s:120
+data:s:20.01.2025
+firma:i:1
+opis:s:Затворање побарување - ДАТА КОНСАЛТИНГ ДООЕЛ
+dolguva:f:0
+pobaruva:f:59000
+vvrska:s:001/2025
+nalog:s:ТН-004
+data_kn:s:25.01.2025
+konto:s:220
+data:s:25.01.2025
+firma:i:2
+opis:s:Влезна фактура - ТИМ ЕЛЕКТРОНИКС - телефонски услуги
+dolguva:f:0
+pobaruva:f:11800
+vvrska:s:ВФ-052
+konto:s:530
+data:s:25.01.2025
+firma:i:2
+opis:s:Трошоци за телекомуникации
+dolguva:f:10000
+pobaruva:f:0
+vvrska:s:ВФ-052
+konto:s:271
+data:s:25.01.2025
+firma:i:0
+opis:s:Претходен ДДВ 18%
+dolguva:f:1800
+pobaruva:f:0
+vvrska:s:ВФ-052
+nalog:s:ТН-005
+data_kn:s:31.01.2025
+konto:s:100
+data:s:31.01.2025
+firma:i:0
+opis:s:Плаќање на сметка за струја - ЕВН Македонија
+dolguva:f:0
+pobaruva:f:8260
+vvrska:s:ЕВН-01/25
+konto:s:521
+data:s:31.01.2025
+firma:i:3
+opis:s:Трошоци за електрична енергија
+dolguva:f:7000
+pobaruva:f:0
+vvrska:s:ЕВН-01/25
+konto:s:271
+data:s:31.01.2025
+firma:i:0
+opis:s:Претходен ДДВ 18%
+dolguva:f:1260
+pobaruva:f:0
+vvrska:s:ЕВН-01/25
+nalog:s:ТН-006
+data_kn:s:05.02.2025
+konto:s:120
+data:s:05.02.2025
+firma:i:4
+opis:s:Фактура бр. 002/2025 - БАЛКАН ФАРМА ДОО
+dolguva:f:118000
+pobaruva:f:0
+vvrska:s:002/2025
+konto:s:700
+data:s:05.02.2025
+firma:i:4
+opis:s:Приход од продажба на производи
+dolguva:f:0
+pobaruva:f:100000
+vvrska:s:002/2025
+konto:s:470
+data:s:05.02.2025
+firma:i:0
+opis:s:ДДВ 18% на фактура 002/2025
+dolguva:f:0
+pobaruva:f:18000
+vvrska:s:002/2025
+nalog:s:ТН-007
+data_kn:s:10.02.2025
+konto:s:220
+data:s:10.02.2025
+firma:i:5
+opis:s:Влезна фактура - ГЛОБАЛ ЛОГИСТИК ДООЕЛ - транспорт
+dolguva:f:0
+pobaruva:f:23600
+vvrska:s:ВФ-078
+konto:s:520
+data:s:10.02.2025
+firma:i:5
+opis:s:Трошоци за транспорт
+dolguva:f:20000
+pobaruva:f:0
+vvrska:s:ВФ-078
+konto:s:271
+data:s:10.02.2025
+firma:i:0
+opis:s:Претходен ДДВ 18%
+dolguva:f:3600
+pobaruva:f:0
+vvrska:s:ВФ-078
+nalog:s:ТН-008
+data_kn:s:15.02.2025
+konto:s:540
+data:s:15.02.2025
+firma:i:0
+opis:s:Плати за вработени - Јануари 2025
+dolguva:f:85000
+pobaruva:f:0
+vvrska:s:ПЛАТА-01/25
+konto:s:100
+data:s:15.02.2025
+firma:i:0
+opis:s:Исплата плати од жиро сметка
+dolguva:f:0
+pobaruva:f:85000
+vvrska:s:ПЛАТА-01/25

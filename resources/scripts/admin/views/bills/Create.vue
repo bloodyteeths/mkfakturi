@@ -756,6 +756,52 @@ onMounted(async () => {
         items[0].quantity = quantity
       })
     }
+
+    // Pre-fill from AI draft
+    if (route.query.draft_id && !scannedData) {
+      loadAiDraft(route.query.draft_id)
+    }
   }
 })
+
+/**
+ * Load AI-generated draft data to pre-fill the bill form.
+ */
+async function loadAiDraft(draftId) {
+  try {
+    const axios = (await import('axios')).default
+    const { data } = await axios.get(`/ai/drafts/${draftId}`)
+    const d = data.entity_data || {}
+
+    // Pre-fill supplier (search by name)
+    if (d.supplier_id) {
+      bill.supplier_id = d.supplier_id
+    }
+
+    // Pre-fill dates
+    if (d.date) bill.bill_date = d.date
+    if (d.due_date) bill.due_date = d.due_date
+    if (d.notes) bill.notes = d.notes
+
+    // Pre-fill items
+    if (d.items?.length > 0) {
+      items.splice(0, items.length, ...d.items.map((item) => ({
+        item_id: item.item_id || null,
+        name: item.name || '',
+        description: item.description || '',
+        quantity: item.quantity || 1,
+        price: (item.unit_price || 0) / 100, // Convert cents to display
+        taxes: [],
+        warehouse_id: null,
+        track_quantity: false,
+        selectedItem: null,
+      })))
+    }
+
+    // Mark draft as used
+    try { await axios.post(`/ai/drafts/${draftId}/use`) } catch (e) { /* non-critical */ }
+  } catch (err) {
+    console.error('[AI Draft] Failed to load bill draft:', err)
+  }
+}
 </script>

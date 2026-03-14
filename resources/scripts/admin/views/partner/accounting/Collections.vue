@@ -274,7 +274,8 @@
               </div>
               <p class="text-sm font-medium text-gray-900 mb-1">{{ humanize(tpl.subject_mk || tpl.subject_en) }}</p>
               <p class="text-xs text-gray-500 mb-2">{{ t('days_after_due') }}: {{ tpl.days_after_due }}</p>
-              <div class="text-xs text-gray-600 mb-3 border rounded p-2 bg-gray-50 max-h-20 overflow-hidden" v-html="humanize(tpl.body_mk || tpl.body_en)"></div>
+              <!-- CLAUDE-CHECKPOINT: sanitized v-html -->
+              <div class="text-xs text-gray-600 mb-3 border rounded p-2 bg-gray-50 max-h-20 overflow-hidden" v-html="sanitizeHtml(humanize(tpl.body_mk || tpl.body_en))"></div>
               <div class="flex justify-end gap-2">
                 <BaseButton size="sm" variant="primary-outline" @click="openTemplateForm(tpl)">
                   {{ t('edit_template') }}
@@ -527,7 +528,8 @@
           </div>
           <div class="p-3 bg-white">
             <p class="text-sm font-medium text-gray-900 mb-2">{{ humanize(templateForm.subject_mk) }}</p>
-            <div class="text-sm text-gray-700 prose prose-sm max-w-none" v-html="humanize(templateForm.body_mk)"></div>
+            <!-- CLAUDE-CHECKPOINT: sanitized v-html -->
+            <div class="text-sm text-gray-700 prose prose-sm max-w-none" v-html="sanitizeHtml(humanize(templateForm.body_mk))"></div>
           </div>
         </div>
 
@@ -571,6 +573,7 @@ import { useNotificationStore } from '@/scripts/stores/notification'
 import { useModalStore } from '@/scripts/stores/modal'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import collectionMessages from '@/scripts/admin/i18n/collections.js'
+import { sanitizeHtml } from '@/scripts/helpers/utilities'
 
 const { locale } = useI18n()
 const notificationStore = useNotificationStore()

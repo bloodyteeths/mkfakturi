@@ -77,6 +77,18 @@
       {{ $t('general.copy_pdf_url') }}
     </BaseDropdownItem>
 
+    <!-- Print PP30 Payment Slip -->
+    <BaseDropdownItem
+      v-if="row.paid_status !== 'PAID'"
+      @click="downloadPp30(row)"
+    >
+      <BaseIcon
+        name="PrinterIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('payment_orders.print_pp30', 'Print PP30') }}
+    </BaseDropdownItem>
+
     <!--  Delete Bill  -->
     <BaseDropdownItem
       v-if="userStore.hasAbilities(abilities.DELETE_BILL)"
@@ -217,6 +229,48 @@ async function sendBill(bill) {
     data: bill,
     variant: 'sm',
   })
+}
+
+async function downloadPp30(bill) {
+  try {
+    const response = await window.axios.get(`/bills/${bill.id}/pp30`, {
+      responseType: 'blob',
+    })
+
+    const blob = response.data
+
+    // Check if response is actually a JSON error wrapped in blob
+    if (blob.type === 'application/json') {
+      const text = await blob.text()
+      const json = JSON.parse(text)
+      notificationStore.showNotification({
+        type: 'error',
+        message: json.message || t('payment_orders.supplier_no_iban', 'Supplier has no IBAN'),
+      })
+      return
+    }
+
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `PP30_${bill.bill_number || bill.id}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    let message = t('payment_orders.supplier_no_iban', 'Failed to generate PP30')
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        message = json.message || message
+      } catch { /* use default */ }
+    } else if (error.response?.data?.message) {
+      message = error.response.data.message
+    }
+    notificationStore.showNotification({ type: 'error', message })
+  }
 }
 
 function copyPdfUrl() {

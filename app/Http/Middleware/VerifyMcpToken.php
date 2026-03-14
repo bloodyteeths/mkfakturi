@@ -38,13 +38,14 @@ class VerifyMcpToken
         // Get the configured MCP server token
         $expectedToken = config('services.mcp.token');
 
-        // Verify token is present and matches
-        if (! $token || $token !== $expectedToken) {
+        // Verify token is present and matches (timing-safe comparison)
+        if (! $token || ! $expectedToken || ! hash_equals($expectedToken, $token)) {
             return response()->json([
                 'error' => 'Invalid MCP token',
                 'message' => 'Authentication failed. Invalid or missing MCP server token.',
             ], 401);
         }
+        // CLAUDE-CHECKPOINT: timing-safe token comparison via hash_equals
 
         // Token is valid, proceed with the request
         return $next($request);

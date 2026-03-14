@@ -55,7 +55,8 @@
             {{ $t('invoices.notes') }}
           </dt>
           <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            <span v-html="invoice.formatted_notes"></span>
+            <!-- CLAUDE-CHECKPOINT: sanitized v-html (user-editable notes) -->
+            <span v-html="sanitizeHtml(invoice.formatted_notes)"></span>
           </dd>
         </div>
       </dl>
@@ -67,6 +68,8 @@
 </template>
 
 <script setup>
+import { sanitizeHtml } from '@/scripts/helpers/utilities'
+
 const props = defineProps({
   invoice: {
     type: [Object, null],

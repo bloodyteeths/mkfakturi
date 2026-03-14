@@ -41,7 +41,7 @@ class StockController extends Controller
         $categoryId = $request->query('category_id');
         $itemId = $request->query('item_id');
         $orderByField = $request->query('orderByField', 'name');
-        $orderBy = $request->query('orderBy', 'asc');
+        $orderBy = in_array(strtolower($request->query('orderBy', 'asc')), ['asc', 'desc']) ? $request->query('orderBy', 'asc') : 'asc';
         $limit = (int) $request->query('limit', 15);
 
         // Build query
@@ -66,7 +66,7 @@ class StockController extends Controller
             $query->where('category_id', $categoryId);
         }
 
-        // Apply sorting
+        // Apply sorting — whitelist allowed orderBy fields to prevent SQL injection
         // We can sort by quantity because StockService updates the item.quantity field
         $allowedSortFields = ['name', 'sku', 'price', 'quantity', 'created_at'];
         if (in_array($orderByField, $allowedSortFields)) {
@@ -74,6 +74,7 @@ class StockController extends Controller
         } else {
             $query->orderBy('name', 'asc');
         }
+        // CLAUDE-CHECKPOINT
 
         // Paginate
         $paginatedItems = $query->paginate($limit);

@@ -86,6 +86,14 @@
                 <span class="text-sm text-gray-500">
                   {{ formatDate(tx.transaction_date) }}
                 </span>
+                <!-- AI Category Badge -->
+                <span
+                  v-if="tx.ai_category"
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                  :class="getCategoryClass(tx.ai_category)"
+                >
+                  {{ $t('banking.category_' + tx.ai_category, tx.ai_category) }}
+                </span>
               </div>
               <p class="text-sm text-gray-900 mb-1">{{ tx.description }}</p>
               <p v-if="tx.counterparty_name" class="text-xs text-gray-500">
@@ -97,11 +105,20 @@
             </div>
 
             <!-- Suggested Match -->
-            <div v-if="tx.suggested_match" class="ml-6 p-4 bg-blue-50 rounded-lg min-w-[300px]">
+            <div v-if="tx.suggested_match" class="ml-6 p-4 rounded-lg min-w-[300px]" :class="tx.suggested_match.match_type === 'ai' ? 'bg-purple-50' : 'bg-blue-50'">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-blue-800">
-                  {{ $t('banking.suggested_match') }}
-                </span>
+                <div class="flex items-center space-x-2">
+                  <span class="text-sm font-medium" :class="tx.suggested_match.match_type === 'ai' ? 'text-purple-800' : 'text-blue-800'">
+                    {{ $t('banking.suggested_match') }}
+                  </span>
+                  <!-- AI badge -->
+                  <span
+                    v-if="tx.suggested_match.match_type === 'ai'"
+                    class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700"
+                  >
+                    AI
+                  </span>
+                </div>
                 <span
                   class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                   :class="getConfidenceClass(tx.suggested_match.confidence)"
@@ -115,6 +132,20 @@
               <p class="text-sm text-gray-600">
                 {{ formatMoney(tx.suggested_match.invoice_total, tx.currency) }}
               </p>
+              <!-- AI Match Reason -->
+              <p
+                v-if="tx.suggested_match.ai_reason || tx.ai_match_reason"
+                class="text-xs text-purple-600 mt-1 italic"
+              >
+                {{ tx.suggested_match.ai_reason || tx.ai_match_reason }}
+              </p>
+              <!-- Split indicator -->
+              <p
+                v-if="tx.suggested_match.is_split"
+                class="text-xs text-orange-600 mt-1 font-medium"
+              >
+                {{ $t('banking.split_payment_detected') }}
+              </p>
               <div class="flex space-x-2 mt-3">
                 <BaseButton
                   variant="primary"
@@ -124,7 +155,7 @@
                   {{ $t('general.accept') }}
                 </BaseButton>
                 <BaseButton
-                  v-if="tx.amount > tx.suggested_match.invoice_total"
+                  v-if="tx.suggested_match.is_split || tx.amount > tx.suggested_match.invoice_total"
                   variant="primary-outline"
                   size="sm"
                   @click="openSplitModal(tx)"
@@ -142,24 +173,33 @@
             </div>
 
             <!-- No Match Found -->
-            <div v-else class="ml-6 flex space-x-2">
-              <BaseButton
-                variant="primary-outline"
-                size="sm"
-                @click="openManualMatchModal(tx)"
+            <div v-else class="ml-6">
+              <!-- AI Category reason for unmatched -->
+              <p
+                v-if="tx.ai_match_reason && !tx.suggested_match"
+                class="text-xs text-gray-500 italic mb-2"
               >
-                <template #left="slotProps">
-                  <BaseIcon name="LinkIcon" :class="slotProps.class" />
-                </template>
-                {{ $t('banking.match_manually') }}
-              </BaseButton>
-              <BaseButton
-                variant="primary-outline"
-                size="sm"
-                @click="openSplitModal(tx)"
-              >
-                {{ $t('banking.split') }}
-              </BaseButton>
+                {{ tx.ai_match_reason }}
+              </p>
+              <div class="flex space-x-2">
+                <BaseButton
+                  variant="primary-outline"
+                  size="sm"
+                  @click="openManualMatchModal(tx)"
+                >
+                  <template #left="slotProps">
+                    <BaseIcon name="LinkIcon" :class="slotProps.class" />
+                  </template>
+                  {{ $t('banking.match_manually') }}
+                </BaseButton>
+                <BaseButton
+                  variant="primary-outline"
+                  size="sm"
+                  @click="openSplitModal(tx)"
+                >
+                  {{ $t('banking.split') }}
+                </BaseButton>
+              </div>
             </div>
           </div>
         </div>
@@ -435,6 +475,22 @@ const getConfidenceClass = (confidence) => {
   if (confidence >= 85) return 'bg-green-100 text-green-800'
   if (confidence >= 70) return 'bg-yellow-100 text-yellow-800'
   return 'bg-red-100 text-red-800'
+}
+
+const getCategoryClass = (category) => {
+  const classes = {
+    salary: 'bg-blue-100 text-blue-800',
+    tax_payment: 'bg-red-100 text-red-800',
+    bank_fee: 'bg-gray-100 text-gray-800',
+    loan_payment: 'bg-orange-100 text-orange-800',
+    internal_transfer: 'bg-indigo-100 text-indigo-800',
+    supplier_payment: 'bg-yellow-100 text-yellow-800',
+    utility: 'bg-teal-100 text-teal-800',
+    rent: 'bg-pink-100 text-pink-800',
+    subscription: 'bg-cyan-100 text-cyan-800',
+    other: 'bg-gray-100 text-gray-600',
+  }
+  return classes[category] || 'bg-gray-100 text-gray-600'
 }
 
 const formatMoney = (amount, currency = 'MKD') => {

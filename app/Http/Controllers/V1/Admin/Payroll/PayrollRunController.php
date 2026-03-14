@@ -51,8 +51,14 @@ class PayrollRunController extends Controller
             $query->where('period_month', $request->month);
         }
 
+        // Whitelist allowed orderBy fields to prevent SQL injection
+        $allowedOrderFields = ['period_start', 'period_end', 'status', 'total_amount', 'created_at'];
+        $orderByField = in_array($request->get('orderByField'), $allowedOrderFields) ? $request->get('orderByField') : 'period_start';
+        $orderByDirection = in_array(strtolower($request->get('orderBy', 'desc')), ['asc', 'desc']) ? $request->get('orderBy', 'desc') : 'desc';
+        // CLAUDE-CHECKPOINT
+
         $runs = $query
-            ->orderBy($request->get('orderByField', 'period_start'), $request->get('orderBy', 'desc'))
+            ->orderBy($orderByField, $orderByDirection)
             ->paginate($limit);
 
         return response()->json([

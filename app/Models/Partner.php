@@ -36,6 +36,8 @@ class Partner extends Model
         'portfolio_enabled',
         'portfolio_activated_at',
         'portfolio_grace_ends_at',
+        // Onboarding
+        'onboarding_completed_at',
     ];
 
     protected $casts = [
@@ -45,6 +47,7 @@ class Partner extends Model
         'stripe_payouts_enabled_at' => 'datetime',
         'portfolio_activated_at' => 'datetime',
         'portfolio_grace_ends_at' => 'datetime',
+        'onboarding_completed_at' => 'datetime',
     ];
 
     /**

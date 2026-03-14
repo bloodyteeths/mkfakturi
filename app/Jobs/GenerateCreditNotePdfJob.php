@@ -20,6 +20,12 @@ class GenerateCreditNotePdfJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
 
+    public $timeout = 300;  // 5 minutes
+
+    public $tries = 3;
+
+    public $backoff = [30, 60, 120];
+
     public function __construct(
         public int $creditNoteId,
         public bool $deleteExistingFile = false
@@ -40,5 +46,15 @@ class GenerateCreditNotePdfJob implements ShouldQueue
 
         return 0;
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Log::error('PDF generation failed', [
+            'job' => static::class,
+            'id' => $this->creditNoteId ?? null,
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT
 

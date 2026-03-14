@@ -23,11 +23,21 @@ class UnzipUpdateController extends Controller
         }
 
         $request->validate([
-            'path' => 'required',
+            'path' => ['required', 'string', 'max:255'],
         ]);
 
+        // Prevent path traversal
+        $path = $request->path;
+        $realPath = realpath($path);
+        $storagePath = realpath(storage_path());
+
+        if (!$realPath || !str_starts_with($realPath, $storagePath)) {
+            return response()->json(['error' => 'Invalid file path'], 422);
+        }
+        // CLAUDE-CHECKPOINT
+
         try {
-            $path = Updater::unzip($request->path);
+            $path = Updater::unzip($realPath);
 
             return response()->json([
                 'success' => true,

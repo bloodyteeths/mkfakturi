@@ -4,6 +4,7 @@ namespace Tests\Feature\Webhooks;
 
 use App\Models\Company;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Mk\Services\CpayDriver;
 use Tests\TestCase;
 
 class WebhookIngestionTest extends TestCase
@@ -45,6 +46,10 @@ class WebhookIngestionTest extends TestCase
     {
         $company = Company::factory()->create();
 
+        // Mock CpayDriver to accept any signature (avoids coupling test to signature algorithm)
+        $mock = $this->mock(CpayDriver::class);
+        $mock->shouldReceive('verifySignature')->once()->andReturn(true);
+
         $payload = [
             'transaction_id' => 'txn_test_456',
             'status' => 'success',
@@ -64,6 +69,24 @@ class WebhookIngestionTest extends TestCase
             'event_id' => 'txn_test_456',
             'status' => 'pending',
         ]);
+    }
+
+    public function test_cpay_webhook_rejects_invalid_signature(): void
+    {
+        $mock = $this->mock(CpayDriver::class);
+        $mock->shouldReceive('verifySignature')->once()->andReturn(false);
+
+        $payload = [
+            'transaction_id' => 'txn_test_789',
+            'status' => 'success',
+            'merchant_data' => ['company_id' => 1],
+            'signature' => 'bad-signature',
+        ];
+
+        $response = $this->postJson('/webhooks/cpay', $payload);
+
+        $response->assertStatus(401);
+        $response->assertJson(['error' => 'Invalid signature']);
     }
 
     public function test_webhook_rejects_missing_company_id(): void

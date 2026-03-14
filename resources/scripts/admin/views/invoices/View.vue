@@ -1,6 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { debounce } from 'lodash'
 
@@ -198,19 +198,33 @@ function scrollToInvoice() {
   }
 }
 
+// Store the scroll handler reference for cleanup
+let scrollHandler = null
+
 function addScrollListener() {
-  invoiceListSection.value.addEventListener('scroll', (ev) => {
-    if (
-      ev.target.scrollTop > 0 &&
-      ev.target.scrollTop + ev.target.clientHeight >
-        ev.target.scrollHeight - 200
-    ) {
-      if (currentPageNumber.value < lastPageNumber.value) {
-        loadInvoices(++currentPageNumber.value, true)
+  if (invoiceListSection.value && !scrollHandler) {
+    scrollHandler = (ev) => {
+      if (
+        ev.target.scrollTop > 0 &&
+        ev.target.scrollTop + ev.target.clientHeight >
+          ev.target.scrollHeight - 200
+      ) {
+        if (currentPageNumber.value < lastPageNumber.value) {
+          loadInvoices(++currentPageNumber.value, true)
+        }
       }
     }
-  })
+    invoiceListSection.value.addEventListener('scroll', scrollHandler)
+  }
 }
+
+// CLAUDE-CHECKPOINT
+onUnmounted(() => {
+  if (invoiceListSection.value && scrollHandler) {
+    invoiceListSection.value.removeEventListener('scroll', scrollHandler)
+    scrollHandler = null
+  }
+})
 
 async function loadInvoice() {
   let response = await invoiceStore.fetchInvoice(route.params.id)
@@ -236,15 +250,16 @@ function sortData() {
 }
 
 function updateSentInvoice() {
-  let pos = invoiceList.value.findIndex(
-    (invoice) => invoice.id === invoiceData.value.id
+  const invoice = invoiceList.value.find(
+    (inv) => inv.id === invoiceData.value.id
   )
 
-  if (invoiceList.value[pos]) {
-    invoiceList.value[pos].status = 'SENT'
+  if (invoice) {
+    invoice.status = 'SENT'
     invoiceData.value.status = 'SENT'
   }
 }
+// CLAUDE-CHECKPOINT
 
 loadInvoices()
 loadInvoice()

@@ -39,8 +39,14 @@ class SalaryStructureController extends Controller
             $query->effectiveOn($request->effective_on);
         }
 
+        // Whitelist allowed orderBy fields to prevent SQL injection
+        $allowedOrderFields = ['name', 'base_salary', 'created_at', 'updated_at', 'effective_from'];
+        $orderByField = in_array($request->get('orderByField'), $allowedOrderFields) ? $request->get('orderByField') : 'effective_from';
+        $orderByDirection = in_array(strtolower($request->get('orderBy', 'desc')), ['asc', 'desc']) ? $request->get('orderBy', 'desc') : 'desc';
+        // CLAUDE-CHECKPOINT
+
         $structures = $query
-            ->orderBy($request->get('orderByField', 'effective_from'), $request->get('orderBy', 'desc'))
+            ->orderBy($orderByField, $orderByDirection)
             ->paginate($limit);
 
         return response()->json([

@@ -1007,6 +1007,13 @@ export default [
         component: ImportWizard,
       },
 
+      // Onboarding Wizard
+      {
+        path: 'onboarding',
+        name: 'onboarding.wizard',
+        component: () => import('@/scripts/admin/views/onboarding/OnboardingWizard.vue'),
+      },
+
       // Console - Partner routes
       {
         path: 'console',

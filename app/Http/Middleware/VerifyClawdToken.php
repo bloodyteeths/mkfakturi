@@ -20,12 +20,13 @@ class VerifyClawdToken
         $token = $request->header('X-Monitor-Token');
         $expectedToken = config('services.clawd.monitor_token');
 
-        if (! $token || ! $expectedToken || $token !== $expectedToken) {
+        if (! $token || ! $expectedToken || ! hash_equals($expectedToken, $token)) {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'Invalid or missing monitor token.',
             ], 401);
         }
+        // CLAUDE-CHECKPOINT: timing-safe token comparison via hash_equals
 
         return $next($request);
     }

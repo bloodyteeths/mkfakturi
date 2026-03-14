@@ -497,7 +497,33 @@ async function loadData() {
     expenseStore.currentExpense.customer_id = route.query.customer
   }
 
+  // Pre-fill from AI draft
+  if (!isEdit.value && route.query.draft_id) {
+    await loadAiDraft(route.query.draft_id)
+  }
+
   isFetchingInitialData.value = false
+}
+
+/**
+ * Load AI-generated draft data to pre-fill the expense form.
+ */
+async function loadAiDraft(draftId) {
+  try {
+    const axios = (await import('axios')).default
+    const { data } = await axios.get(`/ai/drafts/${draftId}`)
+    const d = data.entity_data || {}
+
+    if (d.amount) expenseStore.currentExpense.amount = d.amount / 100 // Cents to display
+    if (d.date) expenseStore.currentExpense.expense_date = d.date
+    if (d.notes) expenseStore.currentExpense.notes = d.notes
+    if (d.customer_id) expenseStore.currentExpense.customer_id = d.customer_id
+
+    // Mark draft as used
+    try { await axios.post(`/ai/drafts/${draftId}/use`) } catch (e) { /* non-critical */ }
+  } catch (err) {
+    console.error('[AI Draft] Failed to load expense draft:', err)
+  }
 }
 
 async function submitForm(allowDuplicate = false) {

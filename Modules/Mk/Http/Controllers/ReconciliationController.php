@@ -50,6 +50,8 @@ class ReconciliationController extends Controller
                 'remittance_info' => $transaction->remittance_info,
                 'counterparty_name' => $transaction->creditor_name ?? $transaction->debtor_name,
                 'external_reference' => $transaction->external_reference,
+                'ai_category' => $transaction->ai_category,
+                'ai_match_reason' => $transaction->ai_match_reason,
                 'suggested_match' => $match,
             ];
         });

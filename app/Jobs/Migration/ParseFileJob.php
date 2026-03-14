@@ -142,8 +142,9 @@ class ParseFileJob implements ShouldQueue
 
             // Chain to next job - AutoMapFieldsJob
             AutoMapFieldsJob::dispatch($this->importJob)
-                ->onQueue('imports')
+                ->onQueue('migration')
                 ->delay(now()->addSeconds(5));
+            // CLAUDE-CHECKPOINT
 
         } catch (\Exception $e) {
             $this->handleJobFailure($e);

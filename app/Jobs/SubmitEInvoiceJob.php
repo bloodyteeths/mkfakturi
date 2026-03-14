@@ -377,13 +377,15 @@ class SubmitEInvoiceJob implements ShouldQueue
             'attempt' => $this->attempts(),
         ]);
 
-        // Create idempotency key based on e-invoice ID and attempt number
+        // Create idempotency key based on e-invoice ID and its last modification timestamp.
+        // This ensures retries of the same unmodified invoice reuse the same key,
+        // but a genuinely modified invoice gets a new key.
         $idempotencyKey = sprintf(
-            'einvoice-%d-attempt-%d-%s',
+            'einvoice-%d-v%d',
             $eInvoice->id,
-            $this->attempts(),
-            now()->format('YmdHis')
+            $eInvoice->updated_at->timestamp  // Changes only when invoice is actually modified
         );
+        // CLAUDE-CHECKPOINT
 
         $submission = EInvoiceSubmission::create([
             'e_invoice_id' => $eInvoice->id,

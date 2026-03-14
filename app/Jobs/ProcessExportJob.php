@@ -128,7 +128,9 @@ class ProcessExportJob implements ShouldQueue
         }
 
         // Get data and flatten any remaining nested structures
-        $results = $query->get();
+        // Safety cap to prevent OOM on very large exports
+        $results = $query->limit(50000)->get();
+        // CLAUDE-CHECKPOINT
 
         // Convert to array and include meaningful relationship data
         return $results->map(function ($model) {

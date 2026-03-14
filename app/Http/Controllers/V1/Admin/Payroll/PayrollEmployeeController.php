@@ -45,6 +45,12 @@ class PayrollEmployeeController extends Controller
 
         $limit = $request->has('limit') ? $request->limit : 10;
 
+        // Whitelist allowed orderBy fields to prevent SQL injection
+        $allowedOrderFields = ['name', 'position', 'base_salary', 'created_at'];
+        $orderByField = in_array($request->get('orderByField'), $allowedOrderFields) ? $request->get('orderByField') : 'created_at';
+        $orderByDirection = in_array(strtolower($request->get('orderBy', 'desc')), ['asc', 'desc']) ? $request->get('orderBy', 'desc') : 'desc';
+        // CLAUDE-CHECKPOINT
+
         $employees = PayrollEmployee::with(['currency', 'creator', 'currentSalaryStructure'])
             ->forCompany($companyId)
             ->when($request->has('status'), function ($query) use ($request) {
@@ -70,7 +76,7 @@ class PayrollEmployeeController extends Controller
             ->when($request->has('department'), function ($query) use ($request) {
                 $query->where('department', $request->department);
             })
-            ->orderBy($request->get('orderByField', 'created_at'), $request->get('orderBy', 'desc'))
+            ->orderBy($orderByField, $orderByDirection)
             ->paginate($limit);
 
         return response()->json([

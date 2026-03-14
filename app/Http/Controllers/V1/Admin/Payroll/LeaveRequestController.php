@@ -52,8 +52,14 @@ class LeaveRequestController extends Controller
             $query->forPeriod($request->start_date, $request->end_date);
         }
 
+        // Whitelist allowed orderBy fields to prevent SQL injection
+        $allowedOrderFields = ['employee_name', 'leave_type', 'start_date', 'end_date', 'status', 'created_at'];
+        $orderByField = in_array($request->get('orderByField'), $allowedOrderFields) ? $request->get('orderByField') : 'created_at';
+        $orderByDirection = in_array(strtolower($request->get('orderBy', 'desc')), ['asc', 'desc']) ? $request->get('orderBy', 'desc') : 'desc';
+        // CLAUDE-CHECKPOINT
+
         $requests = $query
-            ->orderBy($request->get('orderByField', 'created_at'), $request->get('orderBy', 'desc'))
+            ->orderBy($orderByField, $orderByDirection)
             ->paginate($limit);
 
         return response()->json([

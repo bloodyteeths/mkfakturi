@@ -178,6 +178,17 @@ class PartnerJournalImportController extends Controller
             return $fakePartner;
         }
 
+        // Allow company owners to use journal import (for onboarding)
+        if ($user->isOwner()) {
+            $fakePartner = new Partner();
+            $fakePartner->id = 0;
+            $fakePartner->user_id = $user->id;
+            $fakePartner->name = $user->name;
+            $fakePartner->email = $user->email;
+            $fakePartner->is_company_owner = true;
+            return $fakePartner;
+        }
+
         return Partner::where('user_id', $user->id)->first();
     }
 
@@ -188,6 +199,13 @@ class PartnerJournalImportController extends Controller
     {
         if ($partner->is_super_admin ?? false) {
             return true;
+        }
+
+        // Company owners can access their own company
+        if ($partner->is_company_owner ?? false) {
+            return \App\Models\Company::where('id', $companyId)
+                ->whereHas('users', fn ($q) => $q->where('users.id', $partner->user_id))
+                ->exists();
         }
 
         return $partner->companies()

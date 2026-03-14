@@ -1,0 +1,25 @@
+firma:i:1
+ime:s:ДАТА КОНСАЛТИНГ ДООЕЛ
+danocen:s:MK4080012345001
+mesto:s:Скопје
+adresa:s:ул. Македонија 12
+firma:i:2
+ime:s:ТИМ ЕЛЕКТРОНИКС ДООЕЛ
+danocen:s:MK4080012345002
+mesto:s:Скопје
+adresa:s:бул. Партизански Одреди 55
+firma:i:3
+ime:s:ЕВН МАКЕДОНИЈА АД
+danocen:s:MK4080012345003
+mesto:s:Скопје
+adresa:s:ул. Лазар Личеноски 11
+firma:i:4
+ime:s:БАЛКАН ФАРМА ДОО
+danocen:s:MK4080012345004
+mesto:s:Битола
+adresa:s:ул. 1-ви Мај 33
+firma:i:5
+ime:s:ГЛОБАЛ ЛОГИСТИК ДООЕЛ
+danocen:s:MK4080012345005
+mesto:s:Скопје
+adresa:s:ул. Борис Трајковски 18

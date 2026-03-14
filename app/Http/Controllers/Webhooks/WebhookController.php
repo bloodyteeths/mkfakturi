@@ -7,6 +7,7 @@ use App\Jobs\ProcessWebhookEvent;
 use App\Models\GatewayWebhookEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Modules\Mk\Services\CpayDriver;
 
 class WebhookController extends Controller
 {
@@ -60,8 +61,21 @@ class WebhookController extends Controller
     public function cpay(Request $request)
     {
         try {
-            $signature = $request->input('signature');
             $payload = $request->all();
+
+            // Verify CPAY signature using the same algorithm as CpayDriver
+            $cpayDriver = app(CpayDriver::class);
+            if (! $cpayDriver->verifySignature($payload)) {
+                Log::warning('CPAY webhook: invalid signature', [
+                    'ip' => $request->ip(),
+                    'payload' => $payload,
+                ]);
+
+                return response()->json(['error' => 'Invalid signature'], 401);
+            }
+            // CLAUDE-CHECKPOINT: CPAY webhook signature verification added
+
+            $signature = $request->input('signature');
 
             // Extract transaction ID and company from payload
             $eventId = $payload['transaction_id'] ?? null;

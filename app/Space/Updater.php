@@ -7,6 +7,7 @@ use App\Models\Setting;
 use Artisan;
 use File;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Log;
 use ZipArchive;
 
 // Implementation taken from Akaunting - https://github.com/akaunting/akaunting
@@ -87,6 +88,14 @@ class Updater
             throw new \Exception('Zip file not found');
         }
 
+        // Prevent path traversal - zip file must be within storage directory
+        $realZipPath = realpath($zip_file_path);
+        $storagePath = realpath(storage_path());
+        if (!$realZipPath || !str_starts_with($realZipPath, $storagePath)) {
+            throw new \Exception('Invalid zip file path');
+        }
+        // CLAUDE-CHECKPOINT
+
         $temp_extract_dir = storage_path('app/temp2-'.md5(mt_rand()));
 
         if (! File::isDirectory($temp_extract_dir)) {
@@ -122,10 +131,24 @@ class Updater
     public static function deleteFiles($json)
     {
         $files = json_decode($json);
+        $basePath = realpath(base_path());
 
         foreach ($files as $file) {
-            \File::delete(base_path($file));
+            // Prevent path traversal
+            $fullPath = realpath(base_path($file));
+            if (!$fullPath || !str_starts_with($fullPath, $basePath)) {
+                Log::warning('Attempted path traversal in deleteFiles', ['file' => $file]);
+                continue;
+            }
+            // Don't allow deleting critical files
+            $protected = ['.env', 'artisan', 'composer.json', 'composer.lock'];
+            if (in_array(basename($fullPath), $protected)) {
+                Log::warning('Attempted to delete protected file', ['file' => $file]);
+                continue;
+            }
+            \File::delete($fullPath);
         }
+        // CLAUDE-CHECKPOINT
 
         return true;
     }

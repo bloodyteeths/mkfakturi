@@ -2,12 +2,14 @@
 
 namespace App\Domain\Accounting;
 
+use App\Exceptions\PeriodLockedException;
 use App\Models\Company;
 use App\Models\CompanySetting;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Payment;
 use App\Models\StockMovement;
+use App\Services\PeriodLockService;
 use Carbon\Carbon;
 use IFRS\Models\Account;
 use IFRS\Models\Entity;
@@ -55,11 +57,26 @@ class IfrsAdapter
             return;
         }
 
+        // Period lock enforcement
+        $periodLockService = app(PeriodLockService::class);
+        if ($periodLockService->isDateLocked($invoice->company_id, $invoice->invoice_date)) {
+            Log::warning('Attempted to post to locked period', [
+                'company_id' => $invoice->company_id,
+                'date' => $invoice->invoice_date,
+                'type' => 'invoice',
+            ]);
+            throw new PeriodLockedException(
+                "Cannot post to locked period: {$invoice->invoice_date}",
+                'period'
+            );
+        }
+        // CLAUDE-CHECKPOINT: Period lock enforcement for postInvoice
+
         try {
             DB::beginTransaction();
 
             // Get or create IFRS entity for company
-            $entity = $this->getOrCreateEntityForCompany($invoice->company);
+            $entity = $this->getOrCreateEntityForCompany($invoice->company, $invoice->invoice_date);
             if (! $entity) {
                 throw new \Exception('Failed to get or create IFRS Entity for company');
             }
@@ -167,11 +184,26 @@ class IfrsAdapter
             return;
         }
 
+        // Period lock enforcement
+        $periodLockService = app(PeriodLockService::class);
+        if ($periodLockService->isDateLocked($payment->company_id, $payment->payment_date)) {
+            Log::warning('Attempted to post to locked period', [
+                'company_id' => $payment->company_id,
+                'date' => $payment->payment_date,
+                'type' => 'payment',
+            ]);
+            throw new PeriodLockedException(
+                "Cannot post to locked period: {$payment->payment_date}",
+                'period'
+            );
+        }
+        // CLAUDE-CHECKPOINT: Period lock enforcement for postPayment
+
         try {
             DB::beginTransaction();
 
             // Get or create IFRS entity for company
-            $entity = $this->getOrCreateEntityForCompany($payment->company);
+            $entity = $this->getOrCreateEntityForCompany($payment->company, $payment->payment_date);
             if (! $entity) {
                 throw new \Exception('Failed to get or create IFRS Entity for company');
             }
@@ -1102,7 +1134,7 @@ class IfrsAdapter
     /**
      * Get or create IFRS Entity for a company
      */
-    protected function getOrCreateEntityForCompany(Company $company): ?Entity
+    protected function getOrCreateEntityForCompany(Company $company, ?string $transactionDate = null): ?Entity
     {
         // Refresh company to get latest ifrs_entity_id
         $company->refresh();
@@ -1118,8 +1150,8 @@ class IfrsAdapter
                 // NOW we can safely load currency relationship (EntityScope will work)
                 $entity->load('currency');
 
-                // Ensure ReportingPeriod exists for current year
-                $this->ensureReportingPeriodExists($entity);
+                // Ensure ReportingPeriod exists for the transaction year (or current year)
+                $this->ensureReportingPeriodExists($entity, $transactionDate);
                 // Ensure exchange rate exists for the entity's currency
                 $this->ensureExchangeRateExists($entity, $entity->currency_id);
 
@@ -1166,8 +1198,8 @@ class IfrsAdapter
             // Create exchange rate for the entity's currency (required by IFRS package)
             $this->ensureExchangeRateExists($entity, $currencyId);
 
-            // Create ReportingPeriod for current year
-            $this->ensureReportingPeriodExists($entity);
+            // Create ReportingPeriod for the transaction year (or current year)
+            $this->ensureReportingPeriodExists($entity, $transactionDate);
 
             return $entity;
         } catch (\Exception $e) {
@@ -1182,11 +1214,16 @@ class IfrsAdapter
     }
 
     /**
-     * Ensure a ReportingPeriod exists for the entity for the current year
+     * Ensure a ReportingPeriod exists for the entity for the given year
+     *
+     * @param  string|null  $transactionDate  Date to derive the year from (defaults to now)
      */
-    protected function ensureReportingPeriodExists(Entity $entity): void
+    protected function ensureReportingPeriodExists(Entity $entity, ?string $transactionDate = null): void
     {
-        $currentYear = Carbon::now()->year;
+        $currentYear = $transactionDate
+            ? Carbon::parse($transactionDate)->year
+            : Carbon::now()->year;
+        // CLAUDE-CHECKPOINT: ensureReportingPeriodExists now accepts transactionDate parameter
 
         // Use withoutGlobalScope to bypass EntityScope since we're explicitly filtering by entity_id
         // This avoids the Auth::user()->entity->id null error in multi-tenant setup
@@ -1545,11 +1582,26 @@ class IfrsAdapter
             return;
         }
 
+        // Period lock enforcement
+        $periodLockService = app(PeriodLockService::class);
+        if ($periodLockService->isDateLocked($expense->company_id, $expense->expense_date)) {
+            Log::warning('Attempted to post to locked period', [
+                'company_id' => $expense->company_id,
+                'date' => $expense->expense_date,
+                'type' => 'expense',
+            ]);
+            throw new PeriodLockedException(
+                "Cannot post to locked period: {$expense->expense_date}",
+                'period'
+            );
+        }
+        // CLAUDE-CHECKPOINT: Period lock enforcement for postExpense
+
         try {
             DB::beginTransaction();
 
             // Get or create IFRS entity for company
-            $entity = $this->getOrCreateEntityForCompany($expense->company);
+            $entity = $this->getOrCreateEntityForCompany($expense->company, $expense->expense_date);
             if (! $entity) {
                 throw new \Exception('Failed to get or create IFRS Entity for company');
             }
@@ -2614,11 +2666,26 @@ class IfrsAdapter
             return;
         }
 
+        // Period lock enforcement
+        $periodLockService = app(PeriodLockService::class);
+        if ($periodLockService->isDateLocked($bill->company_id, $bill->bill_date)) {
+            Log::warning('Attempted to post to locked period', [
+                'company_id' => $bill->company_id,
+                'date' => $bill->bill_date,
+                'type' => 'bill',
+            ]);
+            throw new PeriodLockedException(
+                "Cannot post to locked period: {$bill->bill_date}",
+                'period'
+            );
+        }
+        // CLAUDE-CHECKPOINT: Period lock enforcement for postBill
+
         try {
             DB::beginTransaction();
 
             // Get or create IFRS entity for company
-            $entity = $this->getOrCreateEntityForCompany($bill->company);
+            $entity = $this->getOrCreateEntityForCompany($bill->company, $bill->bill_date);
             if (! $entity) {
                 throw new \Exception('Failed to get or create IFRS Entity for company');
             }
@@ -3265,7 +3332,7 @@ class IfrsAdapter
             return null;
         }
 
-        $entity = $this->getOrCreateEntityForCompany($company);
+        $entity = $this->getOrCreateEntityForCompany($company, $entry['date'] ?? null);
         if (! $entity) {
             return null;
         }
@@ -3273,6 +3340,25 @@ class IfrsAdapter
         $this->setUserEntityContext($entity);
 
         $currencyId = $this->getCurrencyId($company->id);
+
+        // Get default VAT (0% Exempt) for line items — required by ifrs_line_items.vat_id NOT NULL
+        $defaultVatId = null;
+        if (Schema::hasColumn('ifrs_line_items', 'vat_id')) {
+            $defaultVatId = DB::table('ifrs_vats')
+                ->where('entity_id', $entity->id)
+                ->where('rate', 0)
+                ->value('id');
+            if (!$defaultVatId) {
+                $defaultVatId = DB::table('ifrs_vats')->insertGetId([
+                    'name' => 'Exempt',
+                    'code' => 'EX',
+                    'rate' => 0,
+                    'entity_id' => $entity->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
 
         // Resolve all accounts
         $lineItemsData = [];
@@ -3285,6 +3371,24 @@ class IfrsAdapter
                 'counterparty_name' => $item['counterparty_name'] ?? null,
             ];
         }
+
+        // Validate debits equal credits before posting
+        $totalDebits = 0;
+        $totalCredits = 0;
+        foreach ($lineItemsData as $item) {
+            if (!empty($item['credited'])) {
+                $totalCredits += abs($item['amount']);
+            } else {
+                $totalDebits += abs($item['amount']);
+            }
+        }
+
+        if (abs($totalDebits - $totalCredits) > 0.01) {
+            throw new \InvalidArgumentException(
+                "Unbalanced journal entry: debits ({$totalDebits}) != credits ({$totalCredits})"
+            );
+        }
+        // CLAUDE-CHECKPOINT: Journal entry balance validation
 
         // Compound mode with ALL items as line items.
         // The main account is required by IFRS package but set to amount=0
@@ -3316,6 +3420,9 @@ class IfrsAdapter
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
+            if ($defaultVatId) {
+                $insertData['vat_id'] = $defaultVatId;
+            }
             if (!empty($item['counterparty_name'])) {
                 $insertData['counterparty_name'] = $item['counterparty_name'];
             }

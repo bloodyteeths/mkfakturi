@@ -138,11 +138,15 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBillsStore } from '@/scripts/admin/stores/bills'
 import { useExpenseStore } from '@/scripts/admin/stores/expense'
+import { useDialogStore } from '@/scripts/stores/dialog'
+import { useNotificationStore } from '@/scripts/stores/notification'
 
 const route = useRoute()
 const { t } = useI18n()
 const billsStore = useBillsStore()
 const expenseStore = useExpenseStore()
+const dialogStore = useDialogStore()
+const notificationStore = useNotificationStore()
 
 const billId = computed(() => route.params.id)
 const editingPayment = ref(false)
@@ -197,11 +201,30 @@ function editPayment(payment) {
   hydratePaymentForm(payment)
 }
 
-function removePayment(paymentId) {
+async function removePayment(paymentId) {
+  const confirmed = await dialogStore.openDialog({
+    title: t('general.are_you_sure'),
+    message: t('bills.confirm_delete_payment', 'Are you sure you want to delete this payment?'),
+    yesLabel: t('general.ok'),
+    noLabel: t('general.cancel'),
+    variant: 'danger',
+    hideNoButton: false,
+    size: 'lg',
+  })
+
+  if (!confirmed) return
+
   billsStore.deleteBillPayment(billId.value, paymentId).then(() => {
     billsStore.fetchBill(billId.value)
+    billsStore.fetchBillPayments(billId.value)
+  }).catch((error) => {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error?.response?.data?.message || t('bills.payment_delete_failed', 'Failed to delete payment'),
+    })
   })
 }
+// CLAUDE-CHECKPOINT
 
 function submitPayment() {
   const payload = {
@@ -220,14 +243,26 @@ function submitPayment() {
         billsStore.fetchBill(billId.value)
         resetForm()
       })
+      .catch((error) => {
+        notificationStore.showNotification({
+          type: 'error',
+          message: error?.response?.data?.message || t('bills.payment_update_failed', 'Failed to update payment'),
+        })
+      })
   } else {
     billsStore.createBillPayment(billId.value, payload).then(() => {
       billsStore.fetchBillPayments(billId.value)
       billsStore.fetchBill(billId.value)
       resetForm()
+    }).catch((error) => {
+      notificationStore.showNotification({
+        type: 'error',
+        message: error?.response?.data?.message || t('bills.payment_create_failed', 'Failed to create payment'),
+      })
     })
   }
 }
+// CLAUDE-CHECKPOINT
 
 onMounted(() => {
   expenseStore.fetchPaymentModes()

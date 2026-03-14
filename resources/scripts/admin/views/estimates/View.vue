@@ -267,7 +267,7 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { debounce } from 'lodash'
 
@@ -422,19 +422,33 @@ function scrollToEstimate() {
   }
 }
 
+// Store the scroll handler reference for cleanup
+let scrollHandler = null
+
 function addScrollListener() {
-  estimateListSection.value.addEventListener('scroll', (ev) => {
-    if (
-      ev.target.scrollTop > 0 &&
-      ev.target.scrollTop + ev.target.clientHeight >
-        ev.target.scrollHeight - 200
-    ) {
-      if (currentPageNumber.value < lastPageNumber.value) {
-        loadEstimates(++currentPageNumber.value, true)
+  if (estimateListSection.value && !scrollHandler) {
+    scrollHandler = (ev) => {
+      if (
+        ev.target.scrollTop > 0 &&
+        ev.target.scrollTop + ev.target.clientHeight >
+          ev.target.scrollHeight - 200
+      ) {
+        if (currentPageNumber.value < lastPageNumber.value) {
+          loadEstimates(++currentPageNumber.value, true)
+        }
       }
     }
-  })
+    estimateListSection.value.addEventListener('scroll', scrollHandler)
+  }
 }
+
+// CLAUDE-CHECKPOINT
+onUnmounted(() => {
+  if (estimateListSection.value && scrollHandler) {
+    estimateListSection.value.removeEventListener('scroll', scrollHandler)
+    scrollHandler = null
+  }
+})
 
 async function loadEstimate() {
   isLoadingEstimate.value = true
@@ -518,13 +532,14 @@ async function removeEstimate(id) {
 }
 
 function updateSentEstimate() {
-  let pos = estimateList.value.findIndex(
-    (estimate) => estimate.id === estimateData.value.id
+  const estimate = estimateList.value.find(
+    (est) => est.id === estimateData.value.id
   )
 
-  if (estimateList.value[pos]) {
-    estimateList.value[pos].status = 'SENT'
+  if (estimate) {
+    estimate.status = 'SENT'
     estimateData.value.status = 'SENT'
   }
 }
+// CLAUDE-CHECKPOINT
 </script>

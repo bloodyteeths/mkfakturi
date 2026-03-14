@@ -33,6 +33,12 @@ class SyncBankTransactions implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $timeout = 600;  // 10 minutes (accounts for sleep delays)
+
+    public $tries = 3;
+
+    public $backoff = [60, 300];
+
     /**
      * The company to sync transactions for
      */
@@ -89,6 +95,7 @@ class SyncBankTransactions implements ShouldQueue
                 ]);
 
                 // Rate limiting: Wait 4 seconds between accounts (for Stopanska)
+                // TODO: Refactor to dispatch individual jobs per account with staggered delays
                 if ($bankAccount->bank_code === 'stopanska') {
                     sleep(4);
                 }
@@ -272,5 +279,14 @@ class SyncBankTransactions implements ShouldQueue
             return Carbon::now();
         }
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Log::error('Bank sync failed', [
+            'company_id' => $this->company->id ?? null,
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT
 

@@ -15,6 +15,12 @@ class GenerateEstimatePdfJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
+    public $timeout = 300;  // 5 minutes
+
+    public $tries = 3;
+
+    public $backoff = [30, 60, 120];
+
     public $estimate;
 
     public $deleteExistingFile;
@@ -39,4 +45,14 @@ class GenerateEstimatePdfJob implements ShouldQueue
 
         return 0;
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Log::error('PDF generation failed', [
+            'job' => static::class,
+            'id' => $this->estimate->id ?? null,
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT
