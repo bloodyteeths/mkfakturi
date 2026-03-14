@@ -1290,6 +1290,12 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/extract-invoice', [\App\Http\Controllers\V1\Admin\AiDocumentController::class, 'extractInvoice']);
                 Route::get('/monthly-trends', [\App\Http\Controllers\V1\Admin\AiDocumentController::class, 'monthlyTrends']);
 
+                // Natural Language Assistant (requires Starter+ via ai.feature middleware)
+                Route::post('/assistant', [\App\Http\Controllers\V1\Admin\AiAssistantController::class, 'process'])
+                    ->middleware('ai.feature:nl_assistant');
+                Route::get('/drafts/{id}', [\App\Http\Controllers\V1\Admin\AiAssistantController::class, 'getDraft']);
+                Route::post('/drafts/{id}/use', [\App\Http\Controllers\V1\Admin\AiAssistantController::class, 'useDraft']);
+
             });
 
             // Stock Management Module (Facturino)

@@ -33,7 +33,7 @@
               :searchable="false"
               label="label"
               value-prop="value"
-              class="w-40"
+              class="w-48"
             />
           </BaseInputGroup>
           <BaseInputGroup :label="t('scenario')">
@@ -43,18 +43,26 @@
               :searchable="false"
               label="label"
               value-prop="value"
-              class="w-40"
+              class="w-52"
             />
           </BaseInputGroup>
         </div>
       </div>
 
+      <!-- Loading -->
+      <div v-if="isLoading" class="flex items-center justify-center py-12">
+        <svg class="animate-spin h-8 w-8 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+      </div>
+
       <!-- Budgets List -->
-      <div v-if="budgets.length === 0 && !isLoading" class="text-center py-12 bg-white rounded-lg shadow">
+      <div v-else-if="budgets.length === 0" class="text-center py-12 bg-white rounded-lg shadow">
         <p class="text-sm text-gray-500">{{ $t('general.no_data') }}</p>
       </div>
 
-      <div class="grid grid-cols-1 gap-4">
+      <div v-if="!isLoading && budgets.length > 0" class="grid grid-cols-1 gap-4">
         <div
           v-for="budget in budgets"
           :key="budget.id"
@@ -82,19 +90,19 @@
           </div>
 
           <!-- Budget vs Actual mini-bar (if comparison loaded) -->
-          <div v-if="budget._comparison" class="mt-3 grid grid-cols-3 gap-4">
+          <div v-if="budget._summary" class="mt-3 grid grid-cols-3 gap-4">
             <div>
               <p class="text-xs text-gray-500">{{ t('budgeted') }}</p>
-              <p class="text-sm font-medium">{{ formatNumber(budget._comparison.total_budget) }}</p>
+              <p class="text-sm font-medium">{{ formatNumber(budget._summary.total_budgeted) }}</p>
             </div>
             <div>
               <p class="text-xs text-gray-500">{{ t('actual') }}</p>
-              <p class="text-sm font-medium">{{ formatNumber(budget._comparison.total_actual) }}</p>
+              <p class="text-sm font-medium">{{ formatNumber(budget._summary.total_actual) }}</p>
             </div>
             <div>
               <p class="text-xs text-gray-500">{{ t('variance') }}</p>
-              <p :class="budget._comparison.variance >= 0 ? 'text-green-600' : 'text-red-600'" class="text-sm font-medium">
-                {{ formatNumber(budget._comparison.variance) }}
+              <p :class="budget._summary.total_variance >= 0 ? 'text-green-600' : 'text-red-600'" class="text-sm font-medium">
+                {{ formatNumber(budget._summary.total_variance) }}
               </p>
             </div>
           </div>
@@ -102,25 +110,66 @@
       </div>
 
       <!-- Budget Detail Modal -->
-      <BaseModal :show="showDetail" @close="showDetail = false" size="xl">
+      <BaseModal :show="showDetail" @close="closeDetail" size="xl">
         <template #header>
           <h3 class="text-lg font-medium">{{ selectedBudget?.name }} — {{ t('vs_actual') }}</h3>
         </template>
-        <div v-if="budgetDetail">
+        <div v-if="detailLoading" class="flex items-center justify-center py-12">
+          <svg class="animate-spin h-8 w-8 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        </div>
+        <div v-else-if="budgetDetail">
+          <!-- Status & Actions -->
+          <div class="flex items-center justify-between mb-4">
+            <span :class="statusBadge(selectedBudget?.status)" class="inline-flex items-center px-2.5 py-1 rounded text-sm font-medium">
+              {{ statusLabel(selectedBudget?.status) }}
+            </span>
+            <div class="flex items-center gap-2">
+              <BaseButton
+                v-if="selectedBudget?.status === 'draft'"
+                variant="primary"
+                size="sm"
+                @click="approveBudget(selectedBudget)"
+              >
+                {{ t('approve') }}
+              </BaseButton>
+              <BaseButton
+                v-if="selectedBudget?.status === 'approved'"
+                variant="primary-outline"
+                size="sm"
+                @click="lockBudget(selectedBudget)"
+              >
+                {{ t('lock') }}
+              </BaseButton>
+              <BaseButton
+                v-if="selectedBudget?.status !== 'locked'"
+                variant="danger"
+                size="sm"
+                @click="deleteBudget(selectedBudget)"
+              >
+                {{ t('delete') }}
+              </BaseButton>
+            </div>
+          </div>
+
           <!-- Variance Summary -->
           <div v-if="budgetDetail.summary" class="mb-6">
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div class="bg-green-50 rounded p-3">
                 <p class="text-xs text-green-600 uppercase">{{ t('under_budget') }}</p>
-                <div v-for="item in budgetDetail.summary.under_budget" :key="item.type" class="text-sm text-green-800">
-                  {{ item.type }}: {{ formatNumber(Math.abs(item.variance)) }}
+                <div v-for="item in budgetDetail.summary.top_under_budget" :key="item.account_type" class="text-sm text-green-800">
+                  {{ item.account_type_label }}: {{ formatNumber(Math.abs(item.variance)) }}
                 </div>
+                <p v-if="!budgetDetail.summary.top_under_budget?.length" class="text-sm text-green-600 italic">—</p>
               </div>
               <div class="bg-red-50 rounded p-3">
                 <p class="text-xs text-red-600 uppercase">{{ t('over_budget') }}</p>
-                <div v-for="item in budgetDetail.summary.over_budget" :key="item.type" class="text-sm text-red-800">
-                  {{ item.type }}: {{ formatNumber(Math.abs(item.variance)) }}
+                <div v-for="item in budgetDetail.summary.top_over_budget" :key="item.account_type" class="text-sm text-red-800">
+                  {{ item.account_type_label }}: {{ formatNumber(Math.abs(item.variance)) }}
                 </div>
+                <p v-if="!budgetDetail.summary.top_over_budget?.length" class="text-sm text-red-600 italic">—</p>
               </div>
             </div>
           </div>
@@ -138,10 +187,10 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                <tr v-for="row in budgetDetail.comparison" :key="row.account_type" class="hover:bg-gray-50">
-                  <td class="px-4 py-2 text-sm text-gray-900">{{ row.label || row.account_type }}</td>
-                  <td class="px-4 py-2 text-sm text-right">{{ formatNumber(row.budget_amount) }}</td>
-                  <td class="px-4 py-2 text-sm text-right">{{ formatNumber(row.actual_amount) }}</td>
+                <tr v-for="row in budgetDetail.comparison" :key="row.account_type + row.period_start" class="hover:bg-gray-50">
+                  <td class="px-4 py-2 text-sm text-gray-900">{{ row.account_type_label || row.account_type }}</td>
+                  <td class="px-4 py-2 text-sm text-right">{{ formatNumber(row.budgeted) }}</td>
+                  <td class="px-4 py-2 text-sm text-right">{{ formatNumber(row.actual) }}</td>
                   <td class="px-4 py-2 text-sm text-right" :class="row.variance >= 0 ? 'text-green-600' : 'text-red-600'">
                     {{ formatNumber(row.variance) }}
                   </td>
@@ -153,8 +202,11 @@
             </table>
           </div>
         </div>
+        <div v-else class="text-center py-8 text-sm text-gray-500">
+          {{ t('no_budget_lines') }}
+        </div>
         <template #footer>
-          <BaseButton variant="primary-outline" @click="showDetail = false">{{ $t('general.close') }}</BaseButton>
+          <BaseButton variant="primary-outline" @click="closeDetail">{{ $t('general.close') }}</BaseButton>
         </template>
       </BaseModal>
     </template>
@@ -195,6 +247,7 @@ const selectedCompanyId = ref(null)
 const budgets = ref([])
 const isLoading = ref(false)
 const showDetail = ref(false)
+const detailLoading = ref(false)
 const selectedBudget = ref(null)
 const budgetDetail = ref(null)
 
@@ -278,15 +331,74 @@ async function loadBudgets() {
 async function viewBudget(budget) {
   selectedBudget.value = budget
   showDetail.value = true
+  detailLoading.value = true
+  budgetDetail.value = null
   try {
     const { data } = await axios.get(partnerApi(`/${budget.id}/vs-actual`))
     budgetDetail.value = data.data || null
+    // Also store summary on the budget card for the mini-bar
+    if (data.data?.summary) {
+      budget._summary = data.data.summary
+    }
   } catch (e) {
     notificationStore.showNotification({
       type: 'error',
       message: t('error_loading'),
     })
     budgetDetail.value = null
+  } finally {
+    detailLoading.value = false
+  }
+}
+
+function closeDetail() {
+  showDetail.value = false
+  selectedBudget.value = null
+  budgetDetail.value = null
+}
+
+async function approveBudget(budget) {
+  if (!confirm(t('confirm_approve'))) return
+  try {
+    await axios.post(partnerApi(`/${budget.id}/approve`))
+    notificationStore.showNotification({ type: 'success', message: t('approved') })
+    closeDetail()
+    loadBudgets()
+  } catch (e) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: e.response?.data?.message || t('error_loading'),
+    })
+  }
+}
+
+async function lockBudget(budget) {
+  if (!confirm(t('confirm_lock'))) return
+  try {
+    await axios.post(partnerApi(`/${budget.id}/lock`))
+    notificationStore.showNotification({ type: 'success', message: t('locked') })
+    closeDetail()
+    loadBudgets()
+  } catch (e) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: e.response?.data?.message || t('error_loading'),
+    })
+  }
+}
+
+async function deleteBudget(budget) {
+  if (!confirm(t('confirm_delete'))) return
+  try {
+    await axios.delete(partnerApi(`/${budget.id}`))
+    notificationStore.showNotification({ type: 'success', message: t('delete') })
+    closeDetail()
+    loadBudgets()
+  } catch (e) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: e.response?.data?.message || t('error_loading'),
+    })
   }
 }
 

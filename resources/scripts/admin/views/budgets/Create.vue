@@ -185,7 +185,7 @@
         </div>
         <div class="bg-gray-50 rounded-lg p-3">
           <p class="text-xs text-gray-500">{{ t('period') }}</p>
-          <p class="text-sm font-medium text-gray-900">{{ form.start_date }} - {{ form.end_date }}</p>
+          <p class="text-sm font-medium text-gray-900">{{ formatDate(form.start_date) }} - {{ formatDate(form.end_date) }}</p>
         </div>
         <div class="bg-primary-50 rounded-lg p-3">
           <p class="text-xs text-primary-600">{{ t('total_budgeted') }}</p>
@@ -219,7 +219,7 @@
         </BaseButton>
         <div class="flex space-x-3">
           <BaseButton variant="primary-outline" @click="saveBudget('draft')" :disabled="isSaving">
-            {{ t('draft') }}
+            {{ t('save_draft') }}
           </BaseButton>
           <BaseButton variant="primary" @click="saveBudget('approve')" :disabled="isSaving">
             {{ t('approve') }}
@@ -286,10 +286,10 @@ const accountCategories = [
   { type: 'DIRECT_EXPENSE', label: t('expenses') + ' - ' + accountTypeLabel('DIRECT_EXPENSE') },
   { type: 'OVERHEAD_EXPENSE', label: t('expenses') + ' - ' + accountTypeLabel('OVERHEAD_EXPENSE') },
   { type: 'NON_OPERATING_EXPENSE', label: t('expenses') + ' - ' + accountTypeLabel('NON_OPERATING_EXPENSE') },
-  { type: 'CURRENT_ASSET', label: t('assets') + ' - CURRENT_ASSET' },
-  { type: 'NON_CURRENT_ASSET', label: t('assets') + ' - NON_CURRENT_ASSET' },
-  { type: 'CURRENT_LIABILITY', label: t('liabilities') + ' - CURRENT_LIABILITY' },
-  { type: 'NON_CURRENT_LIABILITY', label: t('liabilities') + ' - NON_CURRENT_LIABILITY' },
+  { type: 'CURRENT_ASSET', label: t('assets') + ' - ' + accountTypeLabel('CURRENT_ASSET') },
+  { type: 'NON_CURRENT_ASSET', label: t('assets') + ' - ' + accountTypeLabel('NON_CURRENT_ASSET') },
+  { type: 'CURRENT_LIABILITY', label: t('liabilities') + ' - ' + accountTypeLabel('CURRENT_LIABILITY') },
+  { type: 'NON_CURRENT_LIABILITY', label: t('liabilities') + ' - ' + accountTypeLabel('NON_CURRENT_LIABILITY') },
 ]
 
 const prefillYears = computed(() => {
@@ -352,7 +352,7 @@ const gridPeriods = computed(() => {
 })
 
 const isStep1Valid = computed(() => {
-  return form.value.name && form.value.start_date && form.value.end_date
+  return form.value.name && form.value.start_date && form.value.end_date && form.value.end_date > form.value.start_date
 })
 
 const grandTotal = computed(() => {
@@ -433,7 +433,7 @@ function scenarioLabel(scenario) {
 async function prefillFromActuals() {
   isPrefilling.value = true
   try {
-    const response = await window.axios.post('/budgets/prefill-from-actuals', {
+    const response = await window.axios.post('/budgets/prefill-actuals', {
       year: prefillYear.value,
       growth_pct: prefillGrowth.value || 0,
     })
@@ -506,6 +506,15 @@ async function saveBudget(action) {
   try {
     const lines = buildLines()
 
+    if (lines.length === 0) {
+      notificationStore.showNotification({
+        type: 'error',
+        message: t('no_budget_lines'),
+      })
+      isSaving.value = false
+      return
+    }
+
     const payload = {
       name: form.value.name,
       period_type: form.value.period_type,
@@ -525,7 +534,7 @@ async function saveBudget(action) {
 
     notificationStore.showNotification({
       type: 'success',
-      message: t('create'),
+      message: t('created_success'),
     })
 
     router.push({ name: 'budgets.index' })

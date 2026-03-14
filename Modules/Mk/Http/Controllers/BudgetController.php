@@ -326,6 +326,7 @@ class BudgetController extends Controller
         $validator = Validator::make($request->all(), [
             'year' => 'required|integer|min:2020|max:2099',
             'growth_pct' => 'nullable|numeric|min:-100|max:1000',
+            'cost_center_id' => 'nullable|integer|exists:cost_centers,id',
         ]);
 
         if ($validator->fails()) {
@@ -335,7 +336,8 @@ class BudgetController extends Controller
         $data = $this->service->prefillFromActuals(
             $companyId,
             (string) $request->input('year'),
-            (float) $request->input('growth_pct', 0)
+            (float) $request->input('growth_pct', 0),
+            $request->input('cost_center_id') ? (int) $request->input('cost_center_id') : null
         );
 
         return response()->json([

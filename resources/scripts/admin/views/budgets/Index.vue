@@ -34,7 +34,7 @@
     </BasePageHeader>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div v-if="!isLoading" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div class="bg-white rounded-lg shadow p-4">
         <p class="text-sm font-medium text-gray-500">{{ t('total_budgets') }}</p>
         <p class="mt-1 text-2xl font-semibold text-gray-900">{{ budgets.length }}</p>
@@ -123,6 +123,14 @@
                 :title="t('vs_actual')"
               >
                 <BaseIcon name="ChartBarIcon" class="h-4 w-4" />
+              </button>
+              <button
+                v-if="budget.status === 'draft'"
+                class="text-primary-600 hover:text-primary-800 mr-2"
+                @click.stop="$router.push({ name: 'budgets.view', params: { id: budget.id } })"
+                :title="t('edit')"
+              >
+                <BaseIcon name="PencilSquareIcon" class="h-4 w-4" />
               </button>
               <button
                 v-if="budget.status === 'draft'"

@@ -29,6 +29,17 @@
             {{ t('lock') }}
           </BaseButton>
 
+          <BaseButton
+            v-if="budget.status !== 'locked'"
+            variant="danger"
+            @click="confirmDelete"
+          >
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="TrashIcon" />
+            </template>
+            {{ t('delete') }}
+          </BaseButton>
+
           <BaseButton variant="primary-outline" @click="$router.push({ name: 'budgets.index' })">
             {{ $t('general.back') }}
           </BaseButton>
@@ -56,6 +67,10 @@
             <p class="text-sm font-medium text-gray-900">
               {{ formatDate(budget.start_date) }} - {{ formatDate(budget.end_date) }}
             </p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">{{ t('period_type') }}</p>
+            <p class="text-sm font-medium text-gray-900">{{ periodTypeLabel(budget.period_type) }}</p>
           </div>
           <div>
             <p class="text-xs text-gray-500">{{ t('scenario') }}</p>
@@ -230,6 +245,15 @@ function accountTypeLabel(type) {
   return translated !== typeKey ? translated : type
 }
 
+function periodTypeLabel(periodType) {
+  const labels = {
+    monthly: t('period_monthly'),
+    quarterly: t('period_quarterly'),
+    yearly: t('period_yearly'),
+  }
+  return labels[periodType] || periodType
+}
+
 // State
 const budget = ref(null)
 const comparison = ref(null)
@@ -359,6 +383,36 @@ function getVarianceClass(line) {
 function barWidth(value, row) {
   const maxVal = Math.max(Math.abs(row.budgeted), Math.abs(row.actual), 1)
   return Math.min(100, (Math.abs(value) / maxVal) * 100)
+}
+
+function confirmDelete() {
+  dialogStore
+    .openDialog({
+      title: t('delete'),
+      message: t('confirm_delete') || 'Are you sure you want to delete this budget?',
+      yesLabel: $t('general.ok'),
+      noLabel: $t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        try {
+          await window.axios.delete(`/budgets/${budget.value.id}`)
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('deleted_success'),
+          })
+          router.push({ name: 'budgets.index' })
+        } catch (error) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.error || t('error_loading'),
+          })
+        }
+      }
+    })
 }
 
 function confirmApprove() {

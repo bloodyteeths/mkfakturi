@@ -208,7 +208,7 @@ class BudgetService
      *
      * @return array Array of budget line structures
      */
-    public function prefillFromActuals(int $companyId, string $year, ?float $growthPct = 0): array
+    public function prefillFromActuals(int $companyId, string $year, ?float $growthPct = 0, ?int $costCenterId = null): array
     {
         $entityId = $companyId; // entity_id = company_id in ifrs_ledgers
 
@@ -219,6 +219,13 @@ class BudgetService
         } else {
             $monthExpr = "MONTH(l.posting_date)";
             $yearFilter = "YEAR(l.posting_date) = ?";
+        }
+
+        $costCenterFilter = '';
+        $params = [$entityId, (string) $year];
+        if ($costCenterId) {
+            $costCenterFilter = 'AND l.cost_center_id = ?';
+            $params[] = $costCenterId;
         }
 
         $rows = DB::select("
@@ -235,11 +242,12 @@ class BudgetService
             JOIN ifrs_accounts a ON a.id = l.post_account AND a.entity_id = l.entity_id
             WHERE l.entity_id = ?
               AND {$yearFilter}
+              {$costCenterFilter}
               AND l.deleted_at IS NULL
               AND a.deleted_at IS NULL
             GROUP BY a.account_type, {$monthExpr}
             ORDER BY a.account_type, {$monthExpr}
-        ", [$entityId, (string) $year]);
+        ", $params);
 
         $multiplier = 1 + (($growthPct ?? 0) / 100);
         $lines = [];
@@ -303,7 +311,14 @@ class BudgetService
 
             $budgeted = $lines->sum('amount');
 
-            // Query actual from ledger
+            // Query actual from ledger, filtering by cost center if budget has one
+            $costCenterFilter = '';
+            $queryParams = [$entityId, $accountType, $periodStart, $periodEnd];
+            if ($budget->cost_center_id) {
+                $costCenterFilter = 'AND l.cost_center_id = ?';
+                $queryParams[] = $budget->cost_center_id;
+            }
+
             $actuals = DB::select("
                 SELECT
                     SUM(
@@ -318,9 +333,10 @@ class BudgetService
                   AND a.account_type = ?
                   AND l.posting_date >= ?
                   AND l.posting_date <= ?
+                  {$costCenterFilter}
                   AND l.deleted_at IS NULL
                   AND a.deleted_at IS NULL
-            ", [$entityId, $accountType, $periodStart, $periodEnd]);
+            ", $queryParams);
 
             $row = $actuals[0] ?? null;
             $isRevenue = str_contains($accountType, 'REVENUE');
