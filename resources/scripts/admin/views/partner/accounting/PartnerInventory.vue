@@ -18,7 +18,7 @@
           v-model="selectedCompanyId"
           :options="companies"
           :searchable="true"
-          track-by="name"
+          track-by="id"
           label="name"
           value-prop="id"
           :placeholder="$t('partner.select_company_placeholder')"
@@ -139,7 +139,7 @@
                 :searchable="true"
                 value-prop="item_id"
                 label="name"
-                track-by="name"
+                track-by="item_id"
                 :placeholder="$t('stock.select_item', 'Select item...')"
               />
             </BaseInputGroup>
@@ -284,7 +284,7 @@
           </div>
         </div>
 
-        <div v-else-if="isLoadingValuation" class="flex justify-center py-8">
+        <div v-else-if="isLoading" class="flex justify-center py-8">
           <BaseContentPlaceholders>
             <BaseContentPlaceholdersBox :rounded="true" class="w-full h-64" />
           </BaseContentPlaceholders>
@@ -316,7 +316,6 @@ const selectedCompanyId = ref(null)
 const activeTab = ref('inventory')
 const isLoading = ref(false)
 const isLoadingCard = ref(false)
-const isLoadingValuation = ref(false)
 const hasSearched = ref(false)
 
 // Inventory tab
@@ -343,7 +342,12 @@ const totalQuantity = computed(() => inventoryData.value.reduce((sum, item) => s
 const totalValue = computed(() => inventoryData.value.reduce((sum, item) => sum + (item.total_value || 0), 0))
 
 onMounted(async () => {
-  await consoleStore.fetchCompanies()
+  try {
+    await consoleStore.fetchCompanies()
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('partner.accounting.failed_to_load_companies', 'Failed to load companies') })
+    return
+  }
   if (companies.value.length === 1) {
     selectedCompanyId.value = companies.value[0].id
     onCompanyChange()
@@ -358,7 +362,6 @@ function onCompanyChange() {
   hasSearched.value = false
   if (selectedCompanyId.value) {
     loadInventory()
-    loadValuation()
   }
 }
 
@@ -383,38 +386,30 @@ async function loadInventory() {
       unit_cost: entry.weighted_average_cost ?? entry.unit_cost ?? 0,
       total_value: entry.total_value ?? 0,
     }))
+    buildValuationFromInventory()
   } catch (error) {
-    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to load inventory' })
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('stock.failed_to_load_inventory', 'Failed to load inventory') })
   } finally {
     isLoading.value = false
   }
 }
 
-async function loadValuation() {
-  if (!selectedCompanyId.value) return
-  isLoadingValuation.value = true
-  try {
-    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/stock-reports/valuation`, {
-      params: { group_by: 'item' },
-    })
-    const data = response.data.data || response.data
-    // Normalize to the shape the template expects
-    valuationData.value = {
-      items: (data.items || []).map(entry => ({
-        item_id: entry.item?.id || entry.id,
-        name: entry.item?.name || entry.name,
-        sku: entry.item?.sku || entry.sku,
-        quantity: entry.total_quantity ?? entry.quantity ?? 0,
-        unit_cost: entry.weighted_average_cost ?? entry.unit_cost ?? 0,
-        total_value: entry.total_value ?? 0,
-      })),
-      total_quantity: data.grand_total?.quantity ?? 0,
-      total_value: data.grand_total?.value ?? 0,
-    }
-  } catch (error) {
-    console.error('Failed to load valuation:', error)
-  } finally {
-    isLoadingValuation.value = false
+function buildValuationFromInventory() {
+  if (!inventoryData.value.length) {
+    valuationData.value = null
+    return
+  }
+  valuationData.value = {
+    items: inventoryData.value.map(item => ({
+      item_id: item.item_id,
+      name: item.name,
+      sku: item.sku,
+      quantity: item.quantity,
+      unit_cost: item.unit_cost,
+      total_value: item.total_value,
+    })),
+    total_quantity: totalQuantity.value,
+    total_value: totalValue.value,
   }
 }
 
@@ -461,27 +456,19 @@ function sourceClass(sourceType) {
     adjustment: 'bg-amber-100 text-amber-700',
     transfer_in: 'bg-blue-100 text-blue-700',
     transfer_out: 'bg-purple-100 text-purple-700',
+    inventory_document: 'bg-teal-100 text-teal-700',
   }
   return map[sourceType] || 'bg-gray-100 text-gray-700'
 }
 
 function sourceLabel(sourceType) {
-  const map = {
-    initial: 'Почетна',
-    bill: 'Набавка',
-    bill_item: 'Набавка',
-    invoice: 'Продажба',
-    invoice_item: 'Продажба',
-    adjustment: 'Корекција',
-    transfer_in: 'Прием',
-    transfer_out: 'Издавање',
-  }
-  return map[sourceType] || sourceType
+  const normalized = sourceType === 'bill_item' ? 'bill' : sourceType === 'invoice_item' ? 'invoice' : sourceType
+  return t(`stock.source_types.${normalized}`, sourceType)
 }
 
 function exportCsv() {
   if (!inventoryData.value.length) return
-  const headers = ['Артикл', 'SKU', 'Количина', 'Ед. цена', 'Вкупна вредност']
+  const headers = [t('items.name'), 'SKU', t('stock.quantity'), t('stock.unit_cost'), t('stock.total_value')]
   const rows = inventoryData.value.map(item => [
     item.name, item.sku || '', item.quantity,
     item.unit_cost ? (item.unit_cost / 100).toFixed(2) : '0', item.total_value ? (item.total_value / 100).toFixed(2) : '0',
@@ -491,7 +478,7 @@ function exportCsv() {
 
 function exportCardCsv() {
   if (!itemCardData.value?.movements?.length) return
-  const headers = ['Датум', 'Извор', 'Опис', 'Влез', 'Излез', 'Ед. цена', 'Салдо кол.', 'Салдо вредност']
+  const headers = [t('general.date'), t('stock.source'), t('general.description'), t('stock.qty_in'), t('stock.qty_out'), t('stock.unit_cost'), t('stock.balance_qty'), t('stock.balance_value')]
   const rows = itemCardData.value.movements.map(m => [
     m.date, m.source_type, m.description || m.reference || '',
     m.quantity > 0 ? m.quantity : '', m.quantity < 0 ? Math.abs(m.quantity) : '',
@@ -503,7 +490,7 @@ function exportCardCsv() {
 
 function exportValuationCsv() {
   if (!valuationData.value?.items?.length) return
-  const headers = ['Артикл', 'SKU', 'Количина', 'Ед. цена', 'Вкупна вредност']
+  const headers = [t('items.name'), 'SKU', t('stock.quantity'), t('stock.unit_cost'), t('stock.total_value')]
   const rows = valuationData.value.items.map(item => [
     item.name, item.sku || '', item.quantity,
     item.unit_cost ? (item.unit_cost / 100).toFixed(2) : '0', item.total_value ? (item.total_value / 100).toFixed(2) : '0',
