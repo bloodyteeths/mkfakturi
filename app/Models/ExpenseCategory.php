@@ -33,7 +33,7 @@ class ExpenseCategory extends Model
 
     public function getFormattedCreatedAtAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }

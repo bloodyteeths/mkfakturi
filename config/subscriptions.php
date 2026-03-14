@@ -58,7 +58,7 @@ return [
                 'custom_fields' => 1,
                 'recurring_invoices_active' => 0,
                 'estimates_per_month' => 1,
-                'ai_queries_per_month' => 2,
+                'ai_queries_per_month' => 10,
                 'payroll_employees' => 0,     // Not available on free
                 'bills_per_month' => 1,
                 'suppliers_total' => 3,
@@ -104,7 +104,7 @@ return [
                 'custom_fields' => 3,
                 'recurring_invoices_active' => 3,
                 'estimates_per_month' => 10,
-                'ai_queries_per_month' => 5,
+                'ai_queries_per_month' => 25,
                 'payroll_employees' => 0,     // Payroll not available on starter
                 'bills_per_month' => 10,
                 'suppliers_total' => 10,
@@ -150,7 +150,7 @@ return [
                 'custom_fields' => 15,
                 'recurring_invoices_active' => 20,
                 'estimates_per_month' => null,
-                'ai_queries_per_month' => 25,
+                'ai_queries_per_month' => 75,
                 'payroll_employees' => 0,     // Payroll not available on standard
                 'bills_per_month' => 100,
                 'suppliers_total' => 100,
@@ -196,7 +196,7 @@ return [
                 'estimates_per_month' => null,
                 'bank_accounts' => 5,
                 'api_requests_per_day' => 1000,
-                'ai_queries_per_month' => 50,
+                'ai_queries_per_month' => 200,
                 'payroll_employees' => 50,
                 'bills_per_month' => 500,
                 'suppliers_total' => 500,
@@ -244,7 +244,7 @@ return [
                 'custom_fields' => null,
                 'recurring_invoices_active' => null,
                 'estimates_per_month' => null,
-                'ai_queries_per_month' => 100,
+                'ai_queries_per_month' => 500,
                 'bank_accounts' => null,
                 'api_requests_per_day' => null,
                 'payroll_employees' => null,
@@ -302,7 +302,7 @@ return [
                 'custom_fields' => 3,
                 'recurring_invoices_active' => 3,
                 'estimates_per_month' => 5,
-                'ai_queries_per_month' => 5,
+                'ai_queries_per_month' => 25,
                 'payroll_employees' => 0,
                 'bills_per_month' => 20,
                 'suppliers_total' => 30,
@@ -379,6 +379,11 @@ return [
         'ai_suggestions' => 'free',           // Preview AI for all (limited on free)
         'ai_advanced' => 'business',          // Advanced AI at Business+
 
+        // AI feature-level gating (used by ai.feature middleware)
+        'ai_reconciliation_suggest' => 'standard',  // AI matching suggestions
+        'ai_reconciliation_categorize' => 'business', // AI transaction categorization
+        'nl_assistant' => 'starter',                 // Natural language accounting assistant
+
         // E-faktura requires Starter+ (key upgrade driver)
         'efaktura_sending' => 'starter',      // 5/month on Starter, unlimited on Standard+
         'payroll' => 'business',              // Payroll only on Business+ (50 employees)
@@ -393,6 +398,25 @@ return [
     | After trial ends, they downgrade to Free unless they subscribe.
     |
     */
+    /*
+    |--------------------------------------------------------------------------
+    | AI Feature Access per Tier
+    |--------------------------------------------------------------------------
+    |
+    | Defines which AI features are available at each tier.
+    | Used by the 'ai.feature' middleware via UsageLimitService::canUseAiFeature().
+    | Partners and super admins bypass all restrictions.
+    |
+    */
+    'ai_features' => [
+        'free' => ['document_classify'],
+        'accountant_basic' => ['document_classify', 'document_extract'],
+        'starter' => ['document_classify', 'document_extract', 'nl_assistant'],
+        'standard' => ['document_classify', 'document_extract', 'document_confirm', 'ai_reconciliation_suggest', 'nl_assistant'],
+        'business' => ['document_classify', 'document_extract', 'document_confirm', 'ai_reconciliation_suggest', 'ai_reconciliation_categorize', 'nl_assistant'],
+        'max' => ['*'], // All AI features
+    ],
+
     'trial' => [
         'enabled' => true,
         'duration_days' => 14,
@@ -500,11 +524,11 @@ return [
             'business' => 'You\'ve reached your user limit (5 users). Upgrade to Max for unlimited users.',
         ],
         'ai_suggestions' => [
-            'free' => 'You\'ve reached your AI query limit (2/month). Upgrade to Starter for 5 AI queries per month.',
-            'starter' => 'You\'ve reached your AI query limit (5/month). Upgrade to Standard for 25 AI queries per month.',
-            'standard' => 'You\'ve reached your AI query limit (25/month). Upgrade to Business for 50 AI queries per month.',
-            'business' => 'You\'ve reached your AI query limit (50/month). Upgrade to Max for 100 AI queries per month.',
-            'max' => 'You\'ve reached your AI query limit (100/month). Contact support for higher limits.',
+            'free' => 'You\'ve reached your AI query limit (10/month). Upgrade to Starter for 25 AI queries per month.',
+            'starter' => 'You\'ve reached your AI query limit (25/month). Upgrade to Standard for 75 AI queries per month.',
+            'standard' => 'You\'ve reached your AI query limit (75/month). Upgrade to Business for 200 AI queries per month.',
+            'business' => 'You\'ve reached your AI query limit (200/month). Upgrade to Max for 500 AI queries per month.',
+            'max' => 'You\'ve reached your AI query limit (500/month). Contact support for higher limits.',
         ],
         'payroll' => 'Payroll management requires a Business plan. Upgrade to Business for payroll with up to 50 employees.',
         'payroll_employees' => [

@@ -1008,6 +1008,29 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/undo', [\App\Http\Controllers\V1\Admin\Accounting\YearEndClosingController::class, 'undo']);
             });
 
+            // Onboarding Wizard
+            // ----------------------------------
+            Route::prefix('onboarding')->group(function () {
+                Route::get('/progress', [\App\Http\Controllers\V1\Admin\OnboardingController::class, 'progress']);
+                Route::post('/dismiss', [\App\Http\Controllers\V1\Admin\OnboardingController::class, 'dismiss']);
+                Route::post('/source', [\App\Http\Controllers\V1\Admin\OnboardingController::class, 'source']);
+                Route::post('/analyze-bank', [\App\Http\Controllers\V1\Admin\OnboardingController::class, 'analyzeBank']);
+                Route::post('/confirm-entities', [\App\Http\Controllers\V1\Admin\OnboardingController::class, 'confirmEntities']);
+                Route::post('/complete', [\App\Http\Controllers\V1\Admin\OnboardingController::class, 'complete']);
+                Route::get('/migration-progress', [\App\Http\Controllers\V1\Admin\OnboardingController::class, 'migrationProgress']);
+
+                // Journal import for company owners (mirrors partner endpoint, uses company header)
+                Route::post('/journal/preview', function (\Illuminate\Http\Request $request) {
+                    $companyId = (int) $request->header('company');
+                    return app(\App\Http\Controllers\V1\Partner\PartnerJournalImportController::class)->preview($request, $companyId);
+                });
+                Route::post('/journal/import', function (\Illuminate\Http\Request $request) {
+                    $companyId = (int) $request->header('company');
+                    return app(\App\Http\Controllers\V1\Partner\PartnerJournalImportController::class)->import($request, $companyId);
+                });
+                Route::get('/journal/formats', [\App\Http\Controllers\V1\Partner\PartnerJournalImportController::class, 'formats']);
+            });
+
             // Client Document Upload Portal (P8-01) + AI Document Hub
             // ----------------------------------
             Route::prefix('client-documents')->group(function () {
@@ -1637,6 +1660,12 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::post('/import-confirm', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'importConfirm'])->middleware('throttle:strict');
         Route::get('/{companyId}', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'show']);
         Route::delete('/{companyId}', [\Modules\Mk\Partner\Controllers\PortfolioCompanyController::class, 'destroy'])->middleware('throttle:strict');
+    });
+
+    // Partner Onboarding
+    Route::prefix('/onboarding')->group(function () {
+        Route::get('/progress', [\App\Http\Controllers\V1\Partner\PartnerOnboardingController::class, 'progress']);
+        Route::post('/complete', [\App\Http\Controllers\V1\Partner\PartnerOnboardingController::class, 'complete']);
     });
 
     Route::get('/payouts', [\Modules\Mk\Partner\Controllers\PartnerPayoutsController::class, 'index']);

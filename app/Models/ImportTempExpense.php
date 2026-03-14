@@ -76,7 +76,7 @@ class ImportTempExpense extends Model
     // Accessors
     public function getFormattedCreatedAtAttribute()
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
@@ -86,7 +86,7 @@ class ImportTempExpense extends Model
         if (! $this->expense_date) {
             return null;
         }
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->expense_date)->translatedFormat($dateFormat);
     }

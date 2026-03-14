@@ -107,6 +107,9 @@ class Bill extends Model implements HasMedia
      */
     public function getFormattedBillDateAttribute()
     {
+        if (! $this->bill_date) {
+            return null;
+        }
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->bill_date)->translatedFormat($dateFormat);
@@ -452,26 +455,30 @@ class Bill extends Model implements HasMedia
      */
     public static function deleteBills($ids)
     {
-        foreach ($ids as $id) {
-            $bill = self::find($id);
+        return \DB::transaction(function () use ($ids) {
+            foreach ($ids as $id) {
+                $bill = self::find($id);
+                if (!$bill) continue;
 
-            if ($bill->items()->exists()) {
-                $bill->items()->delete();
+                if ($bill->items()->exists()) {
+                    $bill->items()->delete();
+                }
+
+                if ($bill->payments()->exists()) {
+                    $bill->payments()->delete();
+                }
+
+                if ($bill->taxes()->exists()) {
+                    $bill->taxes()->delete();
+                }
+
+                $bill->delete();
             }
 
-            if ($bill->payments()->exists()) {
-                $bill->payments()->delete();
-            }
-
-            if ($bill->taxes()->exists()) {
-                $bill->taxes()->delete();
-            }
-
-            $bill->delete();
-        }
-
-        return true;
+            return true;
+        });
     }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Create bill items with base_* fields and taxes

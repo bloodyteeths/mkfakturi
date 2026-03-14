@@ -84,13 +84,17 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/scripts/admin/stores/user'
+import axios from 'axios'
+
 const { t } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
+
+const stepStatuses = ref({})
 
 const isPartnerOrAccountant = computed(() => {
   const user = userStore.currentUser
@@ -98,6 +102,19 @@ const isPartnerOrAccountant = computed(() => {
   return user.role === 'partner' || user.role === 'super admin' ||
          user.account_type === 'accountant' || user.is_partner
 })
+
+async function fetchMigrationProgress() {
+  try {
+    const { data } = await axios.get('/onboarding/migration-progress')
+    if (data.steps) {
+      stepStatuses.value = data.steps
+    }
+  } catch {
+    // Silently fail — defaults to 'not_started'
+  }
+}
+
+onMounted(fetchMigrationProgress)
 
 // All migration steps — some are partner-only, some are for everyone
 const allSteps = computed(() => [
@@ -110,7 +127,7 @@ const allSteps = computed(() => [
     iconBg: 'bg-blue-100',
     iconColor: 'text-blue-600',
     route: { name: 'imports.wizard' },
-    status: 'not_started',
+    status: stepStatuses.value.customers_suppliers || 'not_started',
     disabled: false,
     partnerOnly: false,
   },
@@ -122,7 +139,7 @@ const allSteps = computed(() => [
     iconBg: 'bg-indigo-100',
     iconColor: 'text-indigo-600',
     route: { name: 'imports.wizard' },
-    status: 'not_started',
+    status: stepStatuses.value.products_services || 'not_started',
     disabled: false,
     partnerOnly: false,
   },
@@ -134,7 +151,7 @@ const allSteps = computed(() => [
     iconBg: 'bg-orange-100',
     iconColor: 'text-orange-600',
     route: { name: 'imports.wizard' },
-    status: 'not_started',
+    status: stepStatuses.value.invoices_payments || 'not_started',
     disabled: false,
     partnerOnly: false,
   },
@@ -147,7 +164,7 @@ const allSteps = computed(() => [
     iconBg: 'bg-purple-100',
     iconColor: 'text-purple-600',
     route: { name: 'partner.accounting.chart-of-accounts' },
-    status: 'not_started',
+    status: stepStatuses.value.chart_of_accounts || 'not_started',
     disabled: false,
     partnerOnly: true,
   },
@@ -159,7 +176,7 @@ const allSteps = computed(() => [
     iconBg: 'bg-green-100',
     iconColor: 'text-green-600',
     route: { name: 'partner.accounting.journal-import' },
-    status: 'not_started',
+    status: stepStatuses.value.journal_entries || 'not_started',
     disabled: false,
     partnerOnly: true,
   },

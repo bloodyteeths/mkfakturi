@@ -31,12 +31,6 @@ return Application::configure(basePath: dirname(__DIR__))
             Route::middleware('api')
                 ->group(base_path('routes/mcp.php'));
 
-            // Debug routes (REMOVE IN PRODUCTION)
-            if (file_exists(base_path('routes/debug.php'))) {
-                Route::middleware('web')
-                    ->group(base_path('routes/debug.php'));
-            }
-
             // Bitrix CRM integration routes
             // - Public unsubscribe routes (with web middleware)
             // - Postmark webhooks (without CSRF)
@@ -109,6 +103,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'redirect-if-unauthenticated' => \App\Http\Middleware\RedirectIfUnauthorized::class,
             'super-admin' => \App\Http\Middleware\SuperAdminMiddleware::class, // AC-08: Super admin only routes
             'tier' => \App\Http\Middleware\CheckSubscriptionTier::class, // FG-01-00: Feature gating
+            'ai.feature' => \App\Http\Middleware\CheckAiFeature::class, // AI feature-level gating
             'view-only' => \App\Http\Middleware\CheckViewOnlyMode::class, // Portfolio: view-only for uncovered companies
             'bitrix.auth' => \Modules\Mk\Bitrix\Middleware\BitrixAuthMiddleware::class, // Bitrix CRM integration
             'clawd.token' => \App\Http\Middleware\VerifyClawdToken::class, // Clawd AI assistant monitoring

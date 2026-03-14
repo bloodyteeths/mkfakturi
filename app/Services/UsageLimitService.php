@@ -303,6 +303,29 @@ class UsageLimitService
     }
 
     /**
+     * Check if company's tier has access to a specific AI feature.
+     *
+     * Uses the 'ai_features' config in config/subscriptions.php.
+     * Wildcard '*' grants access to all features (Max tier).
+     *
+     * @param  Company  $company
+     * @param  string  $feature  AI feature key (e.g., 'ai_reconciliation_suggest', 'nl_assistant')
+     * @return bool
+     */
+    public function canUseAiFeature(Company $company, string $feature): bool
+    {
+        $tier = $this->getCompanyTier($company);
+        $allowedFeatures = config("subscriptions.ai_features.{$tier}", []);
+
+        // Wildcard grants all features
+        if (in_array('*', $allowedFeatures)) {
+            return true;
+        }
+
+        return in_array($feature, $allowedFeatures);
+    }
+
+    /**
      * Reset monthly usage counters (called by scheduled job)
      * This is typically run on the 1st of each month
      *

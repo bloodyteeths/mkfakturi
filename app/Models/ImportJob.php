@@ -115,7 +115,7 @@ class ImportJob extends Model
     // Accessors
     public function getFormattedCreatedAtAttribute()
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
@@ -125,7 +125,7 @@ class ImportJob extends Model
         if (! $this->started_at) {
             return null;
         }
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->started_at)->translatedFormat($dateFormat.' H:i:s');
     }
@@ -135,7 +135,7 @@ class ImportJob extends Model
         if (! $this->completed_at) {
             return null;
         }
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->completed_at)->translatedFormat($dateFormat.' H:i:s');
     }

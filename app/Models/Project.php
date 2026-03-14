@@ -199,7 +199,7 @@ class Project extends Model
      */
     public function getFormattedCreatedAtAttribute(): string
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
@@ -213,7 +213,7 @@ class Project extends Model
             return null;
         }
 
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->start_date)->translatedFormat($dateFormat);
     }
@@ -227,7 +227,7 @@ class Project extends Model
             return null;
         }
 
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->end_date)->translatedFormat($dateFormat);
     }

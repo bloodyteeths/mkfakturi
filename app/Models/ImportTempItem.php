@@ -77,7 +77,7 @@ class ImportTempItem extends Model
     // Accessors
     public function getFormattedCreatedAtAttribute()
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->importJob->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }

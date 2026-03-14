@@ -5,6 +5,9 @@ namespace Modules\Mk\Services;
 use App\Models\BankTransaction;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\Reconciliation;
+use App\Services\Reconciliation\AiMatcherService;
+use App\Services\Reconciliation\AiTransactionCategorizer;
 use App\Services\Reconciliation\MatchingRulesService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -233,10 +236,34 @@ class Matcher
             $this->currentRuleActions = null;
         }
 
+        // Layer 4: AI Categorization — categorize remaining unmatched transactions
+        $totalCategorized = 0;
+        $unmatchedIds = collect($unmatchedTransactions)
+            ->pluck('id')
+            ->diff(collect($matches)->pluck('transaction_id'))
+            ->values();
+
+        if ($unmatchedIds->isNotEmpty()) {
+            $uncategorized = BankTransaction::whereIn('id', $unmatchedIds)
+                ->whereNull('ai_category')
+                ->get();
+
+            if ($uncategorized->isNotEmpty()) {
+                try {
+                    $categorizer = app(AiTransactionCategorizer::class);
+                    $catResults = $categorizer->categorizeBatch($uncategorized);
+                    $totalCategorized = count($catResults);
+                } catch (\Exception $e) {
+                    Log::debug('[Matcher] AI categorization skipped', ['error' => $e->getMessage()]);
+                }
+            }
+        }
+
         Log::info('Transaction matching completed', [
             'company_id' => $this->companyId,
             'total_matched' => $totalMatched,
             'total_ignored' => $totalIgnored,
+            'total_categorized' => $totalCategorized,
             'matches' => $matches,
         ]);
 
@@ -270,26 +297,70 @@ class Matcher
     }
 
     /**
-     * Suggest a match for a transaction without creating a payment
-     * Used for displaying suggested matches in the UI
+     * Suggest a match for a transaction without creating a payment.
+     * Used for displaying suggested matches in the UI.
+     *
+     * Enhanced: includes AI match reason and match_type when AI was used.
      */
     public function suggestMatch($transaction): ?array
     {
+        $this->lastAiResult = null;
         $unpaidInvoices = $this->getUnpaidInvoices();
         $matchedInvoice = $this->findMatchingInvoice($transaction, $unpaidInvoices);
 
         if ($matchedInvoice) {
-            return [
+            $result = [
                 'transaction_id' => $transaction->id,
                 'invoice_id' => $matchedInvoice->id,
                 'amount' => (float) $transaction->amount,
                 'confidence' => $this->calculateMatchConfidence($transaction, $matchedInvoice),
                 'invoice_number' => $matchedInvoice->invoice_number,
                 'invoice_total' => (float) $matchedInvoice->total,
+                'match_type' => Reconciliation::MATCH_TYPE_AUTO,
             ];
+
+            // If AI was used, enrich the result
+            if ($this->lastAiResult && isset($this->lastAiResult['best_match'])) {
+                $aiBest = $this->lastAiResult['best_match'];
+                if ($aiBest['invoice_id'] === $matchedInvoice->id) {
+                    $result['confidence'] = $aiBest['confidence'];
+                    $result['ai_reason'] = $aiBest['reason'] ?? '';
+                    $result['match_type'] = Reconciliation::MATCH_TYPE_AI;
+                    $result['is_split'] = $this->lastAiResult['is_split'] ?? false;
+
+                    // Include all matches if split detected
+                    if ($result['is_split'] && count($this->lastAiResult['matches'] ?? []) > 1) {
+                        $result['split_matches'] = $this->lastAiResult['matches'];
+                    }
+                }
+            }
+
+            return $result;
         }
 
         return null;
+    }
+
+    /**
+     * Categorize an unmatched transaction using AI.
+     *
+     * Layer 4: When no invoice match is found, classify the transaction
+     * into an accounting category (salary, tax, bank_fee, etc.).
+     *
+     * @param  BankTransaction  $transaction
+     * @return array|null  ['category' => string, 'confidence' => float, 'reason' => string]
+     */
+    public function categorizeTransaction(BankTransaction $transaction): ?array
+    {
+        try {
+            $categorizer = app(AiTransactionCategorizer::class);
+
+            return $categorizer->categorize($transaction);
+        } catch (\Exception $e) {
+            Log::debug('[Matcher] AI categorization unavailable', ['error' => $e->getMessage()]);
+
+            return null;
+        }
     }
 
     /**
@@ -324,11 +395,16 @@ class Matcher
      * P0-09: If an 'auto_match' rule is active for this transaction,
      * the confidence threshold is lowered to the rule's configured value
      * (default 0.5 instead of 0.7), and the score is boosted by +0.15.
+     *
+     * AI Enhancement: If deterministic score < 0.9, calls AiMatcherService
+     * to boost confidence via Gemini analysis. AI results are stored as
+     * suggestions — the best match is returned for the same flow.
      */
     protected function findMatchingInvoice($transaction, $invoices): ?Invoice
     {
         $bestMatch = null;
         $bestScore = 0;
+        $bestRawScore = 0; // Track raw score even if below threshold
 
         // P0-09: Determine confidence threshold and score boost from rules
         $minConfidence = 0.7; // Default minimum confidence
@@ -344,13 +420,82 @@ class Matcher
         foreach ($invoices as $invoice) {
             $score = $this->calculateMatchScore($transaction, $invoice) + $scoreBoost;
 
+            // Track the best raw score for AI enhancement
+            if ($score > $bestRawScore) {
+                $bestRawScore = $score;
+            }
+
             if ($score > $bestScore && $score >= $minConfidence) {
                 $bestScore = $score;
                 $bestMatch = $invoice;
             }
         }
 
+        // Layer 3: AI Enhancement — if deterministic score < 0.9, try AI
+        if ($bestScore < 0.9) {
+            $aiResult = $this->tryAiEnhancement($transaction, $invoices, $bestRawScore);
+            if ($aiResult) {
+                $this->lastAiResult = $aiResult;
+
+                // If AI-boosted confidence meets suggest threshold (0.5), use AI result
+                $aiBestMatch = $aiResult['best_match'] ?? null;
+                if ($aiBestMatch && ($aiBestMatch['confidence'] / 100.0) >= $minConfidence) {
+                    $aiInvoice = $invoices->firstWhere('id', $aiBestMatch['invoice_id']);
+                    if ($aiInvoice) {
+                        // Store AI reason on the transaction
+                        $this->storeAiMatchReason($transaction, $aiBestMatch['reason'] ?? '');
+
+                        return $aiInvoice;
+                    }
+                }
+            }
+        }
+
         return $bestMatch;
+    }
+
+    /**
+     * Last AI result from findMatchingInvoice, used by suggestMatch.
+     */
+    protected ?array $lastAiResult = null;
+
+    /**
+     * Try AI enhancement for a transaction.
+     *
+     * @param  object  $transaction
+     * @param  \Illuminate\Support\Collection  $invoices
+     * @param  float  $deterministicScore  Best deterministic score (0-1)
+     * @return array|null AI result with merged confidence
+     */
+    protected function tryAiEnhancement(object $transaction, $invoices, float $deterministicScore): ?array
+    {
+        try {
+            $aiMatcher = app(AiMatcherService::class);
+
+            return $aiMatcher->enhance($transaction, $invoices, $this->companyId, $deterministicScore);
+        } catch (\Exception $e) {
+            Log::debug('[Matcher] AI enhancement unavailable', ['error' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
+    /**
+     * Store AI match reason on the bank transaction.
+     */
+    protected function storeAiMatchReason(object $transaction, string $reason): void
+    {
+        if (empty($reason)) {
+            return;
+        }
+
+        try {
+            DB::table('bank_transactions')
+                ->where('id', $transaction->id)
+                ->update(['ai_match_reason' => $reason]);
+        } catch (\Exception $e) {
+            // Non-critical
+        }
     }
 
     /**

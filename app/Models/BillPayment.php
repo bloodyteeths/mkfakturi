@@ -46,7 +46,7 @@ class BillPayment extends Model
      */
     public function getFormattedPaymentDateAttribute()
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->payment_date)->translatedFormat($dateFormat);
     }
@@ -56,7 +56,7 @@ class BillPayment extends Model
      */
     public function getFormattedCreatedAtAttribute()
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }

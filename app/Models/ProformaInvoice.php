@@ -171,21 +171,21 @@ class ProformaInvoice extends Model
 
     public function getFormattedCreatedAtAttribute(): string
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
 
     public function getFormattedProformaInvoiceDateAttribute(): string
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->proforma_invoice_date)->translatedFormat($dateFormat);
     }
 
     public function getFormattedExpiryDateAttribute(): string
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->expiry_date)->translatedFormat($dateFormat);
     }

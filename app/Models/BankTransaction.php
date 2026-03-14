@@ -58,6 +58,8 @@ class BankTransaction extends Model
         'duplicate_of',
         'fingerprint',
         'external_transaction_id',
+        'ai_category',
+        'ai_match_reason',
     ];
 
     protected $casts = [

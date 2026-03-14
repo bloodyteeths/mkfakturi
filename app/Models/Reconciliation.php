@@ -71,6 +71,8 @@ class Reconciliation extends Model
 
     public const MATCH_TYPE_RULE = 'rule';
 
+    public const MATCH_TYPE_AI = 'ai';
+
     /**
      * Confidence score thresholds (0-100 scale)
      */

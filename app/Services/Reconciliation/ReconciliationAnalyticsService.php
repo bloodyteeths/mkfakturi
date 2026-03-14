@@ -332,6 +332,7 @@ class ReconciliationAnalyticsService
             'reference' => 0,
             'customer' => 0,
             'rule' => 0,
+            'ai' => 0,
         ];
 
         foreach ($reconciliations as $rec) {
@@ -347,7 +348,9 @@ class ReconciliationAnalyticsService
             }
 
             // Fall back to match_type
-            if ($rec->match_type === Reconciliation::MATCH_TYPE_RULE) {
+            if ($rec->match_type === Reconciliation::MATCH_TYPE_AI) {
+                $methods['ai']++;
+            } elseif ($rec->match_type === Reconciliation::MATCH_TYPE_RULE) {
                 $methods['rule']++;
             } elseif ($rec->match_type === Reconciliation::MATCH_TYPE_AUTO) {
                 // Auto matches typically use amount + reference

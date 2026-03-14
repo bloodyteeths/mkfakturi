@@ -62,9 +62,9 @@ class Customer extends Authenticatable implements HasMedia
     public function getFormattedCreatedAtAttribute($value)
     {
         return $this->cacheComputed('formatted_created_at', function () {
-            $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+            $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
-            return Carbon::parse($this->created_at)->translatedFormat($dateFormat ?? 'Y-m-d');
+            return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
         });
     }
 
