@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Понуда - {{ $estimate->estimate_number }}</title>
+    <title>Профактура - {{ $invoice->proforma_invoice_number }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
     <style type="text/css">
@@ -221,15 +221,11 @@
                     @if ($logo)
                         <img class="header-logo" style="height:45px" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="Лого">
                     @else
-                        @if (isset($company) && $company)
-                            <h2 class="header-logo" style="margin:0; font-size:16px;">{{ $company->name }}</h2>
-                        @elseif ($estimate->company)
-                            <h2 class="header-logo" style="margin:0; font-size:16px;">{{ $estimate->company->name }}</h2>
-                        @endif
+                        <h2 class="header-logo" style="margin:0; font-size:16px;">{{ $invoice->company->name ?? '' }}</h2>
                     @endif
                 </td>
                 <td width="50%" style="text-align:right; vertical-align:bottom;">
-                    <div style="font-size:24px; font-weight:bold; color:#2D2D2D; letter-spacing:0.15em;">ПОНУДА</div>
+                    <div style="font-size:24px; font-weight:bold; color:#2D2D2D; letter-spacing:0.15em;">ПРОФАКТУРА</div>
                 </td>
             </tr>
         </table>
@@ -243,54 +239,50 @@
                 {{-- Issuer --}}
                 <td class="info-col">
                     <div class="info-title">Издавач</div>
-                    @if ($estimate->company)
-                        <div class="info-row"><strong>Назив:</strong> {{ $estimate->company->name }}</div>
-                    @endif
+                    <div class="info-row"><strong>Назив:</strong> {{ $invoice->company->name ?? '' }}</div>
                     @if($company_address)
                         <div class="info-row"><strong>Адреса:</strong> {!! str_replace('<br />', ', ', $company_address) !!}</div>
-                    @elseif($estimate->company && $estimate->company->address)
+                    @elseif($invoice->company && $invoice->company->address)
                         <div class="info-row"><strong>Адреса:</strong>
-                            {{ $estimate->company->address->address_street_1 ?? '' }}
-                            @if($estimate->company->address->address_street_2), {{ $estimate->company->address->address_street_2 }}@endif
-                            @if($estimate->company->address->city), {{ $estimate->company->address->city }}@endif
-                            @if($estimate->company->address->zip) {{ $estimate->company->address->zip }}@endif
+                            {{ $invoice->company->address->address_street_1 ?? '' }}
+                            @if($invoice->company->address->address_street_2), {{ $invoice->company->address->address_street_2 }}@endif
+                            @if($invoice->company->address->city), {{ $invoice->company->address->city }}@endif
+                            @if($invoice->company->address->zip) {{ $invoice->company->address->zip }}@endif
                         </div>
                     @endif
-                    @if(isset($estimate->company->vat_id) && $estimate->company->vat_id)
-                        <div class="info-row"><strong>ЕДБ за ДДВ:</strong> {{ $estimate->company->vat_id }}</div>
+                    @if(isset($invoice->company->vat_id) && $invoice->company->vat_id)
+                        <div class="info-row"><strong>ЕДБ за ДДВ:</strong> {{ $invoice->company->vat_id }}</div>
                     @endif
-                    @if(isset($estimate->company->tax_id) && $estimate->company->tax_id)
-                        <div class="info-row"><strong>ЕМБС:</strong> {{ $estimate->company->tax_id }}</div>
+                    @if(isset($invoice->company->tax_id) && $invoice->company->tax_id)
+                        <div class="info-row"><strong>ЕМБС:</strong> {{ $invoice->company->tax_id }}</div>
                     @endif
-                    @if($estimate->company && $estimate->company->address && $estimate->company->address->phone)
-                        <div class="info-row"><strong>Телефон:</strong> {{ $estimate->company->address->phone }}</div>
+                    @if($invoice->company && $invoice->company->address && $invoice->company->address->phone)
+                        <div class="info-row"><strong>Телефон:</strong> {{ $invoice->company->address->phone }}</div>
                     @endif
                 </td>
 
                 {{-- Buyer --}}
                 <td class="info-col">
                     <div class="info-title">Примател</div>
-                    @if ($estimate->customer)
-                        <div class="info-row"><strong>Назив:</strong> {{ $estimate->customer->name }}</div>
-                    @endif
+                    <div class="info-row"><strong>Назив:</strong> {{ $invoice->customer->name ?? '' }}</div>
                     @if($billing_address)
                         <div class="info-row"><strong>Адреса:</strong> {!! str_replace('<br />', ', ', $billing_address) !!}</div>
-                    @elseif($estimate->customer && $estimate->customer->billingAddress)
+                    @elseif($invoice->customer && $invoice->customer->billingAddress)
                         <div class="info-row"><strong>Адреса:</strong>
-                            {{ $estimate->customer->billingAddress->address_street_1 ?? '' }}
-                            @if($estimate->customer->billingAddress->address_street_2), {{ $estimate->customer->billingAddress->address_street_2 }}@endif
-                            @if($estimate->customer->billingAddress->city), {{ $estimate->customer->billingAddress->city }}@endif
-                            @if($estimate->customer->billingAddress->zip) {{ $estimate->customer->billingAddress->zip }}@endif
+                            {{ $invoice->customer->billingAddress->address_street_1 ?? '' }}
+                            @if($invoice->customer->billingAddress->address_street_2), {{ $invoice->customer->billingAddress->address_street_2 }}@endif
+                            @if($invoice->customer->billingAddress->city), {{ $invoice->customer->billingAddress->city }}@endif
+                            @if($invoice->customer->billingAddress->zip) {{ $invoice->customer->billingAddress->zip }}@endif
                         </div>
                     @endif
-                    @if(isset($estimate->customer->vat_number) && $estimate->customer->vat_number)
-                        <div class="info-row"><strong>ЕДБ за ДДВ:</strong> {{ $estimate->customer->vat_number }}</div>
+                    @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
+                        <div class="info-row"><strong>ЕДБ за ДДВ:</strong> {{ $invoice->customer->vat_number }}</div>
                     @endif
-                    @if(isset($estimate->customer->tax_id) && $estimate->customer->tax_id)
-                        <div class="info-row"><strong>ЕМБС:</strong> {{ $estimate->customer->tax_id }}</div>
+                    @if(isset($invoice->customer->tax_id) && $invoice->customer->tax_id)
+                        <div class="info-row"><strong>ЕМБС:</strong> {{ $invoice->customer->tax_id }}</div>
                     @endif
-                    @if($estimate->customer && $estimate->customer->phone)
-                        <div class="info-row"><strong>Телефон:</strong> {{ $estimate->customer->phone }}</div>
+                    @if($invoice->customer && $invoice->customer->phone)
+                        <div class="info-row"><strong>Телефон:</strong> {{ $invoice->customer->phone }}</div>
                     @endif
                 </td>
             </tr>
@@ -301,17 +293,23 @@
     <div class="meta-section">
         <table width="100%">
             <tr>
-                <td width="33%">
-                    <span class="meta-label">Број на понуда</span>
-                    <span class="meta-value">{{ $estimate->estimate_number }}</span>
+                <td width="25%">
+                    <span class="meta-label">Број на профактура</span>
+                    <span class="meta-value">{{ $invoice->proforma_invoice_number }}</span>
                 </td>
-                <td width="33%">
+                <td width="25%">
                     <span class="meta-label">Датум на издавање</span>
-                    <span class="meta-value">{{ $estimate->formattedEstimateDate }}</span>
+                    <span class="meta-value">{{ $invoice->formattedProformaInvoiceDate }}</span>
                 </td>
-                <td width="33%">
+                <td width="25%">
                     <span class="meta-label">Важи до</span>
-                    <span class="meta-value">{{ $estimate->formattedExpiryDate }}</span>
+                    <span class="meta-value">{{ $invoice->formattedExpiryDate }}</span>
+                </td>
+                <td width="25%">
+                    @if($invoice->reference_number)
+                        <span class="meta-label">Референтен број</span>
+                        <span class="meta-value">{{ $invoice->reference_number }}</span>
+                    @endif
                 </td>
             </tr>
         </table>
@@ -332,14 +330,14 @@
                 <th style="width:40%;">Опис</th>
                 <th style="width:10%;" class="text-center">Кол.</th>
                 <th style="width:15%;" class="text-right">Цена</th>
-                @if($estimate->discount_per_item === 'YES')
+                @if($invoice->discount_per_item === 'YES')
                 <th style="width:10%;" class="text-right">Попуст</th>
                 @endif
                 <th style="width:15%;" class="text-right">Износ</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($estimate->items as $index => $item)
+            @foreach ($invoice->items as $index => $item)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>
@@ -349,17 +347,17 @@
                         @endif
                     </td>
                     <td class="text-center">{{ $item->quantity }} {{ $item->unit_name ?? '' }}</td>
-                    <td class="text-right">{!! format_money_pdf($item->price, $estimate->customer->currency) !!}</td>
-                    @if($estimate->discount_per_item === 'YES')
+                    <td class="text-right">{!! format_money_pdf($item->price, $invoice->customer->currency) !!}</td>
+                    @if($invoice->discount_per_item === 'YES')
                     <td class="text-right">
                         @if($item->discount_type === 'fixed')
-                            {!! format_money_pdf($item->discount_val, $estimate->customer->currency) !!}
+                            {!! format_money_pdf($item->discount_val, $invoice->customer->currency) !!}
                         @else
                             {{ $item->discount }}%
                         @endif
                     </td>
                     @endif
-                    <td class="text-right">{!! format_money_pdf($item->total, $estimate->customer->currency) !!}</td>
+                    <td class="text-right">{!! format_money_pdf($item->total, $invoice->customer->currency) !!}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -370,18 +368,18 @@
         <table class="totals-table" cellspacing="0">
             <tr>
                 <td class="total-label">Меѓузбир:</td>
-                <td class="total-value">{!! format_money_pdf($estimate->sub_total, $estimate->customer->currency) !!}</td>
+                <td class="total-value">{!! format_money_pdf($invoice->sub_total, $invoice->customer->currency) !!}</td>
             </tr>
 
-            @if ($estimate->discount > 0)
+            @if ($invoice->discount > 0)
             <tr>
                 <td class="total-label">
                     Попуст
-                    @if($estimate->discount_type === 'percentage')
-                        ({{ $estimate->discount }}%)
+                    @if($invoice->discount_type === 'percentage')
+                        ({{ $invoice->discount }}%)
                     @endif
                 </td>
-                <td class="total-value">- {!! format_money_pdf($estimate->discount_val, $estimate->customer->currency) !!}</td>
+                <td class="total-value">- {!! format_money_pdf($invoice->discount_val, $invoice->customer->currency) !!}</td>
             </tr>
             @endif
 
@@ -389,21 +387,21 @@
                 @foreach ($taxes as $tax)
                 <tr>
                     <td class="total-label">{{ $tax->taxType->name }} ({{ $tax->taxType->percent }}%)</td>
-                    <td class="total-value">{!! format_money_pdf($tax->amount, $estimate->customer->currency) !!}</td>
+                    <td class="total-value">{!! format_money_pdf($tax->amount, $invoice->customer->currency) !!}</td>
                 </tr>
                 @endforeach
-            @elseif ($estimate->taxes && $estimate->taxes->count() > 0)
-                @foreach ($estimate->taxes as $tax)
+            @elseif ($invoice->taxes && $invoice->taxes->count() > 0)
+                @foreach ($invoice->taxes as $tax)
                 <tr>
                     <td class="total-label">{{ $tax->taxType->name }} ({{ $tax->taxType->percent }}%)</td>
-                    <td class="total-value">{!! format_money_pdf($tax->amount, $estimate->customer->currency) !!}</td>
+                    <td class="total-value">{!! format_money_pdf($tax->amount, $invoice->customer->currency) !!}</td>
                 </tr>
                 @endforeach
             @endif
 
             <tr class="grand-total">
                 <td class="total-label">Вкупно:</td>
-                <td class="total-value">{!! format_money_pdf($estimate->total, $estimate->customer->currency) !!}</td>
+                <td class="total-value">{!! format_money_pdf($invoice->total, $invoice->customer->currency) !!}</td>
             </tr>
         </table>
         <div style="clear: both;"></div>
@@ -412,14 +410,14 @@
     {{-- Notes --}}
     @if($notes)
         <div class="notes">
-            <div class="notes-label">Забелешки</div>
+            <div class="notes-label">Белешки</div>
             {!! $notes !!}
         </div>
     @endif
 
     {{-- Footer --}}
     <div class="footer">
-        <strong>Овој документ е понуда и не претставува даночен документ.</strong>
+        <strong>Овој документ е профактура и не претставува даночен документ.</strong>
     </div>
 </body>
 
