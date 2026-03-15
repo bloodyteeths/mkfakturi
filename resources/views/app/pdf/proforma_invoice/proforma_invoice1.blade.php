@@ -526,7 +526,7 @@
         <!-- Notes -->
         @if ($notes)
         <div class="notes-section">
-            <div class="notes-title">Белешки</div>
+            <div class="notes-title">Забелешки</div>
             <div class="notes-text">{!! $notes !!}</div>
         </div>
         @endif

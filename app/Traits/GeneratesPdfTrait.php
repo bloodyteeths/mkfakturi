@@ -164,7 +164,7 @@ trait GeneratesPdfTrait
         }
 
         foreach ($fields as $key => $field) {
-            $fields[$key] = htmlspecialchars($field, ENT_QUOTES, 'UTF-8');
+            $fields[$key] = htmlspecialchars($field ?? '', ENT_QUOTES, 'UTF-8');
         }
 
         return $fields;
@@ -174,7 +174,7 @@ trait GeneratesPdfTrait
     {
         $values = array_merge($this->getFieldsArray(), $this->getExtraFields());
 
-        $str = nl2br(strtr($format, $values));
+        $str = nl2br(strtr($format ?? '', $values));
 
         $str = preg_replace('/{(.*?)}/', '', $str);
 

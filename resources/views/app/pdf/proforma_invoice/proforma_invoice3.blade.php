@@ -398,7 +398,7 @@
     {{-- Notes --}}
     @if($notes)
         <div class="notes">
-            <div class="notes-label">Белешки</div>
+            <div class="notes-label">Забелешки</div>
             {!! $notes !!}
         </div>
     @endif
