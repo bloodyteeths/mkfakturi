@@ -554,6 +554,282 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- Blog: AI скенер за документи -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/ai-skener-dokumenti</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-skener-dokumenti" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/ai-skener-dokumenti</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-skener-dokumenti" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/ai-skener-dokumenti</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-skener-dokumenti" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/ai-skener-dokumenti</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-skener-dokumenti" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-skener-dokumenti" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog: AI банкарско усогласување -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/ai-bankarski-usoglasuvanje</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-bankarski-usoglasuvanje" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/ai-bankarski-usoglasuvanje</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-bankarski-usoglasuvanje" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/ai-bankarski-usoglasuvanje</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-bankarski-usoglasuvanje" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/ai-bankarski-usoglasuvanje</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-bankarski-usoglasuvanje" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-bankarski-usoglasuvanje" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog: Како да отворите фирма и почнете со фактурирање -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog: AI асистент за сметководство -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/ai-asistent-smetkovodstvo</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-asistent-smetkovodstvo" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/ai-asistent-smetkovodstvo</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-asistent-smetkovodstvo" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/ai-asistent-smetkovodstvo</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-asistent-smetkovodstvo" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/ai-asistent-smetkovodstvo</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/ai-asistent-smetkovodstvo" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/ai-asistent-smetkovodstvo" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog: Набавки и нарачки -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/nabavki-i-narachki</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/nabavki-i-narachki" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/nabavki-i-narachki</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/nabavki-i-narachki" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/nabavki-i-narachki</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/nabavki-i-narachki" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/nabavki-i-narachki</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/nabavki-i-narachki" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/nabavki-i-narachki" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog: Буџет и контрола на трошоци -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/budzet-i-kontrola-troshoci</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/budzet-i-kontrola-troshoci" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/budzet-i-kontrola-troshoci</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/budzet-i-kontrola-troshoci" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/budzet-i-kontrola-troshoci</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/budzet-i-kontrola-troshoci" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/budzet-i-kontrola-troshoci</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/budzet-i-kontrola-troshoci" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/budzet-i-kontrola-troshoci" />
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Blog: Годишна сметка 2025 -->
   <url>
     <loc>https://www.facturino.mk/mk/blog/godishna-smetka-2025</loc>
