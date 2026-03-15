@@ -65,96 +65,111 @@ class StockReportsController extends Controller
             ], 404);
         }
 
-        // Parse filters
-        $warehouseId = $request->input('warehouse_id');
-        $fromDate = $request->input('from_date');
-        $toDate = $request->input('to_date');
+        try {
+            // Parse filters
+            $warehouseId = $request->input('warehouse_id');
+            $fromDate = $request->input('from_date');
+            $toDate = $request->input('to_date');
 
-        // Validate warehouse if provided
-        $warehouse = null;
-        if ($warehouseId) {
-            $warehouse = Warehouse::where('id', $warehouseId)
-                ->where('company_id', $companyId)
-                ->first();
+            // Validate warehouse if provided
+            $warehouse = null;
+            if ($warehouseId) {
+                $warehouse = Warehouse::where('id', $warehouseId)
+                    ->where('company_id', $companyId)
+                    ->first();
 
-            if (! $warehouse) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Warehouse not found.',
-                ], 404);
+                if (! $warehouse) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Warehouse not found.',
+                    ], 404);
+                }
             }
+
+            // Get opening balance (balance before from_date)
+            $openingBalance = $this->calculateOpeningBalance(
+                (int) $companyId,
+                $item->id,
+                $warehouseId ? (int) $warehouseId : null,
+                $fromDate
+            );
+
+            // Get movements within date range
+            $movements = $this->getMovementsWithDetails(
+                (int) $companyId,
+                $item->id,
+                $warehouseId ? (int) $warehouseId : null,
+                $fromDate,
+                $toDate
+            );
+
+            // Calculate closing balance
+            $closingBalance = $this->calculateClosingBalance(
+                $openingBalance,
+                $movements
+            );
+
+            // Format movements for response
+            $formattedMovements = $movements->map(function ($movement) {
+                return [
+                    'id' => $movement->id,
+                    'date' => $movement->movement_date ? $movement->movement_date->format('Y-m-d') : null,
+                    'source_type' => $this->getSourceTypeLabel($movement->source_type),
+                    'source_type_raw' => $movement->source_type,
+                    'source_id' => $movement->source_id,
+                    'reference' => $this->getMovementReference($movement),
+                    'description' => $this->getMovementDescription($movement),
+                    'quantity' => (float) $movement->quantity,
+                    'unit_cost' => $movement->unit_cost,
+                    'line_value' => $movement->total_cost,
+                    'balance_quantity' => (float) $movement->balance_quantity,
+                    'balance_value' => (int) $movement->balance_value,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'item' => [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'sku' => $item->sku,
+                        'barcode' => $item->barcode ?? null,
+                        'unit' => $item->unit_name,
+                    ],
+                    'warehouse' => $warehouse ? [
+                        'id' => $warehouse->id,
+                        'name' => $warehouse->name,
+                    ] : null,
+                    'filters' => [
+                        'from_date' => $fromDate,
+                        'to_date' => $toDate,
+                    ],
+                    'opening_balance' => [
+                        'quantity' => $openingBalance['quantity'],
+                        'value' => $openingBalance['value'],
+                    ],
+                    'movements' => $formattedMovements,
+                    'closing_balance' => [
+                        'quantity' => $closingBalance['quantity'],
+                        'value' => $closingBalance['value'],
+                    ],
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('StockReportsController::itemCard failed', [
+                'item_id' => $item->id,
+                'company_id' => $companyId,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile().':'.$e->getLine(),
+                'trace' => substr($e->getTraceAsString(), 0, 1000),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load item card: '.$e->getMessage(),
+            ], 500);
         }
-
-        // Get opening balance (balance before from_date)
-        $openingBalance = $this->calculateOpeningBalance(
-            $companyId,
-            $item->id,
-            $warehouseId,
-            $fromDate
-        );
-
-        // Get movements within date range
-        $movements = $this->getMovementsWithDetails(
-            $companyId,
-            $item->id,
-            $warehouseId,
-            $fromDate,
-            $toDate
-        );
-
-        // Calculate closing balance
-        $closingBalance = $this->calculateClosingBalance(
-            $openingBalance,
-            $movements
-        );
-
-        // Format movements for response
-        $formattedMovements = $movements->map(function ($movement) {
-            return [
-                'id' => $movement->id,
-                'date' => $movement->movement_date->format('Y-m-d'),
-                'source_type' => $this->getSourceTypeLabel($movement->source_type),
-                'source_type_raw' => $movement->source_type,
-                'source_id' => $movement->source_id,
-                'reference' => $this->getMovementReference($movement),
-                'description' => $this->getMovementDescription($movement),
-                'quantity' => (float) $movement->quantity,
-                'unit_cost' => $movement->unit_cost,
-                'line_value' => $movement->total_cost,
-                'balance_quantity' => (float) $movement->balance_quantity,
-                'balance_value' => (int) $movement->balance_value,
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'item' => [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                    'sku' => $item->sku,
-                    'barcode' => $item->barcode,
-                    'unit' => $item->unit_name,
-                ],
-                'warehouse' => $warehouse ? [
-                    'id' => $warehouse->id,
-                    'name' => $warehouse->name,
-                ] : null,
-                'filters' => [
-                    'from_date' => $fromDate,
-                    'to_date' => $toDate,
-                ],
-                'opening_balance' => [
-                    'quantity' => $openingBalance['quantity'],
-                    'value' => $openingBalance['value'],
-                ],
-                'movements' => $formattedMovements,
-                'closing_balance' => [
-                    'quantity' => $closingBalance['quantity'],
-                    'value' => $closingBalance['value'],
-                ],
-            ],
-        ]);
     }
 
     /**
