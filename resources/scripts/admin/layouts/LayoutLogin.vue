@@ -1,6 +1,7 @@
 <template>
   <div class="grid min-h-screen grid-cols-12 bg-gray-100 h-screen overflow-y-auto">
     <NotificationRoot />
+    <PwaInstallPrompt />
 
     <div
       class="
@@ -132,6 +133,7 @@
 
 <script setup>
 import NotificationRoot from '@/scripts/components/notifications/NotificationRoot.vue'
+import PwaInstallPrompt from '@/scripts/admin/components/mobile/PwaInstallPrompt.vue'
 import MainLogo from '@/scripts/components/icons/MainLogo.vue'
 import LoginBackground from '@/scripts/components/svg/LoginBackground.vue'
 import LoginPlanetCrater from '@/scripts/components/svg/LoginPlanetCrater.vue'
