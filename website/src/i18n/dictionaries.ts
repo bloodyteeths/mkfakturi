@@ -155,9 +155,9 @@ const mk: Dictionary = {
     title: 'Пакети',
     cta: 'Види ги цените',
     plans: [
-      { name: 'Starter', price: '€12/мес', bullets: ['Е‑Фактура подготвено', 'AI асистент', '25 AI прашања/месец'] },
-      { name: 'Standard', price: '€39/мес', bullets: ['Мулти‑корисници', 'AI документ хаб', 'Автоматизации'], popular: true },
-      { name: 'Business', price: '€59/мес', bullets: ['AI рекончилијација', 'Банкарски увоз', 'API и SLA'] }
+      { name: 'Starter', price: '740 ден/мес', bullets: ['Е‑Фактура подготвено', 'AI асистент', '25 AI прашања/месец'] },
+      { name: 'Standard', price: '2,400 ден/мес', bullets: ['Мулти‑корисници', 'AI документ хаб', 'Автоматизации'], popular: true },
+      { name: 'Business', price: '3,630 ден/мес', bullets: ['AI рекончилијација', 'Банкарски увоз', 'API и SLA'] }
     ]
   },
   faq: {
@@ -390,9 +390,9 @@ const sq: Dictionary = {
     title: 'Planet',
     cta: 'Shiko çmimet',
     plans: [
-      { name: 'Starter', price: '€12/muaj', bullets: ['Gati për e‑Faturë', 'Asistent AI', '25 pyetje AI/muaj'] },
-      { name: 'Standard', price: '€39/muaj', bullets: ['Shumë përdorues', 'AI dokument hub', 'Automatizime'], popular: true },
-      { name: 'Business', price: '€59/muaj', bullets: ['AI rekonçilim', 'Import bankar', 'API dhe SLA'] }
+      { name: 'Starter', price: '740 ден/muaj', bullets: ['Gati për e‑Faturë', 'Asistent AI', '25 pyetje AI/muaj'] },
+      { name: 'Standard', price: '2,400 ден/muaj', bullets: ['Shumë përdorues', 'AI dokument hub', 'Automatizime'], popular: true },
+      { name: 'Business', price: '3,630 ден/muaj', bullets: ['AI rekonçilim', 'Import bankar', 'API dhe SLA'] }
     ]
   },
   faq: {
@@ -625,9 +625,9 @@ const tr: Dictionary = {
     title: 'Paketler',
     cta: 'Fiyatları gör',
     plans: [
-      { name: 'Starter', price: '€12/ay', bullets: ['e‑Fatura hazır', 'AI asistan', '25 AI soru/ay'] },
-      { name: 'Standard', price: '€39/ay', bullets: ['Çoklu kullanıcı', 'AI belge merkezi', 'Otomasyonlar'], popular: true },
-      { name: 'Business', price: '€59/ay', bullets: ['AI mutabakat', 'Banka içe aktarma', 'API ve SLA'] }
+      { name: 'Starter', price: '740 ден/ay', bullets: ['e‑Fatura hazır', 'AI asistan', '25 AI soru/ay'] },
+      { name: 'Standard', price: '2,400 ден/ay', bullets: ['Çoklu kullanıcı', 'AI belge merkezi', 'Otomasyonlar'], popular: true },
+      { name: 'Business', price: '3,630 ден/ay', bullets: ['AI mutabakat', 'Banka içe aktarma', 'API ve SLA'] }
     ]
   },
   faq: {
@@ -860,9 +860,9 @@ const en: Dictionary = {
     title: 'Plans',
     cta: 'View Pricing',
     plans: [
-      { name: 'Starter', price: '€12/mo', bullets: ['e-Invoice Ready', 'AI Assistant', '25 AI queries/month'] },
-      { name: 'Standard', price: '€39/mo', bullets: ['Multi-users', 'AI Document Hub', 'Automations'], popular: true },
-      { name: 'Business', price: '€59/mo', bullets: ['AI Reconciliation', 'Bank Import', 'API & SLA'] }
+      { name: 'Starter', price: '740 ден/mo', bullets: ['e-Invoice Ready', 'AI Assistant', '25 AI queries/month'] },
+      { name: 'Standard', price: '2,400 ден/mo', bullets: ['Multi-users', 'AI Document Hub', 'Automations'], popular: true },
+      { name: 'Business', price: '3,630 ден/mo', bullets: ['AI Reconciliation', 'Bank Import', 'API & SLA'] }
     ]
   },
   faq: {
