@@ -17,7 +17,6 @@
         html {
             margin: 0px;
             padding: 0px;
-            margin-top: 50px;
         }
 
         table {
@@ -28,16 +27,11 @@
 
         .header-container {
             background: #7675ff;
-            position: absolute;
             width: 100%;
-            height: 100px;
-            left: 0px;
-            top: -60px;
+            padding: 20px 0;
         }
 
         .header-logo {
-            padding-top: 30px;
-            position: absolute;
             text-transform: capitalize;
             color: #fff;
         }
@@ -53,7 +47,7 @@
             display: inline-block;
             width: 40%;
             float: right;
-            padding: 25px 30px 0 0;
+            padding: 0 30px 0 0;
             text-align: right;
             color: white;
         }
@@ -74,7 +68,7 @@
         /* -- Info Blocks -- */
 
         .info-section {
-            margin: 60px 30px 15px;
+            margin: 20px 30px 15px;
         }
 
         .info-block {
