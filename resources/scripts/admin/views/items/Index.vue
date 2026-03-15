@@ -187,8 +187,8 @@
         <template #cell-quantity="{ row }">
           <span v-if="row.data.track_quantity" class="text-gray-900">
             {{ row.data.quantity ?? 0 }}
-            <span v-if="row.data.minimum_quantity && row.data.quantity <= row.data.minimum_quantity" class="ml-1 text-xs text-red-500">
-              (Low)
+            <span v-if="row.data.minimum_quantity && row.data.quantity <= row.data.minimum_quantity" class="ml-1 bg-red-100 bg-opacity-75 px-2 py-0.5 text-xs font-medium text-red-700 uppercase rounded-full">
+              {{ $t('general.low') || 'Low' }}
             </span>
           </span>
           <span v-else class="text-gray-400">-</span>

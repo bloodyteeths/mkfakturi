@@ -2140,6 +2140,8 @@
     "users": {
         "title": "Përdoruesit",
         "users_list": "Users List",
+        "users_used": "përdorues",
+        "user_limit_reached": "Limiti i përdoruesve u arrit. Përmirësoni planin tuaj për të shtuar më shumë përdorues.",
         "name": "Emri",
         "description": "Përshkrimi",
         "added_on": "Shtuar më",

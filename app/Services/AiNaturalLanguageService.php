@@ -10,7 +10,10 @@ use App\Models\Customer;
 use App\Models\Estimate;
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Models\Item;
+use App\Models\Supplier;
 use App\Models\TaxType;
+use App\Models\Unit;
 use App\Models\User;
 use App\Services\AiProvider\GeminiProvider;
 use Illuminate\Support\Facades\Auth;
@@ -383,6 +386,12 @@ PROMPT;
                 if ($customer) {
                     $resolved['customer_id'] = $customer->id;
                     $resolved['customer_name'] = $customer->name;
+                } else {
+                    // Auto-create customer
+                    $customer = $this->autoCreateCustomer($resolved['customer_name'], $company);
+                    $resolved['customer_id'] = $customer->id;
+                    $resolved['customer_name'] = $customer->name;
+                    $resolved['_customer_created'] = true;
                 }
             }
         }
@@ -394,11 +403,17 @@ PROMPT;
                 if ($supplier) {
                     $resolved['supplier_id'] = $supplier->id;
                     $resolved['supplier_name'] = $supplier->name;
+                } else {
+                    // Auto-create supplier
+                    $supplier = $this->autoCreateSupplier($resolved['supplier_name'], $company);
+                    $resolved['supplier_id'] = $supplier->id;
+                    $resolved['supplier_name'] = $supplier->name;
+                    $resolved['_supplier_created'] = true;
                 }
             }
         }
 
-        // Resolve item IDs
+        // Resolve item IDs — auto-create if not found
         if (! empty($resolved['items'])) {
             foreach ($resolved['items'] as $i => $item) {
                 if (empty($item['item_id']) && ! empty($item['name'])) {
@@ -409,6 +424,16 @@ PROMPT;
                     if ($found) {
                         $resolved['items'][$i]['item_id'] = $found->id;
                         $resolved['items'][$i]['name'] = $found->name;
+                    } else {
+                        // Auto-create item
+                        $newItem = $this->autoCreateItem(
+                            $item['name'],
+                            $item['unit_price'] ?? 0,
+                            $company
+                        );
+                        $resolved['items'][$i]['item_id'] = $newItem->id;
+                        $resolved['items'][$i]['name'] = $newItem->name;
+                        $resolved['items'][$i]['_item_created'] = true;
                     }
                 }
             }
@@ -476,6 +501,79 @@ PROMPT;
             ->whereNull('deleted_at')
             ->whereRaw('LOWER(name) LIKE ?', ['%' . mb_strtolower($name) . '%'])
             ->first();
+    }
+
+    /**
+     * Auto-create a new Customer from the AI-extracted name.
+     */
+    protected function autoCreateCustomer(string $name, Company $company): Customer
+    {
+        $currencyId = CompanySetting::getSetting('currency', $company->id);
+
+        $customer = Customer::create([
+            'name' => $name,
+            'company_id' => $company->id,
+            'currency_id' => $currencyId,
+            'creator_id' => Auth::id(),
+        ]);
+
+        Log::info('[NLAssistant] Auto-created customer', [
+            'customer_id' => $customer->id,
+            'name' => $name,
+            'company_id' => $company->id,
+        ]);
+
+        return $customer;
+    }
+
+    /**
+     * Auto-create a new Supplier from the AI-extracted name.
+     */
+    protected function autoCreateSupplier(string $name, Company $company): Supplier
+    {
+        $supplier = Supplier::create([
+            'name' => $name,
+            'company_id' => $company->id,
+            'creator_id' => Auth::id(),
+        ]);
+
+        Log::info('[NLAssistant] Auto-created supplier', [
+            'supplier_id' => $supplier->id,
+            'name' => $name,
+            'company_id' => $company->id,
+        ]);
+
+        return $supplier;
+    }
+
+    /**
+     * Auto-create a new Item from the AI-extracted name and price.
+     */
+    protected function autoCreateItem(string $name, int $price, Company $company): Item
+    {
+        // Use the first available unit or default to null
+        $unit = Unit::where('company_id', $company->id)->first()
+            ?? Unit::whereNull('company_id')->first();
+
+        $currencyId = CompanySetting::getSetting('currency', $company->id);
+
+        $item = Item::create([
+            'name' => $name,
+            'price' => $price,
+            'company_id' => $company->id,
+            'unit_id' => $unit?->id,
+            'currency_id' => $currencyId,
+            'creator_id' => Auth::id(),
+        ]);
+
+        Log::info('[NLAssistant] Auto-created item', [
+            'item_id' => $item->id,
+            'name' => $name,
+            'price' => $price,
+            'company_id' => $company->id,
+        ]);
+
+        return $item;
     }
 
     /**

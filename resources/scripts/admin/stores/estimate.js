@@ -433,6 +433,27 @@ export const useEstimateStore = (useWindow = false) => {
         })
       },
 
+      async bulkMarkAsSent() {
+        const notificationStore = useNotificationStore()
+        const ids = [...this.selectedEstimates]
+
+        for (const id of ids) {
+          await axios.post(`/estimates/${id}/status`, { id, status: 'SENT' })
+          let pos = this.estimates.findIndex((e) => e.id === id)
+          if (this.estimates[pos]) {
+            this.estimates[pos].status = 'SENT'
+          }
+        }
+
+        this.selectedEstimates = []
+        this.selectAllField = false
+
+        notificationStore.showNotification({
+          type: 'success',
+          message: global.t('estimates.mark_as_sent_successfully'),
+        })
+      },
+
       convertToInvoice(id) {
         const notificationStore = useNotificationStore()
         return new Promise((resolve, reject) => {

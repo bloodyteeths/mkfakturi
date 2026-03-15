@@ -169,6 +169,11 @@
             </span>
           </template>
 
+          <BaseDropdownItem @click="bulkMarkAsSent">
+            <BaseIcon name="CheckCircleIcon" class="mr-3 text-gray-600" />
+            {{ $t('estimates.mark_as_sent') }}
+          </BaseDropdownItem>
+
           <BaseDropdownItem @click="removeMultipleEstimates">
             <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
             {{ $t('general.delete') }}
@@ -463,6 +468,25 @@ async function removeMultipleEstimates() {
             })
           }
         })
+      }
+    })
+}
+
+async function bulkMarkAsSent() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('estimates.confirm_mark_as_sent'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        await estimateStore.bulkMarkAsSent()
+        refreshTable()
       }
     })
 }

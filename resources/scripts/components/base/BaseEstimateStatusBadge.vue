@@ -18,19 +18,19 @@ const props = defineProps({
 const badgeColorClasses = computed(() => {
   switch (props.status) {
     case 'DRAFT':
-      return 'bg-yellow-300 bg-opacity-25 px-2  py-1 text-sm  text-yellow-800 uppercase font-normal text-center '
+      return 'bg-gray-100 bg-opacity-75 px-3 py-1 text-xs font-medium text-gray-700 uppercase rounded-full'
     case 'SENT':
-      return ' bg-yellow-500 bg-opacity-25 px-2 py-1 text-sm  text-yellow-900 uppercase font-normal text-center '
+      return 'bg-blue-100 bg-opacity-75 px-3 py-1 text-xs font-medium text-blue-700 uppercase rounded-full'
     case 'VIEWED':
-      return 'bg-blue-400 bg-opacity-25 px-2  py-1 text-sm  text-blue-900 uppercase font-normal text-center'
+      return 'bg-amber-100 bg-opacity-75 px-3 py-1 text-xs font-medium text-amber-700 uppercase rounded-full'
     case 'EXPIRED':
-      return 'bg-red-300 bg-opacity-25 px-2 py-1 text-sm  text-red-800 uppercase font-normal text-center'
+      return 'bg-red-100 bg-opacity-75 px-3 py-1 text-xs font-medium text-red-700 uppercase rounded-full'
     case 'ACCEPTED':
-      return 'bg-green-400 bg-opacity-25 px-2 py-1 text-sm  text-green-800 uppercase font-normal text-center'
+      return 'bg-green-100 bg-opacity-75 px-3 py-1 text-xs font-medium text-green-700 uppercase rounded-full'
     case 'REJECTED':
-      return 'bg-purple-300 bg-opacity-25 px-2 py-1 text-sm  text-purple-800 uppercase font-normal text-center'
+      return 'bg-rose-100 bg-opacity-75 px-3 py-1 text-xs font-medium text-rose-700 uppercase rounded-full'
     default:
-      return 'bg-gray-500 bg-opacity-25 px-2 py-1 text-sm  text-gray-900 uppercase font-normal text-center'
+      return 'bg-gray-100 bg-opacity-75 px-3 py-1 text-xs font-medium text-gray-700 uppercase rounded-full'
   }
 })
 </script>

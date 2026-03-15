@@ -41,6 +41,21 @@ class CheckUserLimit
             return $next($request);
         }
 
+        $user = $request->user();
+
+        // Super Admin Bypass
+        if ($user && $user->role === 'super admin') {
+            return $next($request);
+        }
+
+        // Partner Bypass - partners managing client companies have full access
+        if ($user && $user->role === 'partner') {
+            $companyId = $request->header('company');
+            if ($companyId && $user->hasPartnerAccessToCompany((int) $companyId)) {
+                return $next($request);
+            }
+        }
+
         // Get company ID from header (set by CompanyMiddleware)
         $companyId = $request->header('company');
 
@@ -84,6 +99,13 @@ class CheckUserLimit
         }
 
         // Limit OK - proceed with request
-        return $next($request);
+        $response = $next($request);
+
+        // After successful user creation, increment the cache
+        if ($response->isSuccessful() && $request->isMethod('post')) {
+            $this->userCountService->incrementCache((int) $companyId);
+        }
+
+        return $response;
     }
 }

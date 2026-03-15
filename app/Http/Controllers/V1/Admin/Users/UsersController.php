@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteUserRequest;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Company;
 use App\Models\User;
+use App\Services\UserCountService;
 use Illuminate\Http\Request;
 
 class UsersController extends Controller
@@ -90,6 +92,28 @@ class UsersController extends Controller
         $user->updateFromRequest($request);
 
         return new UserResource($user);
+    }
+
+    /**
+     * Get user usage stats for the current company's subscription tier.
+     */
+    public function usage(Request $request, UserCountService $userCountService)
+    {
+        $companyId = $request->header('company');
+
+        if (! $companyId) {
+            return response()->json(['error' => 'company_header_missing'], 400);
+        }
+
+        $company = Company::with('subscription')->find($companyId);
+
+        if (! $company) {
+            return response()->json(['error' => 'company_not_found'], 404);
+        }
+
+        return response()->json([
+            'usage' => $userCountService->getUsageStats($company),
+        ]);
     }
 
     /**

@@ -1438,6 +1438,8 @@
     "users": {
         "title": "Kullanıcılar",
         "users_list": "Kullanıcı Listesi",
+        "users_used": "kullanıcı",
+        "user_limit_reached": "Kullanıcı limitine ulaşıldı. Daha fazla kullanıcı eklemek için planınızı yükseltin.",
         "name": "İsim",
         "description": "Tanım",
         "added_on": "Eklendiği tarih",

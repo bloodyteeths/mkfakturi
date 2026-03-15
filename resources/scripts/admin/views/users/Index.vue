@@ -9,6 +9,23 @@
 
       <template #actions>
         <div class="flex items-center justify-end space-x-5">
+          <!-- Usage indicator -->
+          <div
+            v-if="usageStats && !usageStats.is_unlimited"
+            class="flex items-center space-x-2 text-sm"
+          >
+            <span :class="usageStats.has_reached_limit ? 'text-red-600 font-medium' : 'text-gray-500'">
+              {{ usageStats.current_count }}/{{ usageStats.limit }} {{ $t('users.users_used') }}
+            </span>
+            <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all"
+                :class="usageStats.has_reached_limit ? 'bg-red-500' : 'bg-primary-500'"
+                :style="{ width: Math.min(usageStats.usage_percentage, 100) + '%' }"
+              />
+            </div>
+          </div>
+
           <BaseButton
             v-show="usersStore.totalUsers"
             variant="primary-outline"
@@ -27,6 +44,7 @@
 
           <BaseButton
             v-if="userStore.currentUser.is_owner"
+            :disabled="usageStats && usageStats.has_reached_limit && !usageStats.is_unlimited"
             @click="$router.push('users/create')"
           >
             <template #left="slotProps">
@@ -274,9 +292,12 @@ watch(
   { deep: true }
 )
 
+const usageStats = computed(() => usersStore.usageStats)
+
 onMounted(() => {
   usersStore.fetchUsers()
   usersStore.fetchRoles()
+  usersStore.fetchUsageStats()
 })
 
 onUnmounted(() => {

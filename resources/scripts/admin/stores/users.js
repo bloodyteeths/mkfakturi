@@ -18,6 +18,7 @@ export const useUsersStore = (useWindow = false) => {
       selectedUsers: [],
       customerList: [],
       userList: [],
+      usageStats: null,
 
       userData: {
         name: '',
@@ -38,6 +39,20 @@ export const useUsersStore = (useWindow = false) => {
           role: null,
           companies: [],
         }
+      },
+
+      fetchUsageStats() {
+        return new Promise((resolve, reject) => {
+          axios
+            .get('/users/usage')
+            .then((response) => {
+              this.usageStats = response.data.usage
+              resolve(response)
+            })
+            .catch((err) => {
+              reject(err)
+            })
+        })
       },
 
       fetchUsers(params) {

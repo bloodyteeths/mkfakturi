@@ -6865,6 +6865,8 @@
         "user_updated": "User Updated",
         "users": "Users",
         "users_list": "Users List",
+        "users_used": "users",
+        "user_limit_reached": "User limit reached. Upgrade your plan to add more users.",
         "view_user": "View User"
     },
     "validation": {

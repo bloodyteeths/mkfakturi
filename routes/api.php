@@ -1403,6 +1403,7 @@ Route::prefix('/v1')->group(function () {
         // Note: apiResource creates routes for: index, show, store, update, destroy
         // We only want to gate 'store' (creation), so we'll split it
         Route::get('/users', [UsersController::class, 'index']);
+        Route::get('/users/usage', [UsersController::class, 'usage']);
         Route::get('/users/{user}', [UsersController::class, 'show']);
         Route::post('/users', [UsersController::class, 'store'])->middleware('user-limit'); // FG-01-31
         Route::put('/users/{user}', [UsersController::class, 'update']);

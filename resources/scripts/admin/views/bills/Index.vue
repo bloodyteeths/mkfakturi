@@ -191,6 +191,11 @@
             </span>
           </template>
 
+          <BaseDropdownItem @click="bulkMarkAsSent">
+            <BaseIcon name="CheckCircleIcon" class="mr-3 text-gray-600" />
+            {{ $t('bills.mark_as_sent') }}
+          </BaseDropdownItem>
+
           <BaseDropdownItem @click="removeMultipleBills">
             <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
             {{ $t('general.delete') }}
@@ -575,6 +580,25 @@ function toggleFilter() {
   }
 
   showFilters.value = !showFilters.value
+}
+
+async function bulkMarkAsSent() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('bills.bill_mark_as_sent'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        await billsStore.bulkMarkAsSent()
+        refreshTable()
+      }
+    })
 }
 
 function setActiveTab(val) {

@@ -295,6 +295,27 @@ export const useBillsStore = (useWindow = false) => {
         })
       },
 
+      async bulkMarkAsSent() {
+        const notificationStore = useNotificationStore()
+        const ids = [...this.selectedBills]
+
+        for (const id of ids) {
+          await axios.post(`/bills/${id}/mark-as-sent`, { status: 'SENT' })
+          let pos = this.bills.findIndex((b) => b.id === id)
+          if (this.bills[pos]) {
+            this.bills[pos].status = 'SENT'
+          }
+        }
+
+        this.selectedBills = []
+        this.selectAllField = false
+
+        notificationStore.showNotification({
+          type: 'success',
+          message: global.t('bills.marked_sent_message'),
+        })
+      },
+
       markAsViewed(billId) {
         const notificationStore = useNotificationStore()
 

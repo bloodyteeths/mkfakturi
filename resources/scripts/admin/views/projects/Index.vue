@@ -26,7 +26,6 @@
         <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_PROJECT)"
           variant="primary"
-         
           @click="$router.push('/admin/projects/create')"
         >
           <template #left="slotProps">
@@ -88,11 +87,57 @@
     </BaseEmptyPlaceholder>
 
     <div v-show="!showEmptyScreen" class="relative table-container">
+      <div class="relative flex items-center justify-end h-5">
+        <BaseDropdown v-if="selectedProjectIds.length">
+          <template #activator>
+            <span
+              class="
+                flex
+                text-sm
+                font-medium
+                cursor-pointer
+                select-none
+                text-primary-400
+              "
+            >
+              {{ $t('general.actions') }}
+              <BaseIcon name="ChevronDownIcon" />
+            </span>
+          </template>
+          <BaseDropdownItem @click="removeMultipleProjects">
+            <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
+            {{ $t('general.delete') }}
+          </BaseDropdownItem>
+        </BaseDropdown>
+      </div>
+
       <BaseTable
         ref="tableComponent"
+        class="mt-3"
         :data="fetchData"
         :columns="columns"
       >
+        <template #header>
+          <div class="absolute z-10 items-center left-6 top-2.5 select-none">
+            <BaseCheckbox
+              v-model="selectAllField"
+              variant="primary"
+              @change="toggleSelectAll"
+            />
+          </div>
+        </template>
+
+        <template #cell-checkbox="{ row }">
+          <div class="relative block">
+            <BaseCheckbox
+              :id="row.data.id"
+              v-model="selectField"
+              :value="row.data.id"
+              variant="primary"
+            />
+          </div>
+        </template>
+
         <template #cell-name="{ row }">
           <router-link
             :to="{ path: `/admin/projects/${row.data.id}/view` }"
@@ -147,21 +192,25 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onUnmounted } from 'vue'
 import { debouncedWatch } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import abilities from '@/scripts/admin/stub/abilities'
 import { useProjectStore } from '@/scripts/admin/stores/project'
 import { useUserStore } from '@/scripts/admin/stores/user'
+import { useDialogStore } from '@/scripts/stores/dialog'
 import ProjectDropdown from '@/scripts/admin/components/dropdowns/ProjectIndexDropdown.vue'
 
 const { t } = useI18n()
 const projectStore = useProjectStore()
 const userStore = useUserStore()
+const dialogStore = useDialogStore()
 
 const showFilters = ref(false)
 const tableComponent = ref(null)
 const isFetchingInitialData = ref(true)
+const selectedProjectIds = ref([])
+const selectAllField = ref(false)
 
 const filters = reactive({
   search: '',
@@ -173,6 +222,14 @@ const showEmptyScreen = computed(
   () => !projectStore.totalProjects && !isFetchingInitialData.value
 )
 
+const selectField = computed({
+  get: () => selectedProjectIds.value,
+  set: (value) => {
+    selectedProjectIds.value = value
+    selectAllField.value = value.length === projectStore.projects.length && value.length > 0
+  },
+})
+
 const statusOptions = computed(() => [
   { value: 'open', label: t('projects.statuses.open') },
   { value: 'in_progress', label: t('projects.statuses.in_progress') },
@@ -183,6 +240,12 @@ const statusOptions = computed(() => [
 
 const columns = computed(() => {
   return [
+    {
+      key: 'checkbox',
+      thClass: 'extra w-10 pr-0',
+      sortable: false,
+      tdClass: 'font-medium text-gray-900 pr-0',
+    },
     { key: 'name', label: t('projects.name'), thClass: 'extra' },
     { key: 'customer', label: t('projects.customer'), sortable: false },
     { key: 'status', label: t('projects.status') },
@@ -209,13 +272,30 @@ function getStatusColor(status) {
   return colors[status] || '#6B7280'
 }
 
+function toggleSelectAll() {
+  if (selectedProjectIds.value.length === projectStore.projects.length) {
+    selectedProjectIds.value = []
+    selectAllField.value = false
+  } else {
+    selectedProjectIds.value = projectStore.projects.map(p => p.id)
+    selectAllField.value = true
+  }
+}
+
 debouncedWatch(
   filters,
   () => {
+    selectedProjectIds.value = []
+    selectAllField.value = false
     refreshTable()
   },
   { debounce: 500 }
 )
+
+onUnmounted(() => {
+  selectedProjectIds.value = []
+  selectAllField.value = false
+})
 
 async function fetchData({ page, filter, sort }) {
   let data = {
@@ -266,5 +346,27 @@ function hasAtLeastOneAbility() {
     abilities.EDIT_PROJECT,
     abilities.VIEW_PROJECT,
   ])
+}
+
+function removeMultipleProjects() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('projects.confirm_delete'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then((res) => {
+      if (res) {
+        projectStore.deleteProjects(selectedProjectIds.value).then(() => {
+          selectedProjectIds.value = []
+          selectAllField.value = false
+          refreshTable()
+        })
+      }
+    })
 }
 </script>
