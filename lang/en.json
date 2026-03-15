@@ -7571,5 +7571,19 @@
     "onboarding.partner.label_select": "Select",
     "onboarding.partner.label_import": "Import",
     "onboarding.partner.label_verify": "Verify",
-    "onboarding.partner.label_done": "Done"
+    "onboarding.partner.label_done": "Done",
+    "ai.assistant.review_estimate": "Review Estimate",
+    "ai.assistant.review_proforma": "Review Proforma",
+    "ai.assistant.review_credit_note": "Review Credit Note",
+    "ai.assistant.review_recurring": "Review Recurring Invoice",
+    "ai.assistant.navigate_to": "Open",
+    "ai.assistant.view_invoice": "View Invoice",
+    "ai.assistant.view_bill": "View Bill",
+    "ai.assistant.view_expense": "View Expense",
+    "ai.assistant.view_payment": "View Payment",
+    "ai.assistant.view_estimate": "View Estimate",
+    "ai.assistant.view_proforma": "View Proforma",
+    "ai.assistant.view_credit_note": "View Credit Note",
+    "ai.assistant.view_recurring": "View Recurring",
+    "ai.assistant.view_entity": "View"
 }

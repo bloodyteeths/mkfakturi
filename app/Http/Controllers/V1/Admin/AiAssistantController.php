@@ -31,6 +31,10 @@ class AiAssistantController extends Controller
     {
         $request->validate([
             'message' => 'required|string|max:1000',
+            'locale' => 'nullable|string|in:mk,sq,tr,en',
+            'history' => 'nullable|array|max:10',
+            'history.*.role' => 'required_with:history|string|in:user,assistant',
+            'history.*.content' => 'required_with:history|string|max:1000',
         ]);
 
         $company = Company::find($request->header('company'));
@@ -48,7 +52,13 @@ class AiAssistantController extends Controller
             return response()->json($limitResponse, 402);
         }
 
-        $result = $this->service->process($request->input('message'), $company, $user);
+        $result = $this->service->process(
+            $request->input('message'),
+            $company,
+            $user,
+            $request->input('history', []),
+            $request->input('locale', 'mk')
+        );
 
         return response()->json($result);
     }

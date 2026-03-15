@@ -45,6 +45,18 @@ class KnowledgeBaseService
         'help_ai' => 'ai-assistant',
         'help_deadlines' => 'deadlines',
         'help_payments' => 'payments',
+        'help_purchase_orders' => 'purchase-orders',
+        'help_payment_orders' => 'payment-orders',
+        'help_budgets' => 'budgets',
+        'help_cost_centers' => 'cost-centers',
+        'help_travel_orders' => 'travel-orders',
+        'help_compensations' => 'compensations',
+        'help_collections' => 'collections',
+        'help_interest' => 'interest',
+        'help_consolidation' => 'consolidation',
+        'help_batch_operations' => 'batch-operations',
+        'help_custom_reports' => 'custom-reports',
+        'help_bi_dashboard' => 'bi-dashboard',
     ];
 
     private string $knowledgePath;

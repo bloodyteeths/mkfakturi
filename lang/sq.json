@@ -6838,5 +6838,19 @@
     "documents.review": "Rishiko",
     "documents.upload_success": "Dokumenti u ngarkua. Përpunimi AI filloi.",
     "documents.deleted": "Dokumenti u fshi.",
-    "documents.uploading": "Duke ngarkuar..."
+    "documents.uploading": "Duke ngarkuar...",
+    "ai.assistant.review_estimate": "Rishiko ofertën",
+    "ai.assistant.review_proforma": "Rishiko profaturën",
+    "ai.assistant.review_credit_note": "Rishiko notën e kreditit",
+    "ai.assistant.review_recurring": "Rishiko faturën e përsëritur",
+    "ai.assistant.navigate_to": "Hap",
+    "ai.assistant.view_invoice": "Shiko faturën",
+    "ai.assistant.view_bill": "Shiko llogarinë",
+    "ai.assistant.view_expense": "Shiko shpenzimin",
+    "ai.assistant.view_payment": "Shiko pagesën",
+    "ai.assistant.view_estimate": "Shiko ofertën",
+    "ai.assistant.view_proforma": "Shiko profaturën",
+    "ai.assistant.view_credit_note": "Shiko notën e kreditit",
+    "ai.assistant.view_recurring": "Shiko përsëritësen",
+    "ai.assistant.view_entity": "Shiko"
 }

@@ -7401,5 +7401,19 @@
     "onboarding.partner.label_select": "Seçin",
     "onboarding.partner.label_import": "İçe Aktar",
     "onboarding.partner.label_verify": "Doğrula",
-    "onboarding.partner.label_done": "Bitti"
+    "onboarding.partner.label_done": "Bitti",
+    "ai.assistant.review_estimate": "Teklifi İncele",
+    "ai.assistant.review_proforma": "Proformayı İncele",
+    "ai.assistant.review_credit_note": "Kredi Notunu İncele",
+    "ai.assistant.review_recurring": "Tekrarlayan Faturayı İncele",
+    "ai.assistant.navigate_to": "Aç",
+    "ai.assistant.view_invoice": "Faturayı Görüntüle",
+    "ai.assistant.view_bill": "Faturayı Görüntüle",
+    "ai.assistant.view_expense": "Masrafı Görüntüle",
+    "ai.assistant.view_payment": "Ödemeyi Görüntüle",
+    "ai.assistant.view_estimate": "Teklifi Görüntüle",
+    "ai.assistant.view_proforma": "Proformayı Görüntüle",
+    "ai.assistant.view_credit_note": "Kredi Notunu Görüntüle",
+    "ai.assistant.view_recurring": "Tekrarlayan Görüntüle",
+    "ai.assistant.view_entity": "Görüntüle"
 }

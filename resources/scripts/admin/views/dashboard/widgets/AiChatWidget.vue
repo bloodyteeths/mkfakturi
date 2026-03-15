@@ -84,14 +84,25 @@
             class="text-sm prose prose-sm prose-indigo max-w-none ai-markdown"
             v-html="sanitizeHtml(renderMarkdown(message.content))"
           ></div>
-          <!-- Action button when AI created a draft -->
-          <div v-if="message.draftId && message.redirectUrl" class="mt-3">
+          <!-- Action button when AI created an entity or draft -->
+          <div v-if="message.redirectUrl" class="mt-3">
             <button
               @click="navigateToDraft(message.redirectUrl)"
-              class="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors flex items-center justify-center space-x-2"
+              class="w-full px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
+              :class="message.directlyCreated ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'"
             >
               <DocumentPlusIcon class="w-4 h-4" />
-              <span>{{ getDraftButtonLabel(message.entityType) }}</span>
+              <span>{{ message.directlyCreated ? getViewButtonLabel(message.entityType) : getDraftButtonLabel(message.entityType) }}</span>
+            </button>
+          </div>
+          <!-- Navigate button when AI suggests a feature page -->
+          <div v-if="message.navigationUrl" class="mt-3">
+            <button
+              @click="navigateToDraft(message.navigationUrl)"
+              class="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <ArrowTopRightOnSquareIcon class="w-4 h-4" />
+              <span>{{ $t('ai.assistant.navigate_to') }}</span>
             </button>
           </div>
           <div class="flex items-center justify-between mt-2">
@@ -168,12 +179,13 @@ import {
   TrashIcon,
   PlusCircleIcon,
   ClipboardDocumentIcon,
-  DocumentPlusIcon
+  DocumentPlusIcon,
+  ArrowTopRightOnSquareIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const companyStore = useCompanyStore()
 
 // Company-scoped localStorage key prefix
@@ -214,18 +226,37 @@ async function sendMessage() {
 
     // Try the NL assistant endpoint first (for commands like "Фактура за...")
     try {
-      const nlResponse = await axios.post('/ai/assistant', { message: messageToSend })
+      // Send conversation history + locale for context awareness
+      const historyPayload = messages.value.slice(-10).map(m => ({
+        role: m.role,
+        content: m.content
+      }))
+
+      const nlResponse = await axios.post('/ai/assistant', {
+        message: messageToSend,
+        locale: locale.value,
+        history: historyPayload
+      })
       const nlData = nlResponse.data
 
-      if (nlData.draft_id && nlData.redirect_url) {
-        // AI created a draft — show action button
+      if (nlData.redirect_url) {
+        // AI created an entity directly or a draft — show action button
         assistantMessage = {
           role: 'assistant',
           content: nlData.message || t('ai.chat.no_response'),
           timestamp: new Date(),
-          draftId: nlData.draft_id,
+          draftId: nlData.draft_id || null,
           redirectUrl: nlData.redirect_url,
-          entityType: nlData.intent
+          entityType: nlData.intent,
+          directlyCreated: !nlData.draft_id
+        }
+      } else if (nlData.intent === 'navigate' && nlData.navigation_url) {
+        // AI wants to navigate user to a feature page
+        assistantMessage = {
+          role: 'assistant',
+          content: nlData.message || t('ai.chat.no_response'),
+          timestamp: new Date(),
+          navigationUrl: nlData.navigation_url
         }
       } else if (nlData.intent === 'question' && nlData.message) {
         // AI answered a question — fall through to regular chat for richer answers
@@ -343,9 +374,27 @@ function getDraftButtonLabel(entityType) {
     'create_invoice': t('ai.assistant.review_invoice', 'Review Invoice'),
     'create_bill': t('ai.assistant.review_bill', 'Review Bill'),
     'create_expense': t('ai.assistant.review_expense', 'Review Expense'),
-    'record_payment': t('ai.assistant.review_payment', 'Review Payment')
+    'record_payment': t('ai.assistant.review_payment', 'Review Payment'),
+    'create_estimate': t('ai.assistant.review_estimate', 'Review Estimate'),
+    'create_proforma': t('ai.assistant.review_proforma', 'Review Proforma'),
+    'create_credit_note': t('ai.assistant.review_credit_note', 'Review Credit Note'),
+    'create_recurring': t('ai.assistant.review_recurring', 'Review Recurring Invoice')
   }
   return labels[entityType] || t('ai.assistant.review_draft', 'Review Draft')
+}
+
+function getViewButtonLabel(entityType) {
+  const labels = {
+    'create_invoice': t('ai.assistant.view_invoice', 'View Invoice'),
+    'create_bill': t('ai.assistant.view_bill', 'View Bill'),
+    'create_expense': t('ai.assistant.view_expense', 'View Expense'),
+    'record_payment': t('ai.assistant.view_payment', 'View Payment'),
+    'create_estimate': t('ai.assistant.view_estimate', 'View Estimate'),
+    'create_proforma': t('ai.assistant.view_proforma', 'View Proforma'),
+    'create_credit_note': t('ai.assistant.view_credit_note', 'View Credit Note'),
+    'create_recurring': t('ai.assistant.view_recurring', 'View Recurring Invoice')
+  }
+  return labels[entityType] || t('ai.assistant.view_entity', 'View')
 }
 
 function scrollToBottom() {

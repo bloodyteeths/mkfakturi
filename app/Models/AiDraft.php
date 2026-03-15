@@ -23,11 +23,23 @@ class AiDraft extends Model
 
     public const ENTITY_PAYMENT = 'payment';
 
+    public const ENTITY_ESTIMATE = 'estimate';
+
+    public const ENTITY_PROFORMA = 'proforma';
+
+    public const ENTITY_CREDIT_NOTE = 'credit_note';
+
+    public const ENTITY_RECURRING = 'recurring_invoice';
+
     public const VALID_ENTITIES = [
         self::ENTITY_INVOICE,
         self::ENTITY_BILL,
         self::ENTITY_EXPENSE,
         self::ENTITY_PAYMENT,
+        self::ENTITY_ESTIMATE,
+        self::ENTITY_PROFORMA,
+        self::ENTITY_CREDIT_NOTE,
+        self::ENTITY_RECURRING,
     ];
 
     protected $fillable = [

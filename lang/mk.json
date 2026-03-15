@@ -7089,5 +7089,19 @@
     "documents.error_invalid_format": "Невалиден формат. Дозволени: PDF, PNG, JPEG, XLSX, CSV.",
     "documents.upload_success": "Документот е прикачен. AI обработката започна.",
     "documents.deleted": "Документот е избришан.",
-    "documents.uploading": "Се прикачува..."
+    "documents.uploading": "Се прикачува...",
+    "ai.assistant.review_estimate": "Прегледај понуда",
+    "ai.assistant.review_proforma": "Прегледај профактура",
+    "ai.assistant.review_credit_note": "Прегледај кредит нота",
+    "ai.assistant.review_recurring": "Прегледај повторувачка фактура",
+    "ai.assistant.navigate_to": "Отвори",
+    "ai.assistant.view_invoice": "Прегледај фактура",
+    "ai.assistant.view_bill": "Прегледај сметка",
+    "ai.assistant.view_expense": "Прегледај трошок",
+    "ai.assistant.view_payment": "Прегледај уплата",
+    "ai.assistant.view_estimate": "Прегледај понуда",
+    "ai.assistant.view_proforma": "Прегледај профактура",
+    "ai.assistant.view_credit_note": "Прегледај кредит нота",
+    "ai.assistant.view_recurring": "Прегледај повторувачка",
+    "ai.assistant.view_entity": "Прегледај"
 }
