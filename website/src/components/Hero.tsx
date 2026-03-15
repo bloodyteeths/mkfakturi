@@ -5,7 +5,7 @@ import { Locale } from '@/i18n/locales'
 
 export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
-    <section className="section relative overflow-hidden overflow-x-hidden pt-20 md:pt-32 pb-10 md:pb-20 lg:pt-40 lg:pb-32">
+    <section className="section relative pt-20 md:pt-32 pb-10 md:pb-20 lg:pt-40 lg:pb-32">
       <div className="container relative z-10 grid items-center gap-6 lg:gap-12 lg:grid-cols-2 px-4 sm:px-6">
         <div className="space-y-4 md:space-y-8 text-center lg:text-left animate-[fadeIn_0.8s_ease-out]">
           <h1 className="text-3xl font-extrabold tracking-tight leading-[1.1] sm:text-4xl md:text-5xl lg:text-6xl text-gray-900">
