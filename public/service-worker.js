@@ -7,10 +7,10 @@ const API_CACHE = `${CACHE_VERSION}-api`
 // Static assets to pre-cache on install
 const PRECACHE_URLS = [
   '/offline.html',
-  '/favicons/android-chrome-192x192.png?v=2',
-  '/favicons/android-chrome-512x512.png?v=2',
-  '/favicons/favicon-32x32.png?v=2',
-  '/favicons/favicon-16x16.png?v=2',
+  '/favicons/android-chrome-192x192.png?v=3',
+  '/favicons/android-chrome-512x512.png?v=3',
+  '/favicons/favicon-32x32.png?v=3',
+  '/favicons/favicon-16x16.png?v=3',
 ]
 
 // Install: pre-cache essential assets

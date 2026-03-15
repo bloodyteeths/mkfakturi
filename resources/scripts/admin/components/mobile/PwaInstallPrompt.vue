@@ -9,7 +9,7 @@
       <div class="flex items-center justify-between max-w-lg mx-auto">
         <div class="flex items-center space-x-3 min-w-0">
           <img
-            src="/favicons/android-chrome-192x192.png?v=2"
+            src="/favicons/android-chrome-192x192.png?v=3"
             alt="Facturino"
             class="w-10 h-10 rounded-lg flex-shrink-0"
           />
@@ -50,7 +50,7 @@
       <div class="max-w-lg mx-auto">
         <div class="flex items-start space-x-3">
           <img
-            src="/favicons/android-chrome-192x192.png?v=2"
+            src="/favicons/android-chrome-192x192.png?v=3"
             alt="Facturino"
             class="w-10 h-10 rounded-lg flex-shrink-0"
           />

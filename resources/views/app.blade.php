@@ -5,12 +5,12 @@
     <meta charset="utf-8">
     <title>{{ get_page_title(!Request::header('company')) }}</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=2">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=2">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=2">
-    <link rel="manifest" href="/manifest.json?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=3">
+    <link rel="manifest" href="/manifest.json?v=3">
     <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg" color="#1f2937">
-    <link rel="shortcut icon" href="/favicons/favicon.ico?v=2">
+    <link rel="shortcut icon" href="/favicons/favicon.ico?v=3">
     <meta name="msapplication-TileColor" content="#1f2937">
     <meta name="msapplication-config" content="/favicons/browserconfig.xml">
     <meta name="theme-color" content="#1f2937">
