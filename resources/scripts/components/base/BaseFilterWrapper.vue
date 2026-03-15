@@ -7,7 +7,7 @@
     leave-from-class="opacity-100"
     leave-to-class="opacity-0"
   >
-    <div v-show="show" class="relative z-10 p-4 md:p-8 bg-gray-200 rounded">
+    <div v-show="show" class="relative z-10 p-3 sm:p-4 md:p-6 bg-gray-200 rounded">
       <slot name="filter-header" />
 
       <label

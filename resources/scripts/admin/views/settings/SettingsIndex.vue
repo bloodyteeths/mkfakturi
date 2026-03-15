@@ -11,7 +11,7 @@
       </BaseBreadcrumb>
     </BasePageHeader>
 
-    <div class="w-full mb-6 select-wrapper xl:hidden">
+    <div class="w-full mb-6 select-wrapper lg:hidden">
       <BaseMultiselect
         v-model="currentSetting"
         :options="dropdownMenuItems"
@@ -25,7 +25,7 @@
     </div>
 
     <div class="flex">
-      <div class="hidden mt-1 xl:block min-w-[240px]">
+      <div class="hidden mt-1 lg:block min-w-[240px]">
         <BaseList>
           <BaseListItem
             v-for="(menuItem, index) in globalStore.settingMenu"

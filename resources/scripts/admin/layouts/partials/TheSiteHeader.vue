@@ -111,7 +111,7 @@
       </li>
 
       <!-- Documents shortcut -->
-      <li class="relative float-left ml-2">
+      <li class="relative float-left ml-1 sm:ml-2">
         <router-link
           to="/admin/documents"
           class="
@@ -133,7 +133,7 @@
         </router-link>
       </li>
 
-      <li class="ml-2">
+      <li class="ml-1 sm:ml-2">
         <GlobalSearchBar
           v-if="
             userStore.currentUser.is_owner ||
@@ -146,8 +146,8 @@
         <CompanySwitcher />
       </li>
 
-      <!-- Language Switcher -->
-      <li class="relative block float-left ml-2">
+      <!-- Language Switcher (hidden on small mobile) -->
+      <li class="relative hidden sm:block float-left ml-1 sm:ml-2">
         <BaseDropdown width-class="w-48">
           <template #activator>
             <div
@@ -205,7 +205,7 @@
       </li>
 
       <!-- User Dropdown-->
-      <li class="relative block float-left ml-2">
+      <li class="relative block float-left ml-1 sm:ml-2">
         <BaseDropdown width-class="w-48">
           <template #activator>
             <img

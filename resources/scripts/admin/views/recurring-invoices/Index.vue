@@ -34,14 +34,14 @@
           v-show="recurringInvoiceStore.totalRecurringInvoices"
           type="recurring_invoices"
           :filters="filters"
-          class="ml-4"
+         
         />
 
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_RECURRING_INVOICE)"
           to="recurring-invoices/create"
         >
-          <BaseButton variant="primary" class="ml-4">
+          <BaseButton variant="primary">
             <template #left="slotProps">
               <BaseIcon name="PlusIcon" :class="slotProps.class" />
             </template>

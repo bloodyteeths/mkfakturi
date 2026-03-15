@@ -31,13 +31,13 @@
             v-show="paymentStore.paymentTotalCount"
             type="payments"
             :filters="filters"
-            class="ml-4"
+           
           />
 
           <BaseButton
             v-if="userStore.hasAbilities(abilities.CREATE_PAYMENT)"
             variant="primary"
-            class="ml-4"
+           
             @click="$router.push('/admin/payments/create')"
           >
             <template #left="slotProps">
@@ -67,7 +67,7 @@
             </template>
           </BaseButton>
 
-          <router-link to="/admin/payment-orders/create" class="ml-4">
+          <router-link to="/admin/payment-orders/create">
             <BaseButton variant="primary">
               <template #left="slotProps">
                 <BaseIcon name="PlusIcon" :class="slotProps.class" />

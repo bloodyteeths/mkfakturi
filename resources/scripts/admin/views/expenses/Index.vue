@@ -28,12 +28,12 @@
           v-show="expenseStore.totalExpenses"
           type="expenses"
           :filters="filters"
-          class="ml-4"
+         
         />
 
         <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_EXPENSE)"
-          class="ml-4"
+         
           variant="primary"
           @click="$router.push('expenses/create')"
         >

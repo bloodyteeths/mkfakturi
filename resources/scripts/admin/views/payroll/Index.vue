@@ -105,7 +105,7 @@
           <div class="p-3 bg-primary-100 rounded-lg">
             <BaseIcon name="UsersIcon" class="w-6 h-6 text-primary-600" />
           </div>
-          <div class="ml-4">
+          <div>
             <h3 class="text-lg font-semibold text-gray-900">
               {{ $t('payroll.employees') }}
             </h3>
@@ -122,7 +122,7 @@
           <div class="p-3 bg-green-100 rounded-lg">
             <BaseIcon name="DocumentTextIcon" class="w-6 h-6 text-green-600" />
           </div>
-          <div class="ml-4">
+          <div>
             <h3 class="text-lg font-semibold text-gray-900">
               {{ $t('payroll.payroll_runs') }}
             </h3>
@@ -139,7 +139,7 @@
           <div class="p-3 bg-blue-100 rounded-lg">
             <BaseIcon name="ChartBarIcon" class="w-6 h-6 text-blue-600" />
           </div>
-          <div class="ml-4">
+          <div>
             <h3 class="text-lg font-semibold text-gray-900">
               {{ $t('payroll.reports') }}
             </h3>
@@ -156,7 +156,7 @@
           <div class="p-3 bg-orange-100 rounded-lg">
             <BaseIcon name="CalendarDaysIcon" class="w-6 h-6 text-orange-600" />
           </div>
-          <div class="ml-4">
+          <div>
             <h3 class="text-lg font-semibold text-gray-900">
               {{ $t('navigation.leave') }}
             </h3>

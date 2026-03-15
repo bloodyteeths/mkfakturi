@@ -29,14 +29,14 @@
           v-show="invoiceStore.invoiceTotalCount"
           type="invoices"
           :filters="filters"
-          class="ml-4"
+         
         />
 
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_INVOICE)"
           to="invoices/scan"
         >
-          <BaseButton variant="primary-outline" class="ml-4">
+          <BaseButton variant="primary-outline">
             <template #left="slotProps">
               <BaseIcon name="CameraIcon" :class="slotProps.class" />
             </template>
@@ -48,7 +48,7 @@
           v-if="userStore.hasAbilities(abilities.CREATE_INVOICE)"
           to="invoices/create"
         >
-          <BaseButton variant="primary" class="ml-4">
+          <BaseButton variant="primary">
             <template #left="slotProps">
               <BaseIcon name="PlusIcon" :class="slotProps.class" />
             </template>

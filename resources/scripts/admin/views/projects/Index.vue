@@ -26,7 +26,7 @@
         <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_PROJECT)"
           variant="primary"
-          class="ml-4"
+         
           @click="$router.push('/admin/projects/create')"
         >
           <template #left="slotProps">

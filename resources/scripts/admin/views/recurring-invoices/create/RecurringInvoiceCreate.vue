@@ -66,7 +66,7 @@
       </BasePageHeader>
 
       <!-- Select Customer & Basic Fields  -->
-      <div class="grid-cols-12 gap-8 mt-6 mb-8 lg:grid">
+      <div class="grid-cols-12 gap-3 sm:gap-4 lg:gap-8 mt-4 sm:mt-6 mb-4 sm:mb-8 lg:grid">
         <InvoiceBasicFields
           :v="v$"
           :is-loading="isLoadingContent"

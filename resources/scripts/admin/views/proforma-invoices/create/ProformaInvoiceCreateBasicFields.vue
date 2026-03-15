@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-12 gap-8 mt-6 mb-8">
+  <div class="grid grid-cols-12 gap-3 sm:gap-4 lg:gap-8 mt-4 sm:mt-6 mb-4 sm:mb-8">
     <BaseCustomerSelectPopup
       v-model="proformaInvoiceStore.newProformaInvoice.customer"
       :valid="v.customer_id"

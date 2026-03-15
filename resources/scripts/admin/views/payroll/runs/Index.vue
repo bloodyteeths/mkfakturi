@@ -26,7 +26,7 @@
         </BaseButton>
 
         <BaseButton
-          class="ml-4"
+         
           variant="primary"
           @click="$router.push('/admin/payroll/runs/create')"
         >

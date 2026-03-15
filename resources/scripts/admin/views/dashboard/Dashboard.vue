@@ -63,30 +63,30 @@ onMounted(() => {
     <DashboardStats />
 
     <!-- Main Revenue Chart (full width) -->
-    <div class="mb-6">
+    <div class="mb-3 sm:mb-4 lg:mb-6">
       <DashboardChart />
     </div>
 
     <!-- AI Insights & Chat Widgets (if feature enabled and user setting enabled) -->
-    <div v-if="mcpAiToolsEnabled && showAiInsights" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div v-if="mcpAiToolsEnabled && showAiInsights" class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4 lg:mb-6">
       <AiInsightsWidget />
       <AiChatWidget />
     </div>
 
     <!-- Key Metrics Row: Unpaid Summary + Recent Payments -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4 lg:mb-6">
       <UnpaidSummaryWidget />
       <RecentPaymentsWidget />
     </div>
 
     <!-- Deadlines & Stock Widgets -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4 lg:mb-6">
       <DeadlinesWidget />
       <StockSummaryWidget v-if="stockEnabled" />
     </div>
 
     <!-- Quick Actions -->
-    <div class="mb-6">
+    <div class="mb-3 sm:mb-4 lg:mb-6">
       <QuickActionsWidget />
     </div>
 

@@ -26,7 +26,7 @@
         <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_WAREHOUSE)"
           variant="primary"
-          class="ml-4"
+         
           @click="$router.push('/admin/stock/warehouses/create')"
         >
           <template #left="slotProps">

@@ -7,7 +7,8 @@
       flex-col
       sm:flex-row
       sm:justify-between
-      p-3
+      p-2.5
+      sm:p-3
       bg-white
       rounded
       shadow
@@ -19,11 +20,7 @@
       transition-all
       duration-200
       xl:p-4
-      lg:col-span-2
-      min-h-[80px]
-      sm:min-h-[100px]
     "
-    :class="{ 'lg:!col-span-3': large }"
     :to="route"
     :aria-label="`${label}: ${$slots.default?.()[0]?.children || 'View details'}`"
     role="button"
@@ -31,13 +28,13 @@
   >
     <div class="flex-1">
       <span 
-        class="text-lg font-semibold leading-tight text-black sm:text-xl xl:text-3xl"
+        class="text-base font-semibold leading-tight text-black sm:text-lg xl:text-2xl"
         aria-hidden="true"
       >
         <slot />
       </span>
       <span 
-        class="block mt-1 text-xs leading-tight text-gray-500 sm:text-sm xl:text-lg"
+        class="block mt-0.5 text-[11px] leading-tight text-gray-500 sm:text-xs xl:text-sm"
         aria-hidden="true"
       >
         {{ label }}
@@ -46,7 +43,7 @@
     <div class="flex items-center justify-end mt-2 sm:mt-0 sm:ml-4" aria-hidden="true">
       <component 
         :is="iconComponent" 
-        class="w-8 h-8 sm:w-10 sm:h-10 xl:w-12 xl:h-12 text-primary-500"
+        class="w-6 h-6 sm:w-8 sm:h-8 xl:w-10 xl:h-10 text-primary-500"
         aria-hidden="true"
       />
     </div>

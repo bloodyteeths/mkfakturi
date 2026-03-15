@@ -1,5 +1,5 @@
 <template>
-  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-9 xl:gap-8">
+  <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 xl:gap-6">
     <!-- Amount Due -->
     <DashboardStatsItem
       v-if="userStore.hasAbilities(abilities.VIEW_INVOICE)"

@@ -2,7 +2,7 @@
   <div>
     <div
       v-if="dashboardStore.isDashboardDataLoaded"
-      class="grid grid-cols-10 mt-8 bg-white rounded shadow"
+      class="grid grid-cols-10 mt-4 sm:mt-6 lg:mt-8 bg-white rounded shadow"
     >
       <!-- Chart -->
       <div
@@ -56,19 +56,19 @@
           lg:grid-cols-1
         "
       >
-        <div class="p-6">
+        <div class="p-3 sm:p-4 lg:p-6">
           <span class="text-xs leading-5 lg:text-sm">
             {{ $t('dashboard.chart_info.total_sales') }}
           </span>
           <br />
-          <span class="block mt-1 text-xl font-semibold leading-8 lg:text-2xl">
+          <span class="block mt-1 text-lg font-semibold leading-7 sm:text-xl lg:text-2xl">
             <BaseFormatMoney
               :amount="dashboardStore.totalSales"
               :currency="companyStore.selectedCompanyCurrency"
             />
           </span>
         </div>
-        <div class="p-6">
+        <div class="p-3 sm:p-4 lg:p-6">
           <span class="text-xs leading-5 lg:text-sm">
             {{ $t('dashboard.chart_info.total_receipts') }}
           </span>
@@ -77,9 +77,10 @@
             class="
               block
               mt-1
-              text-xl
+              text-lg
               font-semibold
-              leading-8
+              leading-7
+              sm:text-xl
               lg:text-2xl
               text-green-400
             "
@@ -90,7 +91,7 @@
             />
           </span>
         </div>
-        <div class="p-6">
+        <div class="p-3 sm:p-4 lg:p-6">
           <span class="text-xs leading-5 lg:text-sm">
             {{ $t('dashboard.chart_info.total_expense') }}
           </span>
@@ -99,9 +100,10 @@
             class="
               block
               mt-1
-              text-xl
+              text-lg
               font-semibold
-              leading-8
+              leading-7
+              sm:text-xl
               lg:text-2xl
               text-red-400
             "
@@ -115,7 +117,7 @@
         <div
           class="
             col-span-3
-            p-6
+            p-3 sm:p-4 lg:p-6
             border-t border-gray-200 border-solid
             lg:col-span-1
           "
@@ -128,9 +130,10 @@
             class="
               block
               mt-1
-              text-xl
+              text-lg
               font-semibold
-              leading-8
+              leading-7
+              sm:text-xl
               lg:text-2xl
               text-primary-500
             "

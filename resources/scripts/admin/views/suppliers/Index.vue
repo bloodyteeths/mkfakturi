@@ -27,13 +27,13 @@
           v-show="suppliersStore.supplierTotalCount"
           type="suppliers"
           :filters="filters"
-          class="ml-4"
+         
         />
 
         <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_SUPPLIER)"
           variant="primary"
-          class="ml-4"
+         
           @click="$router.push('/admin/suppliers/create')"
         >
           <template #left="slotProps">

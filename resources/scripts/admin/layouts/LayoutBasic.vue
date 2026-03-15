@@ -18,7 +18,7 @@
       ]"
     >
       <PullToRefresh @refresh="handleRefresh">
-        <div class="pt-16 pb-16">
+        <div class="pt-14 pb-4 sm:pt-16 sm:pb-8 md:pb-16">
           <router-view />
         </div>
       </PullToRefresh>

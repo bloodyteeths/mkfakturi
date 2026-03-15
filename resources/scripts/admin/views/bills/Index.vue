@@ -27,14 +27,14 @@
           v-show="billsStore.billTotalCount"
           type="bills"
           :filters="filters"
-          class="ml-4"
+         
         />
 
         <router-link
           v-if="userStore.hasAbilities(abilities.VIEW_BILL)"
           to="/admin/bills/inbox"
         >
-          <BaseButton variant="primary-outline" class="ml-4">
+          <BaseButton variant="primary-outline">
             <template #left="slotProps">
               <BaseIcon name="InboxStackIcon" :class="slotProps.class" />
             </template>
@@ -46,7 +46,7 @@
           v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
           to="/admin/receipts/scan"
         >
-          <BaseButton variant="primary-outline" class="ml-4">
+          <BaseButton variant="primary-outline">
             <template #left="slotProps">
               <BaseIcon name="CameraIcon" :class="slotProps.class" />
             </template>
@@ -58,7 +58,7 @@
           v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
           to="bills/create"
         >
-          <BaseButton variant="primary" class="ml-4">
+          <BaseButton variant="primary">
             <template #left="slotProps">
               <BaseIcon name="PlusIcon" :class="slotProps.class" />
             </template>

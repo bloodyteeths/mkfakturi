@@ -27,14 +27,14 @@
           v-show="proformaInvoiceStore.proformaInvoiceTotalCount"
           type="proforma_invoices"
           :filters="filters"
-          class="ml-4"
+         
         />
 
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_PROFORMA_INVOICE)"
           to="proforma-invoices/create"
         >
-          <BaseButton variant="primary" class="ml-4">
+          <BaseButton variant="primary">
             <template #left="slotProps">
               <BaseIcon name="PlusIcon" :class="slotProps.class" />
             </template>
