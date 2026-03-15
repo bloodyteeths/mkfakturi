@@ -61,7 +61,7 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
 
           <div className="relative rounded-2xl overflow-hidden shadow-2xl">
             <Image
-              src="/assets/images/hero_skopje.webp"
+              src="/assets/images/hero_home.png"
               alt="Accountant using Facturino on laptop at a cafe by the Stone Bridge, Skopje"
               width={1200}
               height={800}

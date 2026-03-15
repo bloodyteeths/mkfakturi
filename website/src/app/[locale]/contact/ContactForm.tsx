@@ -1,10 +1,12 @@
 "use client"
 import { useMemo, useState } from 'react'
 import { type Locale } from '@/i18n/locales'
+import PageHero from '@/components/PageHero'
 
 const copy = {
   mk: {
     h1: 'Контакт',
+    subtitle: 'Контактирајте го тимот на Facturino за прашања, поддршка или демо.',
     name: 'Име',
     email: 'Е\u2011пошта',
     message: 'Порака',
@@ -15,6 +17,7 @@ const copy = {
   },
   sq: {
     h1: 'Kontakti',
+    subtitle: 'Kontaktoni ekipin e Facturino p\u00ebr pyetje, mb\u00ebshtetje ose demo.',
     name: 'Emri',
     email: 'Email',
     message: 'Mesazhi',
@@ -25,6 +28,7 @@ const copy = {
   },
   tr: {
     h1: '\u0130leti\u015fim',
+    subtitle: 'Sorular, destek veya demo i\u00e7in Facturino ekibiyle ileti\u015fime ge\u00e7in.',
     name: 'Ad',
     email: 'E\u2011posta',
     message: 'Mesaj',
@@ -35,6 +39,7 @@ const copy = {
   },
   en: {
     h1: 'Contact',
+    subtitle: 'Get in touch with the Facturino team for questions, support, or a demo.',
     name: 'Name',
     email: 'Email',
     message: 'Message',
@@ -74,10 +79,15 @@ export default function ContactForm({ locale }: { locale: Locale }) {
   }
 
   return (
-    <main id="main-content" className="section">
-      <div className="container max-w-2xl">
-        <h1 className="mb-6 text-3xl font-bold" style={{color:'var(--color-primary)'}}>{t.h1}</h1>
+    <main id="main-content">
+      <PageHero
+        image="/assets/images/hero_contact.png"
+        alt="Friendly team in bright modern office waving and smiling"
+        title={t.h1}
+        subtitle={t.subtitle}
+      />
 
+      <div className="section container max-w-2xl">
         {status === 'success' && (
           <div className="mb-4 rounded-md bg-green-50 p-4 text-green-800">
             {t.success}

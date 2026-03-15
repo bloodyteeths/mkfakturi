@@ -3,6 +3,7 @@ import { isLocale, Locale, defaultLocale } from '@/i18n/locales'
 import { buildPageMetadata } from '@/lib/metadata'
 import FAQ from '@/components/FAQ'
 import ComparisonTable from '@/components/ComparisonTable'
+import PageHero from '@/components/PageHero'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -57,22 +58,12 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
       />
       {/* Hero Section */}
-      <section className="pt-32 pb-20 bg-slate-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 to-slate-900"></div>
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="container relative z-10 text-center">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight">
-            {h1}
-          </h1>
-          <p className="text-xl text-indigo-200 max-w-2xl mx-auto">
-            {sub}
-          </p>
-        </div>
-      </section>
+      <PageHero
+        image="/assets/images/hero_pricing.png"
+        alt="Entrepreneur reviewing pricing plans on tablet in modern office"
+        title={h1}
+        subtitle={sub}
+      />
 
       <div className="container -mt-10 relative z-20 pb-20">
         {/* Company Pricing */}

@@ -17,36 +17,36 @@ export default function Navbar({ t, locale }: { t: Dictionary; locale: Locale })
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-1">
-          <Link href={`/${locale}/features`} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
+        <nav className="hidden lg:flex items-center gap-0.5">
+          <Link href={`/${locale}/features`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
             {t.nav.features}
           </Link>
           {t.nav.showcase && (
-            <Link href={`/${locale}/pregled`} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
+            <Link href={`/${locale}/pregled`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
               {t.nav.showcase}
             </Link>
           )}
-          <Link href={`/${locale}/e-faktura`} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
+          <Link href={`/${locale}/e-faktura`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
             {t.nav.efaktura}
           </Link>
           {t.nav.integrations && (
-            <Link href={`/${locale}/integrations`} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
+            <Link href={`/${locale}/integrations`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
               {t.nav.integrations}
             </Link>
           )}
-          <Link href={`/${locale}/pricing`} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
+          <Link href={`/${locale}/pricing`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
             {t.nav.pricing}
           </Link>
           {t.nav.forAccountants && (
-            <Link href={`/${locale}/for-accountants`} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
+            <Link href={`/${locale}/for-accountants`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
               {t.nav.forAccountants}
             </Link>
           )}
-          <Link href={`/${locale}/contact`} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
+          <Link href={`/${locale}/contact`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
             {t.nav.contact}
           </Link>
           {t.nav.blog && (
-            <Link href={`/${locale}/blog`} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
+            <Link href={`/${locale}/blog`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
               {t.nav.blog}
             </Link>
           )}

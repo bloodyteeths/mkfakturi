@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildPageMetadata } from '@/lib/metadata'
+import PageHero from '@/components/PageHero'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -499,42 +500,13 @@ export default async function EFakturaPage({ params }: { params: Promise<{ local
   return (
     <main id="main-content" className="overflow-x-hidden">
 
-      {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-28">
-        {/* Background blobs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
-          <div className="absolute top-10 right-20 w-80 h-80 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25"></div>
-          <div className="absolute -bottom-10 left-1/3 w-64 h-64 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-        </div>
-
-        <div className="container relative z-10 text-center max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-sm border border-green-200 px-4 py-1.5 text-sm font-semibold text-green-700 shadow-sm mb-8">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            e-Invoice Ready
-          </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-gray-900 mb-6">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-500">{t.hero.headline.split(': ')[0]}</span>
-            {': '}
-            {t.hero.headline.split(': ')[1]}
-          </h1>
-          <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto mb-10">
-            {t.hero.sub}
-          </p>
-          <a
-            href="https://app.facturino.mk/register"
-            className="btn-primary text-lg px-8 py-4"
-          >
-            {t.hero.cta}
-            <svg className="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </a>
-        </div>
-      </section>
+      <PageHero
+        image="/assets/images/hero_efaktura.png"
+        alt="Digital invoice approval on tablet device"
+        title={t.hero.headline}
+        subtitle={t.hero.sub}
+        cta={{ label: t.hero.cta, href: 'https://app.facturino.mk/signup' }}
+      />
 
       {/* ── TIMELINE / STATUS ────────────────────────────────── */}
       <section className="section bg-slate-50">

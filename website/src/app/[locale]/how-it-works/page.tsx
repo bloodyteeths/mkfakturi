@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildPageMetadata } from '@/lib/metadata'
+import PageHero from '@/components/PageHero'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -323,48 +324,13 @@ export default async function HowItWorksPage({
 
   return (
     <main id="main-content">
-      {/* ============================================================ */}
-      {/*  HERO                                                        */}
-      {/* ============================================================ */}
-      <section className="section relative overflow-hidden pt-24 md:pt-32 pb-16 md:pb-20">
-        {/* Background blobs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob" />
-          <div className="absolute top-10 right-10 w-72 h-72 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-2000" />
-        </div>
-
-        <div className="container relative z-10 text-center max-w-3xl mx-auto px-4 sm:px-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-gray-900 mb-6">
-            {t.hero.title.split('Facturino')[0]}
-            <span className="text-gradient">Facturino</span>
-            {t.hero.title.split('Facturino')[1]}
-          </h1>
-
-          <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto mb-10">
-            {t.hero.subtitle}
-          </p>
-
-          <a
-            href="https://app.facturino.mk/signup"
-            className="btn-primary text-lg px-8 py-4"
-          >
-            {t.hero.cta}
-            <svg
-              className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
-          </a>
-        </div>
-      </section>
+      <PageHero
+        image="/assets/images/hero_howitworks.png"
+        alt="Professional opening laptop at clean desk - getting started concept"
+        title={t.hero.title}
+        subtitle={t.hero.subtitle}
+        cta={{ label: t.hero.cta, href: 'https://app.facturino.mk/signup' }}
+      />
 
       {/* ============================================================ */}
       {/*  THREE STEPS                                                 */}

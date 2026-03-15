@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildPageMetadata } from '@/lib/metadata'
 import FeatureAccordion from '@/components/FeatureAccordion'
+import PageHero from '@/components/PageHero'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -423,28 +424,13 @@ export default async function PregledPage({
 
   return (
     <main id="main-content">
-      {/* ============================================================ */}
-      {/*  HERO                                                        */}
-      {/* ============================================================ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)] to-[#1a2e5a] py-20 text-white md:py-28">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/5" />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-white/5" />
-
-        <div className="container relative mx-auto max-w-4xl px-4 text-center">
-          <h1 className="mb-6 text-4xl font-extrabold leading-tight md:text-5xl lg:text-6xl">
-            {t.hero.title}
-          </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-white/80 md:text-xl">
-            {t.hero.subtitle}
-          </p>
-          <a
-            href={`${APP_URL}/signup`}
-            className="inline-block rounded-lg bg-white px-8 py-4 text-lg font-bold text-[var(--color-primary)] shadow-lg transition hover:scale-105 hover:shadow-xl"
-          >
-            {t.hero.cta}
-          </a>
-        </div>
-      </section>
+      <PageHero
+        image="/assets/images/hero_preview.png"
+        alt="Product demonstration on large screen in modern meeting room"
+        title={t.hero.title}
+        subtitle={t.hero.subtitle}
+        cta={{ label: t.hero.cta, href: 'https://app.facturino.mk/signup' }}
+      />
 
       {/* ============================================================ */}
       {/*  FEATURE GROUPS                                               */}

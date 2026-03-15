@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PageHero from '@/components/PageHero'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildPageMetadata } from '@/lib/metadata'
 
@@ -1045,26 +1046,13 @@ export default async function FeaturesPage({
       {/* ============================================================ */}
       {/*  HERO                                                        */}
       {/* ============================================================ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)] to-[#1a2e5a] py-20 text-white md:py-28">
-        {/* Decorative circles */}
-        <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/5" />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-white/5" />
-
-        <div className="container relative mx-auto max-w-4xl px-4 text-center">
-          <h1 className="mb-6 text-4xl font-extrabold leading-tight md:text-5xl lg:text-6xl">
-            {t.hero.title}
-          </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-white/80 md:text-xl">
-            {t.hero.subtitle}
-          </p>
-          <Link
-            href={`/${locale}/pricing`}
-            className="inline-block rounded-lg bg-white px-8 py-4 text-lg font-bold text-[var(--color-primary)] shadow-lg transition hover:scale-105 hover:shadow-xl"
-          >
-            {t.hero.cta}
-          </Link>
-        </div>
-      </section>
+      <PageHero
+        image="/assets/images/hero_features.png"
+        alt="Modern office workspace with team collaborating on financial software"
+        title={t.hero.title}
+        subtitle={t.hero.subtitle}
+        cta={{ label: t.hero.cta, href: `/${locale}/pricing` }}
+      />
 
       {/* ============================================================ */}
       {/*  FEATURE SECTIONS                                            */}

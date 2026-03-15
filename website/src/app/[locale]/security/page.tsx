@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildPageMetadata } from '@/lib/metadata'
+import PageHero from '@/components/PageHero'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -308,53 +309,12 @@ export default async function SecurityPage({ params }: { params: Promise<{ local
   return (
     <main id="main-content" className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-32 pb-24 bg-slate-900 text-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-900"></div>
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-10 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="container relative z-10 text-center max-w-4xl mx-auto px-4">
-          {/* Shield icon */}
-          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-            <svg className="w-10 h-10 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-            </svg>
-          </div>
-
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 tracking-tight leading-tight">
-            {t.heroTitle}
-          </h1>
-          <p className="text-lg md:text-xl text-indigo-200 max-w-3xl mx-auto leading-relaxed">
-            {t.heroSub}
-          </p>
-
-          {/* Trust badges row */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-6">
-            <div className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-5 py-2.5">
-              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75" /></svg>
-              <span className="text-sm font-medium text-indigo-100">AES-256</span>
-            </div>
-            <div className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-5 py-2.5">
-              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75" /></svg>
-              <span className="text-sm font-medium text-indigo-100">TLS 1.3</span>
-            </div>
-            <div className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-5 py-2.5">
-              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75" /></svg>
-              <span className="text-sm font-medium text-indigo-100">GDPR</span>
-            </div>
-            <div className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-5 py-2.5">
-              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75" /></svg>
-              <span className="text-sm font-medium text-indigo-100">EU Hosted</span>
-            </div>
-            <div className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-5 py-2.5">
-              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75" /></svg>
-              <span className="text-sm font-medium text-indigo-100">AGPL-3.0</span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        image="/assets/images/hero_security.png"
+        alt="Modern secure server room with blue LED lighting"
+        title={t.heroTitle}
+        subtitle={t.heroSub}
+      />
 
       {/* Content Sections */}
       {sections.map((section, sectionIdx) => (
