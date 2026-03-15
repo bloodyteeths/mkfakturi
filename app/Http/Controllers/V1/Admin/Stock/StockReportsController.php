@@ -50,14 +50,15 @@ class StockReportsController extends Controller
      *
      * GET /api/v1/stock/items/{item}/card
      */
-    public function itemCard(Request $request, Item $item): JsonResponse
+    public function itemCard(Request $request, $company, Item $item): JsonResponse
     {
         if ($error = $this->checkStockEnabled()) {
             return $error;
         }
 
         // Authorization: item must belong to user's company
-        $companyId = $request->header('company');
+        // $company comes from the {company} route parameter in partner routes
+        $companyId = $request->header('company') ?: $company;
         if ($item->company_id != $companyId) {
             return response()->json([
                 'success' => false,
