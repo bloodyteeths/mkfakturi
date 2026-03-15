@@ -335,7 +335,7 @@ export default async function HowItWorksPage({
       {/* ============================================================ */}
       {/*  THREE STEPS                                                 */}
       {/* ============================================================ */}
-      <section className="py-16 md:py-24">
+      <section className="py-8 md:py-24">
         <div className="container px-4 sm:px-6">
           {t.steps.map((step, i) => {
             const Icon = stepIcons[i]
@@ -344,18 +344,18 @@ export default async function HowItWorksPage({
             return (
               <div
                 key={i}
-                className={`flex flex-col ${isEven ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-10 lg:gap-16 ${i !== 0 ? 'mt-20 md:mt-28' : ''}`}
+                className={`flex flex-col ${isEven ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-6 lg:gap-16 ${i !== 0 ? 'mt-10 md:mt-28' : ''}`}
               >
                 {/* Visual / number side */}
                 <div className="flex-shrink-0 w-full lg:w-5/12 flex justify-center">
                   <div className="relative">
                     {/* Large number watermark */}
-                    <span className="absolute -top-6 -left-4 text-[120px] md:text-[160px] font-extrabold leading-none text-indigo-100/60 select-none pointer-events-none z-0">
+                    <span className="absolute -top-6 -left-4 text-[80px] md:text-[160px] font-extrabold leading-none text-indigo-100/60 select-none pointer-events-none z-0">
                       {step.num}
                     </span>
                     {/* Icon card */}
                     <div
-                      className={`relative z-10 w-40 h-40 md:w-52 md:h-52 rounded-3xl bg-gradient-to-br ${stepGradients[i]} shadow-xl flex items-center justify-center`}
+                      className={`relative z-10 w-28 h-28 md:w-52 md:h-52 rounded-3xl bg-gradient-to-br ${stepGradients[i]} shadow-xl flex items-center justify-center`}
                     >
                       <div className="flex flex-col items-center gap-3">
                         <Icon />
@@ -422,8 +422,8 @@ export default async function HowItWorksPage({
       {/* ============================================================ */}
       <section className="section bg-gray-50/60">
         <div className="container px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-6 md:mb-12">
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">
               {t.benefits.title}
             </h2>
             <div className="mx-auto w-20 h-1 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400" />

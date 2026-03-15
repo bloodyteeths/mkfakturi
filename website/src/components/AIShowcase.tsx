@@ -46,9 +46,9 @@ export default function AIShowcase({ t }: { t: Dictionary }) {
     return (
         <section className="section bg-slate-50 overflow-hidden">
             <div className="container">
-                <div className="text-center max-w-3xl mx-auto mb-12">
+                <div className="text-center max-w-3xl mx-auto mb-6 md:mb-12">
                     <span className="text-indigo-600 font-semibold tracking-wider uppercase text-sm">{ai.badge}</span>
-                    <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4 text-gray-900">
+                    <h2 className="text-2xl md:text-4xl font-bold mt-2 mb-4 text-gray-900">
                         {ai.title}
                     </h2>
                     <p className="text-lg text-gray-600">
@@ -56,8 +56,8 @@ export default function AIShowcase({ t }: { t: Dictionary }) {
                     </p>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-10 items-center">
-                    <div className="relative order-2 lg:order-1">
+                <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
+                    <div className="relative order-2 lg:order-1 hidden lg:block">
                         <div className="browser-frame">
                             <div className="browser-frame-bar">
                                 <div className="browser-frame-dot"></div>

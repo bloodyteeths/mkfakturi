@@ -318,14 +318,14 @@ export default async function SecurityPage({ params }: { params: Promise<{ local
 
       {/* Content Sections */}
       {sections.map((section, sectionIdx) => (
-        <section key={sectionIdx} className={`py-20 ${sectionBgs[sectionIdx]}`}>
+        <section key={sectionIdx} className={`py-8 md:py-20 ${sectionBgs[sectionIdx]}`}>
           <div className="container max-w-6xl mx-auto px-4">
             {/* Section header */}
-            <div className="flex flex-col items-center text-center mb-14">
-              <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br ${sectionAccents[sectionIdx]} text-white shadow-lg`}>
+            <div className="flex flex-col items-center text-center mb-6 md:mb-14">
+              <div className={`mb-3 md:mb-5 flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl bg-gradient-to-br ${sectionAccents[sectionIdx]} text-white shadow-lg`}>
                 {sectionIcons[sectionIdx]}
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-3">
                 {section.title}
               </h2>
               <p className="text-lg text-gray-500 max-w-2xl">
@@ -338,7 +338,7 @@ export default async function SecurityPage({ params }: { params: Promise<{ local
               {section.items.map(([title, body], itemIdx) => (
                 <div
                   key={itemIdx}
-                  className="group relative rounded-2xl border border-gray-200 bg-white p-7 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+                  className="group relative rounded-xl md:rounded-2xl border border-gray-200 bg-white p-4 md:p-7 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
                 >
                   <div className="flex items-start gap-4">
                     <div className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${sectionAccents[sectionIdx]} text-white`}>
@@ -374,7 +374,7 @@ export default async function SecurityPage({ params }: { params: Promise<{ local
       ))}
 
       {/* Bottom CTA */}
-      <section className="relative overflow-hidden py-24 bg-slate-900 text-white">
+      <section className="relative overflow-hidden py-12 md:py-24 bg-slate-900 text-white">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 to-slate-900"></div>
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-3xl"></div>

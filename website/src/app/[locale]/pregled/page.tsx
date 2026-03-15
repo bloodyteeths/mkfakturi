@@ -435,12 +435,12 @@ export default async function PregledPage({
       {/* ============================================================ */}
       {/*  FEATURE GROUPS                                               */}
       {/* ============================================================ */}
-      <div className="container mx-auto max-w-4xl px-4 py-16 md:py-20">
+      <div className="container mx-auto max-w-4xl px-4 py-8 md:py-20">
         {mkData.groups.map((group, gi) => {
           const groupHeader = t.groups[gi] || { title: group.title, icon: group.icon }
 
           return (
-            <section key={gi} className="mb-16 last:mb-0">
+            <section key={gi} className="mb-8 md:mb-16 last:mb-0">
               {/* Group header */}
               <div className="mb-8 flex items-center gap-3">
                 <span className="text-3xl">{groupHeader.icon}</span>
@@ -473,7 +473,7 @@ export default async function PregledPage({
       {/* ============================================================ */}
       {/*  BOTTOM CTA                                                  */}
       {/* ============================================================ */}
-      <section className="bg-gray-50 py-16 md:py-20">
+      <section className="bg-gray-50 py-8 md:py-20">
         <div className="container mx-auto max-w-3xl px-4 text-center">
           <h2 className="mb-4 text-3xl font-extrabold text-gray-900 md:text-4xl">
             {t.bottomCta.title}

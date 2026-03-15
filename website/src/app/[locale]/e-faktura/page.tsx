@@ -511,8 +511,8 @@ export default async function EFakturaPage({ params }: { params: Promise<{ local
       {/* ── TIMELINE / STATUS ────────────────────────────────── */}
       <section className="section bg-slate-50">
         <div className="container px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{t.timeline.title}</h2>
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-gray-900">{t.timeline.title}</h2>
             <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-cyan-500 mx-auto rounded-full"></div>
           </div>
 
@@ -554,8 +554,8 @@ export default async function EFakturaPage({ params }: { params: Promise<{ local
       <section className="section">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none"></div>
         <div className="container relative z-10 px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{t.features.title}</h2>
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-gray-900">{t.features.title}</h2>
             <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-cyan-500 mx-auto rounded-full"></div>
           </div>
 
@@ -579,14 +579,14 @@ export default async function EFakturaPage({ params }: { params: Promise<{ local
       {/* ── COMPARISON ───────────────────────────────────────── */}
       <section className="section bg-slate-50">
         <div className="container px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{t.comparison.title}</h2>
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-gray-900">{t.comparison.title}</h2>
             <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-cyan-500 mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-8 max-w-4xl mx-auto">
             {/* With Facturino */}
-            <div className="rounded-2xl border-2 border-green-200 bg-white p-8 shadow-lg relative overflow-hidden">
+            <div className="rounded-2xl border-2 border-green-200 bg-white p-5 md:p-8 shadow-lg relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-emerald-500"></div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
@@ -605,7 +605,7 @@ export default async function EFakturaPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Without Facturino */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm relative overflow-hidden">
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 md:p-8 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-300 to-red-400"></div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
@@ -647,7 +647,7 @@ export default async function EFakturaPage({ params }: { params: Promise<{ local
       </section>
 
       {/* ── BOTTOM CTA ───────────────────────────────────────── */}
-      <section className="py-20 lg:py-28 relative overflow-hidden">
+      <section className="py-12 lg:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-cyan-600"></div>
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>

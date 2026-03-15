@@ -5,9 +5,9 @@ import { Locale } from '@/i18n/locales'
 
 export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
-    <section className="section relative overflow-hidden overflow-x-hidden pt-24 md:pt-32 pb-16 md:pb-20 lg:pt-40 lg:pb-32">
-      <div className="container relative z-10 grid items-center gap-12 lg:grid-cols-2 px-4 sm:px-6">
-        <div className="space-y-8 text-center lg:text-left animate-[fadeIn_0.8s_ease-out]">
+    <section className="section relative overflow-hidden overflow-x-hidden pt-20 md:pt-32 pb-10 md:pb-20 lg:pt-40 lg:pb-32">
+      <div className="container relative z-10 grid items-center gap-6 lg:gap-12 lg:grid-cols-2 px-4 sm:px-6">
+        <div className="space-y-4 md:space-y-8 text-center lg:text-left animate-[fadeIn_0.8s_ease-out]">
           <h1 className="text-3xl font-extrabold tracking-tight leading-[1.1] sm:text-4xl md:text-5xl lg:text-6xl text-gray-900">
             {t.hero.h1.split('AI')[0]}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-500">AI</span>
@@ -18,12 +18,12 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
             {t.heroTagline && (
               <p className="text-xl font-medium text-gray-900">{t.heroTagline}</p>
             )}
-            <p className="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+            <p className="text-base md:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
               {t.hero.sub}
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 md:gap-4 pt-2 md:pt-4">
             <a href="https://app.facturino.mk/signup" className="btn-primary w-full sm:w-auto group">
               {t.hero.primaryCta}
               <svg className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -61,7 +61,7 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
 
           <div className="relative rounded-2xl overflow-hidden shadow-2xl">
             <Image
-              src="/assets/images/hero_home.png"
+              src="/assets/images/hero_landing.png"
               alt="Accountant using Facturino on laptop at a cafe by the Stone Bridge, Skopje"
               width={1200}
               height={800}

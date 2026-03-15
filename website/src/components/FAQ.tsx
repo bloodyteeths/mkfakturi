@@ -6,7 +6,7 @@ export default function FAQ({ t }: { t: Dictionary }) {
   return (
     <section className="section bg-slate-50">
       <div className="container max-w-4xl">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8 md:mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
             {t.faq.title}
           </h2>

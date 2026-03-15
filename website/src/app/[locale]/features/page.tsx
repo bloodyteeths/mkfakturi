@@ -1065,40 +1065,35 @@ export default async function FeaturesPage({
           return (
             <section
               key={idx}
-              className="relative overflow-hidden border-b-4 border-[var(--color-primary)]/20 bg-gradient-to-br from-indigo-50 via-white to-blue-50 py-16 md:py-24"
+              className="relative overflow-hidden border-b-4 border-[var(--color-primary)]/20 bg-gradient-to-br from-indigo-50 via-white to-blue-50 py-8 md:py-24"
             >
-              {/* Subtle grid pattern */}
-              <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-
               <div className="container relative mx-auto max-w-6xl px-4">
-                {/* Badge */}
-                <div className="mb-4 flex items-center justify-center gap-2">
+                <div className="mb-3 flex items-center justify-center gap-2">
                   <span className="rounded-full bg-[var(--color-primary)] px-4 py-1.5 text-sm font-semibold text-white">
                     {section.icon} {section.badge}
                   </span>
                 </div>
 
-                <h2 className="mb-3 text-center text-3xl font-extrabold md:text-4xl" style={{ color: 'var(--color-primary)' }}>
+                <h2 className="mb-2 text-center text-2xl font-extrabold md:text-4xl" style={{ color: 'var(--color-primary)' }}>
                   {section.title}
                 </h2>
-                <p className="mx-auto mb-12 max-w-2xl text-center text-gray-600 md:text-lg">
+                <p className="mx-auto mb-6 md:mb-12 max-w-2xl text-center text-sm md:text-lg text-gray-600">
                   {section.subtitle}
                 </p>
 
-                {/* AI chat-style demo bubble + features grid */}
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 md:gap-8 grid-cols-2 lg:grid-cols-3">
                   {section.features.map((feat, fi) => (
                     <div
                       key={fi}
-                      className="group relative rounded-2xl border border-indigo-100 bg-white p-6 shadow-md transition hover:-translate-y-1 hover:shadow-xl"
+                      className="group relative rounded-xl md:rounded-2xl border border-indigo-100 bg-white p-3 md:p-6 shadow-sm md:shadow-md transition hover:-translate-y-1 hover:shadow-xl"
                     >
-                      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-xl">
+                      <div className="hidden md:flex mb-3 h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-xl">
                         {fi === 0 ? '\u{1F4AC}' : fi === 1 ? '\u{1F4C8}' : fi === 2 ? '\u{26A0}\u{FE0F}' : fi === 3 ? '\u{1F52E}' : '\u{1F4CB}'}
                       </div>
-                      <h3 className="mb-2 text-lg font-bold text-gray-900">
+                      <h3 className="mb-1 md:mb-2 text-sm md:text-lg font-bold text-gray-900">
                         {feat.title}
                       </h3>
-                      <p className="text-sm leading-relaxed text-gray-600">
+                      <p className="text-xs md:text-sm leading-relaxed text-gray-600">
                         {feat.desc}
                       </p>
                     </div>
@@ -1112,34 +1107,34 @@ export default async function FeaturesPage({
         return (
           <section
             key={idx}
-            className={`py-16 md:py-20 ${isEven ? 'bg-white' : 'bg-gray-50'}`}
+            className={`py-6 md:py-20 ${isEven ? 'bg-white' : 'bg-gray-50'}`}
           >
             <div className="container mx-auto max-w-6xl px-4">
-              <div className="mb-10 text-center md:text-left">
-                <span className="mb-2 block text-4xl">{section.icon}</span>
+              <div className="mb-4 md:mb-10 text-center md:text-left">
+                <span className="mb-1 block text-2xl md:text-4xl">{section.icon}</span>
                 {section.badge && (
-                  <span className="mb-3 inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                  <span className="mb-2 inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
                     {section.badge}
                   </span>
                 )}
-                <h2 className="mb-3 text-2xl font-extrabold text-gray-900 md:text-3xl">
+                <h2 className="mb-2 text-xl font-extrabold text-gray-900 md:text-3xl">
                   {section.title}
                 </h2>
-                <p className="max-w-2xl text-gray-600 md:text-lg">
+                <p className="max-w-2xl text-sm md:text-lg text-gray-600">
                   {section.subtitle}
                 </p>
               </div>
 
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 md:gap-6 grid-cols-2 lg:grid-cols-3">
                 {section.features.map((feat, fi) => (
                   <div
                     key={fi}
-                    className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md"
+                    className="rounded-xl border border-gray-200 bg-white p-3 md:p-6 shadow-sm transition hover:shadow-md"
                   >
-                    <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                    <h3 className="mb-1 md:mb-2 text-sm md:text-lg font-semibold text-gray-900">
                       {feat.title}
                     </h3>
-                    <p className="text-sm leading-relaxed text-gray-600">
+                    <p className="text-xs md:text-sm leading-relaxed text-gray-600">
                       {feat.desc}
                     </p>
                   </div>
@@ -1153,7 +1148,7 @@ export default async function FeaturesPage({
       {/* ============================================================ */}
       {/*  COMPARISON BANNER                                           */}
       {/* ============================================================ */}
-      <section className="bg-[var(--color-primary)] py-12 text-white md:py-16">
+      <section className="bg-[var(--color-primary)] py-8 text-white md:py-16">
         <div className="container mx-auto max-w-4xl px-4 text-center">
           <p className="mb-3 text-2xl font-extrabold md:text-3xl">
             {t.comparison.text}
@@ -1167,7 +1162,7 @@ export default async function FeaturesPage({
       {/* ============================================================ */}
       {/*  BOTTOM CTA                                                  */}
       {/* ============================================================ */}
-      <section className="bg-gray-50 py-16 md:py-20">
+      <section className="bg-gray-50 py-8 md:py-20">
         <div className="container mx-auto max-w-3xl px-4 text-center">
           <h2 className="mb-4 text-3xl font-extrabold text-gray-900 md:text-4xl">
             {t.bottomCta.title}

@@ -11,7 +11,7 @@ interface PageHeroProps {
 
 export default function PageHero({ title, subtitle, image, alt, cta, badge }: PageHeroProps) {
   return (
-    <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-20">
+    <section className="relative overflow-hidden pt-20 pb-10 md:pt-32 md:pb-20">
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <Image

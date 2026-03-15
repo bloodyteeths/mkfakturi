@@ -41,12 +41,12 @@ export default function FeatureGrid({ t }: { t: Dictionary }) {
     return (
         <section className="section bg-white">
             <div className="container">
-                <div className="text-center max-w-3xl mx-auto mb-12">
-                    <h2 className="text-3xl font-bold mb-4 text-gray-900">{fg.title}</h2>
+                <div className="text-center max-w-3xl mx-auto mb-6 md:mb-12">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4 text-gray-900">{fg.title}</h2>
                     <p className="text-lg text-gray-600">{fg.subtitle}</p>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-12">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-12">
                     {fg.features.map((f, i) => {
                         const Icon = featureIcons[i] || IconScan
                         return (
@@ -61,8 +61,8 @@ export default function FeatureGrid({ t }: { t: Dictionary }) {
                     })}
                 </div>
 
-                {/* Product screenshot showcase */}
-                <div className="browser-frame max-w-4xl mx-auto">
+                {/* Product screenshot showcase — hidden on mobile to save scroll */}
+                <div className="hidden md:block browser-frame max-w-4xl mx-auto">
                     <div className="browser-frame-bar">
                         <div className="browser-frame-dot"></div>
                         <div className="browser-frame-dot"></div>

@@ -4,7 +4,7 @@ import { Locale } from '@/i18n/locales'
 
 export default function CTA({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
-    <section className="py-20 lg:py-32 relative overflow-hidden">
+    <section className="py-12 lg:py-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-cyan-600"></div>
 
       {/* Decorative circles */}

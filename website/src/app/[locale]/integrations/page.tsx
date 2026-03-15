@@ -348,8 +348,8 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
       {/* ── CATEGORY GRID ────────────────────────────────────── */}
       <section className="section bg-slate-50">
         <div className="container px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{t.categories.title}</h2>
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-gray-900">{t.categories.title}</h2>
             <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-cyan-500 mx-auto rounded-full"></div>
           </div>
 
@@ -400,8 +400,8 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
       {/* ── STATUS TIMELINE ──────────────────────────────────── */}
       <section className="section">
         <div className="container px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{t.timeline.title}</h2>
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-gray-900">{t.timeline.title}</h2>
             <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-cyan-500 mx-auto rounded-full"></div>
           </div>
 
@@ -464,7 +464,7 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
       </section>
 
       {/* ── BOTTOM CTA ───────────────────────────────────────── */}
-      <section className="py-20 lg:py-28 relative overflow-hidden">
+      <section className="py-12 lg:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-cyan-600"></div>
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>

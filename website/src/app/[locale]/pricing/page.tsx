@@ -67,8 +67,8 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
 
       <div className="container -mt-10 relative z-20 pb-20">
         {/* Company Pricing */}
-        <div className="mb-24">
-          <div className="flex items-center justify-center gap-4 mb-12">
+        <div className="mb-12 md:mb-24">
+          <div className="flex items-center justify-center gap-4 mb-6 md:mb-12">
             <h2 className="text-2xl font-bold text-gray-900">{sectionCompany}</h2>
             <div className="h-px w-12 bg-gray-200"></div>
           </div>
@@ -138,7 +138,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
 
         {/* Partner Pricing */}
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-4 mb-12">
+          <div className="flex items-center justify-center gap-4 mb-6 md:mb-12">
             <h2 className="text-2xl font-bold text-gray-900">{sectionPartner}</h2>
             <div className="h-px w-12 bg-gray-200"></div>
           </div>

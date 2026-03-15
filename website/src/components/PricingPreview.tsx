@@ -8,7 +8,7 @@ export default function PricingPreview({ t, locale }: { t: Dictionary; locale: L
   return (
     <section className="section">
       <div className="container">
-        <div className="text-center max-w-3xl mx-auto mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-6 md:mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
             {p.title}
           </h2>

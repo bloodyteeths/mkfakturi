@@ -628,12 +628,12 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
       {/* ── PAIN POINTS ──────────────────────────────────────── */}
       <section className="section bg-slate-50">
         <div className="container px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{t.pains.title}</h2>
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
+            <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4 text-gray-900">{t.pains.title}</h2>
             <div className="h-1 w-20 bg-gradient-to-r from-red-400 to-orange-400 mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6 max-w-5xl mx-auto">
             {t.pains.items.map((item, i) => {
               const Icon = painIcons[item.icon]
               return (
@@ -658,12 +658,12 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
       <section className="section">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none"></div>
         <div className="container relative z-10 px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{t.solutions.title}</h2>
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
+            <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4 text-gray-900">{t.solutions.title}</h2>
             <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-cyan-500 mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6 max-w-5xl mx-auto">
             {t.solutions.items.map((item, i) => {
               const Icon = solutionIcons[item.icon]
               return (
@@ -687,15 +687,15 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
       {/* ── YEAR-END CLOSING WIZARD ─────────────────────────── */}
       <section className="section bg-gradient-to-br from-emerald-50 to-cyan-50">
         <div className="container px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-700 mb-6">
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-700 mb-4 md:mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
               </svg>
               NEW
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{t.yearEnd.title}</h2>
-            <p className="text-lg text-gray-600">{t.yearEnd.sub}</p>
+            <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4 text-gray-900">{t.yearEnd.title}</h2>
+            <p className="text-sm md:text-lg text-gray-600">{t.yearEnd.sub}</p>
             <div className="h-1 w-20 bg-gradient-to-r from-emerald-500 to-cyan-500 mx-auto rounded-full mt-4"></div>
           </div>
 
@@ -720,9 +720,9 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
       {/* ── COMPARISON TABLE ─────────────────────────────────── */}
       <section className="section bg-slate-50">
         <div className="container px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3 text-gray-900">{t.comparison.title}</h2>
-            <p className="text-lg text-gray-600">{t.comparison.sub}</p>
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
+            <h2 className="text-2xl md:text-4xl font-bold mb-2 md:mb-3 text-gray-900">{t.comparison.title}</h2>
+            <p className="text-sm md:text-lg text-gray-600">{t.comparison.sub}</p>
             <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-cyan-500 mx-auto rounded-full mt-4"></div>
           </div>
 
@@ -761,12 +761,12 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-cyan-50 pointer-events-none"></div>
         <div className="container relative z-10 px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-center">
               {/* Left: copy */}
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{t.partner.title}</h2>
-                <p className="text-gray-600 text-lg mb-8 leading-relaxed">{t.partner.sub}</p>
-                <ul className="space-y-4 mb-8">
+                <h2 className="text-2xl md:text-4xl font-bold mb-4 text-gray-900">{t.partner.title}</h2>
+                <p className="text-gray-600 text-sm md:text-lg mb-4 md:mb-8 leading-relaxed">{t.partner.sub}</p>
+                <ul className="space-y-3 md:space-y-4 mb-6 md:mb-8">
                   {t.partner.benefits.map((b, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <div className="flex-shrink-0 mt-0.5">
@@ -789,7 +789,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
               {/* Right: visual card */}
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-3xl blur-2xl transform scale-95"></div>
-                <div className="relative glass-panel rounded-2xl p-8 space-y-6">
+                <div className="relative glass-panel rounded-2xl p-5 md:p-8 space-y-4 md:space-y-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600 font-bold text-xl">
                       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -828,7 +828,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
       </section>
 
       {/* ── BOTTOM CTA ───────────────────────────────────────── */}
-      <section className="py-20 lg:py-28 relative overflow-hidden">
+      <section className="py-12 lg:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-cyan-600"></div>
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
@@ -836,10 +836,10 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
         </div>
 
         <div className="container relative z-10 text-center text-white px-4 sm:px-6">
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">
+          <h2 className="text-2xl md:text-5xl font-extrabold mb-4 md:mb-6 tracking-tight">
             {t.bottomCta.title}
           </h2>
-          <p className="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto">
+          <p className="text-base md:text-xl text-indigo-100 mb-6 md:mb-10 max-w-2xl mx-auto">
             {t.bottomCta.sub}
           </p>
           <a

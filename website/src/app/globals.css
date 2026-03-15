@@ -219,7 +219,7 @@ h6 {
 }
 
 .section {
-  @apply py-12 md:py-20;
+  @apply py-8 md:py-20;
   position: relative;
   overflow: hidden;
 }
