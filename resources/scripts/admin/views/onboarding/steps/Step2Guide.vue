@@ -1,122 +1,67 @@
 <template>
-  <div>
-    <!-- Header with source badge -->
-    <div class="mb-6">
-      <div class="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 mb-3">
-        <div class="h-1.5 w-1.5 rounded-full bg-primary-500 animate-pulse" />
-        {{ sourceLabel }}
-      </div>
-      <h2 class="text-2xl font-bold text-gray-900 tracking-tight">
+  <div class="mt-6">
+    <!-- Source badge -->
+    <div class="flex items-center gap-2 mb-4">
+      <h3 class="text-sm font-medium text-gray-700">
         {{ $t('onboarding.step2.title', { source: sourceLabel }) }}
-      </h2>
-      <p class="mt-1.5 text-sm text-gray-500 leading-relaxed">
-        {{ $t('onboarding.step2.subtitle') }}
-      </p>
-    </div>
-
-    <!-- Export steps as timeline -->
-    <div class="relative space-y-0">
-      <!-- Vertical line -->
-      <div class="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gray-100" />
-
-      <div
-        v-for="(step, index) in guideSteps"
-        :key="index"
-        class="relative flex items-start gap-4 py-3"
-      >
-        <!-- Step number / check circle -->
-        <button
-          class="relative z-10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300 cursor-pointer"
-          :class="
-            step.checked
-              ? 'border-green-500 bg-green-500 text-white shadow-md shadow-green-500/20'
-              : 'border-gray-200 bg-white text-gray-400 hover:border-primary-300 hover:text-primary-500'
-          "
-          @click="step.checked = !step.checked"
-        >
-          <BaseIcon v-if="step.checked" name="CheckIcon" class="h-5 w-5" />
-          <span v-else class="text-sm font-bold">{{ index + 1 }}</span>
-        </button>
-
-        <!-- Content card -->
-        <div
-          class="flex-1 rounded-xl border p-4 transition-all duration-300"
-          :class="
-            step.checked
-              ? 'border-green-100 bg-green-50/50'
-              : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
-          "
-        >
-          <p
-            class="text-sm font-semibold transition-all duration-200"
-            :class="step.checked ? 'text-green-700 line-through' : 'text-gray-900'"
-          >
-            {{ step.text }}
-          </p>
-          <p v-if="step.detail" class="mt-1 text-xs text-gray-500 leading-relaxed">
-            {{ step.detail }}
-          </p>
-          <a
-            v-if="step.link"
-            :href="step.link"
-            target="_blank"
-            rel="noopener"
-            class="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-100 hover:text-primary-700"
-          >
-            <BaseIcon name="BookOpenIcon" class="h-3.5 w-3.5" />
-            {{ step.linkText || $t('onboarding.step2.documentation') }}
-            <BaseIcon name="ArrowTopRightOnSquareIcon" class="h-3 w-3" />
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Files to prepare — glass card -->
-    <div class="mt-8 rounded-2xl border border-blue-200/60 bg-gradient-to-br from-blue-50 to-indigo-50/50 p-5 shadow-sm">
-      <h3 class="mb-4 flex items-center gap-2.5 text-sm font-bold text-blue-900">
-        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500 shadow-sm shadow-blue-500/20">
-          <BaseIcon name="DocumentArrowDownIcon" class="h-4 w-4 text-white" />
-        </div>
-        {{ $t('onboarding.step2.files_to_prepare') }}
       </h3>
-      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    </div>
+
+    <!-- Export steps as numbered list -->
+    <div class="rounded-lg border border-gray-200 bg-white p-4 mb-4">
+      <ol class="space-y-3">
+        <li
+          v-for="(step, index) in guideSteps"
+          :key="index"
+          class="flex items-start gap-3"
+        >
+          <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-600">
+            {{ index + 1 }}
+          </span>
+          <div class="flex-1">
+            <p class="text-sm text-gray-900">{{ step.text }}</p>
+            <p v-if="step.detail" class="mt-0.5 text-xs text-gray-500">{{ step.detail }}</p>
+            <a
+              v-if="step.link"
+              :href="step.link"
+              target="_blank"
+              rel="noopener"
+              class="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700"
+            >
+              <BaseIcon name="BookOpenIcon" class="h-3.5 w-3.5" />
+              {{ step.linkText || $t('onboarding.step2.documentation') }}
+              <BaseIcon name="ArrowTopRightOnSquareIcon" class="h-3 w-3" />
+            </a>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <!-- Files to prepare -->
+    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <h4 class="text-sm font-medium text-gray-700 mb-3">
+        {{ $t('onboarding.step2.files_to_prepare') }}
+      </h4>
+      <div class="space-y-2">
         <label
           v-for="file in filesToPrepare"
           :key="file.key"
-          class="flex items-center gap-3 rounded-xl border border-blue-100/60 bg-white/60 p-3 cursor-pointer transition-all hover:bg-white hover:shadow-sm"
-          :class="file.checked ? 'border-blue-300 bg-blue-50/50' : ''"
+          class="flex items-center gap-2.5 text-sm cursor-pointer"
         >
           <input
             v-model="file.checked"
             type="checkbox"
-            class="h-4 w-4 rounded border-blue-300 text-blue-600 focus:ring-blue-500"
+            class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
-          <div class="flex-1 min-w-0">
-            <span class="text-sm font-medium" :class="file.checked ? 'text-blue-700 line-through' : 'text-blue-900'">
-              {{ file.label }}
-            </span>
-            <div class="flex items-center gap-2 mt-0.5">
-              <span class="text-[10px] font-mono text-blue-400">{{ file.format }}</span>
-              <span v-if="file.optional" class="rounded-full bg-blue-100 px-1.5 py-0.5 text-[9px] font-semibold text-blue-500 uppercase tracking-wider">
-                {{ $t('onboarding.step2.optional') }}
-              </span>
-            </div>
-          </div>
+          <span :class="file.checked ? 'text-gray-400 line-through' : 'text-gray-700'">
+            {{ file.label }}
+          </span>
+          <span class="text-xs text-gray-400 font-mono">{{ file.format }}</span>
+          <span v-if="file.optional" class="text-[10px] text-gray-400 uppercase">
+            ({{ $t('onboarding.step2.optional') }})
+          </span>
         </label>
       </div>
-    </div>
-
-    <!-- Action buttons -->
-    <div class="mt-8 flex gap-3">
-      <BaseButton variant="primary" @click="$emit('ready')">
-        <template #left="slotProps">
-          <BaseIcon :class="slotProps.class" name="CheckIcon" />
-        </template>
-        {{ $t('onboarding.step2.files_ready') }}
-      </BaseButton>
-      <BaseButton variant="gray" @click="$emit('skip')">
-        {{ $t('onboarding.step2.do_later') }}
-      </BaseButton>
     </div>
   </div>
 </template>
@@ -133,8 +78,6 @@ const props = defineProps({
     required: true,
   },
 })
-
-defineEmits(['ready', 'skip'])
 
 const sourceLabel = computed(() => {
   const labels = {
@@ -249,12 +192,7 @@ const guideConfigs = {
   ],
 }
 
-const guideSteps = reactive(
-  (guideConfigs[props.source] || guideConfigs.excel).map(step => ({
-    ...step,
-    checked: false,
-  }))
-)
+const guideSteps = guideConfigs[props.source] || guideConfigs.excel
 
 const filesToPrepare = reactive([
   {
