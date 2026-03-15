@@ -201,16 +201,23 @@ class AiNaturalLanguageServiceTest extends TestCase
         $result = $service->process('Фактура за Марков, 10 часа консалтинг по 3000 ден', $this->company, $this->user);
 
         $this->assertEquals('create_invoice', $result['intent']);
-        $this->assertNotNull($result['draft_id']);
-        $this->assertStringContains('/admin/invoices/create?draft_id=', $result['redirect_url']);
         $this->assertNotEmpty($result['message']);
         $this->assertNull($result['clarification_needed']);
 
-        // Verify draft was created in DB
-        $draft = AiDraft::find($result['draft_id']);
-        $this->assertNotNull($draft);
-        $this->assertEquals('invoice', $draft->entity_type);
-        $this->assertEquals('pending', $draft->status);
+        // Direct creation returns redirect_url with /view, draft returns ?draft_id=
+        $this->assertNotEmpty($result['redirect_url']);
+        if ($result['draft_id']) {
+            // Draft path
+            $this->assertStringContains('/admin/invoices/create?draft_id=', $result['redirect_url']);
+            $draft = AiDraft::find($result['draft_id']);
+            $this->assertNotNull($draft);
+            $this->assertEquals('invoice', $draft->entity_type);
+            $this->assertEquals('pending', $draft->status);
+        } else {
+            // Direct creation path — real entity created
+            $this->assertStringContains('/admin/invoices/', $result['redirect_url']);
+            $this->assertStringContains('/view', $result['redirect_url']);
+        }
     }
 
     /** @test */

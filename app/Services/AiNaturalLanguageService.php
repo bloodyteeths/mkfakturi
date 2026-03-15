@@ -387,7 +387,7 @@ PROMPT;
                     $resolved['customer_id'] = $customer->id;
                     $resolved['customer_name'] = $customer->name;
                 } else {
-                    // Auto-create customer
+                    // Auto-create customer — the user explicitly asked to create an entity for this name
                     $customer = $this->autoCreateCustomer($resolved['customer_name'], $company);
                     $resolved['customer_id'] = $customer->id;
                     $resolved['customer_name'] = $customer->name;
@@ -404,7 +404,7 @@ PROMPT;
                     $resolved['supplier_id'] = $supplier->id;
                     $resolved['supplier_name'] = $supplier->name;
                 } else {
-                    // Auto-create supplier
+                    // Auto-create supplier — the user explicitly asked to create a bill for this name
                     $supplier = $this->autoCreateSupplier($resolved['supplier_name'], $company);
                     $resolved['supplier_id'] = $supplier->id;
                     $resolved['supplier_name'] = $supplier->name;
@@ -417,15 +417,12 @@ PROMPT;
         if (! empty($resolved['items'])) {
             foreach ($resolved['items'] as $i => $item) {
                 if (empty($item['item_id']) && ! empty($item['name'])) {
-                    $found = DB::table('items')
-                        ->where('company_id', $company->id)
-                        ->whereRaw('LOWER(name) LIKE ?', ['%' . mb_strtolower($item['name']) . '%'])
-                        ->first();
+                    $found = $this->fuzzyFindItem($item['name'], $company->id);
                     if ($found) {
                         $resolved['items'][$i]['item_id'] = $found->id;
                         $resolved['items'][$i]['name'] = $found->name;
                     } else {
-                        // Auto-create item
+                        // Auto-create item with the AI-extracted name and price
                         $newItem = $this->autoCreateItem(
                             $item['name'],
                             $item['unit_price'] ?? 0,
@@ -444,31 +441,20 @@ PROMPT;
 
     /**
      * Fuzzy-find a customer by name.
+     *
+     * Matching priority:
+     * 1. Exact match
+     * 2. Case-insensitive exact match
+     * 3. Input contained in DB name (e.g. "Adidas" matches "ADIDAS DOO")
+     * 4. DB name contained in input (e.g. "Adidas shoes company" matches "Adidas")
+     * 5. Cyrillic/Latin transliteration (e.g. "Адидас" matches "Adidas")
+     * 6. Soundex-like similarity using Levenshtein on normalized names
      */
     protected function fuzzyFindCustomer(string $name, int $companyId): ?Customer
     {
-        // Exact match first
-        $customer = Customer::where('company_id', $companyId)
-            ->where('name', $name)
-            ->first();
+        $allCustomers = Customer::where('company_id', $companyId)->get();
 
-        if ($customer) {
-            return $customer;
-        }
-
-        // Partial match
-        $customer = Customer::where('company_id', $companyId)
-            ->where('name', 'LIKE', '%' . $name . '%')
-            ->first();
-
-        if ($customer) {
-            return $customer;
-        }
-
-        // mb_strtolower for MySQL compatibility
-        return Customer::where('company_id', $companyId)
-            ->whereRaw('LOWER(name) LIKE ?', ['%' . mb_strtolower($name) . '%'])
-            ->first();
+        return $this->bestMatch($name, $allCustomers, 'name');
     }
 
     /**
@@ -476,31 +462,158 @@ PROMPT;
      */
     protected function fuzzyFindSupplier(string $name, int $companyId): ?object
     {
-        $supplier = DB::table('suppliers')
-            ->where('company_id', $companyId)
-            ->whereNull('deleted_at')
-            ->where('name', $name)
-            ->first();
+        $allSuppliers = Supplier::where('company_id', $companyId)->get();
 
-        if ($supplier) {
-            return $supplier;
+        return $this->bestMatch($name, $allSuppliers, 'name');
+    }
+
+    /**
+     * Fuzzy-find an item by name.
+     */
+    protected function fuzzyFindItem(string $name, int $companyId): ?object
+    {
+        $allItems = DB::table('items')
+            ->where('company_id', $companyId)
+            ->get();
+
+        return $this->bestMatch($name, $allItems, 'name');
+    }
+
+    /**
+     * Universal fuzzy match engine — finds the best matching record from a collection.
+     *
+     * Handles: case differences, Cyrillic↔Latin transliteration, partial matches,
+     * common MK suffixes (ДООЕЛ, ДОО, DOO, DOOEL), whitespace/punctuation.
+     *
+     * @param  string  $needle  The AI-extracted name
+     * @param  \Illuminate\Support\Collection  $haystack  All records to search
+     * @param  string  $field  The field name to compare (e.g. 'name')
+     * @return object|null  The best matching record, or null if no good match
+     */
+    protected function bestMatch(string $needle, $haystack, string $field): ?object
+    {
+        if ($haystack->isEmpty() || empty(trim($needle))) {
+            return null;
         }
 
-        $supplier = DB::table('suppliers')
-            ->where('company_id', $companyId)
-            ->whereNull('deleted_at')
-            ->where('name', 'LIKE', '%' . $name . '%')
-            ->first();
+        $normalizedNeedle = $this->normalizeName($needle);
+        $bestScore = 0;
+        $bestMatch = null;
 
-        if ($supplier) {
-            return $supplier;
+        foreach ($haystack as $record) {
+            $dbName = $record->{$field} ?? '';
+            if (empty($dbName)) {
+                continue;
+            }
+
+            $normalizedDb = $this->normalizeName($dbName);
+
+            // 1. Exact normalized match (case/accent/suffix-independent) → score 100
+            if ($normalizedNeedle === $normalizedDb) {
+                return $record;
+            }
+
+            // 2. One contains the other → score 90
+            if (mb_strlen($normalizedNeedle) >= 2 && mb_strlen($normalizedDb) >= 2) {
+                if (str_contains($normalizedDb, $normalizedNeedle) || str_contains($normalizedNeedle, $normalizedDb)) {
+                    $score = 90;
+                    if ($score > $bestScore) {
+                        $bestScore = $score;
+                        $bestMatch = $record;
+                    }
+
+                    continue;
+                }
+            }
+
+            // 3. Transliterated match — convert both to Latin and compare
+            $latinNeedle = $this->cyrillicToLatin($normalizedNeedle);
+            $latinDb = $this->cyrillicToLatin($normalizedDb);
+
+            if ($latinNeedle === $latinDb) {
+                return $record; // Perfect transliterated match
+            }
+
+            if (mb_strlen($latinNeedle) >= 2 && mb_strlen($latinDb) >= 2) {
+                if (str_contains($latinDb, $latinNeedle) || str_contains($latinNeedle, $latinDb)) {
+                    $score = 85;
+                    if ($score > $bestScore) {
+                        $bestScore = $score;
+                        $bestMatch = $record;
+                    }
+
+                    continue;
+                }
+            }
+
+            // 4. Levenshtein distance on short names (max 255 chars)
+            if (mb_strlen($latinNeedle) <= 255 && mb_strlen($latinDb) <= 255) {
+                $maxLen = max(mb_strlen($latinNeedle), mb_strlen($latinDb));
+                if ($maxLen > 0) {
+                    $distance = levenshtein($latinNeedle, $latinDb);
+                    $similarity = 1 - ($distance / $maxLen);
+
+                    // Accept if >70% similar
+                    if ($similarity > 0.7) {
+                        $score = (int) ($similarity * 80); // Max 80 for Levenshtein
+                        if ($score > $bestScore) {
+                            $bestScore = $score;
+                            $bestMatch = $record;
+                        }
+                    }
+                }
+            }
         }
 
-        return DB::table('suppliers')
-            ->where('company_id', $companyId)
-            ->whereNull('deleted_at')
-            ->whereRaw('LOWER(name) LIKE ?', ['%' . mb_strtolower($name) . '%'])
-            ->first();
+        // Only return if we found a decent match (score >= 56 = 70% * 80)
+        return $bestScore >= 56 ? $bestMatch : null;
+    }
+
+    /**
+     * Normalize a name for comparison.
+     * Strips: company suffixes, punctuation, extra whitespace. Lowercases.
+     */
+    protected function normalizeName(string $name): string
+    {
+        $name = mb_strtolower(trim($name));
+
+        // Strip common MK/regional company suffixes
+        $suffixes = [
+            'дооел', 'доо', 'dooel', 'doo', 'ltd', 'llc', 'gmbh',
+            'ад', 'а.д.', 'ad', 'j.p.', 'јп', 'jp',
+            'inc', 'corp', 'co', 'kg', 'og',
+        ];
+        foreach ($suffixes as $suffix) {
+            // Remove suffix at the end, with optional preceding space/punctuation
+            $name = preg_replace('/[\s\.\-,]*' . preg_quote($suffix, '/') . '[\s\.\-,]*$/u', '', $name);
+        }
+
+        // Strip punctuation and collapse whitespace
+        $name = preg_replace('/[^\p{L}\p{N}\s]/u', '', $name);
+        $name = preg_replace('/\s+/u', ' ', $name);
+
+        return trim($name);
+    }
+
+    /**
+     * Transliterate Macedonian Cyrillic to Latin for cross-script matching.
+     */
+    protected function cyrillicToLatin(string $text): string
+    {
+        $map = [
+            'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd',
+            'ѓ' => 'gj', 'е' => 'e', 'ж' => 'zh', 'з' => 'z', 'ѕ' => 'dz',
+            'и' => 'i', 'ј' => 'j', 'к' => 'k', 'л' => 'l', 'љ' => 'lj',
+            'м' => 'm', 'н' => 'n', 'њ' => 'nj', 'о' => 'o', 'п' => 'p',
+            'р' => 'r', 'с' => 's', 'т' => 't', 'ќ' => 'kj', 'у' => 'u',
+            'ф' => 'f', 'х' => 'h', 'ц' => 'c', 'ч' => 'ch', 'џ' => 'dj',
+            'ш' => 'sh',
+            // Also handle Serbian/other Cyrillic that might appear
+            'щ' => 'sht', 'ъ' => '', 'ь' => '', 'ю' => 'yu', 'я' => 'ya',
+            'э' => 'e', 'ы' => 'i', 'і' => 'i', 'ї' => 'yi', 'є' => 'ye',
+        ];
+
+        return strtr($text, $map);
     }
 
     /**
@@ -1138,6 +1251,28 @@ PROMPT;
             $parts[] = "{$amountWord} **{$amountDisplay} ден**";
         }
 
+        // Note about auto-created entities
+        $autoCreated = [];
+        if (! empty($data['_customer_created'])) {
+            $autoCreated[] = $this->t('new_customer', $locale);
+        }
+        if (! empty($data['_supplier_created'])) {
+            $autoCreated[] = $this->t('new_supplier', $locale);
+        }
+        $itemsCreated = 0;
+        foreach (($data['items'] ?? []) as $item) {
+            if (! empty($item['_item_created'])) {
+                $itemsCreated++;
+            }
+        }
+        if ($itemsCreated > 0) {
+            $autoCreated[] = $this->t('new_items', $locale) . " ({$itemsCreated})";
+        }
+        if (! empty($autoCreated)) {
+            $alsoCreated = $this->t('also_created', $locale);
+            $parts[] = "{$alsoCreated}: " . implode(', ', $autoCreated);
+        }
+
         $draftNote = $this->t('draft_note', $locale);
         $parts[] = $draftNote;
 
@@ -1207,6 +1342,10 @@ PROMPT;
                 'total' => 'вкупно',
                 'amount' => 'износ',
                 'draft_note' => 'статус: **НАЦРТ** (прегледајте пред испраќање)',
+                'also_created' => 'Додадов нови',
+                'new_customer' => 'клиент',
+                'new_supplier' => 'добавувач',
+                'new_items' => 'артикли',
                 'ai_unavailable' => 'AI провајдерот не е достапен. Обидете се повторно подоцна.',
                 'parse_error' => 'Не можев да го разберам барањето. Обидете се со нешто како "Фактура за Марков, 10 часа консалтинг по 3000 ден".',
                 'question_fallback' => 'Не сум сигурен како да одговорам. Обидете се да прашате за креирање фактури, сметки или трошоци.',
@@ -1221,6 +1360,10 @@ PROMPT;
                 'total' => 'gjithsej',
                 'amount' => 'shuma',
                 'draft_note' => 'statusi: **DRAFT** (rishikoni para se ta dërgoni)',
+                'also_created' => 'Gjithashtu krijova',
+                'new_customer' => 'klient',
+                'new_supplier' => 'furnizues',
+                'new_items' => 'artikuj',
                 'ai_unavailable' => 'Ofresi AI nuk është i disponueshëm. Provoni përsëri më vonë.',
                 'parse_error' => 'Nuk munda ta kuptoj kërkesën. Provoni diçka si "Faturë për Markovi, 10 orë konsulencë me 3000 den".',
                 'question_fallback' => 'Nuk jam i sigurt si të përgjigjem. Provoni të pyesni për krijimin e faturave, llogarive ose shpenzimeve.',
@@ -1235,6 +1378,10 @@ PROMPT;
                 'total' => 'toplam',
                 'amount' => 'tutar',
                 'draft_note' => 'durum: **TASLAK** (göndermeden önce kontrol edin)',
+                'also_created' => 'Ayrıca oluşturuldu',
+                'new_customer' => 'müşteri',
+                'new_supplier' => 'tedarikçi',
+                'new_items' => 'ürünler',
                 'ai_unavailable' => 'AI sağlayıcısı kullanılamıyor. Lütfen daha sonra tekrar deneyin.',
                 'parse_error' => 'İsteğinizi anlayamadım. "Markov için fatura, 10 saat danışmanlık 3000 den" gibi bir şey deneyin.',
                 'question_fallback' => 'Nasıl cevaplayacağımdan emin değilim. Fatura, gider veya masraf oluşturma hakkında sormayı deneyin.',
@@ -1249,6 +1396,10 @@ PROMPT;
                 'total' => 'total',
                 'amount' => 'amount',
                 'draft_note' => 'status: **DRAFT** (review before sending)',
+                'also_created' => 'Also created new',
+                'new_customer' => 'customer',
+                'new_supplier' => 'supplier',
+                'new_items' => 'items',
                 'ai_unavailable' => 'AI provider is not available. Please try again later.',
                 'parse_error' => 'I couldn\'t understand that request. Try something like "Invoice for Markov, 10 hours consulting at 3000 den".',
                 'question_fallback' => 'I\'m not sure how to answer that. Try asking about creating invoices, bills, or expenses.',
