@@ -197,13 +197,6 @@ class ClientDocumentController extends Controller
             ], 403);
         }
 
-        if (! $document->isPending()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only pending documents can be deleted.',
-            ], 403);
-        }
-
         // Delete the physical file
         $disk = config('filesystems.media_disk');
         if ($document->file_path && Storage::disk($disk)->exists($document->file_path)) {

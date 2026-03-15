@@ -13,6 +13,15 @@
           </div>
         </div>
         <div class="flex items-center space-x-3">
+          <!-- Delete button (always visible) -->
+          <button
+            @click="deleteDocument"
+            :disabled="isSubmitting"
+            class="px-3 py-2 bg-white hover:bg-red-50 text-red-500 hover:text-red-700 border border-red-300 rounded-md text-sm font-medium"
+            :title="$t('documents.delete', 'Delete')"
+          >
+            <TrashIcon class="h-4 w-4" />
+          </button>
           <!-- Already confirmed: show status + link to entity -->
           <template v-if="isConfirmed">
             <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-green-100 text-green-800">
@@ -638,7 +647,7 @@ import { useI18n } from 'vue-i18n'
 import { useDocumentHubStore } from '@/scripts/admin/stores/document-hub'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useDialogStore } from '@/scripts/stores/dialog'
-import { ArrowLeftIcon, XMarkIcon, DocumentTextIcon } from '@heroicons/vue/24/outline'
+import { ArrowLeftIcon, XMarkIcon, DocumentTextIcon, TrashIcon } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
 const router = useRouter()
@@ -960,6 +969,36 @@ const reprocess = async () => {
     notificationStore.showNotification({
       type: 'error',
       message: err?.response?.data?.message || t('documents.reprocess_failed', 'Reprocess failed.'),
+    })
+  } finally {
+    isSubmitting.value = false
+  }
+}
+const deleteDocument = async () => {
+  const confirmed = await dialogStore.openDialog({
+    title: t('general.are_you_sure'),
+    message: t('documents.confirm_delete', 'This will permanently delete the document and its file. This cannot be undone.'),
+    yesLabel: t('general.delete'),
+    noLabel: t('general.cancel'),
+    variant: 'danger',
+    hideNoButton: false,
+    size: 'lg',
+  })
+
+  if (!confirmed) return
+
+  isSubmitting.value = true
+  try {
+    await store.deleteDocument(document.value.id)
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('documents.deleted', 'Document deleted successfully.'),
+    })
+    router.push({ name: 'client-documents' })
+  } catch (err) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: err?.response?.data?.message || t('documents.delete_failed', 'Failed to delete document.'),
     })
   } finally {
     isSubmitting.value = false
