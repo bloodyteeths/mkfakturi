@@ -14,11 +14,6 @@
             padding: 0;
         }
 
-        html {
-            margin: 0px;
-            padding: 0px;
-        }
-
         table {
             border-collapse: collapse;
         }
@@ -37,7 +32,7 @@
         }
 
         .header-section-left {
-            padding-left: 30px;
+            padding-left: 15px;
             display: inline-block;
             width: 55%;
             vertical-align: middle;
@@ -47,7 +42,7 @@
             display: inline-block;
             width: 40%;
             float: right;
-            padding: 0 30px 0 0;
+            padding: 0 15px 0 0;
             text-align: right;
             color: white;
         }
@@ -68,7 +63,7 @@
         /* -- Info Blocks -- */
 
         .info-section {
-            margin: 20px 30px 15px;
+            margin: 20px 15px 15px;
         }
 
         .info-block {
@@ -116,7 +111,7 @@
         /* -- Document Metadata -- */
 
         .meta-section {
-            margin: 0 30px 15px;
+            margin: 0 15px 15px;
         }
 
         .meta-table {
@@ -143,8 +138,8 @@
         /* -- Items Table -- */
 
         .items-table {
-            margin: 0 30px;
-            width: calc(100% - 60px);
+            margin: 0 15px;
+            width: auto;
             page-break-before: avoid;
             page-break-after: auto;
         }
@@ -190,7 +185,7 @@
         /* -- Totals -- */
 
         .totals-container {
-            margin: 12px 30px 0;
+            margin: 12px 15px 0;
         }
 
         .totals-table {
@@ -232,7 +227,7 @@
         .notes {
             font-size: 10px;
             color: #595959;
-            margin: 15px 30px 0;
+            margin: 15px 15px 0;
             padding: 10px 12px;
             background: #FAFAFF;
             border: 1px solid #D8D6FF;
@@ -250,7 +245,7 @@
 
         .footer-bar {
             margin: 20px 0 0;
-            padding: 10px 30px;
+            padding: 10px 15px;
             background: #7675ff;
             text-align: center;
             font-size: 9px;
@@ -362,7 +357,7 @@
     </div>
 
     @if ($shipping_address)
-    <div style="margin: 0 30px 15px; font-size: 10px;">
+    <div style="margin: 0 15px 15px; font-size: 10px;">
         <strong style="color: #7675ff;">Адреса за испорака:</strong>
         <span style="color: #4a5568;">{!! $shipping_address !!}</span>
     </div>

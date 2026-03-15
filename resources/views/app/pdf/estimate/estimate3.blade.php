@@ -11,14 +11,7 @@
             font-family: "DejaVu Sans";
             font-size: 11px;
             color: #2D2D2D;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            margin: 0px;
-            padding: 0px;
-            margin-top: 40px;
+            margin: 15px;
         }
 
         table {
@@ -28,8 +21,6 @@
         /* -- Header -- */
 
         .header-container {
-            padding: 0 30px;
-            margin-top: -20px;
             margin-bottom: 10px;
         }
 
@@ -47,7 +38,6 @@
         /* -- Info Sections -- */
 
         .info-section {
-            padding: 0 30px;
             margin-bottom: 18px;
         }
 
@@ -81,7 +71,6 @@
         /* -- Document Metadata -- */
 
         .meta-section {
-            padding: 0 30px;
             margin-bottom: 18px;
         }
 
@@ -102,8 +91,7 @@
         /* -- Items Table -- */
 
         .items-table {
-            margin: 0 30px;
-            width: calc(100% - 60px);
+            width: 100%;
             page-break-before: avoid;
             page-break-after: auto;
         }
@@ -143,7 +131,7 @@
         /* -- Totals -- */
 
         .totals-container {
-            margin: 15px 30px 0;
+            margin-top: 15px;
         }
 
         .totals-table {
@@ -184,7 +172,7 @@
         .notes {
             font-size: 10px;
             color: #666;
-            margin: 15px 30px 0;
+            margin-top: 15px;
             padding-top: 10px;
             border-top: 1px solid #E8E8E8;
             page-break-inside: avoid;
@@ -202,7 +190,7 @@
         /* -- Footer -- */
 
         .footer {
-            margin: 25px 30px 0;
+            margin-top: 25px;
             padding-top: 10px;
             border-top: 1px solid #E8E8E8;
             text-align: center;
@@ -318,7 +306,7 @@
     </div>
 
     @if ($shipping_address)
-    <div style="padding: 0 30px; margin-bottom: 15px; font-size: 10px;">
+    <div style="margin-bottom: 15px; font-size: 10px;">
         <strong style="color:#999; text-transform:uppercase; font-size:8px; letter-spacing:0.08em;">Адреса за испорака</strong><br>
         <span style="color: #2D2D2D;">{!! $shipping_address !!}</span>
     </div>

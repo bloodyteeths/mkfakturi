@@ -412,7 +412,14 @@ class Estimate extends Model implements HasMedia
 
         App::setLocale($locale);
 
-        $logo = $company->logo_path;
+        // Get logo - prefer full URL for cloud storage, fall back to local path
+        $logo = $company->logo; // This returns full URL
+        if (! $logo) {
+            $logoPath = $company->logo_path;
+            if ($logoPath && (str_starts_with($logoPath, '/') || filter_var($logoPath, FILTER_VALIDATE_URL))) {
+                $logo = $logoPath;
+            }
+        }
         if (! $logo) {
             $defaultLogo = base_path('logo/facturino_logo.png');
             $logo = file_exists($defaultLogo) ? $defaultLogo : null;
