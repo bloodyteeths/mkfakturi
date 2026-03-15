@@ -24,8 +24,8 @@
 
     <template v-if="selectedCompanyId">
       <!-- Filters -->
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
           <BaseInputGroup :label="t('status')">
             <BaseMultiselect
               v-model="filters.status"
@@ -33,7 +33,7 @@
               :searchable="false"
               label="label"
               value-prop="value"
-              class="w-48"
+              class="w-full sm:w-48"
             />
           </BaseInputGroup>
           <BaseInputGroup :label="t('scenario')">
@@ -43,7 +43,7 @@
               :searchable="false"
               label="label"
               value-prop="value"
-              class="w-52"
+              class="w-full sm:w-52"
             />
           </BaseInputGroup>
         </div>
