@@ -367,7 +367,7 @@ export default async function NabavkiINarachkiPage({
       {/* HERO IMAGE */}
       <div className="container max-w-3xl mx-auto px-4 sm:px-6 mb-8">
         <div className="rounded-2xl overflow-hidden shadow-lg">
-          <img src="/assets/images/blog/blog_purchase_orders.png" alt="Дигитални нарачки за набавка Facturino - управување со набавки во Македонија" className="w-full h-auto" />
+          <img src="/assets/images/blog/blog_purchase_orders_v2.png" alt="Дигитални нарачки за набавка Facturino - управување со набавки во Македонија" className="w-full h-auto" />
         </div>
       </div>
 
