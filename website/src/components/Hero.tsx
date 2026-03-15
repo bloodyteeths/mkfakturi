@@ -55,24 +55,19 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
 
         </div>
 
-        {/* Hero Visual — Real product screenshot in browser mockup */}
+        {/* Hero Visual — Lifestyle photo */}
         <div className="relative order-1 lg:order-2 animate-[slideUp_1s_ease-out_0.3s_both]">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-cyan-500/10 rounded-2xl blur-2xl transform scale-95"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-cyan-500/10 rounded-3xl blur-2xl transform scale-95"></div>
 
-          <div className="relative browser-frame">
-            <div className="browser-frame-bar">
-              <div className="browser-frame-dot"></div>
-              <div className="browser-frame-dot"></div>
-              <div className="browser-frame-dot"></div>
-            </div>
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl">
             <Image
-              src="/assets/screenshots/dashboard.png"
-              alt="Facturino AI accounting dashboard — invoices, reports, and financial overview"
-              width={1400}
-              height={900}
+              src="/assets/images/hero_skopje.webp"
+              alt="Accountant using Facturino on laptop at a cafe by the Stone Bridge, Skopje"
+              width={1200}
+              height={800}
               priority
               sizes="(max-width: 768px) 100vw, 700px"
-              className="w-full h-auto"
+              className="w-full h-auto object-cover"
             />
           </div>
         </div>
