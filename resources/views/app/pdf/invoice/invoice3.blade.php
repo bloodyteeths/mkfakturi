@@ -2,385 +2,513 @@
 <html>
 
 <head>
-    <title>@lang('pdf_invoice_label') - {{ $invoice->invoice_number }}</title>
+    <title>Фактура - {{ $invoice->invoice_number }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
     <style type="text/css">
         /* -- Base -- */
-
         body {
             font-family: "DejaVu Sans";
+            font-size: 11px;
+            color: #2D2D2D;
+            margin: 0;
+            padding: 0;
         }
 
         html {
             margin: 0px;
             padding: 0px;
-            margin-top: 50px;
+            margin-top: 40px;
         }
 
         table {
             border-collapse: collapse;
         }
 
-        hr {
-            color: rgba(0, 0, 0, 0.2);
-            border: 0.5px solid #EAF1FB;
-        }
-
         /* -- Header -- */
 
         .header-container {
-            margin-top: -30px;
-            width: 100%;
-            padding: 0px 30px;
+            padding: 0 30px;
+            margin-top: -20px;
+            margin-bottom: 10px;
         }
 
         .header-logo {
-
             text-transform: capitalize;
-            color: #817AE3;
-            padding-top: 0px;
+            color: #2D2D2D;
         }
 
-        .company-address-container {
-            width: 50%;
+        .header-divider {
+            border: none;
+            border-top: 2px solid #2D2D2D;
+            margin: 10px 0 20px 0;
+        }
+
+        /* -- Info Sections -- */
+
+        .info-section {
+            padding: 0 30px;
+            margin-bottom: 18px;
+        }
+
+        .info-col {
+            width: 48%;
+            vertical-align: top;
+        }
+
+        .info-title {
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #999;
+            margin-bottom: 6px;
+        }
+
+        .info-row {
+            font-size: 10px;
+            line-height: 16px;
+            color: #2D2D2D;
+        }
+
+        .info-row strong {
+            color: #666;
+            font-weight: normal;
+            display: inline-block;
+            width: 125px;
+        }
+
+        /* -- Invoice Metadata -- */
+
+        .meta-section {
+            padding: 0 30px;
+            margin-bottom: 18px;
+        }
+
+        .meta-row {
+            display: inline-block;
+            margin-right: 25px;
+            font-size: 10px;
+        }
+
+        .meta-label {
+            color: #999;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            display: block;
             margin-bottom: 2px;
-            padding-right: 60px;
         }
 
-        .company-address {
-            margin-top: 12px;
-            font-size: 12px;
-            line-height: 15px;
-            color: #595959;
-            word-wrap: break-word;
-        }
-
-        /* -- Content Wrapper  */
-
-        .content-wrapper {
-            display: block;
-            padding-top: 0px;
-            padding-bottom: 20px;
-        }
-
-        .customer-address-container {
-            display: block;
-            float: left;
-            width: 45%;
-            padding: 10px 0 0 30px;
-        }
-
-        /* -- Shipping -- */
-        .shipping-address-container {
-            float: right;
-            display: block;
-        }
-
-        .shipping-address-container--left {
-            float: left;
-            display: block;
-            padding-left: 0;
-        }
-
-        .shipping-address {
-            font-size: 10px;
-            line-height: 15px;
-            color: #595959;
-            margin-top: 5px;
-            width: 160px;
-            word-wrap: break-word;
-        }
-
-        /* -- Billing -- */
-
-        .billing-address-container {
-            display: block;
-            float: left;
-        }
-
-        .billing-address {
-            font-size: 10px;
-            line-height: 15px;
-            color: #595959;
-            margin-top: 5px;
-            width: 160px;
-            word-wrap: break-word;
-        }
-
-        /*  -- Estimate Details -- */
-
-        .invoice-details-container {
-            display: block;
-            float: right;
-            padding: 10px 30px 0 0;
-        }
-
-        .attribute-label {
-            font-size: 12px;
-            line-height: 18px;
-            text-align: left;
-            color: #55547A
-        }
-
-        .attribute-value {
-            font-size: 12px;
-            line-height: 18px;
-            text-align: right;
+        .meta-value {
+            color: #2D2D2D;
+            font-weight: bold;
         }
 
         /* -- Items Table -- */
 
         .items-table {
-            margin-top: 35px;
-            padding: 0px 30px 10px 30px;
+            margin: 0 30px;
+            width: calc(100% - 60px);
             page-break-before: avoid;
             page-break-after: auto;
         }
 
-        .items-table hr {
-            height: 0.1px;
+        .items-table th {
+            padding: 8px 5px;
+            text-align: left;
+            font-size: 8px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: bold;
+            border-bottom: 2px solid #2D2D2D;
         }
 
-        .item-table-heading {
-            font-size: 13.5;
+        .items-table td {
+            padding: 8px 5px;
+            font-size: 10px;
+            border-bottom: 1px solid #E8E8E8;
+            vertical-align: top;
+        }
+
+        .items-table .text-right {
+            text-align: right;
+        }
+
+        .items-table .text-center {
             text-align: center;
-            color: rgba(0, 0, 0, 0.85);
-            padding: 5px;
-            color: #55547A;
-        }
-
-        tr.item-table-heading-row th {
-            border-bottom: 0.620315px solid #E8E8E8;
-            font-size: 12px;
-            line-height: 18px;
-        }
-
-        tr.item-row td {
-            font-size: 12px;
-            line-height: 18px;
-        }
-
-        .item-cell {
-            font-size: 13;
-            text-align: center;
-            padding: 5px;
-            padding-top: 10px;
-            color: #040405;
         }
 
         .item-description {
-            color: #595959;
-            font-size: 9px;
-            line-height: 12px;
+            color: #999;
+            font-size: 8px;
+            line-height: 11px;
         }
 
-        .item-cell-table-hr {
-            margin: 0 30px 0 30px;
+        /* -- VAT Summary -- */
+
+        .vat-summary {
+            width: 50%;
+            margin-left: auto;
+            margin-right: 30px;
+            margin-top: 15px;
         }
 
-        /* -- Total Display Table -- */
-
-        .total-display-container {
-            padding: 0 25px;
-        }
-
-
-        .total-display-table {
-            border-top: none;
-            page-break-inside: avoid;
-            page-break-before: auto;
-            page-break-after: auto;
-            margin-top: 20px;
-            float: right;
-            width: auto;
-        }
-
-        .total-table-attribute-label {
-            font-size: 12px;
-            color: #55547A;
-            text-align: left;
-            padding-left: 10px;
-        }
-
-        .total-table-attribute-value {
-            font-weight: bold;
+        .vat-summary th {
+            padding: 5px 8px;
+            font-size: 8px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
             text-align: right;
-            font-size: 12px;
-            color: #040405;
-            padding-right: 10px;
-            padding-top: 2px;
-            padding-bottom: 2px;
+            font-weight: bold;
+            border-bottom: 1px solid #2D2D2D;
         }
 
-        .total-border-left {
-            border: 1px solid #E8E8E8 !important;
-            border-right: 0px !important;
-            padding-top: 0px;
-            padding: 8px !important;
+        .vat-summary td {
+            padding: 5px 8px;
+            font-size: 10px;
+            text-align: right;
+            border-bottom: 1px solid #E8E8E8;
         }
 
-        .total-border-right {
-            border: 1px solid #E8E8E8 !important;
-            border-left: 0px !important;
-            padding-top: 0px;
-            padding: 8px !important;
+        /* -- Totals -- */
+
+        .totals-container {
+            margin: 15px 30px 0;
+        }
+
+        .totals-table {
+            float: right;
+            width: 42%;
+        }
+
+        .totals-table td {
+            padding: 4px 0;
+            font-size: 10px;
+        }
+
+        .totals-table .total-label {
+            text-align: right;
+            color: #999;
+            padding-right: 12px;
+        }
+
+        .totals-table .total-value {
+            text-align: right;
+            font-weight: bold;
+            color: #2D2D2D;
+        }
+
+        .totals-table .grand-total td {
+            padding-top: 8px;
+            border-top: 2px solid #2D2D2D;
+            font-size: 14px;
+        }
+
+        .totals-table .grand-total .total-label {
+            color: #2D2D2D;
+            font-weight: bold;
+        }
+
+        /* -- Payment Details -- */
+
+        .payment-details {
+            margin: 18px 30px 0;
+            padding-top: 12px;
+            border-top: 1px solid #E8E8E8;
+            font-size: 10px;
+        }
+
+        .payment-title {
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #999;
+            margin-bottom: 5px;
         }
 
         /* -- Notes -- */
+
         .notes {
-            font-size: 12px;
-            color: #595959;
-            margin-top: 15px;
-            margin-left: 30px;
-            width: 442px;
-            text-align: left;
+            font-size: 10px;
+            color: #666;
+            margin: 15px 30px 0;
+            padding-top: 10px;
+            border-top: 1px solid #E8E8E8;
             page-break-inside: avoid;
         }
 
         .notes-label {
-            font-size: 15px;
-            line-height: 22px;
-            letter-spacing: 0.05em;
-            color: #040405;
-            width: 108px;
-            white-space: nowrap;
-            height: 19.87px;
-            padding-bottom: 10px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #999;
+            margin-bottom: 5px;
         }
 
-        /* -- Helpers -- */
+        /* -- Footer -- */
 
-        .text-primary {
-            color: #5851DB;
+        .footer {
+            margin: 25px 30px 0;
+            padding-top: 10px;
+            border-top: 1px solid #E8E8E8;
+            text-align: center;
+            font-size: 8px;
+            color: #999;
         }
-
-        .text-center {
-            text-align: center
-        }
-
-        table .text-left {
-            text-align: left;
-        }
-
-        table .text-right {
-            text-align: right;
-        }
-
-        .border-0 {
-            border: none;
-        }
-
-        .py-2 {
-            padding-top: 2px;
-            padding-bottom: 2px;
-        }
-
-        .py-8 {
-            padding-top: 8px;
-            padding-bottom: 8px;
-        }
-
-        .py-3 {
-            padding: 3px 0;
-        }
-
-        .pr-20 {
-            padding-right: 20px;
-        }
-
-        .pr-10 {
-            padding-right: 10px;
-        }
-
-        .pl-20 {
-            padding-left: 20px;
-        }
-
-        .pl-10 {
-            padding-left: 10px;
-        }
-
-        .pl-0 {
-            padding-left: 0;
-        }
-
     </style>
-
-    @if (App::isLocale('th'))
-        @include('app.pdf.locale.th')
-    @endif
 </head>
 
 <body>
+    {{-- Header --}}
     <div class="header-container">
         <table width="100%">
             <tr>
-                <td width="50%" class="header-section-left">
+                <td width="50%">
                     @if ($logo)
-                        <img class="header-logo" style="height:50px" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="@lang('pdf_company_logo')">
+                        <img class="header-logo" style="height:45px" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="Лого">
                     @else
-                        <h1 class="header-logo"> {{ $invoice->customer->company->name }} </h1>
+                        <h2 class="header-logo" style="margin:0; font-size:16px;">{{ $invoice->company->name ?? '' }}</h2>
                     @endif
                 </td>
-                <td width="50%" class="text-right company-address-container company-address">
-                    {!! $company_address !!}
+                <td width="50%" style="text-align:right; vertical-align:bottom;">
+                    <div style="font-size:24px; font-weight:bold; color:#2D2D2D; letter-spacing:0.15em;">ФАКТУРА</div>
+                </td>
+            </tr>
+        </table>
+        <hr class="header-divider">
+    </div>
+
+    {{-- Issuer & Buyer Information --}}
+    <div class="info-section">
+        <table width="100%">
+            <tr>
+                {{-- Issuer --}}
+                <td class="info-col">
+                    <div class="info-title">Издавач на фактура</div>
+                    <div class="info-row"><strong>Назив:</strong> {{ $invoice->company->name ?? '' }}</div>
+                    @if($company_address)
+                        <div class="info-row"><strong>Адреса:</strong> {!! str_replace('<br />', ', ', $company_address) !!}</div>
+                    @elseif($invoice->company && $invoice->company->address)
+                        <div class="info-row"><strong>Адреса:</strong>
+                            {{ $invoice->company->address->address_street_1 ?? '' }}
+                            @if($invoice->company->address->address_street_2), {{ $invoice->company->address->address_street_2 }}@endif
+                            @if($invoice->company->address->city), {{ $invoice->company->address->city }}@endif
+                            @if($invoice->company->address->zip) {{ $invoice->company->address->zip }}@endif
+                        </div>
+                    @endif
+                    @if(isset($invoice->company->vat_id) && $invoice->company->vat_id)
+                        <div class="info-row"><strong>ЕДБ за ДДВ:</strong> {{ $invoice->company->vat_id }}</div>
+                    @endif
+                    @if(isset($invoice->company->tax_id) && $invoice->company->tax_id)
+                        <div class="info-row"><strong>ЕМБС:</strong> {{ $invoice->company->tax_id }}</div>
+                    @endif
+                    @if($invoice->company && $invoice->company->address && $invoice->company->address->phone)
+                        <div class="info-row"><strong>Телефон:</strong> {{ $invoice->company->address->phone }}</div>
+                    @endif
+                    <div class="info-row"><strong>Место:</strong> {{ optional($invoice->company->address)->city ?? 'Скопје' }}</div>
+                </td>
+
+                {{-- Buyer --}}
+                <td class="info-col">
+                    <div class="info-title">Примател на фактура</div>
+                    <div class="info-row"><strong>Назив:</strong> {{ $invoice->customer->name ?? '' }}</div>
+                    @if($billing_address)
+                        <div class="info-row"><strong>Адреса:</strong> {!! str_replace('<br />', ', ', $billing_address) !!}</div>
+                    @elseif($invoice->customer && $invoice->customer->billingAddress)
+                        <div class="info-row"><strong>Адреса:</strong>
+                            {{ $invoice->customer->billingAddress->address_street_1 ?? '' }}
+                            @if($invoice->customer->billingAddress->address_street_2), {{ $invoice->customer->billingAddress->address_street_2 }}@endif
+                            @if($invoice->customer->billingAddress->city), {{ $invoice->customer->billingAddress->city }}@endif
+                            @if($invoice->customer->billingAddress->zip) {{ $invoice->customer->billingAddress->zip }}@endif
+                        </div>
+                    @endif
+                    @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
+                        <div class="info-row"><strong>ЕДБ за ДДВ:</strong> {{ $invoice->customer->vat_number }}</div>
+                    @endif
+                    @if(isset($invoice->customer->tax_id) && $invoice->customer->tax_id)
+                        <div class="info-row"><strong>ЕМБС:</strong> {{ $invoice->customer->tax_id }}</div>
+                    @endif
+                    @if($invoice->customer && $invoice->customer->phone)
+                        <div class="info-row"><strong>Телефон:</strong> {{ $invoice->customer->phone }}</div>
+                    @endif
                 </td>
             </tr>
         </table>
     </div>
 
-    <hr class="header-bottom-divider">
+    {{-- Invoice Metadata --}}
+    <div class="meta-section">
+        <table width="100%">
+            <tr>
+                <td width="25%">
+                    <span class="meta-label">Број на фактура</span>
+                    <span class="meta-value">{{ $invoice->invoice_number }}</span>
+                </td>
+                <td width="25%">
+                    <span class="meta-label">Датум на издавање</span>
+                    <span class="meta-value">{{ $invoice->formattedInvoiceDate }}</span>
+                </td>
+                <td width="25%">
+                    <span class="meta-label">Ден на извршен промет</span>
+                    <span class="meta-value">{{ $invoice->formattedInvoiceDate }}</span>
+                </td>
+                <td width="25%">
+                    <span class="meta-label">Рок на плаќање</span>
+                    <span class="meta-value">{{ $invoice->formattedDueDate }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
 
-    <div class="content-wrapper">
-        <div class="main-content">
-            <div class="customer-address-container">
-                <div class="billing-address-container billing-address">
-                    @if ($billing_address)
-                        <b>@lang('pdf_bill_to')</b> <br>
-                        {!! $billing_address !!}
-                    @endif
-                </div>
+    {{-- Items Table --}}
+    <table class="items-table" cellspacing="0" border="0">
+        <thead>
+            <tr>
+                <th style="width:4%;">#</th>
+                <th style="width:33%;">Опис</th>
+                <th style="width:8%;" class="text-center">Кол.</th>
+                <th style="width:8%;" class="text-center">Ед.</th>
+                <th style="width:13%;" class="text-right">Цена без ДДВ</th>
+                <th style="width:13%;" class="text-right">Износ без ДДВ</th>
+                <th style="width:8%;" class="text-center">Стапка</th>
+                <th style="width:13%;" class="text-right">ДДВ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php $index = 1; @endphp
+            @foreach ($invoice->items as $item)
+                @php
+                    $itemBaseAmount = $item->total;
+                    $itemTaxPercent = 0;
+                    if($invoice->tax_per_item === 'YES' && $item->taxes->count() > 0) {
+                        $firstTax = $item->taxes->first();
+                        $itemTaxPercent = $firstTax->percent ?? 0;
+                    }
+                @endphp
+                <tr>
+                    <td class="text-center">{{ $index++ }}</td>
+                    <td>
+                        {{ $item->name }}
+                        @if($item->description)
+                            <br><span class="item-description">{{ $item->description }}</span>
+                        @endif
+                    </td>
+                    <td class="text-center">{{ $item->quantity }}</td>
+                    <td class="text-center">{{ $item->unit_name ?? 'пар.' }}</td>
+                    <td class="text-right">{!! format_money_pdf($item->price, $invoice->customer->currency) !!}</td>
+                    <td class="text-right">{!! format_money_pdf($itemBaseAmount, $invoice->customer->currency) !!}</td>
+                    <td class="text-center">{{ $itemTaxPercent }}%</td>
+                    <td class="text-right">{!! format_money_pdf($item->tax, $invoice->customer->currency) !!}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 
-                <div @if ($billing_address !== '</br>') class="shipping-address-container shipping-address" @else class="shipping-address-container--left shipping-address" @endif>
-                    @if ($shipping_address)
-                        <b>@lang('pdf_ship_to')</b> <br>
-                        {!! $shipping_address !!}
-                    @endif
-                </div>
-                <div style="clear: both;"></div>
-            </div>
+    {{-- VAT Summary --}}
+    <table class="vat-summary" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Даночна стапка</th>
+                <th>Основица</th>
+                <th>ДДВ износ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+                $taxesByRate = collect();
+                if ($invoice->tax_per_item === 'YES') {
+                    foreach ($invoice->items as $item) {
+                        foreach ($item->taxes as $tax) {
+                            $rate = $tax->percent ?? 0;
+                            if (!$taxesByRate->has($rate)) {
+                                $taxesByRate->put($rate, ['base' => 0, 'tax' => 0]);
+                            }
+                            $existing = $taxesByRate->get($rate);
+                            $existing['base'] += $item->total;
+                            $existing['tax'] += $tax->amount;
+                            $taxesByRate->put($rate, $existing);
+                        }
+                    }
+                } else {
+                    foreach ($invoice->taxes as $tax) {
+                        $rate = $tax->percent ?? 0;
+                        $taxesByRate->put($rate, [
+                            'base' => $invoice->sub_total,
+                            'tax' => $tax->amount
+                        ]);
+                    }
+                }
+            @endphp
 
-            <div class="invoice-details-container">
-                <table>
-                    <tr>
-                        <td class="attribute-label">@lang('pdf_invoice_number')</td>
-                        <td class="attribute-value"> &nbsp;{{ $invoice->invoice_number }}</td>
-                    </tr>
-                    <tr>
-                        <td class="attribute-label">@lang('pdf_invoice_date')</td>
-                        <td class="attribute-value"> &nbsp;{{ $invoice->formattedInvoiceDate }}</td>
-                    </tr>
-                    <tr>
-                        <td class="attribute-label">@lang('pdf_invoice_due_date')</td>
-                        <td class="attribute-value"> &nbsp;{{ $invoice->formattedDueDate }}</td>
-                    </tr>
-                </table>
-            </div>
-            <div style="clear: both;"></div>
-        </div>
+            @foreach($taxesByRate as $rate => $amounts)
+                <tr>
+                    <td class="text-center">{{ $rate }}%</td>
+                    <td>{!! format_money_pdf($amounts['base'], $invoice->customer->currency) !!}</td>
+                    <td>{!! format_money_pdf($amounts['tax'], $invoice->customer->currency) !!}</td>
+                </tr>
+            @endforeach
 
-        @include('app.pdf.invoice.partials.table')
-
-        <div class="notes">
-            @if ($notes)
-                <div class="notes-label">
-                    @lang('pdf_notes')
-                </div>
-
-                {!! $notes !!}
+            @if($taxesByRate->isEmpty())
+                <tr>
+                    <td class="text-center">0% (ослободено)</td>
+                    <td>{!! format_money_pdf($invoice->sub_total, $invoice->customer->currency) !!}</td>
+                    <td>{!! format_money_pdf(0, $invoice->customer->currency) !!}</td>
+                </tr>
             @endif
+        </tbody>
+    </table>
+
+    {{-- Totals --}}
+    <div class="totals-container">
+        <table class="totals-table" cellspacing="0">
+            <tr>
+                <td class="total-label">Вкупно без ДДВ:</td>
+                <td class="total-value">{!! format_money_pdf($invoice->sub_total, $invoice->customer->currency) !!}</td>
+            </tr>
+            <tr>
+                <td class="total-label">Вкупно ДДВ:</td>
+                <td class="total-value">{!! format_money_pdf($invoice->tax, $invoice->customer->currency) !!}</td>
+            </tr>
+            <tr class="grand-total">
+                <td class="total-label">ВКУПНО ЗА ПЛАЌАЊЕ:</td>
+                <td class="total-value">{!! format_money_pdf($invoice->total, $invoice->customer->currency) !!}</td>
+            </tr>
+            @if($invoice->due_amount > 0 && $invoice->paid_status !== App\Models\Invoice::STATUS_PAID)
+                <tr>
+                    <td class="total-label">Преостанато за плаќање:</td>
+                    <td class="total-value">{!! format_money_pdf($invoice->due_amount, $invoice->customer->currency) !!}</td>
+                </tr>
+            @endif
+        </table>
+        <div style="clear: both;"></div>
+    </div>
+
+    {{-- Payment Details --}}
+    <div class="payment-details">
+        <div class="payment-title">Детали за плаќање</div>
+        <div><strong style="color:#999;">Валута:</strong> МКД (Македонски денар)</div>
+        @if(optional($invoice->company->address)->zip)
+            <div><strong style="color:#999;">Трансакциска сметка:</strong> {{ $invoice->company->address->zip }}</div>
+        @endif
+        <div><strong style="color:#999;">Начин на плаќање:</strong> Банкарски трансфер</div>
+    </div>
+
+    {{-- Notes --}}
+    @if($notes)
+        <div class="notes">
+            <div class="notes-label">Забелешки</div>
+            {!! $notes !!}
         </div>
+    @endif
+
+    {{-- Legal Footer --}}
+    <div class="footer">
+        <strong>Фактурата е валидна без печат и потпис согласно Законот за даночна постапка.</strong>
     </div>
 </body>
 
