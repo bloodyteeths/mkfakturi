@@ -32,9 +32,9 @@ export type Dictionary = {
   cta: { title: string; sub?: string; button: string }
   footer: { rights: string }
   partners?: { title: string; subtitle: string; logos: string[] }
-  pricingPreview?: { title: string; cta: string; plans: { name: string; bullets: string[] }[] }
+  pricingPreview?: { title: string; cta: string; plans: { name: string; price?: string; bullets: string[]; popular?: boolean }[] }
   testimonials?: { title: string; subtitle: string; items: { quote: string; author: string }[] }
-  faq?: { title: string; items: { q: string; a: string }[] }
+  faq?: { title: string; subtitle?: string; items: { q: string; a: string }[] }
   featuresPage?: {
     heroTitle: string
     groups: { title: string; items: string[] }[]
@@ -155,22 +155,14 @@ const mk: Dictionary = {
     title: 'Пакети',
     cta: 'Види ги цените',
     plans: [
-      { name: 'Starter', bullets: ['Е‑Фактура подготвено', 'AI асистент', '25 AI прашања/месец'] },
-      { name: 'Pro', bullets: ['Мулти‑корисници', 'AI документ хаб', 'Автоматизации'] },
-      { name: 'Business', bullets: ['AI рекончилијација', 'Банкарски увоз', 'API и SLA'] }
-    ]
-  },
-  testimonials: {
-    title: 'Што велат корисниците',
-    subtitle: 'Сметководители и бизниси кои веќе работат со Facturino.',
-    items: [
-      { quote: 'Месечното затворање за 12 клиенти ни падна од 3 дена на неколку часа. Увозот на изводи е брз, а порамнувањето е полуавтоматско.', author: 'Елена Стојановска, Сметководствено биро „Биланс Про" — Скопје' },
-      { quote: 'Подготовката за е‑Фактура ни даде огромна предност. Додека конкуренцијата чека, ние веќе ги имаме структурираните податоци спремни за UJP.', author: 'Дарко Митревски, Ревизорска канцеларија „Финанс Консалт" — Битола' },
-      { quote: 'AI советникот ми покажа дека 40% од фактурите ни се задоцнети повеќе од 30 дена. Веднаш го променивме процесот на наплата и готовинскиот тек се подобри за еден месец.', author: 'Ивана Петрова, Управител на „Трговија Плус" ДООЕЛ — Штип' }
+      { name: 'Starter', price: '€12/мес', bullets: ['Е‑Фактура подготвено', 'AI асистент', '25 AI прашања/месец'] },
+      { name: 'Standard', price: '€39/мес', bullets: ['Мулти‑корисници', 'AI документ хаб', 'Автоматизации'], popular: true },
+      { name: 'Business', price: '€59/мес', bullets: ['AI рекончилијација', 'Банкарски увоз', 'API и SLA'] }
     ]
   },
   faq: {
     title: 'ЧПП',
+    subtitle: 'Најчести прашања за Facturino.',
     items: [
       { q: 'Дали сте подготвени за е‑Фактура?', a: 'Да, моделот е изграден околу е‑фактури и се поврзуваме штом UJP отвори продукциски API + QES.' },
       { q: 'Како функционира AI?', a: 'Предлага ДДВ/конта по ставка — човек секогаш потврдува/уредува.' },
@@ -398,22 +390,14 @@ const sq: Dictionary = {
     title: 'Planet',
     cta: 'Shiko çmimet',
     plans: [
-      { name: 'Starter', bullets: ['Gati për e‑Faturë', 'Asistent AI', '25 pyetje AI/muaj'] },
-      { name: 'Pro', bullets: ['Shumë përdorues', 'AI dokument hub', 'Automatizime'] },
-      { name: 'Business', bullets: ['AI rekonçilim', 'Import bankar', 'API dhe SLA'] }
-    ]
-  },
-  testimonials: {
-    title: 'Çfarë thonë përdoruesit',
-    subtitle: 'Kontabilistë dhe biznese që tashmë punojnë me Facturino.',
-    items: [
-      { quote: 'Mbyllja mujore për 12 klientë ra nga 3 ditë në disa orë. Importi i ekstrakteve është i shpejtë dhe pajtimi është gjysmë‑automatik.', author: 'Elena Stojanovska, Zyra kontabël „Bilans Pro" — Shkup' },
-      { quote: 'Përgatitja për e‑Faturë na dha avantazh të madh. Ndërsa konkurrenca pret, ne tashmë i kemi të dhënat e strukturuara gati për UJP.', author: 'Darko Mitrevski, Zyra e revizionit „Finans Konsalt" — Manastir' },
-      { quote: 'Këshilltari AI më tregoi se 40% e faturave tona janë të vonuara mbi 30 ditë. Menjëherë e ndërruam procesin e arkëtimit dhe fluksi i parasë u përmirësua brenda një muaji.', author: 'Ivana Petrova, Drejtore e „Tregtia Plus" SHPK — Shtip' }
+      { name: 'Starter', price: '€12/muaj', bullets: ['Gati për e‑Faturë', 'Asistent AI', '25 pyetje AI/muaj'] },
+      { name: 'Standard', price: '€39/muaj', bullets: ['Shumë përdorues', 'AI dokument hub', 'Automatizime'], popular: true },
+      { name: 'Business', price: '€59/muaj', bullets: ['AI rekonçilim', 'Import bankar', 'API dhe SLA'] }
     ]
   },
   faq: {
     title: 'Pyetje të shpeshta',
+    subtitle: 'Pyetjet më të shpeshta rreth Facturino.',
     items: [
       { q: 'A jeni gati për e‑Faturë?', a: 'Po, modeli është ndërtuar mbi e‑faturë dhe lidhemi sapo UJP hap API + QES.' },
       { q: 'Si punon AI?', a: 'Sugjeron TVSH/llogari për çdo rresht — njeriu gjithmonë konfirmon.' },
@@ -641,22 +625,14 @@ const tr: Dictionary = {
     title: 'Paketler',
     cta: 'Fiyatları gör',
     plans: [
-      { name: 'Starter', bullets: ['e‑Fatura hazır', 'AI asistan', '25 AI soru/ay'] },
-      { name: 'Pro', bullets: ['Çoklu kullanıcı', 'AI belge merkezi', 'Otomasyonlar'] },
-      { name: 'Business', bullets: ['AI mutabakat', 'Banka içe aktarma', 'API ve SLA'] }
-    ]
-  },
-  testimonials: {
-    title: 'Kullanıcılar ne diyor',
-    subtitle: 'Facturino ile zaten calısan muhasebeciler ve isletmeler.',
-    items: [
-      { quote: '12 musteri icin ay sonu kapanısı 3 gunden birkac saate dustu. Ekstre içe aktarımı hızlı ve uzlastırma yarı otomatik.', author: 'Elena Stojanovska, Muhasebe Burosu „Bilans Pro" — Uskup' },
-      { quote: 'e-Fatura hazırlıgı bize buyuk avantaj sagladi. Rakipler beklerken, biz yapılandırılmıs verileri UJP icin hazır tuttuk.', author: 'Darko Mitrevski, Denetim Ofisi „Finans Konsalt" — Manastır' },
-      { quote: 'AI danısman faturalarımızın %40\'ının 30 gunden fazla geciktigini gosterdi. Hemen tahsilat surecini degistirdik ve nakit akısı bir ayda iyilesti.', author: 'Ivana Petrova, „Trgovija Plus" DOOЕЛ Muduru — Stip' }
+      { name: 'Starter', price: '€12/ay', bullets: ['e‑Fatura hazır', 'AI asistan', '25 AI soru/ay'] },
+      { name: 'Standard', price: '€39/ay', bullets: ['Çoklu kullanıcı', 'AI belge merkezi', 'Otomasyonlar'], popular: true },
+      { name: 'Business', price: '€59/ay', bullets: ['AI mutabakat', 'Banka içe aktarma', 'API ve SLA'] }
     ]
   },
   faq: {
     title: 'SSS',
+    subtitle: 'Facturino hakkında sık sorulan sorular.',
     items: [
       { q: "e‑Fatura'ya hazır mısınız?", a: 'Evet, model e‑fatura verileriyle kurulu; UJP üretim API + QES açılınca bağlanıyoruz.' },
       { q: 'AI nasıl çalışır?', a: 'Her satır için KDV/hesap önerir — onay sizde.' },
@@ -884,22 +860,14 @@ const en: Dictionary = {
     title: 'Plans',
     cta: 'View Pricing',
     plans: [
-      { name: 'Starter', bullets: ['e-Invoice Ready', 'AI Assistant', '25 AI queries/month'] },
-      { name: 'Pro', bullets: ['Multi-users', 'AI Document Hub', 'Automations'] },
-      { name: 'Business', bullets: ['AI Reconciliation', 'Bank Import', 'API & SLA'] }
-    ]
-  },
-  testimonials: {
-    title: 'What our users say',
-    subtitle: 'Accountants and businesses already working with Facturino.',
-    items: [
-      { quote: 'Month-end closing for 12 clients dropped from 3 days to a few hours. Statement import is fast and reconciliation is semi-automatic.', author: 'Elena Stojanovska, Accounting Bureau "Bilans Pro" — Skopje' },
-      { quote: 'e-Invoice readiness gave us a huge advantage. While competitors wait, we already have structured data ready for UJP.', author: 'Darko Mitrevski, Audit Office "Finans Konsalt" — Bitola' },
-      { quote: 'The AI advisor showed me that 40% of our invoices were overdue by more than 30 days. We immediately changed our collection process and cash flow improved within a month.', author: 'Ivana Petrova, Manager at "Trgovija Plus" DOOEL — Shtip' }
+      { name: 'Starter', price: '€12/mo', bullets: ['e-Invoice Ready', 'AI Assistant', '25 AI queries/month'] },
+      { name: 'Standard', price: '€39/mo', bullets: ['Multi-users', 'AI Document Hub', 'Automations'], popular: true },
+      { name: 'Business', price: '€59/mo', bullets: ['AI Reconciliation', 'Bank Import', 'API & SLA'] }
     ]
   },
   faq: {
     title: 'FAQ',
+    subtitle: 'Common questions about Facturino.',
     items: [
       { q: 'Are you ready for e-Invoice?', a: 'Yes, the model is built around e-invoices and we connect as soon as UJP opens production API + QES.' },
       { q: 'How does AI work?', a: 'It suggests VAT/accounts per line item — a human always confirms/edits.' },

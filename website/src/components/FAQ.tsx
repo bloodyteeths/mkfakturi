@@ -10,7 +10,7 @@ export default function FAQ({ t }: { t: Dictionary }) {
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
             {t.faq.title}
           </h2>
-          <p className="text-lg text-gray-600">Common questions about Facturino.</p>
+          <p className="text-lg text-gray-600">{t.faq?.subtitle || 'Common questions about Facturino.'}</p>
         </div>
 
         <div className="space-y-4">

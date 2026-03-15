@@ -15,14 +15,14 @@ export default function HowItWorks({ t }: { t: Dictionary }) {
         <div className="relative">
           {/* Connecting Line (Desktop) */}
           <div className="hidden md:block absolute top-12 left-0 w-full h-0.5 bg-gray-100">
-            <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 to-cyan-500 w-2/3 opacity-30"></div>
+            <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 to-cyan-500 w-2/3 opacity-60"></div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-12">
             {t.how.steps.map((step, i) => (
               <div key={i} className="relative group">
                 <div className="flex flex-col items-center text-center">
-                  <div className="hidden md:flex relative z-10 w-24 h-24 mb-8 rounded-full bg-white border-4 border-indigo-50 shadow-lg items-center justify-center group-hover:border-indigo-100 group-hover:scale-110 transition-all duration-300">
+                  <div className="hidden md:flex relative z-10 w-20 h-20 mb-8 rounded-full bg-white border-4 border-indigo-50 shadow-lg items-center justify-center group-hover:border-indigo-100 group-hover:scale-110 transition-all duration-300">
                     <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 to-cyan-500">
                       {i + 1}
                     </span>
