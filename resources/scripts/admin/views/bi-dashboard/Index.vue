@@ -134,27 +134,31 @@
         <div v-if="trendLoading" class="text-center py-8">
           <p class="text-xs text-gray-400">{{ $t('general.loading') }}...</p>
         </div>
-        <div v-else-if="paddedTrendData.length" class="h-40">
+        <div v-else-if="trendDataPoints.length >= 2" class="h-40">
           <div class="flex items-end gap-1 h-full">
             <div
-              v-for="(point, idx) in paddedTrendData"
+              v-for="(point, idx) in displayTrendData"
               :key="idx"
-              class="flex flex-col items-center justify-end"
-              :style="{ width: (100 / 12) + '%' }"
+              class="flex-1 flex flex-col items-center justify-end"
             >
-              <template v-if="point.hasData">
-                <span class="text-[9px] text-gray-500 mb-1">{{ formatTrendValue(point.value) }}</span>
-                <div
-                  class="w-full max-w-[2rem] mx-auto rounded-t transition-all"
-                  :class="point.value < 0 ? 'bg-red-400' : 'bg-primary-500'"
-                  :style="{ height: barHeight(point.value) + '%' }"
-                ></div>
-              </template>
-              <template v-else>
-                <span class="text-[9px] text-gray-300 mb-1">—</span>
-                <div class="w-full max-w-[2rem] mx-auto rounded-t bg-gray-100" style="height: 3%"></div>
-              </template>
-              <span class="text-[9px] mt-1" :class="point.hasData ? 'text-gray-400' : 'text-gray-300'">{{ formatMonth(point.date) }}</span>
+              <span class="text-[9px] text-gray-500 mb-1">{{ formatTrendValue(point.value) }}</span>
+              <div
+                class="w-full max-w-[2.5rem] mx-auto rounded-t transition-all"
+                :class="point.value < 0 ? 'bg-red-400' : 'bg-primary-500'"
+                :style="{ height: barHeight(point.value) + '%' }"
+              ></div>
+              <span class="text-[9px] text-gray-400 mt-1">{{ formatMonth(point.date) }}</span>
+            </div>
+          </div>
+        </div>
+        <div v-else-if="trendDataPoints.length === 1" class="py-6">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-lg bg-primary-50 flex items-center justify-center flex-shrink-0">
+              <span class="text-lg font-bold text-primary-600">{{ formatTrendValue(trendDataPoints[0].value) }}</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-700">{{ formatMonth(trendDataPoints[0].date) }} {{ trendDataPoints[0].date?.substring(0, 4) }}</p>
+              <p class="text-xs text-gray-400">{{ t('trend_not_enough_data') }}</p>
             </div>
           </div>
         </div>
@@ -329,42 +333,13 @@ const netMarginValue = computed(() => summaryData.value?.ratios?.profitability?.
 const cashValue = computed(() => summaryData.value?.raw?.cash || 0)
 const receivableDaysValue = computed(() => summaryData.value?.ratios?.activity?.receivable_days || 0)
 
-// Pad trend data to always show 12 months
-function localYearMonth(d) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  return `${y}-${m}`
-}
-
-const paddedTrendData = computed(() => {
-  // If backend returned data, show it directly (it already sends 12 months)
-  if (trendData.value.length >= 6) {
-    return trendData.value.map(p => ({ ...p, hasData: true }))
-  }
-
-  // Otherwise pad to 12 months using local dates
-  const now = new Date()
-  const months = []
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const ym = localYearMonth(d)
-    months.push({ date: ym + '-01', month: ym, hasData: false, value: 0 })
-  }
-
-  if (trendData.value.length) {
-    for (const point of trendData.value) {
-      const pointMonth = point.date?.substring(0, 7)
-      const match = months.find(m => m.month === pointMonth)
-      if (match) {
-        match.value = point.value ?? 0
-        match.hasData = true
-        match.date = point.date
-      }
-    }
-  }
-
-  return months
+// Filter trend data to only months with actual non-zero values
+const trendDataPoints = computed(() => {
+  return trendData.value.filter(p => p.value !== 0 && p.value !== null && p.value !== undefined)
 })
+
+// For display: show all data points (flex-1 distributes evenly)
+const displayTrendData = computed(() => trendDataPoints.value)
 
 // Formatting
 function formatCurrency(val) {
@@ -431,9 +406,8 @@ function ratioStatusDot(key, value) {
 }
 
 function barHeight(value) {
-  const dataPoints = paddedTrendData.value.filter(p => p.hasData)
-  if (!dataPoints.length) return 0
-  const maxVal = Math.max(...dataPoints.map(p => Math.abs(p.value)), 0.001)
+  if (!trendDataPoints.value.length) return 0
+  const maxVal = Math.max(...trendDataPoints.value.map(p => Math.abs(p.value)), 0.001)
   return Math.max((Math.abs(value) / maxVal) * 100, 5)
 }
 

@@ -57,6 +57,7 @@ export default {
       show_details: 'Прикажи детали',
       hide_details: 'Сокриј детали',
       vs_last_month: 'споредба со мин. месец',
+      trend_not_enough_data: 'Трендот ќе биде достапен кога ќе имате податоци за повеќе месеци.',
       // Metric card explanations
       revenue_desc: 'Вкупен приход од фактури за избраниот период.',
       net_margin_desc: 'Колку процент од приходот останува како добивка после сите трошоци.',
@@ -142,6 +143,7 @@ export default {
       show_details: 'Show details',
       hide_details: 'Hide details',
       vs_last_month: 'vs last month',
+      trend_not_enough_data: 'Trend will be available when you have data for more months.',
       // Metric card explanations
       revenue_desc: 'Total income from invoices for the selected period.',
       net_margin_desc: 'What percentage of revenue remains as profit after all expenses.',
@@ -227,6 +229,7 @@ export default {
       show_details: 'Detayları göster',
       hide_details: 'Detayları gizle',
       vs_last_month: 'geçen aya göre',
+      trend_not_enough_data: 'Daha fazla aya ait verileriniz olduğunda trend görüntülenecektir.',
       // Metric card explanations
       revenue_desc: 'Seçilen dönem için faturalardan elde edilen toplam gelir.',
       net_margin_desc: 'Tüm giderlerden sonra gelirin yüzde kaçı kâr olarak kalıyor.',
@@ -312,6 +315,7 @@ export default {
       show_details: 'Shfaq detajet',
       hide_details: 'Fshih detajet',
       vs_last_month: 'krahasuar me muajin e kaluar',
+      trend_not_enough_data: 'Trendi do të jetë i disponueshëm kur të keni të dhëna për më shumë muaj.',
       // Metric card explanations
       revenue_desc: 'Të ardhurat totale nga faturat për periudhën e zgjedhur.',
       net_margin_desc: 'Sa përqind e të ardhurave mbetet si fitim pas të gjitha shpenzimeve.',
