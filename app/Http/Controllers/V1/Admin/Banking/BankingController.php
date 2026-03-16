@@ -880,8 +880,12 @@ class BankingController extends Controller
 
             $categoryList = $categories->map(fn ($c) => "{$c->id}: {$c->name}")->implode("\n");
 
+            $locale = request()->input('locale', app()->getLocale() ?: 'mk');
+            $localeNames = ['mk' => 'Macedonian', 'sq' => 'Albanian', 'tr' => 'Turkish', 'en' => 'English'];
+            $langName = $localeNames[$locale] ?? 'Macedonian';
+
             $prompt = <<<PROMPT
-You are a Macedonian accounting assistant. Categorize the following bank transaction into ONE of the expense categories listed below.
+You are an accounting assistant. Categorize the following bank transaction into ONE of the expense categories listed below.
 
 Transaction details:
 - Description: {$description}

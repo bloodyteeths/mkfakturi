@@ -24,6 +24,13 @@ use Illuminate\Support\Facades\Log;
  */
 class AiMatcherService
 {
+    private const LOCALE_NAMES = [
+        'mk' => 'Macedonian (македонски)',
+        'sq' => 'Albanian (shqip)',
+        'tr' => 'Turkish (Türkçe)',
+        'en' => 'English',
+    ];
+
     private ?GeminiProvider $provider = null;
 
     /**
@@ -38,7 +45,7 @@ class AiMatcherService
      * @param  float  $deterministicScore  Best deterministic score (0-1 scale)
      * @return array|null  AI match result or null
      */
-    public function enhance(object $transaction, Collection $invoices, int $companyId, float $deterministicScore = 0.0): ?array
+    public function enhance(object $transaction, Collection $invoices, int $companyId, float $deterministicScore = 0.0, string $locale = 'mk'): ?array
     {
         if ($invoices->isEmpty()) {
             return null;
@@ -59,7 +66,7 @@ class AiMatcherService
             }
 
             // Build prompt with transaction data, invoice pool, and feedback hints
-            $prompt = $this->buildMatchingPrompt($transaction, $invoices, $companyId);
+            $prompt = $this->buildMatchingPrompt($transaction, $invoices, $companyId, $locale);
 
             $response = $provider->generate($prompt, [
                 'temperature' => 0.1, // Low temperature for structured output
@@ -91,8 +98,9 @@ class AiMatcherService
     /**
      * Build the Gemini prompt for transaction matching.
      */
-    protected function buildMatchingPrompt(object $transaction, Collection $invoices, int $companyId): string
+    protected function buildMatchingPrompt(object $transaction, Collection $invoices, int $companyId, string $locale = 'mk'): string
     {
+        $langName = self::LOCALE_NAMES[$locale] ?? self::LOCALE_NAMES['mk'];
         $counterpartyName = $transaction->debtor_name ?? $transaction->creditor_name ?? '';
         $counterpartyIban = $transaction->debtor_iban ?? $transaction->creditor_iban ?? '';
 
@@ -126,7 +134,8 @@ class AiMatcherService
         $invoiceData = json_encode($invoiceList, JSON_UNESCAPED_UNICODE);
 
         $prompt = <<<PROMPT
-You are a Macedonian bank reconciliation assistant. Analyze a bank transaction and match it to invoice(s).
+You are a bank reconciliation assistant. Analyze a bank transaction and match it to invoice(s).
+You MUST respond in {$langName}. All text fields (reason) MUST be in this language.
 
 Transaction:
 {$transactionData}
@@ -146,18 +155,18 @@ Known matching hints from previous corrections:
 PROMPT;
         }
 
-        $prompt .= <<<'PROMPT'
+        $prompt .= <<<PROMPT
 
 Instructions:
 1. Match the transaction to one or more invoices based on: name similarity (handle Cyrillic/Latin variations like "ДООЕЛ МАРКОВ" = "Марков ДООЕЛ"), invoice references in description/remittance, amount matching (exact or split across multiple invoices), IBAN matching.
 2. If the transaction description mentions multiple invoice numbers, detect the split.
-3. For each match, provide a confidence score (0.0-1.0) and a brief reason in Macedonian.
+3. For each match, provide a confidence score (0.0-1.0) and a brief reason in {$langName}.
 4. If no reasonable match exists, return empty matches array.
 
 Return ONLY valid JSON (no markdown, no explanation):
 {
   "matches": [
-    {"invoice_id": 123, "amount": 15000, "confidence": 0.95, "reason": "Име совпаѓа + референца на фактура во описот"}
+    {"invoice_id": 123, "amount": 15000, "confidence": 0.95, "reason": "Name matches + invoice reference in description"}
   ],
   "is_split": false
 }

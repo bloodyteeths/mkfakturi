@@ -31,6 +31,8 @@ class Matcher
 
     protected $amountTolerance; // percentage tolerance for amount matching
 
+    protected string $locale = 'mk';
+
     /**
      * @var MatchingRulesService|null Lazily-resolved matching rules service
      */
@@ -41,11 +43,12 @@ class Matcher
      */
     protected ?array $currentRuleActions = null;
 
-    public function __construct(int $companyId, int $matchingWindow = 7, float $amountTolerance = 0.01)
+    public function __construct(int $companyId, int $matchingWindow = 90, float $amountTolerance = 0.01, string $locale = 'mk')
     {
         $this->companyId = $companyId;
         $this->matchingWindow = $matchingWindow;
         $this->amountTolerance = $amountTolerance;
+        $this->locale = $locale;
     }
 
     /**
@@ -251,7 +254,7 @@ class Matcher
             if ($uncategorized->isNotEmpty()) {
                 try {
                     $categorizer = app(AiTransactionCategorizer::class);
-                    $catResults = $categorizer->categorizeBatch($uncategorized);
+                    $catResults = $categorizer->categorizeBatch($uncategorized, $this->locale);
                     $totalCategorized = count($catResults);
                 } catch (\Exception $e) {
                     Log::debug('[Matcher] AI categorization skipped', ['error' => $e->getMessage()]);
@@ -383,7 +386,11 @@ class Matcher
     protected function getUnpaidInvoices()
     {
         return Invoice::where('company_id', $this->companyId)
-            ->where('status', 'SENT')
+            ->whereIn('status', [
+                Invoice::STATUS_SENT,
+                Invoice::STATUS_VIEWED,
+                Invoice::STATUS_PARTIALLY_PAID,
+            ])
             ->where('due_date', '>=', Carbon::now()->subDays($this->matchingWindow * 2))
             ->orderBy('due_date', 'desc')
             ->get();
@@ -472,7 +479,7 @@ class Matcher
         try {
             $aiMatcher = app(AiMatcherService::class);
 
-            return $aiMatcher->enhance($transaction, $invoices, $this->companyId, $deterministicScore);
+            return $aiMatcher->enhance($transaction, $invoices, $this->companyId, $deterministicScore, $this->locale);
         } catch (\Exception $e) {
             Log::debug('[Matcher] AI enhancement unavailable', ['error' => $e->getMessage()]);
 

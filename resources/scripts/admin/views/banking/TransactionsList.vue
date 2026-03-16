@@ -183,6 +183,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
 
@@ -200,6 +201,7 @@ const props = defineProps({
 const emit = defineEmits(['categorize'])
 
 const { t } = useI18n()
+const router = useRouter()
 const notificationStore = useNotificationStore()
 
 // State
@@ -299,12 +301,8 @@ const viewTransactionDetails = (transaction) => {
   showDetailsModal.value = true
 }
 
-const matchToInvoice = async (transaction) => {
-  // TODO: Implement invoice matching logic
-  notificationStore.showNotification({
-    type: 'info',
-    message: t('banking.match_invoice_coming_soon')
-  })
+const matchToInvoice = (transaction) => {
+  router.push('/admin/banking/reconciliation')
 }
 
 const formatDate = (date) => {

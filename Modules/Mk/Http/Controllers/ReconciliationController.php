@@ -28,7 +28,8 @@ class ReconciliationController extends Controller
     public function index(Request $request): JsonResponse
     {
         $company = $this->getCompany();
-        $matcher = new Matcher($company->id);
+        $locale = $request->input('locale', app()->getLocale() ?: 'mk');
+        $matcher = new Matcher($company->id, 90, 0.01, $locale);
 
         // Get unmatched transactions (P0-13: explicit tenant scope)
         $transactions = BankTransaction::forCompany($company->id)
@@ -73,10 +74,12 @@ class ReconciliationController extends Controller
     public function autoMatch(Request $request): JsonResponse
     {
         $company = $this->getCompany();
+        $locale = $request->input('locale', app()->getLocale() ?: 'mk');
         $matcher = new Matcher(
             $company->id,
-            $request->get('lookback_days', 7),
-            $request->get('amount_tolerance', 0.01)
+            $request->get('lookback_days', 90),
+            $request->get('amount_tolerance', 0.01),
+            $locale
         );
 
         $matches = $matcher->matchAllTransactions();
@@ -108,7 +111,11 @@ class ReconciliationController extends Controller
 
         $invoice = Invoice::where('company_id', $company->id)
             ->where('id', $request->invoice_id)
-            ->where('status', 'SENT')
+            ->whereIn('status', [
+                Invoice::STATUS_SENT,
+                Invoice::STATUS_VIEWED,
+                Invoice::STATUS_PARTIALLY_PAID,
+            ])
             ->firstOrFail();
 
         // Create match using Matcher service (confidence = 100 for manual match)
@@ -155,7 +162,11 @@ class ReconciliationController extends Controller
         $company = $this->getCompany();
 
         $invoices = Invoice::where('company_id', $company->id)
-            ->where('status', 'SENT')
+            ->whereIn('status', [
+                Invoice::STATUS_SENT,
+                Invoice::STATUS_VIEWED,
+                Invoice::STATUS_PARTIALLY_PAID,
+            ])
             ->with('customer:id,name')
             ->orderBy('due_date', 'asc')
             ->get(['id', 'invoice_number', 'total', 'due_date', 'customer_id']);
@@ -412,9 +423,14 @@ class ReconciliationController extends Controller
                 'notes' => "Manually matched from bank transaction. Confidence: {$match['confidence']}%",
             ]);
 
-            // Update invoice status
-            $invoice->status = 'PAID';
-            $invoice->paid_status = \App\Models\Payment::STATUS_COMPLETED;
+            // Update invoice status based on payment amount vs total
+            $totalPaid = $invoice->payments()->sum('amount') + $match['amount'];
+            if ($totalPaid >= $invoice->total) {
+                $invoice->status = Invoice::STATUS_PAID;
+                $invoice->paid_status = Invoice::STATUS_PAID;
+            } else {
+                $invoice->paid_status = Invoice::STATUS_PARTIALLY_PAID;
+            }
             $invoice->save();
 
             // Mark transaction as matched

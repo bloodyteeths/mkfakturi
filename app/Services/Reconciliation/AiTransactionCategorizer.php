@@ -20,6 +20,13 @@ use Illuminate\Support\Facades\Log;
  */
 class AiTransactionCategorizer
 {
+    private const LOCALE_NAMES = [
+        'mk' => 'Macedonian (македонски)',
+        'sq' => 'Albanian (shqip)',
+        'tr' => 'Turkish (Türkçe)',
+        'en' => 'English',
+    ];
+
     /**
      * Valid transaction categories.
      */
@@ -44,7 +51,7 @@ class AiTransactionCategorizer
      * @param  BankTransaction  $transaction  The transaction to categorize
      * @return array|null  ['category' => string, 'confidence' => float, 'reason' => string]
      */
-    public function categorize(BankTransaction $transaction): ?array
+    public function categorize(BankTransaction $transaction, string $locale = 'mk'): ?array
     {
         // Check AI usage limits
         $company = Company::find($transaction->company_id);
@@ -58,7 +65,7 @@ class AiTransactionCategorizer
                 return null;
             }
 
-            $prompt = $this->buildCategorizationPrompt($transaction);
+            $prompt = $this->buildCategorizationPrompt($transaction, $locale);
 
             $response = $provider->generate($prompt, [
                 'temperature' => 0.1,
@@ -86,7 +93,7 @@ class AiTransactionCategorizer
      * @param  \Illuminate\Support\Collection  $transactions
      * @return array  [transaction_id => category_result]
      */
-    public function categorizeBatch(\Illuminate\Support\Collection $transactions): array
+    public function categorizeBatch(\Illuminate\Support\Collection $transactions, string $locale = 'mk'): array
     {
         $results = [];
 
@@ -96,7 +103,7 @@ class AiTransactionCategorizer
                 continue;
             }
 
-            $result = $this->categorize($transaction);
+            $result = $this->categorize($transaction, $locale);
             if ($result) {
                 $results[$transaction->id] = $result;
 
@@ -114,8 +121,9 @@ class AiTransactionCategorizer
     /**
      * Build the Gemini prompt for transaction categorization.
      */
-    protected function buildCategorizationPrompt(BankTransaction $transaction): string
+    protected function buildCategorizationPrompt(BankTransaction $transaction, string $locale = 'mk'): string
     {
+        $langName = self::LOCALE_NAMES[$locale] ?? self::LOCALE_NAMES['mk'];
         $counterparty = $transaction->counterparty_name ?? '';
         $iban = $transaction->counterparty_iban ?? '';
 
@@ -132,7 +140,8 @@ class AiTransactionCategorizer
         $categories = implode(', ', self::CATEGORIES);
 
         return <<<PROMPT
-Classify this Macedonian bank transaction into one category.
+Classify this bank transaction into one category.
+You MUST return the reason field in {$langName}.
 
 Transaction:
 {$txData}
@@ -140,19 +149,19 @@ Transaction:
 Categories: {$categories}
 
 Rules:
-- salary: payroll, wages, "плата", "придонес"
-- tax_payment: government tax, "даноци", "ДДВ", "УЈП", "данок"
-- bank_fee: bank charges, "провизија", "камата банка"
-- loan_payment: loan installment, "кредит", "рата"
+- salary: payroll, wages, "плата", "придонес", "paga"
+- tax_payment: government tax, "даноци", "ДДВ", "УЈП", "данок", "tatim", "TVSH"
+- bank_fee: bank charges, "провизија", "камата банка", "komision"
+- loan_payment: loan installment, "кредит", "рата", "kredi"
 - internal_transfer: transfer between own accounts, same company name
 - supplier_payment: payment to supplier for goods/services
-- utility: electricity, water, phone, internet, "ЕВН", "Телеком"
-- rent: office/space rent, "кирија", "закуп"
+- utility: electricity, water, phone, internet, "ЕВН", "Телеком", "EVN"
+- rent: office/space rent, "кирија", "закуп", "qira"
 - subscription: recurring software/service subscription
 - other: none of the above
 
 Return ONLY valid JSON:
-{"category": "salary", "confidence": 0.9, "reason": "Опис содржи 'плата' за вработен"}
+{"category": "salary", "confidence": 0.9, "reason": "Description contains payroll keywords"}
 PROMPT;
     }
 
