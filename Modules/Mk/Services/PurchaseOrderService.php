@@ -6,6 +6,10 @@ use App\Mail\SendPurchaseOrderMail;
 use App\Models\Bill;
 use App\Models\Company;
 use App\Models\CompanySetting;
+use App\Models\Item;
+use App\Models\StockMovement;
+use App\Models\Warehouse;
+use App\Services\StockService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -98,9 +102,13 @@ class PurchaseOrderService
                 $currencyId = CompanySetting::getSetting('currency', $companyId);
             }
 
+            if (empty($data['supplier_id'])) {
+                throw new \InvalidArgumentException('Supplier is required for purchase orders.');
+            }
+
             $po = PurchaseOrder::create([
                 'company_id' => $companyId,
-                'supplier_id' => $data['supplier_id'] ?? null,
+                'supplier_id' => $data['supplier_id'],
                 'po_date' => $data['po_date'] ?? now()->toDateString(),
                 'expected_delivery_date' => $data['expected_delivery_date'] ?? null,
                 'status' => 'draft',
@@ -394,29 +402,39 @@ class PurchaseOrderService
 
     /**
      * Receive goods for a purchase order.
-     * Creates a GoodsReceipt and updates received_quantity on PO items.
+     * Creates a GoodsReceipt, updates received_quantity, and records stock movements.
      *
      * @param array $receivedItems [{ purchase_order_item_id, quantity_received, quantity_accepted, quantity_rejected }]
+     * @return array{receipt: GoodsReceipt, warnings: array}
      */
-    public function receiveGoods(PurchaseOrder $po, array $receivedItems, ?int $userId = null): GoodsReceipt
+    public function receiveGoods(PurchaseOrder $po, array $receivedItems, ?int $userId = null): array
     {
         if (in_array($po->status, ['draft', 'cancelled', 'closed', 'billed'])) {
             throw new \InvalidArgumentException('Cannot receive goods for a PO with status: ' . $po->status);
         }
 
         return DB::transaction(function () use ($po, $receivedItems, $userId) {
+            $warnings = [];
+
+            // Resolve warehouse: PO warehouse → default warehouse
+            $warehouseId = $po->warehouse_id;
+            if (!$warehouseId) {
+                $warehouse = Warehouse::getOrCreateDefault($po->company_id);
+                $warehouseId = $warehouse->id;
+            }
+
             // Create goods receipt
             $receipt = GoodsReceipt::create([
                 'company_id' => $po->company_id,
                 'purchase_order_id' => $po->id,
                 'receipt_date' => now()->toDateString(),
-                'warehouse_id' => $po->warehouse_id,
+                'warehouse_id' => $warehouseId,
                 'status' => 'confirmed',
                 'notes' => null,
                 'created_by' => $userId,
             ]);
 
-            $allFullyReceived = true;
+            $stockService = app(StockService::class);
 
             foreach ($receivedItems as $receivedItem) {
                 $poItem = PurchaseOrderItem::find($receivedItem['purchase_order_item_id']);
@@ -428,14 +446,19 @@ class PurchaseOrderService
                 $qtyAccepted = (float) ($receivedItem['quantity_accepted'] ?? $qtyReceived);
                 $qtyRejected = (float) ($receivedItem['quantity_rejected'] ?? 0);
 
-                // Cap accepted quantity at remaining to prevent over-receipt
+                // Cap accepted quantity at remaining — warn user instead of silent
                 $remaining = max(0, $poItem->quantity - $poItem->received_quantity);
                 if ($qtyAccepted > $remaining) {
+                    $warnings[] = "{$poItem->name}: accepted qty capped from {$qtyAccepted} to {$remaining} (ordered: {$poItem->quantity}, already received: {$poItem->received_quantity})";
                     $qtyAccepted = $remaining;
                 }
 
+                if ($qtyAccepted <= 0 && $qtyReceived <= 0) {
+                    continue;
+                }
+
                 // Create goods receipt item
-                GoodsReceiptItem::create([
+                $receiptItem = GoodsReceiptItem::create([
                     'goods_receipt_id' => $receipt->id,
                     'purchase_order_item_id' => $poItem->id,
                     'item_id' => $poItem->item_id,
@@ -448,9 +471,39 @@ class PurchaseOrderService
                 $newReceived = $poItem->received_quantity + $qtyAccepted;
                 $poItem->update(['received_quantity' => $newReceived]);
 
-                // Check if this item is fully received
-                if ($newReceived < $poItem->quantity) {
-                    $allFullyReceived = false;
+                // Record stock IN for accepted items with track_quantity enabled
+                if ($qtyAccepted > 0 && $poItem->item_id) {
+                    $item = Item::find($poItem->item_id);
+                    if ($item && $item->track_quantity) {
+                        try {
+                            $stockService->recordStockIn(
+                                $po->company_id,
+                                $warehouseId,
+                                $poItem->item_id,
+                                $qtyAccepted,
+                                (int) $poItem->price,
+                                StockMovement::SOURCE_GOODS_RECEIPT,
+                                $receiptItem->id,
+                                now()->toDateString(),
+                                "Stock IN from GR #{$receipt->receipt_number} (PO {$po->po_number})",
+                                [
+                                    'po_id' => $po->id,
+                                    'po_number' => $po->po_number,
+                                    'receipt_id' => $receipt->id,
+                                    'receipt_number' => $receipt->receipt_number,
+                                    'po_item_id' => $poItem->id,
+                                ],
+                                $userId
+                            );
+                        } catch (\Exception $e) {
+                            Log::warning('Failed to record stock movement for goods receipt', [
+                                'receipt_id' => $receipt->id,
+                                'item_id' => $poItem->item_id,
+                                'error' => $e->getMessage(),
+                            ]);
+                            $warnings[] = "{$poItem->name}: stock movement failed — {$e->getMessage()}";
+                        }
+                    }
                 }
             }
 
@@ -474,12 +527,16 @@ class PurchaseOrderService
                 $po->update(['status' => 'partially_received']);
             }
 
-            return $receipt->load('items');
+            return [
+                'receipt' => $receipt->load('items'),
+                'warnings' => $warnings,
+            ];
         });
     }
 
     /**
      * Convert a purchase order to a bill.
+     * Uses received quantities (not ordered) so the bill reflects what was actually delivered.
      */
     public function convertToBill(PurchaseOrder $po): Bill
     {
@@ -487,14 +544,51 @@ class PurchaseOrderService
             throw new \InvalidArgumentException('This purchase order has already been converted to a bill.');
         }
 
-        if (in_array($po->status, ['draft', 'cancelled'])) {
-            throw new \InvalidArgumentException('Cannot convert a draft or cancelled PO to a bill.');
+        if (in_array($po->status, ['draft', 'cancelled', 'sent', 'acknowledged'])) {
+            throw new \InvalidArgumentException('Cannot convert PO to bill before receiving goods.');
         }
 
         return DB::transaction(function () use ($po) {
             $po->load(['items', 'supplier', 'currency']);
 
-            // Create the bill
+            // Build bill items from received quantities
+            $billItems = [];
+            $subTotal = 0;
+            $taxTotal = 0;
+
+            foreach ($po->items as $poItem) {
+                $qty = $poItem->received_quantity;
+                if ($qty <= 0) {
+                    continue;
+                }
+
+                $itemSubTotal = (int) ($poItem->price * $qty);
+                $itemTaxTotal = (int) ($poItem->tax * $qty);
+                $itemTotal = $itemSubTotal + $itemTaxTotal;
+                $subTotal += $itemSubTotal;
+                $taxTotal += $itemTaxTotal;
+
+                $billItems[] = [
+                    'item_id' => $poItem->item_id,
+                    'name' => $poItem->name,
+                    'quantity' => $qty,
+                    'price' => $poItem->price,
+                    'tax' => $poItem->tax,
+                    'total' => $itemTotal,
+                    'discount' => 0,
+                    'discount_val' => 0,
+                    'discount_type' => 'fixed',
+                    'warehouse_id' => $po->warehouse_id,
+                ];
+            }
+
+            if (empty($billItems)) {
+                throw new \InvalidArgumentException('No received items to convert to bill.');
+            }
+
+            $total = $subTotal + $taxTotal;
+
+            // Create the bill with actual received totals
             $bill = Bill::create([
                 'company_id' => $po->company_id,
                 'supplier_id' => $po->supplier_id,
@@ -503,30 +597,14 @@ class PurchaseOrderService
                 'due_date' => now()->addDays(30)->toDateString(),
                 'status' => Bill::STATUS_DRAFT,
                 'paid_status' => Bill::PAID_STATUS_UNPAID,
-                'sub_total' => $po->sub_total,
-                'tax' => $po->tax,
-                'total' => $po->total,
-                'due_amount' => $po->total,
+                'sub_total' => $subTotal,
+                'tax' => $taxTotal,
+                'total' => $total,
+                'due_amount' => $total,
                 'currency_id' => $po->currency_id,
                 'exchange_rate' => 1,
                 'notes' => 'Auto-created from Purchase Order ' . $po->po_number,
             ]);
-
-            // Create bill items from PO items
-            $billItems = [];
-            foreach ($po->items as $poItem) {
-                $billItems[] = [
-                    'item_id' => $poItem->item_id,
-                    'name' => $poItem->name,
-                    'quantity' => $poItem->quantity,
-                    'price' => $poItem->price,
-                    'tax' => $poItem->tax,
-                    'total' => $poItem->total,
-                    'discount' => 0,
-                    'discount_val' => 0,
-                    'discount_type' => 'fixed',
-                ];
-            }
 
             Bill::createItems($bill, $billItems);
 

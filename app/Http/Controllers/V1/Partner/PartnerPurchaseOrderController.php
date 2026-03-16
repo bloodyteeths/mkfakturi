@@ -324,16 +324,22 @@ class PartnerPurchaseOrderController extends Controller
         ]);
 
         try {
-            $receipt = $this->service->receiveGoods($po, $request->input('items'), $request->user()?->id);
+            $result = $this->service->receiveGoods($po, $request->input('items'), $request->user()?->id);
             $po = $po->fresh(['items', 'supplier', 'goodsReceipts']);
+
+            $message = 'Goods received successfully';
+            if (!empty($result['warnings'])) {
+                $message .= ' (warnings: ' . implode('; ', $result['warnings']) . ')';
+            }
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'receipt' => $receipt,
+                    'receipt' => $result['receipt'],
                     'purchase_order' => $po,
                 ],
-                'message' => 'Goods received successfully',
+                'warnings' => $result['warnings'],
+                'message' => $message,
             ]);
         } catch (\InvalidArgumentException $e) {
             return response()->json([
