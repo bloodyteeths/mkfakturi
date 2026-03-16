@@ -368,7 +368,8 @@ class PartnerPurchaseOrderController extends Controller
         }
 
         try {
-            $bill = $this->service->convertToBill($po);
+            $itemIds = $request->input('item_ids');
+            $bill = $this->service->convertToBill($po, $itemIds);
 
             return response()->json([
                 'success' => true,

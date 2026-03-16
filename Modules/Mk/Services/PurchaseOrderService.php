@@ -537,8 +537,11 @@ class PurchaseOrderService
     /**
      * Convert a purchase order to a bill.
      * Uses received quantities (not ordered) so the bill reflects what was actually delivered.
+     * Supports partial billing — pass $itemIds to bill only specific PO items.
+     *
+     * @param  array|null  $itemIds  Optional array of purchase_order_item IDs to include (null = all received)
      */
-    public function convertToBill(PurchaseOrder $po): Bill
+    public function convertToBill(PurchaseOrder $po, ?array $itemIds = null): Bill
     {
         if ($po->converted_bill_id) {
             throw new \InvalidArgumentException('This purchase order has already been converted to a bill.');
@@ -548,7 +551,7 @@ class PurchaseOrderService
             throw new \InvalidArgumentException('Cannot convert PO to bill before receiving goods.');
         }
 
-        return DB::transaction(function () use ($po) {
+        return DB::transaction(function () use ($po, $itemIds) {
             $po->load(['items', 'supplier', 'currency']);
 
             // Build bill items from received quantities
@@ -557,6 +560,11 @@ class PurchaseOrderService
             $taxTotal = 0;
 
             foreach ($po->items as $poItem) {
+                // If specific items requested, skip items not in the list
+                if ($itemIds !== null && !in_array($poItem->id, $itemIds)) {
+                    continue;
+                }
+
                 $qty = $poItem->received_quantity;
                 if ($qty <= 0) {
                     continue;
@@ -588,13 +596,20 @@ class PurchaseOrderService
 
             $total = $subTotal + $taxTotal;
 
+            // Use company payment terms setting, fallback to 30 days
+            $paymentTermsDays = (int) CompanySetting::getSetting(
+                'purchase_order_payment_terms',
+                $po->company_id,
+                30
+            );
+
             // Create the bill with actual received totals
             $bill = Bill::create([
                 'company_id' => $po->company_id,
                 'supplier_id' => $po->supplier_id,
                 'bill_number' => 'BILL-' . $po->po_number,
                 'bill_date' => now()->toDateString(),
-                'due_date' => now()->addDays(30)->toDateString(),
+                'due_date' => now()->addDays($paymentTermsDays)->toDateString(),
                 'status' => Bill::STATUS_DRAFT,
                 'paid_status' => Bill::PAID_STATUS_UNPAID,
                 'sub_total' => $subTotal,
@@ -620,24 +635,30 @@ class PurchaseOrderService
 
     /**
      * Three-way match: compare PO vs GoodsReceipt vs Bill.
-     * Returns match result and any discrepancies.
+     * Checks all three pairwise comparisons:
+     *   1. PO ordered vs received (delivery accuracy)
+     *   2. PO ordered vs billed (billing accuracy)
+     *   3. Received vs billed (invoice verification — the most important check)
      */
     public function threeWayMatch(PurchaseOrder $po): array
     {
         $po->load(['items', 'goodsReceipts.items', 'convertedBill.items']);
 
-        $discrepancies = [];
-        $matched = true;
+        $items = [];
+        $allMatched = true;
 
         foreach ($po->items as $poItem) {
             $entry = [
                 'item_name' => $poItem->name,
+                'item_id' => $poItem->item_id,
                 'po_quantity' => $poItem->quantity,
                 'po_price' => $poItem->price,
                 'received_quantity' => $poItem->received_quantity,
                 'billed_quantity' => 0,
                 'billed_price' => 0,
-                'quantity_match' => false,
+                'po_vs_received' => false,
+                'po_vs_billed' => false,
+                'received_vs_billed' => false,
                 'price_match' => false,
             ];
 
@@ -653,48 +674,86 @@ class PurchaseOrderService
                 }
             }
 
-            // Check quantity match (PO qty == received qty == billed qty)
-            $entry['quantity_match'] = (
-                abs($poItem->quantity - $poItem->received_quantity) < 0.001
-                && abs($poItem->quantity - $entry['billed_quantity']) < 0.001
-            );
+            // 1. PO ordered vs received
+            $entry['po_vs_received'] = abs($poItem->quantity - $poItem->received_quantity) < 0.001;
 
-            // Check price match (PO price == billed price)
-            $entry['price_match'] = (
-                $po->convertedBill === null
-                || $entry['billed_price'] === $poItem->price
-            );
+            // 2. PO ordered vs billed
+            $entry['po_vs_billed'] = $po->convertedBill === null
+                || abs($poItem->quantity - $entry['billed_quantity']) < 0.001;
 
-            if (!$entry['quantity_match'] || !$entry['price_match']) {
-                $matched = false;
+            // 3. Received vs billed (most critical — are we paying for what we got?)
+            $entry['received_vs_billed'] = $po->convertedBill === null
+                || abs($poItem->received_quantity - $entry['billed_quantity']) < 0.001;
+
+            // Price match (PO price == billed price)
+            $entry['price_match'] = $po->convertedBill === null
+                || $entry['billed_price'] === $poItem->price;
+
+            if (!$entry['po_vs_received'] || !$entry['received_vs_billed'] || !$entry['price_match']) {
+                $allMatched = false;
             }
 
-            $discrepancies[] = $entry;
+            $items[] = $entry;
         }
 
         return [
-            'matched' => $matched,
+            'matched' => $allMatched,
             'po_number' => $po->po_number,
             'po_total' => $po->total,
             'bill_number' => $po->convertedBill?->bill_number,
             'bill_total' => $po->convertedBill?->total,
+            'received_total' => $po->items->sum(fn ($i) => (int) ($i->price * $i->received_quantity)),
             'goods_receipts_count' => $po->goodsReceipts->count(),
-            'discrepancies' => $discrepancies,
+            'items' => $items,
         ];
     }
 
     /**
-     * Cancel a purchase order (only if draft or sent).
+     * Cancel a purchase order.
+     * Draft/sent: simple status change.
+     * Partially/fully received: also reverses all stock movements from goods receipts.
+     * Billed POs cannot be cancelled (void the bill first).
      */
     public function cancel(PurchaseOrder $po): PurchaseOrder
     {
-        if (!in_array($po->status, ['draft', 'sent'])) {
-            throw new \InvalidArgumentException('Only draft or sent purchase orders can be cancelled.');
+        if (in_array($po->status, ['billed', 'closed', 'cancelled'])) {
+            throw new \InvalidArgumentException("Cannot cancel a {$po->status} purchase order.");
         }
 
-        $po->update(['status' => 'cancelled']);
+        return DB::transaction(function () use ($po) {
+            // If goods were received, reverse stock movements
+            if (in_array($po->status, ['partially_received', 'fully_received'])) {
+                $stockService = app(StockService::class);
 
-        return $po->fresh(['items', 'supplier']);
+                // Find all stock movements created by goods receipts for this PO via metadata
+                $movements = StockMovement::where('source_type', StockMovement::SOURCE_GOODS_RECEIPT)
+                    ->where('company_id', $po->company_id)
+                    ->whereJsonContains('meta->po_id', $po->id)
+                    ->get();
+
+                foreach ($movements as $movement) {
+                    try {
+                        $stockService->reverseMovement(
+                            $movement,
+                            "Reversed: PO {$po->po_number} cancelled"
+                        );
+                    } catch (\Exception $e) {
+                        Log::warning('Failed to reverse stock movement on PO cancel', [
+                            'po_id' => $po->id,
+                            'movement_id' => $movement->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
+                // Reset received quantities on PO items
+                $po->items()->update(['received_quantity' => 0]);
+            }
+
+            $po->update(['status' => 'cancelled']);
+
+            return $po->fresh(['items', 'supplier']);
+        });
     }
 
     /**

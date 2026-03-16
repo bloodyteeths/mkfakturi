@@ -286,8 +286,14 @@ class PurchaseOrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Purchase order not found'], 404);
         }
 
+        $request->validate([
+            'item_ids' => 'nullable|array',
+            'item_ids.*' => 'integer',
+        ]);
+
         try {
-            $bill = $this->service->convertToBill($po);
+            $itemIds = $request->input('item_ids');
+            $bill = $this->service->convertToBill($po, $itemIds);
 
             return response()->json([
                 'success' => true,
