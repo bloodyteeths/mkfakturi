@@ -240,6 +240,7 @@ class TravelOrderGLService
     private function isIfrsEnabled(int $companyId): bool
     {
         $globalEnabled = config('ifrs.enabled', false) ||
+            env('FEATURE_ACCOUNTING_BACKBONE', false) ||
             (function_exists('feature') && feature('accounting-backbone'));
 
         if (! $globalEnabled) {
