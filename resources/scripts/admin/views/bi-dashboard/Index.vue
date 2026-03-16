@@ -8,6 +8,9 @@
       </template>
     </BasePageHeader>
 
+    <!-- Subtitle -->
+    <p class="text-sm text-gray-500 -mt-4 mb-6">{{ t('subtitle') }}</p>
+
     <!-- Period Selector Pills -->
     <div class="flex flex-wrap gap-2 mb-6">
       <button
@@ -62,14 +65,15 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <div>
+          <div class="flex-1">
             <p class="text-sm text-gray-500">{{ t('overall_health') }}</p>
             <p class="text-lg font-semibold" :class="zoneTextColor(altmanZone)">
               {{ t(altmanZone) }}
             </p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ t('health_desc') }}</p>
           </div>
           <!-- Health dots -->
-          <div class="ml-auto flex gap-5">
+          <div class="flex gap-5">
             <div v-for="(status, key) in healthIndicators" :key="key" class="text-center">
               <div class="w-3 h-3 rounded-full mx-auto mb-1" :class="zoneDot(status)"></div>
               <p class="text-[11px] text-gray-500">{{ t(key) }}</p>
@@ -82,30 +86,34 @@
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <!-- Revenue -->
         <div class="bg-white rounded-lg shadow p-5">
-          <p class="text-xs font-medium text-gray-500 uppercase mb-2">{{ t('revenue') }}</p>
+          <p class="text-xs font-medium text-gray-500 uppercase mb-1">{{ t('revenue') }}</p>
           <p class="text-xl font-bold text-gray-900">{{ formatCurrency(revenueValue) }}</p>
+          <p class="text-[11px] text-gray-400 mt-1.5 leading-snug">{{ t('revenue_desc') }}</p>
         </div>
 
         <!-- Net Margin -->
         <div class="bg-white rounded-lg shadow p-5">
-          <p class="text-xs font-medium text-gray-500 uppercase mb-2">{{ t('net_margin') }}</p>
+          <p class="text-xs font-medium text-gray-500 uppercase mb-1">{{ t('net_margin') }}</p>
           <p class="text-xl font-bold" :class="netMarginValue >= 0 ? 'text-green-600' : 'text-red-600'">
             {{ formatPercent(netMarginValue) }}
           </p>
+          <p class="text-[11px] text-gray-400 mt-1.5 leading-snug">{{ t('net_margin_desc') }}</p>
         </div>
 
         <!-- Cash Position -->
         <div class="bg-white rounded-lg shadow p-5">
-          <p class="text-xs font-medium text-gray-500 uppercase mb-2">{{ t('cash_position') }}</p>
+          <p class="text-xs font-medium text-gray-500 uppercase mb-1">{{ t('cash_position') }}</p>
           <p class="text-xl font-bold text-gray-900">{{ formatCurrency(cashValue) }}</p>
+          <p class="text-[11px] text-gray-400 mt-1.5 leading-snug">{{ t('cash_position_desc') }}</p>
         </div>
 
         <!-- Receivable Days -->
         <div class="bg-white rounded-lg shadow p-5">
-          <p class="text-xs font-medium text-gray-500 uppercase mb-2">{{ t('receivable_days') }}</p>
+          <p class="text-xs font-medium text-gray-500 uppercase mb-1">{{ t('receivable_days') }}</p>
           <p class="text-xl font-bold" :class="receivableDaysValue <= 45 ? 'text-green-600' : receivableDaysValue <= 90 ? 'text-yellow-600' : 'text-red-600'">
             {{ Math.round(receivableDaysValue) }} <span class="text-sm font-normal text-gray-500">{{ t('days_label') }}</span>
           </p>
+          <p class="text-[11px] text-gray-400 mt-1.5 leading-snug">{{ t('receivable_days_desc') }}</p>
         </div>
       </div>
 
@@ -126,19 +134,28 @@
         <div v-if="trendLoading" class="text-center py-8">
           <p class="text-xs text-gray-400">{{ $t('general.loading') }}...</p>
         </div>
-        <div v-else-if="trendData.length" class="flex items-end gap-1 h-40">
-          <div
-            v-for="(point, idx) in trendData"
-            :key="idx"
-            class="flex-1 flex flex-col items-center justify-end"
-          >
-            <span class="text-[9px] text-gray-500 mb-1">{{ formatTrendValue(point.value) }}</span>
+        <div v-else-if="paddedTrendData.length" class="h-40">
+          <div class="flex items-end gap-1 h-full">
             <div
-              class="w-full rounded-t transition-all"
-              :class="point.value < 0 ? 'bg-red-400' : 'bg-primary-500'"
-              :style="{ height: barHeight(point.value) + '%' }"
-            ></div>
-            <span class="text-[9px] text-gray-400 mt-1">{{ formatMonth(point.date) }}</span>
+              v-for="(point, idx) in paddedTrendData"
+              :key="idx"
+              class="flex flex-col items-center justify-end"
+              :style="{ width: (100 / 12) + '%' }"
+            >
+              <template v-if="point.hasData">
+                <span class="text-[9px] text-gray-500 mb-1">{{ formatTrendValue(point.value) }}</span>
+                <div
+                  class="w-full max-w-[2rem] mx-auto rounded-t transition-all"
+                  :class="point.value < 0 ? 'bg-red-400' : 'bg-primary-500'"
+                  :style="{ height: barHeight(point.value) + '%' }"
+                ></div>
+              </template>
+              <template v-else>
+                <span class="text-[9px] text-gray-300 mb-1">—</span>
+                <div class="w-full max-w-[2rem] mx-auto rounded-t bg-gray-100" style="height: 3%"></div>
+              </template>
+              <span class="text-[9px] mt-1" :class="point.hasData ? 'text-gray-400' : 'text-gray-300'">{{ formatMonth(point.date) }}</span>
+            </div>
           </div>
         </div>
         <div v-else class="text-center py-8">
@@ -165,56 +182,62 @@
         <div v-if="showDetails" class="border-t border-gray-200">
           <!-- Liquidity -->
           <div class="px-5 py-3 border-b border-gray-100">
-            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">{{ t('liquidity') }}</h4>
-            <div class="grid grid-cols-3 gap-4">
-              <div v-for="(val, key) in liquidityRatios" :key="key">
-                <p class="text-xs text-gray-500">{{ t(key) }}</p>
-                <p class="text-sm font-medium">
-                  {{ Number(val).toFixed(2) }}
-                  <span class="inline-block w-2 h-2 rounded-full ml-1" :class="ratioStatusDot(key, val)"></span>
-                </p>
+            <h4 class="text-xs font-bold text-gray-500 uppercase mb-1">{{ t('liquidity') }}</h4>
+            <p class="text-[11px] text-gray-400 mb-3 leading-snug">{{ t('liquidity_desc') }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div v-for="(val, key) in liquidityRatios" :key="key" class="flex items-start gap-2">
+                <span class="inline-block w-2 h-2 rounded-full mt-1.5 flex-shrink-0" :class="ratioStatusDot(key, val)"></span>
+                <div class="min-w-0">
+                  <p class="text-xs text-gray-700 font-medium">{{ t(key) }}: {{ Number(val).toFixed(2) }}</p>
+                  <p class="text-[10px] text-gray-400 leading-snug">{{ t(key + '_tip') }}</p>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Profitability -->
           <div class="px-5 py-3 border-b border-gray-100">
-            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">{{ t('profitability') }}</h4>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div v-for="(val, key) in profitabilityRatios" :key="key">
-                <p class="text-xs text-gray-500">{{ t(key) }}</p>
-                <p class="text-sm font-medium">
-                  {{ (Number(val) * 100).toFixed(1) }}%
-                  <span class="inline-block w-2 h-2 rounded-full ml-1" :class="ratioStatusDot(key, val)"></span>
-                </p>
+            <h4 class="text-xs font-bold text-gray-500 uppercase mb-1">{{ t('profitability') }}</h4>
+            <p class="text-[11px] text-gray-400 mb-3 leading-snug">{{ t('profitability_desc') }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <div v-for="(val, key) in profitabilityRatios" :key="key" class="flex items-start gap-2">
+                <span class="inline-block w-2 h-2 rounded-full mt-1.5 flex-shrink-0" :class="ratioStatusDot(key, val)"></span>
+                <div class="min-w-0">
+                  <p class="text-xs text-gray-700 font-medium">{{ t(key) }}: {{ (Number(val) * 100).toFixed(1) }}%</p>
+                  <p class="text-[10px] text-gray-400 leading-snug">{{ t(key + '_tip') }}</p>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Solvency -->
           <div class="px-5 py-3 border-b border-gray-100">
-            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">{{ t('solvency') }}</h4>
-            <div class="grid grid-cols-2 gap-4">
-              <div v-for="(val, key) in solvencyRatios" :key="key">
-                <p class="text-xs text-gray-500">{{ t(key) }}</p>
-                <p class="text-sm font-medium">
-                  {{ Number(val).toFixed(2) }}
-                  <span class="inline-block w-2 h-2 rounded-full ml-1" :class="ratioStatusDot(key, val)"></span>
-                </p>
+            <h4 class="text-xs font-bold text-gray-500 uppercase mb-1">{{ t('solvency') }}</h4>
+            <p class="text-[11px] text-gray-400 mb-3 leading-snug">{{ t('solvency_desc') }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div v-for="(val, key) in solvencyRatios" :key="key" class="flex items-start gap-2">
+                <span class="inline-block w-2 h-2 rounded-full mt-1.5 flex-shrink-0" :class="ratioStatusDot(key, val)"></span>
+                <div class="min-w-0">
+                  <p class="text-xs text-gray-700 font-medium">{{ t(key) }}: {{ Number(val).toFixed(2) }}</p>
+                  <p class="text-[10px] text-gray-400 leading-snug">{{ t(key + '_tip') }}</p>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Activity -->
           <div class="px-5 py-3">
-            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">{{ t('activity') }}</h4>
-            <div class="grid grid-cols-3 gap-4">
-              <div v-for="(val, key) in activityRatios" :key="key">
-                <p class="text-xs text-gray-500">{{ t(key) }}</p>
-                <p class="text-sm font-medium">
-                  {{ key === 'inventory_turnover' ? Number(val).toFixed(2) : Math.round(Number(val)) + ' ' + t('days_label') }}
-                  <span class="inline-block w-2 h-2 rounded-full ml-1" :class="ratioStatusDot(key, val)"></span>
-                </p>
+            <h4 class="text-xs font-bold text-gray-500 uppercase mb-1">{{ t('activity') }}</h4>
+            <p class="text-[11px] text-gray-400 mb-3 leading-snug">{{ t('activity_desc') }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div v-for="(val, key) in activityRatios" :key="key" class="flex items-start gap-2">
+                <span class="inline-block w-2 h-2 rounded-full mt-1.5 flex-shrink-0" :class="ratioStatusDot(key, val)"></span>
+                <div class="min-w-0">
+                  <p class="text-xs text-gray-700 font-medium">
+                    {{ t(key) }}: {{ key === 'inventory_turnover' ? Number(val).toFixed(2) : Math.round(Number(val)) + ' ' + t('days_label') }}
+                  </p>
+                  <p class="text-[10px] text-gray-400 leading-snug">{{ t(key + '_tip') }}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -299,16 +322,40 @@ const healthIndicators = computed(() => summaryData.value?.health || {})
 const altmanZone = computed(() => summaryData.value?.ratios?.altman_z?.zone || 'danger')
 
 const revenueValue = computed(() => {
-  const rev = summaryData.value?.ratios?.profitability?.gross_margin
-  // Revenue is embedded in the ratio data; for the card we show revenue from activity
-  // Use a direct sum — but we only have ratios. Show gross margin as a proxy indicator.
-  // Actually, let's derive from the raw data the backend sends
   return summaryData.value?.raw?.revenue || 0
 })
 
 const netMarginValue = computed(() => summaryData.value?.ratios?.profitability?.net_margin || 0)
 const cashValue = computed(() => summaryData.value?.raw?.cash || 0)
 const receivableDaysValue = computed(() => summaryData.value?.ratios?.activity?.receivable_days || 0)
+
+// Pad trend data to always show 12 months
+const paddedTrendData = computed(() => {
+  const now = new Date()
+  const months = []
+
+  // Generate last 12 months
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const dateStr = d.toISOString().split('T')[0].substring(0, 7) // YYYY-MM
+    months.push({ date: dateStr + '-01', month: dateStr, hasData: false, value: 0 })
+  }
+
+  // Map actual trend data onto the 12-month grid
+  if (trendData.value.length) {
+    for (const point of trendData.value) {
+      const pointMonth = point.date?.substring(0, 7)
+      const match = months.find(m => m.month === pointMonth)
+      if (match) {
+        match.value = point.value || 0
+        match.hasData = true
+        match.date = point.date
+      }
+    }
+  }
+
+  return months
+})
 
 // Formatting
 function formatCurrency(val) {
@@ -375,9 +422,11 @@ function ratioStatusDot(key, value) {
 }
 
 function barHeight(value) {
-  if (!trendData.value.length) return 0
-  const maxVal = Math.max(...trendData.value.map(p => Math.abs(p.value)), 0.001)
-  return Math.max((Math.abs(value) / maxVal) * 100, 3)
+  // Use paddedTrendData for max calculation, only consider data points
+  const dataPoints = paddedTrendData.value.filter(p => p.hasData)
+  if (!dataPoints.length) return 0
+  const maxVal = Math.max(...dataPoints.map(p => Math.abs(p.value)), 0.001)
+  return Math.max((Math.abs(value) / maxVal) * 100, 5)
 }
 
 // API calls
