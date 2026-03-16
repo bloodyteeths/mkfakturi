@@ -44,6 +44,9 @@ class UserInvitationMail extends Mailable
                 'user' => $this->user,
                 'companyName' => $this->companyName,
                 'setPasswordUrl' => $setPasswordUrl,
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
     }
 }

@@ -40,6 +40,9 @@ class PartnerReferralMail extends Mailable
             ->markdown('emails.partner-referral', [
                 'inviterPartnerName' => $this->inviterPartnerName,
                 'signupLink' => $this->signupLink,
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
     }
 }

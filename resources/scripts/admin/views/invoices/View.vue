@@ -596,6 +596,32 @@ onSearched = debounce(onSearched, 500)
           />
         </BaseTab>
 
+        <!-- Email History Tab -->
+        <BaseTab
+          v-if="invoiceData.email_logs?.length"
+          tab-panel-container="py-4 mt-px"
+          :title="`${$t('general.email_history')} (${invoiceData.email_logs.length})`"
+        >
+          <div class="p-4 space-y-3">
+            <div
+              v-for="log in invoiceData.email_logs"
+              :key="log.id"
+              class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
+            >
+              <BaseIcon name="EnvelopeIcon" class="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-sm font-medium text-gray-900 truncate">{{ log.to }}</span>
+                  <span class="text-xs text-gray-500 whitespace-nowrap">
+                    {{ new Date(log.created_at).toLocaleString() }}
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-0.5 truncate">{{ log.subject }}</p>
+              </div>
+            </div>
+          </div>
+        </BaseTab>
+
         <!-- Source Document Tab (shown when original document was attached via AI Hub) -->
         <BaseTab
           v-if="invoiceData.source_document_url"

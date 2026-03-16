@@ -43,6 +43,9 @@ class PartnerInvitationMail extends Mailable
                 'companyName' => $this->companyName,
                 'inviteLink' => $this->inviteLink,
                 'permissions' => $this->permissions,
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
     }
 }

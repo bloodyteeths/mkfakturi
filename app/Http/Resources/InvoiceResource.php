@@ -89,6 +89,17 @@ class InvoiceResource extends JsonResource
             'currency' => $this->whenLoaded('currency', function () {
                 return CurrencyResource::make($this->currency);
             }),
+            'email_logs' => $this->whenLoaded('emailLogs', function () {
+                return $this->emailLogs->map(function ($log) {
+                    return [
+                        'id' => $log->id,
+                        'from' => $log->from,
+                        'to' => $log->to,
+                        'subject' => $log->subject,
+                        'created_at' => $log->created_at,
+                    ];
+                });
+            }),
             'profit' => $profit,
             'source_document_url' => $this->whenLoaded('media', function () {
                 $media = $this->getMedia('source_document')->first();

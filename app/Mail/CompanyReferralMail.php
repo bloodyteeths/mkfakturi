@@ -40,6 +40,9 @@ class CompanyReferralMail extends Mailable
             ->markdown('emails.company-referral', [
                 'inviterCompanyName' => $this->inviterCompanyName,
                 'signupLink' => $this->signupLink,
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
     }
 }

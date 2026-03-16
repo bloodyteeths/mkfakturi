@@ -54,6 +54,7 @@ class InvoicesController extends Controller
             'taxes.currency',
             'fields.customField',
             'fields.company',
+            'emailLogs',
         ];
     }
 

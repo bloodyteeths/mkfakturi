@@ -40,6 +40,9 @@ class CompanyInvitationMail extends Mailable
             ->markdown('emails.company-invitation', [
                 'partnerName' => $this->partnerName,
                 'signupLink' => $this->signupLink,
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
     }
 }

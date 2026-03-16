@@ -64,6 +64,8 @@ class SendCreditNoteMail extends Mailable
             );
         }
 
-        return $mailContent;
+        return $mailContent->withSymfonyMessage(function ($message) {
+            $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+        });
     }
 }

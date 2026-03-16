@@ -43,6 +43,9 @@ class DataExportReadyMail extends Mailable
                 'downloadUrl' => $this->downloadUrl,
                 'fileSizeMb' => $fileSizeMb,
                 'expiresAt' => $this->export->expires_at->format('d.m.Y'),
-            ]);
+            ])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
     }
 }

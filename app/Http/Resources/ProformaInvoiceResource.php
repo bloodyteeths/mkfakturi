@@ -52,6 +52,17 @@ class ProformaInvoiceResource extends JsonResource
             'allow_edit' => $this->allow_edit,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'email_logs' => $this->whenLoaded('emailLogs', function () {
+                return $this->emailLogs->map(function ($log) {
+                    return [
+                        'id' => $log->id,
+                        'from' => $log->from,
+                        'to' => $log->to,
+                        'subject' => $log->subject,
+                        'created_at' => $log->created_at,
+                    ];
+                });
+            }),
             'items' => $this->whenLoaded('items', function () {
                 return ProformaInvoiceItemResource::collection($this->items);
             }),

@@ -74,6 +74,17 @@ class EstimatesController extends Controller
     {
         $this->authorize('view', $estimate);
 
+        $estimate->load([
+            'items.taxes',
+            'customer',
+            'taxes',
+            'fields.customField',
+            'currency',
+            'company',
+            'creator',
+            'emailLogs',
+        ]);
+
         return new EstimateResource($estimate);
     }
 

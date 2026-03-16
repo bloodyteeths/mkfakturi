@@ -55,7 +55,10 @@ class SendInvoiceMail extends Mailable
         $mailContent = $this->from(config('mail.from.address'), $fromName)
             ->replyTo($replyTo, $companyName)
             ->subject($this->data['subject'])
-            ->markdown('emails.send.invoice', ['data' => $this->data]);
+            ->markdown('emails.send.invoice', ['data' => $this->data])
+            ->withSymfonyMessage(function ($message) {
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
 
         if ($this->data['attach']['data']) {
             $mailContent->attachData(

@@ -33,6 +33,8 @@ class TestMail extends Mailable
     {
         return $this->subject($this->subject)->markdown('emails.test')->with([
             'my_message' => $this->message,
-        ]);
+        ])->withSymfonyMessage(function ($message) {
+            $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+        });
     }
 }

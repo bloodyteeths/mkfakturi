@@ -45,6 +45,7 @@ class ProformaInvoicesController extends Controller
             'fields.customField',
             'fields.company',
             'convertedInvoice',
+            'emailLogs',
         ];
     }
 

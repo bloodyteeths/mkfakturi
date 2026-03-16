@@ -26,6 +26,7 @@
             <BaseInput
               v-model="estimateMailForm.from"
               type="text"
+              disabled
               :invalid="v$.from.$error"
               @input="v$.from.$touch()"
             />
