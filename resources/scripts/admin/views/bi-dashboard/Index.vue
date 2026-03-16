@@ -330,24 +330,33 @@ const cashValue = computed(() => summaryData.value?.raw?.cash || 0)
 const receivableDaysValue = computed(() => summaryData.value?.ratios?.activity?.receivable_days || 0)
 
 // Pad trend data to always show 12 months
-const paddedTrendData = computed(() => {
-  const now = new Date()
-  const months = []
+function localYearMonth(d) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  return `${y}-${m}`
+}
 
-  // Generate last 12 months
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const dateStr = d.toISOString().split('T')[0].substring(0, 7) // YYYY-MM
-    months.push({ date: dateStr + '-01', month: dateStr, hasData: false, value: 0 })
+const paddedTrendData = computed(() => {
+  // If backend returned data, show it directly (it already sends 12 months)
+  if (trendData.value.length >= 6) {
+    return trendData.value.map(p => ({ ...p, hasData: true }))
   }
 
-  // Map actual trend data onto the 12-month grid
+  // Otherwise pad to 12 months using local dates
+  const now = new Date()
+  const months = []
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const ym = localYearMonth(d)
+    months.push({ date: ym + '-01', month: ym, hasData: false, value: 0 })
+  }
+
   if (trendData.value.length) {
     for (const point of trendData.value) {
       const pointMonth = point.date?.substring(0, 7)
       const match = months.find(m => m.month === pointMonth)
       if (match) {
-        match.value = point.value || 0
+        match.value = point.value ?? 0
         match.hasData = true
         match.date = point.date
       }
@@ -422,7 +431,6 @@ function ratioStatusDot(key, value) {
 }
 
 function barHeight(value) {
-  // Use paddedTrendData for max calculation, only consider data points
   const dataPoints = paddedTrendData.value.filter(p => p.hasData)
   if (!dataPoints.length) return 0
   const maxVal = Math.max(...dataPoints.map(p => Math.abs(p.value)), 0.001)
