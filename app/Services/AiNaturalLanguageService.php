@@ -77,7 +77,8 @@ class AiNaturalLanguageService
 
             $response = $provider->generate($prompt, [
                 'temperature' => 0.1,
-                'max_tokens' => 1200,
+                'max_tokens' => 2048,
+                'thinking_budget' => 0,
             ]);
 
             // Track usage

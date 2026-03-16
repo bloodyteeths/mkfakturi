@@ -45,6 +45,7 @@ class GeminiProvider implements AiProviderInterface
         $maxTokens = $options['max_tokens'] ?? $this->maxTokens;
         $temperature = $options['temperature'] ?? $this->temperature;
         $model = $options['model'] ?? null;
+        $thinkingBudget = $options['thinking_budget'] ?? null;
 
         return $this->sendRequest([
             'contents' => [
@@ -55,7 +56,7 @@ class GeminiProvider implements AiProviderInterface
                     ],
                 ],
             ],
-        ], $maxTokens, $temperature, 'generate', $model);
+        ], $maxTokens, $temperature, 'generate', $model, $thinkingBudget);
     }
 
     /**
@@ -130,7 +131,8 @@ class GeminiProvider implements AiProviderInterface
         int $maxTokens,
         float $temperature,
         string $method,
-        ?string $modelOverride = null
+        ?string $modelOverride = null,
+        ?int $thinkingBudget = null
     ): string {
         $generationConfig = [
             'temperature' => $temperature,
@@ -138,9 +140,11 @@ class GeminiProvider implements AiProviderInterface
         ];
 
         // Gemini 2.5 models use "thinking" tokens that count toward maxOutputTokens.
-        // For short-output tasks (classification, etc.), disable thinking to avoid
-        // the model consuming the entire token budget on internal reasoning.
-        if ($maxTokens <= 500 && str_contains($modelOverride ?? $this->model, '2.5')) {
+        // Disable thinking when explicitly requested or for short-output tasks.
+        $is25Model = str_contains($modelOverride ?? $this->model, '2.5');
+        if ($thinkingBudget !== null && $is25Model) {
+            $generationConfig['thinkingConfig'] = ['thinkingBudget' => $thinkingBudget];
+        } elseif ($maxTokens <= 500 && $is25Model) {
             $generationConfig['thinkingConfig'] = ['thinkingBudget' => 0];
         }
 
