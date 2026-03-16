@@ -412,8 +412,8 @@ return [
         'free' => ['document_classify'],
         'accountant_basic' => ['document_classify', 'document_extract'],
         'starter' => ['document_classify', 'document_extract', 'nl_assistant'],
-        'standard' => ['document_classify', 'document_extract', 'document_confirm', 'ai_reconciliation_suggest', 'nl_assistant'],
-        'business' => ['document_classify', 'document_extract', 'document_confirm', 'ai_reconciliation_suggest', 'ai_reconciliation_categorize', 'nl_assistant'],
+        'standard' => ['document_classify', 'document_extract', 'document_confirm', 'ai_reconciliation_suggest', 'nl_assistant', 'ai_budget_suggest'],
+        'business' => ['document_classify', 'document_extract', 'document_confirm', 'ai_reconciliation_suggest', 'ai_reconciliation_categorize', 'nl_assistant', 'ai_budget_suggest'],
         'max' => ['*'], // All AI features
     ],
 

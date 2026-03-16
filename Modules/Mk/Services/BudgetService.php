@@ -201,6 +201,291 @@ class BudgetService
     }
 
     /**
+     * Category labels for smart budget (localized).
+     */
+    protected array $smartCategoryLabels = [
+        'invoice_revenue' => [
+            'mk' => 'Приходи од фактури',
+            'en' => 'Invoice Revenue',
+            'sq' => 'Te ardhura nga faturat',
+            'tr' => 'Fatura Gelirleri',
+        ],
+        'recurring_revenue' => [
+            'mk' => 'Повторувачки приходи',
+            'en' => 'Recurring Revenue',
+            'sq' => 'Te ardhura te perseritura',
+            'tr' => 'Tekrarlayan Gelir',
+        ],
+        'bill_expenses' => [
+            'mk' => 'Трошоци од сметки',
+            'en' => 'Bill Expenses',
+            'sq' => 'Shpenzime nga faturat',
+            'tr' => 'Fatura Giderleri',
+        ],
+    ];
+
+    /**
+     * Map expense category names (keywords) to IFRS account types.
+     * Case-insensitive matching via str_contains.
+     */
+    protected array $expenseCategoryMapping = [
+        // Rent / Office
+        'наем' => 'OVERHEAD_EXPENSE',
+        'кирија' => 'OVERHEAD_EXPENSE',
+        'rent' => 'OVERHEAD_EXPENSE',
+        'qira' => 'OVERHEAD_EXPENSE',
+        'kira' => 'OVERHEAD_EXPENSE',
+        'канцелари' => 'OVERHEAD_EXPENSE',
+        'office' => 'OVERHEAD_EXPENSE',
+        'ofis' => 'OVERHEAD_EXPENSE',
+        'zyre' => 'OVERHEAD_EXPENSE',
+        // Utilities
+        'комунал' => 'OVERHEAD_EXPENSE',
+        'utilit' => 'OVERHEAD_EXPENSE',
+        'komunal' => 'OVERHEAD_EXPENSE',
+        'струја' => 'OVERHEAD_EXPENSE',
+        'вода' => 'OVERHEAD_EXPENSE',
+        // Salaries
+        'плата' => 'OPERATING_EXPENSE',
+        'плати' => 'OPERATING_EXPENSE',
+        'salary' => 'OPERATING_EXPENSE',
+        'paga' => 'OPERATING_EXPENSE',
+        'maas' => 'OPERATING_EXPENSE',
+        // Materials / Direct
+        'материјал' => 'DIRECT_EXPENSE',
+        'material' => 'DIRECT_EXPENSE',
+        'malzeme' => 'DIRECT_EXPENSE',
+        'набавк' => 'DIRECT_EXPENSE',
+        'purchase' => 'DIRECT_EXPENSE',
+        'blerje' => 'DIRECT_EXPENSE',
+    ];
+
+    /**
+     * Generate a smart budget from real company data (invoices, bills, expenses).
+     *
+     * Unlike prefillFromActuals() which uses IFRS ledgers, this method queries
+     * actual transaction data that company users create: invoices, bills, expenses.
+     *
+     * @return array Simplified budget proposal with categories
+     */
+    public function generateSmartBudget(int $companyId, string $year, ?float $growthPct = 0, string $locale = 'mk'): array
+    {
+        $driver = DB::getDriverName();
+        if ($driver === 'sqlite') {
+            $monthExpr = "CAST(strftime('%%m', %s) AS INTEGER)";
+            $yearFilter = "strftime('%%Y', %s) = ?";
+        } else {
+            $monthExpr = "MONTH(%s)";
+            $yearFilter = "YEAR(%s) = ?";
+        }
+
+        $multiplier = 1 + (($growthPct ?? 0) / 100);
+        $nextYear = (int) $year + 1;
+        $categories = [];
+
+        // 1. Revenue from invoices
+        $invoiceMonthExpr = sprintf($monthExpr, 'invoice_date');
+        $invoiceYearFilter = sprintf($yearFilter, 'invoice_date');
+
+        $invoiceRows = DB::table('invoices')
+            ->where('company_id', $companyId)
+            ->where('status', '!=', 'DRAFT')
+            ->whereRaw($invoiceYearFilter, [(string) $year])
+            ->select(
+                DB::raw("{$invoiceMonthExpr} as month"),
+                DB::raw('SUM(COALESCE(base_total, total)) as total_cents')
+            )
+            ->groupBy(DB::raw($invoiceMonthExpr))
+            ->orderBy(DB::raw($invoiceMonthExpr))
+            ->get();
+
+        if ($invoiceRows->isNotEmpty()) {
+            $monthly = [];
+            $total = 0;
+            foreach ($invoiceRows as $row) {
+                $amount = round(($row->total_cents ?? 0) / 100, 2);
+                $adjusted = round($amount * $multiplier, 2);
+                $monthly[(int) $row->month] = $adjusted;
+                $total += $adjusted;
+            }
+            $categories[] = [
+                'key' => 'invoice_revenue',
+                'label' => $this->smartCategoryLabels['invoice_revenue'][$locale] ?? $this->smartCategoryLabels['invoice_revenue']['en'],
+                'account_type' => 'OPERATING_REVENUE',
+                'monthly' => $monthly,
+                'total' => round($total, 2),
+                'original_total' => round($total / $multiplier, 2),
+            ];
+        }
+
+        // 2. Recurring revenue projection
+        $recurringTotal = $this->projectRecurringRevenue($companyId, $nextYear, $locale);
+        if ($recurringTotal) {
+            $categories[] = $recurringTotal;
+        }
+
+        // 3. Expenses from bills
+        $billMonthExpr = sprintf($monthExpr, 'bill_date');
+        $billYearFilter = sprintf($yearFilter, 'bill_date');
+
+        $billRows = DB::table('bills')
+            ->where('company_id', $companyId)
+            ->where('status', '!=', 'DRAFT')
+            ->whereNull('deleted_at')
+            ->whereRaw($billYearFilter, [(string) $year])
+            ->select(
+                DB::raw("{$billMonthExpr} as month"),
+                DB::raw('SUM(COALESCE(base_total, total)) as total_cents')
+            )
+            ->groupBy(DB::raw($billMonthExpr))
+            ->orderBy(DB::raw($billMonthExpr))
+            ->get();
+
+        if ($billRows->isNotEmpty()) {
+            $monthly = [];
+            $total = 0;
+            foreach ($billRows as $row) {
+                $amount = round(($row->total_cents ?? 0) / 100, 2);
+                $adjusted = round($amount * $multiplier, 2);
+                $monthly[(int) $row->month] = $adjusted;
+                $total += $adjusted;
+            }
+            $categories[] = [
+                'key' => 'bill_expenses',
+                'label' => $this->smartCategoryLabels['bill_expenses'][$locale] ?? $this->smartCategoryLabels['bill_expenses']['en'],
+                'account_type' => 'OPERATING_EXPENSE',
+                'monthly' => $monthly,
+                'total' => round($total, 2),
+                'original_total' => round($total / $multiplier, 2),
+            ];
+        }
+
+        // 4. Expenses by category
+        $expMonthExpr = sprintf($monthExpr, 'e.expense_date');
+        $expYearFilter = sprintf($yearFilter, 'e.expense_date');
+
+        $catExpenseRows = DB::table('expenses as e')
+            ->join('expense_categories as ec', 'e.expense_category_id', '=', 'ec.id')
+            ->where('e.company_id', $companyId)
+            ->whereRaw($expYearFilter, [(string) $year])
+            ->select(
+                'ec.id as category_id',
+                'ec.name as category_name',
+                DB::raw("{$expMonthExpr} as month"),
+                DB::raw('SUM(COALESCE(e.base_amount, e.amount)) as total_cents')
+            )
+            ->groupBy('ec.id', 'ec.name', DB::raw($expMonthExpr))
+            ->orderBy('ec.name')
+            ->orderBy(DB::raw($expMonthExpr))
+            ->get();
+
+        if ($catExpenseRows->isNotEmpty()) {
+            // Group by category
+            $byCategory = $catExpenseRows->groupBy('category_id');
+
+            foreach ($byCategory as $catId => $rows) {
+                $categoryName = $rows->first()->category_name;
+                $accountType = $this->mapExpenseCategoryToIfrs($categoryName);
+
+                $monthly = [];
+                $total = 0;
+                foreach ($rows as $row) {
+                    $amount = round(($row->total_cents ?? 0) / 100, 2);
+                    $adjusted = round($amount * $multiplier, 2);
+                    $monthly[(int) $row->month] = $adjusted;
+                    $total += $adjusted;
+                }
+
+                $categories[] = [
+                    'key' => 'expense_cat_' . $catId,
+                    'label' => $categoryName,
+                    'account_type' => $accountType,
+                    'monthly' => $monthly,
+                    'total' => round($total, 2),
+                    'original_total' => round($total / $multiplier, 2),
+                ];
+            }
+        }
+
+        // Calculate summary
+        $totalRevenue = collect($categories)
+            ->filter(fn ($c) => str_contains($c['account_type'], 'REVENUE'))
+            ->sum('total');
+        $totalExpenses = collect($categories)
+            ->filter(fn ($c) => ! str_contains($c['account_type'], 'REVENUE'))
+            ->sum('total');
+
+        return [
+            'source_year' => $year,
+            'target_year' => (string) $nextYear,
+            'growth_pct' => $growthPct ?? 0,
+            'has_data' => ! empty($categories),
+            'summary' => [
+                'total_revenue' => round($totalRevenue, 2),
+                'total_expenses' => round($totalExpenses, 2),
+                'projected_profit' => round($totalRevenue - $totalExpenses, 2),
+            ],
+            'categories' => $categories,
+        ];
+    }
+
+    /**
+     * Project recurring revenue for a target year.
+     */
+    protected function projectRecurringRevenue(int $companyId, int $targetYear, string $locale): ?array
+    {
+        $recurring = DB::table('recurring_invoices')
+            ->where('company_id', $companyId)
+            ->where('status', 'ACTIVE')
+            ->get();
+
+        if ($recurring->isEmpty()) {
+            return null;
+        }
+
+        $monthly = [];
+        $total = 0;
+
+        foreach ($recurring as $ri) {
+            $amount = round(($ri->total ?? 0) / 100, 2);
+            // Simple projection: assume monthly frequency for each active recurring invoice
+            // Distribute across all 12 months
+            for ($m = 1; $m <= 12; $m++) {
+                $monthly[$m] = ($monthly[$m] ?? 0) + $amount;
+                $total += $amount;
+            }
+        }
+
+        if ($total <= 0) {
+            return null;
+        }
+
+        return [
+            'key' => 'recurring_revenue',
+            'label' => $this->smartCategoryLabels['recurring_revenue'][$locale] ?? $this->smartCategoryLabels['recurring_revenue']['en'],
+            'account_type' => 'OPERATING_REVENUE',
+            'monthly' => $monthly,
+            'total' => round($total, 2),
+            'original_total' => round($total, 2),
+        ];
+    }
+
+    /**
+     * Map an expense category name to an IFRS account type via keyword matching.
+     */
+    protected function mapExpenseCategoryToIfrs(string $categoryName): string
+    {
+        $lower = mb_strtolower($categoryName);
+        foreach ($this->expenseCategoryMapping as $keyword => $accountType) {
+            if (str_contains($lower, $keyword)) {
+                return $accountType;
+            }
+        }
+
+        return 'OPERATING_EXPENSE'; // Default fallback
+    }
+
+    /**
      * Pre-fill budget lines from actual IFRS ledger data for a given year.
      *
      * Queries ifrs_ledgers joined with ifrs_accounts to get actual amounts
@@ -348,6 +633,16 @@ class BudgetService
                     : round(($row->total_debit ?? 0) - ($row->total_credit ?? 0), 2);
             }
 
+            // Fallback: if IFRS has no data, try real company data (invoices/bills/expenses)
+            if ($actual == 0) {
+                $actual = $this->getActualFromCompanyData(
+                    $budget->company_id,
+                    $accountType,
+                    $periodStart,
+                    $periodEnd
+                );
+            }
+
             $variance = round($actual - $budgeted, 2);
             $variancePct = $budgeted != 0
                 ? round(($variance / abs($budgeted)) * 100, 2)
@@ -451,6 +746,46 @@ class BudgetService
             'top_over_budget' => $overBudget,
             'top_under_budget' => $underBudget,
         ];
+    }
+
+    /**
+     * Get actual amounts from real company data (invoices/bills/expenses)
+     * as fallback when IFRS ledger has no data.
+     */
+    protected function getActualFromCompanyData(int $companyId, string $accountType, string $periodStart, string $periodEnd): float
+    {
+        $isRevenue = str_contains($accountType, 'REVENUE');
+
+        if ($isRevenue) {
+            // Revenue: sum invoices (non-draft) in the period
+            $invoiceTotal = DB::table('invoices')
+                ->where('company_id', $companyId)
+                ->where('status', '<>', 'DRAFT')
+                ->where('invoice_date', '>=', $periodStart)
+                ->where('invoice_date', '<=', $periodEnd)
+                ->whereNull('deleted_at')
+                ->sum('base_total');
+
+            return round($invoiceTotal / 100, 2);
+        }
+
+        // Expenses: sum bills + expenses in the period
+        $billTotal = DB::table('bills')
+            ->where('company_id', $companyId)
+            ->where('status', '<>', 'DRAFT')
+            ->where('bill_date', '>=', $periodStart)
+            ->where('bill_date', '<=', $periodEnd)
+            ->whereNull('deleted_at')
+            ->sum('base_total');
+
+        $expenseTotal = DB::table('expenses')
+            ->where('company_id', $companyId)
+            ->where('expense_date', '>=', $periodStart)
+            ->where('expense_date', '<=', $periodEnd)
+            ->whereNull('deleted_at')
+            ->sum('base_amount');
+
+        return round(($billTotal + $expenseTotal) / 100, 2);
     }
 
     /**

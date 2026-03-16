@@ -314,6 +314,39 @@ class PartnerBudgetController extends Controller
     }
 
     /**
+     * Generate smart budget from real company data.
+     */
+    public function smartBudget(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'year' => 'required|integer|min:2020|max:2099',
+            'growth_pct' => 'nullable|numeric|min:-100|max:1000',
+            'locale' => 'nullable|string|in:mk,en,sq,tr',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
+        }
+
+        $data = $this->service->generateSmartBudget(
+            $company,
+            (string) $request->input('year'),
+            (float) $request->input('growth_pct', 0),
+            $request->input('locale', 'mk')
+        );
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
+
+    /**
      * Pre-fill budget from actuals.
      */
     public function prefillFromActuals(Request $request, int $company): JsonResponse

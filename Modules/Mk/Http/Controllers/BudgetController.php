@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Modules\Mk\Models\Budget;
+use Modules\Mk\Services\AiBudgetService;
 use Modules\Mk\Services\BudgetService;
 
 class BudgetController extends Controller
@@ -313,6 +314,40 @@ class BudgetController extends Controller
     }
 
     /**
+     * Generate a smart budget from real company data (invoices, bills, expenses).
+     */
+    public function smartBudget(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        if (! $companyId) {
+            return response()->json(['error' => 'Company header required'], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'year' => 'required|integer|min:2020|max:2099',
+            'growth_pct' => 'nullable|numeric|min:-100|max:1000',
+            'locale' => 'nullable|string|in:mk,en,sq,tr',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $data = $this->service->generateSmartBudget(
+            $companyId,
+            (string) $request->input('year'),
+            (float) $request->input('growth_pct', 0),
+            $request->input('locale', 'mk')
+        );
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
+
+    /**
      * Pre-fill budget lines from actuals for a given year.
      */
     public function prefillFromActuals(Request $request): JsonResponse
@@ -381,6 +416,61 @@ class BudgetController extends Controller
                 'comparison' => $comparison,
                 'summary' => $summary,
             ],
+        ]);
+    }
+    /**
+     * AI-powered budget suggestions (deducts from AI usage quota).
+     */
+    public function aiSuggest(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        if (! $companyId) {
+            return response()->json(['error' => 'Company header required'], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'year' => 'required|integer|min:2020|max:2099',
+            'locale' => 'nullable|string|in:mk,en,sq,tr',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $company = \App\Models\Company::find($companyId);
+        if (! $company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        // Check usage limit before calling AI
+        $usageService = app(\App\Services\UsageLimitService::class);
+        if (! $usageService->canUse($company, 'ai_queries_per_month')) {
+            $usage = $usageService->getUsage($company, 'ai_queries_per_month');
+
+            return response()->json([
+                'error' => 'AI usage limit exceeded',
+                'usage' => $usage,
+                'upgrade_url' => '/admin/pricing',
+            ], 402);
+        }
+
+        $aiService = app(AiBudgetService::class);
+        $result = $aiService->suggestBudget(
+            $company,
+            (string) $request->input('year'),
+            $request->input('locale', 'mk')
+        );
+
+        if ($result === null) {
+            return response()->json([
+                'error' => 'AI analysis unavailable. Please try again later.',
+            ], 503);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $result,
         ]);
     }
 }
