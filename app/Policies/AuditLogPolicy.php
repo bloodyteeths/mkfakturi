@@ -23,6 +23,14 @@ class AuditLogPolicy
             return true;
         }
 
+        // Partner bypass for managed companies
+        if ($user->role === 'partner') {
+            $companyId = request()->header('company');
+            if ($companyId && $user->hasPartnerAccessToCompany((int) $companyId)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -36,6 +44,11 @@ class AuditLogPolicy
         }
 
         if ($user->can('view-audit-logs', $auditLog) && $user->hasCompany($auditLog->company_id)) {
+            return true;
+        }
+
+        // Partner bypass for managed companies
+        if ($user->role === 'partner' && $user->hasPartnerAccessToCompany($auditLog->company_id)) {
             return true;
         }
 

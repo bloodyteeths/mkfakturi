@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\CacheableTrait;
+use App\Traits\HasAuditing;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 class Item extends Model
 {
     use CacheableTrait;
+    use HasAuditing;
     use HasFactory;
 
     protected static function boot()

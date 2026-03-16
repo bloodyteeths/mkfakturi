@@ -8,6 +8,7 @@ use App\Mail\SendEstimateMail;
 use App\Services\SerialNumberFormatter;
 use App\Space\PdfTemplateUtils;
 use App\Traits\GeneratesPdfTrait;
+use App\Traits\HasAuditing;
 use App\Traits\HasCustomFieldsTrait;
 use App\Traits\RequiresApproval;
 use Carbon\Carbon;
@@ -24,6 +25,7 @@ use Vinkla\Hashids\Facades\Hashids;
 class Estimate extends Model implements HasMedia
 {
     use GeneratesPdfTrait;
+    use HasAuditing;
     use HasCustomFieldsTrait;
     use HasFactory;
     use InteractsWithMedia;

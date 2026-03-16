@@ -1147,6 +1147,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/', [\Modules\Mk\Http\Controllers\BudgetController::class, 'index']);
                 Route::post('/', [\Modules\Mk\Http\Controllers\BudgetController::class, 'store']);
                 Route::post('/prefill-actuals', [\Modules\Mk\Http\Controllers\BudgetController::class, 'prefillFromActuals']);
+                Route::post('/smart-budget', [\Modules\Mk\Http\Controllers\BudgetController::class, 'smartBudget']);
                 Route::get('/{id}', [\Modules\Mk\Http\Controllers\BudgetController::class, 'show']);
                 Route::put('/{id}', [\Modules\Mk\Http\Controllers\BudgetController::class, 'update']);
                 Route::post('/{id}/approve', [\Modules\Mk\Http\Controllers\BudgetController::class, 'approve']);
@@ -1318,6 +1319,10 @@ Route::prefix('/v1')->group(function () {
                     ->middleware('ai.feature:nl_assistant');
                 Route::get('/drafts/{id}', [\App\Http\Controllers\V1\Admin\AiAssistantController::class, 'getDraft']);
                 Route::post('/drafts/{id}/use', [\App\Http\Controllers\V1\Admin\AiAssistantController::class, 'useDraft']);
+
+                // AI Budget Suggestions (requires Standard+ tier, deducts from ai_queries_per_month)
+                Route::post('/budget-suggest', [\Modules\Mk\Http\Controllers\BudgetController::class, 'aiSuggest'])
+                    ->middleware('ai.feature:ai_budget_suggest');
 
             });
 
@@ -1879,6 +1884,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'index']);
             Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'store']);
             Route::post('/prefill-actuals', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'prefillFromActuals']);
+            Route::post('/smart-budget', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'smartBudget']);
             Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'show']);
             Route::put('/{id}', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'update']);
             Route::post('/{id}/approve', [\App\Http\Controllers\V1\Partner\PartnerBudgetController::class, 'approve']);

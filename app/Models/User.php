@@ -6,6 +6,7 @@ use App\Http\Requests\UserRequest;
 use App\Notifications\MailResetPasswordNotification;
 use App\Providers\CacheServiceProvider;
 use App\Traits\CacheableTrait;
+use App\Traits\HasAuditing;
 use App\Traits\HasCustomFieldsTrait;
 use Carbon\Carbon;
 use Coderflex\LaravelTicket\Concerns\HasTickets;
@@ -31,8 +32,11 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
     use Billable;
     use CacheableTrait;
     use HasApiTokens;
+    use HasAuditing;
     use HasCustomFieldsTrait;
     use HasFactory;
+
+    protected $auditExclude = ['password', 'remember_token', 'api_token'];
     use HasRolesAndAbilities;
     use HasTickets; // CLAUDE-CHECKPOINT: Added HasTickets trait for support ticketing
     use IFRSUser;

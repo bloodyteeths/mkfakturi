@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasAuditing;
 use App\Traits\HasCustomFieldsTrait;
 use App\Traits\RequiresApproval;
 use Carbon\Carbon;
@@ -14,6 +15,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Expense extends Model implements HasMedia
 {
+    use HasAuditing;
     use HasCustomFieldsTrait;
     use HasFactory;
     use InteractsWithMedia;

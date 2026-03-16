@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasAuditing;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +21,7 @@ use Throwable;
 class Company extends Model implements HasMedia
 {
     use Billable;
+    use HasAuditing;
     use HasFactory;
     use InteractsWithMedia; // CLAUDE-CHECKPOINT: Added Paddle Billable trait
 

@@ -984,6 +984,18 @@ return [
             'feature_flag' => 'payroll',
         ],
         [
+            'title' => 'partner.accounting.activity_log',
+            'group' => 'partner.accounting',
+            'submenu' => 'compliance',
+            'link' => '/admin/partner/accounting/activity-log',
+            'icon' => 'ClipboardDocumentListIcon',
+            'name' => 'partner.accounting.activity-log',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => '',
+        ],
+        [
             'title' => 'partner.accounting.period_lock',
             'group' => 'partner.accounting',
             'submenu' => 'compliance',

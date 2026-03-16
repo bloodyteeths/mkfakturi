@@ -1500,6 +1500,14 @@ export default [
         component: () => import('@/scripts/admin/views/partner/accounting/Consolidation.vue'),
       },
 
+      // Activity Log (Partner)
+      {
+        path: 'partner/accounting/activity-log',
+        name: 'partner.accounting.activity-log',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/ActivityLog.vue'),
+      },
+
       // Banking
       {
         path: 'banking',

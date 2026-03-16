@@ -5582,6 +5582,7 @@
             "vat_returns": "Deklaratat Tatimore",
             "vat_returns_tab": "Deklaratat e TVSH-së (DDV-04)",
             "payroll_reports": "Raportet e Pagave",
+            "activity_log": "Regjistri i Aktiviteteve",
             "fixed_assets": "Asetet Fikse",
             "equity_changes": "Ndryshimet në Kapital",
             "cash_flow": "Pasqyra e Rrjedhës së Parasë",
@@ -6854,5 +6855,38 @@
     "ai.assistant.view_proforma": "Shiko profaturën",
     "ai.assistant.view_credit_note": "Shiko notën e kreditit",
     "ai.assistant.view_recurring": "Shiko përsëritësen",
-    "ai.assistant.view_entity": "Shiko"
+    "ai.assistant.view_entity": "Shiko",
+    "activity_log": {
+        "title": "Regjistri i Aktiviteteve",
+        "user": "Përdoruesi",
+        "event": "Ngjarja",
+        "entity": "Entiteti",
+        "changes": "Ndryshimet",
+        "timestamp": "Koha",
+        "all_users": "Të gjithë përdoruesit",
+        "all_events": "Të gjitha ngjarjet",
+        "all_entities": "Të gjitha entitetet",
+        "created": "Krijuar",
+        "updated": "Përditësuar",
+        "deleted": "Fshirë",
+        "no_activity": "Nuk ka aktivitet",
+        "no_activity_description": "Nuk ka asnjë aktivitet të regjistruar ende",
+        "fields_changed": "fusha të ndryshuara",
+        "changes_detail": "Detajet e ndryshimeve",
+        "old_value": "Vlera e vjetër",
+        "new_value": "Vlera e re",
+        "no_changes": "Nuk ka ndryshime të regjistruara",
+        "entity_types": {
+            "invoice": "Faturë",
+            "bill": "Llogari",
+            "payment": "Pagesë",
+            "expense": "Shpenzim",
+            "estimate": "Ofertë",
+            "customer": "Klient",
+            "item": "Artikull",
+            "user": "Përdorues",
+            "supplier": "Furnizues",
+            "company": "Kompani"
+        }
+    }
 }

@@ -3337,6 +3337,7 @@
             "vat_returns": "Tax Returns",
             "vat_returns_tab": "VAT Returns (DDV-04)",
             "payroll_reports": "Payroll Reports",
+            "activity_log": "Activity Log",
             "fixed_assets": "Fixed Assets",
             "equity_changes": "Equity Changes",
             "cash_flow": "Cash Flow Statement",
@@ -7587,5 +7588,38 @@
     "ai.assistant.view_proforma": "View Proforma",
     "ai.assistant.view_credit_note": "View Credit Note",
     "ai.assistant.view_recurring": "View Recurring",
-    "ai.assistant.view_entity": "View"
+    "ai.assistant.view_entity": "View",
+    "activity_log": {
+        "title": "Activity Log",
+        "user": "User",
+        "event": "Event",
+        "entity": "Entity",
+        "changes": "Changes",
+        "timestamp": "Timestamp",
+        "all_users": "All Users",
+        "all_events": "All Events",
+        "all_entities": "All Entities",
+        "created": "Created",
+        "updated": "Updated",
+        "deleted": "Deleted",
+        "no_activity": "No Activity",
+        "no_activity_description": "No activity has been recorded yet",
+        "fields_changed": "fields changed",
+        "changes_detail": "Changes Detail",
+        "old_value": "Old Value",
+        "new_value": "New Value",
+        "no_changes": "No changes recorded",
+        "entity_types": {
+            "invoice": "Invoice",
+            "bill": "Bill",
+            "payment": "Payment",
+            "expense": "Expense",
+            "estimate": "Estimate",
+            "customer": "Customer",
+            "item": "Item",
+            "user": "User",
+            "supplier": "Supplier",
+            "company": "Company"
+        }
+    }
 }

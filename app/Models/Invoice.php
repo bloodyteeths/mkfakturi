@@ -9,6 +9,7 @@ use App\Services\SerialNumberFormatter;
 use App\Space\PdfTemplateUtils;
 use App\Traits\CacheableTrait;
 use App\Traits\GeneratesPdfTrait;
+use App\Traits\HasAuditing;
 use App\Traits\HasCustomFieldsTrait;
 use App\Traits\RequiresApproval;
 use Carbon\Carbon;
@@ -26,6 +27,7 @@ class Invoice extends Model implements HasMedia
 {
     use CacheableTrait;
     use GeneratesPdfTrait;
+    use HasAuditing;
     use HasCustomFieldsTrait;
     use HasFactory;
     use InteractsWithMedia;

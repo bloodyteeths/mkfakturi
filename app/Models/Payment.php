@@ -6,6 +6,7 @@ use App\Jobs\GeneratePaymentPdfJob;
 use App\Mail\SendPaymentMail;
 use App\Services\SerialNumberFormatter;
 use App\Traits\GeneratesPdfTrait;
+use App\Traits\HasAuditing;
 use App\Traits\HasCustomFieldsTrait;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Carbon\Carbon;
@@ -21,6 +22,7 @@ use Vinkla\Hashids\Facades\Hashids;
 class Payment extends Model implements HasMedia
 {
     use GeneratesPdfTrait;
+    use HasAuditing;
     use HasCustomFieldsTrait;
     use HasFactory;
     use InteractsWithMedia;

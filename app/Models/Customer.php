@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Notifications\CustomerMailResetPasswordNotification;
 use App\Traits\CacheableTrait;
+use App\Traits\HasAuditing;
 use App\Traits\HasCustomFieldsTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,6 +22,7 @@ class Customer extends Authenticatable implements HasMedia
 {
     use CacheableTrait;
     use HasApiTokens;
+    use HasAuditing;
     use HasCustomFieldsTrait;
     use HasFactory;
     use HasRolesAndAbilities;

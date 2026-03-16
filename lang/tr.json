@@ -5137,6 +5137,7 @@
             "vat_returns": "Vergi Beyannameleri",
             "vat_returns_tab": "KDV Beyannameleri (DDV-04)",
             "payroll_reports": "Bordro Raporları",
+            "activity_log": "Etkinlik Günlüğü",
             "fixed_assets": "Sabit Kıymetler",
             "equity_changes": "Özkaynak Değişimleri",
             "cash_flow": "Nakit Akış Tablosu",
@@ -7417,5 +7418,38 @@
     "ai.assistant.view_proforma": "Proformayı Görüntüle",
     "ai.assistant.view_credit_note": "Kredi Notunu Görüntüle",
     "ai.assistant.view_recurring": "Tekrarlayan Görüntüle",
-    "ai.assistant.view_entity": "Görüntüle"
+    "ai.assistant.view_entity": "Görüntüle",
+    "activity_log": {
+        "title": "Etkinlik Günlüğü",
+        "user": "Kullanıcı",
+        "event": "Olay",
+        "entity": "Varlık",
+        "changes": "Değişiklikler",
+        "timestamp": "Zaman",
+        "all_users": "Tüm Kullanıcılar",
+        "all_events": "Tüm Olaylar",
+        "all_entities": "Tüm Varlıklar",
+        "created": "Oluşturuldu",
+        "updated": "Güncellendi",
+        "deleted": "Silindi",
+        "no_activity": "Etkinlik Yok",
+        "no_activity_description": "Henüz hiçbir etkinlik kaydedilmedi",
+        "fields_changed": "alan değiştirildi",
+        "changes_detail": "Değişiklik Detayları",
+        "old_value": "Eski Değer",
+        "new_value": "Yeni Değer",
+        "no_changes": "Kaydedilmiş değişiklik yok",
+        "entity_types": {
+            "invoice": "Fatura",
+            "bill": "Fatura",
+            "payment": "Ödeme",
+            "expense": "Masraf",
+            "estimate": "Teklif",
+            "customer": "Müşteri",
+            "item": "Ürün",
+            "user": "Kullanıcı",
+            "supplier": "Tedarikçi",
+            "company": "Şirket"
+        }
+    }
 }

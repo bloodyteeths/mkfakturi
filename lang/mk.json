@@ -5897,6 +5897,7 @@
             "vat_returns": "Даночни пријави",
             "vat_returns_tab": "ДДВ пријави (ДДВ-04)",
             "payroll_reports": "Извештаи за плати",
+            "activity_log": "Дневник на активности",
             "fixed_assets": "Основни средства",
             "inventory": "Материјално / Залиха",
             "equity_changes": "Промени во капитал",
@@ -7105,5 +7106,38 @@
     "ai.assistant.view_proforma": "Прегледај профактура",
     "ai.assistant.view_credit_note": "Прегледај кредит нота",
     "ai.assistant.view_recurring": "Прегледај повторувачка",
-    "ai.assistant.view_entity": "Прегледај"
+    "ai.assistant.view_entity": "Прегледај",
+    "activity_log": {
+        "title": "Дневник на активности",
+        "user": "Корисник",
+        "event": "Настан",
+        "entity": "Ентитет",
+        "changes": "Промени",
+        "timestamp": "Време",
+        "all_users": "Сите корисници",
+        "all_events": "Сите настани",
+        "all_entities": "Сите ентитети",
+        "created": "Креирано",
+        "updated": "Ажурирано",
+        "deleted": "Избришано",
+        "no_activity": "Нема активност",
+        "no_activity_description": "Сè уште нема забележана активност",
+        "fields_changed": "полиња променети",
+        "changes_detail": "Детали за промените",
+        "old_value": "Стара вредност",
+        "new_value": "Нова вредност",
+        "no_changes": "Нема забележани промени",
+        "entity_types": {
+            "invoice": "Фактура",
+            "bill": "Сметка",
+            "payment": "Уплата",
+            "expense": "Трошок",
+            "estimate": "Понуда",
+            "customer": "Клиент",
+            "item": "Артикл",
+            "user": "Корисник",
+            "supplier": "Добавувач",
+            "company": "Компанија"
+        }
+    }
 }
