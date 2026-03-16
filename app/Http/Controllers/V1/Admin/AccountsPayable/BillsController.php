@@ -75,6 +75,24 @@ class BillsController extends Controller
             return response()->json($usageService->buildLimitExceededResponse($company, 'bills_per_month'), 402);
         }
 
+        $companyId = (int) $request->header('company');
+
+        if (! $request->allowsDuplicate()) {
+            $duplicates = Bill::findPotentialDuplicates($companyId, [
+                'supplier_id' => $request->input('supplier_id'),
+                'total' => $request->input('total'),
+                'bill_date' => $request->input('bill_date'),
+            ]);
+
+            if ($duplicates->isNotEmpty()) {
+                return response()->json([
+                    'is_duplicate_warning' => true,
+                    'message' => __('bills.duplicate_warning'),
+                    'duplicates' => $duplicates,
+                ], 200);
+            }
+        }
+
         $bill = Bill::create($request->getBillPayload());
 
         if ($request->has('items')) {

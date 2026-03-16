@@ -435,6 +435,7 @@ class Company extends Model implements HasMedia
             'invoice_number_format' => '{{SERIES:INV}}{{DELIMITER:-}}{{SEQUENCE:6}}',
             'estimate_number_format' => '{{SERIES:EST}}{{DELIMITER:-}}{{SEQUENCE:6}}',
             'payment_number_format' => '{{SERIES:PAY}}{{DELIMITER:-}}{{SEQUENCE:6}}',
+            'proforma_invoice_number_format' => '{{SERIES:PRO}}{{DELIMITER:-}}{{SEQUENCE:6}}',
             'estimate_set_expiry_date_automatically' => 'YES',
             'estimate_expiry_date_days' => 7,
             'invoice_set_due_date_automatically' => 'YES',

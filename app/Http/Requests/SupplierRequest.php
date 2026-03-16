@@ -49,6 +49,7 @@ class SupplierRequest extends FormRequest
             'state' => ['nullable', 'string', 'max:255'],
             'country_id' => ['nullable', 'integer'],
             'zip' => ['nullable', 'string', 'max:255'],
+            'allow_duplicate' => ['nullable', 'boolean'],
         ];
 
         if ($this->isMethod('PUT') && $this->route('supplier')) {
@@ -76,10 +77,16 @@ class SupplierRequest extends FormRequest
     public function getSupplierPayload(): array
     {
         return collect($this->validated())
+            ->except('allow_duplicate')
             ->merge([
                 'creator_id' => $this->user()->id ?? null,
                 'company_id' => $this->header('company'),
             ])
             ->toArray();
+    }
+
+    public function allowsDuplicate(): bool
+    {
+        return (bool) $this->input('allow_duplicate', false);
     }
 }

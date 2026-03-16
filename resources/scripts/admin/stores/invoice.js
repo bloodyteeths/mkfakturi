@@ -220,11 +220,19 @@ export const useInvoiceStore = (useWindow = false) => {
         })
       },
 
-      addInvoice(data) {
+      addInvoice(data, allowDuplicate = false) {
+        if (allowDuplicate) {
+          data.allow_duplicate = true
+        }
         return new Promise((resolve, reject) => {
           axios
             .post('/invoices', data)
             .then((response) => {
+              if (response.data?.is_duplicate_warning) {
+                resolve(response)
+                return
+              }
+
               this.invoices = [...this.invoices, response.data.invoice]
 
               notificationStore.showNotification({

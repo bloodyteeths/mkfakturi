@@ -89,7 +89,15 @@ class ItemsRequest extends FormRequest
                 'integer',
                 'exists:accounts,id',
             ],
+            'allow_duplicate' => [
+                'nullable',
+                'boolean',
+            ],
         ];
     }
 
+    public function allowsDuplicate(): bool
+    {
+        return (bool) $this->input('allow_duplicate', false);
+    }
 }

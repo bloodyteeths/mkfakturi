@@ -978,4 +978,41 @@ class Invoice extends Model implements HasMedia
     {
         return $this->creditNotes()->sum('total') ?? 0;
     }
+
+    /**
+     * Find potential duplicate invoices by customer + total + date proximity.
+     */
+    public static function findPotentialDuplicates(int $companyId, array $criteria, ?int $excludeId = null): \Illuminate\Support\Collection
+    {
+        $customerId = $criteria['customer_id'] ?? null;
+        $total = $criteria['total'] ?? null;
+        $invoiceDate = $criteria['invoice_date'] ?? null;
+
+        if (empty($customerId) || empty($total) || empty($invoiceDate)) {
+            return collect();
+        }
+
+        $query = self::where('company_id', $companyId)
+            ->where('customer_id', $customerId)
+            ->whereBetween('total', [(int) ($total * 0.95), (int) ($total * 1.05)])
+            ->whereBetween('invoice_date', [
+                \Carbon\Carbon::parse($invoiceDate)->subDays(7)->toDateString(),
+                \Carbon\Carbon::parse($invoiceDate)->addDays(7)->toDateString(),
+            ]);
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->with('customer:id,name')->get()->map(function ($invoice) {
+            return (object) [
+                'id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'invoice_date' => $invoice->formattedInvoiceDate ?? $invoice->invoice_date,
+                'total' => $invoice->total,
+                'customer_name' => $invoice->customer->name ?? '',
+                'match_reason' => 'similar_amount_date',
+            ];
+        });
+    }
 }

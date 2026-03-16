@@ -111,11 +111,19 @@ export const useItemStore = (useWindow = false) => {
         })
       },
 
-      addItem(data) {
+      addItem(data, allowDuplicate = false) {
+        if (allowDuplicate) {
+          data.allow_duplicate = true
+        }
         return new Promise((resolve, reject) => {
           axios
             .post('/items', data)
             .then((response) => {
+              if (response.data?.is_duplicate_warning) {
+                resolve(response)
+                return
+              }
+
               const notificationStore = useNotificationStore()
 
               this.items.push(response.data.data)

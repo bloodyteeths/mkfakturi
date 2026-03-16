@@ -434,6 +434,14 @@
         </BaseInputGrid>
       </BaseCard>
     </form>
+
+    <DuplicateWarningModal
+      :show="showDuplicateWarning"
+      :duplicates="duplicateRecords"
+      entity-type="items"
+      @close="closeDuplicateWarning"
+      @confirm="saveWithDuplicate"
+    />
   </BasePage>
 </template>
 
@@ -458,6 +466,7 @@ import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useWarehouseStore } from '@/scripts/admin/stores/warehouse'
 import ItemUnitModal from '@/scripts/admin/components/modal-components/ItemUnitModal.vue'
 import ItemCategoryModal from '@/scripts/admin/components/modal-components/ItemCategoryModal.vue'
+import DuplicateWarningModal from '@/scripts/admin/components/modal-components/DuplicateWarningModal.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import abilities from '@/scripts/admin/stub/abilities'
 
@@ -479,6 +488,8 @@ const userStore = useUserStore()
 const isSaving = ref(false)
 const taxPerItem = ref(companyStore.selectedCompanySettings.tax_per_item)
 const isFetchingInitialData = ref(false)
+const showDuplicateWarning = ref(false)
+const duplicateRecords = ref([])
 
 // Stock module is always enabled (no feature flag)
 const stockEnabled = computed(() => true)
@@ -746,7 +757,7 @@ function formatAccountLabel(account) {
   return `${account.code} - ${account.name}`
 }
 
-async function submitItem() {
+async function submitItem(allowDuplicate = false) {
   v$.value.currentItem.$touch()
 
   if (v$.value.currentItem.$invalid) {
@@ -786,9 +797,19 @@ async function submitItem() {
       }
     }
 
-    const action = isEdit.value ? itemStore.updateItem : itemStore.addItem
+    const action = isEdit.value
+      ? itemStore.updateItem
+      : (d) => itemStore.addItem(d, allowDuplicate)
 
-    await action(data)
+    const response = await action(data)
+
+    if (response?.data?.is_duplicate_warning) {
+      isSaving.value = false
+      duplicateRecords.value = response.data.duplicates || []
+      showDuplicateWarning.value = true
+      return
+    }
+
     isSaving.value = false
     router.push('/admin/items')
     closeItemModal()
@@ -804,6 +825,16 @@ async function submitItem() {
       v$.value.$reset()
     }, 300)
   }
+}
+
+function closeDuplicateWarning() {
+  showDuplicateWarning.value = false
+  duplicateRecords.value = []
+}
+
+function saveWithDuplicate() {
+  closeDuplicateWarning()
+  submitItem(true)
 }
 </script>
 // CLAUDE-CHECKPOINT: Added track_quantity toggle for stock module

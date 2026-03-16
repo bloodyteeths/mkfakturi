@@ -107,6 +107,24 @@ class InvoicesController extends Controller
     {
         $this->authorize('create', Invoice::class);
 
+        $companyId = (int) $request->header('company');
+
+        if (! $request->allowsDuplicate()) {
+            $duplicates = Invoice::findPotentialDuplicates($companyId, [
+                'customer_id' => $request->input('customer_id'),
+                'total' => $request->input('total'),
+                'invoice_date' => $request->input('invoice_date'),
+            ]);
+
+            if ($duplicates->isNotEmpty()) {
+                return response()->json([
+                    'is_duplicate_warning' => true,
+                    'message' => __('invoices.duplicate_warning'),
+                    'duplicates' => $duplicates,
+                ], 200);
+            }
+        }
+
         $invoice = Invoice::createInvoice($request);
         $invoice->load($this->invoiceResourceRelations());
 

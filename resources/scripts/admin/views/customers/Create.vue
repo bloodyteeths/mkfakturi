@@ -534,6 +534,14 @@
         </div>
       </BaseCard>
     </form>
+
+    <DuplicateWarningModal
+      :show="showDuplicateWarning"
+      :duplicates="duplicateRecords"
+      entity-type="customers"
+      @close="closeDuplicateWarning"
+      @confirm="saveWithDuplicate"
+    />
   </BasePage>
 </template>
 
@@ -555,6 +563,7 @@ import { useCustomFieldStore } from '@/scripts/admin/stores/custom-field'
 import CustomerCustomFields from '@/scripts/admin/components/custom-fields/CreateCustomFields.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import DuplicateWarningModal from '@/scripts/admin/components/modal-components/DuplicateWarningModal.vue'
 import axios from 'axios'
 
 const customerStore = useCustomerStore()
@@ -576,6 +585,8 @@ const isSaving = ref(false)
 const matchedSupplier = ref(null)
 const linkAfterCreate = ref(false)
 const matchedSupplierId = ref(null)
+const showDuplicateWarning = ref(false)
+const duplicateRecords = ref([])
 
 const isEdit = computed(() => route.name === 'customers.edit')
 
@@ -681,7 +692,7 @@ customerStore.resetCurrentCustomer()
 
 customerStore.fetchCustomerInitialSettings(isEdit.value)
 
-async function submitCustomerData() {
+async function submitCustomerData(allowDuplicate = false) {
   v$.value.$touch()
 
   if (v$.value.$invalid) {
@@ -699,10 +710,17 @@ async function submitCustomerData() {
   try {
     const action = isEdit.value
       ? customerStore.updateCustomer
-      : customerStore.addCustomer
+      : (d) => customerStore.addCustomer(d, allowDuplicate)
     response = await action(data)
   } catch (err) {
     isSaving.value = false
+    return
+  }
+
+  if (response?.data?.is_duplicate_warning) {
+    isSaving.value = false
+    duplicateRecords.value = response.data.duplicates || []
+    showDuplicateWarning.value = true
     return
   }
 
@@ -718,5 +736,15 @@ async function submitCustomerData() {
   }
 
   router.push(`/admin/customers/${response.data.data.id}/view`)
+}
+
+function closeDuplicateWarning() {
+  showDuplicateWarning.value = false
+  duplicateRecords.value = []
+}
+
+function saveWithDuplicate() {
+  closeDuplicateWarning()
+  submitCustomerData(true)
 }
 </script>

@@ -63,13 +63,22 @@ export const useBillsStore = (useWindow = false) => {
         })
       },
 
-      createBill(data) {
+      createBill(data, allowDuplicate = false) {
         const notificationStore = useNotificationStore()
+
+        if (allowDuplicate) {
+          data.allow_duplicate = true
+        }
 
         return new Promise((resolve, reject) => {
           axios
             .post('/bills', data)
             .then((response) => {
+              if (response.data?.is_duplicate_warning) {
+                resolve(response)
+                return
+              }
+
               this.bills.push(response.data.data)
               notificationStore.showNotification({
                 type: 'success',

@@ -113,6 +113,16 @@
         "ascending": "Artan",
         "descending": "Azalan",
         "dismiss": "Kapat",
+        "duplicate_warning_title": "Potansiyel kopya bulundu",
+        "duplicate_warning_confirm": "Bunun kopya olmadığından eminseniz, devam etmek için 'Yine de kaydet' seçeneğine tıklayın.",
+        "save_anyway": "Yine de kaydet",
+        "match_exact_name": "Tam isim eşleşmesi",
+        "match_similar_name": "Benzer isim",
+        "match_transliterated": "Transliterasyon eşleşmesi",
+        "match_tax_id": "Vergi numarası eşleşmesi",
+        "match_email": "E-posta eşleşmesi",
+        "match_phone": "Telefon eşleşmesi",
+        "match_similar_amount": "Benzer tutar ve tarih",
         "subject": "Konu",
         "body": "Gövde",
         "message": "Mesaj",
@@ -434,6 +444,8 @@
         "prefix": "Ön ek",
         "tax_id": "Tax ID",
         "add_customer": "Müşteri ekle",
+        "duplicate_warning_message": "Benzer isim veya bilgilere sahip bir müşteri zaten mevcut. Lütfen aşağıdaki mevcut kayıtları inceleyin.",
+        "existing_records": "Mevcut müşteriler bulundu:",
         "contacts_list": "Müşteri listesi",
         "name": "İsim",
         "mail": "E-posta | E-postalar",
@@ -560,6 +572,8 @@
         "search_supplier": "Tedarikçi ara..."
     },
     "items": {
+        "duplicate_warning_message": "Benzer isimde bir ürün zaten mevcut. Lütfen aşağıdaki mevcut kayıtları inceleyin.",
+        "existing_records": "Mevcut ürünler bulundu:",
         "title": "Öğeler",
         "items_list": "Öğe listesi",
         "name": "İsim",
@@ -807,6 +821,8 @@
         "select_status": "Seçin durum"
     },
     "invoices": {
+        "duplicate_warning_message": "Benzer bilgilere sahip bir fatura zaten mevcut. Lütfen aşağıdaki mevcut kayıtları inceleyin.",
+        "existing_records": "Mevcut faturalar bulundu:",
         "title": "Faturalar",
         "download": "İndir",
         "pay_invoice": "Fatura Ödeme",
@@ -3914,6 +3930,8 @@
         "empty_description": "Oluşturте proforma faturalar için вашveте müşteriler"
     },
     "bills": {
+        "duplicate_warning_message": "Benzer bilgilere sahip bir fatura zaten mevcut. Lütfen aşağıdaki mevcut kayıtları inceleyin.",
+        "existing_records": "Mevcut faturalar bulundu:",
         "title": "Faturalar",
         "bill": "Fatura | Faturalar",
         "new_bill": "Yeni fatura",
@@ -4045,6 +4063,8 @@
         "tax_period_locked": "Kaydedilemez. Bu tarih için vergi dönemi kilitli."
     },
     "suppliers": {
+        "duplicate_warning_message": "Benzer isim veya bilgilere sahip bir tedarikçi zaten mevcut. Lütfen aşağıdaki mevcut kayıtları inceleyin.",
+        "existing_records": "Mevcut tedarikçiler bulundu:",
         "title": "Tedarikçiler",
         "supplier": "Tedarikçi | Tedarikçiler",
         "new_supplier": "Yeni tedarikçi",

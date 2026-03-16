@@ -129,11 +129,19 @@ export const useCustomerStore = (useWindow = false) => {
         })
       },
 
-      addCustomer(data) {
+      addCustomer(data, allowDuplicate = false) {
+        if (allowDuplicate) {
+          data.allow_duplicate = true
+        }
         return new Promise((resolve, reject) => {
           axios
             .post('/customers', data)
             .then((response) => {
+              if (response.data?.is_duplicate_warning) {
+                resolve(response)
+                return
+              }
+
               this.customers.push(response.data.data)
 
               const notificationStore = useNotificationStore()

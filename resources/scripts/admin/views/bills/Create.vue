@@ -287,6 +287,14 @@
         </div>
       </form>
     </BaseCard>
+
+    <DuplicateWarningModal
+      :show="showDuplicateWarning"
+      :duplicates="duplicateRecords"
+      entity-type="bills"
+      @close="closeDuplicateWarning"
+      @confirm="saveWithDuplicate"
+    />
   </BasePage>
 </template>
 
@@ -302,6 +310,7 @@ import { useItemStore } from '@/scripts/admin/stores/item'
 import { useReceiptScannerStore } from '@/scripts/admin/stores/receipt-scanner'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import ScannerModeToggle from '@/scripts/admin/components/ScannerModeToggle.vue'
+import DuplicateWarningModal from '@/scripts/admin/components/modal-components/DuplicateWarningModal.vue'
 import { useBarcodeScanner } from '@/scripts/admin/composables/useBarcodeScanner'
 
 const route = useRoute()
@@ -316,6 +325,8 @@ const receiptScannerStore = useReceiptScannerStore()
 const notificationStore = useNotificationStore()
 
 const isSaving = ref(false)
+const showDuplicateWarning = ref(false)
+const duplicateRecords = ref([])
 const validationErrors = reactive({
   bill_number: '',
   bill_date: '',
@@ -653,7 +664,7 @@ function buildPayload() {
   }
 }
 
-async function handleSubmit() {
+async function handleSubmit(allowDuplicate = false) {
   if (!validateForm()) return
 
   isSaving.value = true
@@ -663,7 +674,14 @@ async function handleSubmit() {
     if (isEdit.value) {
       await billsStore.updateBill(payload)
     } else {
-      await billsStore.createBill(payload)
+      const response = await billsStore.createBill(payload, allowDuplicate)
+
+      if (response?.data?.is_duplicate_warning) {
+        isSaving.value = false
+        duplicateRecords.value = response.data.duplicates || []
+        showDuplicateWarning.value = true
+        return
+      }
     }
     router.push('/admin/bills')
   } catch (err) {
@@ -672,6 +690,16 @@ async function handleSubmit() {
   } finally {
     isSaving.value = false
   }
+}
+
+function closeDuplicateWarning() {
+  showDuplicateWarning.value = false
+  duplicateRecords.value = []
+}
+
+function saveWithDuplicate() {
+  closeDuplicateWarning()
+  handleSubmit(true)
 }
 
 onMounted(async () => {

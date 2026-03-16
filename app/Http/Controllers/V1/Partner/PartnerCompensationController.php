@@ -138,6 +138,36 @@ class PartnerCompensationController extends Controller
             'items.*.amount_offset' => 'required|integer|min:1',
         ]);
 
+        // Duplicate check: same counterparty + similar date
+        if (! $request->input('allow_duplicate')) {
+            $query = \Modules\Mk\Models\Compensation::where('company_id', $company)
+                ->whereBetween('compensation_date', [
+                    \Carbon\Carbon::parse($request->input('compensation_date'))->subDays(7)->toDateString(),
+                    \Carbon\Carbon::parse($request->input('compensation_date'))->addDays(7)->toDateString(),
+                ]);
+
+            if ($request->input('customer_id')) {
+                $query->where('customer_id', $request->input('customer_id'));
+            }
+            if ($request->input('supplier_id')) {
+                $query->where('supplier_id', $request->input('supplier_id'));
+            }
+
+            $existing = $query->get();
+            if ($existing->isNotEmpty()) {
+                return response()->json([
+                    'is_duplicate_warning' => true,
+                    'message' => __('compensations.duplicate_warning'),
+                    'duplicates' => $existing->map(fn ($c) => [
+                        'id' => $c->id,
+                        'compensation_date' => $c->compensation_date,
+                        'type' => $c->type,
+                        'status' => $c->status,
+                    ]),
+                ], 200);
+            }
+        }
+
         try {
             $compensation = $this->service->create($company, $request->all(), $request->user()?->id);
 

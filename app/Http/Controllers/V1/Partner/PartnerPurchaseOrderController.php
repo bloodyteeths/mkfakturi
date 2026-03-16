@@ -108,6 +108,30 @@ class PartnerPurchaseOrderController extends Controller
             'items.*.tax' => 'nullable|integer|min:0',
         ]);
 
+        // Duplicate check: same supplier + similar date
+        if (! $request->input('allow_duplicate') && $request->input('supplier_id')) {
+            $existing = \Modules\Mk\Models\PurchaseOrder::where('company_id', $company)
+                ->where('supplier_id', $request->input('supplier_id'))
+                ->whereBetween('po_date', [
+                    \Carbon\Carbon::parse($request->input('po_date'))->subDays(3)->toDateString(),
+                    \Carbon\Carbon::parse($request->input('po_date'))->addDays(3)->toDateString(),
+                ])
+                ->get();
+
+            if ($existing->isNotEmpty()) {
+                return response()->json([
+                    'is_duplicate_warning' => true,
+                    'message' => __('purchase_orders.duplicate_warning'),
+                    'duplicates' => $existing->map(fn ($po) => [
+                        'id' => $po->id,
+                        'po_number' => $po->po_number,
+                        'po_date' => $po->po_date,
+                        'status' => $po->status,
+                    ]),
+                ], 200);
+            }
+        }
+
         try {
             $po = $this->service->create($company, $request->all(), $request->user()?->id);
 

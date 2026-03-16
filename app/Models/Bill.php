@@ -761,5 +761,42 @@ class Bill extends Model implements HasMedia
             '{SUPPLIER_TAX_ID}' => $this->supplier->tax_id ?? '',
         ];
     }
+
+    /**
+     * Find potential duplicate bills by supplier + total + date proximity.
+     */
+    public static function findPotentialDuplicates(int $companyId, array $criteria, ?int $excludeId = null): \Illuminate\Support\Collection
+    {
+        $supplierId = $criteria['supplier_id'] ?? null;
+        $total = $criteria['total'] ?? null;
+        $billDate = $criteria['bill_date'] ?? null;
+
+        if (empty($supplierId) || empty($total) || empty($billDate)) {
+            return collect();
+        }
+
+        $query = self::where('company_id', $companyId)
+            ->where('supplier_id', $supplierId)
+            ->whereBetween('total', [(int) ($total * 0.95), (int) ($total * 1.05)])
+            ->whereBetween('bill_date', [
+                \Carbon\Carbon::parse($billDate)->subDays(7)->toDateString(),
+                \Carbon\Carbon::parse($billDate)->addDays(7)->toDateString(),
+            ]);
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->with('supplier:id,name')->get()->map(function ($bill) {
+            return (object) [
+                'id' => $bill->id,
+                'bill_number' => $bill->bill_number,
+                'bill_date' => $bill->formattedBillDate ?? $bill->bill_date,
+                'total' => $bill->total,
+                'supplier_name' => $bill->supplier->name ?? '',
+                'match_reason' => 'similar_amount_date',
+            ];
+        });
+    }
 }
 

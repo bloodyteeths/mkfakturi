@@ -57,6 +57,25 @@ class CustomersController extends Controller
     {
         $this->authorize('create', Customer::class);
 
+        $companyId = (int) $request->header('company');
+
+        if (! $request->allowsDuplicate()) {
+            $duplicates = Customer::findPotentialDuplicates($companyId, [
+                'name' => $request->input('name'),
+                'tax_id' => $request->input('billing.tax_id') ?? $request->input('tax_id'),
+                'email' => $request->input('email'),
+                'phone' => $request->input('phone'),
+            ]);
+
+            if ($duplicates->isNotEmpty()) {
+                return response()->json([
+                    'is_duplicate_warning' => true,
+                    'message' => __('customers.duplicate_warning'),
+                    'duplicates' => $duplicates,
+                ], 200);
+            }
+        }
+
         $customer = Customer::createCustomer($request);
 
         return new CustomerResource($customer);

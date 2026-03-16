@@ -94,6 +94,10 @@ class InvoicesRequest extends FormRequest
                 'integer',
                 'exists:projects,id',
             ],
+            'allow_duplicate' => [
+                'nullable',
+                'boolean',
+            ],
         ];
 
         $companyCurrency = CompanySetting::getSetting('currency', $this->header('company'));
@@ -294,5 +298,10 @@ class InvoicesRequest extends FormRequest
                 'project_id' => $this->project_id,
             ])
             ->toArray();
+    }
+
+    public function allowsDuplicate(): bool
+    {
+        return (bool) $this->input('allow_duplicate', false);
     }
 }

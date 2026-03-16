@@ -38,6 +38,7 @@ class BillRequest extends FormRequest
             'items.*.price' => ['numeric', 'required'],
             'currency_id' => ['required', 'integer'],
             'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+            'allow_duplicate' => ['nullable', 'boolean'],
         ];
 
         if ($this->isMethod('PUT') && $this->route('bill')) {
@@ -82,5 +83,10 @@ class BillRequest extends FormRequest
                 'project_id' => $this->project_id,
             ])
             ->toArray();
+    }
+
+    public function allowsDuplicate(): bool
+    {
+        return (bool) $this->input('allow_duplicate', false);
     }
 }

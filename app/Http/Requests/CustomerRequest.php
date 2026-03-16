@@ -96,6 +96,10 @@ class CustomerRequest extends FormRequest
             'billing.fax' => [
                 'nullable',
             ],
+            'allow_duplicate' => [
+                'nullable',
+                'boolean',
+            ],
             'shipping.name' => [
                 'nullable',
             ],
@@ -196,5 +200,10 @@ class CustomerRequest extends FormRequest
         });
 
         return $data;
+    }
+
+    public function allowsDuplicate(): bool
+    {
+        return (bool) $this->input('allow_duplicate', false);
     }
 }

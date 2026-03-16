@@ -81,13 +81,22 @@ export const useSuppliersStore = (useWindow = false) => {
         })
       },
 
-      createSupplier(data) {
+      createSupplier(data, allowDuplicate = false) {
         const notificationStore = useNotificationStore()
+
+        if (allowDuplicate) {
+          data.allow_duplicate = true
+        }
 
         return new Promise((resolve, reject) => {
           axios
             .post('/suppliers', data)
             .then((response) => {
+              if (response.data?.is_duplicate_warning) {
+                resolve(response)
+                return
+              }
+
               this.suppliers.push(response.data.data)
               notificationStore.showNotification({
                 type: 'success',

@@ -146,6 +146,33 @@ class PartnerBudgetController extends Controller
             return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
         }
 
+        // Duplicate check: same name + overlapping period
+        if (! $request->input('allow_duplicate')) {
+            $existing = \Modules\Mk\Models\Budget::where('company_id', $company)
+                ->where('name', $request->input('name'))
+                ->where(function ($q) use ($request) {
+                    $q->where(function ($q2) use ($request) {
+                        $q2->where('start_date', '<=', $request->input('end_date'))
+                            ->where('end_date', '>=', $request->input('start_date'));
+                    });
+                })
+                ->get();
+
+            if ($existing->isNotEmpty()) {
+                return response()->json([
+                    'is_duplicate_warning' => true,
+                    'message' => __('budgets.duplicate_warning'),
+                    'duplicates' => $existing->map(fn ($b) => [
+                        'id' => $b->id,
+                        'name' => $b->name,
+                        'start_date' => $b->start_date,
+                        'end_date' => $b->end_date,
+                        'status' => $b->status,
+                    ]),
+                ], 200);
+            }
+        }
+
         try {
             $data = $validator->validated();
             $data['created_by'] = $request->user()?->id;

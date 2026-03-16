@@ -408,4 +408,55 @@ class Customer extends Authenticatable implements HasMedia
             $query->whereOrder($field, $orderBy);
         }
     }
+
+    /**
+     * Find potential duplicate customers by name, tax_id, email, or phone.
+     */
+    public static function findPotentialDuplicates(int $companyId, array $criteria, ?int $excludeId = null): \Illuminate\Support\Collection
+    {
+        $duplicates = collect();
+
+        // Exact field matches: tax_id, email, phone
+        foreach (['tax_id', 'email', 'phone'] as $field) {
+            if (! empty($criteria[$field])) {
+                $query = self::where('company_id', $companyId)
+                    ->where($field, $criteria[$field]);
+                if ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                }
+                $query->get()->each(function ($record) use (&$duplicates, $field) {
+                    if (! $duplicates->contains('id', $record->id)) {
+                        $duplicates->push((object) [
+                            'id' => $record->id,
+                            'name' => $record->name,
+                            'email' => $record->email,
+                            'phone' => $record->phone,
+                            'tax_id' => $record->tax_id,
+                            'match_reason' => $field,
+                        ]);
+                    }
+                });
+            }
+        }
+
+        // Fuzzy name match
+        if (! empty($criteria['name'])) {
+            $service = app(\App\Services\DuplicateDetectionService::class);
+            $matches = $service->findSimilarByName(self::class, $companyId, $criteria['name'], $excludeId);
+            $matches->each(function ($match) use (&$duplicates) {
+                if (! $duplicates->contains('id', $match['record']->id)) {
+                    $duplicates->push((object) [
+                        'id' => $match['record']->id,
+                        'name' => $match['record']->name,
+                        'email' => $match['record']->email ?? null,
+                        'phone' => $match['record']->phone ?? null,
+                        'tax_id' => $match['record']->tax_id ?? null,
+                        'match_reason' => $match['match_reason'],
+                    ]);
+                }
+            });
+        }
+
+        return $duplicates;
+    }
 }

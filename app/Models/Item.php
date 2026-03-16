@@ -318,4 +318,25 @@ class Item extends Model
 
         return Item::with('taxes')->find($this->id);
     }
+
+    /**
+     * Find potential duplicate items by name.
+     */
+    public static function findPotentialDuplicates(int $companyId, array $criteria, ?int $excludeId = null): \Illuminate\Support\Collection
+    {
+        if (empty($criteria['name'])) {
+            return collect();
+        }
+
+        $service = app(\App\Services\DuplicateDetectionService::class);
+        $matches = $service->findSimilarByName(self::class, $companyId, $criteria['name'], $excludeId);
+
+        return $matches->map(function ($match) {
+            return (object) [
+                'id' => $match['record']->id,
+                'name' => $match['record']->name,
+                'match_reason' => $match['match_reason'],
+            ];
+        });
+    }
 }

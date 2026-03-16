@@ -194,6 +194,14 @@
         </div>
       </BaseCard>
     </form>
+
+    <DuplicateWarningModal
+      :show="showDuplicateWarning"
+      :duplicates="duplicateRecords"
+      entity-type="suppliers"
+      @close="closeDuplicateWarning"
+      @confirm="saveWithDuplicate"
+    />
   </BasePage>
 </template>
 
@@ -205,6 +213,7 @@ import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useVuelidate } from '@vuelidate/core'
 import { required, email, helpers } from '@vuelidate/validators'
+import DuplicateWarningModal from '@/scripts/admin/components/modal-components/DuplicateWarningModal.vue'
 import axios from 'axios'
 
 const { t } = useI18n()
@@ -217,6 +226,8 @@ const isSaving = ref(false)
 const matchedCustomer = ref(null)
 const linkAfterCreate = ref(false)
 const matchedCustomerId = ref(null)
+const showDuplicateWarning = ref(false)
+const duplicateRecords = ref([])
 
 const form = reactive({
   id: null,
@@ -301,7 +312,7 @@ function hydrateForm(data) {
   form.notes = data.notes || ''
 }
 
-async function handleSubmit() {
+async function handleSubmit(allowDuplicate = false) {
   v$.value.$touch()
   if (v$.value.$invalid) {
     return
@@ -316,7 +327,14 @@ async function handleSubmit() {
     if (isEdit.value) {
       response = await suppliersStore.updateSupplier(payload)
     } else {
-      response = await suppliersStore.createSupplier(payload)
+      response = await suppliersStore.createSupplier(payload, allowDuplicate)
+    }
+
+    if (response?.data?.is_duplicate_warning) {
+      isSaving.value = false
+      duplicateRecords.value = response.data.duplicates || []
+      showDuplicateWarning.value = true
+      return
     }
 
     // Link to matched customer after successful create
@@ -336,6 +354,16 @@ async function handleSubmit() {
   } finally {
     isSaving.value = false
   }
+}
+
+function closeDuplicateWarning() {
+  showDuplicateWarning.value = false
+  duplicateRecords.value = []
+}
+
+function saveWithDuplicate() {
+  closeDuplicateWarning()
+  handleSubmit(true)
 }
 
 onMounted(async () => {

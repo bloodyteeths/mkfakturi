@@ -14,6 +14,15 @@ class SerialNumberFormatter
 
     public const DEFAULT_FALLBACK_FORMAT = 'INV-{year}-{increment}';
 
+    /**
+     * Override setting keys for models whose class_basename doesn't match
+     * the conventional underscore-separated company setting key.
+     */
+    private const SETTING_KEY_OVERRIDES = [
+        'proformainvoice' => 'proforma_invoice',
+        'creditnote' => 'credit_note',
+    ];
+
     private $model;
 
     private $ob;
@@ -83,6 +92,7 @@ class SerialNumberFormatter
     public function getNextNumber($data = null)
     {
         $modelName = strtolower(class_basename($this->model));
+        $modelName = self::SETTING_KEY_OVERRIDES[$modelName] ?? $modelName;
         $settingKey = $modelName.'_number_format';
         $companyId = $this->company;
 

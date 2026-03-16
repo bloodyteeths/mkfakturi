@@ -454,7 +454,7 @@ PROMPT;
     {
         $allCustomers = Customer::where('company_id', $companyId)->get();
 
-        return $this->bestMatch($name, $allCustomers, 'name');
+        return $this->duplicateService()->bestMatch($name, $allCustomers, 'name');
     }
 
     /**
@@ -464,7 +464,7 @@ PROMPT;
     {
         $allSuppliers = Supplier::where('company_id', $companyId)->get();
 
-        return $this->bestMatch($name, $allSuppliers, 'name');
+        return $this->duplicateService()->bestMatch($name, $allSuppliers, 'name');
     }
 
     /**
@@ -476,144 +476,15 @@ PROMPT;
             ->where('company_id', $companyId)
             ->get();
 
-        return $this->bestMatch($name, $allItems, 'name');
+        return $this->duplicateService()->bestMatch($name, $allItems, 'name');
     }
 
     /**
-     * Universal fuzzy match engine — finds the best matching record from a collection.
-     *
-     * Handles: case differences, Cyrillic↔Latin transliteration, partial matches,
-     * common MK suffixes (ДООЕЛ, ДОО, DOO, DOOEL), whitespace/punctuation.
-     *
-     * @param  string  $needle  The AI-extracted name
-     * @param  \Illuminate\Support\Collection  $haystack  All records to search
-     * @param  string  $field  The field name to compare (e.g. 'name')
-     * @return object|null  The best matching record, or null if no good match
+     * Get the DuplicateDetectionService instance.
      */
-    protected function bestMatch(string $needle, $haystack, string $field): ?object
+    protected function duplicateService(): DuplicateDetectionService
     {
-        if ($haystack->isEmpty() || empty(trim($needle))) {
-            return null;
-        }
-
-        $normalizedNeedle = $this->normalizeName($needle);
-        $bestScore = 0;
-        $bestMatch = null;
-
-        foreach ($haystack as $record) {
-            $dbName = $record->{$field} ?? '';
-            if (empty($dbName)) {
-                continue;
-            }
-
-            $normalizedDb = $this->normalizeName($dbName);
-
-            // 1. Exact normalized match (case/accent/suffix-independent) → score 100
-            if ($normalizedNeedle === $normalizedDb) {
-                return $record;
-            }
-
-            // 2. One contains the other → score 90
-            if (mb_strlen($normalizedNeedle) >= 2 && mb_strlen($normalizedDb) >= 2) {
-                if (str_contains($normalizedDb, $normalizedNeedle) || str_contains($normalizedNeedle, $normalizedDb)) {
-                    $score = 90;
-                    if ($score > $bestScore) {
-                        $bestScore = $score;
-                        $bestMatch = $record;
-                    }
-
-                    continue;
-                }
-            }
-
-            // 3. Transliterated match — convert both to Latin and compare
-            $latinNeedle = $this->cyrillicToLatin($normalizedNeedle);
-            $latinDb = $this->cyrillicToLatin($normalizedDb);
-
-            if ($latinNeedle === $latinDb) {
-                return $record; // Perfect transliterated match
-            }
-
-            if (mb_strlen($latinNeedle) >= 2 && mb_strlen($latinDb) >= 2) {
-                if (str_contains($latinDb, $latinNeedle) || str_contains($latinNeedle, $latinDb)) {
-                    $score = 85;
-                    if ($score > $bestScore) {
-                        $bestScore = $score;
-                        $bestMatch = $record;
-                    }
-
-                    continue;
-                }
-            }
-
-            // 4. Levenshtein distance on short names (max 255 chars)
-            if (mb_strlen($latinNeedle) <= 255 && mb_strlen($latinDb) <= 255) {
-                $maxLen = max(mb_strlen($latinNeedle), mb_strlen($latinDb));
-                if ($maxLen > 0) {
-                    $distance = levenshtein($latinNeedle, $latinDb);
-                    $similarity = 1 - ($distance / $maxLen);
-
-                    // Accept if >70% similar
-                    if ($similarity > 0.7) {
-                        $score = (int) ($similarity * 80); // Max 80 for Levenshtein
-                        if ($score > $bestScore) {
-                            $bestScore = $score;
-                            $bestMatch = $record;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Only return if we found a decent match (score >= 56 = 70% * 80)
-        return $bestScore >= 56 ? $bestMatch : null;
-    }
-
-    /**
-     * Normalize a name for comparison.
-     * Strips: company suffixes, punctuation, extra whitespace. Lowercases.
-     */
-    protected function normalizeName(string $name): string
-    {
-        $name = mb_strtolower(trim($name));
-
-        // Strip common MK/regional company suffixes
-        $suffixes = [
-            'дооел', 'доо', 'dooel', 'doo', 'ltd', 'llc', 'gmbh',
-            'ад', 'а.д.', 'ad', 'j.p.', 'јп', 'jp',
-            'inc', 'corp', 'co', 'kg', 'og',
-        ];
-        foreach ($suffixes as $suffix) {
-            // Remove suffix at the end, with optional preceding space/punctuation
-            $name = preg_replace('/[\s\.\-,]*' . preg_quote($suffix, '/') . '[\s\.\-,]*$/u', '', $name);
-        }
-
-        // Strip punctuation and collapse whitespace
-        $name = preg_replace('/[^\p{L}\p{N}\s]/u', '', $name);
-        $name = preg_replace('/\s+/u', ' ', $name);
-
-        return trim($name);
-    }
-
-    /**
-     * Transliterate Macedonian Cyrillic to Latin for cross-script matching.
-     */
-    protected function cyrillicToLatin(string $text): string
-    {
-        $map = [
-            'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd',
-            'ѓ' => 'gj', 'е' => 'e', 'ж' => 'zh', 'з' => 'z', 'ѕ' => 'dz',
-            'и' => 'i', 'ј' => 'j', 'к' => 'k', 'л' => 'l', 'љ' => 'lj',
-            'м' => 'm', 'н' => 'n', 'њ' => 'nj', 'о' => 'o', 'п' => 'p',
-            'р' => 'r', 'с' => 's', 'т' => 't', 'ќ' => 'kj', 'у' => 'u',
-            'ф' => 'f', 'х' => 'h', 'ц' => 'c', 'ч' => 'ch', 'џ' => 'dj',
-            'ш' => 'sh',
-            // Also handle Serbian/other Cyrillic that might appear
-            'щ' => 'sht', 'ъ' => '', 'ь' => '', 'ю' => 'yu', 'я' => 'ya',
-            'э' => 'e', 'ы' => 'i', 'і' => 'i', 'ї' => 'yi', 'є' => 'ye',
-        ];
-
-        return strtr($text, $map);
+        return app(DuplicateDetectionService::class);
     }
 
     /**

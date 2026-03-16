@@ -28,12 +28,11 @@ class ProformaInvoiceObserver
                 $serial = (new SerialNumberFormatter)
                     ->setModel($proformaInvoice)
                     ->setCompany($proformaInvoice->company_id)
-                    ->setCustomer($proformaInvoice->customer_id)
-                    ->setNextNumbers();
+                    ->setCustomer($proformaInvoice->customer_id);
 
+                $proformaInvoice->proforma_invoice_number = $serial->getNextNumber();
                 $proformaInvoice->sequence_number = $serial->nextSequenceNumber;
                 $proformaInvoice->customer_sequence_number = $serial->nextCustomerSequenceNumber;
-                $proformaInvoice->proforma_invoice_number = 'PRO-'.str_pad($serial->nextSequenceNumber, 6, '0', STR_PAD_LEFT);
 
                 if (empty($proformaInvoice->unique_hash)) {
                     $proformaInvoice->unique_hash = Hashids::connection(ProformaInvoice::class)->encode($proformaInvoice->id);

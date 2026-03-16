@@ -45,6 +45,25 @@ class SuppliersController extends Controller
             return response()->json($usageService->buildLimitExceededResponse($company, 'suppliers_total'), 402);
         }
 
+        $companyId = (int) $request->header('company');
+
+        if (! $request->allowsDuplicate()) {
+            $duplicates = Supplier::findPotentialDuplicates($companyId, [
+                'name' => $request->input('name'),
+                'tax_id' => $request->input('tax_id'),
+                'email' => $request->input('email'),
+                'phone' => $request->input('phone'),
+            ]);
+
+            if ($duplicates->isNotEmpty()) {
+                return response()->json([
+                    'is_duplicate_warning' => true,
+                    'message' => __('suppliers.duplicate_warning'),
+                    'duplicates' => $duplicates,
+                ], 200);
+            }
+        }
+
         $supplier = Supplier::create($request->getSupplierPayload());
 
         return (new SupplierResource($supplier))

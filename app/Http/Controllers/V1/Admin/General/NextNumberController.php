@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\ProformaInvoice;
 use App\Services\SerialNumberFormatter;
 use Illuminate\Http\Request;
 
@@ -42,6 +43,14 @@ class NextNumberController extends Controller
 
                 case 'payment':
                     $nextNumber = $serial->setModel($payment)
+                        ->setModelObject($request->model_id)
+                        ->getNextNumber();
+
+                    break;
+
+                case 'proforma_invoice':
+                    $proformaInvoice = new ProformaInvoice();
+                    $nextNumber = $serial->setModel($proformaInvoice)
                         ->setModelObject($request->model_id)
                         ->getNextNumber();
 

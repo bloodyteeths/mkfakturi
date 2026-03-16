@@ -32,55 +32,58 @@ class PartnerInvitationController extends Controller
             return response()->json(['message' => 'Partner not found'], 404);
         }
 
-        // Check for existing link
-        $existingLink = DB::table('partner_company_links')
-            ->where('partner_id', $partner->id)
-            ->where('company_id', $validated['company_id'])
-            ->first();
+        return DB::transaction(function () use ($partner, $validated) {
+            // Check for existing link (with lock to prevent race conditions)
+            $existingLink = DB::table('partner_company_links')
+                ->where('partner_id', $partner->id)
+                ->where('company_id', $validated['company_id'])
+                ->lockForUpdate()
+                ->first();
 
-        // If already linked and accepted, update permissions instead of creating new link
-        if ($existingLink && $existingLink->invitation_status === 'accepted') {
-            DB::table('partner_company_links')
-                ->where('id', $existingLink->id)
-                ->update([
-                    'permissions' => json_encode($validated['permissions']),
-                    'updated_at' => now(),
-                ]);
+            // If already linked and accepted, update permissions instead of creating new link
+            if ($existingLink && $existingLink->invitation_status === 'accepted') {
+                DB::table('partner_company_links')
+                    ->where('id', $existingLink->id)
+                    ->update([
+                        'permissions' => json_encode($validated['permissions']),
+                        'updated_at' => now(),
+                    ]);
 
-            return response()->json(['message' => 'Partner permissions updated']);
-        }
+                return response()->json(['message' => 'Partner permissions updated']);
+            }
 
-        // If pending invitation exists, update it
-        if ($existingLink && $existingLink->invitation_status === 'pending') {
-            DB::table('partner_company_links')
-                ->where('id', $existingLink->id)
-                ->update([
-                    'permissions' => json_encode($validated['permissions']),
-                    'invited_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            // If pending invitation exists, update it
+            if ($existingLink && $existingLink->invitation_status === 'pending') {
+                DB::table('partner_company_links')
+                    ->where('id', $existingLink->id)
+                    ->update([
+                        'permissions' => json_encode($validated['permissions']),
+                        'invited_at' => now(),
+                        'updated_at' => now(),
+                    ]);
 
-            return response()->json(['message' => 'Invitation updated']);
-        }
+                return response()->json(['message' => 'Invitation updated']);
+            }
 
-        // If declined, delete old link and create new one
-        if ($existingLink && $existingLink->invitation_status === 'declined') {
-            DB::table('partner_company_links')->where('id', $existingLink->id)->delete();
-        }
+            // If declined, delete old link and create new one
+            if ($existingLink && $existingLink->invitation_status === 'declined') {
+                DB::table('partner_company_links')->where('id', $existingLink->id)->delete();
+            }
 
-        DB::table('partner_company_links')->insert([
-            'partner_id' => $partner->id,
-            'company_id' => $validated['company_id'],
-            'permissions' => json_encode($validated['permissions']),
-            'invitation_status' => 'pending',
-            'created_by' => auth()->id(),
-            'invited_at' => now(),
-            'is_active' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+            DB::table('partner_company_links')->insert([
+                'partner_id' => $partner->id,
+                'company_id' => $validated['company_id'],
+                'permissions' => json_encode($validated['permissions']),
+                'invitation_status' => 'pending',
+                'created_by' => auth()->id(),
+                'invited_at' => now(),
+                'is_active' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-        return response()->json(['message' => 'Invitation sent']);
+            return response()->json(['message' => 'Invitation sent']);
+        });
     }
 
     /**

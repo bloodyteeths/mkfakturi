@@ -62,6 +62,22 @@ class ItemsController extends Controller
     {
         $this->authorize('create', Item::class);
 
+        $companyId = (int) $request->header('company');
+
+        if (! $request->allowsDuplicate()) {
+            $duplicates = Item::findPotentialDuplicates($companyId, [
+                'name' => $request->input('name'),
+            ]);
+
+            if ($duplicates->isNotEmpty()) {
+                return response()->json([
+                    'is_duplicate_warning' => true,
+                    'message' => __('items.duplicate_warning'),
+                    'duplicates' => $duplicates,
+                ], 200);
+            }
+        }
+
         $item = Item::createItem($request);
 
         return new ItemResource($item);

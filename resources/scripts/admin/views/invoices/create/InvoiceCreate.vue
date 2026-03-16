@@ -144,6 +144,14 @@
         </div>
       </BaseScrollPane>
     </form>
+
+    <DuplicateWarningModal
+      :show="showDuplicateWarning"
+      :duplicates="duplicateRecords"
+      entity-type="invoices"
+      @close="closeDuplicateWarning"
+      @confirm="saveWithDuplicate"
+    />
   </BasePage>
 </template>
 
@@ -183,6 +191,7 @@ import TaxTypeModal from '@/scripts/admin/components/modal-components/TaxTypeMod
 import ItemModal from '@/scripts/admin/components/modal-components/ItemModal.vue'
 import SalesTax from '@/scripts/admin/components/estimate-invoice-common/SalesTax.vue'
 import ScannerModeToggle from '@/scripts/admin/components/ScannerModeToggle.vue'
+import DuplicateWarningModal from '@/scripts/admin/components/modal-components/DuplicateWarningModal.vue'
 import { useBarcodeScanner } from '@/scripts/admin/composables/useBarcodeScanner'
 import Guid from 'guid'
 import TaxStub from '@/scripts/admin/stub/tax'
@@ -201,6 +210,8 @@ let router = useRouter()
 const invoiceValidationScope = 'newInvoice'
 let isSaving = ref(false)
 const isMarkAsDefault = ref(false)
+const showDuplicateWarning = ref(false)
+const duplicateRecords = ref([])
 
 // Barcode Scanner Integration
 function handleScannedItem(item) {
@@ -461,7 +472,7 @@ async function loadAiDraft(draftId) {
   }
 }
 
-async function submitForm() {
+async function submitForm(allowDuplicate = false) {
   v$.value.$touch()
 
   if (v$.value.$invalid) {
@@ -498,9 +509,16 @@ async function submitForm() {
   try {
     const action = isEdit.value
       ? invoiceStore.updateInvoice
-      : invoiceStore.addInvoice
+      : (d) => invoiceStore.addInvoice(d, allowDuplicate)
 
     const response = await action(data)
+
+    if (response?.data?.is_duplicate_warning) {
+      isSaving.value = false
+      duplicateRecords.value = response.data.duplicates || []
+      showDuplicateWarning.value = true
+      return
+    }
 
     router.push(`/admin/invoices/${response.data.data.id}/view`)
   } catch (err) {
@@ -508,5 +526,15 @@ async function submitForm() {
   }
 
   isSaving.value = false
+}
+
+function closeDuplicateWarning() {
+  showDuplicateWarning.value = false
+  duplicateRecords.value = []
+}
+
+function saveWithDuplicate() {
+  closeDuplicateWarning()
+  submitForm(true)
 }
 </script>
