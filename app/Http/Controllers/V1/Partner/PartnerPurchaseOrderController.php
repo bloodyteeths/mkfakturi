@@ -263,6 +263,41 @@ class PartnerPurchaseOrderController extends Controller
     }
 
     /**
+     * Resend email for a purchase order.
+     */
+    public function resend(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $po = PurchaseOrder::forCompany($company)->where('id', $id)->first();
+        if (!$po) {
+            return response()->json(['success' => false, 'message' => 'Purchase order not found'], 404);
+        }
+
+        try {
+            $result = $this->service->resendEmail($po);
+
+            return response()->json([
+                'success' => true,
+                'data' => $result['po'],
+                'email_sent_to' => $result['email_sent_to'],
+                'message' => 'Email resent to ' . $result['email_sent_to'],
+            ]);
+        } catch (\InvalidArgumentException|\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
      * Receive goods for a purchase order.
      */
     public function receiveGoods(Request $request, int $company, int $id): JsonResponse

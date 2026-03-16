@@ -1132,6 +1132,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{id}', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'show']);
                 Route::put('/{id}', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'update']);
                 Route::post('/{id}/send', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'send']);
+                Route::post('/{id}/resend', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'resend']);
                 Route::post('/{id}/receive-goods', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'receiveGoods']);
                 Route::post('/{id}/convert-to-bill', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'convertToBill']);
                 Route::get('/{id}/three-way-match', [\Modules\Mk\Http\Controllers\PurchaseOrderController::class, 'threeWayMatch']);
@@ -1183,17 +1184,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/refresh', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'refresh']);
             });
 
-            // F11: Custom Report Builder
-            Route::prefix('custom-reports')->middleware('tier:standard')->group(function () {
-                Route::get('/', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'index']);
-                Route::post('/', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'store']);
-                Route::post('/preview', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'preview']);
-                Route::get('/{id}', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'show']);
-                Route::put('/{id}', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'update']);
-                Route::get('/{id}/execute', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'execute']);
-                Route::get('/{id}/export-pdf', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'exportPdf']);
-                Route::delete('/{id}', [\Modules\Mk\Http\Controllers\CustomReportController::class, 'destroy']);
-            });
+            // F11: Custom Report Builder — Partner-only (IFRS ledger data not relevant for company users)
 
             // PSD2 Banking Integration (OAuth + Transaction Management)
             // Feature flag: FEATURE_PSD2_BANKING
@@ -1871,6 +1862,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'store']);
             Route::put('/{id}', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'update']);
             Route::post('/{id}/send', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'send']);
+            Route::post('/{id}/resend', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'resend']);
             Route::post('/{id}/receive-goods', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'receiveGoods']);
             Route::post('/{id}/convert-to-bill', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'convertToBill']);
             Route::get('/{id}/three-way-match', [\App\Http\Controllers\V1\Partner\PartnerPurchaseOrderController::class, 'threeWayMatch']);
@@ -1910,12 +1902,14 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::get('/summary', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'summary']);
         });
 
-        // F11: Custom Reports (Partner)
+        // F11: Custom Reports (Partner — full CRUD)
         Route::prefix('custom-reports')->group(function () {
             Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerCustomReportController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerCustomReportController::class, 'store']);
             Route::post('/preview', [\App\Http\Controllers\V1\Partner\PartnerCustomReportController::class, 'preview']);
             Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerCustomReportController::class, 'show']);
             Route::get('/{id}/execute', [\App\Http\Controllers\V1\Partner\PartnerCustomReportController::class, 'execute']);
+            Route::delete('/{id}', [\App\Http\Controllers\V1\Partner\PartnerCustomReportController::class, 'destroy']);
         });
 
         // Fixed Assets (full CRUD for partners)

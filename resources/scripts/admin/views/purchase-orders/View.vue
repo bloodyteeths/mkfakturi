@@ -75,6 +75,19 @@
             {{ t('purchaseOrders.three_way_match') }}
           </BaseButton>
 
+          <!-- Resend Email (non-draft, supplier has email) -->
+          <BaseButton
+            v-if="po.status !== 'draft' && supplierEmail"
+            variant="primary-outline"
+            :loading="isResending"
+            @click="showResendDialog = true"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="EnvelopeIcon" :class="slotProps.class" />
+            </template>
+            {{ t('purchaseOrders.resend_email') }}
+          </BaseButton>
+
           <!-- Download PDF -->
           <BaseButton
             variant="primary-outline"
@@ -184,8 +197,15 @@
                 {{ po.created_by_user?.name || po.created_by?.name || '-' }}
               </p>
             </div>
+            <!-- Sent Date -->
+            <div v-if="po.status !== 'draft'">
+              <p class="text-xs text-gray-500 uppercase font-medium">{{ t('purchaseOrders.sent_at') }}</p>
+              <p class="text-sm font-medium text-gray-900 mt-1">
+                {{ po.sent_at ? formatDateTime(po.sent_at) : formatDate(po.po_date) }}
+              </p>
+            </div>
             <!-- Email Status -->
-            <div v-if="po.email_status">
+            <div v-if="po.status !== 'draft'">
               <p class="text-xs text-gray-500 uppercase font-medium">{{ t('purchaseOrders.email_status') }}</p>
               <p class="text-sm mt-1">
                 <span
@@ -432,6 +452,33 @@
       </div>
     </div>
 
+    <!-- Resend Email Dialog -->
+    <div v-if="showResendDialog" class="fixed inset-0 z-50 flex items-center justify-center">
+      <div class="fixed inset-0 bg-black bg-opacity-50" @click="showResendDialog = false" />
+      <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('purchaseOrders.resend_title') }}</h3>
+        <p class="text-sm text-gray-500 mb-3">{{ t('purchaseOrders.resend_message') }}</p>
+        <div class="flex items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4">
+          <BaseIcon name="EnvelopeIcon" class="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
+          <div>
+            <p class="text-xs text-blue-600 font-medium">{{ t('purchaseOrders.supplier_email') }}</p>
+            <p class="text-sm font-medium text-blue-800">{{ supplierEmail }}</p>
+          </div>
+        </div>
+        <div class="flex justify-end space-x-3">
+          <BaseButton variant="primary-outline" @click="showResendDialog = false">
+            {{ t('purchaseOrders.back') }}
+          </BaseButton>
+          <BaseButton variant="primary" :loading="isResending" @click="resendEmail">
+            <template #left="slotProps">
+              <BaseIcon name="PaperAirplaneIcon" :class="slotProps.class" />
+            </template>
+            {{ t('purchaseOrders.resend_email') }}
+          </BaseButton>
+        </div>
+      </div>
+    </div>
+
     <!-- Cancel Dialog -->
     <div v-if="showCancelDialog" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="fixed inset-0 bg-black bg-opacity-50" @click="showCancelDialog = false" />
@@ -509,9 +556,11 @@ const isCancelling = ref(false)
 const isDeleting = ref(false)
 const isConverting = ref(false)
 const isMatching = ref(false)
+const isResending = ref(false)
 const isDownloading = ref(false)
 const showReceiveModal = ref(false)
 const showSendDialog = ref(false)
+const showResendDialog = ref(false)
 const showCancelDialog = ref(false)
 const showDeleteDialog = ref(false)
 const showConvertDialog = ref(false)
@@ -533,6 +582,13 @@ function formatDate(dateStr) {
   const d = new Date(dateStr)
   const fmtLocale = localeMap[locale.value] || 'mk-MK'
   return d.toLocaleDateString(fmtLocale, { year: 'numeric', month: '2-digit', day: '2-digit' })
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  const fmtLocale = localeMap[locale.value] || 'mk-MK'
+  return d.toLocaleDateString(fmtLocale, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
 function statusBadgeClass(status) {
@@ -567,7 +623,7 @@ function emailStatusLabel(emailStatus) {
     case 'sent': return t('purchaseOrders.email_status_sent')
     case 'failed': return t('purchaseOrders.email_status_failed')
     case 'no_email': return t('purchaseOrders.email_status_no_email')
-    default: return emailStatus
+    default: return t('purchaseOrders.email_status_no_email')
   }
 }
 
@@ -613,6 +669,28 @@ async function sendPo() {
     })
   } finally {
     isSending.value = false
+  }
+}
+
+async function resendEmail() {
+  isResending.value = true
+  try {
+    const response = await window.axios.post(`/purchase-orders/${po.value.id}/resend`)
+    showResendDialog.value = false
+
+    const emailTo = response.data?.email_sent_to
+    notificationStore.showNotification({
+      type: 'success',
+      message: `${t('purchaseOrders.resend_success')} — ${emailTo}`,
+    })
+    fetchPo()
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('purchaseOrders.error_sending'),
+    })
+  } finally {
+    isResending.value = false
   }
 }
 

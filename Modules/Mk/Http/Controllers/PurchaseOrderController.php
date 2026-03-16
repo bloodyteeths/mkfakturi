@@ -189,6 +189,38 @@ class PurchaseOrderController extends Controller
     }
 
     /**
+     * Resend email for a purchase order.
+     */
+    public function resend(Request $request, int $id): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $po = PurchaseOrder::forCompany($companyId)
+            ->where('id', $id)
+            ->first();
+
+        if (!$po) {
+            return response()->json(['success' => false, 'message' => 'Purchase order not found'], 404);
+        }
+
+        try {
+            $result = $this->service->resendEmail($po);
+
+            return response()->json([
+                'success' => true,
+                'data' => $result['po'],
+                'email_sent_to' => $result['email_sent_to'],
+                'message' => 'Email resent to ' . $result['email_sent_to'],
+            ]);
+        } catch (\InvalidArgumentException|\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
      * Receive goods for a purchase order.
      */
     public function receiveGoods(Request $request, int $id): JsonResponse

@@ -34,27 +34,27 @@
       </template>
     </BasePageHeader>
 
-    <!-- Status Pipeline -->
-    <div class="mb-6 flex flex-wrap gap-2">
-      <button
-        v-for="statusOpt in statusPipeline"
-        :key="statusOpt.value"
-        :class="[
-          'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-          filters.status === statusOpt.value
-            ? statusOpt.activeClass
-            : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-        ]"
-        @click="toggleStatusFilter(statusOpt.value)"
-      >
-        <span
-          :class="['w-2 h-2 rounded-full mr-1.5', statusOpt.dotClass]"
-        />
-        {{ statusOpt.label }}
-        <span v-if="statusCounts[statusOpt.value]" class="ml-1.5 text-xs opacity-75">
-          ({{ statusCounts[statusOpt.value] }})
-        </span>
-      </button>
+    <!-- Help Box (collapsible) -->
+    <div v-if="showHelp" class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <div class="flex items-start justify-between">
+        <div class="flex items-start gap-3">
+          <BaseIcon name="InformationCircleIcon" class="h-5 w-5 text-blue-500 mt-0.5 shrink-0" />
+          <div>
+            <h4 class="text-sm font-semibold text-blue-900">{{ t('purchaseOrders.help_title') }}</h4>
+            <p class="mt-1 text-sm text-blue-700">{{ t('purchaseOrders.help_description') }}</p>
+            <ol class="mt-2 space-y-1 text-sm text-blue-700 list-decimal list-inside">
+              <li>{{ t('purchaseOrders.help_step_1') }}</li>
+              <li>{{ t('purchaseOrders.help_step_2') }}</li>
+              <li>{{ t('purchaseOrders.help_step_3') }}</li>
+              <li>{{ t('purchaseOrders.help_step_4') }}</li>
+              <li>{{ t('purchaseOrders.help_step_5') }}</li>
+            </ol>
+          </div>
+        </div>
+        <button class="text-blue-400 hover:text-blue-600" @click="dismissHelp">
+          <BaseIcon name="XMarkIcon" class="h-4 w-4" />
+        </button>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -63,6 +63,16 @@
       :row-on-xl="true"
       @clear="clearFilters"
     >
+      <BaseInputGroup :label="t('purchaseOrders.status')">
+        <BaseMultiselect
+          v-model="filters.status"
+          :options="statusOptions"
+          label="label"
+          value-prop="value"
+          :placeholder="t('purchaseOrders.select_status')"
+        />
+      </BaseInputGroup>
+
       <BaseInputGroup :label="t('purchaseOrders.supplier')">
         <BaseMultiselect
           v-model="filters.supplier_id"
@@ -201,15 +211,42 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 py-16">
-      <BaseIcon name="ClipboardDocumentListIcon" class="h-12 w-12 text-gray-400" />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
-        {{ t('purchaseOrders.no_purchase_orders') }}
-      </h3>
-      <p class="mt-1 text-sm text-gray-500">
-        {{ t('purchaseOrders.no_purchase_orders_description') }}
-      </p>
-      <div class="mt-6">
+    <div v-else class="rounded-lg border-2 border-dashed border-gray-300 py-12 px-6">
+      <div class="text-center">
+        <BaseIcon name="ClipboardDocumentListIcon" class="mx-auto h-12 w-12 text-gray-400" />
+        <h3 class="mt-3 text-base font-semibold text-gray-900">
+          {{ t('purchaseOrders.empty_title') }}
+        </h3>
+        <p class="mt-1 text-sm text-gray-500 max-w-md mx-auto">
+          {{ t('purchaseOrders.empty_description') }}
+        </p>
+      </div>
+
+      <!-- Workflow Steps -->
+      <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-3xl mx-auto">
+        <div class="relative rounded-lg border border-gray-200 bg-white p-4 text-center">
+          <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-600 text-sm font-bold">1</div>
+          <h4 class="mt-2 text-sm font-semibold text-gray-900">{{ t('purchaseOrders.empty_step_1_title') }}</h4>
+          <p class="mt-1 text-xs text-gray-500">{{ t('purchaseOrders.empty_step_1_desc') }}</p>
+        </div>
+        <div class="relative rounded-lg border border-gray-200 bg-white p-4 text-center">
+          <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-sm font-bold">2</div>
+          <h4 class="mt-2 text-sm font-semibold text-gray-900">{{ t('purchaseOrders.empty_step_2_title') }}</h4>
+          <p class="mt-1 text-xs text-gray-500">{{ t('purchaseOrders.empty_step_2_desc') }}</p>
+        </div>
+        <div class="relative rounded-lg border border-gray-200 bg-white p-4 text-center">
+          <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600 text-sm font-bold">3</div>
+          <h4 class="mt-2 text-sm font-semibold text-gray-900">{{ t('purchaseOrders.empty_step_3_title') }}</h4>
+          <p class="mt-1 text-xs text-gray-500">{{ t('purchaseOrders.empty_step_3_desc') }}</p>
+        </div>
+        <div class="relative rounded-lg border border-gray-200 bg-white p-4 text-center">
+          <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-sm font-bold">4</div>
+          <h4 class="mt-2 text-sm font-semibold text-gray-900">{{ t('purchaseOrders.empty_step_4_title') }}</h4>
+          <p class="mt-1 text-xs text-gray-500">{{ t('purchaseOrders.empty_step_4_desc') }}</p>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
         <router-link to="purchase-orders/create">
           <BaseButton variant="primary">
             <template #left="slotProps">
@@ -240,8 +277,7 @@ const meta = ref(null)
 const suppliers = ref([])
 const isLoading = ref(false)
 const showFilters = ref(false)
-const statusCounts = ref({})
-
+const showHelp = ref(localStorage.getItem('po_help_dismissed') !== '1')
 const filters = reactive({
   status: null,
   supplier_id: null,
@@ -250,15 +286,15 @@ const filters = reactive({
   search: '',
 })
 
-const statusPipeline = computed(() => [
-  { value: 'draft', label: t('purchaseOrders.status_draft'), dotClass: 'bg-gray-400', activeClass: 'bg-gray-100 text-gray-800 border-gray-400' },
-  { value: 'sent', label: t('purchaseOrders.status_sent'), dotClass: 'bg-blue-400', activeClass: 'bg-blue-100 text-blue-800 border-blue-400' },
-  { value: 'acknowledged', label: t('purchaseOrders.status_acknowledged'), dotClass: 'bg-indigo-400', activeClass: 'bg-indigo-100 text-indigo-800 border-indigo-400' },
-  { value: 'partially_received', label: t('purchaseOrders.status_partially_received'), dotClass: 'bg-yellow-400', activeClass: 'bg-yellow-100 text-yellow-800 border-yellow-400' },
-  { value: 'fully_received', label: t('purchaseOrders.status_fully_received'), dotClass: 'bg-green-400', activeClass: 'bg-green-100 text-green-800 border-green-400' },
-  { value: 'billed', label: t('purchaseOrders.status_billed'), dotClass: 'bg-purple-400', activeClass: 'bg-purple-100 text-purple-800 border-purple-400' },
-  { value: 'closed', label: t('purchaseOrders.status_closed'), dotClass: 'bg-gray-600', activeClass: 'bg-gray-200 text-gray-900 border-gray-600' },
-  { value: 'cancelled', label: t('purchaseOrders.status_cancelled'), dotClass: 'bg-red-400', activeClass: 'bg-red-100 text-red-800 border-red-400' },
+const statusOptions = computed(() => [
+  { value: 'draft', label: t('purchaseOrders.status_draft') },
+  { value: 'sent', label: t('purchaseOrders.status_sent') },
+  { value: 'acknowledged', label: t('purchaseOrders.status_acknowledged') },
+  { value: 'partially_received', label: t('purchaseOrders.status_partially_received') },
+  { value: 'fully_received', label: t('purchaseOrders.status_fully_received') },
+  { value: 'billed', label: t('purchaseOrders.status_billed') },
+  { value: 'closed', label: t('purchaseOrders.status_closed') },
+  { value: 'cancelled', label: t('purchaseOrders.status_cancelled') },
 ])
 
 // Methods
@@ -298,12 +334,9 @@ function statusLabel(status) {
   return t('purchaseOrders.status_' + status)
 }
 
-function toggleStatusFilter(status) {
-  if (filters.status === status) {
-    filters.status = null
-  } else {
-    filters.status = status
-  }
+function dismissHelp() {
+  showHelp.value = false
+  localStorage.setItem('po_help_dismissed', '1')
 }
 
 async function fetchPurchaseOrders(page = 1) {

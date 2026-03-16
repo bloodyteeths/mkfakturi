@@ -29,6 +29,7 @@ class PurchaseOrder extends Model
         'status',
         'email_status',
         'email_sent_to',
+        'sent_at',
         'sub_total',
         'tax',
         'total',
@@ -48,6 +49,7 @@ class PurchaseOrder extends Model
             'sub_total' => 'integer',
             'tax' => 'integer',
             'total' => 'integer',
+            'sent_at' => 'datetime',
         ];
     }
 

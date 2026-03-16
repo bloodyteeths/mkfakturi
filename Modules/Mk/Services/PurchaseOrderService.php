@@ -289,11 +289,105 @@ class PurchaseOrderService
             'status' => 'sent',
             'email_status' => $emailStatus,
             'email_sent_to' => $emailSentTo,
+            'sent_at' => now(),
         ]);
 
         return [
             'po' => $po->fresh(['items', 'supplier']),
             'email_sent_to' => $emailSentTo,
+            'email_status' => $emailStatus,
+        ];
+    }
+
+    /**
+     * Resend email for an already-sent purchase order.
+     */
+    public function resendEmail(PurchaseOrder $po): array
+    {
+        if ($po->status === 'draft') {
+            throw new \InvalidArgumentException('Cannot resend email for draft purchase orders. Use send instead.');
+        }
+
+        $po->load(['items', 'supplier', 'warehouse', 'createdBy', 'currency', 'company.address', 'costCenter']);
+
+        $supplierEmail = $po->supplier?->email;
+        if (!$supplierEmail) {
+            throw new \InvalidArgumentException('Supplier has no email address.');
+        }
+
+        $emailStatus = 'failed';
+        try {
+            $company = Company::find($po->company_id);
+            $companyName = $company?->name ?? 'Facturino';
+
+            $companyLogo = null;
+            if ($company) {
+                $mediaItem = $company->getMedia('logo')->first();
+                $companyLogo = $mediaItem ? $mediaItem->getFullUrl() : null;
+            }
+
+            $pdfInstance = Pdf::loadView('app.pdf.reports.purchase-order', [
+                'po' => $po,
+                'company' => $company,
+            ]);
+            $pdfInstance->setPaper('A4', 'portrait');
+            $pdfContent = $pdfInstance->output();
+            $pdfFilename = "nabavka-{$po->po_number}.pdf";
+
+            $mailData = [
+                'to' => $supplierEmail,
+                'from' => $company?->email ?? config('mail.from.address'),
+                'subject' => "Набавка / Purchase Order {$po->po_number} — {$companyName}",
+                'body' => "<p>Набавка / Purchase Order <strong>{$po->po_number}</strong> од / from <strong>{$companyName}</strong>.</p>"
+                    . ($po->expected_delivery_date ? "<p>Очекувана испорака / Expected delivery: {$po->expected_delivery_date->format('d.m.Y')}</p>" : ''),
+                'company' => [
+                    'name' => $companyName,
+                    'logo' => $companyLogo,
+                ],
+                'purchase_order' => [
+                    'id' => $po->id,
+                    'po_number' => $po->po_number,
+                    'po_date' => $po->po_date,
+                    'total' => $po->total,
+                    'notes' => $po->notes,
+                    'items' => $po->items->map(fn ($item) => [
+                        'name' => $item->name,
+                        'quantity' => $item->quantity,
+                        'price' => $item->price,
+                        'total' => $item->total,
+                    ])->toArray(),
+                ],
+                'labels' => [
+                    'item' => 'Ставка / Item',
+                    'qty' => 'Кол. / Qty',
+                    'price' => 'Цена / Price',
+                    'total' => 'Вкупно / Total',
+                    'notes' => 'Забелешки / Notes',
+                ],
+                'pdf_content' => $pdfContent,
+                'pdf_filename' => $pdfFilename,
+            ];
+
+            Mail::to($supplierEmail)->send(new SendPurchaseOrderMail($mailData));
+            $emailStatus = 'sent';
+        } catch (\Exception $e) {
+            Log::warning('Failed to resend PO email', [
+                'po_id' => $po->id,
+                'supplier_email' => $supplierEmail,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \RuntimeException('Failed to send email: ' . $e->getMessage());
+        }
+
+        $po->update([
+            'email_status' => $emailStatus,
+            'email_sent_to' => $supplierEmail,
+            'sent_at' => now(),
+        ]);
+
+        return [
+            'po' => $po->fresh(['items', 'supplier']),
+            'email_sent_to' => $supplierEmail,
             'email_status' => $emailStatus,
         ];
     }
