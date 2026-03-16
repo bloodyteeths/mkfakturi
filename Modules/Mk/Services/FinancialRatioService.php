@@ -322,34 +322,37 @@ class FinancialRatioService
      */
     public function getTrends(int $companyId, string $ratioType, int $months = 12): array
     {
-        // First check cache
+        // Build cache lookup keyed by YYYY-MM
         $cached = FinancialRatioCache::forCompany($companyId)
             ->ofType($ratioType)
             ->where('period_date', '>=', Carbon::now()->subMonths($months)->startOfMonth()->toDateString())
             ->orderBy('period_date', 'asc')
-            ->get();
+            ->get()
+            ->keyBy(fn ($row) => Carbon::parse($row->period_date)->format('Y-m'));
 
-        if ($cached->isNotEmpty()) {
-            return $cached->map(fn ($row) => [
-                'date' => $row->period_date->toDateString(),
-                'value' => (float) $row->ratio_value,
-                'metadata' => $row->metadata,
-            ])->toArray();
-        }
-
-        // Compute for each month
+        // Compute for each month, using cache when available
         $trends = [];
         $now = Carbon::now();
 
         for ($i = $months - 1; $i >= 0; $i--) {
-            $monthEnd = $now->copy()->subMonths($i)->endOfMonth()->toDateString();
-            $value = $this->getSingleRatioValue($companyId, $monthEnd, $ratioType);
+            $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
+            $monthKey = $monthEnd->format('Y-m');
 
-            $trends[] = [
-                'date' => $monthEnd,
-                'value' => $value,
-                'metadata' => null,
-            ];
+            if ($cached->has($monthKey)) {
+                $row = $cached->get($monthKey);
+                $trends[] = [
+                    'date' => $row->period_date->toDateString(),
+                    'value' => (float) $row->ratio_value,
+                    'metadata' => $row->metadata,
+                ];
+            } else {
+                $value = $this->getSingleRatioValue($companyId, $monthEnd->toDateString(), $ratioType);
+                $trends[] = [
+                    'date' => $monthEnd->toDateString(),
+                    'value' => $value,
+                    'metadata' => null,
+                ];
+            }
         }
 
         return $trends;
