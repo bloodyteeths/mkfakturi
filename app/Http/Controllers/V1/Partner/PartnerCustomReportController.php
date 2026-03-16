@@ -92,6 +92,77 @@ class PartnerCustomReportController extends Controller
     }
 
     /**
+     * Create a new report template for a client company.
+     */
+    public function store(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:150',
+            'account_filter' => 'required|array',
+            'account_filter.type' => 'required|string|in:range,category,specific,all',
+            'columns' => 'required|array|min:1',
+            'columns.*' => 'string|in:code,name,opening,debit,credit,closing,budget,variance,variance_pct',
+            'period_type' => 'nullable|string|in:month,quarter,year,custom',
+            'group_by' => 'nullable|string|in:month,quarter,cost_center',
+            'comparison' => 'nullable|string|in:previous_year,budget',
+            'schedule_cron' => 'nullable|string|max:50',
+            'schedule_emails' => 'nullable|array',
+            'schedule_emails.*' => 'email|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
+        }
+
+        try {
+            $data = $validator->validated();
+            $data['created_by'] = $request->user()?->id;
+
+            $template = $this->service->create($company, $data);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $template->id,
+                    'name' => $template->name,
+                ],
+                'message' => 'Template created successfully.',
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Delete a report template for a client company.
+     */
+    public function destroy(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $template = CustomReportTemplate::forCompany($company)->find($id);
+
+        if (! $template) {
+            return response()->json(['success' => false, 'message' => 'Template not found'], 404);
+        }
+
+        $template->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Template deleted successfully.',
+        ]);
+    }
+
+    /**
      * Preview a report from ad-hoc config.
      */
     public function preview(Request $request, int $company): JsonResponse

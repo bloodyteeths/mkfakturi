@@ -55,7 +55,6 @@ class KnowledgeBaseService
         'help_interest' => 'interest',
         'help_consolidation' => 'consolidation',
         'help_batch_operations' => 'batch-operations',
-        'help_custom_reports' => 'custom-reports',
         'help_bi_dashboard' => 'bi-dashboard',
     ];
 

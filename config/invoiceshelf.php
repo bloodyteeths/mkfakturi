@@ -630,18 +630,7 @@ return [
             'model' => '',
             'feature_flag' => 'accounting_backbone',
         ],
-        [
-            'title' => 'navigation.custom_reports',
-            'group' => 3,
-            'submenu' => 'finance',
-            'link' => '/admin/custom-reports',
-            'icon' => 'DocumentChartBarIcon',
-            'name' => 'Custom Reports',
-            'owner_only' => false,
-            'ability' => 'view-financial-reports',
-            'model' => '',
-            'feature_flag' => 'accounting_backbone',
-        ],
+        // Custom Reports — moved to partner-only (IFRS data not relevant for companies)
         [
             'title' => 'navigation.interest',
             'group' => 3,

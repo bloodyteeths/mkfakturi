@@ -295,7 +295,6 @@ DOCUMENTS: /admin/documents (AI document hub)
 PROJECTS: /admin/projects (list)
 DASHBOARD: /admin/dashboard (main dashboard)
 BI DASHBOARD: /admin/bi-dashboard (business intelligence)
-CUSTOM REPORTS: /admin/custom-reports (user-defined reports)
 BATCH OPERATIONS: /admin/batch-operations (bulk journal entries)
 FINANCIAL CONSOLIDATION: /admin/financial-consolidation
 INTEREST CALCULATOR: /admin/interest-calculator

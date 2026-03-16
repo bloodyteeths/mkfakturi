@@ -1394,25 +1394,7 @@ export default [
         component: () => import('@/scripts/admin/views/bi-dashboard/Index.vue'),
       },
 
-      // F11: Custom Reports
-      {
-        path: 'custom-reports',
-        name: 'custom-reports.index',
-        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
-        component: () => import('@/scripts/admin/views/custom-reports/Index.vue'),
-      },
-      {
-        path: 'custom-reports/create',
-        name: 'custom-reports.create',
-        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
-        component: () => import('@/scripts/admin/views/custom-reports/Create.vue'),
-      },
-      {
-        path: 'custom-reports/:id',
-        name: 'custom-reports.view',
-        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
-        component: () => import('@/scripts/admin/views/custom-reports/View.vue'),
-      },
+      // F11: Custom Reports — Partner-only (removed from company side)
 
       // Partner: F1 Compensations, F2 Payment Orders, F3 Cost Centers
       {
