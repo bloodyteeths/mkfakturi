@@ -473,6 +473,7 @@ async function loadAiDraft(draftId) {
 }
 
 async function submitForm(allowDuplicate = false) {
+  if (typeof allowDuplicate !== 'boolean') allowDuplicate = false
   v$.value.$touch()
 
   if (v$.value.$invalid) {

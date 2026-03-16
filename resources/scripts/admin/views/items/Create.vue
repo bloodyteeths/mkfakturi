@@ -758,6 +758,7 @@ function formatAccountLabel(account) {
 }
 
 async function submitItem(allowDuplicate = false) {
+  if (typeof allowDuplicate !== 'boolean') allowDuplicate = false
   v$.value.currentItem.$touch()
 
   if (v$.value.currentItem.$invalid) {

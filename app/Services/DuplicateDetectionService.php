@@ -31,7 +31,8 @@ class DuplicateDetectionService
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
-        $records = $query->get(['id', 'name']);
+        // Load all columns to avoid $appends accessor crashes on missing columns
+        $records = $query->get();
 
         return $this->findMatches($name, $records, 'name');
     }

@@ -693,6 +693,7 @@ customerStore.resetCurrentCustomer()
 customerStore.fetchCustomerInitialSettings(isEdit.value)
 
 async function submitCustomerData(allowDuplicate = false) {
+  if (typeof allowDuplicate !== 'boolean') allowDuplicate = false
   v$.value.$touch()
 
   if (v$.value.$invalid) {

@@ -665,6 +665,7 @@ function buildPayload() {
 }
 
 async function handleSubmit(allowDuplicate = false) {
+  if (typeof allowDuplicate !== 'boolean') allowDuplicate = false
   if (!validateForm()) return
 
   isSaving.value = true

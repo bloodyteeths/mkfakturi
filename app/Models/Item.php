@@ -184,6 +184,10 @@ class Item extends Model
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', request()->header('company'));
 
+        if (! $dateFormat || ! $this->created_at) {
+            return $this->created_at;
+        }
+
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
 
