@@ -2,13 +2,23 @@
   <div>
     <CostCenterModal />
 
+    <!-- Intro Help -->
+    <div class="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-6">
+      <div class="flex gap-3">
+        <svg class="h-5 w-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+        </svg>
+        <p class="text-sm text-primary-800">{{ t('budgets.smart_help_intro') }}</p>
+      </div>
+    </div>
+
     <!-- Top: Basic Info -->
     <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <BaseInputGroup :label="t('budgets.name')" required>
+        <BaseInputGroup :label="t('budgets.name')" required :help-text="t('budgets.help_name')">
           <BaseInput v-model="form.name" :placeholder="t('budgets.name')" />
         </BaseInputGroup>
-        <BaseInputGroup :label="t('budgets.start_date')" required>
+        <BaseInputGroup :label="t('budgets.start_date')" required :help-text="t('budgets.help_dates')">
           <BaseInput v-model="form.start_date" type="date" />
         </BaseInputGroup>
         <BaseInputGroup :label="t('budgets.end_date')" required>
@@ -16,7 +26,7 @@
         </BaseInputGroup>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-        <BaseInputGroup :label="t('budgets.scenario')">
+        <BaseInputGroup :label="t('budgets.scenario')" :help-text="t('budgets.help_scenario')">
           <select v-model="form.scenario" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
             <option value="expected">{{ t('budgets.scenario_expected') }}</option>
             <option value="optimistic">{{ t('budgets.scenario_optimistic') }}</option>
@@ -30,7 +40,7 @@
             <option value="yearly">{{ t('budgets.period_yearly') }}</option>
           </select>
         </BaseInputGroup>
-        <BaseInputGroup :label="t('budgets.cost_center')">
+        <BaseInputGroup :label="t('budgets.cost_center')" :help-text="t('budgets.help_cost_center')">
           <div class="flex gap-2">
             <BaseMultiselect
               v-model="form.cost_center_id"
@@ -54,7 +64,7 @@
             </button>
           </div>
         </BaseInputGroup>
-        <BaseInputGroup :label="t('budgets.growth_pct')">
+        <BaseInputGroup :label="t('budgets.growth_pct')" :help-text="t('budgets.help_growth')">
           <div class="flex items-center gap-3">
             <input
               type="range"
@@ -80,9 +90,12 @@
           </svg>
           {{ t('budgets.based_on_year', { year: sourceYear }) }}
         </button>
-        <select v-model.number="sourceYear" @change="analyzeData" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500">
-          <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
-        </select>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-400 hidden sm:inline">{{ t('budgets.help_source_year') }}</span>
+          <select v-model.number="sourceYear" @change="analyzeData" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500">
+            <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -114,6 +127,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456Z" />
           </svg>
           <div class="flex-1">
+            <p class="text-xs text-indigo-500 mb-1">{{ t('budgets.help_ai') }}</p>
             <div class="flex items-center justify-between mb-1">
               <p class="text-sm font-medium text-indigo-900">{{ aiInsights.trend_description }}</p>
               <span class="text-xs text-indigo-600">
@@ -156,6 +170,7 @@
       </div>
 
       <!-- Summary Cards -->
+      <p class="text-xs text-gray-400 mb-2">{{ t('budgets.help_summary') }}</p>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div class="bg-green-50 rounded-lg p-4">
           <p class="text-xs text-green-600">{{ t('budgets.expected_revenue') }}</p>
@@ -177,9 +192,12 @@
 
       <!-- Revenue Section -->
       <div v-if="revenueCategories.length" class="bg-white rounded-lg shadow mb-4">
-        <div class="px-4 py-3 bg-green-50 border-b border-green-100 flex items-center justify-between rounded-t-lg">
-          <h3 class="text-sm font-medium text-green-800">{{ t('budgets.revenue') }}</h3>
-          <span class="text-sm font-bold text-green-800">{{ formatCurrency(totalRevenue) }}</span>
+        <div class="px-4 py-3 bg-green-50 border-b border-green-100 rounded-t-lg">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium text-green-800">{{ t('budgets.revenue') }}</h3>
+            <span class="text-sm font-bold text-green-800">{{ formatCurrency(totalRevenue) }}</span>
+          </div>
+          <p class="text-xs text-green-600 mt-1">{{ t('budgets.help_revenue') }}</p>
         </div>
         <div class="divide-y divide-gray-100">
           <div v-for="cat in revenueCategories" :key="cat.key" class="px-4 py-3">
@@ -219,15 +237,19 @@
             >
               {{ cat.showMonthly ? '- ' : '+ ' }}{{ t('budgets.monthly_breakdown') }}
             </button>
+            <span v-if="!cat.showMonthly" class="text-xs text-gray-300 ml-2">{{ t('budgets.help_monthly') }}</span>
           </div>
         </div>
       </div>
 
       <!-- Expenses Section -->
       <div v-if="expenseCategories.length" class="bg-white rounded-lg shadow mb-6">
-        <div class="px-4 py-3 bg-red-50 border-b border-red-100 flex items-center justify-between rounded-t-lg">
-          <h3 class="text-sm font-medium text-red-800">{{ t('budgets.expenses') }}</h3>
-          <span class="text-sm font-bold text-red-800">{{ formatCurrency(totalExpenses) }}</span>
+        <div class="px-4 py-3 bg-red-50 border-b border-red-100 rounded-t-lg">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium text-red-800">{{ t('budgets.expenses') }}</h3>
+            <span class="text-sm font-bold text-red-800">{{ formatCurrency(totalExpenses) }}</span>
+          </div>
+          <p class="text-xs text-red-600 mt-1">{{ t('budgets.help_expenses') }}</p>
         </div>
         <div class="divide-y divide-gray-100">
           <div v-for="cat in expenseCategories" :key="cat.key" class="px-4 py-3">
@@ -266,6 +288,7 @@
             >
               {{ cat.showMonthly ? '- ' : '+ ' }}{{ t('budgets.monthly_breakdown') }}
             </button>
+            <span v-if="!cat.showMonthly" class="text-xs text-gray-300 ml-2">{{ t('budgets.help_monthly') }}</span>
           </div>
         </div>
       </div>
@@ -275,13 +298,16 @@
         <BaseButton variant="primary-outline" @click="$emit('switchMode', 'advanced')">
           {{ t('budgets.switch_to_advanced') }}
         </BaseButton>
-        <div class="flex gap-3">
-          <BaseButton variant="primary-outline" @click="saveBudget('draft')" :disabled="isSaving">
-            {{ t('budgets.save_draft') }}
-          </BaseButton>
-          <BaseButton variant="primary" @click="saveBudget('approve')" :disabled="isSaving">
-            {{ t('budgets.approve') }}
-          </BaseButton>
+        <div class="flex flex-col items-end gap-2">
+          <div class="flex gap-3">
+            <BaseButton variant="primary-outline" @click="saveBudget('draft')" :disabled="isSaving" :title="t('budgets.help_save_draft')">
+              {{ t('budgets.save_draft') }}
+            </BaseButton>
+            <BaseButton variant="primary" @click="saveBudget('approve')" :disabled="isSaving" :title="t('budgets.help_approve')">
+              {{ t('budgets.approve') }}
+            </BaseButton>
+          </div>
+          <p class="text-xs text-gray-400 text-right">{{ t('budgets.help_save_draft') }}</p>
         </div>
       </div>
     </template>

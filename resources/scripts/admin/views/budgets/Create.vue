@@ -9,7 +9,8 @@
     </BasePageHeader>
 
     <!-- Mode Selection -->
-    <div v-if="!mode" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mt-8">
+    <p class="text-sm text-gray-500 text-center max-w-2xl mx-auto mt-4 mb-2">{{ t('budgets.mode_selection_help') }}</p>
+    <div v-if="!mode" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mt-4">
       <!-- Smart Budget Card -->
       <button
         @click="mode = 'smart'"
