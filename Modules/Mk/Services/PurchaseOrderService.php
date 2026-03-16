@@ -597,11 +597,10 @@ class PurchaseOrderService
             $total = $subTotal + $taxTotal;
 
             // Use company payment terms setting, fallback to 30 days
-            $paymentTermsDays = (int) CompanySetting::getSetting(
+            $paymentTermsDays = (int) (CompanySetting::getSetting(
                 'purchase_order_payment_terms',
-                $po->company_id,
-                30
-            );
+                $po->company_id
+            ) ?: 30);
 
             // Create the bill with actual received totals
             $bill = Bill::create([
