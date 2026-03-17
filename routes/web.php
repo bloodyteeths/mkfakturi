@@ -36,6 +36,11 @@ Route::get('/modules/styles/{style}', StyleController::class);
 
 Route::get('/modules/scripts/{script}', ScriptController::class);
 
+// QR Contact Card — scanned from business cards
+// ----------------------------------------------
+Route::get('/contact.vcf', [\Modules\Mk\Http\Controllers\QrContactController::class, 'downloadVcf']);
+Route::get('/qr-stats', [\Modules\Mk\Http\Controllers\QrContactController::class, 'stats']);
+
 // Health check endpoint - comprehensive system health monitoring
 Route::get('/health', [\App\Http\Controllers\HealthController::class, 'health']);
 
