@@ -104,6 +104,13 @@ if (InstallUtils::isDbCreated()) {
         ->runInBackground()
         ->withoutOverlapping();
 
+    // Partner trial expirations - runs daily at 01:30 AM UTC
+    // Downgrades expired partner trials to Free tier
+    Schedule::command('partner:expire-trials')
+        ->dailyAt('01:30')
+        ->runInBackground()
+        ->withoutOverlapping();
+
     // Health check self-test - runs every hour
     Schedule::call(function () {
         try {

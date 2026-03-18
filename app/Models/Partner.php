@@ -161,25 +161,31 @@ class Partner extends Model
     }
 
     /**
-     * Check if partner qualifies for Partner Plus status
-     * Checks both paid subscription AND company count
+     * Check if partner has any paid subscription tier.
+     * Legacy name kept for backward compatibility.
      */
     public function isPartnerPlus(): bool
     {
-        // First check if user has paid Partner Plus subscription
-        if ($this->user && $this->user->partner_subscription_tier === 'plus') {
-            return true;
+        if (!$this->user) {
+            return false;
         }
 
-        // Alternative: auto-qualify based on performance metrics
-        $minCompanies = config('affiliate.plus_tier_min_companies', 10);
-        $activeCompaniesCount = $this->activeCompanies()->count();
+        $tier = $this->user->partner_subscription_tier ?? 'free';
 
-        if ($activeCompaniesCount >= $minCompanies) {
-            return true;
+        // Check for any paid tier (old 'plus' or new tiers)
+        return in_array($tier, ['plus', 'start', 'office', 'pro', 'elite']);
+    }
+
+    /**
+     * Get the partner's current subscription tier name.
+     */
+    public function getSubscriptionTier(): string
+    {
+        if (!$this->user) {
+            return 'free';
         }
 
-        return false;
+        return $this->user->partner_subscription_tier ?? 'free';
     }
 
     /**

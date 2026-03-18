@@ -98,6 +98,12 @@ class PortfolioCompanyController extends Controller
             return response()->json(['error' => 'Portfolio not activated'], 403);
         }
 
+        // Check partner's company limit
+        $partnerUsage = app(\Modules\Mk\Partner\Services\PartnerUsageLimitService::class);
+        if (!$partnerUsage->canUse($partner, 'companies')) {
+            return response()->json($partnerUsage->buildLimitExceededResponse($partner, 'companies'), 403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'tax_id' => 'required|string|max:50',
@@ -403,6 +409,20 @@ class PortfolioCompanyController extends Controller
 
         if (! $rows) {
             return response()->json(['error' => 'Import expired or not found. Please upload again.'], 404);
+        }
+
+        // Check partner's company limit for the number of rows to import
+        $partnerUsage = app(\Modules\Mk\Partner\Services\PartnerUsageLimitService::class);
+        $usage = $partnerUsage->getUsage($partner, 'companies');
+        if ($usage['limit'] !== null && ($usage['used'] + count($rows)) > $usage['limit']) {
+            $canImport = max(0, $usage['limit'] - $usage['used']);
+            return response()->json([
+                'error' => 'partner_limit_exceeded',
+                'message' => "You can only add {$canImport} more companies (limit: {$usage['limit']}). Reduce the import file or upgrade your plan.",
+                'usage' => $usage,
+                'rows_requested' => count($rows),
+                'upgrade_url' => '/partner/billing',
+            ], 403);
         }
 
         Cache::forget($cacheKey);

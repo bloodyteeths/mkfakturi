@@ -56,6 +56,27 @@ class CheckViewOnlyMode
             return $next($request);
         }
 
+        // Partners always have full access to their managed companies
+        if ($user && $user->role === 'partner') {
+            return $next($request);
+        }
+
+        // Company owner of a portfolio-managed company: view-only + AI chat
+        if ($user && $user->role !== 'partner' && $company->owner_id === $user->id) {
+            // Allow AI chat routes
+            if ($this->isAiChatRoute($request)) {
+                return $next($request);
+            }
+
+            return response()->json([
+                'error' => 'view_only_mode',
+                'message' => 'Your company is managed by an accountant. You can view all data and use AI chat, but cannot make changes. Subscribe independently to unlock full access.',
+                'current_tier' => 'managed',
+                'can_use_ai_chat' => true,
+                'upgrade_url' => '/admin/pricing',
+            ], 403);
+        }
+
         // Check the effective tier for this company
         $effectiveTier = $this->getEffectiveTier($company);
 
@@ -92,6 +113,18 @@ class CheckViewOnlyMode
             ->value('portfolio_tier_override');
 
         return $tierOverride ?? config('subscriptions.portfolio.uncovered_tier', 'accountant_basic');
+    }
+
+    /**
+     * Check if the current request is an AI chat route (allowed for view-only company owners).
+     */
+    protected function isAiChatRoute(Request $request): bool
+    {
+        $path = $request->path();
+
+        return str_contains($path, 'ai/assistant')
+            || str_contains($path, 'ai/chat')
+            || str_contains($path, 'nl-assistant');
     }
 }
 // CLAUDE-CHECKPOINT

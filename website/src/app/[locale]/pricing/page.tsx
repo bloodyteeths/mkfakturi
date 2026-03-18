@@ -137,13 +137,14 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
         </div>
 
         {/* Partner Pricing */}
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-4 mb-6 md:mb-12">
+        <div>
+          <div className="flex items-center justify-center gap-4 mb-2 md:mb-4">
             <h2 className="text-2xl font-bold text-gray-900">{sectionPartner}</h2>
             <div className="h-px w-12 bg-gray-200"></div>
           </div>
+          <p className="text-center text-sm text-gray-500 mb-6 md:mb-12">{partnerSubtitle}</p>
 
-          <div className="max-w-lg mx-auto">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {partnerPlans.map((p, i) => {
               const previousPlanName = i > 0 ? partnerPlans[i - 1].name : null
               const bullets = previousPlanName
@@ -151,45 +152,36 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
                 : p.bullets
 
               return (
-                <div key={i} className={`relative flex flex-col bg-white rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-xl ${p.popular ? 'border-green-500 ring-1 ring-green-500' : 'border-gray-200'}`}>
+                <div key={i} className={`relative flex flex-col bg-white rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${p.popular ? 'border-green-500 ring-1 ring-green-500 z-10 scale-105' : 'border-gray-200'}`}>
                   {p.popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-green-600 px-4 py-1 text-xs font-bold text-white whitespace-nowrap shadow-md">
-                      {recommendedBadge}
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-green-600 to-emerald-500 px-4 py-1 text-xs font-bold text-white whitespace-nowrap shadow-md">
+                      {popularBadge}
                     </div>
                   )}
 
-                  <div className="p-8 flex-grow">
-                    <div className="flex justify-between items-start mb-6">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">{p.name}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{partnerSubtitle}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-3xl font-extrabold text-gray-900">{p.price}</div>
-                        <div className="text-sm text-gray-500">{p.period}</div>
-                      </div>
+                  <div className="p-6 flex-grow">
+                    <h3 className="mb-4 text-lg font-bold text-gray-900">{p.name}</h3>
+                    <div className="mb-6">
+                      <span className="text-4xl font-extrabold text-gray-900">{p.price}</span>
+                      <span className="text-sm text-gray-500 font-medium">{p.period}</span>
                     </div>
-
-                    <div className="h-px w-full bg-gray-100 mb-6"></div>
 
                     <ul className="space-y-4 mb-8">
                       {bullets.map((b, j) => (
                         <li key={j} className="flex items-start text-sm text-gray-600">
-                          <div className="w-6 h-6 rounded-full bg-green-50 text-green-600 flex items-center justify-center mr-3 flex-shrink-0">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                          <span className="pt-0.5">{b}</span>
+                          <svg className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{b}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="p-8 pt-0 mt-auto">
+                  <div className="p-6 pt-0 mt-auto">
                     <a
                       href="https://app.facturino.mk/partner/signup"
-                      className={`block w-full py-4 px-6 rounded-xl text-center font-bold transition-all ${p.popular
+                      className={`block w-full py-3 px-4 rounded-xl text-center font-bold transition-all ${p.popular
                         ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-green-500/30'
                         : 'bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-200'
                         }`}

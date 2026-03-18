@@ -105,6 +105,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tier' => \App\Http\Middleware\CheckSubscriptionTier::class, // FG-01-00: Feature gating
             'ai.feature' => \App\Http\Middleware\CheckAiFeature::class, // AI feature-level gating
             'view-only' => \App\Http\Middleware\CheckViewOnlyMode::class, // Portfolio: view-only for uncovered companies
+            'partner.limit' => \Modules\Mk\Http\Middleware\CheckPartnerLimit::class, // Partner usage limit enforcement
             'bitrix.auth' => \Modules\Mk\Bitrix\Middleware\BitrixAuthMiddleware::class, // Bitrix CRM integration
             'clawd.token' => \App\Http\Middleware\VerifyClawdToken::class, // Clawd AI assistant monitoring
         ]);

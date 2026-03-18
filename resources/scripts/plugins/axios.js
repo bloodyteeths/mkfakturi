@@ -50,21 +50,35 @@ axios.interceptors.request.use(function (config) {
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Check if this is a limit_exceeded error (403 with specific error code)
-    if (
-      error.response &&
-      error.response.status === 403 &&
-      error.response.data &&
-      error.response.data.error === 'limit_exceeded'
-    ) {
-      // Import and use the upgrade store dynamically to avoid circular imports
-      import('@/scripts/stores/upgrade.js').then(({ useUpgradeStore }) => {
-        const upgradeStore = useUpgradeStore()
-        upgradeStore.showLimitExceeded(error.response.data)
-      })
+    if (error.response && error.response.status === 403 && error.response.data) {
+      const errorCode = error.response.data.error
 
-      // Still reject the promise so the calling code knows the request failed
-      return Promise.reject(error)
+      // Company limit exceeded — show upgrade modal
+      if (errorCode === 'limit_exceeded') {
+        import('@/scripts/stores/upgrade.js').then(({ useUpgradeStore }) => {
+          const upgradeStore = useUpgradeStore()
+          upgradeStore.showLimitExceeded(error.response.data)
+        })
+        return Promise.reject(error)
+      }
+
+      // Partner limit exceeded — show partner upgrade modal
+      if (errorCode === 'partner_limit_exceeded') {
+        import('@/scripts/stores/upgrade.js').then(({ useUpgradeStore }) => {
+          const upgradeStore = useUpgradeStore()
+          upgradeStore.showPartnerLimitExceeded(error.response.data)
+        })
+        return Promise.reject(error)
+      }
+
+      // View-only mode — show view-only notice
+      if (errorCode === 'view_only_mode') {
+        import('@/scripts/stores/upgrade.js').then(({ useUpgradeStore }) => {
+          const upgradeStore = useUpgradeStore()
+          upgradeStore.showViewOnlyMode(error.response.data)
+        })
+        return Promise.reject(error)
+      }
     }
 
     // For all other errors, just pass them through

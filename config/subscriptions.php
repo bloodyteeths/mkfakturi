@@ -617,5 +617,121 @@ return [
             1, // 1 day before grace ends
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Partner (Accountant) Subscription Tiers
+    |--------------------------------------------------------------------------
+    |
+    | Usage-gated tiers for accountants. ALL features available at every tier,
+    | differentiated by usage LIMITS only (Claude Code model).
+    |
+    | Tiers:
+    | - Free: €0 - Expired trial / no subscription
+    | - Start: €29/month (1,784 ден) - Up to 15 companies
+    | - Office: €59/month (3,629 ден) - Up to 30 companies
+    | - Pro: €99/month (6,089 ден) - Up to 50 companies
+    | - Elite: €199/month (12,239 ден) - Anchor tier, up to 100 companies
+    |
+    | Trial: 30 days free with Start-level limits (no credit card).
+    | Hard block at limits (can view/download, can't create).
+    |
+    */
+    'partner_tiers' => [
+        'free' => [
+            'name' => 'Free',
+            'price_monthly_eur' => 0,
+            'price_monthly_mkd' => 0,
+            'limits' => [
+                'companies' => 3,
+                'ai_credits_per_month' => 5,
+                'bank_accounts' => 0,
+                'payroll_employees' => 0,
+                'efaktura_per_month' => 0,
+                'documents_stored_per_month' => 5,
+                'client_portal_invites' => 0,
+            ],
+            'support_response_hours' => null, // Self-serve only
+        ],
+        'start' => [
+            'name' => 'Start',
+            'price_monthly_eur' => 29,
+            'price_monthly_mkd' => 1784,
+            'limits' => [
+                'companies' => 15,
+                'ai_credits_per_month' => 50,
+                'bank_accounts' => 5,
+                'payroll_employees' => 30,
+                'efaktura_per_month' => 5,
+                'documents_stored_per_month' => 100,
+                'client_portal_invites' => 15,
+            ],
+            'support_response_hours' => 72,
+        ],
+        'office' => [
+            'name' => 'Office',
+            'price_monthly_eur' => 59,
+            'price_monthly_mkd' => 3629,
+            'limits' => [
+                'companies' => 30,
+                'ai_credits_per_month' => 150,
+                'bank_accounts' => 15,
+                'payroll_employees' => 100,
+                'efaktura_per_month' => 30,
+                'documents_stored_per_month' => 500,
+                'client_portal_invites' => 50,
+            ],
+            'support_response_hours' => 48,
+        ],
+        'pro' => [
+            'name' => 'Pro',
+            'price_monthly_eur' => 99,
+            'price_monthly_mkd' => 6089,
+            'limits' => [
+                'companies' => 50,
+                'ai_credits_per_month' => 500,
+                'bank_accounts' => 50,
+                'payroll_employees' => 300,
+                'efaktura_per_month' => 200,
+                'documents_stored_per_month' => 2000,
+                'client_portal_invites' => 200,
+            ],
+            'support_response_hours' => 5,
+        ],
+        'elite' => [
+            'name' => 'Elite',
+            'price_monthly_eur' => 199,
+            'price_monthly_mkd' => 12239,
+            'limits' => [
+                'companies' => 100,
+                'ai_credits_per_month' => null, // Unlimited
+                'bank_accounts' => null,        // Unlimited
+                'payroll_employees' => null,     // Unlimited
+                'efaktura_per_month' => null,    // Unlimited
+                'documents_stored_per_month' => null, // Unlimited
+                'client_portal_invites' => null, // Unlimited
+            ],
+            'support_response_hours' => 5,
+        ],
+    ],
+
+    'partner_plan_hierarchy' => [
+        'free' => 0,
+        'start' => 1,
+        'office' => 2,
+        'pro' => 3,
+        'elite' => 4,
+    ],
+
+    'partner_trial' => [
+        'enabled' => true,
+        'duration_days' => 30,
+        'plan' => 'start', // Trial gets Start-level limits (lowest) to force early upgrades
+    ],
+
+    'partner_seat_price' => [
+        'eur' => 5.00,
+        'mkd' => 308,
+    ],
 ];
 // CLAUDE-CHECKPOINT

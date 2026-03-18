@@ -4804,6 +4804,30 @@
         "stripe_activate_btn": "Актveвveрај",
         "stripe_view_btn": "Görüntüle"
     },
+    "partner_billing": {
+        "trial_active": "Ucretsiz deneme sureciniz aktif",
+        "trial_days_remaining": "{days} gun kaldi",
+        "choose_plan": "Plan secin",
+        "trial_expired": "Deneme sureciniz sona erdi",
+        "trial_expired_message": "Tum ozellikleri kullanmaya devam etmek icin bir plana abone olun.",
+        "current_plan": "Mevcut plan",
+        "mkd_per_month": " den/ay",
+        "eur_per_month": "\u20ac/ay",
+        "manage_billing": "Faturalandirmayi yonet",
+        "seats_info": "{count} ek koltuk (+{price}\u20ac her biri)",
+        "usage_this_month": "Bu ayin kullanimi",
+        "available_plans": "Mevcut planlar",
+        "current": "Mevcut",
+        "popular": "Populer",
+        "support_response": "E-posta destek: {hours}s yanit",
+        "switch_plan": "Plan degistir",
+        "start_free_trial": "Ucretsiz denemeyi baslat",
+        "per_seat": "\u20ac/koltuk/ay",
+        "status_active": "Aktif",
+        "status_trial": "Deneme",
+        "status_expired": "Suresi dolmus",
+        "status_none": "Plan yok"
+    },
     "partners": {
         "title": "Partnerler",
         "partner": "Partner | Partnerler",
@@ -5634,7 +5658,8 @@
             "invitations": "Davetler",
             "payouts": "Ödemeler",
             "logout": "Çıkış",
-            "console": "Konsol"
+            "console": "Konsol",
+            "billing": "Faturalandırma"
         },
         "kyc": {
             "title": "KYC Doğrulama",

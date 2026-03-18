@@ -5479,6 +5479,30 @@
             "cta_secondary": "Видете како функционира",
             "dashboard_alt": "Факторино контролна табла"
         },
+        "partner_billing": {
+            "trial_active": "Вашиот бесплатен пробен период е активен",
+            "trial_days_remaining": "Уште {days} дена",
+            "choose_plan": "Изберете план",
+            "trial_expired": "Вашиот пробен период заврши",
+            "trial_expired_message": "Претплатете се на план за да продолжите да ги користите сите функции.",
+            "current_plan": "Тековен план",
+            "mkd_per_month": " ден/мес",
+            "eur_per_month": "\u20ac/мес",
+            "manage_billing": "Управувај наплата",
+            "seats_info": "{count} дополнителни места (+{price}\u20ac секое)",
+            "usage_this_month": "Користење овој месец",
+            "available_plans": "Достапни планови",
+            "current": "Тековен",
+            "popular": "Популарен",
+            "support_response": "Email поддршка: {hours}ч одговор",
+            "switch_plan": "Промени план",
+            "start_free_trial": "Започни бесплатен период",
+            "per_seat": "\u20ac/место/месец",
+            "status_active": "Активен",
+            "status_trial": "Пробен",
+            "status_expired": "Истечен",
+            "status_none": "Без план"
+        },
         "partners": {
             "trusted_by": "Доверба од иновативни компании"
         },
@@ -5605,7 +5629,8 @@
             "payouts": "Исплати",
             "portfolio": "Портфолио",
             "logout": "Одјава",
-            "console": "Конзола"
+            "console": "Конзола",
+            "billing": "Наплата"
         },
         "commissions": {
             "by_company": "Провизии по компанија",

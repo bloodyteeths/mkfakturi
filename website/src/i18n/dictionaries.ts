@@ -269,11 +269,14 @@ const mk: Dictionary = {
       { name: 'Max', price: '9,170 ден', period: '/месец', bullets: ['Неограничено фактури', 'Неограничено корисници', '500 AI прашања/месец', 'Сите AI функции', 'IFRS извештаи'], popular: false }
     ],
     partnerPlans: [
-      { name: 'Partner', price: 'Бесплатно', period: '', bullets: ['Неограничено клиенти', 'Портфолио: додајте ги сите компании бесплатно', 'Партнер контролен панел', '3 месеци Standard за сите компании', 'Приоритетна поддршка'], popular: true },
+      { name: 'Start', price: '1,784 ден', period: '/месец', bullets: ['15 компании', '50 AI кредити/месец', '3 банкарски сметки', '10 вработени', '5 е-Фактури/месец'], popular: false },
+      { name: 'Office', price: '3,629 ден', period: '/месец', bullets: ['50 компании', '200 AI кредити/месец', '10 банкарски сметки', '50 вработени', '50 е-Фактури/месец'], popular: true },
+      { name: 'Pro', price: '6,089 ден', period: '/месец', bullets: ['150 компании', '500 AI кредити/месец', '30 банкарски сметки', '200 вработени', 'Неограничено е-Фактури'], popular: false },
+      { name: 'Elite', price: '12,239 ден', period: '/месец', bullets: ['Неограничено компании', 'Неограничено AI кредити', 'Неограничено банкарски сметки', 'Неограничено вработени', 'Неограничено е-Фактури'], popular: false },
     ],
-    partnerSubtitle: 'За сметководствени канцеларии',
+    partnerSubtitle: 'За сметководствени канцеларии · + 308 ден/додатна лиценца',
     cta: 'Започни сега',
-    ctaPartner: 'Придружи се',
+    ctaPartner: 'Пробај 30 дена бесплатно',
     sepaNote: 'Немате картичка? Изберете EUR за плаќање преку банкарски трансфер (SEPA).',
     comparisonTable: {
       title: 'Споредете ги пакетите',
@@ -504,11 +507,14 @@ const sq: Dictionary = {
       { name: 'Max', price: '9,170 den', period: '/muaj', bullets: ['Fatura pa limit', 'Përdorues pa limit', '500 pyetje AI/muaj', 'Të gjitha funksionet AI', 'Raporte IFRS'], popular: false }
     ],
     partnerPlans: [
-      { name: 'Partner', price: 'Falas', period: '', bullets: ['Klientë të pakufizuar', 'Portofol: shtoni të gjitha kompanitë falas', 'Paneli i kontrollit të partnerit', '3 muaj Standard për të gjitha kompanitë', 'Mbështetje me prioritet'], popular: true },
+      { name: 'Start', price: '1,784 den', period: '/muaj', bullets: ['15 kompani', '50 kredite AI/muaj', '3 llogari bankare', '10 punonjës', '5 e-Fatura/muaj'], popular: false },
+      { name: 'Office', price: '3,629 den', period: '/muaj', bullets: ['50 kompani', '200 kredite AI/muaj', '10 llogari bankare', '50 punonjës', '50 e-Fatura/muaj'], popular: true },
+      { name: 'Pro', price: '6,089 den', period: '/muaj', bullets: ['150 kompani', '500 kredite AI/muaj', '30 llogari bankare', '200 punonjës', 'e-Fatura pa limit'], popular: false },
+      { name: 'Elite', price: '12,239 den', period: '/muaj', bullets: ['Kompani pa limit', 'Kredite AI pa limit', 'Llogari bankare pa limit', 'Punonjës pa limit', 'e-Fatura pa limit'], popular: false },
     ],
-    partnerSubtitle: 'Për zyrat e kontabilitetit',
+    partnerSubtitle: 'Për zyrat e kontabilitetit · + 308 den/licencë shtesë',
     cta: 'Fillo tani',
-    ctaPartner: 'Bashkohu',
+    ctaPartner: 'Provo 30 ditë falas',
     sepaNote: 'Nuk keni kartë? Zgjidhni EUR për të paguar me transfertë bankare (SEPA).',
     comparisonTable: {
       title: 'Krahasoni paketat',
@@ -739,11 +745,14 @@ const tr: Dictionary = {
       { name: 'Max', price: '9,170 den', period: '/ay', bullets: ['Sınırsız fatura', 'Sınırsız kullanıcı', '500 AI soru/ay', 'Tüm AI özellikleri', 'IFRS raporları'], popular: false }
     ],
     partnerPlans: [
-      { name: 'Partner', price: 'Ücretsiz', period: '', bullets: ['Sınırsız müşteri', 'Portföy: tüm şirketleri ücretsiz ekleyin', 'Partner kontrol paneli', 'Tüm şirketler için 3 ay Standard', 'Öncelikli destek'], popular: true },
+      { name: 'Start', price: '1,784 den', period: '/ay', bullets: ['15 şirket', '50 AI kredisi/ay', '3 banka hesabı', '10 çalışan', '5 e-Fatura/ay'], popular: false },
+      { name: 'Office', price: '3,629 den', period: '/ay', bullets: ['50 şirket', '200 AI kredisi/ay', '10 banka hesabı', '50 çalışan', '50 e-Fatura/ay'], popular: true },
+      { name: 'Pro', price: '6,089 den', period: '/ay', bullets: ['150 şirket', '500 AI kredisi/ay', '30 banka hesabı', '200 çalışan', 'Sınırsız e-Fatura'], popular: false },
+      { name: 'Elite', price: '12,239 den', period: '/ay', bullets: ['Sınırsız şirket', 'Sınırsız AI kredisi', 'Sınırsız banka hesabı', 'Sınırsız çalışan', 'Sınırsız e-Fatura'], popular: false },
     ],
-    partnerSubtitle: 'Muhasebe ofisleri için',
+    partnerSubtitle: 'Muhasebe ofisleri için · + 308 den/ek lisans',
     cta: 'Şimdi başla',
-    ctaPartner: 'Katıl',
+    ctaPartner: '30 gün ücretsiz dene',
     sepaNote: 'Kartınız yok mu? Banka havalesiyle ödeme yapmak için EUR seçin (SEPA).',
     comparisonTable: {
       title: 'Paketleri karşılaştırın',
@@ -974,11 +983,14 @@ const en: Dictionary = {
       { name: 'Max', price: '9,170 MKD', period: '/month', bullets: ['Unlimited invoices', 'Unlimited users', '500 AI queries/month', 'All AI features', 'IFRS reports'], popular: false }
     ],
     partnerPlans: [
-      { name: 'Partner', price: 'Free', period: '', bullets: ['Unlimited clients', 'Portfolio: add all companies for free', 'Partner dashboard', '3 months Standard for all companies', 'Priority support'], popular: true },
+      { name: 'Start', price: '1,784 MKD', period: '/month', bullets: ['15 companies', '50 AI credits/month', '3 bank accounts', '10 employees', '5 e-Invoices/month'], popular: false },
+      { name: 'Office', price: '3,629 MKD', period: '/month', bullets: ['50 companies', '200 AI credits/month', '10 bank accounts', '50 employees', '50 e-Invoices/month'], popular: true },
+      { name: 'Pro', price: '6,089 MKD', period: '/month', bullets: ['150 companies', '500 AI credits/month', '30 bank accounts', '200 employees', 'Unlimited e-Invoices'], popular: false },
+      { name: 'Elite', price: '12,239 MKD', period: '/month', bullets: ['Unlimited companies', 'Unlimited AI credits', 'Unlimited bank accounts', 'Unlimited employees', 'Unlimited e-Invoices'], popular: false },
     ],
-    partnerSubtitle: 'For accounting firms',
+    partnerSubtitle: 'For accounting firms · + 308 MKD/additional seat',
     cta: 'Start Now',
-    ctaPartner: 'Join',
+    ctaPartner: 'Try 30 days free',
     sepaNote: 'No card? Choose EUR to pay via bank transfer (SEPA).',
     comparisonTable: {
       title: 'Compare Plans',

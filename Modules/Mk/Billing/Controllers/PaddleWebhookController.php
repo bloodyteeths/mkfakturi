@@ -4,7 +4,6 @@ namespace Modules\Mk\Billing\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
-use App\Models\User;
 use App\Services\CommissionService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -14,7 +13,7 @@ use Laravel\Paddle\Http\Controllers\WebhookController as CashierWebhookControlle
  * Paddle Webhook Controller for Subscriptions
  *
  * Extends Cashier's webhook controller to handle subscription events
- * for both company subscriptions and partner subscriptions
+ * for company subscriptions (partner subscriptions moved to Stripe)
  */
 class PaddleWebhookController extends CashierWebhookController
 {
@@ -30,11 +29,9 @@ class PaddleWebhookController extends CashierWebhookController
         $data = $payload['data'];
         $customData = $data['custom_data'] ?? [];
 
-        // Determine if this is a company or partner subscription
+        // Company subscriptions only (partner subscriptions now via Stripe)
         if (isset($customData['company_id'])) {
             $this->handleCompanySubscriptionCreated($data, $customData);
-        } elseif (isset($customData['user_id'])) {
-            $this->handlePartnerSubscriptionCreated($data, $customData);
         }
 
         return $this->successMethod();
@@ -52,11 +49,9 @@ class PaddleWebhookController extends CashierWebhookController
         $data = $payload['data'];
         $customData = $data['custom_data'] ?? [];
 
-        // Determine if this is a company or partner subscription
+        // Company subscriptions only (partner subscriptions now via Stripe)
         if (isset($customData['company_id'])) {
             $this->handleCompanySubscriptionUpdated($data, $customData);
-        } elseif (isset($customData['user_id'])) {
-            $this->handlePartnerSubscriptionUpdated($data, $customData);
         }
 
         return $this->successMethod();
@@ -157,52 +152,6 @@ class PaddleWebhookController extends CashierWebhookController
 
                 Log::info('Company downgraded to free tier', [
                     'company_id' => $companyId,
-                    'reason' => $status,
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Handle partner subscription created
-     */
-    private function handlePartnerSubscriptionCreated(array $data, array $customData): void
-    {
-        $userId = $customData['user_id'];
-
-        $user = User::find($userId);
-
-        if ($user) {
-            $user->update([
-                'partner_subscription_tier' => 'plus',
-            ]);
-
-            Log::info('Partner upgraded to Plus', [
-                'user_id' => $userId,
-                'paddle_subscription_id' => $data['id'],
-            ]);
-        }
-    }
-
-    /**
-     * Handle partner subscription updated
-     */
-    private function handlePartnerSubscriptionUpdated(array $data, array $customData): void
-    {
-        $userId = $customData['user_id'];
-        $status = $data['status'];
-
-        $user = User::find($userId);
-
-        if ($user) {
-            // If subscription is cancelled, downgrade to free
-            if (in_array($status, ['canceled', 'past_due'])) {
-                $user->update([
-                    'partner_subscription_tier' => 'free',
-                ]);
-
-                Log::info('Partner downgraded to free tier', [
-                    'user_id' => $userId,
                     'reason' => $status,
                 ]);
             }

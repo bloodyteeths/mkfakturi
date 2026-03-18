@@ -71,6 +71,24 @@ return [
 
         'currency' => 'mkd',
 
+        // Partner (Accountant) subscription price IDs (MKD)
+        'partner_prices' => [
+            'start' => env('STRIPE_PRICE_ACCOUNTANT_START_MKD_MONTHLY'),
+            'office' => env('STRIPE_PRICE_ACCOUNTANT_OFFICE_MKD_MONTHLY'),
+            'pro' => env('STRIPE_PRICE_ACCOUNTANT_PRO_MKD_MONTHLY'),
+            'elite' => env('STRIPE_PRICE_ACCOUNTANT_ELITE_MKD_MONTHLY'),
+            'seat' => env('STRIPE_PRICE_ACCOUNTANT_SEAT_MKD_MONTHLY'),
+        ],
+
+        // Partner (Accountant) subscription price IDs (EUR)
+        'partner_prices_eur' => [
+            'start' => env('STRIPE_PRICE_ACCOUNTANT_START_EUR_MONTHLY'),
+            'office' => env('STRIPE_PRICE_ACCOUNTANT_OFFICE_EUR_MONTHLY'),
+            'pro' => env('STRIPE_PRICE_ACCOUNTANT_PRO_EUR_MONTHLY'),
+            'elite' => env('STRIPE_PRICE_ACCOUNTANT_ELITE_EUR_MONTHLY'),
+            'seat' => env('STRIPE_PRICE_ACCOUNTANT_SEAT_EUR_MONTHLY'),
+        ],
+
         // Stripe Connect for partner payouts (Cross-border to Macedonia)
         'connect' => [
             'client_id' => env('STRIPE_CONNECT_CLIENT_ID'),

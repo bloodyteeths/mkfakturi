@@ -2990,7 +2990,8 @@
             "payouts": "Payouts",
             "portfolio": "Portfolio",
             "referrals": "Referrals",
-            "console": "Console"
+            "console": "Console",
+            "billing": "Billing"
         },
         "commissions": {
             "by_company": "Commissions by Company",
@@ -3822,6 +3823,30 @@
         "total_earned": "Total Earned",
         "type": "Type",
         "warning": "Warning"
+    },
+    "partner_billing": {
+        "trial_active": "Your free trial is active",
+        "trial_days_remaining": "{days} days remaining",
+        "choose_plan": "Choose a Plan",
+        "trial_expired": "Your trial has expired",
+        "trial_expired_message": "Subscribe to a plan to continue using all features.",
+        "current_plan": "Current Plan",
+        "mkd_per_month": " den/mo",
+        "eur_per_month": "\u20ac/mo",
+        "manage_billing": "Manage Billing",
+        "seats_info": "{count} additional seats (+{price}\u20ac each)",
+        "usage_this_month": "Usage This Month",
+        "available_plans": "Available Plans",
+        "current": "Current",
+        "popular": "Popular",
+        "support_response": "Email support: {hours}h response",
+        "switch_plan": "Switch Plan",
+        "start_free_trial": "Start Free Trial",
+        "per_seat": "\u20ac/seat/month",
+        "status_active": "Active",
+        "status_trial": "Trial",
+        "status_expired": "Expired",
+        "status_none": "No Plan"
     },
     "partners": {
         "add_new_partner": "Add New Partner",

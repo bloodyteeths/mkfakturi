@@ -28,10 +28,19 @@ class CheckAiFeature
             return $next($request);
         }
 
-        // Partner bypass
+        // Partner: bypass company-level tier check but track AI credits
         if ($user && $user->role === 'partner') {
             $companyId = $request->header('company');
             if ($companyId && $user->hasPartnerAccessToCompany((int) $companyId)) {
+                $partner = $user->partner;
+                if ($partner) {
+                    $partnerUsage = app(\Modules\Mk\Partner\Services\PartnerUsageLimitService::class);
+                    if (!$partnerUsage->canUse($partner, 'ai_credits_per_month')) {
+                        $response = $partnerUsage->buildLimitExceededResponse($partner, 'ai_credits_per_month');
+                        return response()->json($response, 403);
+                    }
+                    $partnerUsage->incrementUsage($partner, 'ai_credits_per_month');
+                }
                 return $next($request);
             }
         }

@@ -1605,6 +1605,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1/partner/subscription')->group(fu
     Route::post('/checkout', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'checkout'])->name('partner.subscription.checkout')->middleware('throttle:strict');
     Route::get('/success', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'success'])->name('partner.subscription.success');
     Route::get('/manage', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'manage'])->name('partner.subscription.manage');
+    Route::post('/swap', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'swap'])->name('partner.subscription.swap')->middleware('throttle:strict');
     Route::post('/cancel', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'cancel'])->name('partner.subscription.cancel')->middleware('throttle:strict');
     Route::post('/resume', [\Modules\Mk\Partner\Controllers\PartnerSubscriptionController::class, 'resume'])->name('partner.subscription.resume')->middleware('throttle:strict');
 });

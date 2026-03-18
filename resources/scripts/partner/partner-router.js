@@ -88,6 +88,12 @@ export default [
         component: () => import('@/scripts/partner/views/reports/BulkReports.vue'),
         meta: { isPartner: true }
       },
+      {
+        path: 'billing',
+        name: 'partner.billing',
+        component: () => import('@/scripts/partner/views/billing/PartnerBilling.vue'),
+        meta: { isPartner: true }
+      },
     ]
   }
 ]

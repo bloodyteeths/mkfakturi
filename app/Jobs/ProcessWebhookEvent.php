@@ -385,6 +385,12 @@ class ProcessWebhookEvent implements ShouldQueue
             $this->processCompanyReferralReward((int) $metadata['company_referral_id']);
         }
 
+        // Route partner subscription checkouts to dedicated handler
+        if (($metadata['type'] ?? '') === 'partner_subscription') {
+            $this->handlePartnerSubscriptionCheckout($session, $metadata);
+            return;
+        }
+
         // Create/update subscription record and activate company tier
         $companyId = $metadata['company_id'] ?? null;
         $tier = $metadata['tier'] ?? null;
@@ -543,6 +549,11 @@ class ProcessWebhookEvent implements ShouldQueue
             return;
         }
 
+        // Check if this is a partner subscription
+        if ($this->handlePartnerSubscriptionUpdate($subscription, 'updated')) {
+            return;
+        }
+
         // Find the local subscription record
         $companySub = CompanySubscription::where('provider_subscription_id', $subscriptionId)
             ->where('provider', 'stripe')
@@ -599,6 +610,11 @@ class ProcessWebhookEvent implements ShouldQueue
         Log::info('Stripe subscription deleted', ['subscription_id' => $subscriptionId]);
 
         if (! $subscriptionId) {
+            return;
+        }
+
+        // Check if this is a partner subscription
+        if ($this->handlePartnerSubscriptionUpdate($subscription, 'deleted')) {
             return;
         }
 
@@ -684,6 +700,127 @@ class ProcessWebhookEvent implements ShouldQueue
         return null;
     }
     // CLAUDE-CHECKPOINT
+
+    /**
+     * Handle partner subscription checkout completed
+     */
+    protected function handlePartnerSubscriptionCheckout(array $session, array $metadata): void
+    {
+        $userId = $metadata['user_id'] ?? null;
+        $tier = $metadata['tier'] ?? null;
+        $seats = (int) ($metadata['seats'] ?? 0);
+        $subscriptionId = $session['subscription'] ?? null;
+
+        if (!$userId || !$tier) {
+            Log::warning('Partner checkout missing user_id or tier', ['metadata' => $metadata]);
+            return;
+        }
+
+        $user = \App\Models\User::find($userId);
+        if (!$user) {
+            Log::warning('Partner checkout: user not found', ['user_id' => $userId]);
+            return;
+        }
+
+        $user->update([
+            'partner_subscription_tier' => $tier,
+            'stripe_subscription_id' => $subscriptionId,
+            'partner_seat_count' => $seats,
+        ]);
+
+        Log::info('Partner subscription activated via checkout', [
+            'user_id' => $userId,
+            'tier' => $tier,
+            'seats' => $seats,
+            'subscription_id' => $subscriptionId,
+        ]);
+
+        ClawdNotifier::push('new_subscription', [
+            'email' => $user->email,
+            'plan' => "partner_{$tier}",
+        ]);
+    }
+
+    /**
+     * Check if a Stripe subscription is a partner subscription and handle accordingly.
+     * Returns true if handled as partner subscription, false if it's a company subscription.
+     */
+    protected function handlePartnerSubscriptionUpdate(array $subscription, string $action): bool
+    {
+        $metadata = $subscription['metadata'] ?? [];
+
+        if (($metadata['type'] ?? '') !== 'partner_subscription') {
+            return false;
+        }
+
+        $userId = $metadata['user_id'] ?? null;
+        if (!$userId) {
+            return false;
+        }
+
+        $user = \App\Models\User::find($userId);
+        if (!$user) {
+            return false;
+        }
+
+        if ($action === 'deleted') {
+            $user->update([
+                'partner_subscription_tier' => 'free',
+                'stripe_subscription_id' => null,
+            ]);
+            Log::info('Partner subscription deleted', ['user_id' => $userId]);
+
+            ClawdNotifier::push('subscription_cancelled', [
+                'email' => $user->email,
+            ]);
+            return true;
+        }
+
+        // For 'updated': check status and price changes
+        $stripeStatus = $subscription['status'] ?? null;
+
+        if (in_array($stripeStatus, ['canceled', 'unpaid'])) {
+            $user->update([
+                'partner_subscription_tier' => 'free',
+                'stripe_subscription_id' => null,
+            ]);
+            Log::info('Partner subscription cancelled/unpaid', ['user_id' => $userId, 'status' => $stripeStatus]);
+            return true;
+        }
+
+        // Check for tier change via price update
+        $newPriceId = $subscription['items']['data'][0]['price']['id'] ?? null;
+        if ($newPriceId) {
+            $newTier = $this->partnerTierFromStripePriceId($newPriceId);
+            if ($newTier && $newTier !== $user->partner_subscription_tier) {
+                $user->update(['partner_subscription_tier' => $newTier]);
+                Log::info('Partner subscription tier changed', [
+                    'user_id' => $userId,
+                    'new_tier' => $newTier,
+                ]);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Resolve partner tier name from Stripe price ID
+     */
+    protected function partnerTierFromStripePriceId(string $priceId): ?string
+    {
+        foreach (['services.stripe.partner_prices', 'services.stripe.partner_prices_eur'] as $configKey) {
+            $prices = config($configKey, []);
+            foreach ($prices as $tier => $tierPriceId) {
+                if ($tier === 'seat') continue; // Skip seat add-on
+                if ($tierPriceId === $priceId) {
+                    return $tier;
+                }
+            }
+        }
+
+        return null;
+    }
 
     /**
      * Handle Stripe invoice.paid event (for subscriptions)

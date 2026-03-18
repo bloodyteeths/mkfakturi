@@ -5326,6 +5326,30 @@
             "cta_secondary": "Shihni si funksionon",
             "dashboard_alt": "Paneli i kontrollit Facturino"
         },
+        "partner_billing": {
+            "trial_active": "Periudha juaj provuese falas eshte aktive",
+            "trial_days_remaining": "Edhe {days} dite",
+            "choose_plan": "Zgjidhni nje plan",
+            "trial_expired": "Periudha juaj provuese ka perfunduar",
+            "trial_expired_message": "Abonohuni ne nje plan per te vazhduar perdorimin e te gjitha funksioneve.",
+            "current_plan": "Plani aktual",
+            "mkd_per_month": " den/muaj",
+            "eur_per_month": "\u20ac/muaj",
+            "manage_billing": "Menaxho faturimin",
+            "seats_info": "{count} vende shtese (+{price}\u20ac secila)",
+            "usage_this_month": "Perdorimi kete muaj",
+            "available_plans": "Planet e disponueshme",
+            "current": "Aktual",
+            "popular": "Popular",
+            "support_response": "Email mbeshtjetje: {hours}ore pergjigje",
+            "switch_plan": "Ndrysho planin",
+            "start_free_trial": "Fillo periudhen provuese",
+            "per_seat": "\u20ac/vend/muaj",
+            "status_active": "Aktiv",
+            "status_trial": "Provues",
+            "status_expired": "Skaduar",
+            "status_none": "Pa plan"
+        },
         "partners": {
             "trusted_by": "Besuar nga kompani me mendim përpara"
         },
@@ -6162,7 +6186,8 @@
             "invitations": "Ftesa",
             "payouts": "Pagesat",
             "logout": "Dilni",
-            "console": "Konsola"
+            "console": "Konsola",
+            "billing": "Faturimi"
         },
         "kyc": {
             "title": "Verifikimi KYC",

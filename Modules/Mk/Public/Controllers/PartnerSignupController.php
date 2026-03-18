@@ -103,12 +103,17 @@ class PartnerSignupController extends Controller
                 }
             }
 
-            // Create user account
+            // Create user account with trial
+            $trialDays = config('subscriptions.partner_trial.duration_days', 30);
+            $trialPlan = config('subscriptions.partner_trial.plan', 'start');
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => $request->password, // User model auto-hashes
                 'role' => 'partner',
+                'partner_subscription_tier' => $trialPlan,
+                'partner_trial_ends_at' => now()->addDays($trialDays),
             ]);
 
             // Create partner record
