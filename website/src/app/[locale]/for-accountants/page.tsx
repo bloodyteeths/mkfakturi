@@ -110,18 +110,20 @@ const copy = {
       title: 'Facturino наспроти конкуренцијата',
       sub: 'Единствена платформа со AI во Македонија',
       rows: [
-        { feature: 'AI чат асистент', facturino: '✓', others: '✗' },
-        { feature: 'AI скенирање на фактури', facturino: '✓', others: '✗' },
+        { feature: 'AI скенирање (сликај фактура → книжи)', facturino: '✓', others: '✗' },
         { feature: 'AI порамнување со банка', facturino: '✓', others: '✗' },
-        { feature: 'AI креирање на документи', facturino: '✓', others: '✗' },
-        { feature: 'е-Фактура преку УЈП', facturino: '✓', others: '~ Додаток' },
-        { feature: 'Увоз на банкарски изводи', facturino: '✓ 3 формати', others: '~ Ограничено' },
-        { feature: 'Мулти-компанија портал', facturino: '✓ До 100+', others: '~ По лиценца' },
+        { feature: 'AI чат асистент (на македонски)', facturino: '✓', others: '✗' },
+        { feature: 'Генератор на УЈП обрасци', facturino: '✓', others: '✗' },
+        { feature: 'ПП30 налози + масовен извоз за банка', facturino: '✓', others: '~ Рачно' },
+        { feature: 'Заклучување на периоди', facturino: '✓', others: '✗' },
+        { feature: 'Заштита од дупликати (6-слојна)', facturino: '✓', others: '✗' },
+        { feature: 'Консолидација на групации', facturino: '✓', others: '✗' },
+        { feature: 'Наплата + каматен калкулатор', facturino: '✓', others: '✗' },
+        { feature: 'е-Фактура + електронски потпис', facturino: '✓', others: '~ Додаток' },
+        { feature: 'Увоз на банкарски изводи (3 формати)', facturino: '✓', others: '~ Ограничено' },
+        { feature: 'Мулти-компанија портал (до 100+)', facturino: '✓', others: '~ По лиценца' },
         { feature: 'Мобилна апликација', facturino: '✓', others: '✗' },
-        { feature: 'Онлајн (без инсталација)', facturino: '✓', others: '~ Делумно' },
-        { feature: '4 јазици (МК, SQ, TR, EN)', facturino: '✓', others: '~ 1-2 јазика' },
-        { feature: 'Залихи + нарачки', facturino: '✓', others: '~ Делумно' },
-        { feature: 'Плати + платни налози', facturino: '✓', others: '~ Делумно' },
+        { feature: '30 дена бесплатен пробен период', facturino: '✓', others: '✗' },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / Zonel',
@@ -219,18 +221,20 @@ const copy = {
       title: 'Facturino kundrejt konkurrencës',
       sub: 'Platforma e vetme me AI në Maqedoni',
       rows: [
-        { feature: 'Asistent AI chat', facturino: '✓', others: '✗' },
-        { feature: 'AI skanim faturash', facturino: '✓', others: '✗' },
+        { feature: 'AI skanim (fotografo faturë → regjistro)', facturino: '✓', others: '✗' },
         { feature: 'AI pajtim me bankën', facturino: '✓', others: '✗' },
-        { feature: 'AI krijim dokumentesh', facturino: '✓', others: '✗' },
-        { feature: 'e-Fatura përmes UJP', facturino: '✓', others: '~ Shtesë' },
-        { feature: 'Import i ekstrakteve bankare', facturino: '✓ 3 formate', others: '~ Kufizuar' },
-        { feature: 'Portal shumë-kompanish', facturino: '✓ Deri 100+', others: '~ Me licencë' },
+        { feature: 'AI asistent chat (në maqedonisht)', facturino: '✓', others: '✗' },
+        { feature: 'Gjenerator i formularëve UJP', facturino: '✓', others: '✗' },
+        { feature: 'Urdhra PP30 + eksport masiv për bankë', facturino: '✓', others: '~ Manual' },
+        { feature: 'Mbyllje e periudhave', facturino: '✓', others: '✗' },
+        { feature: 'Mbrojtje nga dublikatat (6-shtresore)', facturino: '✓', others: '✗' },
+        { feature: 'Konsolidim i grupeve', facturino: '✓', others: '✗' },
+        { feature: 'Arkëtim + llogaritës interesi', facturino: '✓', others: '✗' },
+        { feature: 'e-Fatura + nënshkrim elektronik', facturino: '✓', others: '~ Shtesë' },
+        { feature: 'Import ekstrakte bankare (3 formate)', facturino: '✓', others: '~ Kufizuar' },
+        { feature: 'Portal shumë-kompanish (deri 100+)', facturino: '✓', others: '~ Me licencë' },
         { feature: 'Aplikacion celular', facturino: '✓', others: '✗' },
-        { feature: 'Online (pa instalim)', facturino: '✓', others: '~ Pjesërisht' },
-        { feature: '4 gjuhë (MK, SQ, TR, EN)', facturino: '✓', others: '~ 1-2 gjuhë' },
-        { feature: 'Inventar + porosi', facturino: '✓', others: '~ Pjesërisht' },
-        { feature: 'Paga + urdhra pagese', facturino: '✓', others: '~ Pjesërisht' },
+        { feature: '30 ditë provë falas', facturino: '✓', others: '✗' },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / Zonel',
@@ -328,18 +332,20 @@ const copy = {
       title: 'Facturino rakiplere karşı',
       sub: 'Makedonya\'da AI\'lı tek platform',
       rows: [
-        { feature: 'AI sohbet asistanı', facturino: '✓', others: '✗' },
-        { feature: 'AI fatura tarama', facturino: '✓', others: '✗' },
+        { feature: 'AI tarama (fatura fotoğrafla → kaydet)', facturino: '✓', others: '✗' },
         { feature: 'AI banka mutabakatı', facturino: '✓', others: '✗' },
-        { feature: 'AI belge oluşturma', facturino: '✓', others: '✗' },
-        { feature: 'UJP üzerinden e-Fatura', facturino: '✓', others: '~ Eklenti' },
-        { feature: 'Banka ekstresi ithalatı', facturino: '✓ 3 format', others: '~ Sınırlı' },
-        { feature: 'Çok şirketli portal', facturino: '✓ 100+ kadar', others: '~ Lisans başına' },
+        { feature: 'AI sohbet asistanı (Makedoncada)', facturino: '✓', others: '✗' },
+        { feature: 'UJP form oluşturucu', facturino: '✓', others: '✗' },
+        { feature: 'PP30 emirleri + toplu banka dışa aktarım', facturino: '✓', others: '~ Manuel' },
+        { feature: 'Dönem kilitleme', facturino: '✓', others: '✗' },
+        { feature: 'Mükerrer koruma (6 katmanlı)', facturino: '✓', others: '✗' },
+        { feature: 'Grup konsolidasyonu', facturino: '✓', others: '✗' },
+        { feature: 'Tahsilat + faiz hesaplayıcı', facturino: '✓', others: '✗' },
+        { feature: 'e-Fatura + elektronik imza', facturino: '✓', others: '~ Eklenti' },
+        { feature: 'Banka ekstresi ithalatı (3 format)', facturino: '✓', others: '~ Sınırlı' },
+        { feature: 'Çok şirketli portal (100+ kadar)', facturino: '✓', others: '~ Lisans başına' },
         { feature: 'Mobil uygulama', facturino: '✓', others: '✗' },
-        { feature: 'Çevrimiçi (kurulum yok)', facturino: '✓', others: '~ Kısmen' },
-        { feature: '4 dil (MK, SQ, TR, EN)', facturino: '✓', others: '~ 1-2 dil' },
-        { feature: 'Stok + siparişler', facturino: '✓', others: '~ Kısmen' },
-        { feature: 'Maaş + ödeme emirleri', facturino: '✓', others: '~ Kısmen' },
+        { feature: '30 gün ücretsiz deneme', facturino: '✓', others: '✗' },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / Zonel',
@@ -437,18 +443,20 @@ const copy = {
       title: 'Facturino vs the competition',
       sub: 'The only platform with AI in Macedonia',
       rows: [
-        { feature: 'AI chat assistant', facturino: '✓', others: '✗' },
-        { feature: 'AI invoice scanning', facturino: '✓', others: '✗' },
+        { feature: 'AI scanning (photo invoice → post)', facturino: '✓', others: '✗' },
         { feature: 'AI bank reconciliation', facturino: '✓', others: '✗' },
-        { feature: 'AI document creation', facturino: '✓', others: '✗' },
-        { feature: 'e-Invoice via UJP', facturino: '✓', others: '~ Add-on' },
-        { feature: 'Bank statement import', facturino: '✓ 3 formats', others: '~ Limited' },
-        { feature: 'Multi-company portal', facturino: '✓ Up to 100+', others: '~ Per license' },
+        { feature: 'AI chat assistant (in Macedonian)', facturino: '✓', others: '✗' },
+        { feature: 'UJP tax forms generator', facturino: '✓', others: '✗' },
+        { feature: 'PP30 orders + bulk bank export', facturino: '✓', others: '~ Manual' },
+        { feature: 'Period locking', facturino: '✓', others: '✗' },
+        { feature: 'Duplicate protection (6-layer)', facturino: '✓', others: '✗' },
+        { feature: 'Group consolidation', facturino: '✓', others: '✗' },
+        { feature: 'Collections + interest calculator', facturino: '✓', others: '✗' },
+        { feature: 'e-Invoice + digital signature', facturino: '✓', others: '~ Add-on' },
+        { feature: 'Bank statement import (3 formats)', facturino: '✓', others: '~ Limited' },
+        { feature: 'Multi-company portal (up to 100+)', facturino: '✓', others: '~ Per license' },
         { feature: 'Mobile app', facturino: '✓', others: '✗' },
-        { feature: 'Online (no installation)', facturino: '✓', others: '~ Partial' },
-        { feature: '4 languages (MK, SQ, TR, EN)', facturino: '✓', others: '~ 1-2 languages' },
-        { feature: 'Inventory + orders', facturino: '✓', others: '~ Partial' },
-        { feature: 'Payroll + payment orders', facturino: '✓', others: '~ Partial' },
+        { feature: '30-day free trial', facturino: '✓', others: '✗' },
       ],
       facturinoLabel: 'Facturino',
       othersLabel: 'PANTHEON / Zonel',
@@ -695,8 +703,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
                 <div className="w-28 text-center">{t.comparison.facturinoLabel}</div>
                 <div className="w-28 text-center">{t.comparison.othersLabel}</div>
               </div>
-              {t.comparison.rows.map((row, i) => {
-                const facturinoIsYes = row.facturino.startsWith('✓')
+              {t.comparison.rows.map((row: { feature: string; facturino: string; others: string }, i: number) => {
                 const othersIsNo = row.others === '✗'
                 const othersIsPartial = row.others.startsWith('~')
                 return (
@@ -708,8 +715,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
                   >
                     <div className="text-gray-700 font-medium">{row.feature}</div>
                     <div className="w-28 flex justify-center items-center gap-1">
-                      {facturinoIsYes && <IconCheck />}
-                      {row.facturino !== '✓' && <span className={`text-xs font-medium ${facturinoIsYes ? 'text-green-600' : ''}`}>{row.facturino.replace('✓ ', '')}</span>}
+                      <IconCheck />
                     </div>
                     <div className="w-28 flex justify-center items-center gap-1">
                       {othersIsNo && <IconX />}

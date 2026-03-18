@@ -8,7 +8,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const API_KEY = 'AIzaSyBio_NnqBwaqzRtwMvvsngaLfUcxdMxdoQ';
+const API_KEY = process.env.GEMINI_API_KEY || '';
 const MODEL = 'gemini-2.5-flash-image';
 const ICONS_DIR = path.join(__dirname, 'icons');
 
