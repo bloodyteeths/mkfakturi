@@ -260,8 +260,8 @@
   }
 
   .cover-logo {
-    height: 28mm;
-    margin-bottom: 12mm;
+    height: 36mm;
+    margin-bottom: 10mm;
     filter: brightness(0) invert(1);
   }
 
@@ -348,29 +348,29 @@
   /* ── INSIDE LEFT (Page 2) — Features ── */
   .inside-left {
     background: var(--white);
-    padding: 12mm 14mm;
+    padding: 10mm 14mm;
     display: flex;
     flex-direction: column;
   }
 
+  .inside-left > * { position: relative; z-index: 1; }
+
   .lifestyle-strip {
-    display: flex;
-    gap: 2mm;
-    margin-bottom: 4mm;
-    border-radius: 3mm;
-    overflow: hidden;
-    height: 26mm;
+    margin-bottom: 3mm;
+    flex-shrink: 0;
+    height: 32mm;
+    line-height: 30mm;
   }
 
   .lifestyle-strip img {
-    flex: 1;
-    object-fit: cover;
-    width: 33.33%;
-    border-radius: 2mm;
+    width: 57mm;
+    height: 30mm;
+    border-radius: 3mm;
+    margin: 0 1mm;
   }
 
   .il-header {
-    margin-bottom: 6mm;
+    margin-bottom: 4mm;
   }
 
   .il-header h2 {
@@ -388,14 +388,14 @@
   .feature-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 3mm;
-    margin-bottom: 5mm;
+    gap: 2.5mm;
+    margin-bottom: 3mm;
   }
 
   .feat-card {
     border: 1px solid var(--slate-200);
     border-radius: 3mm;
-    padding: 4mm;
+    padding: 3mm;
     transition: border-color 0.2s;
   }
 
@@ -423,8 +423,8 @@
   .ai-flow {
     background: linear-gradient(135deg, var(--indigo-light) 0%, #F0F9FF 100%);
     border-radius: 4mm;
-    padding: 5mm;
-    margin-bottom: 5mm;
+    padding: 4mm;
+    margin-bottom: 3mm;
   }
 
   .ai-flow h3 {
@@ -490,10 +490,10 @@
     display: flex;
     align-items: center;
     gap: 1.5mm;
-    padding: 1mm 0;
+    padding: 0.7mm 0;
     font-size: 6.5pt;
     color: var(--slate-700);
-    line-height: 1.3;
+    line-height: 1.2;
   }
 
   .fl-check {
@@ -750,14 +750,18 @@
     margin-top: 0.5mm;
   }
 
-  /* Watermark logo on inside pages */
-  .watermark {
+  /* Watermark logo on inside pages — must be CSS pseudo-element, NOT <img> tag.
+     Puppeteer PDF bug: position:absolute <img> prevents sibling <img> from rendering */
+  .has-watermark::after {
+    content: '';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    height: 80mm;
-    opacity: 0.03;
+    width: 120mm;
+    height: 120mm;
+    background: url('../../website/public/brand/facturino_logo.png') center/contain no-repeat;
+    opacity: 0.06;
     z-index: 0;
     pointer-events: none;
   }
@@ -895,9 +899,8 @@
 <div class="spread">
 
   <!-- INSIDE LEFT (Page 2) — Features -->
-  <div class="panel inside-left">
-    <img src="../../website/public/brand/facturino_logo.png" alt="" class="watermark">
-    <div class="il-header" style="position: relative; z-index: 1;">
+  <div class="panel inside-left has-watermark">
+    <div class="il-header">
       <h2>Сè што ви треба, на едно место</h2>
       <p>Комплетна платформа за модерни сметководствени канцеларии</p>
     </div>
@@ -945,11 +948,11 @@
       </div>
     </div>
 
-    <!-- Lifestyle photo strip -->
+    <!-- Lifestyle photo strip (small JPEGs — Puppeteer PDF can't render large PNGs inline) -->
     <div class="lifestyle-strip">
-      <img src="../../website/public/assets/images/hero_features.png" alt="Modern office workspace">
-      <img src="../../website/public/assets/images/hero_accountants.png" alt="Accountant at desk">
-      <img src="../../website/public/assets/images/hero_landing.png" alt="Team collaboration">
+      <img src="icons/photo1.jpg" alt="">
+      <img src="icons/photo2.jpg" alt="">
+      <img src="icons/photo3.jpg" alt="">
     </div>
 
     <div class="ai-flow">
@@ -1022,8 +1025,7 @@
   </div>
 
   <!-- INSIDE RIGHT (Page 3) — Pricing + Comparison -->
-  <div class="panel inside-right">
-    <img src="../../website/public/brand/facturino_logo.png" alt="" class="watermark">
+  <div class="panel inside-right has-watermark">
     <div class="ir-header">
       <h2>Пакети за сметководители</h2>
       <p>Сите функции на секој план — разликата е во обемот. 30 дена бесплатен пробен период.</p>
