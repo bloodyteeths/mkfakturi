@@ -1,6 +1,8 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildPageMetadata } from '@/lib/metadata'
+import { getDictionary } from '@/i18n/dictionaries'
 import PageHero from '@/components/PageHero'
+import PartnerPricingGrid from '@/components/PartnerPricingGrid'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -43,12 +45,12 @@ const copy = {
         {
           icon: 'clock',
           title: 'Рачно внесување на секоја фактура',
-          body: 'Секоја влезна фактура — отвори PDF, препиши го бројот, износите, ставките, ДДВ... со часови на рачна работа. Грешка во една цифра — и сметката не штима.',
+          body: 'Секоја влезна фактура — отвори, препиши го бројот, износите, ставките, ДДВ... со часови на рачна работа.',
         },
         {
           icon: 'alert',
           title: 'е-Фактура доаѓа, а немате алатка',
-          body: 'УЈП најавува задолжителна е‑Фактура, а вашиот софтвер сe уште нема структурирани податоци.',
+          body: 'УЈП најавува задолжителна е-Фактура, а вашиот софтвер сè уште нема поддршка.',
         },
         {
           icon: 'calendar',
@@ -61,81 +63,72 @@ const copy = {
       title: 'Facturino ги решава сите',
       items: [
         {
-          title: 'Мулти‑компанија: еден контролен панел',
-          body: 'Сите клиенти во еден систем. Префрлете се од компанија на компанија со еден клик.',
+          title: 'Сите клиенти на едно место',
+          body: 'Еден систем за сите компании. Префрлете се од клиент на клиент со еден клик.',
           icon: 'grid',
         },
         {
-          title: 'Банкарски увоз (CSV/MT940/PDF)',
-          body: 'Увоз на изводи од банка во CSV, MT940 или PDF формат и интелигентно порамнување. Без рачно внесување.',
+          title: 'Увоз на банкарски изводи',
+          body: 'Увезете извод од банка и системот автоматски ги порамнува со вашите фактури.',
           icon: 'bank',
         },
         {
           title: 'е-Фактура: веќе подготвени',
-          body: 'Структурирани податоци по UBL 2.1 стандард. Кога УЈП ќе го отвори API‑то, ние се поврзуваме.',
+          body: 'Испраќање на е-Фактура преку УЈП со електронски потпис. Масовно испраќање за повеќе клиенти.',
           icon: 'invoice',
         },
         {
-          title: 'AI асистент за побрзо затворање',
-          body: 'Кажи „Фактура за Марков 3000 ден" и AI ја креира. Скенирај документ — AI го чита. Банковни изводи — AI ги порамнува. Предлози за конта и ДДВ стапки.',
+          title: 'AI асистент за побрзо работење',
+          body: 'Кажи „Фактура за Марков 3000 ден" и AI ја креира. Сликај фактура — AI ја чита. Банкарски извод — AI го порамнува.',
           icon: 'ai',
         },
         {
-          title: 'Материјално сметководство',
-          body: 'Приемница, издатница, преносница + WAC вреднување + автоматско книжење на Класа 3, 6, 7. Инспекторите ќе бидат задоволни.',
+          title: 'Залихи и магацинско работење',
+          body: 'Приемница, издатница, нарачки за набавка и автоматско книжење. Контрола на усогласеност.',
           icon: 'warehouse',
         },
         {
-          title: 'Волшебник за годишно затворање',
-          body: '6 чекори: проверка → преглед → корекции → затворачки книжења → извештаи → заклучување. PDF за ЦРРМ, XML/CSV за е-поднесување, пресметка за ДБ-ВП.',
+          title: 'Годишна завршна сметка',
+          body: '6 чекори: проверка → преглед → корекции → затворачки книжења → извештаи → заклучување. Без стрес, без грешки.',
           icon: 'yearend',
         },
       ],
     },
     yearEnd: {
       title: 'Годишно затворање за 30 минути',
-      sub: 'Волшебникот ве води чекор по чекор — од проверка до заклучување. Без стрес, без грешки.',
+      sub: 'Волшебникот ве води чекор по чекор — од проверка до заклучување.',
       steps: [
         { num: '1', label: 'Проверка', desc: 'Автоматска проверка: дали сите фактури се финализирани, банките порамнети, ДДВ пријавите поднесени.' },
         { num: '2', label: 'Преглед', desc: 'Биланс на состојба, биланс на успех и бруто биланс — на еден екран.' },
         { num: '3', label: 'Корекции', desc: 'Амортизација, резервирања, временски разграничувања — или прескокнете ако сè е книжено.' },
-        { num: '4', label: 'Затворање', desc: 'Автоматски затворачки книжења: класа 5/6 → задржана добивка. Данок 10% пресметан.' },
-        { num: '5', label: 'Извештаи', desc: 'PDF за ЦРРМ, Pantheon XML / Zonel CSV за е-поднесување, пресметка за ДБ-ВП.' },
+        { num: '4', label: 'Затворање', desc: 'Автоматски затворачки книжења: приходи/расходи → задржана добивка. Данок 10% пресметан.' },
+        { num: '5', label: 'Извештаи', desc: 'Готови извештаи за ЦРРМ и електронско поднесување. Пресметка на данок на добивка.' },
         { num: '6', label: 'Заклучи', desc: 'Период заклучен. Рок до 15 март — вие завршивте. Поништување достапно 24 часа.' },
       ],
     },
     comparison: {
-      title: 'Facturino = QuickBooks/Xero за Македонија',
-      sub: 'Светски квалитет, локална логика',
+      title: 'Facturino наспроти конкуренцијата',
+      sub: 'Единствена платформа со AI во Македонија',
       rows: [
-        { feature: 'Мултијазичен UI (MK, SQ, TR, EN)', facturino: true, others: false },
-        { feature: 'ДДВ правила за МК (5%, 18%)', facturino: true, others: false },
-        { feature: 'Банкарски увоз (CSV/MT940/PDF)', facturino: true, others: false },
-        { feature: 'е-Фактура подготвеност (UBL 2.1)', facturino: true, others: false },
-        { feature: 'AI скенирање на документи (PDF/слика → книжење)', facturino: true, others: false },
-        { feature: 'AI контирање и предлози', facturino: true, others: false },
-        { feature: 'IFRS извештаи', facturino: true, others: true },
-        { feature: 'Мулти‑компанија од еден акаунт', facturino: true, others: false },
-        { feature: 'Материјално сметководство (WAC, GL)', facturino: true, others: false },
-        { feature: 'Волшебник за годишно затворање (6 чекори)', facturino: true, others: false },
+        { feature: 'AI чат асистент', facturino: '✓', others: '✗' },
+        { feature: 'AI скенирање на фактури', facturino: '✓', others: '✗' },
+        { feature: 'AI порамнување со банка', facturino: '✓', others: '✗' },
+        { feature: 'AI креирање на документи', facturino: '✓', others: '✗' },
+        { feature: 'е-Фактура преку УЈП', facturino: '✓', others: '~ Додаток' },
+        { feature: 'Увоз на банкарски изводи', facturino: '✓ 3 формати', others: '~ Ограничено' },
+        { feature: 'Мулти-компанија портал', facturino: '✓ До 100+', others: '~ По лиценца' },
+        { feature: 'Мобилна апликација', facturino: '✓', others: '✗' },
+        { feature: 'Онлајн (без инсталација)', facturino: '✓', others: '~ Делумно' },
+        { feature: '4 јазици (МК, SQ, TR, EN)', facturino: '✓', others: '~ 1-2 јазика' },
+        { feature: 'Залихи + нарачки', facturino: '✓', others: '~ Делумно' },
+        { feature: 'Плати + платни налози', facturino: '✓', others: '~ Делумно' },
       ],
       facturinoLabel: 'Facturino',
-      othersLabel: 'PANTHEON / MiniMax',
+      othersLabel: 'PANTHEON / Zonel',
     },
-    partner: {
-      title: 'Од 1,784 ден/месец',
-      sub: '4 пакети за сметководствени канцеларии. Сите функции на секој пакет — разликата е во лимитите. 30 дена бесплатен пробен период.',
-      benefits: [
-        'Start: 15 компании, 50 AI кредити/месец',
-        'Office: 50 компании, 200 AI кредити/месец',
-        'Pro: 150 компании, 500 AI кредити/месец',
-        'Elite: Неограничено сè',
-      ],
-      cta: 'Пробај 30 дена бесплатно',
-      visualRecurring: 'од 1,784 ден/месец',
-      visualDashboard: 'Портфолио панел',
-      visualAnalytics: '+ 308 ден/додатна лиценца',
-      visualSupport: 'Приоритетна поддршка',
+    pricing: {
+      title: 'Пакети за сметководители',
+      sub: 'Сите функции на секој пакет — разликата е во лимитите. 30 дена бесплатен пробен период.',
     },
     bottomCta: {
       title: 'Пробај бесплатно 30 дена',
@@ -161,12 +154,12 @@ const copy = {
         {
           icon: 'clock',
           title: 'Futje manuale e çdo fature',
-          body: 'Çdo faturë hyrëse — hapni PDF, rishkruani numrin, shumat, zërat, TVSH... orë punë manuale. Një gabim i vetëm — dhe llogaria nuk del.',
+          body: 'Çdo faturë hyrëse — hapni, rishkruani numrin, shumat, zërat, TVSH... orë punë manuale.',
         },
         {
           icon: 'alert',
           title: 'e-Fatura po vjen, por nuk keni mjet',
-          body: 'UJP njofton e‑Faturë të detyrueshme, por softueri juaj ende nuk ka të dhëna të strukturuara.',
+          body: 'UJP njofton e-Faturë të detyrueshme, por softueri juaj ende nuk ka mbështetje.',
         },
         {
           icon: 'calendar',
@@ -179,81 +172,72 @@ const copy = {
       title: 'Facturino i zgjidh të gjitha',
       items: [
         {
-          title: 'Shumë kompani: një panel kontrolli',
-          body: 'Të gjithë klientët në një sistem. Kaloni nga kompania në kompani me një klikim.',
+          title: 'Të gjithë klientët në një vend',
+          body: 'Një sistem për të gjitha kompanitë. Kaloni nga klienti në klient me një klikim.',
           icon: 'grid',
         },
         {
-          title: 'Import bankar (CSV/MT940/PDF)',
-          body: 'Import i ekstrakteve bankare ne format CSV, MT940 ose PDF dhe pajtim inteligjent. Pa futje manuale.',
+          title: 'Import i ekstrakteve bankare',
+          body: 'Importoni ekstrakt nga banka dhe sistemi automatikisht i pajton me faturat tuaja.',
           icon: 'bank',
         },
         {
           title: 'e-Fatura: tashmë gati',
-          body: 'Të dhëna të strukturuara sipas standardit UBL 2.1. Kur UJP hap API‑n, ne lidhemi.',
+          body: 'Dërgim i e-Faturës përmes UJP me nënshkrim elektronik. Dërgim masiv për shumë klientë.',
           icon: 'invoice',
         },
         {
-          title: 'Asistent AI për mbyllje më të shpejtë',
-          body: 'Thuaj "Faturë për Markov 3000 den" dhe AI e krijon. Skanoni dokument — AI e lexon. Ekstrakte bankare — AI i pajton. Sugjerime për llogari dhe TVSH.',
+          title: 'Asistent AI për punë më të shpejtë',
+          body: 'Thuaj "Faturë për Markov 3000 den" dhe AI e krijon. Skanoni faturë — AI e lexon. Ekstrakt bankar — AI e pajton.',
           icon: 'ai',
         },
         {
-          title: 'Kontabiliteti Material',
-          body: 'Fletëhyrje, fletëdalje, fletëkalim + vlerësim WAC + regjistrim automatik në Klasa 3, 6, 7. Inspektorët do të jenë të kënaqur.',
+          title: 'Inventar dhe menaxhim i magazinës',
+          body: 'Fletëhyrje, fletëdalje, porosi furnizimi dhe regjistrim automatik. Kontroll i pajtueshmërisë.',
           icon: 'warehouse',
         },
         {
-          title: 'Magjistari i mbylljes vjetore',
-          body: '6 hapa: kontrolli → rishikim → korrigjim → regjistrimet mbyllëse → raporte → mbyllje. PDF për QKRM, XML/CSV për dorëzim elektronik, llogaritje DB-VP.',
+          title: 'Llogaria përfundimtare vjetore',
+          body: '6 hapa: kontrolli → rishikim → korrigjim → regjistrimet mbyllëse → raporte → mbyllje. Pa stres, pa gabime.',
           icon: 'yearend',
         },
       ],
     },
     yearEnd: {
       title: 'Mbyllja vjetore për 30 minuta',
-      sub: 'Magjistari ju udhëzon hap pas hapi — nga kontrolli deri në mbyllje. Pa stres, pa gabime.',
+      sub: 'Magjistari ju udhëzon hap pas hapi — nga kontrolli deri në mbyllje.',
       steps: [
         { num: '1', label: 'Kontrolli', desc: 'Kontroll automatik: a janë finalizuar të gjitha faturat, bankat të pajtuara, deklaratat e TVSH-së të dorëzuara.' },
         { num: '2', label: 'Rishikim', desc: 'Bilanci i gjendjes, bilanci i suksesit dhe bilanci verifikues — në një ekran.' },
         { num: '3', label: 'Korrigjim', desc: 'Amortizim, provigjione, akruale — ose kapërceni nëse gjithçka është regjistruar.' },
-        { num: '4', label: 'Mbyllje', desc: 'Regjistrimet mbyllëse automatike: klasa 5/6 → fitime të mbajtura. Tatimi 10% i llogaritur.' },
-        { num: '5', label: 'Raporte', desc: 'PDF për QKRM, Pantheon XML / Zonel CSV për dorëzim elektronik, llogaritje DB-VP.' },
+        { num: '4', label: 'Mbyllje', desc: 'Regjistrimet mbyllëse automatike: të ardhurat/shpenzimet → fitime të mbajtura. Tatimi 10% i llogaritur.' },
+        { num: '5', label: 'Raporte', desc: 'Raporte gati për QKRM dhe dorëzim elektronik. Llogaritje e tatimit mbi fitimin.' },
         { num: '6', label: 'Mbyll', desc: 'Periudha e mbyllur. Afati deri 15 mars — ju keni mbaruar. Anulim i disponueshëm 24 orë.' },
       ],
     },
     comparison: {
-      title: 'Facturino = QuickBooks/Xero për Maqedoninë',
-      sub: 'Cilësi botërore, logjikë lokale',
+      title: 'Facturino kundrejt konkurrencës',
+      sub: 'Platforma e vetme me AI në Maqedoni',
       rows: [
-        { feature: 'Ndërfaqe shumëgjuhëshe (MK, SQ, TR, EN)', facturino: true, others: false },
-        { feature: 'Rregulla TVSH për MK (5%, 18%)', facturino: true, others: false },
-        { feature: 'Import bankar (CSV/MT940/PDF)', facturino: true, others: false },
-        { feature: 'Gatishmëri e-Fatura (UBL 2.1)', facturino: true, others: false },
-        { feature: 'AI skanim dokumentesh (PDF/imazh → regjistrim)', facturino: true, others: false },
-        { feature: 'Kontim dhe sugjerime me AI', facturino: true, others: false },
-        { feature: 'Raporte IFRS', facturino: true, others: true },
-        { feature: 'Shumë kompani nga një llogari', facturino: true, others: false },
-        { feature: 'Kontabilitet material (WAC, GL)', facturino: true, others: false },
-        { feature: 'Magjistari i mbylljes vjetore (6 hapa)', facturino: true, others: false },
+        { feature: 'Asistent AI chat', facturino: '✓', others: '✗' },
+        { feature: 'AI skanim faturash', facturino: '✓', others: '✗' },
+        { feature: 'AI pajtim me bankën', facturino: '✓', others: '✗' },
+        { feature: 'AI krijim dokumentesh', facturino: '✓', others: '✗' },
+        { feature: 'e-Fatura përmes UJP', facturino: '✓', others: '~ Shtesë' },
+        { feature: 'Import i ekstrakteve bankare', facturino: '✓ 3 formate', others: '~ Kufizuar' },
+        { feature: 'Portal shumë-kompanish', facturino: '✓ Deri 100+', others: '~ Me licencë' },
+        { feature: 'Aplikacion celular', facturino: '✓', others: '✗' },
+        { feature: 'Online (pa instalim)', facturino: '✓', others: '~ Pjesërisht' },
+        { feature: '4 gjuhë (MK, SQ, TR, EN)', facturino: '✓', others: '~ 1-2 gjuhë' },
+        { feature: 'Inventar + porosi', facturino: '✓', others: '~ Pjesërisht' },
+        { feature: 'Paga + urdhra pagese', facturino: '✓', others: '~ Pjesërisht' },
       ],
       facturinoLabel: 'Facturino',
-      othersLabel: 'PANTHEON / MiniMax',
+      othersLabel: 'PANTHEON / Zonel',
     },
-    partner: {
-      title: 'Nga 1,784 den/muaj',
-      sub: '4 paketa për zyrat e kontabilitetit. Të gjitha funksionet në çdo paketë — ndryshimi është në limitet. 30 ditë provë falas.',
-      benefits: [
-        'Start: 15 kompani, 50 kredite AI/muaj',
-        'Office: 50 kompani, 200 kredite AI/muaj',
-        'Pro: 150 kompani, 500 kredite AI/muaj',
-        'Elite: Gjithçka pa limit',
-      ],
-      cta: 'Provo 30 ditë falas',
-      visualRecurring: 'nga 1,784 den/muaj',
-      visualDashboard: 'Paneli i portofolit',
-      visualAnalytics: '+ 308 den/licencë shtesë',
-      visualSupport: 'Mbështetje me prioritet',
+    pricing: {
+      title: 'Paketat për kontabilistë',
+      sub: 'Të gjitha funksionet në çdo paketë — ndryshimi është në limitet. 30 ditë provë falas.',
     },
     bottomCta: {
       title: 'Provoni falas 30 ditë',
@@ -279,12 +263,12 @@ const copy = {
         {
           icon: 'clock',
           title: 'Her faturayı elle girme',
-          body: 'Her gelen fatura — PDF\'yi açın, numarayı, tutarları, kalemleri, KDV\'yi kopyalayın... saatlerce elle çalışma. Bir hanede hata — ve hesap tutmuyor.',
+          body: 'Her gelen fatura — açın, numarayı, tutarları, kalemleri, KDV\'yi kopyalayın... saatlerce elle çalışma.',
         },
         {
           icon: 'alert',
           title: 'e-Fatura geliyor ama aracınız yok',
-          body: 'UJP zorunlu e‑Fatura duyuruyor, ancak yazılımınızda hâlâ yapılandırılmış veri desteği yok.',
+          body: 'UJP zorunlu e-Fatura duyuruyor, ancak yazılımınızda henüz destek yok.',
         },
         {
           icon: 'calendar',
@@ -297,81 +281,72 @@ const copy = {
       title: 'Facturino hepsini çözer',
       items: [
         {
-          title: 'Çok şirket: tek kontrol paneli',
-          body: 'Tüm müşteriler tek sistemde. Bir tıkla şirketten şirkete geçin.',
+          title: 'Tüm müşteriler tek yerde',
+          body: 'Tüm şirketler için tek sistem. Bir tıkla müşteriden müşteriye geçin.',
           icon: 'grid',
         },
         {
-          title: 'Banka ithalatı (CSV/MT940/PDF)',
-          body: 'CSV, MT940 veya PDF formatında ekstre aktarımı ve akıllı mutabakat. Manuel giriş yok.',
+          title: 'Banka ekstresi ithalatı',
+          body: 'Bankadan ekstre aktarın ve sistem otomatik olarak faturalarınızla eşleştirir.',
           icon: 'bank',
         },
         {
           title: 'e-Fatura: şimdiden hazır',
-          body: 'UBL 2.1 standardında yapılandırılmış veriler. UJP API\'yi açınca biz bağlanırız.',
+          body: 'UJP üzerinden elektronik imzayla e-Fatura gönderimi. Birden fazla müşteri için toplu gönderim.',
           icon: 'invoice',
         },
         {
-          title: 'Daha hızlı kapanış için AI asistan',
-          body: '"Markov için fatura 3000 den" yazın ve AI oluşturur. Belge tarayın — AI okur. Banka ekstreleri — AI mutabakat yapar. Hesap ve KDV önerileri.',
+          title: 'Daha hızlı çalışma için AI asistan',
+          body: '"Markov için fatura 3000 den" deyin ve AI oluşturur. Fatura fotoğraflayın — AI okur. Banka ekstresi — AI eşleştirir.',
           icon: 'ai',
         },
         {
-          title: 'Malzeme Muhasebesi',
-          body: 'Giriş fişi, çıkış fişi, transfer fişi + WAC değerleme + Sınıf 3, 6, 7 otomatik muhasebe kaydı. Müfettişler memnun kalacak.',
+          title: 'Stok ve depo yönetimi',
+          body: 'Giriş fişi, çıkış fişi, satın alma siparişleri ve otomatik muhasebe kaydı. Uyum kontrolü.',
           icon: 'warehouse',
         },
         {
-          title: 'Yıl sonu kapanış sihirbazı',
-          body: '6 adım: kontrol → inceleme → düzeltme → kapanış kayıtları → raporlar → kilitleme. CRMS için PDF, e-başvuru için XML/CSV, DB-VP hesaplama.',
+          title: 'Yıl sonu kapanış hesabı',
+          body: '6 adım: kontrol → inceleme → düzeltme → kapanış kayıtları → raporlar → kilitleme. Stressiz, hatasız.',
           icon: 'yearend',
         },
       ],
     },
     yearEnd: {
       title: 'Yıl sonu kapanışı 30 dakikada',
-      sub: 'Sihirbaz sizi adım adım yönlendirir — kontrolden kilitlemeye. Stressiz, hatasız.',
+      sub: 'Sihirbaz sizi adım adım yönlendirir — kontrolden kilitlemeye.',
       steps: [
         { num: '1', label: 'Kontrol', desc: 'Otomatik kontrol: tüm faturalar tamamlanmış mı, bankalar mutabık mı, KDV beyannameleri verilmiş mi.' },
         { num: '2', label: 'İnceleme', desc: 'Bilanço, gelir tablosu ve mizan — tek ekranda.' },
         { num: '3', label: 'Düzeltme', desc: 'Amortisman, karşılık, tahakkuk — veya hepsi kaydedilmişse atlayın.' },
-        { num: '4', label: 'Kapanış', desc: 'Otomatik kapanış kayıtları: sınıf 5/6 → dağıtılmamış kâr. %10 vergi hesaplanır.' },
-        { num: '5', label: 'Raporlar', desc: 'CRMS için PDF, Pantheon XML / Zonel CSV e-başvuru için, DB-VP hesaplaması.' },
+        { num: '4', label: 'Kapanış', desc: 'Otomatik kapanış kayıtları: gelir/gider → dağıtılmamış kâr. %10 vergi hesaplanır.' },
+        { num: '5', label: 'Raporlar', desc: 'CRMS ve elektronik başvuru için hazır raporlar. Kurumlar vergisi hesaplaması.' },
         { num: '6', label: 'Kilitle', desc: 'Dönem kilitlendi. 15 Mart\'a kadar süre var — siz bitirdiniz. 24 saat geri alma mümkün.' },
       ],
     },
     comparison: {
-      title: 'Facturino = Makedonya için QuickBooks/Xero',
-      sub: 'Dünya kalitesi, yerel mantık',
+      title: 'Facturino rakiplere karşı',
+      sub: 'Makedonya\'da AI\'lı tek platform',
       rows: [
-        { feature: 'Çok dilli arayüz (MK, SQ, TR, EN)', facturino: true, others: false },
-        { feature: 'MK KDV kuralları (5%, 18%)', facturino: true, others: false },
-        { feature: 'Banka ithalatı (CSV/MT940/PDF)', facturino: true, others: false },
-        { feature: 'e-Fatura hazırlığı (UBL 2.1)', facturino: true, others: false },
-        { feature: 'AI belge tarama (PDF/görsel → kayıt)', facturino: true, others: false },
-        { feature: 'AI muhasebe kaydı ve öneriler', facturino: true, others: false },
-        { feature: 'IFRS raporları', facturino: true, others: true },
-        { feature: 'Tek hesaptan çok şirket', facturino: true, others: false },
-        { feature: 'Malzeme muhasebesi (WAC, GL)', facturino: true, others: false },
-        { feature: 'Yıl sonu kapanış sihirbazı (6 adım)', facturino: true, others: false },
+        { feature: 'AI sohbet asistanı', facturino: '✓', others: '✗' },
+        { feature: 'AI fatura tarama', facturino: '✓', others: '✗' },
+        { feature: 'AI banka mutabakatı', facturino: '✓', others: '✗' },
+        { feature: 'AI belge oluşturma', facturino: '✓', others: '✗' },
+        { feature: 'UJP üzerinden e-Fatura', facturino: '✓', others: '~ Eklenti' },
+        { feature: 'Banka ekstresi ithalatı', facturino: '✓ 3 format', others: '~ Sınırlı' },
+        { feature: 'Çok şirketli portal', facturino: '✓ 100+ kadar', others: '~ Lisans başına' },
+        { feature: 'Mobil uygulama', facturino: '✓', others: '✗' },
+        { feature: 'Çevrimiçi (kurulum yok)', facturino: '✓', others: '~ Kısmen' },
+        { feature: '4 dil (MK, SQ, TR, EN)', facturino: '✓', others: '~ 1-2 dil' },
+        { feature: 'Stok + siparişler', facturino: '✓', others: '~ Kısmen' },
+        { feature: 'Maaş + ödeme emirleri', facturino: '✓', others: '~ Kısmen' },
       ],
       facturinoLabel: 'Facturino',
-      othersLabel: 'PANTHEON / MiniMax',
+      othersLabel: 'PANTHEON / Zonel',
     },
-    partner: {
-      title: '1,784 den/ay\'dan başlayan fiyatlar',
-      sub: 'Muhasebe ofisleri için 4 paket. Her pakette tüm özellikler — fark limitlerde. 30 gün ücretsiz deneme.',
-      benefits: [
-        'Start: 15 şirket, 50 AI kredisi/ay',
-        'Office: 50 şirket, 200 AI kredisi/ay',
-        'Pro: 150 şirket, 500 AI kredisi/ay',
-        'Elite: Sınırsız her şey',
-      ],
-      cta: '30 gün ücretsiz dene',
-      visualRecurring: '1,784 den/ay\'dan',
-      visualDashboard: 'Portföy paneli',
-      visualAnalytics: '+ 308 den/ek lisans',
-      visualSupport: 'Öncelikli destek',
+    pricing: {
+      title: 'Muhasebeciler için paketler',
+      sub: 'Her pakette tüm özellikler — fark limitlerde. 30 gün ücretsiz deneme.',
     },
     bottomCta: {
       title: '30 gün ücretsiz deneyin',
@@ -397,12 +372,12 @@ const copy = {
         {
           icon: 'clock',
           title: 'Manually entering every invoice',
-          body: 'Every incoming invoice — open the PDF, retype the number, amounts, line items, VAT... hours of manual work. One wrong digit — and the account doesn\'t balance.',
+          body: 'Every incoming invoice — open it, retype the number, amounts, line items, VAT... hours of manual work.',
         },
         {
           icon: 'alert',
           title: 'e-Invoice is coming but you have no tools',
-          body: 'UJP announces mandatory e-Invoice, but your software still lacks structured data support.',
+          body: 'UJP announces mandatory e-Invoice, but your software still lacks support.',
         },
         {
           icon: 'calendar',
@@ -415,81 +390,72 @@ const copy = {
       title: 'Facturino solves them all',
       items: [
         {
-          title: 'Multi-company: one dashboard',
-          body: 'All clients in one system. Switch from company to company with a single click.',
+          title: 'All clients in one place',
+          body: 'One system for all companies. Switch from client to client with a single click.',
           icon: 'grid',
         },
         {
-          title: 'Bank Import (CSV/MT940/PDF)',
-          body: 'Import bank statements in CSV, MT940, or PDF format with intelligent matching. No manual entry.',
+          title: 'Bank statement import',
+          body: 'Import bank statements and the system automatically matches them with your invoices.',
           icon: 'bank',
         },
         {
           title: 'e-Invoice: already ready',
-          body: 'Structured data following UBL 2.1 standard. When UJP opens the API, we connect.',
+          body: 'Send e-Invoices via UJP with electronic signature. Bulk sending for multiple clients.',
           icon: 'invoice',
         },
         {
-          title: 'AI assistant for faster closing',
-          body: 'Say "Invoice for Markov 3000 MKD" and AI creates it. Scan a document — AI reads it. Bank statements — AI reconciles them. Account and VAT suggestions included.',
+          title: 'AI assistant for faster work',
+          body: 'Say "Invoice for Markov 3000 MKD" and AI creates it. Photo an invoice — AI reads it. Bank statement — AI reconciles it.',
           icon: 'ai',
         },
         {
-          title: 'Material Accounting',
-          body: 'Goods received, issued & transfer notes + WAC valuation + automatic GL posting to Class 3, 6, 7 accounts. Inspectors will be satisfied.',
+          title: 'Inventory and warehouse management',
+          body: 'Goods received, issued, purchase orders and automatic posting. Compliance control.',
           icon: 'warehouse',
         },
         {
-          title: 'Year-End Closing Wizard',
-          body: '6 steps: checklist → review → adjustments → closing entries → reports → lock. PDF for CRMS, XML/CSV for e-filing, DB-VP tax calculation.',
+          title: 'Year-end closing account',
+          body: '6 steps: checklist → review → adjustments → closing entries → reports → lock. No stress, no errors.',
           icon: 'yearend',
         },
       ],
     },
     yearEnd: {
       title: 'Year-end closing in 30 minutes',
-      sub: 'The wizard guides you step by step — from checklist to lock. No stress, no errors.',
+      sub: 'The wizard guides you step by step — from checklist to lock.',
       steps: [
         { num: '1', label: 'Checklist', desc: 'Automatic checks: are all invoices finalized, banks reconciled, VAT returns filed.' },
         { num: '2', label: 'Review', desc: 'Balance sheet, income statement, and trial balance — on one screen.' },
         { num: '3', label: 'Adjust', desc: 'Depreciation, provisions, accruals — or skip if everything is already recorded.' },
-        { num: '4', label: 'Close', desc: 'Automatic closing entries: class 5/6 → retained earnings. 10% tax calculated.' },
-        { num: '5', label: 'Reports', desc: 'PDF for CRMS, Pantheon XML / Zonel CSV for e-filing, DB-VP tax calculation.' },
+        { num: '4', label: 'Close', desc: 'Automatic closing entries: revenue/expenses → retained earnings. 10% tax calculated.' },
+        { num: '5', label: 'Reports', desc: 'Ready-made reports for CRMS and electronic filing. Corporate tax calculation.' },
         { num: '6', label: 'Lock', desc: 'Period locked. Deadline March 15 — you\'re done. Undo available for 24 hours.' },
       ],
     },
     comparison: {
-      title: 'Facturino = QuickBooks/Xero for Macedonia',
-      sub: 'World-class quality, local logic',
+      title: 'Facturino vs the competition',
+      sub: 'The only platform with AI in Macedonia',
       rows: [
-        { feature: 'Multilingual UI (MK, SQ, TR, EN)', facturino: true, others: false },
-        { feature: 'MK VAT rules (5%, 18%)', facturino: true, others: false },
-        { feature: 'Bank import (CSV/MT940/PDF)', facturino: true, others: false },
-        { feature: 'e-Invoice readiness (UBL 2.1)', facturino: true, others: false },
-        { feature: 'AI document scanning (PDF/photo → entry)', facturino: true, others: false },
-        { feature: 'AI journal entries and suggestions', facturino: true, others: false },
-        { feature: 'IFRS reports', facturino: true, others: true },
-        { feature: 'Multi-company from one account', facturino: true, others: false },
-        { feature: 'Material accounting (WAC, GL)', facturino: true, others: false },
-        { feature: 'Year-end closing wizard (6 steps)', facturino: true, others: false },
+        { feature: 'AI chat assistant', facturino: '✓', others: '✗' },
+        { feature: 'AI invoice scanning', facturino: '✓', others: '✗' },
+        { feature: 'AI bank reconciliation', facturino: '✓', others: '✗' },
+        { feature: 'AI document creation', facturino: '✓', others: '✗' },
+        { feature: 'e-Invoice via UJP', facturino: '✓', others: '~ Add-on' },
+        { feature: 'Bank statement import', facturino: '✓ 3 formats', others: '~ Limited' },
+        { feature: 'Multi-company portal', facturino: '✓ Up to 100+', others: '~ Per license' },
+        { feature: 'Mobile app', facturino: '✓', others: '✗' },
+        { feature: 'Online (no installation)', facturino: '✓', others: '~ Partial' },
+        { feature: '4 languages (MK, SQ, TR, EN)', facturino: '✓', others: '~ 1-2 languages' },
+        { feature: 'Inventory + orders', facturino: '✓', others: '~ Partial' },
+        { feature: 'Payroll + payment orders', facturino: '✓', others: '~ Partial' },
       ],
       facturinoLabel: 'Facturino',
-      othersLabel: 'PANTHEON / MiniMax',
+      othersLabel: 'PANTHEON / Zonel',
     },
-    partner: {
-      title: 'From 1,784 MKD/month',
-      sub: '4 plans for accounting firms. All features in every plan — the difference is in the limits. 30-day free trial.',
-      benefits: [
-        'Start: 15 companies, 50 AI credits/month',
-        'Office: 50 companies, 200 AI credits/month',
-        'Pro: 150 companies, 500 AI credits/month',
-        'Elite: Unlimited everything',
-      ],
-      cta: 'Try 30 days free',
-      visualRecurring: 'from 1,784 MKD/month',
-      visualDashboard: 'Portfolio dashboard',
-      visualAnalytics: '+ 308 MKD/additional seat',
-      visualSupport: 'Priority support',
+    pricing: {
+      title: 'Plans for accountants',
+      sub: 'All features in every plan — the difference is in the limits. 30-day free trial.',
     },
     bottomCta: {
       title: 'Try free for 30 days',
@@ -499,7 +465,7 @@ const copy = {
   },
 } as const
 
-/* SVG icon helpers – kept inline to avoid extra component files */
+/* SVG icon helpers */
 function IconSwitch() {
   return (
     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -584,10 +550,10 @@ function IconX() {
     </svg>
   )
 }
-function IconStar() {
+function IconPartial() {
   return (
-    <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+    <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
     </svg>
   )
 }
@@ -612,6 +578,8 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
   const { locale: localeParam } = await params
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
+  const dict = await getDictionary(locale)
+  const pp = dict.pricingPage!
 
   return (
     <main id="main-content" className="overflow-x-hidden">
@@ -625,7 +593,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
         cta={{ label: t.hero.cta, href: 'https://app.facturino.mk/partner/signup' }}
       />
 
-      {/* ── PAIN POINTS ──────────────────────────────────────── */}
+      {/* PAIN POINTS */}
       <section className="section bg-slate-50">
         <div className="container px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
@@ -654,7 +622,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
         </div>
       </section>
 
-      {/* ── SOLUTIONS ────────────────────────────────────────── */}
+      {/* SOLUTIONS */}
       <section className="section">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none"></div>
         <div className="container relative z-10 px-4 sm:px-6">
@@ -684,16 +652,10 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
         </div>
       </section>
 
-      {/* ── YEAR-END CLOSING WIZARD ─────────────────────────── */}
+      {/* YEAR-END CLOSING WIZARD */}
       <section className="section bg-gradient-to-br from-emerald-50 to-cyan-50">
         <div className="container px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-700 mb-4 md:mb-6">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-              </svg>
-              NEW
-            </div>
             <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4 text-gray-900">{t.yearEnd.title}</h2>
             <p className="text-sm md:text-lg text-gray-600">{t.yearEnd.sub}</p>
             <div className="h-1 w-20 bg-gradient-to-r from-emerald-500 to-cyan-500 mx-auto rounded-full mt-4"></div>
@@ -717,7 +679,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
         </div>
       </section>
 
-      {/* ── COMPARISON TABLE ─────────────────────────────────── */}
+      {/* COMPARISON TABLE */}
       <section className="section bg-slate-50">
         <div className="container px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto mb-6 md:mb-14">
@@ -728,106 +690,66 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
 
           <div className="max-w-3xl mx-auto">
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
-              {/* Table header */}
               <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4 px-6 py-4 bg-gradient-to-r from-indigo-600 to-cyan-600 text-white text-sm font-bold">
                 <div></div>
                 <div className="w-28 text-center">{t.comparison.facturinoLabel}</div>
                 <div className="w-28 text-center">{t.comparison.othersLabel}</div>
               </div>
-              {/* Table rows */}
-              {t.comparison.rows.map((row, i) => (
-                <div
-                  key={i}
-                  className={`grid grid-cols-[1fr_auto_auto] items-center gap-4 px-6 py-3.5 text-sm ${
-                    i % 2 === 0 ? 'bg-white' : 'bg-slate-50'
-                  } ${i < t.comparison.rows.length - 1 ? 'border-b border-gray-100' : ''}`}
-                >
-                  <div className="text-gray-700 font-medium">{row.feature}</div>
-                  <div className="w-28 flex justify-center">
-                    {row.facturino ? <IconCheck /> : <IconX />}
+              {t.comparison.rows.map((row, i) => {
+                const facturinoIsYes = row.facturino.startsWith('✓')
+                const othersIsNo = row.others === '✗'
+                const othersIsPartial = row.others.startsWith('~')
+                return (
+                  <div
+                    key={i}
+                    className={`grid grid-cols-[1fr_auto_auto] items-center gap-4 px-6 py-3.5 text-sm ${
+                      i % 2 === 0 ? 'bg-white' : 'bg-slate-50'
+                    } ${i < t.comparison.rows.length - 1 ? 'border-b border-gray-100' : ''}`}
+                  >
+                    <div className="text-gray-700 font-medium">{row.feature}</div>
+                    <div className="w-28 flex justify-center items-center gap-1">
+                      {facturinoIsYes && <IconCheck />}
+                      {row.facturino !== '✓' && <span className={`text-xs font-medium ${facturinoIsYes ? 'text-green-600' : ''}`}>{row.facturino.replace('✓ ', '')}</span>}
+                    </div>
+                    <div className="w-28 flex justify-center items-center gap-1">
+                      {othersIsNo && <IconX />}
+                      {othersIsPartial && <IconPartial />}
+                      {othersIsPartial && <span className="text-xs text-amber-600 font-medium">{row.others.replace('~ ', '')}</span>}
+                    </div>
                   </div>
-                  <div className="w-28 flex justify-center">
-                    {row.others ? <IconCheck /> : <IconX />}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── PARTNER PROGRAM ──────────────────────────────────── */}
+      {/* PRICING WITH TOGGLE */}
       <section className="section relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-cyan-50 pointer-events-none"></div>
         <div className="container relative z-10 px-4 sm:px-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-center">
-              {/* Left: copy */}
-              <div>
-                <h2 className="text-2xl md:text-4xl font-bold mb-4 text-gray-900">{t.partner.title}</h2>
-                <p className="text-gray-600 text-sm md:text-lg mb-4 md:mb-8 leading-relaxed">{t.partner.sub}</p>
-                <ul className="space-y-3 md:space-y-4 mb-6 md:mb-8">
-                  {t.partner.benefits.map((b, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        <IconCheck />
-                      </div>
-                      <span className="text-gray-700">{b}</span>
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="https://app.facturino.mk/partner/signup"
-                  className="btn-primary inline-flex"
-                >
-                  {t.partner.cta}
-                  <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </a>
-              </div>
-              {/* Right: visual card */}
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-3xl blur-2xl transform scale-95"></div>
-                <div className="relative glass-panel rounded-2xl p-5 md:p-8 space-y-4 md:space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600 font-bold text-xl">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-extrabold text-gray-900">{t.partner.visualRecurring}</p>
-                      <p className="text-sm text-gray-500">{t.partner.visualRecurring}</p>
-                    </div>
-                  </div>
-                  <div className="h-px bg-gray-200"></div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center">
-                      <IconGrid />
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-gray-900">{t.partner.visualDashboard}</p>
-                      <p className="text-sm text-gray-500">{t.partner.visualAnalytics}</p>
-                    </div>
-                  </div>
-                  <div className="h-px bg-gray-200"></div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex -space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i}><IconStar /></span>
-                      ))}
-                    </div>
-                    <p className="text-sm text-gray-500 font-medium">{t.partner.visualSupport}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-10">
+            <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4 text-gray-900">{t.pricing.title}</h2>
+            <p className="text-sm md:text-lg text-gray-600">{t.pricing.sub}</p>
+            <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-cyan-500 mx-auto rounded-full mt-4"></div>
+          </div>
+
+          <div className="max-w-6xl mx-auto">
+            <PartnerPricingGrid
+              plans={pp.partnerPlans as { name: string; price: string; priceYearly?: string; period: string; periodYearly?: string; bullets: string[]; popular: boolean }[]}
+              popularBadge={pp.popularBadge}
+              ctaPartner={pp.ctaPartner}
+              includesPrevious={pp.includesPrevious}
+              billingToggleMonthly={pp.billingToggleMonthly || 'Monthly'}
+              billingToggleYearly={pp.billingToggleYearly || 'Yearly'}
+              billingYearlySave={pp.billingYearlySave || '2 months free'}
+            />
+            <p className="text-center text-sm text-gray-500 mt-4">{pp.partnerSubtitle}</p>
           </div>
         </div>
       </section>
 
-      {/* ── BOTTOM CTA ───────────────────────────────────────── */}
+      {/* BOTTOM CTA */}
       <section className="py-12 lg:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-cyan-600"></div>
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -843,7 +765,7 @@ export default async function ForAccountantsPage({ params }: { params: Promise<{
             {t.bottomCta.sub}
           </p>
           <a
-            href="https://app.facturino.mk/register"
+            href="https://app.facturino.mk/partner/signup"
             className="px-8 py-4 bg-white text-indigo-600 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 inline-flex items-center"
           >
             {t.bottomCta.cta}
