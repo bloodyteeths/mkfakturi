@@ -19,7 +19,7 @@ class SupplierRequest extends FormRequest
         $isMacedonian = (int) $this->input('country_id') === self::MACEDONIA_COUNTRY_ID;
 
         $taxIdRules = $isMacedonian
-            ? ['required', 'string', 'regex:/^\d{7}$/']
+            ? ['nullable', 'string', 'regex:/^\d{7}$/']
             : ['nullable', 'string', 'max:255'];
 
         $vatRules = $isMacedonian
