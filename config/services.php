@@ -71,7 +71,7 @@ return [
 
         'currency' => 'mkd',
 
-        // Partner (Accountant) subscription price IDs (MKD)
+        // Partner (Accountant) subscription price IDs — Monthly (MKD)
         'partner_prices' => [
             'start' => env('STRIPE_PRICE_ACCOUNTANT_START_MKD_MONTHLY'),
             'office' => env('STRIPE_PRICE_ACCOUNTANT_OFFICE_MKD_MONTHLY'),
@@ -80,13 +80,31 @@ return [
             'seat' => env('STRIPE_PRICE_ACCOUNTANT_SEAT_MKD_MONTHLY'),
         ],
 
-        // Partner (Accountant) subscription price IDs (EUR)
+        // Partner (Accountant) subscription price IDs — Monthly (EUR)
         'partner_prices_eur' => [
             'start' => env('STRIPE_PRICE_ACCOUNTANT_START_EUR_MONTHLY'),
             'office' => env('STRIPE_PRICE_ACCOUNTANT_OFFICE_EUR_MONTHLY'),
             'pro' => env('STRIPE_PRICE_ACCOUNTANT_PRO_EUR_MONTHLY'),
             'elite' => env('STRIPE_PRICE_ACCOUNTANT_ELITE_EUR_MONTHLY'),
             'seat' => env('STRIPE_PRICE_ACCOUNTANT_SEAT_EUR_MONTHLY'),
+        ],
+
+        // Partner (Accountant) subscription price IDs — Yearly (MKD) — 2 months free
+        'partner_prices_yearly' => [
+            'start' => env('STRIPE_PRICE_ACCOUNTANT_START_MKD_YEARLY'),
+            'office' => env('STRIPE_PRICE_ACCOUNTANT_OFFICE_MKD_YEARLY'),
+            'pro' => env('STRIPE_PRICE_ACCOUNTANT_PRO_MKD_YEARLY'),
+            'elite' => env('STRIPE_PRICE_ACCOUNTANT_ELITE_MKD_YEARLY'),
+            'seat' => env('STRIPE_PRICE_ACCOUNTANT_SEAT_MKD_YEARLY'),
+        ],
+
+        // Partner (Accountant) subscription price IDs — Yearly (EUR) — 2 months free
+        'partner_prices_eur_yearly' => [
+            'start' => env('STRIPE_PRICE_ACCOUNTANT_START_EUR_YEARLY'),
+            'office' => env('STRIPE_PRICE_ACCOUNTANT_OFFICE_EUR_YEARLY'),
+            'pro' => env('STRIPE_PRICE_ACCOUNTANT_PRO_EUR_YEARLY'),
+            'elite' => env('STRIPE_PRICE_ACCOUNTANT_ELITE_EUR_YEARLY'),
+            'seat' => env('STRIPE_PRICE_ACCOUNTANT_SEAT_EUR_YEARLY'),
         ],
 
         // Stripe Connect for partner payouts (Cross-border to Macedonia)

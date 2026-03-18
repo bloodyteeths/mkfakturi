@@ -21,6 +21,7 @@ use Stripe\Subscription as StripeSubscription;
  * Handles accountant subscription management with Stripe.
  * 4 tiers: Start (€29), Office (€59), Pro (€99), Elite (€199)
  * + Seat add-on (€5/seat/month)
+ * Yearly billing: 2 months free (pay for 10)
  */
 class PartnerSubscriptionController extends Controller
 {
@@ -70,6 +71,8 @@ class PartnerSubscriptionController extends Controller
                 'name' => $tierConf['name'],
                 'price_eur' => $tierConf['price_monthly_eur'],
                 'price_mkd' => $tierConf['price_monthly_mkd'],
+                'price_yearly_eur' => $tierConf['price_yearly_eur'] ?? $tierConf['price_monthly_eur'] * 10,
+                'price_yearly_mkd' => $tierConf['price_yearly_mkd'] ?? $tierConf['price_monthly_mkd'] * 10,
                 'limits' => $tierConf['limits'],
                 'support_response_hours' => $tierConf['support_response_hours'] ?? null,
             ];
@@ -93,6 +96,7 @@ class PartnerSubscriptionController extends Controller
             'tier' => 'required|in:start,office,pro,elite',
             'seats' => 'sometimes|integer|min:0|max:50',
             'currency' => 'sometimes|in:mkd,eur',
+            'billing_cycle' => 'sometimes|in:monthly,yearly',
         ]);
 
         $user = Auth::user();
@@ -105,9 +109,14 @@ class PartnerSubscriptionController extends Controller
         $tier = $request->input('tier');
         $seats = $request->input('seats', 0);
         $currency = strtolower($request->input('currency', 'mkd'));
+        $billingCycle = $request->input('billing_cycle', 'monthly');
 
-        // Get Stripe price ID
-        $pricesKey = $currency === 'eur' ? 'services.stripe.partner_prices_eur' : 'services.stripe.partner_prices';
+        // Get Stripe price ID based on currency + billing cycle
+        if ($billingCycle === 'yearly') {
+            $pricesKey = $currency === 'eur' ? 'services.stripe.partner_prices_eur_yearly' : 'services.stripe.partner_prices_yearly';
+        } else {
+            $pricesKey = $currency === 'eur' ? 'services.stripe.partner_prices_eur' : 'services.stripe.partner_prices';
+        }
         $priceId = config("{$pricesKey}.{$tier}");
 
         if (!$priceId) {
@@ -168,6 +177,7 @@ class PartnerSubscriptionController extends Controller
                         'partner_id' => $partner->id,
                         'tier' => $tier,
                         'seats' => $seats,
+                        'billing_cycle' => $billingCycle,
                     ],
                 ],
                 'metadata' => [
@@ -175,6 +185,7 @@ class PartnerSubscriptionController extends Controller
                     'user_id' => $user->id,
                     'partner_id' => $partner->id,
                     'tier' => $tier,
+                    'billing_cycle' => $billingCycle,
                     'payment_currency' => $currency,
                 ],
                 'allow_promotion_codes' => true,
@@ -185,6 +196,7 @@ class PartnerSubscriptionController extends Controller
                 'partner_id' => $partner->id,
                 'tier' => $tier,
                 'seats' => $seats,
+                'billing_cycle' => $billingCycle,
                 'session_id' => $session->id,
             ]);
 
@@ -253,7 +265,21 @@ class PartnerSubscriptionController extends Controller
         }
 
         $newTier = $request->input('tier');
-        $newPriceId = config("services.stripe.partner_prices.{$newTier}");
+
+        // Detect current billing cycle from Stripe subscription to use matching price
+        $isYearly = false;
+        try {
+            Stripe::setApiKey(config('services.stripe.secret'));
+            $currentSub = StripeSubscription::retrieve($user->stripe_subscription_id);
+            if ($currentSub->items->data[0]->price->recurring->interval === 'year') {
+                $isYearly = true;
+            }
+        } catch (\Exception $e) {
+            // Fall back to monthly
+        }
+
+        $pricesKey = $isYearly ? 'services.stripe.partner_prices_yearly' : 'services.stripe.partner_prices';
+        $newPriceId = config("{$pricesKey}.{$newTier}");
 
         if (!$newPriceId) {
             return response()->json(['error' => 'Invalid tier or price not configured'], 400);
@@ -269,6 +295,8 @@ class PartnerSubscriptionController extends Controller
             $seatPriceIds = array_filter([
                 config('services.stripe.partner_prices.seat'),
                 config('services.stripe.partner_prices_eur.seat'),
+                config('services.stripe.partner_prices_yearly.seat'),
+                config('services.stripe.partner_prices_eur_yearly.seat'),
             ]);
 
             foreach ($stripeSub->items->data as $item) {

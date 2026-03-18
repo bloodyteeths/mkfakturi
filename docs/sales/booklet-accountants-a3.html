@@ -3,1237 +3,1230 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Facturino za Smetkovoditeli — A3 Booklet</title>
+<title>Facturino — Booklet A3 za Smetkovoditeli</title>
 <style>
-  /* ── PRINT-OPTIMIZED A3 BOOKLET ─────────────────────────── */
-  /* Print: A3 landscape → fold → 4-page A4 booklet           */
-  /* Page order when folded: Cover(P4) | Back(P1) || P2 | P3  */
-  /* We lay out pages top-to-bottom for screen, side-by-side   */
-  /* for print.                                                 */
+  /*
+   * A3 LANDSCAPE BOOKLET — Print double-sided, fold in half
+   * Sheet 1 (front): Back Cover (left) | Front Cover (right)
+   * Sheet 1 (back):  Inside Left (left) | Inside Right (right)
+   *
+   * On-screen: shown as 2 landscape spreads for preview
+   */
 
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
   :root {
-    --brand-primary: #4F46E5;
-    --brand-primary-dark: #3730A3;
-    --brand-cyan: #06B6D4;
-    --brand-green: #10B981;
-    --brand-red: #EF4444;
-    --brand-orange: #F59E0B;
-    --text-dark: #111827;
-    --text-body: #374151;
-    --text-muted: #6B7280;
-    --bg-light: #F8FAFC;
-    --bg-white: #FFFFFF;
-    /* A4 in mm for each half-page */
-    --page-w: 210mm;
-    --page-h: 297mm;
+    --indigo: #4F46E5;
+    --indigo-dark: #3730A3;
+    --indigo-light: #EEF2FF;
+    --emerald: #059669;
+    --emerald-light: #D1FAE5;
+    --cyan: #0891B2;
+    --slate-900: #0F172A;
+    --slate-700: #334155;
+    --slate-500: #64748B;
+    --slate-200: #E2E8F0;
+    --slate-50: #F8FAFC;
+    --white: #FFFFFF;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: var(--text-dark);
-    background: #E5E7EB;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--slate-900);
+    background: #94A3B8;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* Each .page = one A4 panel (half of A3 sheet) */
-  .page {
-    width: var(--page-w);
-    height: var(--page-h);
-    background: var(--bg-white);
+  /* Each .spread = one A3 landscape sheet (420mm x 297mm) */
+  .spread {
+    width: 420mm;
+    height: 297mm;
+    display: flex;
+    background: var(--white);
+    margin: 20px auto;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
     overflow: hidden;
     position: relative;
-    page-break-after: always;
-    margin: 10mm auto;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  }
+
+  /* Each .panel = one A4 portrait half (210mm x 297mm) */
+  .panel {
+    width: 210mm;
+    height: 297mm;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* ── FOLD LINE (screen only) ── */
+  .spread::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-left: 1px dashed #CBD5E1;
+    z-index: 100;
   }
 
   @media print {
-    body { background: white; }
-    .page {
+    body { background: none; margin: 0; }
+    .spread {
       margin: 0;
       box-shadow: none;
-      width: var(--page-w);
-      height: var(--page-h);
+      page-break-after: always;
     }
-    @page {
-      size: A4 portrait;
-      margin: 0;
-    }
+    .spread::after { display: none; }
   }
 
-  /* ── UTILITY CLASSES ───────────────────────────────────── */
-  .gradient-text {
-    background: linear-gradient(135deg, var(--brand-primary), var(--brand-cyan));
+  @page {
+    size: A3 landscape;
+    margin: 0;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     SPREAD 1 — FRONT OF SHEET
+     Left = BACK COVER (Page 4)  |  Right = FRONT COVER (Page 1)
+     ══════════════════════════════════════════════════════ */
+
+  /* ── BACK COVER (Page 4) ── */
+  .back-cover {
+    background: linear-gradient(160deg, rgba(15,23,42,0.92) 0%, rgba(30,41,59,0.92) 100%);
+    color: var(--white);
+    padding: 40mm 18mm 25mm 18mm;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .back-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('../../website/public/assets/images/hero_home.png') center/cover;
+    filter: blur(3px);
+    opacity: 0.12;
+    z-index: 0;
+  }
+
+  .back-cover > * { position: relative; z-index: 1; }
+
+  .back-cover .bc-top {
+    flex: 1;
+  }
+
+  .back-cover h2 {
+    font-size: 22pt;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 6mm;
+    background: linear-gradient(135deg, var(--white) 0%, #CBD5E1 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .gradient-bg {
-    background: linear-gradient(135deg, var(--brand-primary), var(--brand-cyan));
+
+  .back-cover .vision-text {
+    font-size: 10pt;
+    line-height: 1.7;
+    color: #94A3B8;
+    margin-bottom: 10mm;
+    max-width: 160mm;
   }
-  .gradient-bg-dark {
-    background: linear-gradient(135deg, #1E1B4B, var(--brand-primary-dark));
+
+  .ecosystem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4mm;
+    margin-bottom: 10mm;
   }
-  .tag {
-    display: inline-block;
-    padding: 3px 12px;
-    border-radius: 100px;
+
+  .eco-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4mm;
+    padding: 5mm;
+  }
+
+  .eco-card .eco-icon {
+    font-size: 16pt;
+    margin-bottom: 2mm;
+  }
+
+  .eco-card h4 {
     font-size: 8pt;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    color: var(--white);
+    margin-bottom: 1.5mm;
     text-transform: uppercase;
-  }
-  .tag-primary { background: rgba(79,70,229,0.1); color: var(--brand-primary); }
-  .tag-green { background: rgba(16,185,129,0.1); color: var(--brand-green); }
-  .tag-orange { background: rgba(245,158,11,0.1); color: var(--brand-orange); }
-  .tag-white { background: rgba(255,255,255,0.2); color: white; }
-
-  .check-icon {
-    width: 16px; height: 16px; flex-shrink: 0;
-    background: var(--brand-green);
-    border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    margin-right: 6px;
-  }
-  .check-icon::after {
-    content: '';
-    width: 5px; height: 8px;
-    border: solid white; border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    margin-top: -1px;
-  }
-  .x-icon {
-    width: 16px; height: 16px; flex-shrink: 0;
-    background: #FEE2E2;
-    border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    margin-right: 6px;
-    color: var(--brand-red);
-    font-size: 10px;
-    font-weight: 800;
+    letter-spacing: 0.5px;
   }
 
-  /* ══════════════════════════════════════════════════════════
-     PAGE 1 — COVER (Front of booklet)
-     ══════════════════════════════════════════════════════════ */
-  .cover {
-    background: linear-gradient(165deg, #0F0A2A 0%, #1E1B4B 35%, #312E81 65%, #4338CA 100%);
-    color: white;
+  .eco-card p {
+    font-size: 7pt;
+    line-height: 1.5;
+    color: #94A3B8;
+  }
+
+  .roadmap {
+    margin-bottom: 10mm;
+  }
+
+  .roadmap h3 {
+    font-size: 9pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--indigo);
+    margin-bottom: 4mm;
+    opacity: 0.9;
+  }
+
+  .roadmap-items {
+    display: flex;
+    gap: 4mm;
+  }
+
+  .roadmap-item {
+    flex: 1;
+    background: rgba(79,70,229,0.08);
+    border-radius: 3mm;
+    padding: 4mm;
+  }
+
+  .roadmap-item .rm-date {
+    font-size: 7pt;
+    font-weight: 700;
+    color: #818CF8;
+    margin-bottom: 1.5mm;
+  }
+
+  .roadmap-item .rm-text {
+    font-size: 7pt;
+    color: #CBD5E1;
+    line-height: 1.4;
+  }
+
+  .bc-footer {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 5mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .bc-footer .bc-logo {
+    height: 8mm;
+    opacity: 0.7;
+  }
+
+  .bc-footer .bc-contact {
+    font-size: 7pt;
+    color: #64748B;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* ── FRONT COVER (Page 1) ── */
+  .front-cover {
+    background: linear-gradient(160deg, var(--indigo-dark) 0%, var(--indigo) 50%, var(--cyan) 100%);
+    color: var(--white);
     display: flex;
     flex-direction: column;
-    padding: 0;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 25mm 20mm;
+    position: relative;
   }
 
-  .cover-hero-image {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 55%;
-    overflow: hidden;
-  }
-  .cover-hero-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.25;
-    filter: blur(1px);
-  }
-  .cover-hero-image::after {
+  .front-cover::before {
     content: '';
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 60%;
-    background: linear-gradient(to top, #0F0A2A, transparent);
+    inset: 0;
+    background: url('../../website/public/assets/images/hero_accountants.png') center/cover;
+    opacity: 0.08;
   }
 
   .cover-content {
     position: relative;
     z-index: 2;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 14mm 16mm;
   }
 
   .cover-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: auto;
-  }
-  .cover-logo img {
-    height: 36px;
+    height: 14mm;
+    margin-bottom: 15mm;
     filter: brightness(0) invert(1);
   }
 
-  .cover-main {
-    margin-bottom: 24mm;
+  .cover-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 2mm 5mm;
+    font-size: 7pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10mm;
   }
-  .cover-main .tag {
-    margin-bottom: 14px;
-  }
-  .cover-main h1 {
+
+  .cover-h1 {
     font-size: 32pt;
     font-weight: 900;
-    line-height: 1.1;
-    margin-bottom: 12px;
+    line-height: 1.15;
+    margin-bottom: 6mm;
     letter-spacing: -0.5px;
   }
-  .cover-main h1 span {
-    background: linear-gradient(135deg, #818CF8, #67E8F9);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .cover-main p.subtitle {
-    font-size: 13pt;
-    color: #C7D2FE;
-    line-height: 1.5;
-    max-width: 400px;
+
+  .cover-sub {
+    font-size: 12pt;
+    font-weight: 300;
+    line-height: 1.6;
+    opacity: 0.85;
+    margin-bottom: 15mm;
+    max-width: 155mm;
   }
 
   .cover-stats {
     display: flex;
-    gap: 0;
-    margin-bottom: 12mm;
+    gap: 6mm;
+    margin-bottom: 15mm;
   }
+
   .cover-stat {
-    flex: 1;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4mm;
+    padding: 4mm 6mm;
     text-align: center;
-    padding: 10px 8px;
-    border-right: 1px solid rgba(255,255,255,0.1);
   }
-  .cover-stat:last-child { border-right: none; }
-  .cover-stat .num {
-    font-size: 22pt;
+
+  .cover-stat .stat-num {
+    font-size: 18pt;
     font-weight: 800;
-    background: linear-gradient(135deg, #818CF8, #67E8F9);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
   }
-  .cover-stat .label {
-    font-size: 7pt;
-    color: #A5B4FC;
+
+  .cover-stat .stat-label {
+    font-size: 6.5pt;
+    opacity: 0.7;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-top: 2px;
   }
 
   .cover-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, #818CF8, #06B6D4);
-    color: white;
+    display: inline-block;
+    background: var(--white);
+    color: var(--indigo);
     font-size: 11pt;
-    font-weight: 700;
-    padding: 12px 28px;
-    border-radius: 12px;
+    font-weight: 800;
+    padding: 4mm 12mm;
+    border-radius: 3mm;
     text-decoration: none;
-    box-shadow: 0 4px 20px rgba(79,70,229,0.4);
+    letter-spacing: 0.3px;
   }
 
-  .cover-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 10px;
-    font-size: 7.5pt;
-    color: #A5B4FC;
+  .cover-url {
+    margin-top: 4mm;
+    font-size: 8pt;
+    opacity: 0.6;
   }
 
-  /* ══════════════════════════════════════════════════════════
-     PAGE 2 — INNER LEFT (Features + AI Ecosystem)
-     ══════════════════════════════════════════════════════════ */
-  .inner-left {
+  /* ══════════════════════════════════════════════════════
+     SPREAD 2 — BACK OF SHEET
+     Left = INSIDE LEFT (Page 2)  |  Right = INSIDE RIGHT (Page 3)
+     ══════════════════════════════════════════════════════ */
+
+  /* ── INSIDE LEFT (Page 2) — Features ── */
+  .inside-left {
+    background: var(--white);
     padding: 12mm 14mm;
     display: flex;
     flex-direction: column;
-    gap: 0;
   }
 
-  .section-header {
-    margin-bottom: 8mm;
+  .lifestyle-strip {
+    display: flex;
+    gap: 2mm;
+    margin-bottom: 4mm;
+    border-radius: 3mm;
+    overflow: hidden;
+    height: 26mm;
   }
-  .section-header h2 {
-    font-size: 18pt;
+
+  .lifestyle-strip img {
+    flex: 1;
+    object-fit: cover;
+    width: 33.33%;
+    border-radius: 2mm;
+  }
+
+  .il-header {
+    margin-bottom: 6mm;
+  }
+
+  .il-header h2 {
+    font-size: 16pt;
     font-weight: 800;
-    color: var(--text-dark);
-    margin-bottom: 4px;
+    color: var(--slate-900);
+    margin-bottom: 1.5mm;
   }
-  .section-header p {
-    font-size: 9pt;
-    color: var(--text-muted);
-  }
-  .section-divider {
-    width: 40px;
-    height: 3px;
-    border-radius: 2px;
-    margin-top: 6px;
+
+  .il-header p {
+    font-size: 8pt;
+    color: var(--slate-500);
   }
 
   .feature-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 5mm;
-    margin-bottom: 8mm;
+    gap: 3mm;
+    margin-bottom: 5mm;
   }
-  .feature-card {
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid #E5E7EB;
-    background: var(--bg-light);
+
+  .feat-card {
+    border: 1px solid var(--slate-200);
+    border-radius: 3mm;
+    padding: 4mm;
+    transition: border-color 0.2s;
   }
-  .feature-card .icon-circle {
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 6px;
-    font-size: 13px;
+
+  .feat-card .feat-icon {
+    font-size: 14pt;
+    margin-bottom: 1.5mm;
   }
-  .feature-card h4 {
-    font-size: 9pt;
+
+  .feat-card h4 {
+    font-size: 8pt;
     font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 3px;
+    color: var(--slate-900);
+    margin-bottom: 1mm;
   }
-  .feature-card p {
-    font-size: 7pt;
-    color: var(--text-muted);
+
+  .feat-card p {
+    font-size: 6.5pt;
+    color: var(--slate-500);
     line-height: 1.4;
   }
 
-  /* AI Ecosystem section */
-  .ai-ecosystem {
-    background: linear-gradient(135deg, #EEF2FF, #F0FDFA);
-    border-radius: 12px;
-    padding: 10mm 10mm;
-    margin-bottom: 6mm;
-  }
-  .ai-ecosystem h3 {
-    font-size: 13pt;
-    font-weight: 800;
-    margin-bottom: 8px;
-  }
+  /* AI Flow */
   .ai-flow {
+    background: linear-gradient(135deg, var(--indigo-light) 0%, #F0F9FF 100%);
+    border-radius: 4mm;
+    padding: 5mm;
+    margin-bottom: 5mm;
+  }
+
+  .ai-flow h3 {
+    font-size: 9pt;
+    font-weight: 800;
+    color: var(--indigo);
+    margin-bottom: 3mm;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-steps {
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin-bottom: 8px;
+    justify-content: space-between;
+    gap: 1mm;
   }
-  .ai-flow-step {
-    flex: 1;
+
+  .ai-step {
     text-align: center;
-    padding: 8px 4px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  }
-  .ai-flow-step .emoji { font-size: 16px; margin-bottom: 2px; }
-  .ai-flow-step .name { font-size: 6.5pt; font-weight: 600; color: var(--text-dark); }
-  .ai-flow-arrow { color: var(--brand-primary); font-size: 12px; font-weight: 700; }
-
-  /* Screenshot showcase */
-  .screenshot-strip {
-    display: flex;
-    gap: 4mm;
-    margin-top: 4mm;
-  }
-  .screenshot-strip img {
     flex: 1;
-    border-radius: 8px;
-    border: 1px solid #E5E7EB;
-    object-fit: cover;
-    height: 55mm;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
 
-  /* ══════════════════════════════════════════════════════════
-     PAGE 3 — INNER RIGHT (Pricing + Comparison)
-     ══════════════════════════════════════════════════════════ */
-  .inner-right {
+  .ai-step .step-icon {
+    font-size: 16pt;
+    margin-bottom: 1mm;
+  }
+
+  .ai-step .step-label {
+    font-size: 6.5pt;
+    font-weight: 600;
+    color: var(--indigo-dark);
+  }
+
+  .ai-arrow {
+    color: var(--indigo);
+    font-size: 10pt;
+    opacity: 0.4;
+    flex-shrink: 0;
+  }
+
+  /* Full feature list */
+  .feature-list-section {
+    flex: 1;
+  }
+
+  .feature-list-section h3 {
+    font-size: 9pt;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 3mm;
+  }
+
+  .feature-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 6mm;
+  }
+
+  .fl-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5mm;
+    padding: 1mm 0;
+    font-size: 6.5pt;
+    color: var(--slate-700);
+    line-height: 1.3;
+  }
+
+  .fl-check {
+    color: var(--emerald);
+    font-size: 7pt;
+    flex-shrink: 0;
+  }
+
+  /* ── INSIDE RIGHT (Page 3) — Pricing + Comparison ── */
+  .inside-right {
+    background: var(--slate-50);
     padding: 12mm 14mm;
     display: flex;
     flex-direction: column;
+    position: relative;
+  }
+
+  .inside-right::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 35mm;
+    background: url('../../website/public/assets/images/hero_pricing.png') center/cover;
+    filter: blur(2px);
+    opacity: 0.06;
+    z-index: 0;
+  }
+
+  .inside-right > * { position: relative; z-index: 1; }
+
+  .ir-header {
+    margin-bottom: 4mm;
+  }
+
+  .ir-header h2 {
+    font-size: 16pt;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin-bottom: 1.5mm;
+  }
+
+  .ir-header p {
+    font-size: 8pt;
+    color: var(--slate-500);
   }
 
   /* Pricing tiers */
   .pricing-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 3.5mm;
-    margin-bottom: 6mm;
+    gap: 3mm;
+    margin-bottom: 3mm;
   }
-  .price-card {
-    border-radius: 10px;
-    border: 1.5px solid #E5E7EB;
-    padding: 8px 8px 10px;
+
+  .tier-card {
+    background: var(--white);
+    border: 1px solid var(--slate-200);
+    border-radius: 3mm;
+    padding: 4mm;
     position: relative;
-    display: flex;
-    flex-direction: column;
   }
-  .price-card.popular {
-    border-color: var(--brand-green);
-    box-shadow: 0 0 0 1px var(--brand-green), 0 2px 12px rgba(16,185,129,0.15);
+
+  .tier-card.popular {
+    border-color: var(--emerald);
+    box-shadow: 0 0 0 1px var(--emerald);
   }
-  .price-card .pop-badge {
+
+  .tier-badge {
     position: absolute;
-    top: -8px;
+    top: -2.5mm;
     left: 50%;
     transform: translateX(-50%);
-    background: linear-gradient(135deg, var(--brand-green), #059669);
-    color: white;
-    font-size: 6pt;
-    font-weight: 800;
-    padding: 2px 10px;
-    border-radius: 100px;
-    white-space: nowrap;
+    background: var(--emerald);
+    color: var(--white);
+    font-size: 5.5pt;
+    font-weight: 700;
+    padding: 0.8mm 3mm;
+    border-radius: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    white-space: nowrap;
   }
-  .price-card .tier-name {
+
+  .tier-name {
     font-size: 10pt;
     font-weight: 800;
-    color: var(--text-dark);
-    margin-bottom: 2px;
-    margin-top: 2px;
+    color: var(--slate-900);
+    margin-bottom: 1.5mm;
   }
-  .price-card .tier-price {
-    font-size: 16pt;
-    font-weight: 900;
-    color: var(--text-dark);
-    line-height: 1;
+
+  .tier-prices {
+    margin-bottom: 3mm;
+    padding-bottom: 2.5mm;
+    border-bottom: 1px solid var(--slate-200);
   }
-  .price-card .tier-price small {
-    font-size: 7pt;
-    font-weight: 500;
-    color: var(--text-muted);
-  }
-  .price-card .tier-eur {
-    font-size: 7pt;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-  }
-  .price-card .tier-features {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    flex: 1;
-  }
-  .price-card .tier-features li {
-    font-size: 6.5pt;
-    color: var(--text-body);
-    padding: 2.5px 0;
+
+  .tier-price-row {
     display: flex;
-    align-items: flex-start;
-    gap: 4px;
-    line-height: 1.3;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.5mm;
   }
-  .price-card .tier-features li::before {
-    content: '✓';
-    color: var(--brand-green);
+
+  .tier-price-label {
+    font-size: 6pt;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .tier-price-val {
+    font-size: 9pt;
     font-weight: 800;
-    font-size: 7pt;
+    color: var(--slate-900);
+  }
+
+  .tier-price-val.yearly {
+    color: var(--emerald);
+  }
+
+  .tier-eur {
+    font-size: 6pt;
+    color: var(--slate-500);
+    margin-top: 0.5mm;
+  }
+
+  .tier-save {
+    display: inline-block;
+    background: var(--emerald-light);
+    color: var(--emerald);
+    font-size: 5.5pt;
+    font-weight: 700;
+    padding: 0.5mm 2mm;
+    border-radius: 6px;
+    margin-top: 1mm;
+  }
+
+  .tier-limits {
+    list-style: none;
+  }
+
+  .tier-limits li {
+    font-size: 6.5pt;
+    color: var(--slate-700);
+    padding: 0.8mm 0;
+    display: flex;
+    align-items: center;
+    gap: 1.5mm;
+  }
+
+  .tier-limits .tl-check {
+    color: var(--emerald);
+    font-size: 6pt;
     flex-shrink: 0;
   }
 
   .seat-note {
     text-align: center;
-    font-size: 7.5pt;
-    color: var(--text-muted);
-    margin-bottom: 6mm;
-    padding: 6px 0;
-    border-top: 1px dashed #E5E7EB;
-    border-bottom: 1px dashed #E5E7EB;
-  }
-  .seat-note strong { color: var(--text-dark); }
-
-  /* Comparison Table */
-  .comparison {
+    font-size: 7pt;
+    color: var(--slate-500);
     margin-bottom: 5mm;
   }
-  .comparison h3 {
-    font-size: 12pt;
-    font-weight: 800;
-    margin-bottom: 6px;
+
+  .seat-note strong {
+    color: var(--slate-700);
   }
+
+  /* Comparison table */
+  .comparison {
+    flex: 1;
+  }
+
+  .comparison h3 {
+    font-size: 10pt;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin-bottom: 3mm;
+  }
+
   .comp-table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 6.5pt;
+  }
+
+  .comp-table th {
+    text-align: left;
+    padding: 1.5mm 2mm;
+    font-weight: 700;
+    color: var(--slate-900);
+    background: var(--white);
+    border-bottom: 1.5px solid var(--slate-200);
+  }
+
+  .comp-table th:not(:first-child) {
+    text-align: center;
     font-size: 7pt;
   }
-  .comp-table thead th {
+
+  .comp-table td {
+    padding: 1.5mm 2mm;
+    border-bottom: 0.5px solid var(--slate-200);
+    color: var(--slate-700);
+  }
+
+  .comp-table td:not(:first-child) {
     text-align: center;
-    padding: 6px 4px;
-    font-weight: 800;
-    font-size: 7.5pt;
-    border-bottom: 2px solid #E5E7EB;
-  }
-  .comp-table thead th:first-child {
-    text-align: left;
-    width: 50%;
-  }
-  .comp-table thead th.facturino-col {
-    background: linear-gradient(135deg, #EEF2FF, #F0FDFA);
-    border-radius: 6px 6px 0 0;
-    color: var(--brand-primary);
-  }
-  .comp-table tbody td {
-    padding: 4.5px 4px;
-    border-bottom: 1px solid #F3F4F6;
-    text-align: center;
-    color: var(--text-body);
-  }
-  .comp-table tbody td:first-child {
-    text-align: left;
     font-weight: 500;
   }
-  .comp-table tbody td.facturino-col {
-    background: #FAFBFF;
+
+  .comp-table tr:last-child td {
+    border-bottom: none;
   }
-  .comp-table tbody tr:last-child td { border-bottom: none; }
+
+  .comp-yes { color: var(--emerald); font-weight: 700; }
+  .comp-no { color: #DC2626; }
+  .comp-partial { color: #D97706; }
+  .comp-highlight { background: #F0FDF4; }
 
   /* Why us section */
-  .why-us {
-    background: linear-gradient(135deg, #F0FDF4, #ECFDF5);
-    border-radius: 10px;
-    padding: 8mm;
-    margin-top: auto;
-  }
-  .why-us h3 {
-    font-size: 11pt;
-    font-weight: 800;
-    color: var(--text-dark);
-    margin-bottom: 6px;
-  }
-  .why-us-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
-  .why-us-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 5px;
-    font-size: 7pt;
-    color: var(--text-body);
-    line-height: 1.3;
-  }
-  .why-us-item strong {
-    color: var(--text-dark);
-    display: block;
-    font-size: 7.5pt;
+  .why-section {
+    margin-top: 4mm;
+    background: var(--white);
+    border-radius: 3mm;
+    padding: 4mm;
   }
 
-  /* ══════════════════════════════════════════════════════════
-     PAGE 4 — BACK COVER (Vision + CTA + Contact)
-     ══════════════════════════════════════════════════════════ */
-  .back-cover {
-    background: linear-gradient(165deg, #0F0A2A 0%, #1E1B4B 50%, #312E81 100%);
-    color: white;
-    padding: 14mm 16mm;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .back-hero-bg {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 40%;
-    overflow: hidden;
-  }
-  .back-hero-bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.12;
-    filter: blur(2px);
-  }
-  .back-hero-bg::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 50%;
-    background: linear-gradient(to bottom, #1E1B4B, transparent);
-    z-index: 1;
-  }
-
-  .back-content {
-    position: relative;
-    z-index: 2;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .vision-section {
-    margin-bottom: 10mm;
-  }
-  .vision-section h2 {
-    font-size: 20pt;
-    font-weight: 900;
-    line-height: 1.15;
-    margin-bottom: 10px;
-  }
-  .vision-section p {
-    font-size: 9.5pt;
-    color: #C7D2FE;
-    line-height: 1.6;
-    max-width: 440px;
-  }
-
-  .ecosystem-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5mm;
-    margin-bottom: 10mm;
-  }
-  .eco-card {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 12px;
-    padding: 12px 14px;
-    backdrop-filter: blur(4px);
-  }
-  .eco-card .eco-icon {
-    font-size: 20px;
-    margin-bottom: 6px;
-  }
-  .eco-card h4 {
-    font-size: 10pt;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-  .eco-card p {
-    font-size: 7pt;
-    color: #C7D2FE;
-    line-height: 1.4;
-  }
-
-  .roadmap {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 10mm;
-    margin-bottom: 10mm;
-  }
-  .roadmap h3 {
-    font-size: 12pt;
-    font-weight: 800;
-    margin-bottom: 8px;
-  }
-  .roadmap-items {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 5mm;
-  }
-  .roadmap-item .year {
-    font-size: 8pt;
-    font-weight: 800;
-    background: linear-gradient(135deg, #818CF8, #67E8F9);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 3px;
-  }
-  .roadmap-item .desc {
-    font-size: 7pt;
-    color: #C7D2FE;
-    line-height: 1.3;
-  }
-
-  .back-cta {
-    text-align: center;
-    margin-bottom: 10mm;
-  }
-  .back-cta h3 {
-    font-size: 18pt;
-    font-weight: 900;
-    margin-bottom: 4px;
-  }
-  .back-cta p {
+  .why-section h3 {
     font-size: 9pt;
-    color: #A5B4FC;
-    margin-bottom: 12px;
-  }
-  .back-cta a {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: white;
-    color: var(--brand-primary);
-    font-size: 11pt;
     font-weight: 800;
-    padding: 12px 32px;
-    border-radius: 12px;
-    text-decoration: none;
-    box-shadow: 0 4px 20px rgba(255,255,255,0.2);
+    color: var(--slate-900);
+    margin-bottom: 2.5mm;
   }
 
-  .back-footer {
-    margin-top: auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 8px;
-  }
-  .back-footer .logo-area {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .back-footer .logo-area img {
-    height: 28px;
-    filter: brightness(0) invert(1);
-  }
-  .back-footer .contact-info {
-    text-align: right;
-    font-size: 7pt;
-    color: #A5B4FC;
-    line-height: 1.6;
-  }
-  .back-footer .contact-info strong {
-    color: white;
-  }
-
-  /* ── QR code placeholder ──────────────────────────────── */
-  .qr-box {
-    width: 50px; height: 50px;
-    background: white;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 6pt;
-    color: var(--text-muted);
-    text-align: center;
-    padding: 4px;
-  }
-
-  /* Full feature list */
-  .full-features {
-    margin-bottom: 6mm;
-  }
-  .full-features h3 {
-    font-size: 12pt;
-    font-weight: 800;
-    margin-bottom: 6px;
-  }
-  .full-features-grid {
+  .why-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 3px 8px;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5mm;
   }
-  .full-features-grid .ff-item {
+
+  .why-item {
     display: flex;
-    align-items: center;
+    gap: 2mm;
+    align-items: flex-start;
+  }
+
+  .why-icon {
+    font-size: 12pt;
+    flex-shrink: 0;
+    margin-top: 0.5mm;
+  }
+
+  .why-item h4 {
     font-size: 7pt;
-    color: var(--text-body);
-    padding: 2.5px 0;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 0.5mm;
+  }
+
+  .why-item p {
+    font-size: 6pt;
+    color: var(--slate-500);
+    line-height: 1.4;
   }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE 1 — COVER
-     ═══════════════════════════════════════════════════════════ -->
-<div class="page cover">
-  <div class="cover-hero-image">
-    <img src="../../website/public/assets/images/hero_accountants.png" alt="">
-  </div>
-  <div class="cover-content">
-    <div class="cover-logo">
-      <img src="../../website/public/brand/facturino_logo.png" alt="Facturino">
-    </div>
+<!-- ══════════════════════════════════════════════════════
+     SPREAD 1 — FRONT OF A3 SHEET
+     When folded: Left becomes BACK COVER, Right becomes FRONT COVER
+     ══════════════════════════════════════════════════════ -->
+<div class="spread">
 
-    <div class="cover-main">
-      <div class="tag tag-white">AI Платформа за сметководители</div>
-      <h1>Една пријава.<br><span>Десетици клиенти.</span></h1>
-      <p class="subtitle">
-        Завршете ја работата за 10 клиенти за времето кое сега ви треба за 3.
-        AI скенирање, банкарско порамнување, е-Фактура — сè на едно место.
+  <!-- BACK COVER (Page 4) — Left panel -->
+  <div class="panel back-cover">
+    <div class="bc-top">
+      <h2>Иднината на<br>македонското<br>сметководство</h2>
+      <p class="vision-text">
+        Facturino не е само софтвер за фактури. Тоа е комплетен екосистем
+        кој го поврзува сметководителот, компанијата, банката и регулаторот
+        во една интелигентна платформа.
       </p>
-    </div>
 
-    <div class="cover-stats">
-      <div class="cover-stat">
-        <div class="num">25+</div>
-        <div class="label">Функции</div>
-      </div>
-      <div class="cover-stat">
-        <div class="num">4</div>
-        <div class="label">Јазици (MK, SQ, TR, EN)</div>
-      </div>
-      <div class="cover-stat">
-        <div class="num">AI</div>
-        <div class="label">Gemini 2.5 интеграција</div>
-      </div>
-      <div class="cover-stat">
-        <div class="num">30</div>
-        <div class="label">Дена бесплатно</div>
-      </div>
-    </div>
-
-    <div style="margin-bottom: 10mm;">
-      <span class="cover-cta">
-        Пробајте бесплатно 30 дена &rarr;
-      </span>
-      <span style="display:block; font-size:7.5pt; color:#A5B4FC; margin-top:6px;">
-        Без кредитна картичка &middot; Без обврска &middot; Целосен пристап
-      </span>
-    </div>
-
-    <div class="cover-bottom">
-      <span>www.facturino.mk</span>
-      <span>Facturino ДООЕЛ &middot; Скопје, Македонија</span>
-      <span>+389 70 000 000 &middot; info@facturino.mk</span>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE 2 — INNER LEFT (Features + AI)
-     ═══════════════════════════════════════════════════════════ -->
-<div class="page inner-left">
-  <div class="section-header">
-    <div class="tag tag-primary">Сè што ви треба</div>
-    <h2>Повеќе од сметководствен софтвер</h2>
-    <p>Целосен AI екосистем за сметководствени канцеларии</p>
-    <div class="section-divider gradient-bg"></div>
-  </div>
-
-  <div class="feature-grid">
-    <div class="feature-card">
-      <div class="icon-circle" style="background:#EEF2FF; color:#4F46E5;">&#x1F4CA;</div>
-      <h4>Мулти-компанија панел</h4>
-      <p>Сите клиенти на едно место. Префрлете се меѓу компании со еден клик. Портфолио контролен панел.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon-circle" style="background:#F0FDF4; color:#10B981;">&#x1F3E6;</div>
-      <h4>Банкарски увоз</h4>
-      <p>CSV, MT940, PDF увоз на изводи. AI рекончилијација ги порамнува автоматски. 90-дневен прозорец.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon-circle" style="background:#FFF7ED; color:#F59E0B;">&#x1F4C4;</div>
-      <h4>е-Фактура (UBL 2.1)</h4>
-      <p>Структурирани податоци за УЈП. QES дигитален потпис. Целосно подготвени за задолжителна е-Фактура.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon-circle" style="background:#FDF2F8; color:#EC4899;">&#x1F4F7;</div>
-      <h4>AI скенирање документи</h4>
-      <p>Сликајте фактура → AI ја чита. OCR за фискални, влезни фактури. Автоматско контирање и ДДВ.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon-circle" style="background:#EFF6FF; color:#3B82F6;">&#x1F4AC;</div>
-      <h4>AI асистент (Chat)</h4>
-      <p>Кажете „Фактура за Марков 3,000 ден" — AI ја креира. Прашајте го AI за финансиски совети.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon-circle" style="background:#ECFDF5; color:#059669;">&#x1F4E6;</div>
-      <h4>Материјално (Залиха)</h4>
-      <p>Приемница, издатница, WAC вреднување. Автоматско книжење на Класа 3, 6, 7. Инвентура.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon-circle" style="background:#FEF2F2; color:#EF4444;">&#x1F4C5;</div>
-      <h4>Годишно затворање</h4>
-      <p>6-чекорен волшебник: проверка → корекции → затворачки книжења → ЦРРМ извештаи. 30 минути.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon-circle" style="background:#F5F3FF; color:#7C3AED;">&#x1F4B0;</div>
-      <h4>Плати / Payroll</h4>
-      <p>МПИН/МВРП пресметка, PP30 платен налог, извештаи по вработен. Извоз за банка.</p>
-    </div>
-  </div>
-
-  <!-- AI Ecosystem Flow -->
-  <div class="ai-ecosystem">
-    <div class="tag tag-primary" style="margin-bottom:6px;">AI Екосистем</div>
-    <h3>Од хартија до книжење за 10 секунди</h3>
-    <div class="ai-flow">
-      <div class="ai-flow-step">
-        <div class="emoji">&#x1F4F8;</div>
-        <div class="name">Скенирај</div>
-      </div>
-      <div class="ai-flow-arrow">&rarr;</div>
-      <div class="ai-flow-step">
-        <div class="emoji">&#x1F916;</div>
-        <div class="name">AI чита</div>
-      </div>
-      <div class="ai-flow-arrow">&rarr;</div>
-      <div class="ai-flow-step">
-        <div class="emoji">&#x1F4CB;</div>
-        <div class="name">Контира</div>
-      </div>
-      <div class="ai-flow-arrow">&rarr;</div>
-      <div class="ai-flow-step">
-        <div class="emoji">&#x2705;</div>
-        <div class="name">Книжи</div>
-      </div>
-      <div class="ai-flow-arrow">&rarr;</div>
-      <div class="ai-flow-step">
-        <div class="emoji">&#x1F3E6;</div>
-        <div class="name">Порамни</div>
-      </div>
-    </div>
-    <p style="font-size:7pt; color:var(--text-muted); line-height:1.4;">
-      Единствениот AI пајплајн на пазарот: скенирај → извлечи → контирај → книжи → порамни со банка. Gemini 2.5 модел. Македонски, албански, турски и англиски.
-    </p>
-  </div>
-
-  <!-- Full feature list -->
-  <div class="full-features">
-    <h3>Целосен список на функции</h3>
-    <div class="full-features-grid">
-      <div class="ff-item"><span class="check-icon"></span> Фактури / Профактури</div>
-      <div class="ff-item"><span class="check-icon"></span> Проценки / Понуди</div>
-      <div class="ff-item"><span class="check-icon"></span> Повторливи фактури</div>
-      <div class="ff-item"><span class="check-icon"></span> Влезни фактури (Bills)</div>
-      <div class="ff-item"><span class="check-icon"></span> Трошоци / Расходи</div>
-      <div class="ff-item"><span class="check-icon"></span> Нарачки за купување</div>
-      <div class="ff-item"><span class="check-icon"></span> Плаќања и наплати</div>
-      <div class="ff-item"><span class="check-icon"></span> Клиенти / Добавувачи</div>
-      <div class="ff-item"><span class="check-icon"></span> Проекти + трошоци</div>
-      <div class="ff-item"><span class="check-icon"></span> Буџети по оддел</div>
-      <div class="ff-item"><span class="check-icon"></span> Залиха (WAC, FIFO)</div>
-      <div class="ff-item"><span class="check-icon"></span> IFRS извештаи</div>
-      <div class="ff-item"><span class="check-icon"></span> Плати / МПИН / PP30</div>
-      <div class="ff-item"><span class="check-icon"></span> Банкарски увоз</div>
-      <div class="ff-item"><span class="check-icon"></span> AI рекончилијација</div>
-      <div class="ff-item"><span class="check-icon"></span> AI скенирање (OCR)</div>
-      <div class="ff-item"><span class="check-icon"></span> AI чет асистент</div>
-      <div class="ff-item"><span class="check-icon"></span> AI инсајти</div>
-      <div class="ff-item"><span class="check-icon"></span> е-Фактура (UBL 2.1)</div>
-      <div class="ff-item"><span class="check-icon"></span> QES дигитален потпис</div>
-      <div class="ff-item"><span class="check-icon"></span> Годишно затворање</div>
-      <div class="ff-item"><span class="check-icon"></span> PWA мобилна апл.</div>
-      <div class="ff-item"><span class="check-icon"></span> PDF шаблони (3 стила)</div>
-      <div class="ff-item"><span class="check-icon"></span> Портфолио панел</div>
-      <div class="ff-item"><span class="check-icon"></span> Рокови / Deadlines</div>
-      <div class="ff-item"><span class="check-icon"></span> Email праќање</div>
-      <div class="ff-item"><span class="check-icon"></span> Активностен дневник</div>
-    </div>
-  </div>
-
-  <div class="screenshot-strip">
-    <img src="../../website/public/assets/screenshots/dashboard.png" alt="Dashboard">
-    <img src="../../website/public/assets/screenshots/banking.png" alt="Banking">
-    <img src="../../website/public/assets/screenshots/invoices.png" alt="Invoices">
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE 3 — INNER RIGHT (Pricing + Comparison)
-     ═══════════════════════════════════════════════════════════ -->
-<div class="page inner-right">
-  <div class="section-header">
-    <div class="tag tag-green">Цени за сметководители</div>
-    <h2>Сите функции. Секој пакет.</h2>
-    <p>Разликата е само во лимитите. 30 дена бесплатен пробен период.</p>
-    <div class="section-divider" style="background: var(--brand-green);"></div>
-  </div>
-
-  <div class="pricing-grid">
-    <!-- Start -->
-    <div class="price-card">
-      <div class="tier-name">Start</div>
-      <div class="tier-price">1,784 <small>ден/мес</small></div>
-      <div class="tier-eur">(€29/месец)</div>
-      <ul class="tier-features">
-        <li>15 компании</li>
-        <li>50 AI кредити/месец</li>
-        <li>3 банкарски сметки</li>
-        <li>10 вработени</li>
-        <li>5 е-Фактури/месец</li>
-        <li>50 документи/месец</li>
-        <li>10 портал покани</li>
-        <li>Поддршка: 48ч</li>
-      </ul>
-    </div>
-
-    <!-- Office (Popular) -->
-    <div class="price-card popular">
-      <div class="pop-badge">Популарен</div>
-      <div class="tier-name">Office</div>
-      <div class="tier-price">3,629 <small>ден/мес</small></div>
-      <div class="tier-eur">(€59/месец)</div>
-      <ul class="tier-features">
-        <li>50 компании</li>
-        <li>200 AI кредити/месец</li>
-        <li>10 банкарски сметки</li>
-        <li>50 вработени</li>
-        <li>50 е-Фактури/месец</li>
-        <li>200 документи/месец</li>
-        <li>50 портал покани</li>
-        <li>Поддршка: 24ч</li>
-      </ul>
-    </div>
-
-    <!-- Pro -->
-    <div class="price-card">
-      <div class="tier-name">Pro</div>
-      <div class="tier-price">6,089 <small>ден/мес</small></div>
-      <div class="tier-eur">(€99/месец)</div>
-      <ul class="tier-features">
-        <li>150 компании</li>
-        <li>500 AI кредити/месец</li>
-        <li>30 банкарски сметки</li>
-        <li>200 вработени</li>
-        <li>Неограничено е-Фактури</li>
-        <li>500 документи/месец</li>
-        <li>200 портал покани</li>
-        <li>Поддршка: 4ч</li>
-      </ul>
-    </div>
-
-    <!-- Elite -->
-    <div class="price-card">
-      <div class="tier-name">Elite</div>
-      <div class="tier-price">12,239 <small>ден/мес</small></div>
-      <div class="tier-eur">(€199/месец)</div>
-      <ul class="tier-features">
-        <li>Неограничено компании</li>
-        <li>Неограничено AI кредити</li>
-        <li>Неограничено сметки</li>
-        <li>Неограничено вработени</li>
-        <li>Неограничено е-Фактури</li>
-        <li>Неограничено документи</li>
-        <li>Неограничено покани</li>
-        <li>Поддршка: 1ч (WhatsApp)</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="seat-note">
-    <strong>+ 308 ден/месец (€5)</strong> за секоја додатна лиценца (колега/вработен) &middot;
-    Пробниот период вклучува Start лимити
-  </div>
-
-  <!-- Comparison Table -->
-  <div class="comparison">
-    <h3>Споредба: Facturino vs PANTHEON vs Zonel</h3>
-    <table class="comp-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th class="facturino-col">Facturino</th>
-          <th>PANTHEON</th>
-          <th>Zonel</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Мулти-јазичен UI (MK, SQ, TR, EN)</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>AI скенирање на документи (OCR)</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>AI чет асистент (креирање + совети)</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>AI банкарско порамнување</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>Банкарски увоз (CSV/MT940/PDF)</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-          <td><span class="check-icon"></span></td>
-        </tr>
-        <tr>
-          <td>е-Фактура подготвеност (UBL 2.1)</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>Мулти-компанија од 1 акаунт</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>Материјално сметководство (WAC)</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>Годишно затворање (6-чекорен волшебник)</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>Мобилна PWA апликација</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-          <td><span class="check-icon"></span></td>
-        </tr>
-        <tr>
-          <td>IFRS извештаи</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>Плати / МПИН / PP30</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>Клиентски портал</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-          <td><span class="x-icon">&times;</span></td>
-        </tr>
-        <tr>
-          <td>Cloud-based (без инсталација)</td>
-          <td class="facturino-col"><span class="check-icon"></span></td>
-          <td><span class="x-icon">&times;</span></td>
-          <td><span class="check-icon"></span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Why us -->
-  <div class="why-us">
-    <h3>Зошто сметководителите избираат Facturino?</h3>
-    <div class="why-us-grid">
-      <div class="why-us-item">
-        <span class="check-icon"></span>
-        <div>
-          <strong>Сè на едно место</strong>
-          Не само фактури — плати, залиха, банкарство, AI, IFRS, годишно затворање
+      <div class="ecosystem-grid">
+        <div class="eco-card">
+          <div class="eco-icon">👥</div>
+          <h4>Сметководители</h4>
+          <p>Еден портал, сите клиенти. AI автоматизација, масовни операции, извештаи со еден клик.</p>
+        </div>
+        <div class="eco-card">
+          <div class="eco-icon">🏢</div>
+          <h4>Компании</h4>
+          <p>Фактури, понуди, е-Фактура, QES потпис, залихи, плати — сè на едно место.</p>
+        </div>
+        <div class="eco-card">
+          <div class="eco-icon">🏦</div>
+          <h4>Банкарство</h4>
+          <p>CSV/MT940/PDF увоз, AI порамнување, автоматско книжење. PSD2 наскоро.</p>
+        </div>
+        <div class="eco-card">
+          <div class="eco-icon">📋</div>
+          <h4>Регулатива</h4>
+          <p>UJP е-Фактура, IFRS извештаи, АОП обрасци, даночна усогласеност.</p>
         </div>
       </div>
-      <div class="why-us-item">
-        <span class="check-icon"></span>
-        <div>
-          <strong>Локализирано за МК</strong>
-          ДДВ правила, MK банки, е-Фактура UBL 2.1, ЦРРМ извештаи, PP30 формати
-        </div>
-      </div>
-      <div class="why-us-item">
-        <span class="check-icon"></span>
-        <div>
-          <strong>AI штеди 70% време</strong>
-          Скенирај → контирај → книжи за 10 секунди наместо 10 минути
-        </div>
-      </div>
-      <div class="why-us-item">
-        <span class="check-icon"></span>
-        <div>
-          <strong>Вашите клиенти добиваат пристап</strong>
-          View-only режим + AI чет за секој клиент. Без дополнителен трошок
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     PAGE 4 — BACK COVER (Vision + CTA)
-     ═══════════════════════════════════════════════════════════ -->
-<div class="page back-cover">
-  <div class="back-hero-bg">
-    <img src="../../website/public/assets/images/hero_home.png" alt="">
-  </div>
-
-  <div class="back-content">
-    <div class="vision-section">
-      <div class="tag tag-white" style="margin-bottom:10px;">Визија</div>
-      <h2>Иднината на<br>македонските компании</h2>
-      <p>
-        Facturino не е само сметководствен софтвер. Тоа е целосен дигитален екосистем
-        кој ги поврзува сметководителите со нивните клиенти, банките со книговодството,
-        и AI со секојдневните задачи. Градиме платформа каде секоја македонска компанија
-        е дигитално подготвена — за е-Фактура, за IFRS, за иднината.
-      </p>
-    </div>
-
-    <div class="ecosystem-cards">
-      <div class="eco-card">
-        <div class="eco-icon">&#x1F465;</div>
-        <h4>За сметководители</h4>
-        <p>Портфолио панел, AI автоматизација, годишно затворање, плати, рокови — сè за ефикасна канцеларија.</p>
-      </div>
-      <div class="eco-card">
-        <div class="eco-icon">&#x1F3E2;</div>
-        <h4>За компании</h4>
-        <p>View-only пристап до фактури и финансии. AI чет за прашања. Транспарентен увид во работата на сметководителот.</p>
-      </div>
-      <div class="eco-card">
-        <div class="eco-icon">&#x1F3E6;</div>
-        <h4>Банкарска интеграција</h4>
-        <p>CSV/MT940/PDF увоз. AI рекончилијација. Скоро: директно PSD2 поврзување со македонски банки.</p>
-      </div>
-      <div class="eco-card">
-        <div class="eco-icon">&#x1F4C8;</div>
-        <h4>Регулаторна готовност</h4>
-        <p>е-Фактура UBL 2.1 подготвено. IFRS извештаи. Pantheon XML извоз. ЦРРМ документи. Сè за усогласеност.</p>
-      </div>
-    </div>
-
-    <div class="roadmap">
-      <h3>&#x1F5FA; Патоказ 2026–2027</h3>
-      <div class="roadmap-items">
-        <div class="roadmap-item">
-          <div class="year">Q2 2026</div>
-          <div class="desc">PSD2 директно поврзување со банки, е-Фактура API интеграција со УЈП</div>
-        </div>
-        <div class="roadmap-item">
-          <div class="year">Q3 2026</div>
-          <div class="desc">Клиентски портал, автоматски ДДВ пријави, AI прогноза на готовински тек</div>
-        </div>
-        <div class="roadmap-item">
-          <div class="year">Q1 2027</div>
-          <div class="desc">Целосна ERP интеграција, мобилна апликација, мултивалутна поддршка</div>
+      <div class="roadmap">
+        <h3>Патоказ 2026–2027</h3>
+        <div class="roadmap-items">
+          <div class="roadmap-item">
+            <div class="rm-date">Q2 2026</div>
+            <div class="rm-text">PSD2 директна банкарска конекција</div>
+          </div>
+          <div class="roadmap-item">
+            <div class="rm-date">Q3 2026</div>
+            <div class="rm-text">AI годишна завршна сметка</div>
+          </div>
+          <div class="roadmap-item">
+            <div class="rm-date">Q1 2027</div>
+            <div class="rm-text">Мобилна апликација + биометрика</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="back-cta">
-      <h3>Пробајте бесплатно 30 дена</h3>
-      <p>Регистрирајте се како партнер и започнете веднаш</p>
-      <a href="https://app.facturino.mk/partner/signup">
-        app.facturino.mk/partner/signup &rarr;
-      </a>
-    </div>
-
-    <div class="back-footer">
-      <div class="logo-area">
-        <img src="../../website/public/brand/facturino_logo.png" alt="Facturino">
-        <div style="font-size:7pt; color:#A5B4FC;">
-          AI платформа за<br>сметководство
-        </div>
-      </div>
-      <div class="qr-box">
-        QR код:<br>facturino.mk
-      </div>
-      <div class="contact-info">
-        <strong>www.facturino.mk</strong><br>
+    <div class="bc-footer">
+      <img src="../../website/public/brand/facturino_logo.png" alt="Facturino" class="bc-logo">
+      <div class="bc-contact">
         info@facturino.mk<br>
-        Facturino ДООЕЛ, Скопје
+        www.facturino.mk<br>
+        Facturino ДООЕЛ · Скопје
+      </div>
+    </div>
+  </div>
+
+  <!-- FRONT COVER (Page 1) — Right panel -->
+  <div class="panel front-cover">
+    <div class="cover-content">
+      <img src="../../website/public/brand/facturino_logo.png" alt="Facturino" class="cover-logo">
+
+      <div class="cover-badge">AI-Powered Accounting Platform</div>
+
+      <h1 class="cover-h1">Една пријава.<br>Десетици клиенти.</h1>
+
+      <p class="cover-sub">
+        AI сметководствена платформа со е-Фактура, банкарски увоз,
+        автоматско книжење и IFRS извештаи — за сметководители
+        кои сакаат повеќе клиенти, помалку рачна работа.
+      </p>
+
+      <div class="cover-stats">
+        <div class="cover-stat">
+          <div class="stat-num">25+</div>
+          <div class="stat-label">Функции</div>
+        </div>
+        <div class="cover-stat">
+          <div class="stat-num">4</div>
+          <div class="stat-label">Јазици</div>
+        </div>
+        <div class="cover-stat">
+          <div class="stat-num">AI</div>
+          <div class="stat-label">Екосистем</div>
+        </div>
+        <div class="cover-stat">
+          <div class="stat-num">30</div>
+          <div class="stat-label">Дена бесплатно</div>
+        </div>
+      </div>
+
+      <div class="cover-cta">Пробај 30 дена бесплатно</div>
+      <div class="cover-url">app.facturino.mk/partner/signup</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SPREAD 2 — BACK OF A3 SHEET
+     When opened: Left = INSIDE LEFT (Page 2), Right = INSIDE RIGHT (Page 3)
+     ══════════════════════════════════════════════════════ -->
+<div class="spread">
+
+  <!-- INSIDE LEFT (Page 2) — Features -->
+  <div class="panel inside-left">
+    <div class="il-header">
+      <h2>Сè што ви треба, на едно место</h2>
+      <p>Комплетна платформа за модерни сметководствени канцеларии</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🏢</div>
+        <h4>Мулти-компанија</h4>
+        <p>Управувајте со сите клиенти од еден портал. Брзо менување, масовни операции.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🏦</div>
+        <h4>Банкарски увоз</h4>
+        <p>CSV, MT940, PDF извод. AI порамнување со фактури, автоматски предлози.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📄</div>
+        <h4>е-Фактура + QES</h4>
+        <p>UJP интеграција со квалификуван електронски потпис. Масовно испраќање.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📷</div>
+        <h4>AI Скенирање</h4>
+        <p>Сликајте фактура → AI извлекува податоци → автоматски внес. Gemini Vision.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💬</div>
+        <h4>AI Асистент</h4>
+        <p>Поставувајте прашања на македонски. AI создава фактури, извештаи, анализи.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📦</div>
+        <h4>Залихи + Набавки</h4>
+        <p>Нарачки, приемници, 3-way match, автоматско книжење на залиха.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <h4>IFRS Извештаи</h4>
+        <p>Биланс, АОП обрасци, BI Dashboard, финансиски показатели, трендови.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💰</div>
+        <h4>Плати + PP30</h4>
+        <p>Пресметка на плати, придонеси, PP30 налози. Масовен извоз за банка.</p>
+      </div>
+    </div>
+
+    <!-- Lifestyle photo strip -->
+    <div class="lifestyle-strip">
+      <img src="../../website/public/assets/images/hero_features.png" alt="Modern office workspace">
+      <img src="../../website/public/assets/images/hero_accountants.png" alt="Accountant at desk">
+      <img src="../../website/public/assets/images/hero_landing.png" alt="Team collaboration">
+    </div>
+
+    <div class="ai-flow">
+      <h3>AI Екосистем — Автоматски работен тек</h3>
+      <div class="ai-steps">
+        <div class="ai-step">
+          <div class="step-icon">📷</div>
+          <div class="step-label">Скенирај</div>
+        </div>
+        <div class="ai-arrow">→</div>
+        <div class="ai-step">
+          <div class="step-icon">🔍</div>
+          <div class="step-label">Извлечи</div>
+        </div>
+        <div class="ai-arrow">→</div>
+        <div class="ai-step">
+          <div class="step-icon">📋</div>
+          <div class="step-label">Книжи</div>
+        </div>
+        <div class="ai-arrow">→</div>
+        <div class="ai-step">
+          <div class="step-icon">🏦</div>
+          <div class="step-label">Порамни</div>
+        </div>
+        <div class="ai-arrow">→</div>
+        <div class="ai-step">
+          <div class="step-icon">📊</div>
+          <div class="step-label">Извести</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-list-section">
+      <h3>Комплетна листа на функции</h3>
+      <div class="feature-columns">
+        <div>
+          <div class="fl-item"><span class="fl-check">✓</span> Фактури, профактури, понуди</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Сметки од добавувачи</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Повторувачки фактури</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Плаќања + делумни плаќања</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Клиенти + добавувачи</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Производи + услуги</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Залихи + SKU следење</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Нарачки за набавка</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Приемници + 3-way match</div>
+          <div class="fl-item"><span class="fl-check">✓</span> е-Фактура UJP + QES</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Банкарски увоз (CSV/MT940/PDF)</div>
+          <div class="fl-item"><span class="fl-check">✓</span> AI рекончилијација</div>
+          <div class="fl-item"><span class="fl-check">✓</span> AI документ хаб + OCR</div>
+          <div class="fl-item"><span class="fl-check">✓</span> AI чат асистент</div>
+        </div>
+        <div>
+          <div class="fl-item"><span class="fl-check">✓</span> Биланс на состојба</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Биланс на успех</div>
+          <div class="fl-item"><span class="fl-check">✓</span> АОП обрасци</div>
+          <div class="fl-item"><span class="fl-check">✓</span> BI Dashboard</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Плати + придонеси</div>
+          <div class="fl-item"><span class="fl-check">✓</span> PP30 платни налози</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Буџети по проект</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Дупликат заштита</div>
+          <div class="fl-item"><span class="fl-check">✓</span> PDF шаблони (3 стила)</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Мулти-валута</div>
+          <div class="fl-item"><span class="fl-check">✓</span> 4 јазици (МК, SQ, TR, EN)</div>
+          <div class="fl-item"><span class="fl-check">✓</span> PWA мобилна верзија</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Аудит логови</div>
+          <div class="fl-item"><span class="fl-check">✓</span> EU хостинг + резервни копии</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSIDE RIGHT (Page 3) — Pricing + Comparison -->
+  <div class="panel inside-right">
+    <div class="ir-header">
+      <h2>Пакети за сметководители</h2>
+      <p>Сите функции на секој план — разликата е во обемот. 30 дена бесплатен пробен период.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- Start -->
+      <div class="tier-card">
+        <div class="tier-name">Start</div>
+        <div class="tier-prices">
+          <div class="tier-price-row">
+            <span class="tier-price-label">Месечно</span>
+            <span class="tier-price-val">1,784 ден</span>
+          </div>
+          <div class="tier-price-row">
+            <span class="tier-price-label">Годишно</span>
+            <span class="tier-price-val yearly">17,840 ден</span>
+          </div>
+          <div class="tier-eur">€29/мес · €290/год</div>
+          <div class="tier-save">2 месеци бесплатно</div>
+        </div>
+        <ul class="tier-limits">
+          <li><span class="tl-check">✓</span> 15 компании</li>
+          <li><span class="tl-check">✓</span> 50 AI кредити/мес</li>
+          <li><span class="tl-check">✓</span> 5 банкарски сметки</li>
+          <li><span class="tl-check">✓</span> 30 вработени</li>
+          <li><span class="tl-check">✓</span> 5 е-Фактури/мес</li>
+        </ul>
+      </div>
+
+      <!-- Office -->
+      <div class="tier-card popular">
+        <div class="tier-badge">Популарен</div>
+        <div class="tier-name">Office</div>
+        <div class="tier-prices">
+          <div class="tier-price-row">
+            <span class="tier-price-label">Месечно</span>
+            <span class="tier-price-val">3,629 ден</span>
+          </div>
+          <div class="tier-price-row">
+            <span class="tier-price-label">Годишно</span>
+            <span class="tier-price-val yearly">36,290 ден</span>
+          </div>
+          <div class="tier-eur">€59/мес · €590/год</div>
+          <div class="tier-save">2 месеци бесплатно</div>
+        </div>
+        <ul class="tier-limits">
+          <li><span class="tl-check">✓</span> 30 компании</li>
+          <li><span class="tl-check">✓</span> 150 AI кредити/мес</li>
+          <li><span class="tl-check">✓</span> 15 банкарски сметки</li>
+          <li><span class="tl-check">✓</span> 100 вработени</li>
+          <li><span class="tl-check">✓</span> 30 е-Фактури/мес</li>
+        </ul>
+      </div>
+
+      <!-- Pro -->
+      <div class="tier-card">
+        <div class="tier-name">Pro</div>
+        <div class="tier-prices">
+          <div class="tier-price-row">
+            <span class="tier-price-label">Месечно</span>
+            <span class="tier-price-val">6,089 ден</span>
+          </div>
+          <div class="tier-price-row">
+            <span class="tier-price-label">Годишно</span>
+            <span class="tier-price-val yearly">60,890 ден</span>
+          </div>
+          <div class="tier-eur">€99/мес · €990/год</div>
+          <div class="tier-save">2 месеци бесплатно</div>
+        </div>
+        <ul class="tier-limits">
+          <li><span class="tl-check">✓</span> 50 компании</li>
+          <li><span class="tl-check">✓</span> 500 AI кредити/мес</li>
+          <li><span class="tl-check">✓</span> 50 банкарски сметки</li>
+          <li><span class="tl-check">✓</span> 300 вработени</li>
+          <li><span class="tl-check">✓</span> Неограничено е-Фактури</li>
+        </ul>
+      </div>
+
+      <!-- Elite -->
+      <div class="tier-card">
+        <div class="tier-name">Elite</div>
+        <div class="tier-prices">
+          <div class="tier-price-row">
+            <span class="tier-price-label">Месечно</span>
+            <span class="tier-price-val">12,239 ден</span>
+          </div>
+          <div class="tier-price-row">
+            <span class="tier-price-label">Годишно</span>
+            <span class="tier-price-val yearly">122,390 ден</span>
+          </div>
+          <div class="tier-eur">€199/мес · €1,990/год</div>
+          <div class="tier-save">2 месеци бесплатно</div>
+        </div>
+        <ul class="tier-limits">
+          <li><span class="tl-check">✓</span> 100 компании</li>
+          <li><span class="tl-check">✓</span> Неограничено AI</li>
+          <li><span class="tl-check">✓</span> Неограничено сметки</li>
+          <li><span class="tl-check">✓</span> Неограничено вработени</li>
+          <li><span class="tl-check">✓</span> Неограничено е-Фактури</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="seat-note">+ <strong>308 ден/месец (€5)</strong> за секоја додатна лиценца · Годишно: <strong>3,080 ден (€50)</strong></div>
+
+    <!-- Comparison Table -->
+    <div class="comparison">
+      <h3>Зошто Facturino наместо PANTHEON или Zonel?</h3>
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th style="width:38%">Функција</th>
+            <th style="width:22%">Facturino</th>
+            <th style="width:20%">PANTHEON</th>
+            <th style="width:20%">Zonel</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="comp-highlight">
+            <td>AI асистент + OCR</td>
+            <td class="comp-yes">✓ Gemini AI</td>
+            <td class="comp-no">✗</td>
+            <td class="comp-no">✗</td>
+          </tr>
+          <tr>
+            <td>AI банкарско порамнување</td>
+            <td class="comp-yes">✓ Автоматски</td>
+            <td class="comp-no">✗</td>
+            <td class="comp-no">✗</td>
+          </tr>
+          <tr class="comp-highlight">
+            <td>е-Фактура UJP + QES</td>
+            <td class="comp-yes">✓ Вграден</td>
+            <td class="comp-partial">~ Додаток</td>
+            <td class="comp-yes">✓</td>
+          </tr>
+          <tr>
+            <td>Банкарски увоз (CSV/MT940/PDF)</td>
+            <td class="comp-yes">✓</td>
+            <td class="comp-partial">~ Само CSV</td>
+            <td class="comp-no">✗</td>
+          </tr>
+          <tr class="comp-highlight">
+            <td>Мулти-компанија портал</td>
+            <td class="comp-yes">✓ До 100+</td>
+            <td class="comp-partial">~ По лиценца</td>
+            <td class="comp-partial">~ Ограничено</td>
+          </tr>
+          <tr>
+            <td>IFRS извештаи + АОП</td>
+            <td class="comp-yes">✓</td>
+            <td class="comp-yes">✓</td>
+            <td class="comp-partial">~ Делумно</td>
+          </tr>
+          <tr class="comp-highlight">
+            <td>PWA мобилна верзија</td>
+            <td class="comp-yes">✓</td>
+            <td class="comp-no">✗</td>
+            <td class="comp-no">✗</td>
+          </tr>
+          <tr>
+            <td>4 јазици (МК, SQ, TR, EN)</td>
+            <td class="comp-yes">✓</td>
+            <td class="comp-partial">~ 2 јазика</td>
+            <td class="comp-partial">~ 1 јазик</td>
+          </tr>
+          <tr class="comp-highlight">
+            <td>Залихи + нарачки + 3-way</td>
+            <td class="comp-yes">✓</td>
+            <td class="comp-yes">✓</td>
+            <td class="comp-no">✗</td>
+          </tr>
+          <tr>
+            <td>Плати + PP30</td>
+            <td class="comp-yes">✓</td>
+            <td class="comp-yes">✓</td>
+            <td class="comp-partial">~ Основно</td>
+          </tr>
+          <tr class="comp-highlight">
+            <td>Cloud-native (без инсталација)</td>
+            <td class="comp-yes">✓</td>
+            <td class="comp-no">✗ Десктоп</td>
+            <td class="comp-yes">✓</td>
+          </tr>
+          <tr>
+            <td>Почетна цена (сметководител)</td>
+            <td class="comp-yes" style="font-weight:800">1,784 ден</td>
+            <td>~12,000+ ден</td>
+            <td>~3,000 ден</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Why Section -->
+    <div class="why-section">
+      <h3>Зошто сметководителите го избираат Facturino</h3>
+      <div class="why-grid">
+        <div class="why-item">
+          <div class="why-icon">⚡</div>
+          <div>
+            <h4>10x побрзо</h4>
+            <p>AI ја елиминира рачната работа — скенирање, книжење, порамнување.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-icon">💰</div>
+          <div>
+            <h4>5x поевтино</h4>
+            <p>Почнувате од 1,784 ден наместо 12,000+ ден за традиционален софтвер.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-icon">🌐</div>
+          <div>
+            <h4>Cloud + PWA</h4>
+            <p>Работете од секаде — десктоп, таблет, телефон. Без инсталација.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-icon">🔮</div>
+          <div>
+            <h4>AI иднина</h4>
+            <p>Единствениот МК софтвер со AI асистент, OCR и автоматско порамнување.</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>

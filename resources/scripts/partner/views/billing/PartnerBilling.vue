@@ -85,9 +85,32 @@
 
     <!-- Tier Comparison -->
     <div ref="tiersSection" class="bg-white rounded-lg shadow-sm border p-6 mb-6">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6">
-        {{ t('partner_billing.available_plans') }}
-      </h2>
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-gray-900">
+          {{ t('partner_billing.available_plans') }}
+        </h2>
+
+        <!-- Monthly/Yearly Toggle -->
+        <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <button
+            class="px-3 py-1.5 text-sm font-medium rounded-md transition"
+            :class="billingCycle === 'monthly' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'"
+            @click="billingCycle = 'monthly'"
+          >
+            {{ t('partner_billing.monthly') }}
+          </button>
+          <button
+            class="px-3 py-1.5 text-sm font-medium rounded-md transition relative"
+            :class="billingCycle === 'yearly' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'"
+            @click="billingCycle = 'yearly'"
+          >
+            {{ t('partner_billing.yearly') }}
+            <span class="absolute -top-2 -right-2 px-1.5 py-0.5 bg-green-500 text-white text-[10px] font-bold rounded-full leading-none">
+              -17%
+            </span>
+          </button>
+        </div>
+      </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div
@@ -117,11 +140,18 @@
 
           <h3 class="text-lg font-semibold text-gray-900">{{ tier.name }}</h3>
           <div class="mt-2">
-            <span class="text-3xl font-bold text-gray-900">{{ tier.price_mkd }}</span>
-            <span class="text-sm text-gray-500"> {{ t('partner_billing.mkd_per_month') }}</span>
+            <span class="text-3xl font-bold text-gray-900">
+              {{ billingCycle === 'yearly' ? tier.price_yearly_mkd : tier.price_mkd }}
+            </span>
+            <span class="text-sm text-gray-500">
+              {{ billingCycle === 'yearly' ? t('partner_billing.mkd_per_year') : t('partner_billing.mkd_per_month') }}
+            </span>
           </div>
           <p class="text-sm text-gray-500 mt-1">
-            {{ tier.price_eur }}{{ t('partner_billing.eur_per_month') }}
+            {{ billingCycle === 'yearly' ? tier.price_yearly_eur : tier.price_eur }}{{ billingCycle === 'yearly' ? t('partner_billing.eur_per_year') : t('partner_billing.eur_per_month') }}
+          </p>
+          <p v-if="billingCycle === 'yearly'" class="text-xs text-green-600 font-medium mt-1">
+            {{ t('partner_billing.save_2_months') }}
           </p>
 
           <!-- Limits -->
@@ -170,6 +200,7 @@ const loading = ref(true)
 const checkoutLoading = ref(null)
 const portalLoading = ref(false)
 const tiersSection = ref(null)
+const billingCycle = ref('monthly')
 
 const currentPlan = ref({
   tier: 'free',
@@ -272,6 +303,7 @@ async function handleTierAction(tierKey) {
       const { data } = await axios.post('/partner/subscription/checkout', {
         tier: tierKey,
         currency: 'mkd',
+        billing_cycle: billingCycle.value,
       })
       if (data.checkout_url) {
         window.location.href = data.checkout_url

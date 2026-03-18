@@ -4,6 +4,7 @@ import { buildPageMetadata } from '@/lib/metadata'
 import FAQ from '@/components/FAQ'
 import ComparisonTable from '@/components/ComparisonTable'
 import PageHero from '@/components/PageHero'
+import PartnerPricingGrid from '@/components/PartnerPricingGrid'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -33,7 +34,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   const t = await getDictionary(locale)
 
   if (!t.pricingPage) return null
-  const { h1, sub, sectionCompany, sectionPartner, popularBadge, recommendedBadge, partnerSubtitle, companyPlans, partnerPlans, cta, ctaPartner, sepaNote } = t.pricingPage
+  const { h1, sub, sectionCompany, sectionPartner, popularBadge, recommendedBadge, partnerSubtitle, companyPlans, partnerPlans, cta, ctaPartner, sepaNote, billingToggleMonthly, billingToggleYearly, billingYearlySave } = t.pricingPage
 
   const softwareAppLd = {
     '@context': 'https://schema.org',
@@ -142,57 +143,17 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
             <h2 className="text-2xl font-bold text-gray-900">{sectionPartner}</h2>
             <div className="h-px w-12 bg-gray-200"></div>
           </div>
-          <p className="text-center text-sm text-gray-500 mb-6 md:mb-12">{partnerSubtitle}</p>
+          <p className="text-center text-sm text-gray-500 mb-6 md:mb-8">{partnerSubtitle}</p>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {partnerPlans.map((p, i) => {
-              const previousPlanName = i > 0 ? partnerPlans[i - 1].name : null
-              const bullets = previousPlanName
-                ? [t.pricingPage!.includesPrevious.replace('{plan}', previousPlanName), ...p.bullets]
-                : p.bullets
-
-              return (
-                <div key={i} className={`relative flex flex-col bg-white rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${p.popular ? 'border-green-500 ring-1 ring-green-500 z-10 scale-105' : 'border-gray-200'}`}>
-                  {p.popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-green-600 to-emerald-500 px-4 py-1 text-xs font-bold text-white whitespace-nowrap shadow-md">
-                      {popularBadge}
-                    </div>
-                  )}
-
-                  <div className="p-6 flex-grow">
-                    <h3 className="mb-4 text-lg font-bold text-gray-900">{p.name}</h3>
-                    <div className="mb-6">
-                      <span className="text-4xl font-extrabold text-gray-900">{p.price}</span>
-                      <span className="text-sm text-gray-500 font-medium">{p.period}</span>
-                    </div>
-
-                    <ul className="space-y-4 mb-8">
-                      {bullets.map((b, j) => (
-                        <li key={j} className="flex items-start text-sm text-gray-600">
-                          <svg className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span>{b}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="p-6 pt-0 mt-auto">
-                    <a
-                      href="https://app.facturino.mk/partner/signup"
-                      className={`block w-full py-3 px-4 rounded-xl text-center font-bold transition-all ${p.popular
-                        ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-green-500/30'
-                        : 'bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-200'
-                        }`}
-                    >
-                      {ctaPartner}
-                    </a>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <PartnerPricingGrid
+            plans={partnerPlans}
+            popularBadge={popularBadge}
+            ctaPartner={ctaPartner}
+            includesPrevious={t.pricingPage!.includesPrevious}
+            billingToggleMonthly={billingToggleMonthly || 'Monthly'}
+            billingToggleYearly={billingToggleYearly || 'Yearly'}
+            billingYearlySave={billingYearlySave || '2 months free'}
+          />
         </div>
       </div>
 

@@ -657,6 +657,8 @@ return [
             'name' => 'Start',
             'price_monthly_eur' => 29,
             'price_monthly_mkd' => 1784,
+            'price_yearly_eur' => 290,
+            'price_yearly_mkd' => 17840,
             'limits' => [
                 'companies' => 15,
                 'ai_credits_per_month' => 50,
@@ -672,6 +674,8 @@ return [
             'name' => 'Office',
             'price_monthly_eur' => 59,
             'price_monthly_mkd' => 3629,
+            'price_yearly_eur' => 590,
+            'price_yearly_mkd' => 36290,
             'limits' => [
                 'companies' => 30,
                 'ai_credits_per_month' => 150,
@@ -687,6 +691,8 @@ return [
             'name' => 'Pro',
             'price_monthly_eur' => 99,
             'price_monthly_mkd' => 6089,
+            'price_yearly_eur' => 990,
+            'price_yearly_mkd' => 60890,
             'limits' => [
                 'companies' => 50,
                 'ai_credits_per_month' => 500,
@@ -702,6 +708,8 @@ return [
             'name' => 'Elite',
             'price_monthly_eur' => 199,
             'price_monthly_mkd' => 12239,
+            'price_yearly_eur' => 1990,
+            'price_yearly_mkd' => 122390,
             'limits' => [
                 'companies' => 100,
                 'ai_credits_per_month' => null, // Unlimited
@@ -732,6 +740,8 @@ return [
     'partner_seat_price' => [
         'eur' => 5.00,
         'mkd' => 308,
+        'eur_yearly' => 50.00,
+        'mkd_yearly' => 3080,
     ],
 ];
 // CLAUDE-CHECKPOINT
