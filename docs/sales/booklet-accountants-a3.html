@@ -153,8 +153,10 @@
   }
 
   .eco-card .eco-icon {
-    font-size: 16pt;
     margin-bottom: 2mm;
+    height: 9mm;
+    width: 9mm;
+    object-fit: contain;
   }
 
   .eco-card h4 {
@@ -220,8 +222,8 @@
   }
 
   .bc-footer .bc-logo {
-    height: 8mm;
-    opacity: 0.7;
+    height: 14mm;
+    opacity: 0.8;
   }
 
   .bc-footer .bc-contact {
@@ -258,8 +260,8 @@
   }
 
   .cover-logo {
-    height: 14mm;
-    margin-bottom: 15mm;
+    height: 28mm;
+    margin-bottom: 12mm;
     filter: brightness(0) invert(1);
   }
 
@@ -398,7 +400,9 @@
   }
 
   .feat-card .feat-icon {
-    font-size: 14pt;
+    height: 8mm;
+    width: 8mm;
+    object-fit: contain;
     margin-bottom: 1.5mm;
   }
 
@@ -445,7 +449,9 @@
   }
 
   .ai-step .step-icon {
-    font-size: 16pt;
+    height: 9mm;
+    width: 9mm;
+    object-fit: contain;
     margin-bottom: 1mm;
   }
 
@@ -737,9 +743,23 @@
   }
 
   .why-icon {
-    font-size: 12pt;
+    height: 7mm;
+    width: 7mm;
+    object-fit: contain;
     flex-shrink: 0;
     margin-top: 0.5mm;
+  }
+
+  /* Watermark logo on inside pages */
+  .watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 80mm;
+    opacity: 0.03;
+    z-index: 0;
+    pointer-events: none;
   }
 
   .why-item h4 {
@@ -769,31 +789,31 @@
     <div class="bc-top">
       <h2>Иднината на<br>македонското<br>сметководство</h2>
       <p class="vision-text">
-        Facturino не е само софтвер за фактури. Тоа е комплетен екосистем
-        кој го поврзува сметководителот, компанијата, банката и регулаторот
-        во една интелигентна платформа.
+        Facturino не е само софтвер за фактури. Тоа е комплетна платформа
+        која го поврзува сметководителот, компанијата, банката и даночните
+        органи на едно место.
       </p>
 
       <div class="ecosystem-grid">
         <div class="eco-card">
-          <div class="eco-icon">👥</div>
+          <img class="eco-icon" src="icons/users.png" alt="Сметководители">
           <h4>Сметководители</h4>
           <p>Еден портал, сите клиенти. AI автоматизација + 20% провизија за секоја компанија (22% за годишна претплата).</p>
         </div>
         <div class="eco-card">
-          <div class="eco-icon">🏢</div>
+          <img class="eco-icon" src="icons/building.png" alt="Компании">
           <h4>Компании</h4>
-          <p>Фактури, понуди, е-Фактура, QES потпис, залихи, плати — сè на едно место.</p>
+          <p>Фактури, понуди, е-Фактура, електронски потпис, залихи, плати — сè на едно место.</p>
         </div>
         <div class="eco-card">
-          <div class="eco-icon">🏦</div>
+          <img class="eco-icon" src="icons/bank.png" alt="Банкарство">
           <h4>Банкарство</h4>
-          <p>CSV/MT940/PDF увоз, AI порамнување, автоматско книжење. PSD2 наскоро.</p>
+          <p>Увоз на банкарски изводи, AI порамнување со фактури, автоматско книжење.</p>
         </div>
         <div class="eco-card">
-          <div class="eco-icon">📋</div>
+          <img class="eco-icon" src="icons/clipboard.png" alt="Регулатива">
           <h4>Регулатива</h4>
-          <p>UJP е-Фактура, IFRS извештаи, АОП обрасци, даночна усогласеност.</p>
+          <p>е-Фактура преку УЈП, финансиски извештаи, АОП обрасци, даночна усогласеност.</p>
         </div>
       </div>
 
@@ -801,16 +821,16 @@
         <h3>Патоказ 2026–2027</h3>
         <div class="roadmap-items">
           <div class="roadmap-item">
-            <div class="rm-date">Q2 2026</div>
-            <div class="rm-text">PSD2 директна банкарска конекција</div>
-          </div>
-          <div class="roadmap-item">
             <div class="rm-date">Q3 2026</div>
             <div class="rm-text">AI годишна завршна сметка</div>
           </div>
           <div class="roadmap-item">
             <div class="rm-date">Q1 2027</div>
-            <div class="rm-text">Мобилна апликација + биометрика</div>
+            <div class="rm-text">Мобилна апликација</div>
+          </div>
+          <div class="roadmap-item">
+            <div class="rm-date">Q2 2027</div>
+            <div class="rm-text">Директна банкарска конекција</div>
           </div>
         </div>
       </div>
@@ -837,7 +857,7 @@
 
       <p class="cover-sub">
         AI сметководствена платформа со е-Фактура, банкарски увоз,
-        автоматско книжење и IFRS извештаи — за сметководители
+        автоматско книжење и финансиски извештаи — за сметководители
         кои сакаат повеќе клиенти, помалку рачна работа.
         <strong>Заработувајте 20% провизија</strong> за секоја компанија
         која ја приклучувате на системот.
@@ -876,51 +896,52 @@
 
   <!-- INSIDE LEFT (Page 2) — Features -->
   <div class="panel inside-left">
-    <div class="il-header">
+    <img src="../../website/public/brand/facturino_logo.png" alt="" class="watermark">
+    <div class="il-header" style="position: relative; z-index: 1;">
       <h2>Сè што ви треба, на едно место</h2>
       <p>Комплетна платформа за модерни сметководствени канцеларии</p>
     </div>
 
     <div class="feature-grid">
       <div class="feat-card">
-        <div class="feat-icon">🏢</div>
+        <img class="feat-icon" src="icons/building.png" alt="Мулти-компанија">
         <h4>Мулти-компанија</h4>
         <p>Управувајте со сите клиенти од еден портал. Брзо менување, масовни операции.</p>
       </div>
       <div class="feat-card">
-        <div class="feat-icon">🏦</div>
+        <img class="feat-icon" src="icons/bank.png" alt="Банкарски увоз">
         <h4>Банкарски увоз</h4>
-        <p>CSV, MT940, PDF извод. AI порамнување со фактури, автоматски предлози.</p>
+        <p>Увоз на банкарски извод. AI порамнување со фактури, автоматски предлози.</p>
       </div>
       <div class="feat-card">
-        <div class="feat-icon">📄</div>
-        <h4>е-Фактура + QES</h4>
-        <p>UJP интеграција со квалификуван електронски потпис. Масовно испраќање.</p>
+        <img class="feat-icon" src="icons/document.png" alt="е-Фактура">
+        <h4>е-Фактура + е-Потпис</h4>
+        <p>Испраќање преку УЈП со електронски потпис. Масовно испраќање.</p>
       </div>
       <div class="feat-card">
-        <div class="feat-icon">📷</div>
+        <img class="feat-icon" src="icons/camera.png" alt="AI Скенирање">
         <h4>AI Скенирање</h4>
-        <p>Сликајте фактура → AI извлекува податоци → автоматски внес. Gemini Vision.</p>
+        <p>Сликајте фактура — AI ги извлекува податоците и автоматски ги внесува.</p>
       </div>
       <div class="feat-card">
-        <div class="feat-icon">💬</div>
+        <img class="feat-icon" src="icons/chat.png" alt="AI Асистент">
         <h4>AI Асистент</h4>
         <p>Поставувајте прашања на македонски. AI создава фактури, извештаи, анализи.</p>
       </div>
       <div class="feat-card">
-        <div class="feat-icon">📦</div>
+        <img class="feat-icon" src="icons/box.png" alt="Залихи">
         <h4>Залихи + Набавки</h4>
-        <p>Нарачки, приемници, 3-way match, автоматско книжење на залиха.</p>
+        <p>Нарачки, приемници, проверка на усогласеност, автоматско книжење.</p>
       </div>
       <div class="feat-card">
-        <div class="feat-icon">📊</div>
-        <h4>IFRS Извештаи</h4>
-        <p>Биланс, АОП обрасци, BI Dashboard, финансиски показатели, трендови.</p>
+        <img class="feat-icon" src="icons/chart.png" alt="Извештаи">
+        <h4>Финансиски извештаи</h4>
+        <p>Биланс на состојба и успех, АОП обрасци, аналитички преглед, трендови.</p>
       </div>
       <div class="feat-card">
-        <div class="feat-icon">💰</div>
-        <h4>Плати + PP30</h4>
-        <p>Пресметка на плати, придонеси, PP30 налози. Масовен извоз за банка.</p>
+        <img class="feat-icon" src="icons/payroll.png" alt="Плати">
+        <h4>Плати + ПП30</h4>
+        <p>Пресметка на плати, придонеси, платни налози. Масовен извоз за банка.</p>
       </div>
     </div>
 
@@ -935,27 +956,27 @@
       <h3>AI Екосистем — Автоматски работен тек</h3>
       <div class="ai-steps">
         <div class="ai-step">
-          <div class="step-icon">📷</div>
+          <img class="step-icon" src="icons/camera.png" alt="Скенирај">
           <div class="step-label">Скенирај</div>
         </div>
         <div class="ai-arrow">→</div>
         <div class="ai-step">
-          <div class="step-icon">🔍</div>
+          <img class="step-icon" src="icons/search.png" alt="Извлечи">
           <div class="step-label">Извлечи</div>
         </div>
         <div class="ai-arrow">→</div>
         <div class="ai-step">
-          <div class="step-icon">📋</div>
+          <img class="step-icon" src="icons/clipboard.png" alt="Книжи">
           <div class="step-label">Книжи</div>
         </div>
         <div class="ai-arrow">→</div>
         <div class="ai-step">
-          <div class="step-icon">🏦</div>
+          <img class="step-icon" src="icons/bank.png" alt="Порамни">
           <div class="step-label">Порамни</div>
         </div>
         <div class="ai-arrow">→</div>
         <div class="ai-step">
-          <div class="step-icon">📊</div>
+          <img class="step-icon" src="icons/chart.png" alt="Извести">
           <div class="step-label">Извести</div>
         </div>
       </div>
@@ -966,35 +987,35 @@
       <div class="feature-columns">
         <div>
           <div class="fl-item"><span class="fl-check">✓</span> Фактури, профактури, понуди</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Сметки од добавувачи</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Влезни фактури (добавувачи)</div>
           <div class="fl-item"><span class="fl-check">✓</span> Повторувачки фактури</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Плаќања + делумни плаќања</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Клиенти + добавувачи</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Производи + услуги</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Залихи + SKU следење</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Плаќања и делумни плаќања</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Регистар на клиенти и добавувачи</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Производи и услуги</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Залихи и магацинско работење</div>
           <div class="fl-item"><span class="fl-check">✓</span> Нарачки за набавка</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Приемници + 3-way match</div>
-          <div class="fl-item"><span class="fl-check">✓</span> е-Фактура UJP + QES</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Банкарски увоз (CSV/MT940/PDF)</div>
-          <div class="fl-item"><span class="fl-check">✓</span> AI рекончилијација</div>
-          <div class="fl-item"><span class="fl-check">✓</span> AI документ хаб + OCR</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Приемници и контрола</div>
+          <div class="fl-item"><span class="fl-check">✓</span> е-Фактура преку УЈП</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Увоз на банкарски изводи</div>
+          <div class="fl-item"><span class="fl-check">✓</span> AI порамнување со фактури</div>
+          <div class="fl-item"><span class="fl-check">✓</span> AI скенирање на документи</div>
           <div class="fl-item"><span class="fl-check">✓</span> AI чат асистент</div>
         </div>
         <div>
           <div class="fl-item"><span class="fl-check">✓</span> Биланс на состојба</div>
           <div class="fl-item"><span class="fl-check">✓</span> Биланс на успех</div>
           <div class="fl-item"><span class="fl-check">✓</span> АОП обрасци</div>
-          <div class="fl-item"><span class="fl-check">✓</span> BI Dashboard</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Плати + придонеси</div>
-          <div class="fl-item"><span class="fl-check">✓</span> PP30 платни налози</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Аналитички преглед</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Плати и придонеси</div>
+          <div class="fl-item"><span class="fl-check">✓</span> ПП30 платни налози</div>
           <div class="fl-item"><span class="fl-check">✓</span> Буџети по проект</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Дупликат заштита</div>
-          <div class="fl-item"><span class="fl-check">✓</span> PDF шаблони (3 стила)</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Мулти-валута</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Заштита од дупликати</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Печатење на фактури (3 стила)</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Повеќе валути</div>
           <div class="fl-item"><span class="fl-check">✓</span> 4 јазици (МК, SQ, TR, EN)</div>
-          <div class="fl-item"><span class="fl-check">✓</span> PWA мобилна верзија</div>
-          <div class="fl-item"><span class="fl-check">✓</span> Аудит логови</div>
-          <div class="fl-item"><span class="fl-check">✓</span> EU хостинг + резервни копии</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Мобилна апликација</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Евиденција на промени</div>
+          <div class="fl-item"><span class="fl-check">✓</span> Безбеден EU хостинг</div>
         </div>
       </div>
     </div>
@@ -1002,6 +1023,7 @@
 
   <!-- INSIDE RIGHT (Page 3) — Pricing + Comparison -->
   <div class="panel inside-right">
+    <img src="../../website/public/brand/facturino_logo.png" alt="" class="watermark">
     <div class="ir-header">
       <h2>Пакети за сметководители</h2>
       <p>Сите функции на секој план — разликата е во обемот. 30 дена бесплатен пробен период.</p>
@@ -1131,8 +1153,8 @@
         </thead>
         <tbody>
           <tr class="comp-highlight">
-            <td>AI асистент + OCR</td>
-            <td class="comp-yes">✓ Gemini AI</td>
+            <td>AI асистент + скенирање</td>
+            <td class="comp-yes">✓ Вграден</td>
             <td class="comp-no">✗</td>
             <td class="comp-no">✗</td>
           </tr>
@@ -1143,13 +1165,13 @@
             <td class="comp-no">✗</td>
           </tr>
           <tr class="comp-highlight">
-            <td>е-Фактура UJP + QES</td>
+            <td>е-Фактура преку УЈП</td>
             <td class="comp-yes">✓ Вграден</td>
             <td class="comp-partial">~ Додаток</td>
             <td class="comp-yes">✓</td>
           </tr>
           <tr>
-            <td>Банкарски увоз (CSV/MT940/PDF)</td>
+            <td>Увоз на банкарски изводи</td>
             <td class="comp-yes">✓</td>
             <td class="comp-partial">~ Само CSV</td>
             <td class="comp-no">✗</td>
@@ -1161,13 +1183,13 @@
             <td class="comp-partial">~ Ограничено</td>
           </tr>
           <tr>
-            <td>IFRS извештаи + АОП</td>
+            <td>Финансиски извештаи + АОП</td>
             <td class="comp-yes">✓</td>
             <td class="comp-yes">✓</td>
             <td class="comp-partial">~ Делумно</td>
           </tr>
           <tr class="comp-highlight">
-            <td>PWA мобилна верзија</td>
+            <td>Мобилна апликација</td>
             <td class="comp-yes">✓</td>
             <td class="comp-no">✗</td>
             <td class="comp-no">✗</td>
@@ -1179,7 +1201,7 @@
             <td class="comp-partial">~ 1 јазик</td>
           </tr>
           <tr class="comp-highlight">
-            <td>Залихи + нарачки + 3-way</td>
+            <td>Залихи + нарачки + контрола</td>
             <td class="comp-yes">✓</td>
             <td class="comp-yes">✓</td>
             <td class="comp-no">✗</td>
@@ -1191,7 +1213,7 @@
             <td class="comp-partial">~ Основно</td>
           </tr>
           <tr class="comp-highlight">
-            <td>Cloud-native (без инсталација)</td>
+            <td>Онлајн (без инсталација)</td>
             <td class="comp-yes">✓</td>
             <td class="comp-no">✗ Десктоп</td>
             <td class="comp-yes">✓</td>
@@ -1211,31 +1233,31 @@
       <h3>Зошто сметководителите го избираат Facturino</h3>
       <div class="why-grid">
         <div class="why-item">
-          <div class="why-icon">⚡</div>
+          <img class="why-icon" src="icons/lightning.png" alt="Брзина">
           <div>
             <h4>10x побрзо</h4>
             <p>AI ја елиминира рачната работа — скенирање, книжење, порамнување.</p>
           </div>
         </div>
         <div class="why-item">
-          <div class="why-icon">💰</div>
+          <img class="why-icon" src="icons/percent.png" alt="Провизија">
           <div>
             <h4>20% провизија</h4>
             <p>Заработувајте 20% месечно (22% годишно) од секоја компанија што ја приклучувате.</p>
           </div>
         </div>
         <div class="why-item">
-          <div class="why-icon">🌐</div>
+          <img class="why-icon" src="icons/globe.png" alt="Онлајн">
           <div>
-            <h4>Cloud + PWA</h4>
-            <p>Работете од секаде — десктоп, таблет, телефон. Без инсталација.</p>
+            <h4>Онлајн + Мобилно</h4>
+            <p>Работете од секаде — компјутер, таблет, телефон. Без инсталација.</p>
           </div>
         </div>
         <div class="why-item">
-          <div class="why-icon">🔮</div>
+          <img class="why-icon" src="icons/sparkle.png" alt="AI">
           <div>
-            <h4>AI иднина</h4>
-            <p>Единствениот МК софтвер со AI асистент, OCR и автоматско порамнување.</p>
+            <h4>AI технологија</h4>
+            <p>Единствениот МК софтвер со AI асистент, скенирање и автоматско порамнување.</p>
           </div>
         </div>
       </div>
