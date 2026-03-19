@@ -45,17 +45,20 @@
         <div class="info-col" style="border-right: 1px solid #ccc;">
             <div class="section-title">ИЗДАВАЧ НА ФАКТУРА</div>
             <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->company->name ?? '' }}</span></div>
-            @if($company_address)
-                <div><span class="field-label">Адреса:</span> <span class="field-value">{!! str_replace('<br />', ', ', $company_address) !!}</span></div>
-            @elseif($invoice->company && $invoice->company->address)
-                {{-- Fallback: show address from relationship --}}
+            @php
+                $addr = $invoice->company ? $invoice->company->address : null;
+            @endphp
+            @if($addr)
                 <div><span class="field-label">Адреса:</span> <span class="field-value">
-                    {{ $invoice->company->address->address_street_1 ?? '' }}
-                    @if($invoice->company->address->address_street_2), {{ $invoice->company->address->address_street_2 }}@endif
-                    @if($invoice->company->address->city), {{ $invoice->company->address->city }}@endif
-                    @if($invoice->company->address->zip) {{ $invoice->company->address->zip }}@endif
-                    @if($invoice->company->address->country_name), {{ $invoice->company->address->country_name }}@endif
+                    {{ $addr->address_street_1 ?? '' }}
+                    @if($addr->address_street_2), {{ $addr->address_street_2 }}@endif
                 </span></div>
+                @if($addr->city || $addr->zip)
+                    <div><span class="field-label"></span> <span class="field-value">
+                        {{ $addr->city ?? '' }}@if($addr->zip) {{ $addr->zip }}@endif
+                        @if($addr->country && $addr->country->name), {{ $addr->country->name }}@endif
+                    </span></div>
+                @endif
             @endif
             @if(isset($invoice->company->vat_id) && $invoice->company->vat_id)
                 <div><span class="field-label">ЕДБ за ДДВ:</span> <span class="field-value">{{ $invoice->company->vat_id }}</span></div>
@@ -63,27 +66,30 @@
             @if(isset($invoice->company->tax_id) && $invoice->company->tax_id)
                 <div><span class="field-label">Даночен број (ЕМБС):</span> <span class="field-value">{{ $invoice->company->tax_id }}</span></div>
             @endif
-            @if($invoice->company && $invoice->company->address && $invoice->company->address->phone)
-                <div><span class="field-label">Телефон:</span> <span class="field-value">{{ $invoice->company->address->phone }}</span></div>
+            @if($addr && $addr->phone)
+                <div><span class="field-label">Телефон:</span> <span class="field-value">{{ $addr->phone }}</span></div>
             @endif
-            <div><span class="field-label">Место на издавање:</span> <span class="field-value">{{ optional($invoice->company->address)->city ?? 'Скопје' }}</span></div>
+            <div><span class="field-label">Место на издавање:</span> <span class="field-value">{{ optional($addr)->city ?? 'Скопје' }}</span></div>
         </div>
 
         {{-- Buyer Block --}}
         <div class="info-col">
             <div class="section-title">ПРИМАТЕЛ НА ФАКТУРА</div>
             <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->customer->name ?? '' }}</span></div>
-            @if($billing_address)
-                <div><span class="field-label">Адреса:</span> <span class="field-value">{!! str_replace('<br />', ', ', $billing_address) !!}</span></div>
-            @elseif($invoice->customer && $invoice->customer->billingAddress)
-                {{-- Fallback: show address from relationship --}}
+            @php
+                $custAddr = $invoice->customer ? $invoice->customer->billingAddress : null;
+            @endphp
+            @if($custAddr)
                 <div><span class="field-label">Адреса:</span> <span class="field-value">
-                    {{ $invoice->customer->billingAddress->address_street_1 ?? '' }}
-                    @if($invoice->customer->billingAddress->address_street_2), {{ $invoice->customer->billingAddress->address_street_2 }}@endif
-                    @if($invoice->customer->billingAddress->city), {{ $invoice->customer->billingAddress->city }}@endif
-                    @if($invoice->customer->billingAddress->zip) {{ $invoice->customer->billingAddress->zip }}@endif
-                    @if($invoice->customer->billingAddress->country_name), {{ $invoice->customer->billingAddress->country_name }}@endif
+                    {{ $custAddr->address_street_1 ?? '' }}
+                    @if($custAddr->address_street_2), {{ $custAddr->address_street_2 }}@endif
                 </span></div>
+                @if($custAddr->city || $custAddr->zip)
+                    <div><span class="field-label"></span> <span class="field-value">
+                        {{ $custAddr->city ?? '' }}@if($custAddr->zip) {{ $custAddr->zip }}@endif
+                        @if($custAddr->country && $custAddr->country->name), {{ $custAddr->country->name }}@endif
+                    </span></div>
+                @endif
             @endif
             @if(isset($invoice->customer->vat_number) && $invoice->customer->vat_number)
                 <div><span class="field-label">ЕДБ за ДДВ:</span> <span class="field-value">{{ $invoice->customer->vat_number }}</span></div>
