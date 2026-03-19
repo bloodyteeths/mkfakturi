@@ -711,8 +711,15 @@ class ProcessWebhookEvent implements ShouldQueue
         $seats = (int) ($metadata['seats'] ?? 0);
         $subscriptionId = $session['subscription'] ?? null;
 
+        $validTiers = array_keys(config('subscriptions.partner_tiers', []));
+
         if (!$userId || !$tier) {
             Log::warning('Partner checkout missing user_id or tier', ['metadata' => $metadata]);
+            return;
+        }
+
+        if (!in_array($tier, $validTiers)) {
+            Log::warning('Partner checkout: invalid tier', ['tier' => $tier, 'valid' => $validTiers]);
             return;
         }
 
@@ -726,6 +733,7 @@ class ProcessWebhookEvent implements ShouldQueue
             'partner_subscription_tier' => $tier,
             'stripe_subscription_id' => $subscriptionId,
             'partner_seat_count' => $seats,
+            'partner_trial_ends_at' => null, // Clear trial — now on paid plan
         ]);
 
         Log::info('Partner subscription activated via checkout', [
@@ -792,11 +800,18 @@ class ProcessWebhookEvent implements ShouldQueue
         $newPriceId = $subscription['items']['data'][0]['price']['id'] ?? null;
         if ($newPriceId) {
             $newTier = $this->partnerTierFromStripePriceId($newPriceId);
-            if ($newTier && $newTier !== $user->partner_subscription_tier) {
+            $validTiers = array_keys(config('subscriptions.partner_tiers', []));
+            if ($newTier && in_array($newTier, $validTiers) && $newTier !== $user->partner_subscription_tier) {
                 $user->update(['partner_subscription_tier' => $newTier]);
                 Log::info('Partner subscription tier changed', [
                     'user_id' => $userId,
+                    'old_tier' => $user->partner_subscription_tier,
                     'new_tier' => $newTier,
+                ]);
+            } elseif (!$newTier) {
+                Log::warning('Partner subscription: unrecognized price ID', [
+                    'user_id' => $userId,
+                    'price_id' => $newPriceId,
                 ]);
             }
         }
@@ -809,7 +824,12 @@ class ProcessWebhookEvent implements ShouldQueue
      */
     protected function partnerTierFromStripePriceId(string $priceId): ?string
     {
-        foreach (['services.stripe.partner_prices', 'services.stripe.partner_prices_eur'] as $configKey) {
+        foreach ([
+            'services.stripe.partner_prices',
+            'services.stripe.partner_prices_eur',
+            'services.stripe.partner_prices_yearly',
+            'services.stripe.partner_prices_eur_yearly',
+        ] as $configKey) {
             $prices = config($configKey, []);
             foreach ($prices as $tier => $tierPriceId) {
                 if ($tier === 'seat') continue; // Skip seat add-on
