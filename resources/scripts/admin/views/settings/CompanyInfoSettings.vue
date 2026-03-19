@@ -13,6 +13,24 @@
             @remove="onFileInputRemove"
           />
         </BaseInputGroup>
+
+        <BaseInputGroup :label="$t('settings.company_info.company_stamp')">
+          <BaseFileUploader
+            v-model="previewStamp"
+            base64
+            @change="onStampInputChange"
+            @remove="onStampInputRemove"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="$t('settings.company_info.company_signature')">
+          <BaseFileUploader
+            v-model="previewSignature"
+            base64
+            @change="onSignatureInputChange"
+            @remove="onSignatureInputRemove"
+          />
+        </BaseInputGroup>
       </BaseInputGrid>
 
       <BaseInputGrid class="mt-5">
@@ -182,9 +200,31 @@ let logoFileBlob = ref(null)
 let logoFileName = ref(null)
 const isCompanyLogoRemoved = ref(false)
 
+let previewStamp = ref([])
+let stampFileBlob = ref(null)
+let stampFileName = ref(null)
+const isCompanyStampRemoved = ref(false)
+
+let previewSignature = ref([])
+let signatureFileBlob = ref(null)
+let signatureFileName = ref(null)
+const isCompanySignatureRemoved = ref(false)
+
 if (companyForm.logo) {
   previewLogo.value.push({
     image: companyForm.logo,
+  })
+}
+
+if (companyStore.selectedCompany?.stamp) {
+  previewStamp.value.push({
+    image: companyStore.selectedCompany.stamp,
+  })
+}
+
+if (companyStore.selectedCompany?.signature) {
+  previewSignature.value.push({
+    image: companyStore.selectedCompany.signature,
   })
 }
 
@@ -222,6 +262,26 @@ function onFileInputRemove() {
   isCompanyLogoRemoved.value = true
 }
 
+function onStampInputChange(fileName, file, fileCount, fileList) {
+  stampFileName.value = fileList.name
+  stampFileBlob.value = file
+}
+
+function onStampInputRemove() {
+  stampFileBlob.value = null
+  isCompanyStampRemoved.value = true
+}
+
+function onSignatureInputChange(fileName, file, fileCount, fileList) {
+  signatureFileName.value = fileList.name
+  signatureFileBlob.value = file
+}
+
+function onSignatureInputRemove() {
+  signatureFileBlob.value = null
+  isCompanySignatureRemoved.value = true
+}
+
 async function updateCompanyData() {
   v$.value.$touch()
 
@@ -245,6 +305,32 @@ async function updateCompanyData() {
       await companyStore.updateCompanyLogo(logoData)
       logoFileBlob.value = null
       isCompanyLogoRemoved.value = false
+    }
+
+    if (stampFileBlob.value || isCompanyStampRemoved.value) {
+      let stampData = new FormData()
+
+      if (stampFileBlob.value) {
+        stampData.append('company_stamp', stampFileBlob.value, stampFileName.value)
+      }
+      stampData.append('is_company_stamp_removed', isCompanyStampRemoved.value)
+
+      await companyStore.updateCompanyStamp(stampData)
+      stampFileBlob.value = null
+      isCompanyStampRemoved.value = false
+    }
+
+    if (signatureFileBlob.value || isCompanySignatureRemoved.value) {
+      let signatureData = new FormData()
+
+      if (signatureFileBlob.value) {
+        signatureData.append('company_signature', signatureFileBlob.value, signatureFileName.value)
+      }
+      signatureData.append('is_company_signature_removed', isCompanySignatureRemoved.value)
+
+      await companyStore.updateCompanySignature(signatureData)
+      signatureFileBlob.value = null
+      isCompanySignatureRemoved.value = false
     }
 
     isSaving.value = false

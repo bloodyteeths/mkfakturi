@@ -617,6 +617,8 @@ Route::prefix('/v1')->group(function () {
             Route::put('/company', [CompanyController::class, 'updateCompany']);
 
             Route::post('/company/upload-logo', [CompanyController::class, 'uploadCompanyLogo']);
+            Route::post('/company/upload-stamp', [CompanyController::class, 'uploadCompanyStamp']);
+            Route::post('/company/upload-signature', [CompanyController::class, 'uploadCompanySignature']);
 
             Route::get('/company/settings', GetCompanySettingsController::class);
 

@@ -49,7 +49,7 @@ class Company extends Model implements HasMedia
 
     public const CUSTOMER_LEVEL = 'customer_level';
 
-    protected $appends = ['logo', 'logo_path'];
+    protected $appends = ['logo', 'logo_path', 'stamp', 'stamp_path', 'signature', 'signature_path'];
 
     public function roles(): HasMany
     {
@@ -86,10 +86,71 @@ class Company extends Model implements HasMedia
 
     protected function logoFileExists(Media $logo): bool
     {
-        $diskName = $logo->disk ?? config('filesystems.default');
+        return $this->mediaFileExists($logo);
+    }
+
+    public function getStampPathAttribute()
+    {
+        $stamp = $this->getMedia('stamp')->first();
+
+        if (! $stamp || ! $this->mediaFileExists($stamp)) {
+            return null;
+        }
+
+        $fileDisk = FileDisk::whereSetAsDefault(true)->first();
+
+        if ($fileDisk && $fileDisk->isSystem()) {
+            return $stamp->getPath();
+        }
+
+        return $stamp->getFullUrl();
+    }
+
+    public function getStampAttribute()
+    {
+        $stamp = $this->getMedia('stamp')->first();
+
+        if ($stamp && $this->mediaFileExists($stamp)) {
+            return $stamp->getFullUrl();
+        }
+
+        return null;
+    }
+
+    public function getSignaturePathAttribute()
+    {
+        $signature = $this->getMedia('signature')->first();
+
+        if (! $signature || ! $this->mediaFileExists($signature)) {
+            return null;
+        }
+
+        $fileDisk = FileDisk::whereSetAsDefault(true)->first();
+
+        if ($fileDisk && $fileDisk->isSystem()) {
+            return $signature->getPath();
+        }
+
+        return $signature->getFullUrl();
+    }
+
+    public function getSignatureAttribute()
+    {
+        $signature = $this->getMedia('signature')->first();
+
+        if ($signature && $this->mediaFileExists($signature)) {
+            return $signature->getFullUrl();
+        }
+
+        return null;
+    }
+
+    protected function mediaFileExists(Media $media): bool
+    {
+        $diskName = $media->disk ?? config('filesystems.default');
 
         try {
-            return Storage::disk($diskName)->exists($logo->getPathRelativeToRoot());
+            return Storage::disk($diskName)->exists($media->getPathRelativeToRoot());
         } catch (Throwable $exception) {
             return false;
         }

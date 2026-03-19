@@ -403,6 +403,26 @@
         </div>
     @endif
 
+    {{-- Stamp & Signature --}}
+    @if(isset($stamp) && $stamp || isset($signature) && $signature)
+    <table style="width:100%; margin-top:10px; border:none;">
+        <tr>
+            <td style="width:50%; text-align:center; border:none;">
+                @if(isset($stamp) && $stamp)
+                    <img src="{{ \App\Space\ImageUtils::toBase64Src($stamp) }}" style="height:80px;" alt="Печат">
+                    <div style="font-size:8px; color:#666;">Печат / Stamp</div>
+                @endif
+            </td>
+            <td style="width:50%; text-align:center; border:none;">
+                @if(isset($signature) && $signature)
+                    <img src="{{ \App\Space\ImageUtils::toBase64Src($signature) }}" style="height:80px;" alt="Потпис">
+                    <div style="font-size:8px; color:#666;">Овластен потпис / Signature</div>
+                @endif
+            </td>
+        </tr>
+    </table>
+    @endif
+
     {{-- Footer --}}
     <div class="footer">
         <strong>Овој документ е профактура и не претставува даночен документ.</strong>

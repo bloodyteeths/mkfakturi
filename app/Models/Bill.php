@@ -606,12 +606,17 @@ class Bill extends Model implements HasMedia
 
         $customFields = CustomField::where('model_type', 'BillItem')->get();
 
+        $stamp = $company->stamp ?: ($company->stamp_path ?: null);
+        $signature = $company->signature ?: ($company->signature_path ?: null);
+
         view()->share([
             // Bill-specific data
             'bill' => $this,
             'company' => $company,
             'supplier' => $this->supplier,
             'logo' => $logo,
+            'stamp' => $stamp,
+            'signature' => $signature,
             'taxes' => $taxes,
             'company_address' => $this->getCompanyAddress(),
             'billing_address' => $this->getSupplierAddress(),

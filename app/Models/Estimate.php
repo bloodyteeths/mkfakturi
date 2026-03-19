@@ -427,11 +427,16 @@ class Estimate extends Model implements HasMedia
             $logo = file_exists($defaultLogo) ? $defaultLogo : null;
         }
 
+        $stamp = $company->stamp ?: ($company->stamp_path ?: null);
+        $signature = $company->signature ?: ($company->signature_path ?: null);
+
         view()->share([
             'estimate' => $this,
             'company' => $company,
             'customFields' => $customFields,
             'logo' => $logo ?? null,
+            'stamp' => $stamp,
+            'signature' => $signature,
             'company_address' => $this->getCompanyAddress(),
             'shipping_address' => $this->getCustomerShippingAddress(),
             'billing_address' => $this->getCustomerBillingAddress(),

@@ -728,6 +728,10 @@ class ProformaInvoice extends Model
             'has_customer' => $this->customer ? true : false,
         ]);
 
+        // Get stamp and signature (no default fallback - null if not set)
+        $stamp = $company->stamp ?: ($company->stamp_path ?: null);
+        $signature = $company->signature ?: ($company->signature_path ?: null);
+
         // Share view data - use 'invoice' key for template compatibility
         view()->share([
             'invoice' => $this,
@@ -738,6 +742,8 @@ class ProformaInvoice extends Model
             'billing_address' => $billingAddress,
             'notes' => $this->getNotes(),
             'logo' => $logo ?? null,
+            'stamp' => $stamp,
+            'signature' => $signature,
             'taxes' => $taxes,
         ]);
 

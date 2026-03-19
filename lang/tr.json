@@ -1921,6 +1921,8 @@
             "tax_id": "Vergi Kimlik Numarası",
             "vat_id": "KDV Kimlik Numarası",
             "company_logo": "Şirket Logosu",
+            "company_stamp": "Şirket Kaşesi",
+            "company_signature": "Yetkili İmza",
             "section_description": "Facturino tarafından oluşturulacak faturaların, proformaların ve diğer evrakların üzerinde görünecek şirket bilgileriniz.",
             "phone": "Telefon",
             "country": "Ülke",

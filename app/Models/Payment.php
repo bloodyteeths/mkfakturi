@@ -463,12 +463,17 @@ class Payment extends Model implements HasMedia
             $logo = file_exists($defaultLogo) ? $defaultLogo : null;
         }
 
+        $stamp = $company->stamp ?: ($company->stamp_path ?: null);
+        $signature = $company->signature ?: ($company->signature_path ?: null);
+
         view()->share([
             'payment' => $this,
             'company_address' => $this->getCompanyAddress(),
             'billing_address' => $this->getCustomerBillingAddress(),
             'notes' => $this->getNotes(),
             'logo' => $logo ?? null,
+            'stamp' => $stamp,
+            'signature' => $signature,
         ]);
 
         if (request()->has('preview')) {

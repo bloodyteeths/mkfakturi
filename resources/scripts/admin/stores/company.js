@@ -83,6 +83,34 @@ export const useCompanyStore = (useWindow = false) => {
         })
       },
 
+      updateCompanyStamp(data) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post('/company/upload-stamp', data)
+            .then((response) => {
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      updateCompanySignature(data) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post('/company/upload-signature', data)
+            .then((response) => {
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
       addNewCompany(data) {
         return new Promise((resolve, reject) => {
           axios
