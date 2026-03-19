@@ -298,7 +298,7 @@ async function updateCompanyData() {
       let logoData = new FormData()
 
       if (logoFileBlob.value) {
-        logoData.append('company_logo', logoFileBlob.value, logoFileName.value)
+        logoData.append('company_logo', JSON.stringify({ data: logoFileBlob.value, name: logoFileName.value }))
       }
       logoData.append('is_company_logo_removed', isCompanyLogoRemoved.value)
 
@@ -311,7 +311,7 @@ async function updateCompanyData() {
       let stampData = new FormData()
 
       if (stampFileBlob.value) {
-        stampData.append('company_stamp', stampFileBlob.value, stampFileName.value)
+        stampData.append('company_stamp', JSON.stringify({ data: stampFileBlob.value, name: stampFileName.value }))
       }
       stampData.append('is_company_stamp_removed', isCompanyStampRemoved.value)
 
@@ -324,7 +324,7 @@ async function updateCompanyData() {
       let signatureData = new FormData()
 
       if (signatureFileBlob.value) {
-        signatureData.append('company_signature', signatureFileBlob.value, signatureFileName.value)
+        signatureData.append('company_signature', JSON.stringify({ data: signatureFileBlob.value, name: signatureFileName.value }))
       }
       signatureData.append('is_company_signature_removed', isCompanySignatureRemoved.value)
 
