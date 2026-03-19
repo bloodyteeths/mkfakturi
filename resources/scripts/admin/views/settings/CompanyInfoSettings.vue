@@ -308,29 +308,37 @@ async function updateCompanyData() {
     }
 
     if (stampFileBlob.value || isCompanyStampRemoved.value) {
-      let stampData = new FormData()
+      try {
+        let stampData = new FormData()
 
-      if (stampFileBlob.value) {
-        stampData.append('company_stamp', JSON.stringify({ data: stampFileBlob.value, name: stampFileName.value }))
+        if (stampFileBlob.value) {
+          stampData.append('company_stamp', JSON.stringify({ data: stampFileBlob.value, name: stampFileName.value }))
+        }
+        stampData.append('is_company_stamp_removed', isCompanyStampRemoved.value)
+
+        await companyStore.updateCompanyStamp(stampData)
+        stampFileBlob.value = null
+        isCompanyStampRemoved.value = false
+      } catch (err) {
+        console.error('Stamp upload failed:', err?.response?.data || err)
       }
-      stampData.append('is_company_stamp_removed', isCompanyStampRemoved.value)
-
-      await companyStore.updateCompanyStamp(stampData)
-      stampFileBlob.value = null
-      isCompanyStampRemoved.value = false
     }
 
     if (signatureFileBlob.value || isCompanySignatureRemoved.value) {
-      let signatureData = new FormData()
+      try {
+        let signatureData = new FormData()
 
-      if (signatureFileBlob.value) {
-        signatureData.append('company_signature', JSON.stringify({ data: signatureFileBlob.value, name: signatureFileName.value }))
+        if (signatureFileBlob.value) {
+          signatureData.append('company_signature', JSON.stringify({ data: signatureFileBlob.value, name: signatureFileName.value }))
+        }
+        signatureData.append('is_company_signature_removed', isCompanySignatureRemoved.value)
+
+        await companyStore.updateCompanySignature(signatureData)
+        signatureFileBlob.value = null
+        isCompanySignatureRemoved.value = false
+      } catch (err) {
+        console.error('Signature upload failed:', err?.response?.data || err)
       }
-      signatureData.append('is_company_signature_removed', isCompanySignatureRemoved.value)
-
-      await companyStore.updateCompanySignature(signatureData)
-      signatureFileBlob.value = null
-      isCompanySignatureRemoved.value = false
     }
 
     isSaving.value = false

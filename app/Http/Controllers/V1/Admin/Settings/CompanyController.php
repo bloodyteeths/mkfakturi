@@ -119,22 +119,46 @@ class CompanyController extends Controller
 
         $this->authorize('manage company', $company);
 
-        $data = json_decode($request->company_stamp);
+        try {
+            $data = json_decode($request->company_stamp);
 
-        if (isset($request->is_company_stamp_removed) && (bool) $request->is_company_stamp_removed) {
-            $company->clearMediaCollection('stamp');
+            \Log::info('uploadCompanyStamp', [
+                'company_id' => $company->id,
+                'has_data' => (bool) $data,
+                'has_raw' => (bool) $request->company_stamp,
+                'raw_length' => strlen($request->company_stamp ?? ''),
+                'data_name' => $data->name ?? null,
+                'removed' => $request->is_company_stamp_removed,
+            ]);
+
+            if (isset($request->is_company_stamp_removed) && $request->is_company_stamp_removed === 'true') {
+                $company->clearMediaCollection('stamp');
+            }
+            if ($data) {
+                $company->clearMediaCollection('stamp');
+
+                $company->addMediaFromBase64($data->data)
+                    ->usingFileName($data->name)
+                    ->toMediaCollection('stamp');
+
+                \Log::info('Stamp saved successfully', ['company_id' => $company->id]);
+            }
+
+            return response()->json([
+                'success' => true,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('uploadCompanyStamp failed', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Stamp upload failed: '.$e->getMessage(),
+            ], 500);
         }
-        if ($data) {
-            $company->clearMediaCollection('stamp');
-
-            $company->addMediaFromBase64($data->data)
-                ->usingFileName($data->name)
-                ->toMediaCollection('stamp');
-        }
-
-        return response()->json([
-            'success' => true,
-        ]);
     }
 
     public function uploadCompanySignature(CompanySignatureRequest $request)
@@ -143,22 +167,46 @@ class CompanyController extends Controller
 
         $this->authorize('manage company', $company);
 
-        $data = json_decode($request->company_signature);
+        try {
+            $data = json_decode($request->company_signature);
 
-        if (isset($request->is_company_signature_removed) && (bool) $request->is_company_signature_removed) {
-            $company->clearMediaCollection('signature');
+            \Log::info('uploadCompanySignature', [
+                'company_id' => $company->id,
+                'has_data' => (bool) $data,
+                'has_raw' => (bool) $request->company_signature,
+                'raw_length' => strlen($request->company_signature ?? ''),
+                'data_name' => $data->name ?? null,
+                'removed' => $request->is_company_signature_removed,
+            ]);
+
+            if (isset($request->is_company_signature_removed) && $request->is_company_signature_removed === 'true') {
+                $company->clearMediaCollection('signature');
+            }
+            if ($data) {
+                $company->clearMediaCollection('signature');
+
+                $company->addMediaFromBase64($data->data)
+                    ->usingFileName($data->name)
+                    ->toMediaCollection('signature');
+
+                \Log::info('Signature saved successfully', ['company_id' => $company->id]);
+            }
+
+            return response()->json([
+                'success' => true,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('uploadCompanySignature failed', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Signature upload failed: '.$e->getMessage(),
+            ], 500);
         }
-        if ($data) {
-            $company->clearMediaCollection('signature');
-
-            $company->addMediaFromBase64($data->data)
-                ->usingFileName($data->name)
-                ->toMediaCollection('signature');
-        }
-
-        return response()->json([
-            'success' => true,
-        ]);
     }
 
     /**
