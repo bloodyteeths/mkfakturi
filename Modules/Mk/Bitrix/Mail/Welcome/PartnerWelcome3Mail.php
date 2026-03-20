@@ -19,7 +19,7 @@ class PartnerWelcome3Mail extends Mailable implements ShouldQueue
     public function __construct(string $name)
     {
         $this->name = $name;
-        $this->ctaUrl = config('app.url') . '/admin/partner/dashboard';
+        $this->ctaUrl = config('app.url') . '/admin/partner/portfolio/companies/import';
     }
 
     public function build()

@@ -19,7 +19,7 @@ class PartnerWelcome1Mail extends Mailable implements ShouldQueue
     public function __construct(string $name)
     {
         $this->name = $name;
-        $this->appUrl = config('app.url');
+        $this->appUrl = config('app.url') . '/admin/partner/onboarding';
     }
 
     public function build()

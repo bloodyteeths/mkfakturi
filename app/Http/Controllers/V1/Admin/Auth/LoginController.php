@@ -139,16 +139,26 @@ class LoginController extends Controller
             'returned_role' => $role,
         ]);
 
+        // Build user response data
+        $userData = [
+            'id' => $user->id,
+            'email' => $user->email,
+            'name' => $user->name,
+            'role' => $role,
+            'is_partner' => $isPartner,
+        ];
+
+        // Include onboarding status for partner users
+        if ($isPartner) {
+            $partner = $user->partner;
+            $userData['onboarding_completed_at'] = $partner?->onboarding_completed_at;
+        }
+
         // Return user info in the response so frontend can check role
         return response()->json([
             'success' => true,
-            'user' => [
-                'id' => $user->id,
-                'email' => $user->email,
-                'name' => $user->name,
-                'role' => $role,
-                'is_partner' => $isPartner,
-            ],
+            'user' => $userData,
         ]);
+        // CLAUDE-CHECKPOINT
     }
 }

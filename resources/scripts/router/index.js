@@ -66,6 +66,21 @@ router.beforeEach((to, from, next) => {
     }
   }
 
+  // Force partners who haven't completed onboarding to the onboarding wizard
+  // Super admins bypass this check
+  if (
+    userStore.currentUser?.role === 'partner' &&
+    userStore.currentUser?.role !== 'super admin' &&
+    !userStore.currentUser?.onboarding_completed_at &&
+    isAppLoaded
+  ) {
+    const onboardingAllowedRoutes = ['partner.onboarding', 'logout', 'account.settings']
+    if (!onboardingAllowedRoutes.includes(to.name)) {
+      next({ name: 'partner.onboarding' })
+      return
+    }
+  }
+
   // IMPORTANT: Redirect partners AWAY from regular admin routes
   // UNLESS they have selected a company to manage (via console)
   if (userStore.currentUser?.role === 'partner' && to.path.startsWith('/admin') && !to.path.startsWith('/admin/partner')) {
@@ -118,5 +133,6 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+// CLAUDE-CHECKPOINT
 
 export default router

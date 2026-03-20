@@ -18,4 +18,5 @@
 @lang('welcome.signature_phone')<br>
 <a href="https://facturino.mk">facturino.mk</a>
 </p>
+{{-- CLAUDE-CHECKPOINT --}}
 @endcomponent

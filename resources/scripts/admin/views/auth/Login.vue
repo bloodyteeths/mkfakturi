@@ -186,10 +186,16 @@ async function onSubmit() {
     // Redirect based on user role
     // Partner users go to partner dashboard, others go to admin dashboard
     if (userRole === 'partner') {
-      router.push('/admin/partner/dashboard')
+      // Redirect to onboarding if not completed (super admins bypass)
+      if (!userData.onboarding_completed_at && userData.role !== 'super admin') {
+        router.push('/admin/partner/onboarding')
+      } else {
+        router.push('/admin/partner/dashboard')
+      }
     } else {
       router.push('/admin/dashboard')
     }
+    // CLAUDE-CHECKPOINT
   } catch (error) {
     isLoading.value = false
     console.error('Login error:', error)

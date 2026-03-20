@@ -9,69 +9,110 @@
       {{ partnerStore.mockWarning || $t('partner_dashboard.mock_data_warning') }}
     </BaseAlert>
 
-    <!-- Stripe Connect Status Banner -->
+    <!-- Empty state: no companies yet -->
     <div
-      v-if="showStripeConnectBanner"
-      class="mb-6 rounded-lg p-4 flex items-center justify-between"
-      :class="stripeConnectBannerClass"
-      role="alert"
-      :aria-label="stripeConnectMessage"
+      v-if="hasNoCompanies"
+      class="flex flex-col items-center justify-center py-16 px-6"
     >
-      <div class="flex items-center gap-3">
-        <div class="flex-shrink-0" aria-hidden="true">
-          <!-- Not connected icon -->
-          <svg v-if="!partnerStore.stripeConnect.connected" class="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305z"/>
-          </svg>
-          <!-- Pending icon -->
-          <svg v-else-if="partnerStore.stripeConnect.status === 'pending'" class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-          </svg>
-          <!-- Restricted icon -->
-          <svg v-else-if="partnerStore.stripeConnect.status === 'restricted'" class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <!-- Active icon -->
-          <svg v-else-if="partnerStore.stripeConnect.status === 'active'" class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-          </svg>
-        </div>
-        <div>
-          <p class="font-medium" :class="stripeConnectTextClass">
-            {{ stripeConnectMessage }}
-          </p>
-        </div>
+      <div class="bg-indigo-50 rounded-full p-6 mb-6">
+        <svg class="w-16 h-16 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+        </svg>
       </div>
-      <router-link
-        to="/admin/partner/payouts"
-        class="px-4 py-2 rounded-lg text-sm font-medium transition"
-        :class="stripeConnectButtonClass"
-        :aria-label="stripeConnectButtonText"
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">
+        {{ t('partner_dashboard.empty_welcome') }}
+      </h2>
+      <p class="text-gray-500 text-center max-w-md mb-8">
+        {{ t('partner_dashboard.empty_description') }}
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <router-link
+          to="/admin/partner/portfolio"
+          class="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          {{ t('partner_dashboard.empty_add_company') }}
+        </router-link>
+        <router-link
+          to="/admin/partner/portfolio/companies/import"
+          class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          {{ t('partner_dashboard.empty_import_csv') }}
+        </router-link>
+      </div>
+    </div>
+
+    <!-- Normal dashboard: has companies -->
+    <template v-else>
+      <!-- Stripe Connect Status Banner -->
+      <div
+        v-if="showStripeConnectBanner"
+        class="mb-6 rounded-lg p-4 flex items-center justify-between"
+        :class="stripeConnectBannerClass"
+        role="alert"
+        :aria-label="stripeConnectMessage"
       >
-        {{ stripeConnectButtonText }}
-      </router-link>
-    </div>
-
-    <!-- Loading state for Stripe Connect -->
-    <div
-      v-else-if="partnerStore.stripeConnectLoading"
-      class="mb-6 rounded-lg p-4 bg-gray-50 animate-pulse"
-      role="status"
-      :aria-label="$t('partner_dashboard.loading')"
-    >
-      <div class="flex items-center gap-3">
-        <div class="w-6 h-6 bg-gray-200 rounded"></div>
-        <div class="h-5 bg-gray-200 rounded w-64"></div>
+        <div class="flex items-center gap-3">
+          <div class="flex-shrink-0" aria-hidden="true">
+            <!-- Not connected icon -->
+            <svg v-if="!partnerStore.stripeConnect.connected" class="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305z"/>
+            </svg>
+            <!-- Pending icon -->
+            <svg v-else-if="partnerStore.stripeConnect.status === 'pending'" class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <!-- Restricted icon -->
+            <svg v-else-if="partnerStore.stripeConnect.status === 'restricted'" class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <!-- Active icon -->
+            <svg v-else-if="partnerStore.stripeConnect.status === 'active'" class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-medium" :class="stripeConnectTextClass">
+              {{ stripeConnectMessage }}
+            </p>
+          </div>
+        </div>
+        <router-link
+          to="/admin/partner/payouts"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition"
+          :class="stripeConnectButtonClass"
+          :aria-label="stripeConnectButtonText"
+        >
+          {{ stripeConnectButtonText }}
+        </router-link>
       </div>
-    </div>
 
-    <DashboardStats />
-    <DashboardTable />
+      <!-- Loading state for Stripe Connect -->
+      <div
+        v-else-if="partnerStore.stripeConnectLoading"
+        class="mb-6 rounded-lg p-4 bg-gray-50 animate-pulse"
+        role="status"
+        :aria-label="$t('partner_dashboard.loading')"
+      >
+        <div class="flex items-center gap-3">
+          <div class="w-6 h-6 bg-gray-200 rounded"></div>
+          <div class="h-5 bg-gray-200 rounded w-64"></div>
+        </div>
+      </div>
+
+      <DashboardStats />
+      <DashboardTable />
+    </template>
   </BasePage>
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseAlert from '@/scripts/components/base/BaseAlert.vue'
 import DashboardStats from '@/scripts/partner/views/dashboard/DashboardStats.vue'
@@ -87,6 +128,16 @@ const partnerStore = usePartnerStore()
 const userStore = useUserStore()
 const notificationStore = useNotificationStore()
 const router = useRouter()
+
+// Track whether dashboard stats have been loaded at least once
+const statsLoaded = ref(false)
+
+// Empty state: partner has no companies
+const hasNoCompanies = computed(() => {
+  // Don't show empty state until stats have actually been fetched
+  if (!statsLoaded.value) return false
+  return partnerStore.dashboardStats.activeClients === 0
+})
 
 // Stripe Connect computed properties
 const showStripeConnectBanner = computed(() => {
@@ -179,11 +230,21 @@ const loadStripeStatus = async () => {
   }
 }
 
+// CLAUDE-CHECKPOINT
 onMounted(async () => {
   // Set impersonation partner_id from URL query for super admin
   const currentUser = userStore.currentUser
   if (currentUser?.role === 'super admin' && route.query.partner_id) {
     partnerStore.setImpersonatedPartnerId(route.query.partner_id)
+  }
+
+  // Pre-load dashboard stats so we can determine empty state before children mount
+  try {
+    await partnerStore.loadDashboardStats()
+  } catch (e) {
+    // DashboardStats child will handle error display
+  } finally {
+    statsLoaded.value = true
   }
 
   // Load Stripe Connect status with error handling

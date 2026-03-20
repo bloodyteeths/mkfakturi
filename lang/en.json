@@ -3822,7 +3822,11 @@
         "stripe_view_btn": "View",
         "total_earned": "Total Earned",
         "type": "Type",
-        "warning": "Warning"
+        "warning": "Warning",
+        "empty_welcome": "Welcome to Facturino!",
+        "empty_description": "Your partner portfolio is where you manage all your client companies. Add your first company to start tracking invoices, commissions, and financial reports.",
+        "empty_add_company": "Add your first company",
+        "empty_import_csv": "Import companies from CSV"
     },
     "partner_billing": {
         "trial_active": "Your free trial is active",

@@ -7,6 +7,7 @@ use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Modules\Mk\Bitrix\Services\WelcomeEmailService;
@@ -148,6 +149,10 @@ class PartnerSignupController extends Controller
 
             DB::commit();
 
+            // Auto-login the newly created user
+            Auth::login($user);
+            $request->session()->regenerate();
+
             // Send welcome drip series (Day 0 immediately, rest via cron)
             try {
                 app(WelcomeEmailService::class)->sendPartnerWelcome($partner);
@@ -166,9 +171,12 @@ class PartnerSignupController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Успешна регистрација! Најавете се на партнерскиот портал.',
+                'auto_login' => true,
+                'redirect' => '/admin/partner/onboarding',
+                'message' => 'Успешна регистрација!',
                 'partner_id' => $partner->id,
             ]);
+            // CLAUDE-CHECKPOINT
 
         } catch (\Exception $e) {
             DB::rollBack();

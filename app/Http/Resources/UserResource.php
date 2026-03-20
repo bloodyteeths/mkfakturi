@@ -40,6 +40,14 @@ class UserResource extends JsonResource
             'companies' => $this->whenLoaded('companies', function () {
                 return CompanyResource::collection($this->companies);
             }),
+            // Include onboarding status for partner users
+            'onboarding_completed_at' => $this->when(
+                $this->role === 'partner' || $this->partner()->exists(),
+                function () {
+                    return $this->partner?->onboarding_completed_at;
+                }
+            ),
         ];
+        // CLAUDE-CHECKPOINT
     }
 }

@@ -19,7 +19,7 @@ class PartnerWelcome4Mail extends Mailable implements ShouldQueue
     public function __construct(string $name)
     {
         $this->name = $name;
-        $this->ctaUrl = config('app.url') . '/admin/partner/commissions';
+        $this->ctaUrl = config('app.url') . '/admin/partner/billing';
     }
 
     public function build()

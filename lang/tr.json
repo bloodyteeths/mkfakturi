@@ -4804,7 +4804,11 @@
         "stripe_connect_btn": "Поврзve",
         "stripe_continue_btn": "Проborç",
         "stripe_activate_btn": "Актveвveрај",
-        "stripe_view_btn": "Görüntüle"
+        "stripe_view_btn": "Görüntüle",
+        "empty_welcome": "Facturino'ya hosgeldiniz!",
+        "empty_description": "Partner portfoyunuz tum musteri sirketlerinizi yonettiginiz yerdir. Fatura, komisyon ve finansal raporlari takip etmeye baslamak icin ilk sirketinizi ekleyin.",
+        "empty_add_company": "Ilk sirketinizi ekleyin",
+        "empty_import_csv": "CSV'den sirket aktarin"
     },
     "partner_billing": {
         "trial_active": "Ucretsiz deneme sureciniz aktif",

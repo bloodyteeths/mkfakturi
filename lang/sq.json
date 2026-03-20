@@ -490,7 +490,11 @@
         "stripe_connect_btn": "Lidhu",
         "stripe_continue_btn": "Vazhdo",
         "stripe_activate_btn": "Aktivizo",
-        "stripe_view_btn": "Shiko"
+        "stripe_view_btn": "Shiko",
+        "empty_welcome": "Mire se vini ne Facturino!",
+        "empty_description": "Portofoli juaj i partnerit eshte vendi ku menaxhoni te gjitha kompanite e klienteve. Shtoni kompanine tuaj te pare per te filluar gjurmimin e faturave, komisioneve dhe raporteve financiare.",
+        "empty_add_company": "Shtoni kompanine tuaj te pare",
+        "empty_import_csv": "Importoni kompani nga CSV"
     },
     "tax_types": {
         "name": "Emri",

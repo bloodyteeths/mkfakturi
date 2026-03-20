@@ -3,6 +3,7 @@
 namespace Modules\Mk\Bitrix\Services;
 
 use App\Models\Company;
+use App\Models\CompanySetting;
 use App\Models\Partner;
 use App\Models\WelcomeSend;
 use Illuminate\Database\Eloquent\Model;
@@ -89,8 +90,11 @@ class WelcomeEmailService
             ]);
         }
 
+        // Resolve company locale from settings, default to 'mk'
+        $locale = CompanySetting::getSetting('language', $company->id) ?: 'mk';
+
         // Send Day 0 immediately
-        $this->sendEmail('company_1', $email, $name);
+        $this->sendEmail('company_1', $email, $name, $locale);
     }
 
     /**
@@ -117,8 +121,11 @@ class WelcomeEmailService
             ]);
         }
 
+        // Resolve partner locale from their user settings, default to 'mk'
+        $locale = $this->resolvePartnerLocale($partner);
+
         // Send Day 0 immediately
-        $this->sendEmail('partner_1', $partner->email, $partner->name);
+        $this->sendEmail('partner_1', $partner->email, $partner->name, $locale);
     }
 
     /**
@@ -192,10 +199,11 @@ class WelcomeEmailService
                     continue;
                 }
 
-                // Resolve the recipient name
+                // Resolve the recipient name and locale
                 $name = $this->resolveName($send);
+                $locale = $this->resolveLocale($send);
 
-                $this->sendEmail($templateKey, $send->email, $name);
+                $this->sendEmail($templateKey, $send->email, $name, $locale);
                 $sent++;
             }
         }
@@ -206,7 +214,7 @@ class WelcomeEmailService
     /**
      * Send a single email and update tracking.
      */
-    protected function sendEmail(string $templateKey, string $email, string $name): void
+    protected function sendEmail(string $templateKey, string $email, string $name, string $locale = 'mk'): void
     {
         $mailableClass = $this->mailableMap[$templateKey] ?? null;
 
@@ -218,7 +226,7 @@ class WelcomeEmailService
 
         try {
             $mailable = new $mailableClass($name);
-            Mail::to($email)->locale('mk')->send($mailable);
+            Mail::to($email)->locale($locale)->send($mailable);
 
             // Mark as sent
             WelcomeSend::where('email', $email)
@@ -270,4 +278,40 @@ class WelcomeEmailService
 
         return '';
     }
+
+    /**
+     * Resolve locale from the sendable entity (for drip emails).
+     */
+    protected function resolveLocale(WelcomeSend $send): string
+    {
+        if ($send->sendable_type === Company::class) {
+            return CompanySetting::getSetting('language', $send->sendable_id) ?: 'mk';
+        }
+
+        if ($send->sendable_type === Partner::class) {
+            $partner = Partner::find($send->sendable_id);
+
+            return $partner ? $this->resolvePartnerLocale($partner) : 'mk';
+        }
+
+        return 'mk';
+    }
+
+    /**
+     * Resolve a partner's preferred locale from their user's language setting.
+     * Falls back to 'mk' if no preference is set.
+     */
+    protected function resolvePartnerLocale(Partner $partner): string
+    {
+        if ($partner->user) {
+            $settings = $partner->user->getSettings(['language']);
+
+            if (! empty($settings['language'])) {
+                return $settings['language'];
+            }
+        }
+
+        return 'mk';
+    }
+    // CLAUDE-CHECKPOINT
 }

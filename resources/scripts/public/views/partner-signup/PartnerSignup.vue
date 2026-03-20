@@ -229,9 +229,16 @@ const submitForm = async () => {
     const response = await axios.post('/public/partner-signup/register', form.value)
 
     if (response.data.success) {
-      // Redirect to login with success message
-      window.location.href = '/admin/login?registered=1&email=' + encodeURIComponent(form.value.email)
+      if (response.data.auto_login && response.data.redirect) {
+        // Auto-logged in by backend — get CSRF cookie then redirect to onboarding
+        await axios.get('/sanctum/csrf-cookie')
+        window.location.href = response.data.redirect
+      } else {
+        // Fallback: redirect to login page
+        window.location.href = '/admin/login?registered=1&email=' + encodeURIComponent(form.value.email)
+      }
     }
+    // CLAUDE-CHECKPOINT
   } catch (err) {
     console.error('Partner registration failed:', err)
     if (err.response?.data?.errors) {
