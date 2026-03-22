@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Mk\Bitrix\Controllers\PostmarkWebhookController;
 use Modules\Mk\Bitrix\Controllers\UnsubscribeController;
 
 /*
@@ -40,11 +41,12 @@ Route::post('/unsubscribe', [UnsubscribeController::class, 'process'])
 
 Route::prefix('webhooks')->group(function () {
     // Postmark email event webhooks (opens, clicks, bounces, spam complaints)
-    Route::post('/postmark', function () {
-        // Placeholder for PostmarkWebhookController
-        // Will process email opens, clicks, bounces, and spam complaints
-        return response()->json(['status' => 'ok']);
-    })->name('webhooks.postmark');
+    Route::post('/postmark', [PostmarkWebhookController::class, 'handle'])
+        ->name('webhooks.postmark');
+
+    // Postmark inbound email webhook (reply detection for outreach)
+    Route::post('/postmark/inbound', [PostmarkWebhookController::class, 'handleInbound'])
+        ->name('webhooks.postmark.inbound');
 });
 
 /*

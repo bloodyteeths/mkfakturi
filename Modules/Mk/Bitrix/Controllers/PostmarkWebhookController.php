@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Modules\Mk\Bitrix\Models\HubSpotLeadMap;
 use Modules\Mk\Bitrix\Models\OutreachEvent;
 use Modules\Mk\Bitrix\Models\OutreachSend;
+use Modules\Mk\Bitrix\Models\OutreachLead;
 use Modules\Mk\Bitrix\Models\Suppression;
 use Modules\Mk\Bitrix\Services\HubSpotApiClient;
 
@@ -438,5 +439,110 @@ class PostmarkWebhookController extends Controller
             'message_id' => $event->postmark_message_id,
         ]);
     }
+
+    /**
+     * Handle incoming Postmark inbound email (reply detection).
+     *
+     * When an outreach recipient replies, mark them as "interested"
+     * so the batch command stops sending follow-ups.
+     *
+     * POST /webhooks/postmark/inbound
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function handleInbound(Request $request): JsonResponse
+    {
+        $fromEmail = $request->input('FromFull.Email') ?? $request->input('From');
+        $subject = $request->input('Subject', '');
+        $textBody = $request->input('TextBody', '');
+        $messageId = $request->input('MessageID', '');
+        $originalMessageId = $request->input('Headers.In-Reply-To')
+            ?? $request->input('OriginalRecipient', '');
+
+        Log::info('Postmark inbound email received', [
+            'from' => $fromEmail,
+            'subject' => $subject,
+            'message_id' => $messageId,
+        ]);
+
+        if (!$fromEmail) {
+            return response()->json(['status' => 'ignored', 'reason' => 'no sender']);
+        }
+
+        // Normalize email
+        $fromEmail = strtolower(trim($fromEmail));
+
+        // Find matching outreach lead by sender email
+        $lead = OutreachLead::where('email', $fromEmail)->first();
+
+        if (!$lead) {
+            Log::info('Inbound email from non-lead, ignoring', ['from' => $fromEmail]);
+            return response()->json(['status' => 'ignored', 'reason' => 'not a lead']);
+        }
+
+        // Skip if already interested or beyond
+        if (in_array($lead->status, [
+            OutreachLead::STATUS_INTERESTED,
+            OutreachLead::STATUS_INVITE_SENT,
+            OutreachLead::STATUS_PARTNER_ACTIVE,
+        ])) {
+            Log::info('Lead already in advanced status, skipping', [
+                'email' => $fromEmail,
+                'status' => $lead->status,
+            ]);
+            return response()->json(['status' => 'already_processed']);
+        }
+
+        // Mark lead as interested — stops all future outreach sends
+        $lead->update([
+            'status' => OutreachLead::STATUS_INTERESTED,
+        ]);
+
+        // Sync to HubSpot
+        $mapping = HubSpotLeadMap::findByEmail($fromEmail);
+        if ($mapping) {
+            try {
+                // Move deal to interested stage
+                if ($mapping->hubspot_deal_id) {
+                    $interestedStageId = config('hubspot.stages.interested');
+                    if ($interestedStageId) {
+                        $this->hubspot->updateDealStage($mapping->hubspot_deal_id, $interestedStageId);
+                        $mapping->update(['deal_stage' => 'interested']);
+                    }
+                }
+
+                // Log note to contact
+                if ($mapping->hubspot_contact_id) {
+                    $this->hubspot->createNote(
+                        $mapping->hubspot_contact_id,
+                        "Lead REPLIED to outreach email!\nSubject: {$subject}\nBody preview: " . mb_substr($textBody, 0, 200)
+                    );
+
+                    // Create urgent task
+                    $this->hubspot->createTask(
+                        $mapping->hubspot_contact_id,
+                        "REPLY received from {$fromEmail} — call NOW",
+                        "Lead replied to outreach.\nSubject: {$subject}\n\n" . mb_substr($textBody, 0, 500),
+                        now()->endOfDay()
+                    );
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to sync inbound reply to HubSpot', [
+                    'email' => $fromEmail,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        Log::info('Lead marked as interested from inbound reply', [
+            'email' => $fromEmail,
+            'lead_id' => $lead->id,
+            'subject' => $subject,
+        ]);
+
+        return response()->json(['status' => 'processed', 'lead_id' => $lead->id]);
+    }
+    // CLAUDE-CHECKPOINT
 }
 

@@ -37,6 +37,7 @@ class VerifyCsrfToken extends Middleware
 
         // Postmark email event webhook (routes/bitrix.php)
         'webhooks/postmark',
+        'webhooks/postmark/inbound',
 
         // CPAY payment callback (routes/web.php)
         'payment/cpay/callback',
