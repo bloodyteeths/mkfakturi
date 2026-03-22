@@ -48,7 +48,7 @@ class OutreachFollowUp1Mail extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->from('partners@facturino.mk', 'Facturino')
+        return $this->from('partners@facturino.mk', 'Благица од Facturino')
             ->subject(__('outreach.followup1.subject'))
             ->view('emails.outreach.followup_1', [
                 'companyName' => $this->companyName,

@@ -729,10 +729,10 @@ class OutreachSendBatchCommand extends Command
     {
         return match ($templateKey) {
             'first_touch' => 'Facturino Partner Opportunity',
-            'followup_1' => 'Following Up - Facturino Partnership',
-            'followup_2' => 'Free Trial - Facturino',
-            'followup_3' => '14 Days Free - Facturino',
-            'followup_4' => 'Final Message - e-Faktura Deadline',
+            'followup_1' => 'Дали сè уште ги внесувате фактурите рачно?',
+            'followup_2' => 'Бесплатна миграција — доаѓаме кај вас',
+            'followup_3' => '30 клиенти, 30 логини, 30 главоболки',
+            'followup_4' => 'Последна порака од мене',
             'company_initial' => 'Is your company ready for e-Faktura?',
             'company_followup_1' => 'Automatic bank statements - Facturino',
             'company_followup_2' => 'Starter plan: only €12/month',

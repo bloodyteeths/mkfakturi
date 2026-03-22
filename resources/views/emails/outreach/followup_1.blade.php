@@ -1,29 +1,24 @@
 @extends('emails.outreach._plain_layout')
 
 @section('content')
-<p>@lang('outreach.followup1.greeting', ['companyName' => $companyName])</p>
+<p>@lang('outreach.followup1.greeting')</p>
 
-<p>@lang('outreach.followup1.intro')</p>
+<p>@lang('outreach.followup1.line1')</p>
 
-<p>
-@lang('outreach.followup1.math_1')<br>
-@lang('outreach.followup1.math_2')<br>
-@lang('outreach.followup1.math_3')
-</p>
+<p>@lang('outreach.followup1.line2')</p>
 
-<p>@lang('outreach.followup1.recurring')</p>
+<p>@lang('outreach.followup1.line3')</p>
 
-<p>@lang('outreach.followup1.easy')</p>
+<p>@lang('outreach.followup1.line4')</p>
 
-<p><a href="{{ $signupUrl }}" style="color: #1a73e8; font-weight: bold; font-size: 16px; text-decoration: underline;">@lang('outreach.followup1.cta') &rarr;</a></p>
-
-<p><em>@lang('outreach.followup1.fomo')</em></p>
+<p>@lang('outreach.followup1.line5')</p>
 
 <p>
 @lang('outreach.signature_closing')<br>
-<strong>@lang('outreach.signature_name')</strong><br>
-@lang('outreach.signature_company')<br>
-<a href="https://{{ __('outreach.signature_url') }}">{{ __('outreach.signature_url') }}</a> | @lang('outreach.signature_phone')
+<strong>@lang('outreach.signature_name_outreach')</strong><br>
+@lang('outreach.signature_company_outreach')<br>
+@lang('outreach.signature_address')<br>
+@lang('outreach.signature_phone_outreach')
 </p>
 
 <p style="font-size: 12px; color: #999;"><a href="{{ $unsubscribeUrl }}" style="color: #999;">@lang('outreach.unsubscribe')</a></p>
