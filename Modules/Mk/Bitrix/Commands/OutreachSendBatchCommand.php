@@ -279,17 +279,26 @@ class OutreachSendBatchCommand extends Command
             // Apply template-specific filtering
             $query = $this->applyTemplateFilter($query, $forcedTemplate);
         } else {
-            // Auto-select: either never contacted, or next_followup_at is due
+            // Determine max templates based on lead type
+            $isCompany = $leadType === OutreachLead::TYPE_COMPANY;
+            $maxTemplates = $isCompany
+                ? ['company_initial', 'company_followup_1', 'company_followup_2', 'company_followup_3', 'company_followup_4']
+                : ['first_touch', 'followup_1', 'followup_2', 'followup_3', 'followup_4'];
+
+            // Auto-select: either never contacted, or has pending follow-ups
             $query->where(function ($q) {
                 $q->whereNull('last_contacted_at')
                   ->orWhere(function ($q2) {
-                      // Has a next followup that is due
                       $q2->whereHas('sends')
                          ->whereIn('status', [
                              OutreachLead::STATUS_EMAILED,
                              OutreachLead::STATUS_FOLLOWUP,
                          ]);
                   });
+            })
+            // Exclude leads that already received all 5 templates (max emails reached)
+            ->whereDoesntHave('sends', function ($q) use ($maxTemplates) {
+                $q->where('template_key', end($maxTemplates));
             });
         }
 
