@@ -106,7 +106,8 @@ class PdfImageConverter
         try {
             $imagick = new \Imagick;
             $imagick->setResolution($dpi, $dpi);
-            $imagick->readImage($fullPath);
+            // Force PDF format hint — temp upload files have no extension
+            $imagick->readImage('pdf:' . $fullPath);
 
             $images = [];
             $pageCount = $imagick->getNumberImages();
