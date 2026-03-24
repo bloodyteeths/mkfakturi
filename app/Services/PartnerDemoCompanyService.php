@@ -296,7 +296,7 @@ class PartnerDemoCompanyService
                     'tax_per_item' => 'YES',
                     'discount_per_item' => 'NO',
                     'template_name' => 'invoice1',
-                    'sent' => in_array($def['status'], [Invoice::STATUS_SENT, Invoice::STATUS_VIEWED, Invoice::STATUS_COMPLETED, Invoice::STATUS_OVERDUE]),
+                    'sent' => in_array($def['status'], [Invoice::STATUS_SENT, Invoice::STATUS_VIEWED, Invoice::STATUS_COMPLETED]),
                 ]);
                 $invoice->unique_hash = Hashids::connection(Invoice::class)->encode($invoice->id);
                 $invoice->save();
