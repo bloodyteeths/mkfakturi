@@ -3,16 +3,30 @@
  * Import bank transactions from journal CSVs for company 118 (Elektromena DOOEL)
  *
  * Reads journal-style bank statement CSVs (Windows-1251, semicolon-delimited).
- * Each CSV has grouped journal entries — we extract the account 1000 (cash at bank)
- * line from each group as the actual bank transaction, with counterparty info from
- * the non-1000 entries.
+ * Each CSV has grouped journal entries — we extract EVERY account 1000 (cash at bank)
+ * line as a separate bank transaction. Some groups have multiple 1000 lines
+ * (e.g. a customer payment IN and supplier payment OUT on the same date).
+ *
+ * Sign convention:
+ *   Debit on 1000 = money IN  → positive amount, transaction_type=credit
+ *   Credit on 1000 = money OUT → negative amount, transaction_type=debit
+ *
+ * Opening balances (from repNalog.csv + repNalog2.csv):
+ *   Тутунска: +63,902 (account 1000 debit)
+ *   Уни: -63,902 (repNalog 1000 credit) + -1,370,773 (repNalog2 overdraft) = -1,434,675
+ *
+ * Expected closing balances:
+ *   Тутунска: 155 (63,902 - 63,747 = 155)
+ *   Уни: -1,499,008 (-1,434,675 - 64,333 = -1,499,008)
  *
  * Files:
  *   bank transfers.csv/2/3  → Тутунска Банка (Налог 3001-3003, Jan-Mar)
  *   unibanka1.csv/2/3       → Уни Банка (Налог 4001-4003, Jan-Mar)
  *
  * Usage: php logs/import_elektromena_bank_txns.php
- * Idempotent: skips transactions that match existing date+amount+bank_account.
+ *
+ * DESTRUCTIVE: Deletes all existing csv_import transactions for company 118
+ * before re-importing to ensure correct data.
  */
 require '/var/www/html/vendor/autoload.php';
 $app = require_once '/var/www/html/bootstrap/app.php';
@@ -41,6 +55,20 @@ if (!$tutunska || !$unibanka) {
 echo "Тутунска Банка: ID {$tutunska->id}, account={$tutunska->account_number}\n";
 echo "Уни Банка: ID {$unibanka->id}, account={$unibanka->account_number}\n\n";
 
+// Delete ALL existing csv_import transactions for this company
+$deleted = BankTransaction::where('company_id', $companyId)
+    ->where('source', 'csv_import')
+    ->delete();
+echo "Deleted {$deleted} existing csv_import transactions\n\n";
+
+// Set opening balances from repNalog.csv + repNalog2.csv
+// Тутунска: account 1000 debit 63,902 → +63,902
+// Уни: account 1000 credit 63,902 (repNalog) + credit 1,370,773 (repNalog2 overdraft) → -1,434,675
+$tutunska->update(['opening_balance' => 63902, 'current_balance' => 63902]);
+$unibanka->update(['opening_balance' => -1434675, 'current_balance' => -1434675]);
+echo "Set Тутунска opening_balance=63902\n";
+echo "Set Уни opening_balance=-1434675\n\n";
+
 // File → bank account mapping
 $files = [
     ['path' => 'bank transfers.csv',  'bank' => $tutunska, 'label' => 'ТУТУНСКА БАНКА'],
@@ -52,7 +80,6 @@ $files = [
 ];
 
 $totalCreated = 0;
-$totalSkipped = 0;
 $totalErrors = 0;
 
 foreach ($files as $fileInfo) {
@@ -74,7 +101,7 @@ foreach ($files as $fileInfo) {
 
     echo "=== {$fileInfo['path']} → {$bankAccount->bank_name} ===\n";
 
-    // Parse into groups by transaction number (col 2)
+    // Parse into groups by transaction number (col 2), collecting ALL entries
     $groups = [];
     foreach ($lines as $line) {
         $cols = explode(';', $line);
@@ -95,10 +122,11 @@ foreach ($files as $fileInfo) {
         $credit = parseMkNumber($creditStr);
 
         if (!isset($groups[$txNum])) {
-            $groups[$txNum] = ['entries' => [], 'bank_entry' => null];
+            $groups[$txNum] = ['entries' => [], 'bank_entries' => []];
         }
 
         $entry = [
+            'row' => $rowNum,
             'acct' => $acct,
             'partner' => $partner,
             'desc' => $desc,
@@ -109,25 +137,16 @@ foreach ($files as $fileInfo) {
 
         $groups[$txNum]['entries'][] = $entry;
 
-        // Account 1000 = cash at bank — this is the actual bank transaction
+        // Account 1000 = cash at bank — each line is a bank movement
         if ($acct === '1000') {
-            $groups[$txNum]['bank_entry'] = $entry;
+            $groups[$txNum]['bank_entries'][] = $entry;
         }
     }
 
     $created = 0;
-    $skipped = 0;
 
     foreach ($groups as $txNum => $group) {
-        $bankEntry = $group['bank_entry'];
-        if (!$bankEntry) continue;
-
-        // Debit on 1000 = money coming IN (credit transaction)
-        // Credit on 1000 = money going OUT (debit transaction)
-        $isCredit = $bankEntry['debit'] > 0;
-        $amount = $isCredit ? $bankEntry['debit'] : $bankEntry['credit'];
-
-        if ($amount == 0) continue;
+        if (empty($group['bank_entries'])) continue;
 
         // Get counterparty from non-1000 entries (skip bank name itself)
         $counterparties = [];
@@ -142,84 +161,94 @@ foreach ($files as $fileInfo) {
             }
         }
 
-        $counterparty = $counterparties[0] ?? '';
-        $description = $descriptions[0] ?? ($counterparty ?: 'Банкарска трансакција');
+        // Process EACH 1000 line as a separate bank transaction
+        $lineIdx = 0;
+        foreach ($group['bank_entries'] as $bankEntry) {
+            $lineIdx++;
 
-        // Parse date: "02.01.2026" → "2026-01-02"
-        $dateParts = explode('.', $bankEntry['date']);
-        if (count($dateParts) !== 3) continue;
-        $txDate = "{$dateParts[2]}-{$dateParts[1]}-{$dateParts[0]}";
+            // Debit on 1000 = money IN (positive), Credit on 1000 = money OUT (negative)
+            $isIncoming = $bankEntry['debit'] > 0;
+            $signedAmount = $bankEntry['debit'] - $bankEntry['credit'];
 
-        // Build a reference for idempotency
-        $reference = "JN-{$fileInfo['path']}-TX{$txNum}";
+            if ($signedAmount == 0) continue;
 
-        // Check for existing transaction
-        $existing = BankTransaction::where('bank_account_id', $bankAccount->id)
-            ->where('transaction_reference', $reference)
-            ->first();
+            $counterparty = $counterparties[0] ?? '';
+            $description = $descriptions[0] ?? ($counterparty ?: 'Банкарска трансакција');
 
-        if ($existing) {
-            $skipped++;
-            continue;
-        }
+            // Parse date: "02.01.2026" → "2026-01-02"
+            $dateParts = explode('.', $bankEntry['date']);
+            if (count($dateParts) !== 3) continue;
+            $txDate = "{$dateParts[2]}-{$dateParts[1]}-{$dateParts[0]}";
 
-        try {
-            BankTransaction::create([
-                'bank_account_id' => $bankAccount->id,
-                'company_id' => $companyId,
-                'transaction_reference' => $reference,
-                'amount' => $amount,
-                'currency' => 'MKD',
-                'transaction_type' => $isCredit ? 'credit' : 'debit',
-                'booking_status' => 'booked',
-                'transaction_date' => $txDate,
-                'booking_date' => $txDate,
-                'value_date' => $txDate,
-                'description' => $description,
-                'debtor_name' => $isCredit ? $counterparty : null,
-                'creditor_name' => !$isCredit ? $counterparty : null,
-                'processing_status' => 'unprocessed',
-                'source' => 'csv_import',
-            ]);
+            // Unique reference per 1000 line (not per group)
+            $reference = "JN-{$fileInfo['path']}-TX{$txNum}-L{$lineIdx}";
 
-            $created++;
-            $type = $isCredit ? 'IN' : 'OUT';
-            echo "  TX {$txNum} | {$txDate} | {$type} | {$amount} | {$counterparty}\n";
-        } catch (\Exception $e) {
-            $totalErrors++;
-            echo "  ERROR TX {$txNum}: {$e->getMessage()}\n";
+            try {
+                BankTransaction::create([
+                    'bank_account_id' => $bankAccount->id,
+                    'company_id' => $companyId,
+                    'transaction_reference' => $reference,
+                    'amount' => abs($signedAmount),
+                    'currency' => 'MKD',
+                    'transaction_type' => $isIncoming ? 'credit' : 'debit',
+                    'booking_status' => 'booked',
+                    'transaction_date' => $txDate,
+                    'booking_date' => $txDate,
+                    'value_date' => $txDate,
+                    'description' => $description,
+                    'debtor_name' => $isIncoming ? $counterparty : null,
+                    'creditor_name' => !$isIncoming ? $counterparty : null,
+                    'processing_status' => 'unprocessed',
+                    'source' => 'csv_import',
+                ]);
+
+                $created++;
+                $sign = $signedAmount >= 0 ? '+' : '-';
+                $absAmt = abs($signedAmount);
+                echo "  TX {$txNum}.{$lineIdx} | {$txDate} | {$sign}{$absAmt} | {$counterparty}\n";
+            } catch (\Exception $e) {
+                $totalErrors++;
+                echo "  ERROR TX {$txNum}.{$lineIdx}: {$e->getMessage()}\n";
+            }
         }
     }
 
-    echo "  Created: {$created}, Skipped: {$skipped}\n\n";
+    echo "  Created: {$created}\n\n";
     $totalCreated += $created;
-    $totalSkipped += $skipped;
 }
 
-// Update bank account balances
+// Recalculate bank account balances: opening_balance + sum(credits) - sum(debits)
 foreach ([$tutunska, $unibanka] as $account) {
+    $account->refresh();
     $credits = BankTransaction::where('bank_account_id', $account->id)
         ->where('transaction_type', 'credit')
         ->sum('amount');
     $debits = BankTransaction::where('bank_account_id', $account->id)
         ->where('transaction_type', 'debit')
         ->sum('amount');
-    $balance = $credits - $debits;
+    $movement = $credits - $debits;
+    $balance = $account->opening_balance + $movement;
 
     $account->update(['current_balance' => $balance]);
-    echo "Updated {$account->bank_name} balance: {$balance} MKD (credits={$credits}, debits={$debits})\n";
+    echo "Updated {$account->bank_name}: opening={$account->opening_balance}, credits={$credits}, debits={$debits}, movement={$movement}, current={$balance}\n";
 }
 
 echo "\n=== SUMMARY ===\n";
 echo "Created: {$totalCreated}\n";
-echo "Skipped: {$totalSkipped}\n";
 echo "Errors: {$totalErrors}\n";
 
 function parseMkNumber(string $str): float
 {
     $str = trim($str);
     if ($str === '' || $str === '0') return 0.0;
-    return floatval(str_replace(['.', ','], ['', '.'], $str));
+    // Handle negative numbers like "-1.370.773"
+    $negative = false;
+    if (str_starts_with($str, '-')) {
+        $negative = true;
+        $str = substr($str, 1);
+    }
+    $val = floatval(str_replace(['.', ','], ['', '.'], $str));
+    return $negative ? -$val : $val;
 }
 
 // CLAUDE-CHECKPOINT
