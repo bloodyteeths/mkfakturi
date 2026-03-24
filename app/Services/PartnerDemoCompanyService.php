@@ -250,7 +250,7 @@ class PartnerDemoCompanyService
                 ['customer' => 2, 'items' => [[0, 8], [4, 3]], 'status' => Invoice::STATUS_VIEWED, 'paid' => Invoice::STATUS_UNPAID, 'days_ago' => 10],
                 ['customer' => 0, 'items' => [[3, 1]], 'status' => Invoice::STATUS_COMPLETED, 'paid' => Invoice::STATUS_PAID, 'days_ago' => 45],
                 ['customer' => 3, 'items' => [[1, 20], [4, 10]], 'status' => Invoice::STATUS_SENT, 'paid' => Invoice::STATUS_PARTIALLY_PAID, 'days_ago' => 30],
-                ['customer' => 4, 'items' => [[0, 5]], 'status' => Invoice::STATUS_OVERDUE, 'paid' => Invoice::STATUS_UNPAID, 'days_ago' => 60],
+                ['customer' => 4, 'items' => [[0, 5]], 'status' => Invoice::STATUS_SENT, 'paid' => Invoice::STATUS_UNPAID, 'days_ago' => 60],
                 ['customer' => 1, 'items' => [[5, 3], [6, 10]], 'status' => Invoice::STATUS_COMPLETED, 'paid' => Invoice::STATUS_PAID, 'days_ago' => 20],
             ];
 
