@@ -8,14 +8,12 @@
             font-family: "DejaVu Sans";
             font-size: 9px;
             color: #333;
+            margin: 15px;
         }
 
         table {
             border-collapse: collapse;
-        }
-
-        .sub-container {
-            padding: 0px 10px;
+            width: 100%;
         }
 
         .report-header {
@@ -193,7 +191,6 @@
 </head>
 
 <body>
-    <div class="sub-container">
         @include('app.pdf.reports._company-header')
 
         <p class="sub-heading-text">{{ $report_title }}</p>
@@ -297,7 +294,6 @@
                 </td>
             </tr>
         </table>
-    </div>
 </body>
 
 </html>

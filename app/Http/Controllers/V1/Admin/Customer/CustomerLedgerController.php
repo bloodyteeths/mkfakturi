@@ -431,33 +431,36 @@ class CustomerLedgerController extends Controller
             ? ($customer->tax_id ?? '')
             : ($supplier->tax_id ?? '');
 
-        // Translated labels for the PDF template
+        // Load nested JSON translations (trans() can't navigate nested JSON)
+        $langFile = lang_path($locale . '.json');
+        $t = file_exists($langFile) ? json_decode(file_get_contents($langFile), true) : [];
+
         $reportTitle = $perspective === 'customer'
-            ? trans('customers.customer_ledger_report')
-            : trans('customers.supplier_ledger_report');
+            ? (data_get($t, 'customers.customer_ledger_report') ?: 'Картица на купувач')
+            : (data_get($t, 'customers.supplier_ledger_report') ?: 'Картица на добавувач');
 
         $labels = [
-            'tax_id' => trans('customers.tax_id', [], $locale) ?: 'ЕМБС',
-            'period' => trans('general.period', [], $locale) ?: 'Период',
-            'total' => trans('general.total', [], $locale) ?: 'Вкупно',
-            'debit' => trans('customers.debit'),
-            'credit' => trans('customers.credit'),
-            'closing_balance' => trans('customers.closing_balance'),
-            'receivable' => trans('customers.receivable'),
-            'payable' => trans('customers.payable'),
-            'date' => trans('general.date', [], $locale) ?: 'Датум',
-            'type' => trans('customers.document_type'),
-            'reference' => trans('customers.reference'),
-            'account' => trans('customers.account_code'),
-            'balance' => trans('customers.closing_balance'),
-            'prepared_by' => trans('customers.prepared_by'),
-            'approved_by' => trans('customers.approved_by'),
+            'tax_id' => data_get($t, 'customers.tax_id') ?: 'ЕМБС',
+            'period' => data_get($t, 'general.period') ?: 'Период',
+            'total' => data_get($t, 'general.total') ?: 'Вкупно',
+            'debit' => data_get($t, 'customers.debit') ?: 'Должи',
+            'credit' => data_get($t, 'customers.credit') ?: 'Побарува',
+            'closing_balance' => data_get($t, 'customers.closing_balance') ?: 'Крајно салдо',
+            'receivable' => data_get($t, 'customers.receivable') ?: 'Побарување',
+            'payable' => data_get($t, 'customers.payable') ?: 'Обврска',
+            'date' => data_get($t, 'general.date') ?: 'Датум',
+            'type' => data_get($t, 'customers.document_type') ?: 'Тип на документ',
+            'reference' => data_get($t, 'customers.reference') ?: 'Референца',
+            'account' => data_get($t, 'customers.account_code') ?: 'Конто',
+            'balance' => data_get($t, 'customers.closing_balance') ?: 'Крајно салдо',
+            'prepared_by' => data_get($t, 'customers.prepared_by') ?: 'Составил',
+            'approved_by' => data_get($t, 'customers.approved_by') ?: 'Одобрил',
             'types' => [
-                'invoice' => trans('invoices.invoice', [], $locale) ?: 'Фактура',
-                'payment' => trans('payments.payment', [], $locale) ?: 'Уплата',
-                'bill' => trans('bills.bill', [], $locale) ?: 'Сметка',
-                'bill_payment' => trans('bills.payment', [], $locale) ?: 'Исплата',
-                'journal' => trans('customers.journal_entry', [], $locale) ?: 'Книжење',
+                'invoice' => data_get($t, 'invoices.invoice') ?: 'Фактура',
+                'payment' => data_get($t, 'payments.payment') ?: 'Уплата',
+                'bill' => data_get($t, 'bills.bill') ?: 'Сметка',
+                'bill_payment' => data_get($t, 'bills.payment') ?: 'Исплата',
+                'journal' => data_get($t, 'customers.journal_entry') ?: 'Книжење',
             ],
         ];
 
@@ -477,6 +480,7 @@ class CustomerLedgerController extends Controller
         ]);
 
         $pdf = PDF::loadView('app.pdf.reports.customer-ledger-card');
+        $pdf->setPaper('A4', 'landscape');
 
         $filename = ($perspective === 'customer' ? 'customer' : 'supplier')
             . '-ledger-' . str_replace(' ', '_', $entityName)
