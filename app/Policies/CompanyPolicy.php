@@ -12,6 +12,11 @@ class CompanyPolicy
 
     public function view(User $user, Company $company): bool
     {
+        // Super admins can view everything
+        if ($user->role === 'super admin' || $user->is_super_admin) {
+            return true;
+        }
+
         // Allow viewing if user owns the company
         if ($user->id == $company->owner_id) {
             return true;
@@ -20,6 +25,17 @@ class CompanyPolicy
         // Allow viewing if user is part of the company (for multi-company setups)
         if ($user->companies && $user->companies->contains($company)) {
             return true;
+        }
+
+        // Partners can view companies linked via partner_company_links
+        if ($user->role === 'partner' && $user->partner) {
+            $linked = \Modules\Mk\Models\PartnerCompany::where('partner_id', $user->partner->id)
+                ->where('company_id', $company->id)
+                ->where('is_active', true)
+                ->exists();
+            if ($linked) {
+                return true;
+            }
         }
 
         // For now, allow all authenticated admin users to view company data
