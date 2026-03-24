@@ -1,6 +1,6 @@
 // Facturino Service Worker
 // Cache-first for static assets, network-first for API calls, offline fallback
-const CACHE_VERSION = 'facturino-v2'
+const CACHE_VERSION = 'facturino-v3'
 const STATIC_CACHE = `${CACHE_VERSION}-static`
 const API_CACHE = `${CACHE_VERSION}-api`
 
@@ -60,7 +60,13 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Static assets (JS, CSS, images, fonts): cache-first
+  // Vite build assets: network-first to avoid stale chunks after deploy
+  if (url.pathname.startsWith('/build/')) {
+    event.respondWith(networkFirst(request, STATIC_CACHE))
+    return
+  }
+
+  // Other static assets (images, fonts, favicons): cache-first
   if (isStaticAsset(url.pathname)) {
     event.respondWith(cacheFirst(request, STATIC_CACHE))
     return
