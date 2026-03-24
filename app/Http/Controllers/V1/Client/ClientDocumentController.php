@@ -53,7 +53,28 @@ class ClientDocumentController extends Controller
         try {
             // Store file — use explicit disk to avoid FileDisk contamination
             $disk = config('filesystems.media_disk');
-            Storage::disk($disk)->putFileAs($directory, $file, $filename);
+
+            Log::info('ClientDocument upload', [
+                'disk' => $disk,
+                'path' => $path,
+                'company_id' => $companyId,
+                'file_size' => $file->getSize(),
+            ]);
+
+            $stored = Storage::disk($disk)->putFileAs($directory, $file, $filename);
+
+            if (! $stored) {
+                Log::error('ClientDocument: putFileAs returned false (silent failure)', [
+                    'disk' => $disk,
+                    'path' => $path,
+                    'driver' => config("filesystems.disks.{$disk}.driver"),
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to store file. Please try again.',
+                ], 500);
+            }
 
             // Auto-assign partner_id from company's active partner link
             $partnerId = $this->getActivePartnerId($companyId);

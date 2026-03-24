@@ -117,9 +117,13 @@ class Invoice2DataClient implements InvoiceParserClient
         if (! $exists) {
             Log::error('Invoice2DataClient: file does not exist in storage', [
                 'disk' => $disk,
+                'driver' => config("filesystems.disks.{$disk}.driver"),
                 'path' => $filePath,
                 'file' => $originalName,
                 'company_id' => $companyId,
+                'media_disk_config' => config('filesystems.media_disk'),
+                'env_MEDIA_DISK' => env('MEDIA_DISK'),
+                'env_FILESYSTEM_DISK' => env('FILESYSTEM_DISK'),
             ]);
 
             throw new Invoice2DataServiceException(

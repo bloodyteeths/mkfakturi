@@ -84,6 +84,9 @@ echo "Nginx configured to listen on ports 80 and 8080"
 
 # Build optimization caches
 # NOTE: config:cache is intentionally OMITTED — Railway injects env vars at runtime
+# Clear config cache FIRST — stale config:cache makes env() return null for all vars
+echo "Clearing config cache (CRITICAL — stale cache breaks env vars)..."
+php artisan config:clear 2>/dev/null || echo "Warning: config:clear failed"
 # Clear application cache on deploy — menu and bootstrap caches contain config-dependent data
 echo "Clearing application cache..."
 php artisan cache:clear 2>/dev/null || echo "Warning: cache:clear failed"
