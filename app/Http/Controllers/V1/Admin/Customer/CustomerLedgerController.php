@@ -265,13 +265,17 @@ class CustomerLedgerController extends Controller
             return;
         }
 
-        // Query IFRS ledger entries where counterparty_name matches
+        // Only show receivable entries for customers, payable for suppliers
+        $accountType = $customer ? 'RECEIVABLE' : 'PAYABLE';
+
+        // Query IFRS ledger entries where counterparty_name matches on the relevant account
         $journalEntries = DB::table('ifrs_ledgers as l')
             ->join('ifrs_transactions as t', 'l.transaction_id', '=', 't.id')
             ->leftJoin('ifrs_line_items as li', 'l.line_item_id', '=', 'li.id')
-            ->leftJoin('ifrs_accounts as a', 'l.post_account', '=', 'a.id')
+            ->join('ifrs_accounts as a', 'l.post_account', '=', 'a.id')
             ->where('l.entity_id', $entityId)
             ->where('li.counterparty_name', $counterpartyName)
+            ->where('a.account_type', $accountType)
             ->whereBetween('l.posting_date', [$fromDate->toDateString(), $toDate->toDateString()])
             ->whereNull('l.deleted_at')
             ->select([
