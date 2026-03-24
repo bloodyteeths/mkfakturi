@@ -576,7 +576,8 @@
         "customer_ledger_report": "Müşteri Hesap Kartı",
         "supplier_ledger_report": "Tedarikçi Hesap Kartı",
         "prepared_by": "Hazırlayan",
-        "approved_by": "Onaylayan"
+        "approved_by": "Onaylayan",
+        "journal_entry": "Yevmiye Kaydı"
     },
     "items": {
         "duplicate_warning_message": "Benzer isimde bir ürün zaten mevcut. Lütfen aşağıdaki mevcut kayıtları inceleyin.",

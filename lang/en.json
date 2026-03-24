@@ -943,7 +943,8 @@
         "customer_ledger_report": "Customer Ledger Card",
         "supplier_ledger_report": "Supplier Ledger Card",
         "prepared_by": "Prepared by",
-        "approved_by": "Approved by"
+        "approved_by": "Approved by",
+        "journal_entry": "Journal Entry"
     },
     "dashboard": {
         "cards": {

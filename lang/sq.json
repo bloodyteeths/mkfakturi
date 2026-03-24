@@ -782,7 +782,8 @@
         "customer_ledger_report": "Kartela e klientit",
         "supplier_ledger_report": "Kartela e furnitorit",
         "prepared_by": "Përpiloi",
-        "approved_by": "Miratoi"
+        "approved_by": "Miratoi",
+        "journal_entry": "Regjistrim"
     },
     "suppliers": {
         "title": "Furnitorët",

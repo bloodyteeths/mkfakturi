@@ -190,6 +190,7 @@ const typeLabels = computed(() => ({
   payment: t('payments.payment'),
   bill: t('bills.bill', 'Bill'),
   bill_payment: t('bills.payment', 'Bill Payment'),
+  journal: t('customers.journal_entry', 'Книжење'),
 }))
 
 const typeClasses = {
@@ -197,6 +198,7 @@ const typeClasses = {
   payment: 'bg-green-100 text-green-700',
   bill: 'bg-orange-100 text-orange-700',
   bill_payment: 'bg-purple-100 text-purple-700',
+  journal: 'bg-indigo-100 text-indigo-700',
 }
 
 function formatAmount(amount) {

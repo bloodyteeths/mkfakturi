@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use PDF;
 
 class CustomerLedgerController extends Controller
@@ -174,12 +175,21 @@ class CustomerLedgerController extends Controller
             }
         }
 
+        // IFRS journal entries: pull ledger records by counterparty_name
+        // This surfaces imported journal data that has no matching invoice/bill record
+        $this->addIfrsJournalEntries($entries, $ifrsTransactionIds, $customer, $supplier, $fromDate, $toDate);
+
         // Batch-load GL accounts for all IFRS transactions
         $glAccountMap = $this->batchLoadGlAccounts($ifrsTransactionIds);
 
-        // Enrich entries with GL account info
+        // Enrich entries with GL account info (skip journal entries — already enriched)
         $entries = $entries->map(function ($entry) use ($glAccountMap) {
-            $txId = $entry['ifrs_transaction_id'];
+            if ($entry['type'] === 'journal') {
+                unset($entry['ifrs_transaction_id']);
+                return $entry;
+            }
+
+            $txId = $entry['ifrs_transaction_id'] ?? null;
             $accounts = $txId ? ($glAccountMap[$txId] ?? []) : [];
 
             // Pick the primary account based on document type
@@ -225,6 +235,99 @@ class CustomerLedgerController extends Controller
                 'supplier_id' => $supplier?->id,
             ],
         ];
+    }
+
+    /**
+     * Add IFRS journal entries for a customer/supplier by counterparty_name.
+     * Only adds entries whose transaction_id is NOT already in the ledger (avoids duplicates).
+     */
+    private function addIfrsJournalEntries(
+        \Illuminate\Support\Collection &$entries,
+        array &$ifrsTransactionIds,
+        ?Customer $customer,
+        ?Supplier $supplier,
+        Carbon $fromDate,
+        Carbon $toDate
+    ): void {
+        if (!Schema::hasColumn('ifrs_line_items', 'counterparty_name')) {
+            return;
+        }
+
+        // Determine entity_id and counterparty name to search
+        $entity = $customer ? $customer->company : ($supplier ? $supplier->company : null);
+        if (!$entity || !$entity->ifrs_entity_id) {
+            return;
+        }
+
+        $entityId = $entity->ifrs_entity_id;
+        $counterpartyName = $customer ? $customer->name : ($supplier ? $supplier->name : null);
+        if (!$counterpartyName) {
+            return;
+        }
+
+        // Query IFRS ledger entries where counterparty_name matches
+        $journalEntries = DB::table('ifrs_ledgers as l')
+            ->join('ifrs_transactions as t', 'l.transaction_id', '=', 't.id')
+            ->leftJoin('ifrs_line_items as li', 'l.line_item_id', '=', 'li.id')
+            ->leftJoin('ifrs_accounts as a', 'l.post_account', '=', 'a.id')
+            ->where('l.entity_id', $entityId)
+            ->where('li.counterparty_name', $counterpartyName)
+            ->whereBetween('l.posting_date', [$fromDate->toDateString(), $toDate->toDateString()])
+            ->whereNull('l.deleted_at')
+            ->select([
+                'l.posting_date as date',
+                'l.entry_type',
+                'l.amount',
+                'l.transaction_id',
+                't.transaction_no as reference',
+                'li.narration as line_narration',
+                't.narration',
+                'a.code as account_code',
+                'a.name as account_name',
+                'a.account_type',
+            ])
+            ->orderBy('l.posting_date')
+            ->orderBy('l.id')
+            ->get();
+
+        // Skip entries whose transaction_id already exists in the ledger (from invoices/bills)
+        $existingTxIds = array_flip($ifrsTransactionIds);
+
+        foreach ($journalEntries as $entry) {
+            if (isset($existingTxIds[$entry->transaction_id])) {
+                continue;
+            }
+
+            // IFRS stores amounts in full units; invoices/bills store in cents (subunit)
+            // Multiply by 100 to match the format used by formatAmount() in the frontend
+            $amount = (float) $entry->amount * 100;
+            $debit = $entry->entry_type === 'D' ? $amount : 0;
+            $credit = $entry->entry_type === 'C' ? $amount : 0;
+
+            // Determine side from account type
+            $side = in_array($entry->account_type, ['RECEIVABLE']) ? 'AR' : (
+                in_array($entry->account_type, ['PAYABLE']) ? 'AP' : 'GL'
+            );
+
+            $description = $entry->line_narration ?? $entry->narration ?? '';
+
+            $entries->push([
+                'date' => $entry->date,
+                'type' => 'journal',
+                'reference' => $entry->reference ?? '',
+                'description' => $description,
+                'debit' => $debit,
+                'credit' => $credit,
+                'side' => $side,
+                'id' => $entry->transaction_id,
+                'ifrs_transaction_id' => $entry->transaction_id,
+                'account_code' => $entry->account_code,
+                'account_name' => $entry->account_name,
+            ]);
+
+            // Track this transaction so GL enrichment doesn't duplicate
+            $ifrsTransactionIds[] = $entry->transaction_id;
+        }
     }
 
     /**
@@ -354,6 +457,7 @@ class CustomerLedgerController extends Controller
                 'payment' => trans('payments.payment', [], $locale) ?: 'Уплата',
                 'bill' => trans('bills.bill', [], $locale) ?: 'Сметка',
                 'bill_payment' => trans('bills.payment', [], $locale) ?: 'Исплата',
+                'journal' => trans('customers.journal_entry', [], $locale) ?: 'Книжење',
             ],
         ];
 

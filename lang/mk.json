@@ -739,7 +739,8 @@
         "customer_ledger_report": "Картица на купувач",
         "supplier_ledger_report": "Картица на добавувач",
         "prepared_by": "Составил",
-        "approved_by": "Одобрил"
+        "approved_by": "Одобрил",
+        "journal_entry": "Книжење"
     },
     "suppliers": {
         "title": "Добавувачи",
