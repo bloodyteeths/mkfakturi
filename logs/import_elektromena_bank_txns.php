@@ -188,7 +188,7 @@ foreach ($files as $fileInfo) {
                     'bank_account_id' => $bankAccount->id,
                     'company_id' => $companyId,
                     'transaction_reference' => $reference,
-                    'amount' => abs($signedAmount),
+                    'amount' => $signedAmount,
                     'currency' => 'MKD',
                     'transaction_type' => $isIncoming ? 'credit' : 'debit',
                     'booking_status' => 'booked',
@@ -217,20 +217,14 @@ foreach ($files as $fileInfo) {
     $totalCreated += $created;
 }
 
-// Recalculate bank account balances: opening_balance + sum(credits) - sum(debits)
+// Recalculate bank account balances: opening_balance + sum(signed amounts)
 foreach ([$tutunska, $unibanka] as $account) {
     $account->refresh();
-    $credits = BankTransaction::where('bank_account_id', $account->id)
-        ->where('transaction_type', 'credit')
-        ->sum('amount');
-    $debits = BankTransaction::where('bank_account_id', $account->id)
-        ->where('transaction_type', 'debit')
-        ->sum('amount');
-    $movement = $credits - $debits;
-    $balance = $account->opening_balance + $movement;
+    $totalAmount = BankTransaction::where('bank_account_id', $account->id)->sum('amount');
+    $balance = $account->opening_balance + $totalAmount;
 
     $account->update(['current_balance' => $balance]);
-    echo "Updated {$account->bank_name}: opening={$account->opening_balance}, credits={$credits}, debits={$debits}, movement={$movement}, current={$balance}\n";
+    echo "Updated {$account->bank_name}: opening={$account->opening_balance}, sum={$totalAmount}, current={$balance}\n";
 }
 
 echo "\n=== SUMMARY ===\n";
