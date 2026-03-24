@@ -5,59 +5,49 @@ $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 use Illuminate\Support\Facades\DB;
 
-// User 140
-$user = DB::table('users')->where('id', 140)->first();
-echo "User 140: email={$user->email} role=" . ($user->role ?? 'NULL') . "\n";
+// Find ALL Ivana users
+$users = DB::table('users')->where('email', 'LIKE', '%ivana%')->get();
+echo "Users matching 'ivana':\n";
+foreach ($users as $u) {
+    echo "  id={$u->id} email={$u->email} role=" . ($u->role ?? 'NULL') . "\n";
+}
 
-// user_company pivot (correct table name)
-$userCompanies = DB::table('user_company')->where('user_id', 140)->get();
-echo "\nUser 140 user_company links: " . count($userCompanies) . "\n";
-foreach ($userCompanies as $uc) {
+// Partner records
+$partners = DB::table('partners')->get();
+echo "\nAll partners:\n";
+foreach ($partners as $p) {
+    $uemail = DB::table('users')->where('id', $p->user_id)->value('email');
+    echo "  partner_id={$p->id} user_id={$p->user_id} email={$uemail}\n";
+}
+
+// All partner_company_links
+$links = DB::table('partner_company_links')->get();
+echo "\nAll partner_company_links:\n";
+foreach ($links as $l) {
+    $cname = DB::table('companies')->where('id', $l->company_id)->value('name');
+    echo "  partner_id={$l->partner_id} company_id={$l->company_id} name={$cname} active={$l->is_active} portfolio=" . ($l->is_portfolio_managed ?? 'NULL') . "\n";
+}
+
+// User 140 details
+$u140 = DB::table('users')->where('id', 140)->first();
+echo "\nUser 140: email={$u140->email} role=" . ($u140->role ?? 'NULL') . "\n";
+
+// User 140 companies
+$ucs = DB::table('user_company')->where('user_id', 140)->get();
+echo "User 140 user_company: " . count($ucs) . "\n";
+foreach ($ucs as $uc) {
     $cname = DB::table('companies')->where('id', $uc->company_id)->value('name');
     echo "  company_id={$uc->company_id} name={$cname}\n";
 }
 
-// Partner 26 links
-$links = DB::table('partner_company_links')->where('partner_id', 26)->get();
-echo "\nPartner 26 company links: " . count($links) . "\n";
-foreach ($links as $l) {
-    $cname = DB::table('companies')->where('id', $l->company_id)->value('name');
-    echo "  company_id={$l->company_id} name={$cname} active={$l->is_active} portfolio=" . ($l->is_portfolio_managed ?? 'NULL') . "\n";
-}
-
-// Partner 26 record — dump all columns
-$partner = DB::table('partners')->where('id', 26)->first();
-echo "\nPartner 26 record:\n";
-foreach ((array)$partner as $k => $v) {
-    echo "  {$k}=" . ($v ?? 'NULL') . "\n";
-}
-
-// Total companies
-$total = DB::table('companies')->count();
-echo "\nTotal companies in DB: {$total}\n";
-
-// User model companies
-$userModel = App\Models\User::find(140);
-echo "\nUser->companies(): " . $userModel->companies->count() . "\n";
-foreach ($userModel->companies as $c) {
-    echo "  id={$c->id} name={$c->name}\n";
-}
-
-// Partner model queries
-$partnerModel = App\Models\Partner::find(26);
-echo "\nPartner->portfolioCompanies: " . $partnerModel->portfolioCompanies->count() . "\n";
-foreach ($partnerModel->portfolioCompanies as $pc) {
-    echo "  id={$pc->id} name={$pc->name}\n";
-}
-echo "\nPartner->companies (all): " . $partnerModel->companies->count() . "\n";
-foreach ($partnerModel->companies as $ac) {
-    echo "  id={$ac->id} name={$ac->name}\n";
-}
-
-// Check what user 140 sees — is_partner flag, partner_id on user
-echo "\nUser 140 all columns:\n";
-$u = DB::table('users')->where('id', 140)->first();
-foreach ((array)$u as $k => $v) {
-    if (in_array($k, ['password', 'remember_token'])) continue;
-    echo "  {$k}=" . ($v ?? 'NULL') . "\n";
+// Check partner user's companies too
+$partnerUser = DB::table('users')->where('email', 'LIKE', '%yahoo%')->where('email', 'LIKE', '%ivana%')->first();
+if ($partnerUser) {
+    echo "\nPartner user: id={$partnerUser->id} email={$partnerUser->email} role=" . ($partnerUser->role ?? 'NULL') . "\n";
+    $pucs = DB::table('user_company')->where('user_id', $partnerUser->id)->get();
+    echo "Partner user user_company: " . count($pucs) . "\n";
+    foreach ($pucs as $puc) {
+        $cname = DB::table('companies')->where('id', $puc->company_id)->value('name');
+        echo "  company_id={$puc->company_id} name={$cname}\n";
+    }
 }
