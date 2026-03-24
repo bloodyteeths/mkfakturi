@@ -59,7 +59,8 @@ storage/framework/testing/
 documentation/
 
 # Log files (all subdirectories)
-logs/
+logs/*
+!logs/import_*.php
 *.log
 ai-service/*.log
 
@@ -105,3 +106,6 @@ test_*.csv
 
 # Uploaded import files
 storage/app/imports/
+
+# Claude Code plans (temporary working files)
+.claude/plans/
