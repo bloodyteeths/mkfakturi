@@ -733,7 +733,13 @@
         "reference": "Референца",
         "no_linked_supplier": "Нема поврзан добавувач",
         "already_linked": "Овој добавувач е веќе поврзан со друг клиент",
-        "search_supplier": "Пребарај добавувач..."
+        "search_supplier": "Пребарај добавувач...",
+        "account_code": "Конто",
+        "download_ledger_pdf": "Преземи PDF",
+        "customer_ledger_report": "Картица на купувач",
+        "supplier_ledger_report": "Картица на добавувач",
+        "prepared_by": "Составил",
+        "approved_by": "Одобрил"
     },
     "suppliers": {
         "title": "Добавувачи",

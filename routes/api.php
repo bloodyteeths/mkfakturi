@@ -315,6 +315,7 @@ Route::prefix('/v1')->group(function () {
             Route::post('customers/{customer}/link-supplier', [CustomerLinkController::class, 'link']);
             Route::delete('customers/{customer}/link-supplier', [CustomerLinkController::class, 'unlink']);
             Route::get('customers/{customer}/ledger', [CustomerLedgerController::class, 'forCustomer']);
+            Route::get('customers/{customer}/ledger/pdf', [CustomerLedgerController::class, 'customerPdf']);
             Route::get('customers/match-by-tax-id', [CustomerMatchController::class, 'matchSupplier']);
 
             Route::resource('customers', CustomersController::class);
@@ -729,6 +730,7 @@ Route::prefix('/v1')->group(function () {
             Route::post('/suppliers/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class, 'delete']);
             Route::get('suppliers/{supplier}/stats', \App\Http\Controllers\V1\Admin\AccountsPayable\SupplierStatsController::class);
             Route::get('suppliers/{supplier}/ledger', [CustomerLedgerController::class, 'forSupplier']);
+            Route::get('suppliers/{supplier}/ledger/pdf', [CustomerLedgerController::class, 'supplierPdf']);
             Route::get('suppliers/match-by-tax-id', [CustomerMatchController::class, 'matchCustomer']);
             Route::apiResource('suppliers', \App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class);
 

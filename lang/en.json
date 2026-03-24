@@ -937,7 +937,13 @@
         "reference": "Reference",
         "no_linked_supplier": "No linked supplier",
         "already_linked": "This supplier is already linked to another customer",
-        "search_supplier": "Search supplier..."
+        "search_supplier": "Search supplier...",
+        "account_code": "Account",
+        "download_ledger_pdf": "Download PDF",
+        "customer_ledger_report": "Customer Ledger Card",
+        "supplier_ledger_report": "Supplier Ledger Card",
+        "prepared_by": "Prepared by",
+        "approved_by": "Approved by"
     },
     "dashboard": {
         "cards": {

@@ -26,24 +26,36 @@
       </div>
     </div>
 
-    <!-- Date Range Filters -->
-    <div class="flex items-center gap-3 mb-4">
-      <div class="flex items-center gap-2">
-        <label class="text-sm text-gray-600">{{ $t('general.from') }}:</label>
-        <input
-          v-model="fromDate"
-          type="date"
-          class="border border-gray-300 rounded px-2 py-1 text-sm"
-        />
+    <!-- Date Range Filters + Download -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-gray-600">{{ $t('general.from') }}:</label>
+          <input
+            v-model="fromDate"
+            type="date"
+            class="border border-gray-300 rounded px-2 py-1 text-sm"
+          />
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-gray-600">{{ $t('general.to') }}:</label>
+          <input
+            v-model="toDate"
+            type="date"
+            class="border border-gray-300 rounded px-2 py-1 text-sm"
+          />
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <label class="text-sm text-gray-600">{{ $t('general.to') }}:</label>
-        <input
-          v-model="toDate"
-          type="date"
-          class="border border-gray-300 rounded px-2 py-1 text-sm"
-        />
-      </div>
+      <button
+        v-if="entries.length > 0"
+        @click="downloadPdf"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-lg hover:bg-primary-100 transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        {{ $t('customers.download_ledger_pdf') }}
+      </button>
     </div>
 
     <!-- Ledger Table -->
@@ -60,6 +72,9 @@
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               {{ $t('customers.reference') }}
             </th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              {{ $t('customers.account_code') }}
+            </th>
             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
               {{ $t('customers.debit') }}
             </th>
@@ -73,12 +88,12 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-if="isLoading">
-            <td colspan="6" class="px-4 py-8 text-center text-gray-400">
+            <td colspan="7" class="px-4 py-8 text-center text-gray-400">
               {{ $t('general.loading') }}...
             </td>
           </tr>
           <tr v-else-if="entries.length === 0">
-            <td colspan="6" class="px-4 py-8 text-center text-gray-400">
+            <td colspan="7" class="px-4 py-8 text-center text-gray-400">
               {{ $t('general.no_records_found') }}
             </td>
           </tr>
@@ -104,6 +119,12 @@
             <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap">
               {{ entry.reference }}
             </td>
+            <td class="px-3 py-2 text-xs text-gray-500 whitespace-nowrap">
+              <span v-if="entry.account_code" :title="entry.account_name">
+                {{ entry.account_code }} — {{ entry.account_name }}
+              </span>
+              <span v-else class="text-gray-300">-</span>
+            </td>
             <td class="px-4 py-2 text-sm text-right whitespace-nowrap">
               <span v-if="entry.debit" class="text-gray-900 font-medium">
                 {{ formatAmount(entry.debit) }}
@@ -126,7 +147,7 @@
         <!-- Summary Footer -->
         <tfoot v-if="entries.length > 0" class="bg-gray-100 font-medium">
           <tr>
-            <td colspan="3" class="px-4 py-3 text-sm text-gray-700 text-right">
+            <td colspan="4" class="px-4 py-3 text-sm text-gray-700 text-right">
               {{ $t('general.total') }}
             </td>
             <td class="px-4 py-3 text-sm text-right text-gray-900">
@@ -184,6 +205,11 @@ function formatAmount(amount) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(amount / 100)
+}
+
+function downloadPdf() {
+  const url = `/api/v1/customers/${route.params.id}/ledger/pdf?from_date=${fromDate.value}&to_date=${toDate.value}&download=true`
+  window.open(url, '_blank')
 }
 
 async function fetchLedger() {

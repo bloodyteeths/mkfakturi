@@ -570,7 +570,13 @@
         "reference": "Referans",
         "no_linked_supplier": "Bağlı tedarikçi yok",
         "already_linked": "Bu tedarikçi başka bir müşteriye zaten bağlı",
-        "search_supplier": "Tedarikçi ara..."
+        "search_supplier": "Tedarikçi ara...",
+        "account_code": "Hesap",
+        "download_ledger_pdf": "PDF İndir",
+        "customer_ledger_report": "Müşteri Hesap Kartı",
+        "supplier_ledger_report": "Tedarikçi Hesap Kartı",
+        "prepared_by": "Hazırlayan",
+        "approved_by": "Onaylayan"
     },
     "items": {
         "duplicate_warning_message": "Benzer isimde bir ürün zaten mevcut. Lütfen aşağıdaki mevcut kayıtları inceleyin.",

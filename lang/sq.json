@@ -776,7 +776,13 @@
         "reference": "Referenca",
         "no_linked_supplier": "Nuk ka furnitor të lidhur",
         "already_linked": "Ky furnitor është i lidhur me një klient tjetër",
-        "search_supplier": "Kërko furnitor..."
+        "search_supplier": "Kërko furnitor...",
+        "account_code": "Llogaria",
+        "download_ledger_pdf": "Shkarko PDF",
+        "customer_ledger_report": "Kartela e klientit",
+        "supplier_ledger_report": "Kartela e furnitorit",
+        "prepared_by": "Përpiloi",
+        "approved_by": "Miratoi"
     },
     "suppliers": {
         "title": "Furnitorët",
