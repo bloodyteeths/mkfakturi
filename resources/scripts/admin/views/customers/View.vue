@@ -88,8 +88,8 @@
     <!-- Chart -->
     <CustomerChart />
 
-    <!-- Ledger Card (only if linked to a supplier) -->
-    <CustomerLedgerCard v-if="hasLinkedSupplier" />
+    <!-- Ledger Card -->
+    <CustomerLedgerCard />
   </BasePage>
 </template>
 

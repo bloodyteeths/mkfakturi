@@ -42,8 +42,8 @@
     <!-- Chart -->
     <SupplierChart />
 
-    <!-- Ledger Card (only if linked to a customer) -->
-    <SupplierLedgerCard v-if="hasLinkedCustomer" />
+    <!-- Ledger Card -->
+    <SupplierLedgerCard />
   </BasePage>
 </template>
 
