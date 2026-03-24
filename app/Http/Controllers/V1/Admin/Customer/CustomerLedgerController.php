@@ -62,12 +62,33 @@ class CustomerLedgerController extends Controller
 
     private function buildLedgerResponse(Request $request, ?Customer $customer, ?Supplier $supplier)
     {
-        $result = $this->buildLedger($request, $customer, $supplier);
+        try {
+            $result = $this->buildLedger($request, $customer, $supplier);
 
-        return response()->json([
-            'data' => $result['ledger']->values(),
-            'meta' => $result['meta'],
-        ]);
+            return response()->json([
+                'data' => $result['ledger']->values(),
+                'meta' => $result['meta'],
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Ledger build failed', [
+                'customer_id' => $customer?->id,
+                'supplier_id' => $supplier?->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'data' => [],
+                'meta' => [
+                    'error' => $e->getMessage(),
+                    'from_date' => $request->query('from_date'),
+                    'to_date' => $request->query('to_date'),
+                    'total_debit' => 0,
+                    'total_credit' => 0,
+                    'closing_balance' => 0,
+                ],
+            ]);
+        }
     }
 
     private function buildLedger(Request $request, ?Customer $customer, ?Supplier $supplier): array

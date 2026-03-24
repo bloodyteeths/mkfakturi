@@ -94,7 +94,7 @@
           </tr>
           <tr v-else-if="entries.length === 0">
             <td colspan="7" class="px-4 py-8 text-center text-gray-400">
-              {{ $t('general.no_records_found') }}
+              {{ meta.error ? meta.error : $t('general.no_records_found') }}
             </td>
           </tr>
           <tr
@@ -226,6 +226,7 @@ async function fetchLedger() {
     entries.value = response.data.data
     meta.value = response.data.meta
   } catch (e) {
+    console.error('CustomerLedgerCard fetch error:', e.response?.status, e.response?.data || e.message)
     entries.value = []
     meta.value = {}
   } finally {

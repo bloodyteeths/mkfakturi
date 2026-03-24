@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'fixed top-0 left-0 hidden h-full pt-16 pb-[6.6rem] bg-white w-88 xl:block',
+      'fixed top-0 left-0 hidden h-full pt-16 pb-[6.6rem] bg-white w-88 xl:block flex flex-col',
       globalStore.isSidebarCollapsed ? 'ml-16' : 'ml-56 xl:ml-64'
     ]"
   >
@@ -99,7 +99,8 @@
     <div
       ref="supplierListSection"
       class="
-        h-full
+        flex-1
+        min-h-0
         overflow-y-scroll
         border-l border-gray-200 border-solid
         sidebar
