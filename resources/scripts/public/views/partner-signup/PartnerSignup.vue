@@ -231,7 +231,7 @@ const submitForm = async () => {
     if (response.data.success) {
       if (response.data.auto_login && response.data.redirect) {
         // Auto-logged in by backend — get CSRF cookie then redirect to onboarding
-        await axios.get('/sanctum/csrf-cookie')
+        await axios.get('/sanctum/csrf-cookie', { baseURL: '/' })
         window.location.href = response.data.redirect
       } else {
         // Fallback: redirect to login page
