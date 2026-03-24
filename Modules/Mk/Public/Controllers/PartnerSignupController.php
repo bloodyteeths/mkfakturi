@@ -147,6 +147,17 @@ class PartnerSignupController extends Controller
                 ]);
             }
 
+            // Seed demo company for partner (non-blocking)
+            try {
+                app(\App\Services\PartnerDemoCompanyService::class)
+                    ->seedForPartner($partner, $user);
+            } catch (\Throwable $e) {
+                Log::warning('Demo company seeding failed (non-blocking)', [
+                    'partner_id' => $partner->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             DB::commit();
 
             // Auto-login the newly created user
