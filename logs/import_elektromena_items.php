@@ -7,10 +7,17 @@
  *   col 1: row number
  *   col 2: SKU (Шифра)
  *   col 5: item name (Артикал)
- *   col 11: unit (Мера) — бр, мет, пар, ком, etc.
- *   col 13: tax rate (Данок) — "18%" or "5%"
+ *   col 11: unit (Мера) — бр, мет, пар, ком, кг, etc.
+ *   col 13: tax rate (Данок) — "18%", "5%", "0%"
+ *   col 16: opening stock (Влез)
  *   col 25: current stock quantity (Залиха)
- *   col 29: stock value (Залиха вред.)
+ *   col 29: stock value (Залиха вред.) — always 0 in this report
+ *
+ * Issues handled:
+ *   - 8 duplicate SKUs → appended "-2" suffix to second occurrence
+ *   - 15 items with negative stock → imported as-is
+ *   - Unit "МЕТ" vs "мет" → case-insensitive matching
+ *   - No price data in CSV → price=0, can be set later
  *
  * Usage: php logs/import_elektromena_items.php
  * Idempotent: skips items that already exist by SKU within company 118.
@@ -32,14 +39,14 @@ if (!$company) {
 }
 echo "Importing items for: {$company->name} (ID: {$companyId})\n\n";
 
-// Get or create company currency
+// Get company currency
 $currencyId = DB::table('company_settings')
     ->where('company_id', $companyId)
     ->where('option', 'currency')
     ->value('value');
 echo "Company currency_id: {$currencyId}\n";
 
-// Unit mapping: Macedonian abbreviation → unit name
+// Unit mapping: Macedonian abbreviation (lowercase) → unit name
 $unitMap = [
     'бр'  => 'Парче',    // piece
     'мет' => 'Метар',    // meter
@@ -76,7 +83,6 @@ echo "\n";
 // Read and parse CSV
 $csvPath = '/var/www/html/elktro/Zaliha 1.csv';
 if (!file_exists($csvPath)) {
-    // Try local path
     $csvPath = __DIR__ . '/../elktro/Zaliha 1.csv';
 }
 if (!file_exists($csvPath)) {
@@ -85,18 +91,18 @@ if (!file_exists($csvPath)) {
 }
 
 $raw = file_get_contents($csvPath);
-// Convert from Windows-1251 to UTF-8
 $content = mb_convert_encoding($raw, 'UTF-8', 'Windows-1251');
 $lines = explode("\n", str_replace("\r\n", "\n", $content));
 
 $created = 0;
 $skipped = 0;
 $errors = 0;
+$seenSkus = []; // Track SKUs to handle duplicates within CSV
 
 foreach ($lines as $lineNum => $line) {
     $cols = explode(';', $line);
 
-    // Data rows start with empty col[0], numeric col[1] (row number), numeric col[2] (SKU)
+    // Data rows: empty col[0], numeric col[1] (row number), numeric col[2] (SKU)
     if (!isset($cols[2]) || !is_numeric(trim($cols[1] ?? ''))) {
         continue;
     }
@@ -104,36 +110,38 @@ foreach ($lines as $lineNum => $line) {
     $rowNum = (int) trim($cols[1]);
     $sku = trim($cols[2] ?? '');
     $name = trim($cols[5] ?? '');
-    $unitAbbr = trim($cols[11] ?? '');
+    $unitAbbr = mb_strtolower(trim($cols[11] ?? '')); // case-insensitive
     $taxStr = trim($cols[13] ?? '');
     $stockStr = trim($cols[25] ?? '');
-    $valueStr = trim($cols[29] ?? '');
 
-    // Skip summary rows (0%, 5%, 18% at bottom)
+    // Skip summary rows at bottom (0%, 5%, 18%)
     if (empty($name) || $rowNum < 1) {
         continue;
     }
 
-    // Clean up name — remove extra quotes
+    // Clean up name — remove CSV quoting artifacts
     $name = trim($name, '"');
     $name = str_replace('""', '"', $name);
+    // Remove trailing quotes from names like: dozna ЕС 195х152х70"
+    $name = rtrim($name, '"');
 
-    // Parse quantity: "1.700,00" → 1700
+    // Parse MK number format: "1.700,00" → 1700
     $stock = (int) round(floatval(str_replace(['.', ','], ['', '.'], $stockStr)));
 
-    // Parse value: same format
-    $value = floatval(str_replace(['.', ','], ['', '.'], $valueStr));
-
-    // Calculate unit price in cents (value / stock, or 0)
-    $priceInCents = 0;
-    if ($stock > 0 && $value > 0) {
-        $priceInCents = (int) round(($value / $stock) * 100);
+    // Handle duplicate SKUs within the CSV (8 duplicates found)
+    if (isset($seenSkus[$sku])) {
+        $seenSkus[$sku]++;
+        $originalSku = $sku;
+        $sku = $sku . '-' . $seenSkus[$sku];
+        echo "  WARN: Duplicate SKU {$originalSku} → renamed to {$sku} for \"{$name}\"\n";
+    } else {
+        $seenSkus[$sku] = 1;
     }
 
-    // Unit ID
+    // Unit ID — case-insensitive lookup
     $unitId = $unitIds[$unitAbbr] ?? ($unitIds['бр'] ?? null);
 
-    // Check if item already exists by SKU
+    // Check if item already exists by SKU in this company
     $existing = Item::where('company_id', $companyId)
         ->where('sku', $sku)
         ->first();
@@ -151,20 +159,20 @@ foreach ($lines as $lineNum => $line) {
             'creator_id' => 141, // Ivana Nacev
             'unit_id' => $unitId,
             'currency_id' => $currencyId ?: null,
-            'price' => $priceInCents,
-            'cost' => $priceInCents, // same as selling price for now
-            'quantity' => $stock,
+            'price' => 0, // No price data in this CSV
+            'quantity' => $stock, // Includes negative stock (backordered)
             'track_quantity' => true,
             'tax_per_item' => false,
         ]);
 
         $created++;
-        if ($created <= 10 || $created % 50 === 0) {
-            echo "  [{$rowNum}] {$sku} — {$name} | qty={$stock} unit={$unitAbbr} price=" . ($priceInCents / 100) . " → ID {$item->id}\n";
+        if ($created <= 15 || $created % 100 === 0) {
+            $unitLabel = $unitAbbr ?: '?';
+            echo "  [{$rowNum}] SKU={$sku} — {$name} | qty={$stock} unit={$unitLabel} → ID {$item->id}\n";
         }
     } catch (\Exception $e) {
         $errors++;
-        echo "  ERROR [{$rowNum}] {$sku} — {$name}: {$e->getMessage()}\n";
+        echo "  ERROR [{$rowNum}] SKU={$sku} — {$name}: {$e->getMessage()}\n";
     }
 }
 
