@@ -25,32 +25,39 @@ foreach ($links as $l) {
     echo "  company_id={$l->company_id} name={$cname} active={$l->is_active} portfolio=" . ($l->is_portfolio_managed ?? 'NULL') . "\n";
 }
 
-// Partner 26 record
+// Partner 26 record — dump all columns
 $partner = DB::table('partners')->where('id', 26)->first();
-echo "\nPartner 26: user_id={$partner->user_id} status={$partner->status}\n";
-echo "  onboarding=" . ($partner->onboarding_completed_at ?? 'NULL') . "\n";
-echo "  portfolio_activated=" . ($partner->portfolio_activated_at ?? 'NULL') . "\n";
+echo "\nPartner 26 record:\n";
+foreach ((array)$partner as $k => $v) {
+    echo "  {$k}=" . ($v ?? 'NULL') . "\n";
+}
 
-// All companies (to see what she might be seeing)
+// Total companies
 $total = DB::table('companies')->count();
 echo "\nTotal companies in DB: {$total}\n";
 
-// Via model
+// User model companies
 $userModel = App\Models\User::find(140);
-$companies = $userModel->companies;
-echo "\nUser->companies() relationship: " . count($companies) . "\n";
-foreach ($companies as $c) {
+echo "\nUser->companies(): " . $userModel->companies->count() . "\n";
+foreach ($userModel->companies as $c) {
     echo "  id={$c->id} name={$c->name}\n";
 }
 
-// Check if partner dashboard uses different query
+// Partner model queries
 $partnerModel = App\Models\Partner::find(26);
 echo "\nPartner->portfolioCompanies: " . $partnerModel->portfolioCompanies->count() . "\n";
 foreach ($partnerModel->portfolioCompanies as $pc) {
     echo "  id={$pc->id} name={$pc->name}\n";
 }
-
-echo "\nPartner->companies (all, no portfolio filter): " . $partnerModel->companies->count() . "\n";
+echo "\nPartner->companies (all): " . $partnerModel->companies->count() . "\n";
 foreach ($partnerModel->companies as $ac) {
     echo "  id={$ac->id} name={$ac->name}\n";
+}
+
+// Check what user 140 sees — is_partner flag, partner_id on user
+echo "\nUser 140 all columns:\n";
+$u = DB::table('users')->where('id', 140)->first();
+foreach ((array)$u as $k => $v) {
+    if (in_array($k, ['password', 'remember_token'])) continue;
+    echo "  {$k}=" . ($v ?? 'NULL') . "\n";
 }
