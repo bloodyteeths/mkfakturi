@@ -3425,8 +3425,14 @@ class IfrsAdapter
             if ($defaultVatId) {
                 $insertData['vat_id'] = $defaultVatId;
             }
+            // Only assign counterparty_name to AR/AP lines — otherwise payment
+            // journals get the supplier name on BOTH sides (e.g. D 2200 + C 2200)
+            // which creates phantom double entries on ledger cards
             if (!empty($item['counterparty_name'])) {
-                $insertData['counterparty_name'] = $item['counterparty_name'];
+                $acctType = $item['account']->account_type ?? '';
+                if (in_array($acctType, ['RECEIVABLE', 'PAYABLE'])) {
+                    $insertData['counterparty_name'] = $item['counterparty_name'];
+                }
             }
             DB::table('ifrs_line_items')->insert($insertData);
         }
