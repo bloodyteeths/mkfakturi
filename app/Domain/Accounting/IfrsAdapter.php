@@ -105,7 +105,7 @@ class IfrsAdapter
                 'amount' => $invoice->total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
-
+                'counterparty_name' => $invoice->customer->name ?? null,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -245,7 +245,7 @@ class IfrsAdapter
                 'amount' => $payment->amount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
-
+                'counterparty_name' => $payment->customer->name ?? null,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -426,7 +426,7 @@ class IfrsAdapter
                 'amount' => $creditNote->total / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => true, // Credit entry
-
+                'counterparty_name' => $creditNote->customer->name ?? null,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -2748,7 +2748,7 @@ class IfrsAdapter
                 'amount' => $bill->total / 100, // Total includes tax
                 'quantity' => 1,
                 'credited' => true, // Credit entry
-
+                'counterparty_name' => $bill->supplier->name ?? null,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -2844,13 +2844,16 @@ class IfrsAdapter
 
             // Line Item: Debit Accounts Payable (reduce liability)
             // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
+            $supplierName = $billPayment->bill && $billPayment->bill->supplier
+                ? $billPayment->bill->supplier->name
+                : null;
             DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $apAccount->id,
                 'amount' => $billPayment->amount / 100, // Convert cents to dollars
                 'quantity' => 1,
                 'credited' => false, // Debit entry
-
+                'counterparty_name' => $supplierName,
                 'entity_id' => $entity->id,
                 'created_at' => now(),
                 'updated_at' => now(),

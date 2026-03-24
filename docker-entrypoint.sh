@@ -130,6 +130,10 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     echo "Generating recurring deadline instances..."
     php artisan deadlines:generate-recurring || echo "Deadline generation failed or table not ready"
 
+    # Fix missing counterparty_name on IFRS AR/AP line items (one-time backfill, idempotent)
+    echo "Fixing IFRS counterparty names..."
+    php artisan ifrs:fix-counterparty --force 2>&1 || echo "IFRS counterparty fix failed or not needed"
+
     # Check if installation already complete (like commit 09c2afc)
     PROFILE_STATUS=$(php artisan tinker --execute="echo \App\Models\Setting::getSetting('profile_complete') ?? 'NOT_SET';" 2>/dev/null | tail -1)
     echo "Profile status: $PROFILE_STATUS"
