@@ -68,10 +68,12 @@ router.beforeEach((to, from, next) => {
 
   // Force partners who haven't completed onboarding to the onboarding wizard
   // Super admins bypass this check
+  // Partners who have switched to a company context also bypass (they're managing a company)
   if (
     userStore.currentUser?.role === 'partner' &&
     userStore.currentUser?.role !== 'super admin' &&
     !userStore.currentUser?.onboarding_completed_at &&
+    !window.Ls?.get('selectedCompany') &&
     isAppLoaded
   ) {
     const onboardingAllowedRoutes = ['partner.onboarding', 'logout', 'account.settings']
