@@ -94,7 +94,9 @@ onMounted(() => {
     }
 
     // Only redirect if abilities are fully loaded AND user lacks the required ability
-    if (route.meta.ability && userStore.currentAbilities && userStore.currentAbilities.length > 0) {
+    // Partners in company context bypass ability checks — they have full access to their companies
+    const isPartnerUser = userStore.currentUser?.role === 'partner'
+    if (route.meta.ability && userStore.currentAbilities && userStore.currentAbilities.length > 0 && !isPartnerUser) {
       if (!userStore.hasAbilities(route.meta.ability)) {
         router.push({ name: 'account.settings' })
         return
