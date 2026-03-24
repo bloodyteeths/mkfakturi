@@ -33,10 +33,13 @@ RUN apk add --no-cache \
     libxml2-dev \
     postgresql-dev \
     imagemagick-dev \
+    ghostscript \
     curl-dev \
     # For Redis
     && pecl install redis imagick \
     && docker-php-ext-enable redis imagick \
+    # Allow ImageMagick to read PDF files (requires ghostscript delegate)
+    && sed -i 's/<policy domain="coder" rights="none" pattern="PDF" \/>/<policy domain="coder" rights="read|write" pattern="PDF" \/>/g' /etc/ImageMagick-*/policy.xml 2>/dev/null || true \
     # Configure and install PHP extensions
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
