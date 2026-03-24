@@ -88,7 +88,8 @@ class AccountantConsoleController extends Controller
             ->join('companies', 'companies.id', '=', 'partner_company_links.company_id')
             ->leftJoin('addresses', function ($join) {
                 $join->on('addresses.company_id', '=', 'companies.id')
-                    ->where('addresses.type', '=', 'billing');
+                    ->where('addresses.type', '=', 'billing')
+                    ->whereNull('addresses.customer_id');
             })
             ->where('partner_company_links.partner_id', $partner->id)
             ->where('partner_company_links.is_active', true)

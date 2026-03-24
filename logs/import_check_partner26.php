@@ -3,34 +3,31 @@ require '/var/www/html/vendor/autoload.php';
 $app = require_once '/var/www/html/bootstrap/app.php';
 $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
-use Illuminate\Support\Facades\DB;
+$l = DB::table('partner_company_links')->where('partner_id', 26)->first();
+echo "invitation_status=" . ($l->invitation_status ?? 'NULL') . "\n";
 
-// How many addresses exist for company_id=118?
-$addresses = DB::table('addresses')->where('company_id', 118)->get();
-echo "Addresses with company_id=118: " . count($addresses) . "\n";
-foreach ($addresses as $a) {
-    echo "  id={$a->id} type={$a->type} customer_id=" . ($a->customer_id ?? 'NULL') . " name=" . ($a->name ?? 'NULL') . "\n";
+// Also check activeCompanies query used by switchCompany
+$partner = App\Models\Partner::find(26);
+$active = $partner->activeCompanies()->get();
+echo "activeCompanies count: " . count($active) . "\n";
+foreach ($active as $c) {
+    echo "  id={$c->id} name={$c->name}\n";
 }
 
-// Simulate the exact console query for partner 26
-$results = DB::table('partner_company_links')
+// Check what the fixed console query would return
+$fixed = DB::table('partner_company_links')
     ->join('companies', 'companies.id', '=', 'partner_company_links.company_id')
     ->leftJoin('addresses', function ($join) {
         $join->on('addresses.company_id', '=', 'companies.id')
-            ->where('addresses.type', '=', 'billing');
+            ->where('addresses.type', '=', 'billing')
+            ->whereNull('addresses.customer_id');
     })
     ->where('partner_company_links.partner_id', 26)
     ->where('partner_company_links.is_active', true)
     ->where('partner_company_links.invitation_status', 'accepted')
-    ->select([
-        'companies.id',
-        'companies.name',
-        'addresses.id as address_id',
-        'addresses.customer_id',
-    ])
+    ->select(['companies.id', 'companies.name'])
     ->get();
-
-echo "\nConsole query results (raw): " . count($results) . " rows\n";
-foreach ($results as $r) {
-    echo "  company_id={$r->id} name={$r->name} address_id=" . ($r->address_id ?? 'NULL') . " customer_id=" . ($r->customer_id ?? 'NULL') . "\n";
+echo "\nFixed console query: " . count($fixed) . " rows\n";
+foreach ($fixed as $r) {
+    echo "  company_id={$r->id} name={$r->name}\n";
 }
