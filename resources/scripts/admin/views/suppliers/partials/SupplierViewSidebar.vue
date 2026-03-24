@@ -220,7 +220,7 @@ async function loadSuppliers(pageNumber, fromScrollListener = false) {
     return
   }
 
-  let params = {}
+  let params = { limit: 50 }
   if (
     searchData.searchText !== '' &&
     searchData.searchText !== null &&
