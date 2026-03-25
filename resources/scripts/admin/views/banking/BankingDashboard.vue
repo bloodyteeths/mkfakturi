@@ -119,7 +119,9 @@
         <div
           v-for="account in connectedAccounts"
           :key="account.id"
-          class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow"
+          class="bg-white rounded-lg shadow-md p-6 border-2 cursor-pointer hover:shadow-lg transition-all"
+          :class="filters.account_id === account.id ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-200'"
+          @click="selectAccount(account.id)"
         >
           <!-- Bank Logo and Name -->
           <div class="flex items-center justify-between mb-4">
@@ -203,9 +205,18 @@
     <!-- Recent Transactions Section -->
     <div v-if="!showEmptyScreen" class="mt-8">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-semibold text-gray-900">
-          {{ $t('banking.recent_transactions') }}
-        </h2>
+        <div class="flex items-center gap-3">
+          <h2 class="text-xl font-semibold text-gray-900">
+            {{ selectedAccountLabel }}
+          </h2>
+          <button
+            v-if="filters.account_id"
+            @click="filters.account_id = null"
+            class="text-sm text-primary-600 hover:text-primary-800 underline"
+          >
+            {{ $t('banking.all_accounts') }}
+          </button>
+        </div>
         <BaseButton
           v-if="connectedAccounts.length > 0"
           variant="primary-outline"
@@ -322,6 +333,14 @@ const filters = ref({
 // Computed
 const showEmptyScreen = computed(() => {
   return !isLoadingAccounts.value && connectedAccounts.value.length === 0
+})
+
+const selectedAccountLabel = computed(() => {
+  if (!filters.value.account_id) {
+    return t('banking.recent_transactions')
+  }
+  const acc = connectedAccounts.value.find(a => a.id === filters.value.account_id)
+  return acc ? `${acc.bank_name} — ${acc.account_number}` : t('banking.recent_transactions')
 })
 
 const accountOptions = computed(() => {
@@ -441,6 +460,15 @@ const onManualEntryCreated = () => {
 
 const toggleFilters = () => {
   showFilters.value = !showFilters.value
+}
+
+const selectAccount = (accountId) => {
+  // Toggle: click same account again to deselect (show all)
+  if (filters.value.account_id === accountId) {
+    filters.value.account_id = null
+  } else {
+    filters.value.account_id = accountId
+  }
 }
 
 const clearFilters = () => {

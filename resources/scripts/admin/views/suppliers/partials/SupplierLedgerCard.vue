@@ -235,4 +235,10 @@ async function fetchLedger() {
 onMounted(fetchLedger)
 
 watch([fromDate, toDate], fetchLedger)
+
+watch(() => route.params.id, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    fetchLedger()
+  }
+})
 </script>

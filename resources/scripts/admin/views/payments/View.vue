@@ -240,7 +240,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { debounce } from 'lodash'
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import moment from 'moment'
 
@@ -308,8 +308,19 @@ watch(route, () => {
   loadPayment()
 })
 
-loadPayments()
-loadPayment()
+onMounted(() => {
+  loadPayments()
+  loadPayment()
+  if (paymentListSection.value) {
+    paymentListSection.value.addEventListener('scroll', scrollHandler)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (paymentListSection.value) {
+    paymentListSection.value.removeEventListener('scroll', scrollHandler)
+  }
+})
 
 onSearch = debounce(onSearch, 500)
 
@@ -391,11 +402,14 @@ async function loadPayment() {
 
   isFetching.value = true
 
-  let response = await paymentStore.fetchPayment(route.params.id)
+  try {
+    let response = await paymentStore.fetchPayment(route.params.id)
 
-  if (response.data) {
+    if (response.data) {
+      Object.assign(payment, response.data.data)
+    }
+  } finally {
     isFetching.value = false
-    Object.assign(payment, response.data.data)
   }
 }
 
@@ -405,22 +419,19 @@ function scrollToPayment() {
   if (el) {
     el.scrollIntoView({ behavior: 'smooth' })
     el.classList.add('shake')
-    addScrollListener()
   }
 }
 
-function addScrollListener() {
-  paymentListSection.value.addEventListener('scroll', (ev) => {
-    if (
-      ev.target.scrollTop > 0 &&
-      ev.target.scrollTop + ev.target.clientHeight >
-        ev.target.scrollHeight - 200
-    ) {
-      if (currentPageNumber.value < lastPageNumber.value) {
-        loadPayments(++currentPageNumber.value, true)
-      }
+function scrollHandler(ev) {
+  if (
+    ev.target.scrollTop > 0 &&
+    ev.target.scrollTop + ev.target.clientHeight >
+      ev.target.scrollHeight - 200
+  ) {
+    if (currentPageNumber.value < lastPageNumber.value) {
+      loadPayments(++currentPageNumber.value, true)
     }
-  })
+  }
 }
 
 async function onSearch() {

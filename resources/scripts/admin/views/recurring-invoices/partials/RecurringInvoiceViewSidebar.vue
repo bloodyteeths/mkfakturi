@@ -1,6 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { debounce } from 'lodash'
 
@@ -100,22 +100,19 @@ function scrollToRecurringInvoice() {
   if (el) {
     el.scrollIntoView({ behavior: 'smooth' })
     el.classList.add('shake')
-    addScrollListener()
   }
 }
 
-function addScrollListener() {
-  invoiceListSection.value.addEventListener('scroll', (ev) => {
-    if (
-      ev.target.scrollTop > 0 &&
-      ev.target.scrollTop + ev.target.clientHeight >
-        ev.target.scrollHeight - 200
-    ) {
-      if (currentPageNumber.value < lastPageNumber.value) {
-        loadRecurringInvoices(++currentPageNumber.value, true)
-      }
+function scrollHandler(ev) {
+  if (
+    ev.target.scrollTop > 0 &&
+    ev.target.scrollTop + ev.target.clientHeight >
+      ev.target.scrollHeight - 200
+  ) {
+    if (currentPageNumber.value < lastPageNumber.value) {
+      loadRecurringInvoices(++currentPageNumber.value, true)
     }
-  })
+  }
 }
 
 async function onSearched() {
@@ -134,8 +131,20 @@ function sortData() {
   return true
 }
 
-loadRecurringInvoices()
 onSearched = debounce(onSearched, 500)
+
+onMounted(() => {
+  loadRecurringInvoices()
+  if (invoiceListSection.value) {
+    invoiceListSection.value.addEventListener('scroll', scrollHandler)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (invoiceListSection.value) {
+    invoiceListSection.value.removeEventListener('scroll', scrollHandler)
+  }
+})
 </script>
 
 <template>

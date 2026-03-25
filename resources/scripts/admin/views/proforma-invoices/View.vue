@@ -1,6 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { debounce } from 'lodash'
 
@@ -217,22 +217,19 @@ function scrollToProformaInvoice() {
   if (el) {
     el.scrollIntoView({ behavior: 'smooth' })
     el.classList.add('shake')
-    addScrollListener()
   }
 }
 
-function addScrollListener() {
-  proformaInvoiceListSection.value?.addEventListener('scroll', (ev) => {
-    if (
-      ev.target.scrollTop > 0 &&
-      ev.target.scrollTop + ev.target.clientHeight >
-        ev.target.scrollHeight - 200
-    ) {
-      if (currentPageNumber.value < lastPageNumber.value) {
-        loadProformaInvoices(++currentPageNumber.value, true)
-      }
+function scrollHandler(ev) {
+  if (
+    ev.target.scrollTop > 0 &&
+    ev.target.scrollTop + ev.target.clientHeight >
+      ev.target.scrollHeight - 200
+  ) {
+    if (currentPageNumber.value < lastPageNumber.value) {
+      loadProformaInvoices(++currentPageNumber.value, true)
     }
-  })
+  }
 }
 
 async function loadProformaInvoice() {
@@ -270,8 +267,19 @@ const onSearched = debounce(async function () {
   loadProformaInvoices()
 }, 500)
 
-loadProformaInvoices()
-loadProformaInvoice()
+onMounted(() => {
+  loadProformaInvoices()
+  loadProformaInvoice()
+  if (proformaInvoiceListSection.value) {
+    proformaInvoiceListSection.value.addEventListener('scroll', scrollHandler)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (proformaInvoiceListSection.value) {
+    proformaInvoiceListSection.value.removeEventListener('scroll', scrollHandler)
+  }
+})
 </script>
 
 <template>

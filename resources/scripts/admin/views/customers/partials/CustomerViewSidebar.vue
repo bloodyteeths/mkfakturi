@@ -173,7 +173,7 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive } from 'vue'
+import { computed, ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useCustomerStore } from '@/scripts/admin/stores/customer'
@@ -282,22 +282,22 @@ function scrollToCustomer() {
   if (el) {
     el.scrollIntoView({ behavior: 'smooth' })
     el.classList.add('shake')
-    addScrollListener()
   }
 }
 
-function addScrollListener() {
-  customerListSection.value.addEventListener('scroll', (ev) => {
-    if (
-      ev.target.scrollTop > 0 &&
-      ev.target.scrollTop + ev.target.clientHeight >
-        ev.target.scrollHeight - 200
-    ) {
-      if (currentPageNumber.value < lastPageNumber.value) {
-        loadCustomers(++currentPageNumber.value, true)
-      }
+function scrollListener() {
+  const element = customerListSection.value
+  if (!element) return
+
+  if (
+    element.scrollTop > 0 &&
+    element.scrollTop + element.clientHeight >
+      element.scrollHeight - 200
+  ) {
+    if (currentPageNumber.value < lastPageNumber.value) {
+      loadCustomers(++currentPageNumber.value, true)
     }
-  })
+  }
 }
 
 async function onSearch() {
@@ -316,5 +316,16 @@ function sortData() {
   return true
 }
 
-loadCustomers()
+onMounted(() => {
+  loadCustomers()
+  if (customerListSection.value) {
+    customerListSection.value.addEventListener('scroll', scrollListener)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (customerListSection.value) {
+    customerListSection.value.removeEventListener('scroll', scrollListener)
+  }
+})
 </script>

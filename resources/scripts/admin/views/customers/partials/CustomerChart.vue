@@ -24,7 +24,7 @@
         </div>
 
         <LineChart
-          v-if="isLoading"
+          v-if="!isLoading"
           :invoices="getChartInvoices"
           :expenses="getChartExpenses"
           :receipts="getReceiptTotals"
@@ -191,7 +191,7 @@ watch(
 )
 
 async function loadCustomer() {
-  isLoading.value = false
+  isLoading.value = true
   let response = await customerStore.fetchViewCustomer({
     id: route.params.id,
   })
@@ -201,7 +201,7 @@ async function loadCustomer() {
     Object.assign(data, response.data.data)
   }
 
-  isLoading.value = true
+  isLoading.value = false
 }
 
 async function onChangeYear(data) {

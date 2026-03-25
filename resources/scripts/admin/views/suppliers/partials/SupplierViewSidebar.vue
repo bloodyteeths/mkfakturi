@@ -173,7 +173,7 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive, onMounted } from 'vue'
+import { computed, ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
@@ -295,6 +295,12 @@ onMounted(() => {
   loadSuppliers(1, false)
   if (supplierListSection.value) {
     supplierListSection.value.addEventListener('scroll', scrollListener)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (supplierListSection.value) {
+    supplierListSection.value.removeEventListener('scroll', scrollListener)
   }
 })
 </script>
