@@ -258,6 +258,9 @@ class BankingController extends Controller
                 try {
                     return [
                         'id' => $transaction->id,
+                        'bank_account_id' => $transaction->bank_account_id,
+                        'bank_account_name' => $transaction->bankAccount?->bank_name ?? '',
+                        'bank_account_number' => $transaction->bankAccount?->account_number ?? '',
                         'transaction_date' => $transaction->transaction_date?->toIso8601String(),
                         'booking_date' => $transaction->booking_date?->toIso8601String(),
                         'amount' => $transaction->amount ?? 0,

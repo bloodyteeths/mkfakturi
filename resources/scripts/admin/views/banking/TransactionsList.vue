@@ -7,6 +7,12 @@
       :columns="transactionColumns"
       class="mt-3"
     >
+      <template #cell-account="{ row }">
+        <span class="text-sm text-gray-900">
+          {{ row.data.bank_account_name }}
+        </span>
+      </template>
+
       <template #cell-date="{ row }">
         <span class="text-sm text-gray-900">
           {{ formatDate(row.data.transaction_date) }}
@@ -181,7 +187,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -209,8 +215,21 @@ const tableComponent = ref(null)
 const showDetailsModal = ref(false)
 const selectedTransactionDetails = ref(null)
 
+// Re-fetch when filters change (account_id, dates)
+watch(() => props.filters, () => {
+  if (tableComponent.value) {
+    tableComponent.value.refresh()
+  }
+}, { deep: true })
+
 // Table columns
 const transactionColumns = computed(() => [
+  {
+    label: t('banking.account'),
+    key: 'account',
+    thClass: 'text-left',
+    tdClass: 'text-left'
+  },
   {
     label: t('banking.date'),
     key: 'date',
