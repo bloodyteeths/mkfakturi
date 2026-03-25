@@ -733,7 +733,7 @@ return [
 
     'partner_trial' => [
         'enabled' => true,
-        'duration_days' => 30,
+        'duration_days' => 14,
         'plan' => 'start', // Trial gets Start-level limits (lowest) to force early upgrades
     ],
 

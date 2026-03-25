@@ -282,7 +282,7 @@ const mk: Dictionary = {
     billingToggleYearly: 'Годишно',
     billingYearlySave: '2 месеци бесплатно',
     cta: 'Започни сега',
-    ctaPartner: 'Пробај 30 дена бесплатно',
+    ctaPartner: 'Пробај 14 дена бесплатно',
     sepaNote: 'Немате картичка? Изберете EUR за плаќање преку банкарски трансфер (SEPA).',
     comparisonTable: {
       title: 'Споредете ги пакетите',
@@ -523,7 +523,7 @@ const sq: Dictionary = {
     billingToggleYearly: 'Vjetore',
     billingYearlySave: '2 muaj falas',
     cta: 'Fillo tani',
-    ctaPartner: 'Provo 30 ditë falas',
+    ctaPartner: 'Provo 14 ditë falas',
     sepaNote: 'Nuk keni kartë? Zgjidhni EUR për të paguar me transfertë bankare (SEPA).',
     comparisonTable: {
       title: 'Krahasoni paketat',
@@ -764,7 +764,7 @@ const tr: Dictionary = {
     billingToggleYearly: 'Yıllık',
     billingYearlySave: '2 ay ücretsiz',
     cta: 'Şimdi başla',
-    ctaPartner: '30 gün ücretsiz dene',
+    ctaPartner: '14 gün ücretsiz dene',
     sepaNote: 'Kartınız yok mu? Banka havalesiyle ödeme yapmak için EUR seçin (SEPA).',
     comparisonTable: {
       title: 'Paketleri karşılaştırın',
@@ -1005,7 +1005,7 @@ const en: Dictionary = {
     billingToggleYearly: 'Yearly',
     billingYearlySave: '2 months free',
     cta: 'Start Now',
-    ctaPartner: 'Try 30 days free',
+    ctaPartner: 'Try 14 days free',
     sepaNote: 'No card? Choose EUR to pay via bank transfer (SEPA).',
     comparisonTable: {
       title: 'Compare Plans',
