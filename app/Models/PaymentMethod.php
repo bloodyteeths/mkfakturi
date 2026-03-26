@@ -19,10 +19,10 @@ class PaymentMethod extends Model
 
     public const TYPE_MODULE = 'MODULE';
 
-    // Standard GL account codes (Macedonian chart of accounts)
-    public const GL_CASH = '100';          // Готовина
-    public const GL_BANK = '102';          // Жиро-сметка
-    public const GL_OTHER_CASH = '105';    // Други парични средства
+    // Standard GL account codes (Правилник 174/2011)
+    public const GL_CASH = '102';          // Парични средства во благајна
+    public const GL_BANK = '100';          // Парични средства на трансакциски сметки
+    public const GL_OTHER_CASH = '105';    // Парични средства во благајна во странска валута
 
     protected function casts(): array
     {

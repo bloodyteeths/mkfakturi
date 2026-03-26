@@ -1406,7 +1406,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_REVENUE,
             ifrsAccountType: Account::OPERATING_REVENUE,
             fallbackName: 'Sales Revenue',
-            fallbackCode: '720', // Macedonian: Приходи од продажба на производи во земјата
+            fallbackCode: '740', // Macedonian: Приходи од продажба на добра (производи) и услуги во земјата
             specificName: 'Sales'
         );
     }
@@ -1537,7 +1537,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_LIABILITY,
             ifrsAccountType: Account::CONTROL,
             fallbackName: 'Tax Payable',
-            fallbackCode: '231', // Macedonian: Обврски за ДДВ
+            fallbackCode: '230', // Macedonian: Обврски за данокот на додадена вредност
             specificName: 'Tax'
         );
     }
@@ -2926,7 +2926,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_ASSET,
             ifrsAccountType: Account::CURRENT_ASSET,
             fallbackName: 'VAT Receivable',
-            fallbackCode: '131', // Macedonian: Побарувања за ДДВ
+            fallbackCode: '130', // Macedonian: Данок на додадена вредност (претходен данок)
             specificName: 'VAT'
         );
     }

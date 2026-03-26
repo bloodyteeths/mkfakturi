@@ -9,7 +9,7 @@ return new class extends Migration
 {
     /**
      * Add account_code to payment_methods so each method maps to a GL account.
-     * Macedonian chart: 100=Готовина, 102=Жиро-сметка, 105=Други парични средства
+     * Macedonian chart (Правилник 174/2011): 100=Трансакциска сметка, 102=Благајна, 105=Девизна благајна
      */
     public function up(): void
     {

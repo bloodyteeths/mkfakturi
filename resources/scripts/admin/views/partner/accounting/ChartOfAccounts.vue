@@ -126,6 +126,7 @@
               <BaseInput
                 v-model="accountForm.code"
                 :placeholder="$t('settings.accounts.code_placeholder')"
+                :disabled="isSystemDefined"
               />
             </BaseInputGroup>
 
@@ -137,6 +138,7 @@
                 track-by="value"
                 label="label"
                 value-prop="value"
+                :disabled="isSystemDefined"
               />
             </BaseInputGroup>
           </div>
@@ -157,6 +159,7 @@
               label="display_name"
               value-prop="id"
               :placeholder="$t('settings.accounts.no_parent')"
+              :disabled="isSystemDefined"
             />
           </BaseInputGroup>
 
@@ -275,6 +278,7 @@ const accountForm = reactive({
   parent_id: null,
   description: '',
   is_active: true,
+  system_defined: false,
 })
 
 // Computed
@@ -283,6 +287,7 @@ const companies = computed(() => {
 })
 
 const isEdit = computed(() => accountForm.id !== null)
+const isSystemDefined = computed(() => isEdit.value && accountForm.system_defined)
 
 const accountTypes = computed(() => [
   { value: null, label: t('general.all') },
@@ -393,6 +398,7 @@ function resetAccountForm() {
   accountForm.parent_id = null
   accountForm.description = ''
   accountForm.is_active = true
+  accountForm.system_defined = false
 }
 
 function openCreateModal() {
@@ -419,6 +425,7 @@ function openEditModal(account) {
   accountForm.parent_id = account.parent_id
   accountForm.description = account.description || ''
   accountForm.is_active = account.is_active
+  accountForm.system_defined = account.system_defined || false
   console.log('[ChartOfAccounts] Form populated with:', { ...accountForm })
   showAccountModal.value = true
 }

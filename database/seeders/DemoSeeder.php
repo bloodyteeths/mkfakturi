@@ -146,11 +146,11 @@ class DemoSeeder extends Seeder
 
         // Create Macedonia payment methods with GL account codes
         $paymentMethods = [
-            ['name' => 'Готовина', 'account_code' => '100'],
-            ['name' => 'Банкарски трансфер', 'account_code' => '102'],
-            ['name' => 'Кредитна картичка', 'account_code' => '102'],
-            ['name' => 'Чек', 'account_code' => '100'],
-            ['name' => 'Вирман', 'account_code' => '102'],
+            ['name' => 'Готовина', 'account_code' => '102'],           // Парични средства во благајна
+            ['name' => 'Банкарски трансфер', 'account_code' => '100'], // Парични средства на трансакциски сметки
+            ['name' => 'Кредитна картичка', 'account_code' => '100'],  // Парични средства на трансакциски сметки
+            ['name' => 'Чек', 'account_code' => '102'],               // Парични средства во благајна
+            ['name' => 'Вирман', 'account_code' => '100'],            // Парични средства на трансакциски сметки
         ];
 
         foreach ($paymentMethods as $method) {

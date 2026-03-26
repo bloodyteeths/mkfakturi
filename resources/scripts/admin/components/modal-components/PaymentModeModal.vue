@@ -90,8 +90,8 @@ const { t } = useI18n()
 const isSaving = ref(false)
 
 const accountCodeOptions = computed(() => [
-  { code: '100', label: '100 - ' + t('settings.payment_modes.account_cash') },
-  { code: '102', label: '102 - ' + t('settings.payment_modes.account_bank') },
+  { code: '100', label: '100 - ' + t('settings.payment_modes.account_bank') },
+  { code: '102', label: '102 - ' + t('settings.payment_modes.account_cash') },
   { code: '103', label: '103 - ' + t('settings.payment_modes.account_foreign') },
   { code: '105', label: '105 - ' + t('settings.payment_modes.account_other') },
 ])

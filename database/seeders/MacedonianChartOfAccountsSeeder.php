@@ -9,33 +9,28 @@ use Illuminate\Database\Seeder;
 /**
  * Macedonian Chart of Accounts Seeder
  *
- * Implements the OFFICIAL Macedonian 10-class accounting system
- * based on Правилник за сметковниот план (Regulation 174/2011)
+ * Implements the OFFICIAL Macedonian chart of accounts per:
+ * Правилник за сметковниот план и содржината на одделните сметки
+ * во сметковниот план (Службен весник на РМ број 174/2011)
  *
  * 10 Classes (0-9):
- * - Class 0: Non-current assets (НЕТЕКОВНИ СРЕДСТВА)
- * - Class 1: Cash and receivables (ПАРИЧНИ СРЕДСТВА, КРАТКОРОЧНИ ПОБАРУВАЊА)
- * - Class 2: Liabilities and provisions (ОБВРСКИ, РЕЗЕРВИРАЊА)
- * - Class 3: Raw materials inventory (ЗАЛИХИ НА СУРОВИНИ)
- * - Class 4: Costs and expenses (ТРОШОЦИ И РАСХОДИ)
- * - Class 5: Free/internal use (СЛОБОДНА)
- * - Class 6: Production inventory (ЗАЛИХИ НА ПРОИЗВОДСТВО)
- * - Class 7: Revenue coverage (ПОКРИВАЊЕ НА РАСХОДИ И ПРИХОДИ)
- * - Class 8: Operating results (РЕЗУЛТАТИ ОД РАБОТЕЊЕТО)
- * - Class 9: Capital and reserves (КАПИТАЛ, РЕЗЕРВИ)
+ * - Class 0: НЕТЕКОВНИ СРЕДСТВА
+ * - Class 1: ПАРИЧНИ СРЕДСТВА, ХАРТИИ ОД ВРЕДНОСТ, КРАТКОРОЧНИ ПОБАРУВАЊА И ПЛАТЕНИ ТРОШОЦИ ЗА ИДНИ ПЕРИОДИ И ПРЕСМЕТАНИ ПРИХОДИ
+ * - Class 2: ОБВРСКИ, РЕЗЕРВИРАЊА ЗА ТРОШОЦИ И РИЗИЦИ, ОДЛОЖЕНИ ПЛАЌАЊА И ПРИХОДИ ЗА ИДНИ ПЕРИОДИ
+ * - Class 3: ЗАЛИХИ НА СУРОВИНИ, МАТЕРИЈАЛИ, РЕЗЕРВНИ ДЕЛОВИ И СИТЕН ИНВЕНТАР
+ * - Class 4: ТРОШОЦИ И РАСХОДИ ОД РАБОТЕЊЕТО
+ * - Class 5: СЛОБОДНА (ЗА ИНТЕРНА УПОТРЕБА)
+ * - Class 6: ЗАЛИХИ НА ПРОИЗВОДСТВО, ГОТОВИ ПРОИЗВОДИ И СТОКИ
+ * - Class 7: ПОКРИВАЊЕ НА РАСХОДИ И ПРИХОДИ
+ * - Class 8: РЕЗУЛТАТИ ОД РАБОТЕЊЕТО
+ * - Class 9: КАПИТАЛ, РЕЗЕРВИ И ВОНБИЛАНСНА ЕВИДЕНЦИЈА
  */
 class MacedonianChartOfAccountsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run(): void
     {
-        $this->log('Seeding Macedonian Chart of Accounts...');
+        $this->log('Seeding Macedonian Chart of Accounts (Правилник 174/2011)...');
 
-        // Get all companies to seed accounts for each
         $companies = Company::all();
 
         if ($companies->isEmpty()) {
@@ -44,44 +39,26 @@ class MacedonianChartOfAccountsSeeder extends Seeder
         }
 
         $seeded = 0;
-        $skipped = 0;
 
         foreach ($companies as $company) {
-            // Skip companies that already have 3-digit chart of accounts
-            $hasOfficialAccounts = Account::where('company_id', $company->id)
-                ->whereRaw('LENGTH(code) = 3')
-                ->exists();
-
-            if ($hasOfficialAccounts) {
-                $skipped++;
-
-                continue;
-            }
-
             $this->log("Seeding chart of accounts for company: {$company->name}");
 
-            // First, clean up old placeholder 4-digit accounts (e.g., 1000, 2000, 3000, 4000, 5000)
-            // These were from the simplified seeder and should be replaced with official 3-digit codes
             $this->cleanupOldPlaceholderAccounts($company->id);
 
-            // Seed all 10 classes
-            $this->seedClass0NonCurrentAssets($company->id);
-            $this->seedClass1CashAndReceivables($company->id);
-            $this->seedClass2LiabilitiesAndProvisions($company->id);
-            $this->seedClass3RawMaterialsInventory($company->id);
-            $this->seedClass4CostsAndExpenses($company->id);
-            $this->seedClass5Internal($company->id);
-            $this->seedClass6ProductionInventory($company->id);
-            $this->seedClass7Revenue($company->id);
-            $this->seedClass8OperatingResults($company->id);
-            $this->seedClass9CapitalAndReserves($company->id);
+            // createAccounts() skips codes that already exist, so this is safe
+            // for both new companies and existing ones (fills in missing accounts)
+            $this->seedClass0($company->id);
+            $this->seedClass1($company->id);
+            $this->seedClass2($company->id);
+            $this->seedClass3($company->id);
+            $this->seedClass4($company->id);
+            $this->seedClass6($company->id);
+            $this->seedClass7($company->id);
+            $this->seedClass8($company->id);
+            $this->seedClass9($company->id);
 
             $this->log("  ✓ Seeded chart of accounts for {$company->name}");
             $seeded++;
-        }
-
-        if ($skipped > 0) {
-            $this->log("Skipped {$skipped} companies (already have chart of accounts)");
         }
 
         $this->log('Macedonian Chart of Accounts seeded successfully!');
@@ -90,95 +67,93 @@ class MacedonianChartOfAccountsSeeder extends Seeder
     /**
      * Seed chart of accounts for a specific company.
      * Called by CompanyObserver when a new company is created.
-     *
-     * @param int $companyId
-     * @return void
      */
     public function seedForCompany(int $companyId): void
     {
-        // Skip if company already has accounts (idempotent)
-        if (Account::where('company_id', $companyId)->exists()) {
-            $this->log("Company {$companyId} already has accounts, skipping.");
-            return;
-        }
-
-        // Seed all 10 classes
-        $this->seedClass0NonCurrentAssets($companyId);
-        $this->seedClass1CashAndReceivables($companyId);
-        $this->seedClass2LiabilitiesAndProvisions($companyId);
-        $this->seedClass3RawMaterialsInventory($companyId);
-        $this->seedClass4CostsAndExpenses($companyId);
-        $this->seedClass5Internal($companyId);
-        $this->seedClass6ProductionInventory($companyId);
-        $this->seedClass7Revenue($companyId);
-        $this->seedClass8OperatingResults($companyId);
-        $this->seedClass9CapitalAndReserves($companyId);
+        // createAccounts() skips codes that already exist, so safe to call always
+        $this->seedClass0($companyId);
+        $this->seedClass1($companyId);
+        $this->seedClass2($companyId);
+        $this->seedClass3($companyId);
+        $this->seedClass4($companyId);
+        $this->seedClass6($companyId);
+        $this->seedClass7($companyId);
+        $this->seedClass8($companyId);
+        $this->seedClass9($companyId);
 
         $this->log("Seeded chart of accounts for company {$companyId}");
     }
 
-    /**
-     * Helper method to log messages (handles both CLI and non-CLI contexts)
-     */
     private function log(string $message, string $level = 'info'): void
     {
         if ($this->command) {
             $this->command->{$level}($message);
         } else {
-            // Fall back to Laravel's logger for Railway/non-CLI contexts
             \Log::{$level}("[MacedonianChartOfAccountsSeeder] {$message}");
         }
     }
 
     /**
-     * Class 0: НЕТЕКОВНИ СРЕДСТВА (Non-current Assets)
+     * КЛАСА 0: НЕТЕКОВНИ СРЕДСТВА
      */
-    private function seedClass0NonCurrentAssets(int $companyId): void
+    private function seedClass0(int $companyId): void
     {
         $accounts = [
-            // 00x - Intangible assets (Нематеријални средства)
-            ['code' => '000', 'name' => 'Трошоци за развој', 'type' => Account::TYPE_ASSET],
-            ['code' => '001', 'name' => 'Концесии, патенти, лиценци, трговски марки', 'type' => Account::TYPE_ASSET],
-            ['code' => '002', 'name' => 'Софтвер', 'type' => Account::TYPE_ASSET],
-            ['code' => '003', 'name' => 'Деловна репутација (Goodwill)', 'type' => Account::TYPE_ASSET],
-            ['code' => '004', 'name' => 'Аванси за нематеријални средства', 'type' => Account::TYPE_ASSET],
-            ['code' => '005', 'name' => 'Нематеријални средства во подготовка', 'type' => Account::TYPE_ASSET],
-            ['code' => '009', 'name' => 'Исправка на вредност на нематеријални средства', 'type' => Account::TYPE_ASSET],
+            // 00 - НЕМАТЕРИЈАЛНИ СРЕДСТВА
+            ['code' => '000', 'name' => 'Издатоци за развој', 'type' => Account::TYPE_ASSET],
+            ['code' => '001', 'name' => 'Гудвил (Goodwill)', 'type' => Account::TYPE_ASSET],
+            ['code' => '002', 'name' => 'Концесии, патенти, лиценци, трговски и услужни марки', 'type' => Account::TYPE_ASSET],
+            ['code' => '003', 'name' => 'Софтвер и останати права', 'type' => Account::TYPE_ASSET],
+            ['code' => '005', 'name' => 'Аванси за набавка на нематеријални средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '006', 'name' => 'Нематеријални средства во подготовка', 'type' => Account::TYPE_ASSET],
+            ['code' => '007', 'name' => 'Останати нематеријални средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '008', 'name' => 'Вредносно усогласување на нематеријални средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '009', 'name' => 'Акумулирана амортизација на нематеријални средства', 'type' => Account::TYPE_ASSET],
 
-            // 01x - Tangible assets (Материјални средства)
-            ['code' => '010', 'name' => 'Земјиште', 'type' => Account::TYPE_ASSET],
+            // 01 - МАТЕРИЈАЛНИ СРЕДСТВА
+            ['code' => '010', 'name' => 'Земјишта', 'type' => Account::TYPE_ASSET],
             ['code' => '011', 'name' => 'Градежни објекти', 'type' => Account::TYPE_ASSET],
             ['code' => '012', 'name' => 'Постројки и опрема', 'type' => Account::TYPE_ASSET],
-            ['code' => '013', 'name' => 'Алат, погонски инвентар и транспортни средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '013', 'name' => 'Алат, погонски и канцелариски инвентар, мебел и транспортни средства', 'type' => Account::TYPE_ASSET],
             ['code' => '014', 'name' => 'Биолошки средства', 'type' => Account::TYPE_ASSET],
-            ['code' => '015', 'name' => 'Аванси за материјални средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '015', 'name' => 'Останати материјални средства', 'type' => Account::TYPE_ASSET],
             ['code' => '016', 'name' => 'Материјални средства во подготовка', 'type' => Account::TYPE_ASSET],
-            ['code' => '019', 'name' => 'Исправка на вредност на материјални средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '017', 'name' => 'Аванси за набавка на материјални средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '018', 'name' => 'Вредносно усогласување на материјални средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '019', 'name' => 'Акумулирана амортизација на материјални средства', 'type' => Account::TYPE_ASSET],
 
-            // 02x - Investment property (Инвестициски недвижности)
-            ['code' => '020', 'name' => 'Инвестициски недвижности - земјиште', 'type' => Account::TYPE_ASSET],
-            ['code' => '021', 'name' => 'Инвестициски недвижности - градежни објекти', 'type' => Account::TYPE_ASSET],
-            ['code' => '029', 'name' => 'Исправка на вредност на инвестициски недвижности', 'type' => Account::TYPE_ASSET],
+            // 02 - ВЛОЖУВАЊА ВО НЕДВИЖНОСТИ
+            ['code' => '020', 'name' => 'Вложувања во недвижности за наем', 'type' => Account::TYPE_ASSET],
+            ['code' => '021', 'name' => 'Вложувања во недвижности заради зголемување на капиталот', 'type' => Account::TYPE_ASSET],
+            ['code' => '026', 'name' => 'Вложувања во недвижности во подготовка', 'type' => Account::TYPE_ASSET],
+            ['code' => '027', 'name' => 'Аванси за вложувања во недвижности', 'type' => Account::TYPE_ASSET],
+            ['code' => '028', 'name' => 'Вредносно усогласување на вложувања во недвижности', 'type' => Account::TYPE_ASSET],
+            ['code' => '029', 'name' => 'Акумулирана амортизација на вложувања во недвижности', 'type' => Account::TYPE_ASSET],
 
-            // 03x - Long-term financial assets (Долгорочни финансиски средства)
-            ['code' => '030', 'name' => 'Учества во капиталот на поврзани друштва', 'type' => Account::TYPE_ASSET],
-            ['code' => '031', 'name' => 'Учества во капиталот на здружени друштва', 'type' => Account::TYPE_ASSET],
-            ['code' => '032', 'name' => 'Учества во капиталот на заеднички контролирани друштва', 'type' => Account::TYPE_ASSET],
-            ['code' => '033', 'name' => 'Учества во капиталот на други друштва', 'type' => Account::TYPE_ASSET],
-            ['code' => '034', 'name' => 'Долгорочни кредити и заеми дадени на поврзани друштва', 'type' => Account::TYPE_ASSET],
-            ['code' => '035', 'name' => 'Други долгорочни кредити и заеми', 'type' => Account::TYPE_ASSET],
-            ['code' => '036', 'name' => 'Хартии од вредност', 'type' => Account::TYPE_ASSET],
-            ['code' => '037', 'name' => 'Долгорочни финансиски пласмани', 'type' => Account::TYPE_ASSET],
-            ['code' => '039', 'name' => 'Исправка на вредност на долгорочни финансиски средства', 'type' => Account::TYPE_ASSET],
+            // 03 - ДОЛГОРОЧНИ ФИНАНСИСКИ СРЕДСТВА
+            ['code' => '030', 'name' => 'Вложувања во подружница', 'type' => Account::TYPE_ASSET],
+            ['code' => '031', 'name' => 'Вложувања во придружни друштва и заеднички контролирани друштва', 'type' => Account::TYPE_ASSET],
+            ['code' => '032', 'name' => 'Долгорочни заеми и кредити на поврзани друштва во земјата и странство', 'type' => Account::TYPE_ASSET],
+            ['code' => '033', 'name' => 'Дадени заеми и кредити во земјата и во странство', 'type' => Account::TYPE_ASSET],
+            ['code' => '034', 'name' => 'Финансиски средства кои се чуваат до доспевање', 'type' => Account::TYPE_ASSET],
+            ['code' => '035', 'name' => 'Финансиски средства расположиви за продажба', 'type' => Account::TYPE_ASSET],
+            ['code' => '036', 'name' => 'Финансиски средства според објективна вредност преку добивката или загубата', 'type' => Account::TYPE_ASSET],
+            ['code' => '037', 'name' => 'Дадени депозити и кауции во земјата и странство', 'type' => Account::TYPE_ASSET],
+            ['code' => '038', 'name' => 'Останати долгорочни финансиски средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '039', 'name' => 'Вредносно усогласување на долгорочните финансиски средства', 'type' => Account::TYPE_ASSET],
 
-            // 04x - Long-term receivables (Долгорочни побарувања)
-            ['code' => '040', 'name' => 'Долгорочни побарувања од поврзани друштва', 'type' => Account::TYPE_ASSET],
-            ['code' => '041', 'name' => 'Долгорочни побарувања од купувачи', 'type' => Account::TYPE_ASSET],
-            ['code' => '042', 'name' => 'Долгорочни побарувања од државата', 'type' => Account::TYPE_ASSET],
-            ['code' => '043', 'name' => 'Други долгорочни побарувања', 'type' => Account::TYPE_ASSET],
-            ['code' => '049', 'name' => 'Исправка на вредност на долгорочни побарувања', 'type' => Account::TYPE_ASSET],
+            // 04 - ДОЛГОРОЧНИ ПОБАРУВАЊА
+            ['code' => '040', 'name' => 'Побарувања од поврзани друштва врз основа на продажба', 'type' => Account::TYPE_ASSET],
+            ['code' => '041', 'name' => 'Побарувања од неповрзани друштва врз основа на продажба на кредит', 'type' => Account::TYPE_ASSET],
+            ['code' => '042', 'name' => 'Побарувања врз основа на наем - финансиски лизинг', 'type' => Account::TYPE_ASSET],
+            ['code' => '043', 'name' => 'Побарувања врз основа на форфетинг', 'type' => Account::TYPE_ASSET],
+            ['code' => '044', 'name' => 'Побарувања врз основа на дадени гаранции', 'type' => Account::TYPE_ASSET],
+            ['code' => '045', 'name' => 'Спорни и ризични побарувања', 'type' => Account::TYPE_ASSET],
+            ['code' => '046', 'name' => 'Побарувања за дадени аванси', 'type' => Account::TYPE_ASSET],
+            ['code' => '047', 'name' => 'Останати долгорочни побарувања', 'type' => Account::TYPE_ASSET],
+            ['code' => '049', 'name' => 'Вредносно усогласување на долгорочни побарувања', 'type' => Account::TYPE_ASSET],
 
-            // 05x - Deferred tax assets (Одложени даночни средства)
+            // 05 - ОДЛОЖЕНИ ДАНОЧНИ СРЕДСТВА
             ['code' => '050', 'name' => 'Одложени даночни средства', 'type' => Account::TYPE_ASSET],
         ];
 
@@ -186,421 +161,519 @@ class MacedonianChartOfAccountsSeeder extends Seeder
     }
 
     /**
-     * Class 1: ПАРИЧНИ СРЕДСТВА, КРАТКОРОЧНИ ПОБАРУВАЊА (Cash and Receivables)
+     * КЛАСА 1: ПАРИЧНИ СРЕДСТВА, ХАРТИИ ОД ВРЕДНОСТ, КРАТКОРОЧНИ ПОБАРУВАЊА
      */
-    private function seedClass1CashAndReceivables(int $companyId): void
+    private function seedClass1(int $companyId): void
     {
         $accounts = [
-            // 10x - Cash and cash equivalents (Парични средства)
-            ['code' => '100', 'name' => 'Готовина', 'type' => Account::TYPE_ASSET],
-            ['code' => '101', 'name' => 'Готовина во странска валута', 'type' => Account::TYPE_ASSET],
-            ['code' => '102', 'name' => 'Жиро-сметка', 'type' => Account::TYPE_ASSET],
-            ['code' => '103', 'name' => 'Девизна сметка', 'type' => Account::TYPE_ASSET],
-            ['code' => '104', 'name' => 'Благајна за авансни плаќања', 'type' => Account::TYPE_ASSET],
-            ['code' => '105', 'name' => 'Други парични средства', 'type' => Account::TYPE_ASSET],
+            // 10 - ПАРИЧНИ СРЕДСТВА И ПАРИЧНИ ЕКВИВАЛЕНТИ
+            ['code' => '100', 'name' => 'Парични средства на трансакциски сметки во денари', 'type' => Account::TYPE_ASSET],
+            ['code' => '101', 'name' => 'Издвоени парични средства и акредитиви', 'type' => Account::TYPE_ASSET],
+            ['code' => '102', 'name' => 'Парични средства во благајна', 'type' => Account::TYPE_ASSET],
+            ['code' => '103', 'name' => 'Девизни сметки', 'type' => Account::TYPE_ASSET],
+            ['code' => '104', 'name' => 'Девизни акредитиви', 'type' => Account::TYPE_ASSET],
+            ['code' => '105', 'name' => 'Парични средства во благајна во странска валута', 'type' => Account::TYPE_ASSET],
+            ['code' => '106', 'name' => 'Депозити - парични еквиваленти', 'type' => Account::TYPE_ASSET],
+            ['code' => '107', 'name' => 'Хартии од вредност - готовински еквиваленти', 'type' => Account::TYPE_ASSET],
+            ['code' => '108', 'name' => 'Останати парични средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '109', 'name' => 'Вредносно усогласување на парични еквиваленти', 'type' => Account::TYPE_ASSET],
 
-            // 11x - Receivables from related parties (Побарувања од поврзани друштва)
-            ['code' => '110', 'name' => 'Побарувања од поврзани друштва - главница', 'type' => Account::TYPE_ASSET],
-            ['code' => '111', 'name' => 'Побарувања од поврзани друштва - камата', 'type' => Account::TYPE_ASSET],
-            ['code' => '119', 'name' => 'Исправка на вредност на побарувања од поврзани друштва', 'type' => Account::TYPE_ASSET],
+            // 11 - ПОБАРУВАЊА ОД ПОВРЗАНИ ДРУШТВА
+            ['code' => '110', 'name' => 'Побарувања од поврзани друштва врз основа на продажба на добра и услуги во земјата', 'type' => Account::TYPE_ASSET],
+            ['code' => '111', 'name' => 'Побарувања од поврзани друштва врз основа на продажба на добра и услуги во странство', 'type' => Account::TYPE_ASSET],
+            ['code' => '112', 'name' => 'Побарувања од поврзани друштва за аванси, депозити и кауции во земјата', 'type' => Account::TYPE_ASSET],
+            ['code' => '113', 'name' => 'Побарувања од поврзани друштва за аванси, депозити и кауции во странство', 'type' => Account::TYPE_ASSET],
+            ['code' => '114', 'name' => 'Побарувања од поврзани друштва за камати во земјата', 'type' => Account::TYPE_ASSET],
+            ['code' => '115', 'name' => 'Побарувања од поврзани друштва за камати во странство', 'type' => Account::TYPE_ASSET],
+            ['code' => '116', 'name' => 'Побарувања од специфично работење од поврзани друштва', 'type' => Account::TYPE_ASSET],
+            ['code' => '118', 'name' => 'Останати побарувања од поврзани друштва', 'type' => Account::TYPE_ASSET],
+            ['code' => '119', 'name' => 'Вредносно усогласување на побарувањата од поврзани друштва', 'type' => Account::TYPE_ASSET],
 
-            // 12x - Receivables from customers (Побарувања од купувачи)
+            // 12 - ПОБАРУВАЊА ОД КУПУВАЧИ
             ['code' => '120', 'name' => 'Побарувања од купувачи во земјата', 'type' => Account::TYPE_ASSET],
             ['code' => '121', 'name' => 'Побарувања од купувачи во странство', 'type' => Account::TYPE_ASSET],
-            ['code' => '122', 'name' => 'Побарувања по основ на издадени записи', 'type' => Account::TYPE_ASSET],
-            ['code' => '123', 'name' => 'Побарувања од купувачи - спорни', 'type' => Account::TYPE_ASSET],
-            ['code' => '129', 'name' => 'Исправка на вредност на побарувања од купувачи', 'type' => Account::TYPE_ASSET],
+            ['code' => '122', 'name' => 'Побарувања за дадени аванси, депозити и кауции во земјата', 'type' => Account::TYPE_ASSET],
+            ['code' => '123', 'name' => 'Побарувања за дадени аванси, депозити и кауции во странство', 'type' => Account::TYPE_ASSET],
+            ['code' => '124', 'name' => 'Побарувања од специфично работење на неповрзани друштва', 'type' => Account::TYPE_ASSET],
+            ['code' => '125', 'name' => 'Побарувања од камати (договорни и казнени)', 'type' => Account::TYPE_ASSET],
+            ['code' => '126', 'name' => 'Спорни и сомнителни побарувања', 'type' => Account::TYPE_ASSET],
+            ['code' => '127', 'name' => 'Останати побарувања', 'type' => Account::TYPE_ASSET],
+            ['code' => '129', 'name' => 'Вредносно усогласување на побарувањата од купувачи', 'type' => Account::TYPE_ASSET],
 
-            // 13x - Receivables from government (Побарувања од државата)
-            ['code' => '130', 'name' => 'Побарувања од даноци и придонеси', 'type' => Account::TYPE_ASSET],
-            ['code' => '131', 'name' => 'Побарувања за ДДВ', 'type' => Account::TYPE_ASSET],
-            ['code' => '132', 'name' => 'Побарувања за акцизи', 'type' => Account::TYPE_ASSET],
-            ['code' => '133', 'name' => 'Побарувања за царини', 'type' => Account::TYPE_ASSET],
-            ['code' => '134', 'name' => 'Побарувања за субвенции, дотации и донации', 'type' => Account::TYPE_ASSET],
-            ['code' => '139', 'name' => 'Други побарувања од државата', 'type' => Account::TYPE_ASSET],
+            // 13 - ПОБАРУВАЊА ОД ДРЖАВНИ ОРГАНИ И ИНСТИТУЦИИ
+            ['code' => '130', 'name' => 'Данок на додадена вредност', 'type' => Account::TYPE_ASSET],
+            ['code' => '131', 'name' => 'Побарувања за повеќе платени акцизи', 'type' => Account::TYPE_ASSET],
+            ['code' => '132', 'name' => 'Побарувања за повеќе платени царини и царински давачки', 'type' => Account::TYPE_ASSET],
+            ['code' => '133', 'name' => 'Побарувања за повеќе платен данок на добивка', 'type' => Account::TYPE_ASSET],
+            ['code' => '134', 'name' => 'Побарувања за повеќе платен персонален данок на доход', 'type' => Account::TYPE_ASSET],
+            ['code' => '135', 'name' => 'Побарувања за повеќе платени придонеси и други давачки', 'type' => Account::TYPE_ASSET],
+            ['code' => '136', 'name' => 'Побарувања за повеќе платен данок на имот', 'type' => Account::TYPE_ASSET],
+            ['code' => '137', 'name' => 'Побарувања за регрес, субвенции, премии и други државни поддршки', 'type' => Account::TYPE_ASSET],
+            ['code' => '138', 'name' => 'Останати побарувања од државни органи и институции', 'type' => Account::TYPE_ASSET],
+            ['code' => '139', 'name' => 'Вредносно усогласување на побарувањата од државни органи и институции', 'type' => Account::TYPE_ASSET],
 
-            // 14x - Receivables from employees (Побарувања од вработени)
-            ['code' => '140', 'name' => 'Побарувања од вработени за дадени аванси', 'type' => Account::TYPE_ASSET],
-            ['code' => '141', 'name' => 'Побарувања од вработени за кредити', 'type' => Account::TYPE_ASSET],
-            ['code' => '142', 'name' => 'Побарувања од вработени за надоместоци', 'type' => Account::TYPE_ASSET],
-            ['code' => '149', 'name' => 'Други побарувања од вработени', 'type' => Account::TYPE_ASSET],
+            // 14 - ПОБАРУВАЊА ОД ВРАБОТЕНИТЕ
+            ['code' => '140', 'name' => 'Побарувања од вработените за повеќе исплатена плата и надоместоци', 'type' => Account::TYPE_ASSET],
+            ['code' => '143', 'name' => 'Побарувања од вработените за аконтации за службени патувања', 'type' => Account::TYPE_ASSET],
+            ['code' => '145', 'name' => 'Останати побарувања од вработените', 'type' => Account::TYPE_ASSET],
+            ['code' => '149', 'name' => 'Вредносно усогласување на побарувањата од вработените', 'type' => Account::TYPE_ASSET],
 
-            // 15x - Short-term financial assets (Краткорочни финансиски средства)
-            ['code' => '150', 'name' => 'Краткорочни кредити и заеми - поврзани друштва', 'type' => Account::TYPE_ASSET],
-            ['code' => '151', 'name' => 'Краткорочни кредити и заеми - други', 'type' => Account::TYPE_ASSET],
-            ['code' => '152', 'name' => 'Хартии од вредност', 'type' => Account::TYPE_ASSET],
-            ['code' => '153', 'name' => 'Краткорочни финансиски пласмани', 'type' => Account::TYPE_ASSET],
-            ['code' => '159', 'name' => 'Исправка на вредност на краткорочни финансиски средства', 'type' => Account::TYPE_ASSET],
+            // 15 - ОСТАНАТИ ПОБАРУВАЊА
+            ['code' => '150', 'name' => 'Побарувања од осигурителни друштва', 'type' => Account::TYPE_ASSET],
+            ['code' => '151', 'name' => 'Побарувања за тантиеми', 'type' => Account::TYPE_ASSET],
+            ['code' => '152', 'name' => 'Побарувања врз основа на цесија, асигнација и преземање на долг', 'type' => Account::TYPE_ASSET],
+            ['code' => '153', 'name' => 'Побарувања за членарини', 'type' => Account::TYPE_ASSET],
+            ['code' => '154', 'name' => 'Побарувања за дивиденда или удел во добивката', 'type' => Account::TYPE_ASSET],
+            ['code' => '157', 'name' => 'Побарувања врз основа на продажба на удел', 'type' => Account::TYPE_ASSET],
+            ['code' => '158', 'name' => 'Останати побарувања', 'type' => Account::TYPE_ASSET],
+            ['code' => '159', 'name' => 'Вредносно усогласување на останати побарувања', 'type' => Account::TYPE_ASSET],
 
-            // 16x - Other receivables (Други побарувања)
-            ['code' => '160', 'name' => 'Побарувања за дивиденди и уделни во добивка', 'type' => Account::TYPE_ASSET],
-            ['code' => '161', 'name' => 'Побарувања за камати', 'type' => Account::TYPE_ASSET],
-            ['code' => '162', 'name' => 'Побарувања за штети од осигурување', 'type' => Account::TYPE_ASSET],
-            ['code' => '163', 'name' => 'Побарувања за продажба на средства', 'type' => Account::TYPE_ASSET],
-            ['code' => '164', 'name' => 'Побарувања од содружници', 'type' => Account::TYPE_ASSET],
-            ['code' => '169', 'name' => 'Разни побарувања', 'type' => Account::TYPE_ASSET],
+            // 16 - КРАТКОРОЧНИ ФИНАНСИСКИ СРЕДСТВА
+            ['code' => '160', 'name' => 'Краткорочни кредити и заеми од поврзани друштва во земјата', 'type' => Account::TYPE_ASSET],
+            ['code' => '161', 'name' => 'Краткорочни кредити и заеми од поврзани друштва во странство', 'type' => Account::TYPE_ASSET],
+            ['code' => '162', 'name' => 'Краткорочни кредити и заеми во земјата', 'type' => Account::TYPE_ASSET],
+            ['code' => '163', 'name' => 'Краткорочни кредити и заеми од странство', 'type' => Account::TYPE_ASSET],
+            ['code' => '164', 'name' => 'Хартии од вредност кои се чуваат до доспевање', 'type' => Account::TYPE_ASSET],
+            ['code' => '165', 'name' => 'Хартии од вредност според објективна вредност преку добивката или загубата', 'type' => Account::TYPE_ASSET],
+            ['code' => '166', 'name' => 'Краткорочно орочени денарски средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '167', 'name' => 'Краткорочно орочени странски средства за плаќање', 'type' => Account::TYPE_ASSET],
+            ['code' => '168', 'name' => 'Останати краткорочни финансиски средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '169', 'name' => 'Вредносно усогласување на финансиски средства', 'type' => Account::TYPE_ASSET],
 
-            // 19x - Prepaid expenses (Активни временски разграничувања)
-            ['code' => '190', 'name' => 'Однапред плаќени трошоци', 'type' => Account::TYPE_ASSET],
-            ['code' => '191', 'name' => 'Пресметани приходи', 'type' => Account::TYPE_ASSET],
+            // 19 - ПЛАТЕНИ ТРОШОЦИ ЗА ИДНИ ПЕРИОДИ И ПРЕСМЕТАНИ ПРИХОДИ (АВР)
+            ['code' => '190', 'name' => 'Однапред платени трошоци', 'type' => Account::TYPE_ASSET],
+            ['code' => '191', 'name' => 'Однапред платени зависни трошоци за набавка', 'type' => Account::TYPE_ASSET],
+            ['code' => '195', 'name' => 'Пресметани приходи што не можеле да бидат фактурирани', 'type' => Account::TYPE_ASSET],
+            ['code' => '198', 'name' => 'Останати однапред платени трошоци и пресметани приходи', 'type' => Account::TYPE_ASSET],
         ];
 
         $this->createAccounts($companyId, $accounts);
     }
 
     /**
-     * Class 2: ОБВРСКИ, РЕЗЕРВИРАЊА (Liabilities and Provisions)
+     * КЛАСА 2: ОБВРСКИ, РЕЗЕРВИРАЊА ЗА ТРОШОЦИ И РИЗИЦИ
      */
-    private function seedClass2LiabilitiesAndProvisions(int $companyId): void
+    private function seedClass2(int $companyId): void
     {
         $accounts = [
-            // 21x - Short-term liabilities to related parties (Краткорочни обврски кон поврзани друштва)
-            ['code' => '210', 'name' => 'Обврски кон поврзани друштва - главница', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '211', 'name' => 'Обврски кон поврзани друштва - камата', 'type' => Account::TYPE_LIABILITY],
+            // 21 - КРАТКОРОЧНИ ОБВРСКИ СПРЕМА ПОВРЗАНИ ДРУШТВА
+            ['code' => '210', 'name' => 'Обврски од поврзани друштва врз основа на набавка на добра и услуги во земјата', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '211', 'name' => 'Обврски од поврзани друштва врз основа на набавка на добра и услуги од странство', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '212', 'name' => 'Обврски од поврзани друштва за аванси, депозити и кауции во земјата', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '213', 'name' => 'Обврски од поврзани друштва за аванси, депозити и кауции од странство', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '214', 'name' => 'Обврски од поврзани друштва за камати во земјата', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '215', 'name' => 'Обврски од поврзани друштва за камати од странство', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '216', 'name' => 'Обврски од специфично работење од поврзани друштва', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '218', 'name' => 'Останати обврски од поврзани друштва', 'type' => Account::TYPE_LIABILITY],
 
-            // 22x - Liabilities to suppliers (Обврски кон добавувачи)
-            ['code' => '220', 'name' => 'Обврски кон добавувачи во земјата', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '221', 'name' => 'Обврски кон добавувачи во странство', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '222', 'name' => 'Обврски по основ на дадени записи', 'type' => Account::TYPE_LIABILITY],
+            // 22 - КРАТКОРОЧНИ ОБВРСКИ СПРЕМА ДОБАВУВАЧИ
+            ['code' => '220', 'name' => 'Обврски спрема добавувачи во земјата', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '221', 'name' => 'Обврски спрема добавувачи од странство', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '222', 'name' => 'Обврски за примени аванси, депозити и кауции во земјата', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '223', 'name' => 'Обврски за примени аванси, депозити и кауции од странство', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '224', 'name' => 'Обврски од специфично работење од неповрзани друштва', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '225', 'name' => 'Обврски за камати (договорни и казнени)', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '229', 'name' => 'Останати обврски од добавувачи', 'type' => Account::TYPE_LIABILITY],
 
-            // 23x - Tax liabilities (Обврски за даноци и придонеси)
-            ['code' => '230', 'name' => 'Обврски за данок на добивка', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '231', 'name' => 'Обврски за ДДВ', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '232', 'name' => 'Обврски за акцизи', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '233', 'name' => 'Обврски за царини', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '234', 'name' => 'Обврски за данок на личен доход', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '235', 'name' => 'Обврски за придонеси од плати', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '236', 'name' => 'Обврски за данок на наследство и подароци', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '237', 'name' => 'Обврски за данок на имот', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '239', 'name' => 'Обврски за други даноци', 'type' => Account::TYPE_LIABILITY],
+            // 23 - КРАТКОРОЧНИ ОБВРСКИ ЗА ДАНОЦИ, ПРИДОНЕСИ И ДРУГИ ДАВАЧКИ
+            ['code' => '230', 'name' => 'Обврски за данокот на додадена вредност', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '231', 'name' => 'Обврски за акцизи', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '232', 'name' => 'Обврски за царини и царински давачки', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '233', 'name' => 'Обврски за данок на добивка', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '234', 'name' => 'Обврски за даноци и придонеси на плата и надоместоци на плата', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '235', 'name' => 'Обврски за персонален данок на доход', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '236', 'name' => 'Обврски за данок на имот', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '237', 'name' => 'Обврски за данок на непризнати расходи и помалку искажани приходи', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '239', 'name' => 'Обврски за останати даноци, придонеси и други давачки', 'type' => Account::TYPE_LIABILITY],
 
-            // 24x - Employee liabilities (Обврски кон вработени)
-            ['code' => '240', 'name' => 'Обврски за нето плати', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '241', 'name' => 'Обврски за придонеси на товар на вработени', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '242', 'name' => 'Обврски за надоместоци од плата', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '243', 'name' => 'Обврски за други примања на вработени', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '244', 'name' => 'Обврски за отпремнини', 'type' => Account::TYPE_LIABILITY],
+            // 24 - ОБВРСКИ СПРЕМА ВРАБОТЕНИТЕ
+            ['code' => '240', 'name' => 'Обврски за плата и надоместоци на плата', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '241', 'name' => 'Обврски за надоместоци на трошоците на вработените', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '242', 'name' => 'Останати обврски спрема вработените врз основа на колективни договори', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '249', 'name' => 'Останати обврски спрема вработените', 'type' => Account::TYPE_LIABILITY],
 
-            // 25x - Short-term financial liabilities (Краткорочни финансиски обврски)
-            ['code' => '250', 'name' => 'Краткорочни кредити од банки', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '251', 'name' => 'Краткорочни заеми од поврзани друштва', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '252', 'name' => 'Краткорочни заеми од други', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '253', 'name' => 'Обврски по основ на хартии од вредност', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '254', 'name' => 'Обврски по основ на финансиски лизинг', 'type' => Account::TYPE_LIABILITY],
+            // 25 - ОСТАНАТИ КРАТКОРОЧНИ ОБВРСКИ И КРАТКОРОЧНИ РЕЗЕРВИРАЊА
+            ['code' => '250', 'name' => 'Обврски спрема осигурителни друштва', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '251', 'name' => 'Обврски за надомест на членови на управен и надзорен одбор', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '252', 'name' => 'Обврски спрема вршители на дејност и други физички лица', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '253', 'name' => 'Обврски врз основа на наем', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '254', 'name' => 'Обврски врз основа на учество во добивката', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '255', 'name' => 'Обврски за членарини', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '256', 'name' => 'Обврски за краткорочни резервирања на трошоци во гарантен рок', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '259', 'name' => 'Останати краткорочни обврски', 'type' => Account::TYPE_LIABILITY],
 
-            // 26x - Other short-term liabilities (Други краткорочни обврски)
-            ['code' => '260', 'name' => 'Обврски за дивиденди', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '261', 'name' => 'Обврски за камати', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '262', 'name' => 'Обврски за штети', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '263', 'name' => 'Обврски кон содружници', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '269', 'name' => 'Разни обврски', 'type' => Account::TYPE_LIABILITY],
+            // 26 - КРАТКОРОЧНИ ФИНАНСИСКИ ОБВРСКИ
+            ['code' => '260', 'name' => 'Краткорочни кредити и заеми од поврзани друштва во земјата', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '261', 'name' => 'Краткорочни кредити и заеми од поврзани друштва од странство', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '262', 'name' => 'Краткорочни кредити и заеми во земјата', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '263', 'name' => 'Краткорочни кредити и заеми од странство', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '264', 'name' => 'Обврски врз основа на издадени хартии од вредност', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '265', 'name' => 'Обврски врз основа на есконтни работи', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '266', 'name' => 'Обврски врз основа на откуп на побарувања', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '269', 'name' => 'Обврски врз основа на останати краткорочни финансиски средства', 'type' => Account::TYPE_LIABILITY],
 
-            // 27x - Provisions (Резервирања)
-            ['code' => '270', 'name' => 'Резервирања за пензии и слични обврски', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '271', 'name' => 'Резервирања за трошоци за реструктуирање', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '272', 'name' => 'Резервирања за обврски по основ на гаранции', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '273', 'name' => 'Резервирања за тековни судски спорови', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '279', 'name' => 'Други резервирања', 'type' => Account::TYPE_LIABILITY],
+            // 27 - ДОЛГОРОЧНИ РЕЗЕРВИРАЊА
+            ['code' => '270', 'name' => 'Резервирања за трошоци во гарантен рок', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '271', 'name' => 'Резервирања за трошоци за обновување на природни богатства', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '272', 'name' => 'Резервирања за трошоци за преструктуирање', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '273', 'name' => 'Резервирања за користи на вработените', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '279', 'name' => 'Останати долгорочни резервирања', 'type' => Account::TYPE_LIABILITY],
 
-            // 28x - Long-term liabilities (Долгорочни обврски)
-            ['code' => '280', 'name' => 'Долгорочни кредити од банки', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '281', 'name' => 'Долгорочни заеми од поврзани друштва', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '282', 'name' => 'Долгорочни заеми од други', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '283', 'name' => 'Долгорочни обврски по основ на хартии од вредност', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '284', 'name' => 'Долгорочни обврски по основ на финансиски лизинг', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '285', 'name' => 'Долгорочни обврски кон добавувачи', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '286', 'name' => 'Други долгорочни обврски', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '287', 'name' => 'Одложени даночни обврски', 'type' => Account::TYPE_LIABILITY],
+            // 28 - ДОЛГОРОЧНИ ОБВРСКИ
+            ['code' => '280', 'name' => 'Долгорочни обврски од поврзани друштва врз основа на набавка во земјата и странство', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '281', 'name' => 'Долгорочни обврски од поврзани друштва за аванси, депозити и кауции', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '282', 'name' => 'Долгорочни обврски спрема добавувачи во земјата', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '283', 'name' => 'Долгорочни обврски спрема добавувачи од странство', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '284', 'name' => 'Долгорочни обврски за примени аванси, депозити и кауции', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '285', 'name' => 'Долгорочни обврски врз основа на заеми и кредити од поврзани друштва', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '286', 'name' => 'Долгорочни обврски врз основа на заеми и кредити во земјата и странство', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '287', 'name' => 'Долгорочни обврски врз основа на издадени хартии од вредност', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '288', 'name' => 'Останати долгорочни обврски и останати финансиски долгорочни обврски', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '289', 'name' => 'Одложени даночни обврски', 'type' => Account::TYPE_LIABILITY],
 
-            // 29x - Deferred income (Пасивни временски разграничувања)
-            ['code' => '290', 'name' => 'Однапред наплатени приходи', 'type' => Account::TYPE_LIABILITY],
-            ['code' => '291', 'name' => 'Пресметани трошоци', 'type' => Account::TYPE_LIABILITY],
+            // 29 - ОДЛОЖЕНИ ПЛАЌАЊА НА ТРОШОЦИ И ПРИХОДИ НА ИДНИ ПЕРИОДИ (ПВР)
+            ['code' => '290', 'name' => 'Однапред пресметани трошоци', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '291', 'name' => 'Пресметани трошоци за набавка на добра', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '293', 'name' => 'Пресметани приходи за идни периоди', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '294', 'name' => 'Одложено признавање на приходи врз основа на државни поддршки', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '295', 'name' => 'Одложено признавање на приходи', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '299', 'name' => 'Останати пасивни временски разграничувања', 'type' => Account::TYPE_LIABILITY],
         ];
 
         $this->createAccounts($companyId, $accounts);
     }
 
     /**
-     * Class 3: ЗАЛИХИ НА СУРОВИНИ (Raw Materials Inventory)
+     * КЛАСА 3: ЗАЛИХИ НА СУРОВИНИ, МАТЕРИЈАЛИ, РЕЗЕРВНИ ДЕЛОВИ И СИТЕН ИНВЕНТАР
      */
-    private function seedClass3RawMaterialsInventory(int $companyId): void
+    private function seedClass3(int $companyId): void
     {
         $accounts = [
-            // 30x - Purchase calculations (Пресметки на набавки)
-            ['code' => '300', 'name' => 'Набавка на материјали', 'type' => Account::TYPE_ASSET],
-            ['code' => '301', 'name' => 'Набавка на резервни делови', 'type' => Account::TYPE_ASSET],
-            ['code' => '302', 'name' => 'Набавка на ситен инвентар', 'type' => Account::TYPE_ASSET],
-            ['code' => '303', 'name' => 'Набавка на стока', 'type' => Account::TYPE_ASSET],
+            // 30 - ПРЕСМЕТКА НА НАБАВКАТА НА ЗАЛИХИ
+            ['code' => '300', 'name' => 'Вредност по пресметка од добавувачите', 'type' => Account::TYPE_ASSET],
+            ['code' => '301', 'name' => 'Зависни трошоци на набавката', 'type' => Account::TYPE_ASSET],
+            ['code' => '302', 'name' => 'Царини и други увозни давачки', 'type' => Account::TYPE_ASSET],
+            ['code' => '303', 'name' => 'Данок на додадена вредност и останати давачки (без право на одбивка)', 'type' => Account::TYPE_ASSET],
+            ['code' => '304', 'name' => 'Останати давачки поврзани со набавката на залихите', 'type' => Account::TYPE_ASSET],
+            ['code' => '309', 'name' => 'Пресметка на набавката', 'type' => Account::TYPE_ASSET],
 
-            // 31x - Raw materials (Суровини и материјали)
-            ['code' => '310', 'name' => 'Суровини', 'type' => Account::TYPE_ASSET],
-            ['code' => '311', 'name' => 'Материјали', 'type' => Account::TYPE_ASSET],
-            ['code' => '312', 'name' => 'Помошни материјали', 'type' => Account::TYPE_ASSET],
-            ['code' => '313', 'name' => 'Енергенти', 'type' => Account::TYPE_ASSET],
-            ['code' => '314', 'name' => 'Амбалажа', 'type' => Account::TYPE_ASSET],
+            // 31 - ЗАЛИХА НА СУРОВИНИ И МАТЕРИЈАЛИ
+            ['code' => '310', 'name' => 'Суровини и материјали на залиха', 'type' => Account::TYPE_ASSET],
+            ['code' => '311', 'name' => 'Суровини и материјали на пат', 'type' => Account::TYPE_ASSET],
+            ['code' => '316', 'name' => 'Суровини и материјали во доработка, обработка и манипулација', 'type' => Account::TYPE_ASSET],
+            ['code' => '318', 'name' => 'Вредносно усогласување на залихите на суровини и материјали', 'type' => Account::TYPE_ASSET],
+            ['code' => '319', 'name' => 'Отстапување од стандардните (плански) цени на суровини и материјали', 'type' => Account::TYPE_ASSET],
 
-            // 32x - Spare parts (Резервни делови)
-            ['code' => '320', 'name' => 'Резервни делови', 'type' => Account::TYPE_ASSET],
+            // 32 - ЗАЛИХА НА РЕЗЕРВНИ ДЕЛОВИ
+            ['code' => '320', 'name' => 'Залиха на резервни делови', 'type' => Account::TYPE_ASSET],
+            ['code' => '328', 'name' => 'Вредносно усогласување на залиха на резервни делови', 'type' => Account::TYPE_ASSET],
 
-            // 33x - Small inventory (Ситен инвентар)
-            ['code' => '330', 'name' => 'Ситен инвентар', 'type' => Account::TYPE_ASSET],
-            ['code' => '331', 'name' => 'Погонска облека и обувки', 'type' => Account::TYPE_ASSET],
-
-            // 34x - Materials in transit (Материјали во транзит)
-            ['code' => '340', 'name' => 'Материјали во транзит', 'type' => Account::TYPE_ASSET],
-
-            // 35x - Advances for materials (Аванси за материјали)
-            ['code' => '350', 'name' => 'Аванси за материјали', 'type' => Account::TYPE_ASSET],
+            // 35 - ЗАЛИХА НА СИТЕН ИНВЕНТАР, АМБАЛАЖА И АВТОГУМИ
+            ['code' => '350', 'name' => 'Ситен инвентар на залиха', 'type' => Account::TYPE_ASSET],
+            ['code' => '351', 'name' => 'Ситен инвентар во употреба', 'type' => Account::TYPE_ASSET],
+            ['code' => '352', 'name' => 'Залиха на амбалажа', 'type' => Account::TYPE_ASSET],
+            ['code' => '353', 'name' => 'Амбалажа во употреба', 'type' => Account::TYPE_ASSET],
+            ['code' => '354', 'name' => 'Залиха на автогуми', 'type' => Account::TYPE_ASSET],
+            ['code' => '355', 'name' => 'Автогуми во употреба', 'type' => Account::TYPE_ASSET],
+            ['code' => '358', 'name' => 'Вредносно усогласување на залихи на ситен инвентар, амбалажа и автогуми', 'type' => Account::TYPE_ASSET],
         ];
 
         $this->createAccounts($companyId, $accounts);
     }
 
     /**
-     * Class 4: ТРОШОЦИ И РАСХОДИ (Costs and Expenses)
+     * КЛАСА 4: ТРОШОЦИ И РАСХОДИ ОД РАБОТЕЊЕТО
      */
-    private function seedClass4CostsAndExpenses(int $companyId): void
+    private function seedClass4(int $companyId): void
     {
         $accounts = [
-            // 40x - Material costs (Трошоци за материјали)
-            ['code' => '400', 'name' => 'Трошоци за суровини и материјали', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '401', 'name' => 'Трошоци за енергија', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '402', 'name' => 'Трошоци за резервни делови', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '403', 'name' => 'Трошоци за ситен инвентар', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '404', 'name' => 'Трошоци за канцелариски материјал', 'type' => Account::TYPE_EXPENSE],
+            // 40 - ТРОШОЦИ ЗА СУРОВИНИ, МАТЕРИЈАЛИ, ЕНЕРГИЈА, РЕЗЕРВНИ ДЕЛОВИ И СИТЕН ИНВЕНТАР
+            ['code' => '400', 'name' => 'Трошоци за суровини и материјали (за производство)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '401', 'name' => 'Трошоци за материјали (за администрација, управа и продажба)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '402', 'name' => 'Трошоци за енергија (за производство)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '403', 'name' => 'Трошоци за енергија (за администрација, управа и продажба)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '404', 'name' => 'Трошоци за резервни делови и материјали за одржување (за производство)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '405', 'name' => 'Трошоци за резервни делови и материјали за одржување (за администрација)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '406', 'name' => 'Трошоци за амбалажа', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '407', 'name' => 'Трошоци за ситен инвентар, амбалажа и автогуми (за производство)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '408', 'name' => 'Трошоци за ситен инвентар, амбалажа и автогуми (за администрација)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '409', 'name' => 'Отстапувања од стандардните (плански) цени', 'type' => Account::TYPE_EXPENSE],
 
-            // 41x - Service costs (Трошоци за услуги)
-            ['code' => '410', 'name' => 'Трошоци за транспортни услуги', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '411', 'name' => 'Трошоци за одржување', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '412', 'name' => 'Трошоци за закупнини', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '413', 'name' => 'Трошоци за реклама и пропаганда', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '414', 'name' => 'Трошоци за истражување и развој', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '415', 'name' => 'Трошоци за комунални услуги', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '416', 'name' => 'Трошоци за сметководствени и консултантски услуги', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '417', 'name' => 'Трошоци за осигурување', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '418', 'name' => 'Трошоци за телефон, поштарина, интернет', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '419', 'name' => 'Други трошоци за услуги', 'type' => Account::TYPE_EXPENSE],
+            // 41 - ТРОШОЦИ ЗА УСЛУГИ
+            ['code' => '410', 'name' => 'Транспортни услуги', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '411', 'name' => 'Поштенски услуги, телефонски услуги и интернет', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '412', 'name' => 'Надворешни услуги за изработка на добра и извршување на услуги', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '413', 'name' => 'Услуги за одржување и заштита', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '414', 'name' => 'Наем - лизинг', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '415', 'name' => 'Комунални услуги', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '416', 'name' => 'Трошоци за истражување и развој', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '417', 'name' => 'Трошоци за реклама, пропаганда, промоција и саеми', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '419', 'name' => 'Останати услуги', 'type' => Account::TYPE_EXPENSE],
 
-            // 42x - Salary costs (Трошоци за вработени)
-            ['code' => '420', 'name' => 'Плати на вработени', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '421', 'name' => 'Придонеси на товар на работодавач', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '422', 'name' => 'Надоместоци на плата', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '423', 'name' => 'Надоместоци за превоз', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '424', 'name' => 'Надоместоци за топол оброк', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '425', 'name' => 'Отпремнини', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '426', 'name' => 'Јубилејни награди', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '429', 'name' => 'Други трошоци за вработени', 'type' => Account::TYPE_EXPENSE],
+            // 42 - ПЛАТА, НАДОМЕСТОЦИ НА ПЛАТА И ОСТАНАТИ ТРОШОЦИ ЗА ВРАБОТЕНИТЕ
+            ['code' => '420', 'name' => 'Плата и надоместоци на плата - бруто (за производство)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '421', 'name' => 'Плата и надоместоци на плата - бруто (за администрација, управа и продажба)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '422', 'name' => 'Останати трошоци за вработените', 'type' => Account::TYPE_EXPENSE],
 
-            // 43x - Depreciation and amortization (Амортизација)
-            ['code' => '430', 'name' => 'Амортизација на нематеријални средства', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '431', 'name' => 'Амортизација на материјални средства', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '432', 'name' => 'Амортизација на инвестициски недвижности', 'type' => Account::TYPE_EXPENSE],
+            // 43 - ТРОШОЦИ ЗА АМОРТИЗАЦИЈА И РЕЗЕРВИРАЊА
+            ['code' => '430', 'name' => 'Трошоци за амортизација (за производство)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '431', 'name' => 'Трошоци за амортизација на биолошки средства', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '432', 'name' => 'Трошоци за амортизација (за администрација, управа и продажба)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '433', 'name' => 'Долгорочни резервирања за трошоци за обновување на природни богатства', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '435', 'name' => 'Долгорочни резервирања за користи на вработените', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '436', 'name' => 'Долгорочни резервирања на трошоци за преструктуирање', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '437', 'name' => 'Долгорочни резервирања за гарантен рок', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '438', 'name' => 'Долгорочни резервирања за кауции и депозити', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '439', 'name' => 'Останати долгорочни резервирања за трошоци и ризици', 'type' => Account::TYPE_EXPENSE],
 
-            // 44x - Other operating expenses (Други оперативни трошоци)
-            ['code' => '440', 'name' => 'Трошоци за репрезентација', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '441', 'name' => 'Трошоци за службени патувања', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '442', 'name' => 'Трошоци за стручно усовршување', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '443', 'name' => 'Трошоци за членарини', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '444', 'name' => 'Трошоци за донации и спонзорства', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '445', 'name' => 'Трошоци за провизии и надоместоци', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '449', 'name' => 'Други оперативни трошоци', 'type' => Account::TYPE_EXPENSE],
+            // 44 - ОСТАНАТИ ТРОШОЦИ ОД РАБОТЕЊЕТО
+            ['code' => '440', 'name' => 'Дневници за службени патувања, ноќевања и патни трошоци', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '441', 'name' => 'Надоместоци на трошоци на вработените и подароци', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '442', 'name' => 'Трошоци за надомест на членови на управен и надзорен одбор', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '443', 'name' => 'Трошоци за спонзорства и донации', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '444', 'name' => 'Трошоци за репрезентација', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '445', 'name' => 'Трошоци за осигурување', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '446', 'name' => 'Банкарски услуги и трошоци за платен промет', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '447', 'name' => 'Даноци кои не зависат од резултатот, членарини и други давачки', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '448', 'name' => 'Трошоци за користење на права (освен наем)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '449', 'name' => 'Останати трошоци на работењето', 'type' => Account::TYPE_EXPENSE],
 
-            // 45x - Impairment (Оштетување)
-            ['code' => '450', 'name' => 'Оштетување на побарувања', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '451', 'name' => 'Оштетување на залихи', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '452', 'name' => 'Оштетување на финансиски средства', 'type' => Account::TYPE_EXPENSE],
+            // 45 - ВРЕДНОСНО УСОГЛАСУВАЊЕ (ОБЕЗВРЕДНУВАЊЕ)
+            ['code' => '450', 'name' => 'Вредносно усогласување (обезвреднување) на нематеријални средства', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '451', 'name' => 'Вредносно усогласување (обезвреднување) на материјални средства', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '452', 'name' => 'Вредносно усогласување (обезвреднување) на вложувања во недвижности', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '455', 'name' => 'Вредносно усогласување (обезвреднување) на краткорочни побарувања', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '456', 'name' => 'Вредносно усогласување (обезвреднување) на залихи', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '459', 'name' => 'Вредносно усогласување (обезвреднување) на останати средства', 'type' => Account::TYPE_EXPENSE],
 
-            // 46x - Other expenses (Други расходи)
-            ['code' => '460', 'name' => 'Загуби од продажба на средства', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '461', 'name' => 'Отпис на побарувања', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '462', 'name' => 'Отпис на залихи', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '463', 'name' => 'Казни и пенали', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '464', 'name' => 'Неоперативни расходи', 'type' => Account::TYPE_EXPENSE],
+            // 46 - ОСТАНАТИ РАСХОДИ
+            ['code' => '460', 'name' => 'Загуби врз основа на расходување и загуби од продажба на средства', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '462', 'name' => 'Загуби врз основа на продажба на учество во капитал и хартии од вредност', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '463', 'name' => 'Загуба од продажба на материјали', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '464', 'name' => 'Кусоци, кало, растур, расипување и кршење', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '466', 'name' => 'Расходи врз основа на директен отпис на побарувања', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '467', 'name' => 'Расходи за дополнително одобрени попусти, рабат, рекламации', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '468', 'name' => 'Казни, пенали, надоместоци за штети и друго', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '469', 'name' => 'Останати расходи од работењето', 'type' => Account::TYPE_EXPENSE],
 
-            // 47x - Financial expenses (Финансиски расходи)
-            ['code' => '470', 'name' => 'Камати', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '471', 'name' => 'Негативни курсни разлики', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '472', 'name' => 'Загуби од промени на фер вредност', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '479', 'name' => 'Други финансиски расходи', 'type' => Account::TYPE_EXPENSE],
+            // 47 - ФИНАНСИСКИ РАСХОДИ
+            ['code' => '470', 'name' => 'Расходи врз основа на камати од работењето со поврзани друштва', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '471', 'name' => 'Расходи врз основа на курсни разлики од работењето со поврзани друштва', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '472', 'name' => 'Останати финансиски расходи од поврзани друштва', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '474', 'name' => 'Расходи врз основа на камати од работењето со неповрзани друштва', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '475', 'name' => 'Расходи врз основа на негативни курсни разлики', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '476', 'name' => 'Вредносно усогласување на долгорочни финансиски средства', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '477', 'name' => 'Нереализирани загуби (расходи) од финансиски средства', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '479', 'name' => 'Останати финансиски расходи', 'type' => Account::TYPE_EXPENSE],
+
+            // 48 - УДЕЛ ВО ЗАГУБА НА ПРИДРУЖНО ДРУШТВО
+            ['code' => '480', 'name' => 'Удел во загуба на придружно друштво', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '481', 'name' => 'Нето загуба од прекинато работење', 'type' => Account::TYPE_EXPENSE],
+
+            // 49 - ПРЕНОС НА РАСХОДИ
+            ['code' => '490', 'name' => 'Распоред на директни трошоци', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '491', 'name' => 'Распоред на општи трошоци', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '492', 'name' => 'Распоред на трошоците непосредно врз товар на вкупниот приход', 'type' => Account::TYPE_EXPENSE],
         ];
 
         $this->createAccounts($companyId, $accounts);
     }
 
     /**
-     * Class 5: СЛОБОДНА (Internal/Free Use)
+     * КЛАСА 6: ЗАЛИХИ НА ПРОИЗВОДСТВО, ГОТОВИ ПРОИЗВОДИ И СТОКИ
      */
-    private function seedClass5Internal(int $companyId): void
+    private function seedClass6(int $companyId): void
     {
         $accounts = [
-            ['code' => '500', 'name' => 'Интерни пресметки', 'type' => Account::TYPE_EXPENSE],
+            // 60 - ПРОИЗВОДСТВО
+            ['code' => '600', 'name' => 'Производство (изградба) во тек', 'type' => Account::TYPE_ASSET],
+            ['code' => '601', 'name' => 'Залиха на полупроизводи', 'type' => Account::TYPE_ASSET],
+            ['code' => '602', 'name' => 'Залиха на застарени недовршени производи, полупроизводи и делови', 'type' => Account::TYPE_ASSET],
+            ['code' => '608', 'name' => 'Вредносно усогласување на недовршени производи', 'type' => Account::TYPE_ASSET],
+
+            // 61 - БИОЛОШКИ СРЕДСТВА
+            ['code' => '610', 'name' => 'Недовршено производство на биолошки средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '611', 'name' => 'Залиха на биолошки средства за продажба', 'type' => Account::TYPE_ASSET],
+            ['code' => '618', 'name' => 'Вредносно усогласување на биолошки средства', 'type' => Account::TYPE_ASSET],
+
+            // 63 - ГОТОВИ ПРОИЗВОДИ
+            ['code' => '630', 'name' => 'Производи на залиха', 'type' => Account::TYPE_ASSET],
+            ['code' => '631', 'name' => 'Производи во туѓ склад', 'type' => Account::TYPE_ASSET],
+            ['code' => '633', 'name' => 'Производи во продавница', 'type' => Account::TYPE_ASSET],
+            ['code' => '634', 'name' => 'Вкалкулиран данок на додадена вредност', 'type' => Account::TYPE_ASSET],
+            ['code' => '637', 'name' => 'Залихи на некурентни производи и отпадоци', 'type' => Account::TYPE_ASSET],
+            ['code' => '638', 'name' => 'Вредносно усогласување на залихите на готовите производи', 'type' => Account::TYPE_ASSET],
+
+            // 65 - ПРЕСМЕТКА НА НАБАВКАТА НА СТОКИ
+            ['code' => '650', 'name' => 'Вредност на стоките по пресметка на добавувачот', 'type' => Account::TYPE_ASSET],
+            ['code' => '651', 'name' => 'Зависни трошоци за набавка на стоки', 'type' => Account::TYPE_ASSET],
+            ['code' => '652', 'name' => 'Царини и други увозни давачки за стоките', 'type' => Account::TYPE_ASSET],
+            ['code' => '659', 'name' => 'Пресметка на набавката', 'type' => Account::TYPE_ASSET],
+
+            // 66 - СТОКИ
+            ['code' => '660', 'name' => 'Стоки на залиха', 'type' => Account::TYPE_ASSET],
+            ['code' => '661', 'name' => 'Стоки во туѓ склад', 'type' => Account::TYPE_ASSET],
+            ['code' => '662', 'name' => 'Стоки на пат', 'type' => Account::TYPE_ASSET],
+            ['code' => '663', 'name' => 'Стоки во продавница', 'type' => Account::TYPE_ASSET],
+            ['code' => '664', 'name' => 'Вкалкулиран данок на додадена вредност', 'type' => Account::TYPE_ASSET],
+            ['code' => '668', 'name' => 'Вредносно усогласување на залихата на стоките', 'type' => Account::TYPE_ASSET],
+            ['code' => '669', 'name' => 'Разлика во цени на стоките', 'type' => Account::TYPE_ASSET],
+
+            // 67 - НЕТЕКОВНИ СРЕДСТВА КОИ СЕ ЧУВААТ ЗА ПРОДАЖБА
+            ['code' => '670', 'name' => 'Нематеријални средства кои се чуваат за продажба', 'type' => Account::TYPE_ASSET],
+            ['code' => '674', 'name' => 'Останати нетековни средства кои се чуваат за продажба', 'type' => Account::TYPE_ASSET],
+            ['code' => '678', 'name' => 'Вредносно усогласување на нетековни средства за продажба', 'type' => Account::TYPE_ASSET],
         ];
 
         $this->createAccounts($companyId, $accounts);
     }
 
     /**
-     * Class 6: ЗАЛИХИ НА ПРОИЗВОДСТВО (Production Inventory)
+     * КЛАСА 7: ПОКРИВАЊЕ НА РАСХОДИ И ПРИХОДИ
      */
-    private function seedClass6ProductionInventory(int $companyId): void
+    private function seedClass7(int $companyId): void
     {
         $accounts = [
-            // 60x - Work in progress (Недовршено производство)
-            ['code' => '600', 'name' => 'Недовршено производство', 'type' => Account::TYPE_ASSET],
+            // 70 - РАСХОДИ НА ПРОДАДЕНИ ДОБРА И УСЛУГИ
+            ['code' => '700', 'name' => 'Расходи врз основа на продадени добра (производи) и услуги', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '701', 'name' => 'Набавна вредност на продадени добра (стоки)', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '702', 'name' => 'Набавна вредност на продадени нетековни средства', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '703', 'name' => 'Набавна вредност на продадени материјали, резервни делови и отпадоци', 'type' => Account::TYPE_EXPENSE],
 
-            // 61x - Semi-finished products (Полупроизводи)
-            ['code' => '610', 'name' => 'Полупроизводи', 'type' => Account::TYPE_ASSET],
+            // 73 - ПРИХОДИ ОД ПРОДАЖБА НА ДОБРА И УСЛУГИ НА ПОВРЗАНИ ДРУШТВА
+            ['code' => '730', 'name' => 'Приходи од продажба на добра и услуги на поврзани друштва во земјата', 'type' => Account::TYPE_REVENUE],
+            ['code' => '731', 'name' => 'Приходи од продажба на добра и услуги на поврзани друштва од странство', 'type' => Account::TYPE_REVENUE],
+            ['code' => '732', 'name' => 'Приходи од специфично работење на поврзани друштва', 'type' => Account::TYPE_REVENUE],
 
-            // 62x - Finished products (Готови производи)
-            ['code' => '620', 'name' => 'Готови производи', 'type' => Account::TYPE_ASSET],
-            ['code' => '621', 'name' => 'Готови производи во магацин', 'type' => Account::TYPE_ASSET],
-            ['code' => '622', 'name' => 'Готови производи во транзит', 'type' => Account::TYPE_ASSET],
+            // 74 - ПРИХОДИ ОД ПРОДАЖБА НА НЕПОВРЗАНИ ДРУШТВА
+            ['code' => '740', 'name' => 'Приходи од продажба на добра (производи) и услуги во земјата', 'type' => Account::TYPE_REVENUE],
+            ['code' => '741', 'name' => 'Приходи од продажба на добра (стоки) во земјата', 'type' => Account::TYPE_REVENUE],
+            ['code' => '742', 'name' => 'Приходи од продажба на добра и услуги во странство', 'type' => Account::TYPE_REVENUE],
+            ['code' => '743', 'name' => 'Приходи од продажба на материјали, резервни делови и отпадоци', 'type' => Account::TYPE_REVENUE],
+            ['code' => '744', 'name' => 'Приходи од продажба на нетековни средства за продажба', 'type' => Account::TYPE_REVENUE],
+            ['code' => '745', 'name' => 'Приходи врз основа на употреба на сопствени добра и услуги', 'type' => Account::TYPE_REVENUE],
+            ['code' => '747', 'name' => 'Приходи од наемнини', 'type' => Account::TYPE_REVENUE],
+            ['code' => '749', 'name' => 'Останати приходи од продажба на неповрзани друштва', 'type' => Account::TYPE_REVENUE],
 
-            // 63x - Merchandise (Стока)
-            ['code' => '630', 'name' => 'Стока во магацин', 'type' => Account::TYPE_ASSET],
-            ['code' => '631', 'name' => 'Стока во транзит', 'type' => Account::TYPE_ASSET],
-            ['code' => '632', 'name' => 'Стока на конзигнација', 'type' => Account::TYPE_ASSET],
+            // 75 - ПРИХОДИ ОД ВРЕДНОСНО УСОГЛАСУВАЊЕ
+            ['code' => '750', 'name' => 'Приходи од вредносно усогласување на нематеријални средства', 'type' => Account::TYPE_REVENUE],
+            ['code' => '751', 'name' => 'Приходи од вредносно усогласување на материјални средства', 'type' => Account::TYPE_REVENUE],
+            ['code' => '755', 'name' => 'Приходи од вредносно усогласување на краткорочни побарувања', 'type' => Account::TYPE_REVENUE],
+            ['code' => '756', 'name' => 'Приходи од вредносно усогласување на залихи', 'type' => Account::TYPE_REVENUE],
+            ['code' => '759', 'name' => 'Приходи од вредносно усогласување на останати средства', 'type' => Account::TYPE_REVENUE],
 
-            // 64x - Biological assets (Биолошки средства)
-            ['code' => '640', 'name' => 'Биолошки средства', 'type' => Account::TYPE_ASSET],
+            // 76 - ОСТАНАТИ ПРИХОДИ
+            ['code' => '760', 'name' => 'Добивки од продажба на нематеријални и материјални средства', 'type' => Account::TYPE_REVENUE],
+            ['code' => '762', 'name' => 'Добивки од продажба на учество во капитал и хартии од вредност', 'type' => Account::TYPE_REVENUE],
+            ['code' => '764', 'name' => 'Вишоци', 'type' => Account::TYPE_REVENUE],
+            ['code' => '765', 'name' => 'Приходи од наплатени отпишани побарувања и приходи од отпис на обврските', 'type' => Account::TYPE_REVENUE],
+            ['code' => '767', 'name' => 'Приходи од премии, субвенции, дотации и донации', 'type' => Account::TYPE_REVENUE],
+            ['code' => '768', 'name' => 'Приходи од укинување на долгорочни резервирања', 'type' => Account::TYPE_REVENUE],
+            ['code' => '769', 'name' => 'Останати приходи од работењето', 'type' => Account::TYPE_REVENUE],
 
-            // 65x - Non-current assets held for sale (Нетековни средства за продажба)
-            ['code' => '650', 'name' => 'Нетековни средства наменети за продажба', 'type' => Account::TYPE_ASSET],
+            // 77 - ФИНАНСИСКИ ПРИХОДИ
+            ['code' => '770', 'name' => 'Приходи врз основа на камати од работењето со поврзани друштва', 'type' => Account::TYPE_REVENUE],
+            ['code' => '771', 'name' => 'Приходи врз основа на позитивни курсни разлики со поврзани друштва', 'type' => Account::TYPE_REVENUE],
+            ['code' => '773', 'name' => 'Приходи од вложувања во поврзани друштва', 'type' => Account::TYPE_REVENUE],
+            ['code' => '774', 'name' => 'Приходи врз основа на камати од работењето со неповрзани друштва', 'type' => Account::TYPE_REVENUE],
+            ['code' => '775', 'name' => 'Приходи врз основа на позитивни курсни разлики со неповрзани друштва', 'type' => Account::TYPE_REVENUE],
+            ['code' => '776', 'name' => 'Приходи од вложувања во неповрзани друштва', 'type' => Account::TYPE_REVENUE],
+            ['code' => '777', 'name' => 'Нереализирани добивки (приходи) од финансиски средства', 'type' => Account::TYPE_REVENUE],
+            ['code' => '779', 'name' => 'Останати финансиски приходи', 'type' => Account::TYPE_REVENUE],
 
-            // 66x - Advances for goods (Аванси за стока)
-            ['code' => '660', 'name' => 'Аванси за стока', 'type' => Account::TYPE_ASSET],
+            // 78 - УДЕЛ ВО ДОБИВКАТА НА ПРИДРУЖНО ДРУШТВО
+            ['code' => '780', 'name' => 'Удел во добивката на придружно друштво', 'type' => Account::TYPE_REVENUE],
+            ['code' => '781', 'name' => 'Нето добивка од прекинато работење', 'type' => Account::TYPE_REVENUE],
+
+            // 79 - РАЗЛИКА НА ПРИХОДИ И РАСХОДИ
+            ['code' => '790', 'name' => 'Разлика на приходи и расходи од вкупното работење', 'type' => Account::TYPE_REVENUE],
         ];
 
         $this->createAccounts($companyId, $accounts);
     }
 
     /**
-     * Class 7: ПОКРИВАЊЕ НА РАСХОДИ И ПРИХОДИ (Revenue Coverage)
+     * КЛАСА 8: РЕЗУЛТАТИ ОД РАБОТЕЊЕТО
      */
-    private function seedClass7Revenue(int $companyId): void
+    private function seedClass8(int $companyId): void
     {
         $accounts = [
-            // 70x - Cost of goods sold (Вредност на продадени производи)
-            ['code' => '700', 'name' => 'Вредност на продадени готови производи', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '701', 'name' => 'Вредност на продадени полупроизводи', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '702', 'name' => 'Вредност на продадена стока', 'type' => Account::TYPE_EXPENSE],
-
-            // 71x - Sales revenue to related parties (Приходи од продажба до поврзани друштва)
-            ['code' => '710', 'name' => 'Приходи од продажба на производи до поврзани друштва', 'type' => Account::TYPE_REVENUE],
-            ['code' => '711', 'name' => 'Приходи од продажба на услуги до поврзани друштва', 'type' => Account::TYPE_REVENUE],
-            ['code' => '712', 'name' => 'Приходи од продажба на стока до поврзани друштва', 'type' => Account::TYPE_REVENUE],
-
-            // 72x - Sales revenue domestic (Приходи од продажба во земјата)
-            ['code' => '720', 'name' => 'Приходи од продажба на производи во земјата', 'type' => Account::TYPE_REVENUE],
-            ['code' => '721', 'name' => 'Приходи од продажба на услуги во земјата', 'type' => Account::TYPE_REVENUE],
-            ['code' => '722', 'name' => 'Приходи од продажба на стока во земјата', 'type' => Account::TYPE_REVENUE],
-
-            // 73x - Sales revenue export (Приходи од продажба во странство)
-            ['code' => '730', 'name' => 'Приходи од продажба на производи во странство', 'type' => Account::TYPE_REVENUE],
-            ['code' => '731', 'name' => 'Приходи од продажба на услуги во странство', 'type' => Account::TYPE_REVENUE],
-            ['code' => '732', 'name' => 'Приходи од продажба на стока во странство', 'type' => Account::TYPE_REVENUE],
-
-            // 74x - Changes in inventory (Промени на залихи)
-            ['code' => '740', 'name' => 'Зголемување на залихи на готови производи', 'type' => Account::TYPE_REVENUE],
-            ['code' => '741', 'name' => 'Намалување на залихи на готови производи', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '742', 'name' => 'Зголемување на залихи на недовршено производство', 'type' => Account::TYPE_REVENUE],
-            ['code' => '743', 'name' => 'Намалување на залихи на недовршено производство', 'type' => Account::TYPE_EXPENSE],
-
-            // 75x - Value adjustments income (Усогласувања на вредност - приходи)
-            ['code' => '750', 'name' => 'Приходи од намалување на оштетување на побарувања', 'type' => Account::TYPE_REVENUE],
-            ['code' => '751', 'name' => 'Приходи од намалување на оштетување на залихи', 'type' => Account::TYPE_REVENUE],
-            ['code' => '752', 'name' => 'Приходи од намалување на резервирања', 'type' => Account::TYPE_REVENUE],
-
-            // 76x - Other income (Други приходи)
-            ['code' => '760', 'name' => 'Приходи од продажба на материјали', 'type' => Account::TYPE_REVENUE],
-            ['code' => '761', 'name' => 'Приходи од закупнини', 'type' => Account::TYPE_REVENUE],
-            ['code' => '762', 'name' => 'Приходи од добиени неоперативни средства', 'type' => Account::TYPE_REVENUE],
-            ['code' => '763', 'name' => 'Приходи од продажба на средства', 'type' => Account::TYPE_REVENUE],
-            ['code' => '764', 'name' => 'Приходи од отпис на обврски', 'type' => Account::TYPE_REVENUE],
-            ['code' => '765', 'name' => 'Приходи од субвенции, дотации и донации', 'type' => Account::TYPE_REVENUE],
-            ['code' => '769', 'name' => 'Други оперативни приходи', 'type' => Account::TYPE_REVENUE],
-
-            // 77x - Financial income (Финансиски приходи)
-            ['code' => '770', 'name' => 'Приходи од камати', 'type' => Account::TYPE_REVENUE],
-            ['code' => '771', 'name' => 'Позитивни курсни разлики', 'type' => Account::TYPE_REVENUE],
-            ['code' => '772', 'name' => 'Добивки од промени на фер вредност', 'type' => Account::TYPE_REVENUE],
-            ['code' => '773', 'name' => 'Приходи од дивиденди', 'type' => Account::TYPE_REVENUE],
-            ['code' => '779', 'name' => 'Други финансиски приходи', 'type' => Account::TYPE_REVENUE],
-        ];
-
-        $this->createAccounts($companyId, $accounts);
-    }
-
-    /**
-     * Class 8: РЕЗУЛТАТИ ОД РАБОТЕЊЕТО (Operating Results)
-     */
-    private function seedClass8OperatingResults(int $companyId): void
-    {
-        $accounts = [
-            // 80x - Profit/loss before tax (Добивка/загуба пред оданочување)
+            // 80 - ДОБИВКА/ЗАГУБА ПРЕД ОДАНОЧУВАЊЕ
             ['code' => '800', 'name' => 'Добивка пред оданочување', 'type' => Account::TYPE_EQUITY],
             ['code' => '801', 'name' => 'Загуба пред оданочување', 'type' => Account::TYPE_EQUITY],
 
-            // 81x - Income tax (Данок на добивка)
+            // 81 - ДАНОК НА ДОБИВКА И ДРУГИ ДАВАЧКИ
             ['code' => '810', 'name' => 'Данок на добивка', 'type' => Account::TYPE_EXPENSE],
-            ['code' => '811', 'name' => 'Одложен данок на добивка', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '811', 'name' => 'Одложени даночни приходи', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '812', 'name' => 'Одложени даночни расходи', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '813', 'name' => 'Други давачки', 'type' => Account::TYPE_EXPENSE],
 
-            // 82x - Net profit/loss (Нето добивка/загуба)
-            ['code' => '820', 'name' => 'Нето добивка', 'type' => Account::TYPE_EQUITY],
-            ['code' => '821', 'name' => 'Нето загуба', 'type' => Account::TYPE_EQUITY],
+            // 82 - НЕТО ДОБИВКА/ЗАГУБА ЗА ПЕРИОДОТ
+            ['code' => '820', 'name' => 'Нето добивка за периодот', 'type' => Account::TYPE_EQUITY],
+            ['code' => '821', 'name' => 'Нето загуба за периодот', 'type' => Account::TYPE_EQUITY],
 
-            // 83x - Comprehensive income (Севкупен сеопфатен доход)
-            ['code' => '830', 'name' => 'Севкупен сеопфатен доход', 'type' => Account::TYPE_EQUITY],
+            // 83 - ДОБИВКА/ЗАГУБА КОЈА ПРИПАЃА НА ДРУГИ
+            ['code' => '830', 'name' => 'Добивка која припаѓа на сопствениците на матичното друштво', 'type' => Account::TYPE_EQUITY],
+            ['code' => '831', 'name' => 'Добивка која припаѓа на учество кое нема контрола', 'type' => Account::TYPE_EQUITY],
+            ['code' => '832', 'name' => 'Загуба која припаѓа на сопствениците на матичното друштво', 'type' => Account::TYPE_EQUITY],
+            ['code' => '833', 'name' => 'Загуба која припаѓа на учество кое нема контрола', 'type' => Account::TYPE_EQUITY],
 
-            // 84x - Profit distribution (Распределба на добивка)
-            ['code' => '840', 'name' => 'Распределба на добивка', 'type' => Account::TYPE_EQUITY],
-            ['code' => '841', 'name' => 'Покривање на загуби', 'type' => Account::TYPE_EQUITY],
+            // 89 - РАСПОРЕДУВАЊЕ НА ДОБИВКАТА
+            ['code' => '890', 'name' => 'Покривање на загубата од претходни години', 'type' => Account::TYPE_EQUITY],
+            ['code' => '891', 'name' => 'Зголемување на капиталот (капитал на сопствениците)', 'type' => Account::TYPE_EQUITY],
+            ['code' => '892', 'name' => 'Дивиденди или удел во добивката и друго', 'type' => Account::TYPE_EQUITY],
+            ['code' => '893', 'name' => 'Резерви', 'type' => Account::TYPE_EQUITY],
+            ['code' => '899', 'name' => 'Нераспоредена добивка', 'type' => Account::TYPE_EQUITY],
         ];
 
         $this->createAccounts($companyId, $accounts);
     }
 
     /**
-     * Class 9: КАПИТАЛ, РЕЗЕРВИ (Capital and Reserves)
+     * КЛАСА 9: КАПИТАЛ, РЕЗЕРВИ И ВОНБИЛАНСНА ЕВИДЕНЦИЈА
      */
-    private function seedClass9CapitalAndReserves(int $companyId): void
+    private function seedClass9(int $companyId): void
     {
         $accounts = [
-            // 90x - Share capital (Акционерски капитал / Основен капитал)
-            ['code' => '900', 'name' => 'Запишан капитал', 'type' => Account::TYPE_EQUITY],
-            ['code' => '901', 'name' => 'Уплатен капитал', 'type' => Account::TYPE_EQUITY],
-            ['code' => '902', 'name' => 'Сопствени акции', 'type' => Account::TYPE_EQUITY],
+            // 90 - ОСНОВНА ГЛАВНИНА - ЗАПИШАН КАПИТАЛ
+            ['code' => '900', 'name' => 'Основна главнина - запишан и уплатен капитал', 'type' => Account::TYPE_EQUITY],
+            ['code' => '901', 'name' => 'Запишана, а неуплатена основна главнина', 'type' => Account::TYPE_EQUITY],
+            ['code' => '902', 'name' => 'Сопствени акции и удели', 'type' => Account::TYPE_EQUITY],
 
-            // 91x - Share premiums (Премија од издавање акции)
-            ['code' => '910', 'name' => 'Премија од емисија на акции', 'type' => Account::TYPE_EQUITY],
+            // 91 - ПРЕМИИ НА ЕМИТИРАНИ АКЦИИ
+            ['code' => '910', 'name' => 'Премии врз основа на продажба на обични акции', 'type' => Account::TYPE_EQUITY],
+            ['code' => '911', 'name' => 'Премии врз основа на продажба на приоритетни акции', 'type' => Account::TYPE_EQUITY],
 
-            // 92x - Revaluation reserves (Ревалоризациски резерви)
-            ['code' => '920', 'name' => 'Ревалоризациска резерва', 'type' => Account::TYPE_EQUITY],
-            ['code' => '921', 'name' => 'Резерви од добивки/загуби од финансиски средства', 'type' => Account::TYPE_EQUITY],
+            // 93 - РЕВАЛОРИЗАЦИОНИ РЕЗЕРВИ
+            ['code' => '930', 'name' => 'Ревалоризациони резерви на нематеријални и материјални средства', 'type' => Account::TYPE_EQUITY],
+            ['code' => '931', 'name' => 'Ревалоризациони резерви врз основа на преведување на странско работење', 'type' => Account::TYPE_EQUITY],
+            ['code' => '932', 'name' => 'Ревалоризациони резерви врз основа на финансиски средства расположиви за продажба', 'type' => Account::TYPE_EQUITY],
+            ['code' => '935', 'name' => 'Останати ревалоризациони резерви', 'type' => Account::TYPE_EQUITY],
 
-            // 93x - Reserves (Резерви)
-            ['code' => '930', 'name' => 'Законски резерви', 'type' => Account::TYPE_EQUITY],
-            ['code' => '931', 'name' => 'Статутарни резерви', 'type' => Account::TYPE_EQUITY],
-            ['code' => '932', 'name' => 'Резерви за сопствени акции', 'type' => Account::TYPE_EQUITY],
-            ['code' => '933', 'name' => 'Други резерви', 'type' => Account::TYPE_EQUITY],
+            // 94 - РЕЗЕРВИ
+            ['code' => '940', 'name' => 'Законски резерви', 'type' => Account::TYPE_EQUITY],
+            ['code' => '941', 'name' => 'Статутарни резерви', 'type' => Account::TYPE_EQUITY],
+            ['code' => '942', 'name' => 'Останати резерви', 'type' => Account::TYPE_EQUITY],
 
-            // 94x - Retained earnings (Задржана добивка)
-            ['code' => '940', 'name' => 'Задржана добивка од претходни години', 'type' => Account::TYPE_EQUITY],
-            ['code' => '941', 'name' => 'Нераспределена добивка', 'type' => Account::TYPE_EQUITY],
+            // 95 - ЗАДРЖАНА (АКУМУЛИРАНА) ДОБИВКА
+            ['code' => '950', 'name' => 'Задржана (акумулирана) добивка од претходни години', 'type' => Account::TYPE_EQUITY],
+            ['code' => '951', 'name' => 'Добивка од тековната година', 'type' => Account::TYPE_EQUITY],
 
-            // 95x - Losses (Загуби)
-            ['code' => '950', 'name' => 'Загуба пренесена од претходни години', 'type' => Account::TYPE_EQUITY],
-            ['code' => '951', 'name' => 'Загуба на тековната година', 'type' => Account::TYPE_EQUITY],
+            // 96 - ПРЕНЕСЕНА ЗАГУБА
+            ['code' => '960', 'name' => 'Пренесена загуба од претходни години', 'type' => Account::TYPE_EQUITY],
+            ['code' => '961', 'name' => 'Загуба за тековната година', 'type' => Account::TYPE_EQUITY],
 
-            // 96x - Non-controlling interest (Учество без контрола)
-            ['code' => '960', 'name' => 'Учество без контрола', 'type' => Account::TYPE_EQUITY],
-
-            // 99x - Off-balance sheet (Вонбилансна евиденција)
-            ['code' => '990', 'name' => 'Примени гаранции', 'type' => Account::TYPE_EQUITY],
-            ['code' => '991', 'name' => 'Издадени гаранции', 'type' => Account::TYPE_EQUITY],
-            ['code' => '992', 'name' => 'Примени средства на чување', 'type' => Account::TYPE_EQUITY],
-            ['code' => '993', 'name' => 'Дадени средства на чување', 'type' => Account::TYPE_EQUITY],
-            ['code' => '999', 'name' => 'Друга вонбилансна евиденција', 'type' => Account::TYPE_EQUITY],
+            // 99 - ВОНБИЛАНСНА ЕВИДЕНЦИЈА
+            ['code' => '990', 'name' => 'Примени туѓи недвижности, постројки и опрема', 'type' => Account::TYPE_EQUITY],
+            ['code' => '991', 'name' => 'Примени туѓи материјали, полупроизводи, производи и стоки', 'type' => Account::TYPE_EQUITY],
+            ['code' => '992', 'name' => 'Хартии од вредност и други вредносници', 'type' => Account::TYPE_EQUITY],
+            ['code' => '993', 'name' => 'Права', 'type' => Account::TYPE_EQUITY],
+            ['code' => '994', 'name' => 'Останата активна вонбилансна евиденција', 'type' => Account::TYPE_EQUITY],
+            ['code' => '995', 'name' => 'Обврски за примени туѓи недвижности, постројки и опрема', 'type' => Account::TYPE_EQUITY],
+            ['code' => '996', 'name' => 'Обврски за примени туѓи материјали, полупроизводи, производи и стоки', 'type' => Account::TYPE_EQUITY],
+            ['code' => '997', 'name' => 'Обврски за хартии од вредност и други вредносници', 'type' => Account::TYPE_EQUITY],
+            ['code' => '998', 'name' => 'Обврски за права', 'type' => Account::TYPE_EQUITY],
+            ['code' => '999', 'name' => 'Останата пасивна вонбилансна евиденција', 'type' => Account::TYPE_EQUITY],
         ];
 
         $this->createAccounts($companyId, $accounts);
@@ -612,7 +685,6 @@ class MacedonianChartOfAccountsSeeder extends Seeder
     private function createAccounts(int $companyId, array $accounts): void
     {
         foreach ($accounts as $accountData) {
-            // Check if account already exists (idempotent)
             $existingAccount = Account::where('company_id', $companyId)
                 ->where('code', $accountData['code'])
                 ->first();
@@ -632,14 +704,10 @@ class MacedonianChartOfAccountsSeeder extends Seeder
     }
 
     /**
-     * Clean up old placeholder 4-digit accounts that were created by a previous simpler seeder.
-     * These will be replaced by the official 3-digit Macedonian chart of accounts.
-     *
-     * Old placeholder accounts: 1000 (Assets), 2000 (Liabilities), 3000 (Equity), 4000 (Revenue), 5000 (Expenses)
+     * Clean up old placeholder 4-digit accounts
      */
     private function cleanupOldPlaceholderAccounts(int $companyId): void
     {
-        // Known old placeholder 4-digit codes that should be removed
         $oldPlaceholderCodes = [
             '1000', '1001', '1002', '1003', '1004', '1005', '1006', '1007', '1008', '1009',
             '1100', '1101', '1200', '1201', '1202', '1203', '1300', '1400', '1500', '1600',
@@ -652,7 +720,6 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             '5100', '5200', '5300', '5400', '5500',
         ];
 
-        // Delete old placeholder accounts that aren't used in any mappings
         $deletedCount = 0;
         foreach ($oldPlaceholderCodes as $code) {
             $account = Account::where('company_id', $companyId)
@@ -664,7 +731,6 @@ class MacedonianChartOfAccountsSeeder extends Seeder
                     $account->delete();
                     $deletedCount++;
                 } catch (\Exception $e) {
-                    // Skip accounts that can't be deleted (may have transactions)
                     $this->log("  Could not delete account {$code}: {$e->getMessage()}", 'warn');
                 }
             }
@@ -675,3 +741,5 @@ class MacedonianChartOfAccountsSeeder extends Seeder
         }
     }
 }
+
+// CLAUDE-CHECKPOINT

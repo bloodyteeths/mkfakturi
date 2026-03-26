@@ -2407,7 +2407,7 @@
                 "accounts_payable": "Обврски кон добавувачи",
                 "cash_and_bank": "Парични средства и банка",
                 "sales_revenue": "Приходи од продажба",
-                "tax_payable": "Обврски за ДДВ",
+                "tax_payable": "Обврски за данокот на додадена вредност",
                 "expenses": "Расходи"
             }
         },
@@ -3402,8 +3402,8 @@
             "gl_account": "Конто",
             "gl_account_help": "Книговодствена сметка за автоматско книжење",
             "select_gl_account": "Изберете конто",
-            "account_cash": "Готовина",
-            "account_bank": "Жиро-сметка",
+            "account_cash": "Благајна",
+            "account_bank": "Трансакциска сметка",
             "account_foreign": "Девизна сметка",
             "account_other": "Други парични средства"
         },

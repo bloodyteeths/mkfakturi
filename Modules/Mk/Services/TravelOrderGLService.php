@@ -218,20 +218,20 @@ class TravelOrderGLService
     }
 
     /**
-     * Account 100: Готовина (Cash on hand)
-     * Could also be 102 (Жиро сметка) depending on payment method,
-     * but for simplicity we default to 100 (cash).
+     * Account 102: Парични средства во благајна (Cash/Cashier)
+     * Official Правилник 174/2011: 100 = Bank (трансакциски сметки), 102 = Cash (благајна).
+     * Travel orders default to cash (102) since per-diem is typically paid in cash.
      */
     private function getCashAccount(Entity $entity, int $currencyId): Account
     {
         return Account::firstOrCreate(
             [
                 'account_type' => Account::BANK,
-                'code' => '100',
+                'code' => '102',
                 'entity_id' => $entity->id,
             ],
             [
-                'name' => 'Готовина и парични еквиваленти',
+                'name' => 'Парични средства во благајна',
                 'currency_id' => $currencyId,
             ]
         );

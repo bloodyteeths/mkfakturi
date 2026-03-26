@@ -312,7 +312,7 @@ class IfrsAuditSeeder extends Seeder
                 'date' => '2024-03-01',
                 'narration' => 'Capital injection',
                 'line_items' => [
-                    ['account_code' => '102', 'account_name' => 'Bank', 'amount' => 500000, 'credited' => false],
+                    ['account_code' => '100', 'account_name' => 'Bank', 'amount' => 500000, 'credited' => false],
                     ['account_code' => '900', 'account_name' => 'Capital', 'amount' => 500000, 'credited' => true],
                 ],
             ],
@@ -321,7 +321,7 @@ class IfrsAuditSeeder extends Seeder
                 'narration' => 'Equipment purchase',
                 'line_items' => [
                     ['account_code' => '1520', 'account_name' => 'Equipment', 'amount' => 150000, 'credited' => false],
-                    ['account_code' => '102', 'account_name' => 'Bank', 'amount' => 150000, 'credited' => true],
+                    ['account_code' => '100', 'account_name' => 'Bank', 'amount' => 150000, 'credited' => true],
                 ],
             ],
             [
@@ -329,7 +329,7 @@ class IfrsAuditSeeder extends Seeder
                 'narration' => 'Raw materials purchase',
                 'line_items' => [
                     ['account_code' => '310', 'account_name' => 'Raw Materials', 'amount' => 120000, 'credited' => false],
-                    ['account_code' => '102', 'account_name' => 'Bank', 'amount' => 120000, 'credited' => true],
+                    ['account_code' => '100', 'account_name' => 'Bank', 'amount' => 120000, 'credited' => true],
                 ],
             ],
             [
@@ -380,7 +380,7 @@ class IfrsAuditSeeder extends Seeder
                 'date' => '2025-02-01',
                 'narration' => 'Customer payment received',
                 'line_items' => [
-                    ['account_code' => '102', 'account_name' => 'Bank', 'amount' => 118000, 'credited' => false],
+                    ['account_code' => '100', 'account_name' => 'Bank', 'amount' => 118000, 'credited' => false],
                     ['account_code' => '120', 'account_name' => 'AR', 'amount' => 118000, 'credited' => true],
                 ],
             ],
@@ -389,14 +389,14 @@ class IfrsAuditSeeder extends Seeder
                 'narration' => 'Supplier payment',
                 'line_items' => [
                     ['account_code' => '220', 'account_name' => 'AP', 'amount' => 59000, 'credited' => false],
-                    ['account_code' => '102', 'account_name' => 'Bank', 'amount' => 59000, 'credited' => true],
+                    ['account_code' => '100', 'account_name' => 'Bank', 'amount' => 59000, 'credited' => true],
                 ],
             ],
             [
                 'date' => '2025-03-01',
                 'narration' => 'Interest income',
                 'line_items' => [
-                    ['account_code' => '102', 'account_name' => 'Bank', 'amount' => 5000, 'credited' => false],
+                    ['account_code' => '100', 'account_name' => 'Bank', 'amount' => 5000, 'credited' => false],
                     ['account_code' => '770', 'account_name' => 'Interest Income', 'amount' => 5000, 'credited' => true],
                 ],
             ],
@@ -405,7 +405,7 @@ class IfrsAuditSeeder extends Seeder
                 'narration' => 'Interest expense',
                 'line_items' => [
                     ['account_code' => '470', 'account_name' => 'Interest Exp', 'amount' => 3000, 'credited' => false],
-                    ['account_code' => '102', 'account_name' => 'Bank', 'amount' => 3000, 'credited' => true],
+                    ['account_code' => '100', 'account_name' => 'Bank', 'amount' => 3000, 'credited' => true],
                 ],
             ],
             [
@@ -429,7 +429,7 @@ class IfrsAuditSeeder extends Seeder
                 'narration' => 'Salary payment',
                 'line_items' => [
                     ['account_code' => '240', 'account_name' => 'Wages Payable', 'amount' => 120000, 'credited' => false],
-                    ['account_code' => '102', 'account_name' => 'Bank', 'amount' => 120000, 'credited' => true],
+                    ['account_code' => '100', 'account_name' => 'Bank', 'amount' => 120000, 'credited' => true],
                 ],
             ],
             [
@@ -444,7 +444,7 @@ class IfrsAuditSeeder extends Seeder
                 'date' => '2025-11-01',
                 'narration' => 'Other income (asset sale)',
                 'line_items' => [
-                    ['account_code' => '102', 'account_name' => 'Bank', 'amount' => 12000, 'credited' => false],
+                    ['account_code' => '100', 'account_name' => 'Bank', 'amount' => 12000, 'credited' => false],
                     ['account_code' => '760', 'account_name' => 'Other Income', 'amount' => 12000, 'credited' => true],
                 ],
             ],

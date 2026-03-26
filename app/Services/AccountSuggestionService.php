@@ -621,20 +621,20 @@ class AccountSuggestionService
      * Detect special account types (VAT, bank, cash, etc.)
      *
      * Uses official 3-digit Macedonian chart of accounts (Regulation 174/2011):
-     * - 231 = Обврски за ДДВ (VAT payable)
-     * - 131 = Побарувања за ДДВ (VAT receivable)
-     * - 102 = Жиро-сметка (Bank)
-     * - 100 = Готовина (Cash)
+     * - 230 = Обврски за данокот на додадена вредност (VAT payable)
+     * - 130 = Данок на додадена вредност (VAT receivable/input)
+     * - 100 = Парични средства на трансакциски сметки (Bank)
+     * - 102 = Парични средства во благајна (Cash)
      */
     protected function detectSpecialAccountType(string $text, int $companyId, string $entityType): ?array
     {
         $specialPatterns = [
-            // VAT/Tax payable - Class 2 Liabilities
-            ['patterns' => ['ддв', 'vat', 'данок', 'tax', 'ddv'], 'code' => '231', 'confidence' => 0.92],
-            // Bank - Class 1 Cash and Receivables
-            ['patterns' => ['банка', 'bank', 'жиро', 'трансакциска', 'комерцијална', 'стопанска', 'халк'], 'code' => '102', 'confidence' => 0.90],
-            // Cash - Class 1 Cash and Receivables
-            ['patterns' => ['каса', 'cash', 'готовина', 'готово'], 'code' => '100', 'confidence' => 0.90],
+            // VAT/Tax payable - Class 2 Liabilities (230 = Обврски за данокот на додадена вредност)
+            ['patterns' => ['ддв', 'vat', 'данок', 'tax', 'ddv'], 'code' => '230', 'confidence' => 0.92],
+            // Bank - Class 1 Cash and Receivables (100 = Парични средства на трансакциски сметки)
+            ['patterns' => ['банка', 'bank', 'жиро', 'трансакциска', 'комерцијална', 'стопанска', 'халк'], 'code' => '100', 'confidence' => 0.90],
+            // Cash - Class 1 Cash and Receivables (102 = Парични средства во благајна)
+            ['patterns' => ['каса', 'cash', 'готовина', 'готово'], 'code' => '102', 'confidence' => 0.90],
         ];
 
         foreach ($specialPatterns as $special) {
@@ -783,13 +783,13 @@ class AccountSuggestionService
         // Return appropriate account code based on winner
         // Uses official 3-digit Macedonian codes (Class 7 - Revenue)
         if ($consultingScore === $maxScore) {
-            return ['code' => '721', 'confidence' => $confidence, 'type' => 'consulting']; // Services (includes consulting)
+            return ['code' => '740', 'confidence' => $confidence, 'type' => 'consulting']; // Приходи од продажба на добра (производи) и услуги во земјата
         } elseif ($serviceScore === $maxScore) {
-            return ['code' => '721', 'confidence' => $confidence, 'type' => 'service']; // Services
+            return ['code' => '740', 'confidence' => $confidence, 'type' => 'service']; // Приходи од продажба на добра (производи) и услуги во земјата
         } elseif ($goodsScore === $maxScore) {
-            return ['code' => '722', 'confidence' => $confidence, 'type' => 'goods']; // Goods/Trade
+            return ['code' => '741', 'confidence' => $confidence, 'type' => 'goods']; // Приходи од продажба на добра (стоки) во земјата
         } else {
-            return ['code' => '720', 'confidence' => $confidence, 'type' => 'product']; // Products
+            return ['code' => '740', 'confidence' => $confidence, 'type' => 'product']; // Приходи од продажба на добра (производи) и услуги во земјата
         }
     }
 
@@ -983,7 +983,7 @@ class AccountSuggestionService
      * - 2210 = Обврски - домашни добавувачи (Supplier payables)
      * - 5000 = Набавна вредност на продадена стока (General expense)
      * Uses official 3-digit Macedonian chart of accounts (Regulation 174/2011):
-     * - 231 = Обврски за ДДВ (VAT payable)
+     * - 231 = Обврски за данок на додадена вредност (VAT payable)
      * - 720 = Приходи од продажба на производи во земјата (Revenue)
      * - 220 = Обврски кон добавувачи во земјата (Payables)
      * - 400 = Трошоци за суровини и материјали (Expenses)
@@ -996,13 +996,13 @@ class AccountSuggestionService
     {
         // Default account codes by entity type (using official 3-digit Macedonian codes)
         $defaults = [
-            AccountMapping::ENTITY_CUSTOMER => '720', // Приходи од продажба на производи во земјата
-            'customer' => '720',
+            AccountMapping::ENTITY_CUSTOMER => '740', // Приходи од продажба на добра (производи) и услуги во земјата
+            'customer' => '740',
             AccountMapping::ENTITY_SUPPLIER => '220', // Обврски кон добавувачи во земјата
             'supplier' => '220',
             AccountMapping::ENTITY_EXPENSE_CATEGORY => '400', // Трошоци за суровини и материјали
             'expense_category' => '400',
-            'tax' => '231', // Обврски за ДДВ
+            'tax' => '230', // Обврски за данокот на додадена вредност
         ];
 
         $accountCode = $defaults[$entityType] ?? null;
@@ -1018,13 +1018,13 @@ class AccountSuggestionService
         if (!$account) {
             // Fallback to alternative codes (still 3-digit Macedonian)
             $fallbacks = [
-                AccountMapping::ENTITY_CUSTOMER => '721', // Приходи од продажба на услуги во земјата
-                'customer' => '721',
+                AccountMapping::ENTITY_CUSTOMER => '741', // Приходи од продажба на добра (стоки) во земјата
+                'customer' => '741',
                 AccountMapping::ENTITY_SUPPLIER => '220', // Обврски кон добавувачи во земјата
                 'supplier' => '220',
                 AccountMapping::ENTITY_EXPENSE_CATEGORY => '419', // Други трошоци за услуги
                 'expense_category' => '419',
-                'tax' => '231', // Обврски за ДДВ
+                'tax' => '230', // Обврски за данокот на додадена вредност
             ];
 
             $account = Account::where('company_id', $companyId)
