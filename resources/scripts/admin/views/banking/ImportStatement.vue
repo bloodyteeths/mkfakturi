@@ -364,10 +364,14 @@
         </p>
 
         <!-- Import Result Summary -->
-        <div class="grid grid-cols-3 gap-4 mb-8 max-w-md mx-auto">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-lg mx-auto">
           <div class="bg-green-50 rounded-lg p-3">
             <p class="text-xs text-green-600">{{ $t('banking.imported') }}</p>
             <p class="text-xl font-bold text-green-900">{{ importResult.imported || 0 }}</p>
+          </div>
+          <div class="bg-blue-50 rounded-lg p-3">
+            <p class="text-xs text-blue-600">{{ $t('banking.auto_matched') || 'Совпаднати' }}</p>
+            <p class="text-xl font-bold text-blue-900">{{ importResult.auto_matched || 0 }}</p>
           </div>
           <div class="bg-yellow-50 rounded-lg p-3">
             <p class="text-xs text-yellow-600">{{ $t('banking.skipped') }}</p>
