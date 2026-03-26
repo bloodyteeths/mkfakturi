@@ -94,13 +94,26 @@ class BankingController extends Controller
                             ]);
                         }
 
+                        // Auto-recalculate balance if it's zero but transactions exist
+                        $balance = (float) ($account->current_balance ?? 0);
+                        if ($balance == 0.0) {
+                            $credits = BankTransaction::where('bank_account_id', $account->id)
+                                ->where('transaction_type', BankTransaction::TYPE_CREDIT)->sum('amount');
+                            $debits = BankTransaction::where('bank_account_id', $account->id)
+                                ->where('transaction_type', BankTransaction::TYPE_DEBIT)->sum('amount');
+                            if ($credits > 0 || $debits > 0) {
+                                $balance = (float) $account->opening_balance + (float) $credits - (float) $debits;
+                                $account->update(['current_balance' => round($balance, 2)]);
+                            }
+                        }
+
                         return [
                             'id' => $account->id,
                             'bank_name' => $account->bank_name ?? 'Unknown Bank',
                             'bank_code' => $account->bank_code,
                             'account_number' => $account->account_number ?? '',
                             'iban' => $account->iban ?? '',
-                            'current_balance' => $account->current_balance ?? 0,
+                            'current_balance' => $balance,
                             'currency' => $currencyCode,
                             'bank_logo' => $this->getBankLogo($account->bank_code),
                             'last_sync_at' => $account->updated_at?->toIso8601String(),
