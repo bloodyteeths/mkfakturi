@@ -12,7 +12,8 @@
       </BaseBreadcrumb>
 
       <template #actions>
-        <div class="flex items-center justify-end space-x-5">
+        <div class="flex items-center justify-end space-x-3">
+          <!-- Primary actions -->
           <BaseButton
             variant="primary-outline"
             @click="router.push({ name: 'banking.import' })"
@@ -23,65 +24,46 @@
             {{ $t('banking.import_statement') || 'Import Statement' }}
           </BaseButton>
           <BaseButton
-            variant="primary-outline"
-            @click="router.push({ name: 'banking.import-history' })"
+            variant="primary"
+            @click="showAddAccountModal = true"
           >
             <template #left="slotProps">
-              <BaseIcon name="ClockIcon" :class="slotProps.class" />
+              <BaseIcon name="PlusIcon" :class="slotProps.class" />
             </template>
-            {{ $t('banking.history.title') || 'Import History' }}
+            {{ $t('banking.add_account', 'Додај сметка') }}
           </BaseButton>
-          <BaseButton
-            variant="primary-outline"
-            @click="router.push({ name: 'banking.reconciliation' })"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="ArrowsRightLeftIcon" :class="slotProps.class" />
+
+          <!-- Secondary actions dropdown -->
+          <BaseDropdown width-class="w-48">
+            <template #activator>
+              <BaseButton variant="primary-outline">
+                <template #left="slotProps">
+                  <BaseIcon name="EllipsisVerticalIcon" :class="slotProps.class" />
+                </template>
+                {{ $t('general.more', 'Повеќе') }}
+              </BaseButton>
             </template>
-            {{ $t('banking.reconciliation') || 'Reconciliation' }}
-          </BaseButton>
-          <BaseButton
-            variant="primary-outline"
-            @click="router.push({ name: 'banking.analytics' })"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="ChartBarIcon" :class="slotProps.class" />
-            </template>
-            {{ $t('banking.analytics') || 'Analytics' }}
-          </BaseButton>
-          <BaseButton
-            variant="primary-outline"
-            @click="router.push({ name: 'banking.matching-rules' })"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="AdjustmentsHorizontalIcon" :class="slotProps.class" />
-            </template>
-            {{ $t('matching_rules.title') || 'Matching Rules' }}
-          </BaseButton>
-          <BaseButton
-            variant="primary-outline"
-            @click="showManualEntryModal = true"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="PencilSquareIcon" :class="slotProps.class" />
-            </template>
-            {{ $t('banking.manual_entry.button', 'Manual Entry') }}
-          </BaseButton>
-          <div class="relative">
-            <BaseButton
-              variant="primary"
-              disabled
-              class="opacity-60 cursor-not-allowed"
-            >
-              <template #left="slotProps">
-                <BaseIcon name="PlusIcon" :class="slotProps.class" />
-              </template>
-              {{ $t('banking.connect_bank') }}
-            </BaseButton>
-            <span class="absolute -top-2 -right-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300">
-              {{ $t('general.coming_soon', 'Coming soon') }}
-            </span>
-          </div>
+            <BaseDropdownItem @click="router.push({ name: 'banking.reconciliation' })">
+              <BaseIcon name="ArrowsRightLeftIcon" class="mr-3 h-5 w-5 text-gray-500" />
+              {{ $t('banking.reconciliation') || 'Reconciliation' }}
+            </BaseDropdownItem>
+            <BaseDropdownItem @click="router.push({ name: 'banking.matching-rules' })">
+              <BaseIcon name="AdjustmentsHorizontalIcon" class="mr-3 h-5 w-5 text-gray-500" />
+              {{ $t('matching_rules.title') || 'Matching Rules' }}
+            </BaseDropdownItem>
+            <BaseDropdownItem @click="router.push({ name: 'banking.analytics' })">
+              <BaseIcon name="ChartBarIcon" class="mr-3 h-5 w-5 text-gray-500" />
+              {{ $t('banking.analytics') || 'Analytics' }}
+            </BaseDropdownItem>
+            <BaseDropdownItem @click="router.push({ name: 'banking.import-history' })">
+              <BaseIcon name="ClockIcon" class="mr-3 h-5 w-5 text-gray-500" />
+              {{ $t('banking.history.title') || 'Import History' }}
+            </BaseDropdownItem>
+            <BaseDropdownItem @click="showManualEntryModal = true">
+              <BaseIcon name="PencilSquareIcon" class="mr-3 h-5 w-5 text-gray-500" />
+              {{ $t('banking.manual_entry.button', 'Manual Entry') }}
+            </BaseDropdownItem>
+          </BaseDropdown>
         </div>
       </template>
     </BasePageHeader>
@@ -95,21 +77,15 @@
       <BanknotesIcon class="mt-5 mb-4 w-20 h-20 text-gray-300" />
 
       <template #actions>
-        <div class="relative inline-block">
-          <BaseButton
-            variant="primary-outline"
-            disabled
-            class="opacity-60 cursor-not-allowed"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="PlusIcon" :class="slotProps.class" />
-            </template>
-            {{ $t('banking.connect_first_bank') }}
-          </BaseButton>
-          <span class="absolute -top-2 -right-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300">
-            {{ $t('general.coming_soon', 'Coming soon') }}
-          </span>
-        </div>
+        <BaseButton
+          variant="primary"
+          @click="showAddAccountModal = true"
+        >
+          <template #left="slotProps">
+            <BaseIcon name="PlusIcon" :class="slotProps.class" />
+          </template>
+          {{ $t('banking.add_account', 'Додај сметка') }}
+        </BaseButton>
       </template>
     </BaseEmptyPlaceholder>
 
@@ -293,6 +269,67 @@
       :accounts="manualEntryAccounts"
       @created="onManualEntryCreated"
     />
+
+    <!-- Add Bank Account Modal -->
+    <BaseModal
+      :show="showAddAccountModal"
+      @close="showAddAccountModal = false"
+    >
+      <template #header>
+        <h3 class="text-lg font-semibold">{{ $t('banking.add_account', 'Додај сметка') }}</h3>
+      </template>
+      <form @submit.prevent="createAccount">
+        <BaseInputGroup
+          :label="$t('banking.bank_name', 'Име на банка')"
+          required
+          class="mb-4"
+        >
+          <BaseInput
+            v-model="newAccount.bank_name"
+            :placeholder="$t('banking.bank_name_placeholder', 'пр. Комерцијална Банка')"
+            required
+          />
+        </BaseInputGroup>
+        <BaseInputGroup
+          :label="$t('banking.account_number', 'Број на сметка')"
+          required
+          class="mb-4"
+        >
+          <BaseInput
+            v-model="newAccount.account_number"
+            :placeholder="$t('banking.account_number_placeholder', 'пр. 300000000000123')"
+            required
+          />
+        </BaseInputGroup>
+        <BaseInputGroup
+          :label="$t('banking.opening_balance', 'Почетно салдо')"
+          class="mb-4"
+        >
+          <BaseInput
+            v-model="newAccount.opening_balance"
+            type="number"
+            step="0.01"
+            placeholder="0.00"
+          />
+        </BaseInputGroup>
+        <div class="flex justify-end space-x-3 mt-6">
+          <BaseButton
+            variant="primary-outline"
+            type="button"
+            @click="showAddAccountModal = false"
+          >
+            {{ $t('general.cancel') }}
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            type="submit"
+            :loading="isCreatingAccount"
+          >
+            {{ $t('general.save') }}
+          </BaseButton>
+        </div>
+      </form>
+    </BaseModal>
   </BasePage>
 </template>
 
@@ -320,6 +357,9 @@ const isLoadingAccounts = ref(true)
 const showConnectModal = ref(false)
 const showCategorizationModal = ref(false)
 const showManualEntryModal = ref(false)
+const showAddAccountModal = ref(false)
+const isCreatingAccount = ref(false)
+const newAccount = ref({ bank_name: '', account_number: '', opening_balance: null })
 const selectedTransaction = ref(null)
 const showFilters = ref(false)
 
@@ -456,6 +496,28 @@ const manualEntryAccounts = computed(() => {
 const onManualEntryCreated = () => {
   // Refresh accounts and transactions
   fetchConnectedAccounts()
+}
+
+const createAccount = async () => {
+  isCreatingAccount.value = true
+  try {
+    await axios.post('/banking/accounts', newAccount.value)
+    showAddAccountModal.value = false
+    newAccount.value = { bank_name: '', account_number: '', opening_balance: null }
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('banking.account_created', 'Сметката е додадена успешно')
+    })
+    await fetchConnectedAccounts()
+  } catch (error) {
+    console.error('Failed to create account:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('banking.account_create_failed', 'Грешка при додавање на сметка')
+    })
+  } finally {
+    isCreatingAccount.value = false
+  }
 }
 
 const toggleFilters = () => {

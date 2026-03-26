@@ -2341,49 +2341,59 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
         if not contents:
             raise HTTPException(status_code=400, detail="Empty file")
 
-        if pytesseract is None or Image is None:
-            raise HTTPException(
-                status_code=500,
-                detail="OCR not available (pytesseract/Pillow missing)",
-            )
-
-        # Preprocess image for better table extraction
-        processed_image = _preprocess_for_table(contents)
-        original_image = _open_image_with_exif(contents)
-        width, height = original_image.size
-
-        langs = os.getenv("OCR_LANGS", "mkd+eng+srp")
-        logger.info(f"Bank statement OCR with languages: {langs}")
-
-        # Step 1: Extract plain text for metadata (bank name, date, account)
-        plain_text = pytesseract.image_to_string(
-            original_image, lang=langs, config="--oem 3 --psm 3"
-        )
-        logger.info(f"Plain text extracted: {len(plain_text)} chars")
-        logger.info(f"First 300 chars: {plain_text[:300]}")
-
-        bank_code, bank_name = _detect_bank_from_text(plain_text)
-        statement_date = _extract_statement_date(plain_text)
-        account_number = _extract_account_number(plain_text)
-
-        logger.info(
-            f"Detected: bank={bank_code}, date={statement_date}, account={account_number}"
-        )
-
-        # Step 2: Primary extraction via Gemini Vision (if available)
-        transactions: List[Dict[str, Any]] = []
-        extraction_method = "none"
-        avg_confidence = 0.0
-
-        # Determine MIME type for Gemini
+        # Determine MIME type early
         fname = (file.filename or "").lower()
+        is_pdf = fname.endswith(".pdf")
         if fname.endswith(".png"):
             mime_type = "image/png"
-        elif fname.endswith(".pdf"):
+        elif is_pdf:
             mime_type = "application/pdf"
         else:
             mime_type = "image/jpeg"
 
+        transactions: List[Dict[str, Any]] = []
+        extraction_method = "none"
+        avg_confidence = 0.0
+        plain_text = ""
+        bank_code, bank_name = None, None
+        statement_date, account_number = None, None
+        width, height = 0, 0
+        processed_image, original_image = None, None
+
+        # For PDFs: skip Tesseract (Pillow can't open PDFs), go straight to Gemini
+        if not is_pdf:
+            if pytesseract is None or Image is None:
+                raise HTTPException(
+                    status_code=500,
+                    detail="OCR not available (pytesseract/Pillow missing)",
+                )
+
+            # Preprocess image for better table extraction
+            processed_image = _preprocess_for_table(contents)
+            original_image = _open_image_with_exif(contents)
+            width, height = original_image.size
+
+            langs = os.getenv("OCR_LANGS", "mkd+eng+srp")
+            logger.info(f"Bank statement OCR with languages: {langs}")
+
+            # Step 1: Extract plain text for metadata (bank name, date, account)
+            plain_text = pytesseract.image_to_string(
+                original_image, lang=langs, config="--oem 3 --psm 3"
+            )
+            logger.info(f"Plain text extracted: {len(plain_text)} chars")
+            logger.info(f"First 300 chars: {plain_text[:300]}")
+
+            bank_code, bank_name = _detect_bank_from_text(plain_text)
+            statement_date = _extract_statement_date(plain_text)
+            account_number = _extract_account_number(plain_text)
+
+            logger.info(
+                f"Detected: bank={bank_code}, date={statement_date}, account={account_number}"
+            )
+        else:
+            logger.info("PDF file detected, skipping Tesseract, using Gemini directly")
+
+        # Step 2: Primary extraction via Gemini Vision (handles both images and PDFs)
         gemini_txs = await _extract_with_gemini(contents, mime_type)
         if gemini_txs:
             transactions = gemini_txs
@@ -2397,7 +2407,7 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
         debug_tsv_lines: Dict[str, List[str]] = {}
         winning_key = ""
 
-        if not transactions:
+        if not transactions and not is_pdf and original_image is not None:
             logger.info("Gemini unavailable/failed, falling back to Tesseract")
             for psm, img_label, img in [
                 (6, "original", original_image),
@@ -2441,7 +2451,7 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
                         sum(all_confs) / len(all_confs) if all_confs else 0
                     )
 
-        if not transactions:
+        if not transactions and plain_text:
             # Final fallback: parse from plain text using regex patterns
             logger.info("All TSV extraction failed, falling back to plain-text")
             transactions = _extract_transactions_from_text(plain_text)

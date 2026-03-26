@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -77,11 +79,11 @@ class Handler extends ExceptionHandler
         // Log critical errors to separate channel for monitoring
         if (in_array($logLevel, ['critical', 'emergency', 'alert'])) {
             Log::channel('critical')->log($logLevel, "CRITICAL: {$exception->getMessage()}", $context);
+        }
 
-            // Send notifications for critical errors in production
-            if (app()->environment('production')) {
-                $this->notifyCriticalError($exception, $context);
-            }
+        // Email admin on any server error (5xx) a user encounters in production
+        if (app()->environment('production') && in_array($logLevel, ['critical', 'emergency', 'alert', 'error'])) {
+            $this->notifyUserError($exception, $context);
         }
 
         // Log security-related errors
@@ -434,44 +436,61 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * Send notifications for critical errors
+     * Email admin when a user encounters a server error.
+     * Rate-limited: same error type + message only alerts once per 15 minutes.
      */
-    protected function notifyCriticalError(Throwable $exception, array $context): void
+    protected function notifyUserError(Throwable $exception, array $context): void
     {
         try {
-            // Send Slack notification if configured
-            if (config('logging.channels.slack_critical.url')) {
-                Log::channel('slack_critical')->critical('Critical Error Alert', [
-                    'exception' => get_class($exception),
-                    'message' => $exception->getMessage(),
-                    'file' => $exception->getFile(),
-                    'line' => $exception->getLine(),
-                    'url' => $context['url'] ?? 'Unknown',
-                    'user_id' => $context['user_id'] ?? 'Guest',
-                    'company_id' => $context['company_id'] ?? 'Unknown',
-                    'timestamp' => $context['timestamp'] ?? now()->toISOString(),
-                ]);
+            $adminEmail = env('ADMIN_EMAIL');
+            if (empty($adminEmail)) {
+                return;
             }
 
-            // Send email notification if configured
-            if (config('logging.channels.email_critical') && env('LOG_EMAIL_RECIPIENTS')) {
-                Log::channel('email_critical')->critical('Critical System Error', [
-                    'exception_class' => get_class($exception),
-                    'message' => $exception->getMessage(),
-                    'file' => $exception->getFile(),
-                    'line' => $exception->getLine(),
-                    'stack_trace' => $exception->getTraceAsString(),
-                    'context' => $context,
-                ]);
+            // Rate-limit: deduplicate by exception class + truncated message
+            $dedupKey = 'user_error_alert:' . md5(get_class($exception) . ':' . Str::limit($exception->getMessage(), 100));
+            if (Cache::has($dedupKey)) {
+                // Increment counter for suppressed occurrences
+                Cache::increment($dedupKey . ':count');
+                return;
             }
+            Cache::put($dedupKey, true, now()->addMinutes(15));
+            Cache::put($dedupKey . ':count', 1, now()->addMinutes(15));
 
-            // Log to Sentry if configured
-            if (config('logging.channels.sentry') && function_exists('\\Sentry\\captureException')) {
-                \Sentry\captureException($exception);
-            }
-        } catch (\Exception $notificationException) {
-            // If notification fails, log the failure but don't throw
-            Log::error("Failed to send critical error notification: {$notificationException->getMessage()}");
+            $userId = $context['user_id'] ?? 'Guest';
+            $companyId = $context['company_id'] ?? 'N/A';
+            $url = $context['url'] ?? 'Unknown';
+            $method = $context['method'] ?? 'Unknown';
+            $exClass = class_basename($exception);
+            $message = Str::limit($exception->getMessage(), 500);
+            $file = basename($exception->getFile()) . ':' . $exception->getLine();
+            $time = now()->timezone('Europe/Skopje')->format('H:i:s d.m.Y');
+
+            $html = <<<HTML
+            <p style="color:#dc2626;font-weight:bold;">🔴 User Error — {$exClass}</p>
+            <table style="border-collapse:collapse;font-family:monospace;font-size:13px;">
+                <tr><td style="padding:4px 12px 4px 0;color:#666;">Error</td><td>{$message}</td></tr>
+                <tr><td style="padding:4px 12px 4px 0;color:#666;">URL</td><td>{$method} {$url}</td></tr>
+                <tr><td style="padding:4px 12px 4px 0;color:#666;">User</td><td>ID: {$userId}</td></tr>
+                <tr><td style="padding:4px 12px 4px 0;color:#666;">Company</td><td>ID: {$companyId}</td></tr>
+                <tr><td style="padding:4px 12px 4px 0;color:#666;">File</td><td>{$file}</td></tr>
+                <tr><td style="padding:4px 12px 4px 0;color:#666;">Time</td><td>{$time}</td></tr>
+            </table>
+            <p style="font-size:12px;color:#999;">Repeated alerts for this error are suppressed for 15 min.</p>
+            HTML;
+
+            $subject = "Facturino Error: {$exClass} — " . Str::limit($exception->getMessage(), 60);
+
+            Mail::html($html, function ($msg) use ($adminEmail, $subject) {
+                $msg->to($adminEmail)
+                    ->from(config('mail.from.address', 'fakturi@facturino.mk'), 'Facturino Errors')
+                    ->subject($subject);
+                $msg->getSymfonyMessage()
+                    ->getHeaders()
+                    ->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
+        } catch (\Exception $e) {
+            Log::warning('Failed to send user error alert email: ' . $e->getMessage());
         }
     }
 

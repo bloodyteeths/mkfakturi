@@ -111,6 +111,14 @@ if (InstallUtils::isDbCreated()) {
         ->runInBackground()
         ->withoutOverlapping();
 
+    // External service health monitor - runs every 15 minutes
+    // Alerts ADMIN_EMAIL on first failure, suppresses repeats, sends recovery notice
+    Schedule::command('services:monitor')
+        ->everyFifteenMinutes()
+        ->runInBackground()
+        ->name('services-monitor')
+        ->withoutOverlapping();
+
     // Health check self-test - runs every hour
     Schedule::call(function () {
         try {
