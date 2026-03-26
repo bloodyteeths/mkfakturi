@@ -113,6 +113,7 @@ class ReconciliationController extends Controller
         $invoice = Invoice::where('company_id', $company->id)
             ->where('id', $request->invoice_id)
             ->whereIn('status', [
+                Invoice::STATUS_DRAFT,
                 Invoice::STATUS_SENT,
                 Invoice::STATUS_VIEWED,
                 Invoice::STATUS_PARTIALLY_PAID,
@@ -164,13 +165,14 @@ class ReconciliationController extends Controller
 
         $invoices = Invoice::where('company_id', $company->id)
             ->whereIn('status', [
+                Invoice::STATUS_DRAFT,
                 Invoice::STATUS_SENT,
                 Invoice::STATUS_VIEWED,
                 Invoice::STATUS_PARTIALLY_PAID,
             ])
             ->with('customer:id,name')
             ->orderBy('due_date', 'asc')
-            ->get(['id', 'invoice_number', 'total', 'due_date', 'customer_id']);
+            ->get(['id', 'invoice_number', 'total', 'due_date', 'status', 'customer_id']);
 
         return response()->json([
             'data' => $invoices->map(fn ($inv) => [
@@ -178,6 +180,7 @@ class ReconciliationController extends Controller
                 'invoice_number' => $inv->invoice_number,
                 'total' => (float) $inv->total,
                 'due_date' => $inv->due_date,
+                'status' => $inv->status,
                 'customer_name' => $inv->customer->name ?? 'Unknown',
             ]),
         ]);

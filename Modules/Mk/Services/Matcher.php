@@ -397,6 +397,7 @@ class Matcher
     {
         return Invoice::where('company_id', $this->companyId)
             ->whereIn('status', [
+                Invoice::STATUS_DRAFT,
                 Invoice::STATUS_SENT,
                 Invoice::STATUS_VIEWED,
                 Invoice::STATUS_PARTIALLY_PAID,

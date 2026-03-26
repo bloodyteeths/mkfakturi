@@ -236,20 +236,36 @@
           <p class="text-sm text-gray-900">{{ selectedTransaction.description }}</p>
         </div>
 
-        <div v-if="unpaidInvoices.length === 0" class="text-center py-4 text-gray-500">
+        <!-- Search filter -->
+        <div class="mb-3">
+          <input
+            v-model="invoiceSearch"
+            type="text"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+            :placeholder="$t('general.search') || 'Search invoices...'"
+          />
+        </div>
+
+        <div v-if="filteredInvoices.length === 0" class="text-center py-4 text-gray-500">
           {{ $t('banking.no_unpaid_invoices') }}
         </div>
 
         <div v-else class="space-y-2 max-h-96 overflow-y-auto">
           <div
-            v-for="invoice in unpaidInvoices"
+            v-for="invoice in filteredInvoices"
             :key="invoice.id"
             class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-blue-50"
             :class="{ 'border-blue-500 bg-blue-50': selectedInvoiceId === invoice.id }"
             @click="selectedInvoiceId = invoice.id"
           >
             <div>
-              <p class="font-medium text-gray-900">{{ invoice.invoice_number }}</p>
+              <p class="font-medium text-gray-900">
+                {{ invoice.invoice_number }}
+                <span
+                  v-if="invoice.status === 'DRAFT'"
+                  class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600"
+                >DRAFT</span>
+              </p>
               <p class="text-sm text-gray-500">{{ invoice.customer_name }}</p>
               <p class="text-xs text-gray-400">{{ $t('general.due') }}: {{ formatDate(invoice.due_date) }}</p>
             </div>
@@ -298,7 +314,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
@@ -327,6 +343,17 @@ const meta = ref({
 const showManualMatchModal = ref(false)
 const selectedTransaction = ref(null)
 const selectedInvoiceId = ref(null)
+const invoiceSearch = ref('')
+
+const filteredInvoices = computed(() => {
+  if (!invoiceSearch.value) return unpaidInvoices.value
+  const q = invoiceSearch.value.toLowerCase()
+  return unpaidInvoices.value.filter(inv =>
+    (inv.invoice_number || '').toLowerCase().includes(q) ||
+    (inv.customer_name || '').toLowerCase().includes(q) ||
+    String(inv.total).includes(q)
+  )
+})
 
 // P0-14: Split payment state
 const showSplitModal = ref(false)
@@ -422,6 +449,7 @@ const acceptMatch = async (transaction, match) => {
 const openManualMatchModal = async (transaction) => {
   selectedTransaction.value = transaction
   selectedInvoiceId.value = null
+  invoiceSearch.value = ''
   await fetchUnpaidInvoices()
   showManualMatchModal.value = true
 }
