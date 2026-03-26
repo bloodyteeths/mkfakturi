@@ -336,31 +336,11 @@ class BankImportController extends Controller
                 'import_log_id' => $importLog?->id,
             ]);
 
-            // Auto-reconcile: run matching on newly imported transactions
-            $autoMatched = 0;
-            if ($result->created > 0) {
-                try {
-                    $locale = $request->header('Accept-Language', 'mk');
-                    $matcher = new \Modules\Mk\Services\Matcher($company->id, 90, 0.01, $locale);
-                    $matches = $matcher->matchAllTransactions();
-                    $autoMatched = count($matches);
-                    Log::info('Auto-reconciliation after import', [
-                        'company_id' => $company->id,
-                        'auto_matched' => $autoMatched,
-                    ]);
-                } catch (\Exception $e) {
-                    Log::warning('Auto-reconciliation failed (non-blocking)', [
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
-
             return response()->json([
                 'data' => [
                     'imported' => $result->created,
                     'duplicates' => $duplicatesFromPreview + $result->duplicates,
                     'failed' => $result->failed,
-                    'auto_matched' => $autoMatched,
                     'import_log_id' => $importLog?->id,
                 ],
             ]);
