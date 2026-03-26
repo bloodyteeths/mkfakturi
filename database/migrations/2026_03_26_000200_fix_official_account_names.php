@@ -111,12 +111,16 @@ return new class extends Migration
         // ═══════════════════════════════════════════════════════════
 
         if (Schema::hasColumn('payment_methods', 'account_code')) {
-            // Check if swap is needed by looking for "Cash" method with code 100
-            // After swap, Cash should be 102 and Bank should be 100
-            $cashWith100 = DB::table('payment_methods')
+            // Check if swap is needed: fetch methods with code 100, check names in PHP
+            // to avoid utf8mb3/utf8mb4 collation mismatch in MySQL WHERE clause
+            $methodsWith100 = DB::table('payment_methods')
                 ->where('account_code', '100')
-                ->whereRaw("LOWER(name) IN ('cash', 'готовина', 'каса')")
-                ->exists();
+                ->pluck('name');
+
+            $cashNames = ['cash', 'готовина', 'каса'];
+            $cashWith100 = $methodsWith100->contains(function ($name) use ($cashNames) {
+                return in_array(mb_strtolower($name), $cashNames);
+            });
 
             if ($cashWith100) {
                 // Old mapping detected — perform swap
