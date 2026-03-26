@@ -1214,6 +1214,12 @@ export default [
         component: () => import('@/scripts/admin/views/partner/accounting/VatBooks.vue'),
       },
       {
+        path: 'partner/accounting/trade-book',
+        name: 'partner.accounting.trade-book',
+        meta: { isPartner: true },
+        component: () => import('@/scripts/admin/views/partner/accounting/TradeBook.vue'),
+      },
+      {
         path: 'partner/accounting/ios-statement',
         name: 'partner.accounting.ios-statement',
         meta: { isPartner: true },

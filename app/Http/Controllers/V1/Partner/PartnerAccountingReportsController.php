@@ -999,6 +999,246 @@ class PartnerAccountingReportsController extends Controller
         usort($byRate, fn($a, $b) => $b['rate'] <=> $a['rate']);
         return array_values($byRate);
     }
+    /**
+     * Trade Book (Трговска книга) — Образец "ET" per Правилник Сл. весник 51/04
+     *
+     * Chronological evidence of purchase (набавка) and sales (продажба) transactions.
+     * Columns per UJP regulation:
+     *   1. Реден број
+     *   2. Датум на книжење
+     *   3. Книговодствен документ (назив и број)
+     *   4. Датум на документот
+     *   5. Набавна вредност на стоките
+     *   6. Продажна вредност на стоките
+     *   7. Дневен промет
+     */
+    public function tradeBook(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner || !$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        if (!$fromDate || !$toDate) {
+            return response()->json(['error' => 'Потребни се и почетен и краен датум.', 'message' => 'Потребни се и почетен и краен датум.'], 422);
+        }
+        if ($fromDate > $toDate) {
+            return response()->json(['error' => 'Почетниот датум не може да биде после крајниот.', 'message' => 'Почетниот датум не може да биде после крајниот.'], 422);
+        }
+
+        $entries = collect();
+
+        // 1. Sales invoices (излезни фактури) → Набавна = 0, Продажна = total
+        $invoices = \App\Models\Invoice::where('company_id', $company)
+            ->whereNotIn('status', ['DRAFT'])
+            ->with('customer')
+            ->where('invoice_date', '>=', $fromDate)
+            ->where('invoice_date', '<=', $toDate)
+            ->orderBy('invoice_date')
+            ->get();
+
+        foreach ($invoices as $inv) {
+            $entries->push([
+                'date' => $inv->invoice_date instanceof \DateTimeInterface ? $inv->invoice_date->format('Y-m-d') : ($inv->invoice_date ?? ''),
+                'doc_name' => 'Фактура',
+                'doc_number' => $inv->invoice_number ?? '',
+                'doc_date' => $inv->invoice_date instanceof \DateTimeInterface ? $inv->invoice_date->format('Y-m-d') : ($inv->invoice_date ?? ''),
+                'party' => $inv->customer?->name ?? '',
+                'nabavna' => 0,
+                'prodazhna' => (int) ($inv->total ?? 0),
+                'promet' => (int) ($inv->total ?? 0),
+                'doc_type' => 'invoice',
+            ]);
+        }
+
+        // 2. Credit notes → negative prodazhna
+        $creditNotes = \App\Models\CreditNote::where('company_id', $company)
+            ->whereNotIn('status', ['DRAFT'])
+            ->with('customer')
+            ->where('credit_note_date', '>=', $fromDate)
+            ->where('credit_note_date', '<=', $toDate)
+            ->orderBy('credit_note_date')
+            ->get();
+
+        foreach ($creditNotes as $cn) {
+            $entries->push([
+                'date' => $cn->credit_note_date instanceof \DateTimeInterface ? $cn->credit_note_date->format('Y-m-d') : ($cn->credit_note_date ?? ''),
+                'doc_name' => 'Кредит нота',
+                'doc_number' => $cn->credit_note_number ?? '',
+                'doc_date' => $cn->credit_note_date instanceof \DateTimeInterface ? $cn->credit_note_date->format('Y-m-d') : ($cn->credit_note_date ?? ''),
+                'party' => $cn->customer?->name ?? '',
+                'nabavna' => 0,
+                'prodazhna' => -abs((int) ($cn->total ?? 0)),
+                'promet' => -abs((int) ($cn->total ?? 0)),
+                'doc_type' => 'credit_note',
+            ]);
+        }
+
+        // 3. Bills (влезни фактури) → Набавна = total, Продажна = 0
+        $bills = \App\Models\Bill::where('company_id', $company)
+            ->whereNotIn('status', ['DRAFT'])
+            ->with('supplier')
+            ->where('bill_date', '>=', $fromDate)
+            ->where('bill_date', '<=', $toDate)
+            ->orderBy('bill_date')
+            ->get();
+
+        foreach ($bills as $bill) {
+            $entries->push([
+                'date' => $bill->bill_date instanceof \DateTimeInterface ? $bill->bill_date->format('Y-m-d') : ($bill->bill_date ?? ''),
+                'doc_name' => 'Влезна фактура',
+                'doc_number' => $bill->bill_number ?? '',
+                'doc_date' => $bill->bill_date instanceof \DateTimeInterface ? $bill->bill_date->format('Y-m-d') : ($bill->bill_date ?? ''),
+                'party' => $bill->supplier?->name ?? '',
+                'nabavna' => (int) ($bill->total ?? 0),
+                'prodazhna' => 0,
+                'promet' => 0,
+                'doc_type' => 'bill',
+            ]);
+        }
+
+        // 4. Expenses → Набавна = amount, Продажна = 0
+        $expenses = \App\Models\Expense::where('company_id', $company)
+            ->with('category')
+            ->where('expense_date', '>=', $fromDate)
+            ->where('expense_date', '<=', $toDate)
+            ->orderBy('expense_date')
+            ->get();
+
+        foreach ($expenses as $exp) {
+            $entries->push([
+                'date' => $exp->expense_date instanceof \DateTimeInterface ? $exp->expense_date->format('Y-m-d') : ($exp->expense_date ?? ''),
+                'doc_name' => 'Трошок',
+                'doc_number' => $exp->expense_number ?? ('EXP-' . $exp->id),
+                'doc_date' => $exp->expense_date instanceof \DateTimeInterface ? $exp->expense_date->format('Y-m-d') : ($exp->expense_date ?? ''),
+                'party' => $exp->category?->name ?? '',
+                'nabavna' => (int) ($exp->amount ?? 0),
+                'prodazhna' => 0,
+                'promet' => 0,
+                'doc_type' => 'expense',
+            ]);
+        }
+
+        // Sort chronologically, assign sequential numbers
+        $sorted = $entries->sortBy('date')->values();
+
+        // Aggregate daily promet (дневен промет)
+        $dailyPromet = [];
+        foreach ($sorted as $entry) {
+            $d = $entry['date'];
+            if (!isset($dailyPromet[$d])) {
+                $dailyPromet[$d] = 0;
+            }
+            $dailyPromet[$d] += $entry['promet'];
+        }
+
+        $result = [];
+        $totalNabavna = 0;
+        $totalProdazhna = 0;
+        $totalPromet = 0;
+        $lastDate = null;
+
+        foreach ($sorted as $i => $entry) {
+            $totalNabavna += $entry['nabavna'];
+            $totalProdazhna += $entry['prodazhna'];
+            $totalPromet += $entry['promet'];
+
+            // Show daily promet only on last entry for each date
+            $showDailyPromet = true;
+            $remaining = $sorted->slice($i + 1);
+            foreach ($remaining as $next) {
+                if ($next['date'] === $entry['date']) {
+                    $showDailyPromet = false;
+                    break;
+                }
+                break; // only check next entry
+            }
+
+            $result[] = [
+                'seq' => $i + 1,
+                'date' => $entry['date'],
+                'doc_name' => $entry['doc_name'],
+                'doc_number' => $entry['doc_number'],
+                'doc_date' => $entry['doc_date'],
+                'party' => $entry['party'],
+                'nabavna' => $entry['nabavna'],
+                'prodazhna' => $entry['prodazhna'],
+                'promet' => $showDailyPromet ? ($dailyPromet[$entry['date']] ?? 0) : null,
+                'doc_type' => $entry['doc_type'],
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'entries' => $result,
+                'summary' => [
+                    'total_nabavna' => $totalNabavna,
+                    'total_prodazhna' => $totalProdazhna,
+                    'total_promet' => $totalPromet,
+                    'count' => count($result),
+                ],
+                'period' => [
+                    'from_date' => $fromDate,
+                    'to_date' => $toDate,
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Export Trade Book as PDF — Образец "ET"
+     */
+    public function tradeBookExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            abort(404, 'Partner not found');
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'No access to this company');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+        $companyModel->load('address');
+
+        $fromDate = $request->query('from_date', now()->startOfMonth()->toDateString());
+        $toDate = $request->query('to_date', now()->toDateString());
+
+        // Reuse the JSON endpoint logic
+        $jsonRequest = new Request(['from_date' => $fromDate, 'to_date' => $toDate]);
+        $jsonRequest->setUserResolver(function () use ($request) { return $request->user(); });
+        $jsonResponse = $this->tradeBook($jsonRequest, $companyModel->id);
+        $data = json_decode($jsonResponse->getContent(), true)['data'] ?? [];
+
+        $entries = $data['entries'] ?? [];
+        $summary = $data['summary'] ?? [];
+
+        $currency = \App\Models\Currency::find(
+            CompanySetting::getSetting('currency', $company)
+        );
+
+        view()->share([
+            'company' => $companyModel,
+            'entries' => $entries,
+            'summary' => $summary,
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'report_period' => $fromDate . ' - ' . $toDate,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.trade-book');
+        $pdf->setPaper('a4', 'landscape');
+
+        return $pdf->download("trgovska_kniga_{$fromDate}_{$toDate}.pdf");
+    }
 }
 // CLAUDE-CHECKPOINT
 

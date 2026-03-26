@@ -1041,6 +1041,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/upload', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'upload']);
                 Route::get('/', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'index']);
                 Route::get('/{id}/download', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'download']);
+                Route::get('/{id}/preview', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'preview']);
                 Route::get('/{id}/processing-status', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'processingStatus']);
                 Route::post('/{id}/confirm', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'confirm']);
                 Route::post('/{id}/reprocess', [\App\Http\Controllers\V1\Client\ClientDocumentController::class, 'reprocess']);
@@ -1802,6 +1803,8 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/equity-changes/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'equityChangesExport']);
         Route::get('/vat-books', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'vatBooks']);
         Route::get('/vat-books/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'vatBooksExport']);
+        Route::get('/trade-book', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'tradeBook']);
+        Route::get('/trade-book/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'tradeBookExport']);
 
         // F1: Compensations (Partner)
         Route::prefix('compensations')->group(function () {

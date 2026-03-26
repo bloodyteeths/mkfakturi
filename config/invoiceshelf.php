@@ -937,6 +937,18 @@ return [
             'feature_flag' => 'accounting_backbone',
         ],
         [
+            'title' => 'partner.accounting.trade_book',
+            'group' => 'partner.accounting',
+            'submenu' => 'compliance',
+            'link' => '/admin/partner/accounting/trade-book',
+            'icon' => 'BookOpenIcon',
+            'name' => 'partner.accounting.trade-book',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => '',
+        ],
+        [
             'title' => 'partner.accounting.vat_returns',
             'group' => 'partner.accounting',
             'submenu' => 'compliance',
