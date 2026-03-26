@@ -34,7 +34,7 @@ class ReconciliationController extends Controller
         // Get unmatched transactions (P0-13: explicit tenant scope)
         $transactions = BankTransaction::forCompany($company->id)
             ->whereNull('matched_invoice_id')
-            ->where('amount', '>', 0)
+            ->where('transaction_type', BankTransaction::TYPE_CREDIT)
             ->orderBy('transaction_date', 'desc')
             ->paginate($request->get('limit', 20));
 
@@ -47,6 +47,7 @@ class ReconciliationController extends Controller
                 'transaction_date' => $transaction->transaction_date,
                 'amount' => (float) $transaction->amount,
                 'currency' => $transaction->currency,
+                'transaction_type' => $transaction->transaction_type,
                 'description' => $transaction->description,
                 'remittance_info' => $transaction->remittance_info,
                 'counterparty_name' => $transaction->creditor_name ?? $transaction->debtor_name,

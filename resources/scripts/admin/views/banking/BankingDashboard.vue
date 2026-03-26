@@ -63,6 +63,10 @@
               <BaseIcon name="PencilSquareIcon" class="mr-3 h-5 w-5 text-gray-500" />
               {{ $t('banking.manual_entry.button', 'Manual Entry') }}
             </BaseDropdownItem>
+            <BaseDropdownItem @click="exportTransactions">
+              <BaseIcon name="ArrowDownTrayIcon" class="mr-3 h-5 w-5 text-gray-500" />
+              {{ $t('banking.export', 'Export CSV') }}
+            </BaseDropdownItem>
           </BaseDropdown>
         </div>
       </template>
@@ -407,6 +411,29 @@ const fetchConnectedAccounts = async () => {
     })
   } finally {
     isLoadingAccounts.value = false
+  }
+}
+
+const exportTransactions = async () => {
+  try {
+    const params = { ...filters.value }
+    const response = await axios.get('/banking/transactions/export', {
+      params,
+      responseType: 'blob',
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `transactions_${new Date().toISOString().split('T')[0]}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: 'Failed to export transactions',
+    })
   }
 }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\Company;
+use App\Models\Invoice;
 use App\Models\Currency;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
@@ -265,6 +266,7 @@ class BankingController extends Controller
                         'booking_date' => $transaction->booking_date?->toIso8601String(),
                         'amount' => $transaction->amount ?? 0,
                         'currency' => $transaction->currency ?? 'MKD',
+                        'transaction_type' => $transaction->transaction_type ?? 'credit',
                         'description' => $transaction->description ?? '',
                         'remittance_info' => $transaction->remittance_info ?? '',
                         'transaction_reference' => $transaction->transaction_reference ?? '',
@@ -1077,6 +1079,214 @@ PROMPT;
 
             return new NullAiProvider($provider, $e->getMessage());
         }
+    }
+
+    /**
+     * Delete a single bank transaction.
+     */
+    public function deleteTransaction(Request $request, int $id): JsonResponse
+    {
+        $company = $this->resolveCompany($request);
+        if (! $company) {
+            return response()->json(['error' => 'No company found'], 404);
+        }
+
+        $transaction = BankTransaction::where('company_id', $company->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        if ($transaction->matched_invoice_id) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Cannot delete a matched transaction. Unmatch it first.',
+            ], 422);
+        }
+
+        $transaction->delete();
+
+        return response()->json(['success' => true, 'message' => 'Transaction deleted']);
+    }
+
+    /**
+     * Bulk delete bank transactions.
+     */
+    public function bulkDeleteTransactions(Request $request): JsonResponse
+    {
+        $company = $this->resolveCompany($request);
+        if (! $company) {
+            return response()->json(['error' => 'No company found'], 404);
+        }
+
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer',
+        ]);
+
+        $query = BankTransaction::where('company_id', $company->id)
+            ->whereIn('id', $request->ids)
+            ->whereNull('matched_invoice_id');
+
+        $count = $query->count();
+        $query->delete();
+
+        $skipped = count($request->ids) - $count;
+
+        return response()->json([
+            'success' => true,
+            'deleted' => $count,
+            'skipped' => $skipped,
+            'message' => $skipped > 0
+                ? "Deleted {$count} transactions. {$skipped} matched transactions were skipped."
+                : "Deleted {$count} transactions.",
+        ]);
+    }
+
+    /**
+     * Delete all transactions from a specific import.
+     */
+    public function deleteImport(Request $request, int $logId): JsonResponse
+    {
+        $company = $this->resolveCompany($request);
+        if (! $company) {
+            return response()->json(['error' => 'No company found'], 404);
+        }
+
+        $importLog = \App\Models\BankImportLog::where('company_id', $company->id)
+            ->where('id', $logId)
+            ->firstOrFail();
+
+        // Delete unmatched transactions from this import (matched ones are skipped)
+        $query = BankTransaction::where('company_id', $company->id)
+            ->where('source', BankTransaction::SOURCE_CSV_IMPORT)
+            ->whereJsonContains('raw_data->import_log_id', $importLog->id);
+
+        // If raw_data doesn't have import_log_id, fall back to date/bank matching
+        $count = $query->count();
+
+        if ($count === 0) {
+            // Fallback: delete by created_at range around the import time
+            $importTime = $importLog->created_at;
+            $count = BankTransaction::where('company_id', $company->id)
+                ->whereNull('matched_invoice_id')
+                ->where('created_at', '>=', $importTime->copy()->subMinutes(1))
+                ->where('created_at', '<=', $importTime->copy()->addMinutes(5))
+                ->delete();
+        } else {
+            $query->whereNull('matched_invoice_id')->delete();
+        }
+
+        // Mark import log as deleted
+        $importLog->update(['status' => 'deleted']);
+
+        return response()->json([
+            'success' => true,
+            'deleted' => $count,
+            'message' => "Deleted {$count} transactions from this import.",
+        ]);
+    }
+
+    /**
+     * Unmatch a transaction from its invoice (reverse a match).
+     */
+    public function unmatchTransaction(Request $request, int $id): JsonResponse
+    {
+        $company = $this->resolveCompany($request);
+        if (! $company) {
+            return response()->json(['error' => 'No company found'], 404);
+        }
+
+        $transaction = BankTransaction::where('company_id', $company->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        if (! $transaction->matched_invoice_id) {
+            return response()->json(['error' => true, 'message' => 'Transaction is not matched'], 422);
+        }
+
+        // Remove the payment that was created for this match
+        if ($transaction->matched_payment_id) {
+            $payment = \App\Models\Payment::find($transaction->matched_payment_id);
+            if ($payment) {
+                // Recalculate invoice paid status
+                $invoice = \App\Models\Invoice::find($transaction->matched_invoice_id);
+                if ($invoice) {
+                    $remainingPaid = $invoice->payments()->where('id', '!=', $payment->id)->sum('amount');
+                    if ($remainingPaid <= 0) {
+                        $invoice->update([
+                            'status' => Invoice::STATUS_SENT,
+                            'paid_status' => Invoice::STATUS_UNPAID,
+                        ]);
+                    } elseif ($remainingPaid < $invoice->total) {
+                        $invoice->update(['paid_status' => Invoice::STATUS_PARTIALLY_PAID]);
+                    }
+                }
+                $payment->delete();
+            }
+        }
+
+        $transaction->update([
+            'matched_invoice_id' => null,
+            'matched_payment_id' => null,
+            'matched_at' => null,
+            'match_confidence' => null,
+            'processing_status' => BankTransaction::STATUS_UNPROCESSED,
+            'processed_at' => null,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Transaction unmatched successfully']);
+    }
+
+    /**
+     * Export transactions as CSV.
+     */
+    public function exportTransactions(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $company = $this->resolveCompany($request);
+        if (! $company) {
+            abort(404, 'No company found');
+        }
+
+        $query = BankTransaction::where('company_id', $company->id)
+            ->orderBy('transaction_date', 'desc');
+
+        if ($request->account_id) {
+            $query->where('bank_account_id', $request->account_id);
+        }
+        if ($request->from_date) {
+            $query->where('transaction_date', '>=', $request->from_date);
+        }
+        if ($request->to_date) {
+            $query->where('transaction_date', '<=', $request->to_date);
+        }
+        if ($request->type) {
+            $query->where('transaction_type', $request->type);
+        }
+
+        $transactions = $query->get();
+
+        $filename = 'transactions_' . $company->id . '_' . date('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($transactions) {
+            $handle = fopen('php://output', 'w');
+            // BOM for Excel UTF-8
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($handle, ['Date', 'Description', 'Counterparty', 'Amount', 'Type', 'Currency', 'Reference', 'Status']);
+
+            foreach ($transactions as $tx) {
+                $amount = $tx->transaction_type === 'debit' ? -$tx->amount : $tx->amount;
+                fputcsv($handle, [
+                    $tx->transaction_date,
+                    $tx->description,
+                    $tx->debtor_name ?? $tx->creditor_name,
+                    $amount,
+                    $tx->transaction_type,
+                    $tx->currency,
+                    $tx->transaction_reference,
+                    $tx->processing_status,
+                ]);
+            }
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv']);
     }
 
     /**

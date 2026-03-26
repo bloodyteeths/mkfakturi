@@ -1208,6 +1208,10 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/accounts', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'storeManualAccount']);
                 Route::delete('/accounts/{account}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'disconnect']);
                 Route::post('/transactions/manual', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'storeManualTransaction']);
+                Route::delete('/transactions/{id}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'deleteTransaction']);
+                Route::post('/transactions/bulk-delete', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'bulkDeleteTransactions']);
+                Route::post('/transactions/{id}/unmatch', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'unmatchTransaction']);
+                Route::get('/transactions/export', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'exportTransactions']);
 
                 // CSV Import
                 Route::prefix('import')->group(function () {
@@ -1218,6 +1222,7 @@ Route::prefix('/v1')->group(function () {
                     Route::get('/history', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'importHistory']);
                     Route::get('/stats', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'importStats']);
                     Route::get('/history/{log}/download', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'downloadFile']);
+                    Route::delete('/history/{log}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'deleteImport']);
                 });
 
                 // Invoice Reconciliation

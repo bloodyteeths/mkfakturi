@@ -243,6 +243,9 @@
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               {{ $t('banking.history.user') || 'User' }}
             </th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+              {{ $t('general.actions') || 'Actions' }}
+            </th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -292,6 +295,22 @@
             <td class="px-4 py-3 text-sm text-gray-600">
               {{ log.user?.name || '-' }}
             </td>
+            <td class="px-4 py-3 text-right">
+              <BaseButton
+                v-if="log.status !== 'deleted'"
+                variant="danger-outline"
+                size="sm"
+                @click="confirmDeleteImport(log)"
+              >
+                <template #left="slotProps">
+                  <BaseIcon name="TrashIcon" :class="slotProps.class" />
+                </template>
+                {{ $t('general.delete') || 'Delete' }}
+              </BaseButton>
+              <span v-else class="text-xs text-gray-400 italic">
+                {{ $t('banking.history.deleted') || 'Deleted' }}
+              </span>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -324,6 +343,40 @@
         </div>
       </div>
     </div>
+    <!-- Delete Import Confirm Modal -->
+    <BaseModal
+      :show="showDeleteConfirm"
+      @close="showDeleteConfirm = false"
+      @update:show="showDeleteConfirm = $event"
+    >
+      <template #header>
+        <h3 class="text-lg font-semibold text-red-600">
+          {{ $t('general.confirm_delete') || 'Confirm Delete' }}
+        </h3>
+      </template>
+
+      <div class="p-6">
+        <p class="text-sm text-gray-700">
+          {{ $t('banking.history.confirm_delete_import') || 'This will delete all unmatched transactions from this import. Matched transactions will be kept.' }}
+        </p>
+        <div v-if="deleteTargetLog" class="mt-3 p-3 bg-gray-50 rounded-lg text-sm">
+          <p><strong>{{ $t('banking.bank') || 'Bank' }}:</strong> {{ bankDisplayName(deleteTargetLog.bank_code) }}</p>
+          <p><strong>{{ $t('banking.history.file') || 'File' }}:</strong> {{ deleteTargetLog.file_name }}</p>
+          <p><strong>{{ $t('banking.history.imported_rows') || 'Imported' }}:</strong> {{ deleteTargetLog.imported_rows }} {{ $t('banking.transactions') || 'transactions' }}</p>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <BaseButton variant="secondary" @click="showDeleteConfirm = false">
+            {{ $t('general.cancel') }}
+          </BaseButton>
+          <BaseButton variant="danger" @click="executeDeleteImport" :disabled="isDeletingImport">
+            {{ $t('general.delete') }}
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
   </BasePage>
 </template>
 
@@ -346,6 +399,9 @@ const isLoading = ref(true)
 const logs = ref([])
 const stats = ref(null)
 const showFilters = ref(false)
+const showDeleteConfirm = ref(false)
+const deleteTargetLog = ref(null)
+const isDeletingImport = ref(false)
 let filterDebounceTimer = null
 
 const pagination = ref({
@@ -512,6 +568,35 @@ const downloadFile = async (log) => {
       type: 'error',
       message: 'Failed to download file',
     })
+  }
+}
+
+const confirmDeleteImport = (log) => {
+  deleteTargetLog.value = log
+  showDeleteConfirm.value = true
+}
+
+const executeDeleteImport = async () => {
+  if (!deleteTargetLog.value) return
+  isDeletingImport.value = true
+  try {
+    const response = await axios.delete(`/banking/import/history/${deleteTargetLog.value.id}`)
+    notificationStore.showNotification({
+      type: 'success',
+      message: response.data.message || 'Import deleted',
+    })
+    showDeleteConfirm.value = false
+    deleteTargetLog.value = null
+    fetchHistory(pagination.value.current_page)
+    fetchStats()
+  } catch (error) {
+    console.error('Delete import failed:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || 'Failed to delete import',
+    })
+  } finally {
+    isDeletingImport.value = false
   }
 }
 

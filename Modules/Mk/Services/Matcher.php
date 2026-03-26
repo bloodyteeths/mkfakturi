@@ -43,6 +43,11 @@ class Matcher
      */
     protected ?array $currentRuleActions = null;
 
+    /**
+     * @var float|null Override min confidence for suggest-only mode (lower threshold)
+     */
+    protected ?float $suggestMinConfidence = null;
+
     public function __construct(int $companyId, int $matchingWindow = 90, float $amountTolerance = 0.01, string $locale = 'mk')
     {
         $this->companyId = $companyId;
@@ -309,7 +314,12 @@ class Matcher
     {
         $this->lastAiResult = null;
         $unpaidInvoices = $this->getUnpaidInvoices();
+
+        // Use lower threshold for suggestions (user must always verify)
+        $savedMinConfidence = $this->suggestMinConfidence;
+        $this->suggestMinConfidence = 0.4;
         $matchedInvoice = $this->findMatchingInvoice($transaction, $unpaidInvoices);
+        $this->suggestMinConfidence = $savedMinConfidence;
 
         if ($matchedInvoice) {
             $result = [
@@ -374,7 +384,7 @@ class Matcher
         return DB::table('bank_transactions')
             ->where('company_id', $this->companyId)
             ->whereNull('matched_invoice_id')
-            ->where('amount', '>', 0) // Only incoming payments
+            ->where('transaction_type', 'credit') // Only incoming payments
             ->where('transaction_date', '>=', Carbon::now()->subDays($this->matchingWindow))
             ->orderBy('transaction_date', 'desc')
             ->get();
@@ -414,7 +424,7 @@ class Matcher
         $bestRawScore = 0; // Track raw score even if below threshold
 
         // P0-09: Determine confidence threshold and score boost from rules
-        $minConfidence = 0.7; // Default minimum confidence
+        $minConfidence = $this->suggestMinConfidence ?? 0.7;
         $scoreBoost = 0.0;
 
         if ($this->currentRuleActions && $this->hasRuleAction($this->currentRuleActions, 'auto_match')) {
@@ -597,45 +607,61 @@ class Matcher
             }
         }
 
-        // 4. Fuzzy description match (Levenshtein): +0.2
+        // 4. Customer name match: +0.2
         if ($invoice->customer && $invoice->customer->name) {
-            $customerName = strtolower($invoice->customer->name);
-            $debtorName = strtolower($bankTxn->debtor_name ?? '');
-            $creditorName = strtolower($bankTxn->creditor_name ?? '');
+            $customerName = mb_strtolower(trim($invoice->customer->name));
+            $debtorName = mb_strtolower(trim($bankTxn->debtor_name ?? ''));
+            $creditorName = mb_strtolower(trim($bankTxn->creditor_name ?? ''));
 
-            // Use the appropriate counterparty name based on transaction direction
-            $counterpartyName = $bankTxn->amount > 0 ? $debtorName : $creditorName;
+            // Use the appropriate counterparty name based on transaction type
+            $txType = $bankTxn->transaction_type ?? ($bankTxn->amount > 0 ? 'credit' : 'debit');
+            $counterpartyName = $txType === 'credit' ? $debtorName : $creditorName;
 
             if (strlen($customerName) > 0 && strlen($counterpartyName) > 0) {
-                // Calculate Levenshtein distance
-                $maxLen = max(strlen($customerName), strlen($counterpartyName));
-                $distance = levenshtein($customerName, $counterpartyName);
-                $similarity = 1 - ($distance / $maxLen);
-
-                if ($similarity >= 0.8) {
+                // Check if one name contains the other (handles city suffixes like "COMPANY Велес - СКОПЈЕ")
+                if (mb_strpos($counterpartyName, $customerName) !== false || mb_strpos($customerName, $counterpartyName) !== false) {
                     $score += 0.2;
-                } elseif ($similarity >= 0.6) {
-                    $score += 0.15;
-                } elseif ($similarity >= 0.4) {
-                    $score += 0.1;
+                } else {
+                    // Levenshtein on the shorter of the two names for fuzzy matching
+                    $shorter = strlen($customerName) <= strlen($counterpartyName) ? $customerName : $counterpartyName;
+                    $longer = strlen($customerName) > strlen($counterpartyName) ? $customerName : $counterpartyName;
+
+                    // Try substring match — check if the customer name appears within the counterparty
+                    $shorterClean = preg_replace('/\s+(дооел|доо|ад|дпту|тп)\s*$/u', '', $shorter);
+                    if (strlen($shorterClean) >= 4 && mb_strpos($longer, $shorterClean) !== false) {
+                        $score += 0.18;
+                    } else {
+                        // Fall back to Levenshtein distance
+                        $maxLen = max(strlen($customerName), strlen($counterpartyName));
+                        $distance = levenshtein($customerName, $counterpartyName);
+                        $similarity = 1 - ($distance / $maxLen);
+
+                        if ($similarity >= 0.8) {
+                            $score += 0.2;
+                        } elseif ($similarity >= 0.6) {
+                            $score += 0.15;
+                        } elseif ($similarity >= 0.4) {
+                            $score += 0.1;
+                        }
+                    }
                 }
             }
         }
 
-        // 5. Customer IBAN match: +0.1
+        // 5. Customer IBAN/account match: +0.1
         if ($invoice->customer) {
-            $customerIban = strtolower($invoice->customer->iban ?? '');
-            $debtorIban = strtolower($bankTxn->debtor_iban ?? '');
-            $creditorIban = strtolower($bankTxn->creditor_iban ?? '');
+            $customerIban = str_replace(' ', '', strtolower($invoice->customer->iban ?? ''));
 
             if (strlen($customerIban) > 0) {
-                // Remove spaces from IBANs for comparison
-                $customerIban = str_replace(' ', '', $customerIban);
-                $debtorIban = str_replace(' ', '', $debtorIban);
-                $creditorIban = str_replace(' ', '', $creditorIban);
+                $txAccounts = array_filter(array_map(fn ($f) => str_replace(' ', '', strtolower($bankTxn->$f ?? '')), [
+                    'debtor_iban', 'creditor_iban', 'debtor_account', 'creditor_account',
+                ]));
 
-                if ($customerIban === $debtorIban || $customerIban === $creditorIban) {
-                    $score += 0.1;
+                foreach ($txAccounts as $acc) {
+                    if ($acc === $customerIban || str_ends_with($acc, $customerIban) || str_ends_with($customerIban, $acc)) {
+                        $score += 0.1;
+                        break;
+                    }
                 }
             }
         }
@@ -831,12 +857,12 @@ class Matcher
     {
         $totalTransactions = DB::table('bank_transactions')
             ->where('company_id', $this->companyId)
-            ->where('amount', '>', 0)
+            ->where('transaction_type', 'credit')
             ->count();
 
         $matchedTransactions = DB::table('bank_transactions')
             ->where('company_id', $this->companyId)
-            ->where('amount', '>', 0)
+            ->where('transaction_type', 'credit')
             ->whereNotNull('matched_invoice_id')
             ->count();
 

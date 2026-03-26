@@ -1,5 +1,35 @@
 <template>
   <div class="relative">
+    <!-- Bulk Action Bar -->
+    <div
+      v-if="selectedIds.length > 0"
+      class="mb-3 bg-primary-50 border border-primary-200 rounded-lg p-3 flex items-center justify-between"
+    >
+      <span class="text-sm font-medium text-primary-800">
+        {{ selectedIds.length }} {{ $t('general.selected') || 'selected' }}
+      </span>
+      <div class="flex items-center space-x-2">
+        <BaseButton
+          variant="danger"
+          size="sm"
+          @click="bulkDelete"
+          :disabled="isBulkDeleting"
+        >
+          <template #left="slotProps">
+            <BaseIcon name="TrashIcon" :class="slotProps.class" />
+          </template>
+          {{ $t('general.delete') }}
+        </BaseButton>
+        <BaseButton
+          variant="secondary"
+          size="sm"
+          @click="selectedIds = []"
+        >
+          {{ $t('general.cancel') }}
+        </BaseButton>
+      </div>
+    </div>
+
     <!-- Transactions Table -->
     <BaseTable
       ref="tableComponent"
@@ -7,6 +37,15 @@
       :columns="transactionColumns"
       class="mt-3"
     >
+      <template #cell-select="{ row }">
+        <input
+          type="checkbox"
+          class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+          :checked="selectedIds.includes(row.data.id)"
+          @change="toggleSelect(row.data.id)"
+        />
+      </template>
+
       <template #cell-account="{ row }">
         <span class="text-sm text-gray-900">
           {{ row.data.bank_account_name }}
@@ -34,9 +73,9 @@
         <div class="text-right">
           <span
             class="text-sm font-semibold"
-            :class="row.data.amount > 0 ? 'text-green-600' : 'text-red-600'"
+            :class="isCredit(row.data) ? 'text-green-600' : 'text-red-600'"
           >
-            {{ formatAmount(row.data.amount, row.data.currency) }}
+            {{ formatAmount(row.data) }}
           </span>
         </div>
       </template>
@@ -44,11 +83,11 @@
       <template #cell-type="{ row }">
         <span
           class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-          :class="row.data.amount > 0
+          :class="isCredit(row.data)
             ? 'bg-green-100 text-green-800'
             : 'bg-red-100 text-red-800'"
         >
-          {{ row.data.amount > 0 ? $t('banking.credit') : $t('banking.debit') }}
+          {{ isCredit(row.data) ? $t('banking.credit') : $t('banking.debit') }}
         </span>
       </template>
 
@@ -99,6 +138,10 @@
               class="h-5 w-5 text-gray-400 cursor-pointer"
             />
           </template>
+          <BaseDropdownItem @click="viewTransactionDetails(row.data)">
+            <BaseIcon name="EyeIcon" class="mr-3 text-gray-600" />
+            {{ $t('general.view') }}
+          </BaseDropdownItem>
           <BaseDropdownItem
             v-if="!row.data.category"
             @click="$emit('categorize', row.data)"
@@ -106,16 +149,26 @@
             <BaseIcon name="TagIcon" class="mr-3 text-gray-600" />
             {{ $t('banking.categorize') }}
           </BaseDropdownItem>
-          <BaseDropdownItem @click="viewTransactionDetails(row.data)">
-            <BaseIcon name="EyeIcon" class="mr-3 text-gray-600" />
-            {{ $t('general.view') }}
-          </BaseDropdownItem>
           <BaseDropdownItem
-            v-if="!row.data.matched_invoice_id"
+            v-if="!row.data.matched_invoice_id && isCredit(row.data)"
             @click="matchToInvoice(row.data)"
           >
             <BaseIcon name="LinkIcon" class="mr-3 text-gray-600" />
             {{ $t('banking.match_invoice') }}
+          </BaseDropdownItem>
+          <BaseDropdownItem
+            v-if="row.data.matched_invoice_id"
+            @click="unmatchTransaction(row.data)"
+          >
+            <BaseIcon name="ArrowUturnLeftIcon" class="mr-3 text-yellow-600" />
+            {{ $t('banking.unmatch') || 'Unmatch' }}
+          </BaseDropdownItem>
+          <BaseDropdownItem
+            v-if="!row.data.matched_invoice_id"
+            @click="deleteTransaction(row.data)"
+          >
+            <BaseIcon name="TrashIcon" class="mr-3 text-red-600" />
+            {{ $t('general.delete') }}
           </BaseDropdownItem>
         </BaseDropdown>
       </template>
@@ -141,8 +194,8 @@
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500">{{ $t('banking.amount') }}</p>
-            <p class="text-sm font-semibold" :class="selectedTransactionDetails.amount > 0 ? 'text-green-600' : 'text-red-600'">
-              {{ formatAmount(selectedTransactionDetails.amount, selectedTransactionDetails.currency) }}
+            <p class="text-sm font-semibold" :class="isCredit(selectedTransactionDetails) ? 'text-green-600' : 'text-red-600'">
+              {{ formatAmount(selectedTransactionDetails) }}
             </p>
           </div>
           <div class="col-span-2">
@@ -166,6 +219,10 @@
             <p class="text-sm text-gray-900">{{ selectedTransactionDetails.transaction_reference }}</p>
           </div>
           <div>
+            <p class="text-sm font-medium text-gray-500">{{ $t('banking.type') }}</p>
+            <p class="text-sm text-gray-900">{{ isCredit(selectedTransactionDetails) ? 'Credit' : 'Debit' }}</p>
+          </div>
+          <div>
             <p class="text-sm font-medium text-gray-500">{{ $t('banking.status') }}</p>
             <p class="text-sm text-gray-900">{{ selectedTransactionDetails.booking_status }}</p>
           </div>
@@ -179,6 +236,36 @@
             @click="showDetailsModal = false"
           >
             {{ $t('general.close') }}
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
+
+    <!-- Delete Confirm Modal -->
+    <BaseModal
+      :show="showDeleteConfirm"
+      @close="showDeleteConfirm = false"
+      @update:show="showDeleteConfirm = $event"
+    >
+      <template #header>
+        <h3 class="text-lg font-semibold text-red-600">
+          {{ $t('general.confirm_delete') || 'Confirm Delete' }}
+        </h3>
+      </template>
+
+      <div class="p-6">
+        <p class="text-sm text-gray-700">
+          {{ deleteConfirmMessage }}
+        </p>
+      </div>
+
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <BaseButton variant="secondary" @click="showDeleteConfirm = false">
+            {{ $t('general.cancel') }}
+          </BaseButton>
+          <BaseButton variant="danger" @click="confirmDelete" :disabled="isDeleting">
+            {{ $t('general.delete') }}
           </BaseButton>
         </div>
       </template>
@@ -204,7 +291,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['categorize'])
+const emit = defineEmits(['categorize', 'refresh'])
 
 const { t } = useI18n()
 const router = useRouter()
@@ -214,6 +301,12 @@ const notificationStore = useNotificationStore()
 const tableComponent = ref(null)
 const showDetailsModal = ref(false)
 const selectedTransactionDetails = ref(null)
+const selectedIds = ref([])
+const showDeleteConfirm = ref(false)
+const deleteConfirmMessage = ref('')
+const pendingDeleteAction = ref(null)
+const isDeleting = ref(false)
+const isBulkDeleting = ref(false)
 
 // Re-fetch when filters change (account_id, dates)
 watch(() => props.filters, () => {
@@ -222,8 +315,17 @@ watch(() => props.filters, () => {
   }
 }, { deep: true })
 
+// Helpers
+const isCredit = (tx) => tx.transaction_type === 'credit'
+
 // Table columns
 const transactionColumns = computed(() => [
+  {
+    label: '',
+    key: 'select',
+    thClass: 'w-10 text-center',
+    tdClass: 'text-center'
+  },
   {
     label: t('banking.account'),
     key: 'account',
@@ -315,6 +417,15 @@ const fetchTransactions = async ({ page, limit, search, orderByField, orderBy })
   }
 }
 
+const toggleSelect = (id) => {
+  const idx = selectedIds.value.indexOf(id)
+  if (idx >= 0) {
+    selectedIds.value.splice(idx, 1)
+  } else {
+    selectedIds.value.push(id)
+  }
+}
+
 const viewTransactionDetails = (transaction) => {
   selectedTransactionDetails.value = transaction
   showDetailsModal.value = true
@@ -322,6 +433,81 @@ const viewTransactionDetails = (transaction) => {
 
 const matchToInvoice = (transaction) => {
   router.push('/admin/banking/reconciliation')
+}
+
+const deleteTransaction = (transaction) => {
+  deleteConfirmMessage.value = t('banking.confirm_delete_transaction') || `Delete this transaction? (${formatAmount(transaction)})`
+  pendingDeleteAction.value = async () => {
+    try {
+      await axios.delete(`/banking/transactions/${transaction.id}`)
+      notificationStore.showNotification({
+        type: 'success',
+        message: t('banking.transaction_deleted') || 'Transaction deleted'
+      })
+      refresh()
+    } catch (error) {
+      notificationStore.showNotification({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to delete transaction'
+      })
+    }
+  }
+  showDeleteConfirm.value = true
+}
+
+const unmatchTransaction = async (transaction) => {
+  try {
+    await axios.post(`/banking/transactions/${transaction.id}/unmatch`)
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('banking.transaction_unmatched') || 'Transaction unmatched'
+    })
+    refresh()
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || 'Failed to unmatch transaction'
+    })
+  }
+}
+
+const bulkDelete = () => {
+  deleteConfirmMessage.value = `${t('banking.confirm_bulk_delete') || 'Delete'} ${selectedIds.value.length} ${t('banking.transactions') || 'transactions'}?`
+  pendingDeleteAction.value = async () => {
+    isBulkDeleting.value = true
+    try {
+      const response = await axios.post('/banking/transactions/bulk-delete', {
+        ids: selectedIds.value
+      })
+      notificationStore.showNotification({
+        type: 'success',
+        message: response.data.message
+      })
+      selectedIds.value = []
+      refresh()
+    } catch (error) {
+      notificationStore.showNotification({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to delete transactions'
+      })
+    } finally {
+      isBulkDeleting.value = false
+    }
+  }
+  showDeleteConfirm.value = true
+}
+
+const confirmDelete = async () => {
+  isDeleting.value = true
+  try {
+    if (pendingDeleteAction.value) {
+      await pendingDeleteAction.value()
+    }
+  } finally {
+    isDeleting.value = false
+    showDeleteConfirm.value = false
+    pendingDeleteAction.value = null
+  }
 }
 
 const formatDate = (date) => {
@@ -333,16 +519,16 @@ const formatDate = (date) => {
   })
 }
 
-const formatAmount = (amount, currency) => {
+const formatAmount = (tx) => {
+  const amount = tx.amount
   if (amount === null || amount === undefined) return '-'
 
-  const absAmount = Math.abs(amount)
-  const sign = amount >= 0 ? '+' : '-'
+  const sign = isCredit(tx) ? '+' : '-'
 
   return `${sign} ${new Intl.NumberFormat('mk-MK', {
     style: 'currency',
-    currency: currency || 'MKD'
-  }).format(absAmount)}`
+    currency: tx.currency || 'MKD'
+  }).format(Math.abs(amount))}`
 }
 
 // Public methods for parent component
@@ -350,6 +536,7 @@ const refresh = () => {
   if (tableComponent.value) {
     tableComponent.value.refresh()
   }
+  emit('refresh')
 }
 
 defineExpose({
