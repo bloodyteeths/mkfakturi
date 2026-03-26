@@ -1102,7 +1102,10 @@ PROMPT;
             ], 422);
         }
 
+        $accountId = $transaction->bank_account_id;
         $transaction->delete();
+
+        $this->recalculateAccountBalance($accountId);
 
         return response()->json(['success' => true, 'message' => 'Transaction deleted']);
     }
@@ -1126,8 +1129,16 @@ PROMPT;
             ->whereIn('id', $request->ids)
             ->whereNull('matched_invoice_id');
 
+        // Get affected account IDs before deletion
+        $affectedAccountIds = (clone $query)->distinct()->pluck('bank_account_id')->toArray();
+
         $count = $query->count();
         $query->delete();
+
+        // Recalculate balance for affected accounts
+        foreach ($affectedAccountIds as $accountId) {
+            $this->recalculateAccountBalance($accountId);
+        }
 
         $skipped = count($request->ids) - $count;
 
@@ -1177,6 +1188,12 @@ PROMPT;
 
         // Mark import log as deleted
         $importLog->update(['status' => 'deleted']);
+
+        // Recalculate balance for all company accounts
+        $accounts = BankAccount::where('company_id', $company->id)->get();
+        foreach ($accounts as $acc) {
+            $this->recalculateAccountBalance($acc->id);
+        }
 
         return response()->json([
             'success' => true,
@@ -1322,6 +1339,28 @@ PROMPT;
         }
 
         return $this->currentCompany = $company;
+    }
+
+    /**
+     * Recalculate bank account balance from opening_balance + transactions.
+     */
+    private function recalculateAccountBalance(int $accountId): void
+    {
+        $account = BankAccount::find($accountId);
+        if (! $account) {
+            return;
+        }
+
+        $credits = BankTransaction::where('bank_account_id', $accountId)
+            ->where('transaction_type', BankTransaction::TYPE_CREDIT)
+            ->sum('amount');
+
+        $debits = BankTransaction::where('bank_account_id', $accountId)
+            ->where('transaction_type', BankTransaction::TYPE_DEBIT)
+            ->sum('amount');
+
+        $balance = (float) $account->opening_balance + (float) $credits - (float) $debits;
+        $account->update(['current_balance' => round($balance, 2)]);
     }
 }
 

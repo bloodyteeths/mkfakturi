@@ -327,6 +327,9 @@ class BankImportController extends Controller
                 );
             }
 
+            // Recalculate current_balance from transactions
+            $this->recalculateAccountBalance($account);
+
             Log::info('CSV import completed', [
                 'company_id' => $company->id,
                 'account_id' => $account->id,
@@ -771,6 +774,28 @@ class BankImportController extends Controller
         }
 
         return $this->currentCompany = $company;
+    }
+
+    /**
+     * Recalculate bank account current_balance from opening_balance + sum of transactions.
+     *
+     * Credits are positive, debits are negative. Transaction amounts are stored as
+     * absolute values with a separate transaction_type column, so we reconstruct
+     * the signed sum: SUM(credits) - SUM(debits).
+     */
+    private function recalculateAccountBalance(BankAccount $account): void
+    {
+        $credits = BankTransaction::where('bank_account_id', $account->id)
+            ->where('transaction_type', BankTransaction::TYPE_CREDIT)
+            ->sum('amount');
+
+        $debits = BankTransaction::where('bank_account_id', $account->id)
+            ->where('transaction_type', BankTransaction::TYPE_DEBIT)
+            ->sum('amount');
+
+        $balance = (float) $account->opening_balance + (float) $credits - (float) $debits;
+
+        $account->update(['current_balance' => round($balance, 2)]);
     }
 }
 
