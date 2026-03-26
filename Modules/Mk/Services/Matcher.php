@@ -237,7 +237,7 @@ class Matcher
                     'tx_debtor' => $transaction->debtor_name ?? 'null',
                     'best_score' => round($bestDebugScore, 3),
                     'best_invoice' => $bestDebugInvoice ? $bestDebugInvoice->invoice_number : 'none',
-                    'best_inv_total' => $bestDebugInvoice ? $bestDebugInvoice->total : 0,
+                    'best_inv_total' => $bestDebugInvoice ? $bestDebugInvoice->total / 100 : 0,
                     'invoice_pool_size' => $invoicePool->count(),
                 ]);
             }
@@ -318,7 +318,7 @@ class Matcher
                     'amount' => $transaction->amount,
                     'confidence' => $this->calculateMatchConfidence($transaction, $matchedInvoice),
                     'invoice_number' => $matchedInvoice->invoice_number,
-                    'invoice_total' => (float) $matchedInvoice->total,
+                    'invoice_total' => (float) $matchedInvoice->total / 100,
                 ];
             }
         }
@@ -350,7 +350,7 @@ class Matcher
                 'amount' => (float) $transaction->amount,
                 'confidence' => $this->calculateMatchConfidence($transaction, $matchedInvoice),
                 'invoice_number' => $matchedInvoice->invoice_number,
-                'invoice_total' => (float) $matchedInvoice->total,
+                'invoice_total' => (float) $matchedInvoice->total / 100,
                 'match_type' => Reconciliation::MATCH_TYPE_AUTO,
             ];
 
@@ -587,10 +587,12 @@ class Matcher
         $score = 0.0;
 
         // 1. Exact amount match: +0.4
-        $amountDiff = abs($bankTxn->amount - $invoice->total);
+        // Invoice total is stored in cents (integer cast), bank amount is in currency units
+        $invoiceTotal = $invoice->total / 100;
+        $amountDiff = abs($bankTxn->amount - $invoiceTotal);
         if ($amountDiff == 0) {
             $score += 0.4;
-        } elseif ($invoice->total > 0 && ($amountDiff / $invoice->total) <= 0.01) {
+        } elseif ($invoiceTotal > 0 && ($amountDiff / $invoiceTotal) <= 0.01) {
             // Within 1% tolerance
             $score += 0.35;
         }

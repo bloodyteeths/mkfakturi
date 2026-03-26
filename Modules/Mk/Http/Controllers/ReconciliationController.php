@@ -128,7 +128,7 @@ class ReconciliationController extends Controller
             'amount' => (float) $transaction->amount,
             'confidence' => 100.0,
             'invoice_number' => $invoice->invoice_number,
-            'invoice_total' => (float) $invoice->total,
+            'invoice_total' => (float) $invoice->total / 100,
         ];
 
         // Use reflection to call the protected method or duplicate logic here
@@ -178,7 +178,7 @@ class ReconciliationController extends Controller
             'data' => $invoices->map(fn ($inv) => [
                 'id' => $inv->id,
                 'invoice_number' => $inv->invoice_number,
-                'total' => (float) $inv->total,
+                'total' => (float) $inv->total / 100,
                 'due_date' => $inv->due_date,
                 'status' => $inv->status,
                 'customer_name' => $inv->customer->name ?? 'Unknown',
@@ -267,7 +267,7 @@ class ReconciliationController extends Controller
                 'reconciliation_id' => $split->reconciliation_id,
                 'invoice_id' => $split->invoice_id,
                 'invoice_number' => $split->invoice->invoice_number ?? null,
-                'invoice_total' => (float) ($split->invoice->total ?? 0),
+                'invoice_total' => (float) ($split->invoice->total ?? 0) / 100,
                 'allocated_amount' => (float) $split->allocated_amount,
                 'payment_id' => $split->payment_id,
                 'payment_number' => $split->payment->payment_number ?? null,
