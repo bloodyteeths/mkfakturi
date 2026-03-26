@@ -246,11 +246,11 @@ return new class extends Migration
         // ═══════════════════════════════════════════════════════════
 
         foreach ($this->nameUpdates as $code => [$oldNamePattern, $newName]) {
+            // Skip name comparison (collation mismatch utf8mb3 vs utf8mb4) — just update unconditionally
             $affected = DB::table('accounts')
                 ->where('company_id', $companyId)
                 ->where('code', $code)
                 ->where('system_defined', true)
-                ->where('name', '!=', $newName)
                 ->update(['name' => $newName]);
 
             $updated += $affected;
