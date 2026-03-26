@@ -220,6 +220,28 @@ class Matcher
 
             $matchedInvoice = $this->findMatchingInvoice($transaction, $invoicePool);
 
+            if (! $matchedInvoice) {
+                // Log best score for debugging when no match found
+                $bestDebugScore = 0;
+                $bestDebugInvoice = null;
+                foreach ($invoicePool as $inv) {
+                    $s = $this->calculateMatchScore($transaction, $inv);
+                    if ($s > $bestDebugScore) {
+                        $bestDebugScore = $s;
+                        $bestDebugInvoice = $inv;
+                    }
+                }
+                Log::debug('No match found for transaction', [
+                    'tx_id' => $transaction->id,
+                    'tx_amount' => $transaction->amount,
+                    'tx_debtor' => $transaction->debtor_name ?? 'null',
+                    'best_score' => round($bestDebugScore, 3),
+                    'best_invoice' => $bestDebugInvoice ? $bestDebugInvoice->invoice_number : 'none',
+                    'best_inv_total' => $bestDebugInvoice ? $bestDebugInvoice->total : 0,
+                    'invoice_pool_size' => $invoicePool->count(),
+                ]);
+            }
+
             if ($matchedInvoice) {
                 $success = $this->createPaymentRecord($transaction, $matchedInvoice);
 
@@ -425,7 +447,7 @@ class Matcher
         $bestRawScore = 0; // Track raw score even if below threshold
 
         // P0-09: Determine confidence threshold and score boost from rules
-        $minConfidence = $this->suggestMinConfidence ?? 0.7;
+        $minConfidence = $this->suggestMinConfidence ?? 0.5;
         $scoreBoost = 0.0;
 
         if ($this->currentRuleActions && $this->hasRuleAction($this->currentRuleActions, 'auto_match')) {
