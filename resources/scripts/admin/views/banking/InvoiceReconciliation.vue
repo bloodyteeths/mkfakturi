@@ -86,9 +86,9 @@
                 <span class="text-sm text-gray-500">
                   {{ formatDate(tx.transaction_date) }}
                 </span>
-                <!-- AI Category Badge -->
+                <!-- AI Category Badge (only show when no invoice match found) -->
                 <span
-                  v-if="tx.ai_category"
+                  v-if="tx.ai_category && !tx.suggested_match"
                   class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
                   :class="getCategoryClass(tx.ai_category)"
                 >
@@ -132,12 +132,9 @@
               <p class="text-sm text-gray-600">
                 {{ formatMoney(tx.suggested_match.invoice_total, tx.currency) }}
               </p>
-              <!-- AI Match Reason -->
-              <p
-                v-if="tx.suggested_match.ai_reason || tx.ai_match_reason"
-                class="text-xs text-purple-600 mt-1 italic"
-              >
-                {{ tx.suggested_match.ai_reason || tx.ai_match_reason }}
+              <!-- Match explanation -->
+              <p class="text-xs mt-1 italic" :class="tx.suggested_match.match_type === 'ai' ? 'text-purple-600' : 'text-blue-600'">
+                {{ getMatchExplanation(tx) }}
               </p>
               <!-- Split indicator -->
               <p
@@ -527,6 +524,28 @@ const formatMoney = (amount, currency = 'MKD') => {
     style: 'currency',
     currency: currency || 'MKD'
   }).format(amount)
+}
+
+const getMatchExplanation = (tx) => {
+  const match = tx.suggested_match
+  if (!match) return ''
+  const parts = []
+  // Amount match
+  if (Math.abs(tx.amount - match.invoice_total) < 1) {
+    parts.push(t('banking.match_reason_amount'))
+  }
+  // Counterparty
+  if (tx.counterparty_name) {
+    parts.push(t('banking.match_reason_counterparty'))
+  }
+  // Invoice reference
+  if (match.confidence >= 80) {
+    parts.push(t('banking.match_reason_reference'))
+  }
+  if (parts.length === 0) {
+    parts.push(t('banking.match_reason_general'))
+  }
+  return t('banking.matched_to_invoice', { invoice: match.invoice_number }) + ' — ' + parts.join(', ')
 }
 
 const formatDate = (date) => {
