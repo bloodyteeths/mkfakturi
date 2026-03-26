@@ -253,8 +253,18 @@
             <td class="px-4 py-3 text-sm text-gray-600">
               {{ bankDisplayName(log.bank_code) }}
             </td>
-            <td class="px-4 py-3 text-sm text-gray-600 max-w-[200px] truncate" :title="log.file_name">
-              {{ log.file_name }}
+            <td class="px-4 py-3 text-sm text-gray-600 max-w-[200px]">
+              <div class="flex items-center space-x-1">
+                <span class="truncate" :title="log.file_name">{{ log.file_name }}</span>
+                <button
+                  v-if="log.file_path"
+                  class="flex-shrink-0 text-primary-500 hover:text-primary-700"
+                  :title="'Download'"
+                  @click="downloadFile(log)"
+                >
+                  <BaseIcon name="ArrowDownTrayIcon" class="w-4 h-4" />
+                </button>
+              </div>
             </td>
             <td class="px-4 py-3 text-sm text-gray-900 text-right font-medium">
               {{ log.total_rows }}
@@ -359,8 +369,14 @@ const bankNames = {
   nlb: 'NLB Banka',
   stopanska: 'Stopanska Banka',
   komercijalna: 'Komercijalna Banka',
+  halkbank: 'Halkbank',
+  sparkasse: 'Sparkasse Banka',
+  procredit: 'ProCredit Banka',
+  ttbank: 'TT Banka',
+  ocr: 'OCR (скен)',
   generic: 'Generic CSV',
   auto: 'Auto-detected',
+  other: 'Other',
 }
 
 // Filter options
@@ -474,6 +490,28 @@ const statusLabel = (status) => {
       return t('banking.history.status_pending') || 'Pending'
     default:
       return status
+  }
+}
+
+const downloadFile = async (log) => {
+  try {
+    const response = await axios.get(`/banking/import/history/${log.id}/download`, {
+      responseType: 'blob',
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', log.file_name)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Download failed:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: 'Failed to download file',
+    })
   }
 }
 

@@ -1307,31 +1307,40 @@ def _extract_transactions_from_text(plain_text: str) -> List[Dict[str, Any]]:
 # Gemini Vision enhancement
 # ---------------------------------------------------------------------------
 
-_GEMINI_PROMPT = """This is a Macedonian bank statement image. Extract ALL transactions from the table.
+_GEMINI_PROMPT = """This is a Macedonian bank statement (извод). Extract the header metadata AND all transactions.
 
-Return a JSON array where each element has exactly these fields:
-- row_number: integer (sequential, starting from 1)
-- counterparty_name: string (full company/person name)
-- counterparty_account: string (15-16 digit bank account number)
-- debit: number (amount debited/withdrawn, 0.00 if none)
-- credit: number (amount credited/received, 0.00 if none)
-- payment_code: integer (3-digit payment code, null if not visible)
-- description: string (purpose of payment/transfer)
-- reference: string (6-7 digit reference number, null if not visible)
+Return a single JSON object with these top-level fields:
+- bank_name: string (e.g. "Комерцијална банка АД Скопје", "НЛБ Банка АД Скопје", etc.)
+- account_number: string (the account number, e.g. "300270000172343")
+- statement_date: string (date of transactions in DD.MM.YYYY format — look for "Датум на промет", "за ден", or similar)
+- statement_number: string (statement/извод number, null if not visible)
+- transactions: array of objects, each with:
+  - row_number: integer (sequential, starting from 1)
+  - date: string (transaction date in DD.MM.YYYY format — use statement date if individual dates not shown)
+  - counterparty_name: string (full company/person name from "Назив на примач/налогодавач")
+  - counterparty_account: string (15-16 digit bank account number from "Сметка" column)
+  - debit: number (amount from "должи" column, 0.00 if none)
+  - credit: number (amount from "побарува" column, 0.00 if none)
+  - payment_code: integer (from "Шиф" column, null if not visible)
+  - description: string (from "Цел на дознака" column — the human-readable purpose of payment)
+  - reference: string (from "Рекламација" column — 6-7 digit reference number, null if not visible)
+  - pbo: string (from "ПБО/ПБЗ" column, null if not visible)
 
 IMPORTANT:
 - Extract EVERY transaction row, do not skip any
+- Do NOT include totals/summary rows (e.g. "Вкупно:")
 - Amounts must be numeric (e.g. 10000.00 not "10,000.00")
 - Account numbers are 15-16 digits, do not truncate
-- Return ONLY the raw JSON array, no markdown code fences, no explanation"""
+- The "Цел на дознака" column contains the payment description — extract the readable text, not the payment reference codes
+- Return ONLY the JSON object, no markdown code fences, no explanation"""
 
 
 async def _extract_with_gemini(
     contents: bytes, mime_type: str = "image/jpeg"
-) -> Optional[List[Dict[str, Any]]]:
+) -> Optional[Dict[str, Any]]:
     """
     Use Gemini Vision to extract transactions from bank statement image.
-    Returns list of transaction dicts, or None if Gemini is unavailable/fails.
+    Returns dict with metadata + transactions, or None if Gemini is unavailable/fails.
     """
     logger = logging.getLogger(__name__)
 
@@ -1409,10 +1418,26 @@ async def _extract_with_gemini(
 
         # Parse JSON (with repair for trailing commas etc.)
         text = _repair_json(text)
-        transactions = json_module.loads(text)
+        parsed = json_module.loads(text)
+
+        # Handle both old format (list) and new format (object with transactions key)
+        if isinstance(parsed, list):
+            transactions = parsed
+            metadata = {}
+        elif isinstance(parsed, dict):
+            transactions = parsed.get("transactions", [])
+            metadata = {
+                "bank_name": parsed.get("bank_name"),
+                "account_number": str(parsed["account_number"]) if parsed.get("account_number") else None,
+                "statement_date": parsed.get("statement_date"),
+                "statement_number": parsed.get("statement_number"),
+            }
+        else:
+            logger.warning(f"Gemini returned unexpected type: {type(parsed)}")
+            return None
 
         if not isinstance(transactions, list):
-            logger.warning(f"Gemini returned non-list: {type(transactions)}")
+            logger.warning(f"Gemini transactions is not a list: {type(transactions)}")
             return None
 
         # Normalize fields
@@ -1426,16 +1451,17 @@ async def _extract_with_gemini(
             # Add pbo field for compatibility
             tx.setdefault("pbo", None)
 
-        logger.info(f"Gemini extracted {len(transactions)} transactions")
+        logger.info(f"Gemini extracted {len(transactions)} transactions, metadata={metadata}")
         for tx in transactions:
             logger.info(
                 f"  Gemini TX{tx['row_number']}: "
+                f"date={tx.get('date')} "
                 f"acct={tx.get('counterparty_account')} "
                 f"d={tx['debit']} c={tx['credit']} "
                 f"name={str(tx.get('counterparty_name', ''))[:40]}"
             )
 
-        return transactions
+        return {"metadata": metadata, "transactions": transactions}
 
     except json_module.JSONDecodeError as e:
         logger.warning(f"Gemini JSON parse error: {e}")
@@ -2394,14 +2420,41 @@ async def parse_bank_statement(file: UploadFile = File(...)) -> JSONResponse:
             logger.info("PDF file detected, skipping Tesseract, using Gemini directly")
 
         # Step 2: Primary extraction via Gemini Vision (handles both images and PDFs)
-        gemini_txs = await _extract_with_gemini(contents, mime_type)
-        if gemini_txs:
-            transactions = gemini_txs
+        gemini_result = await _extract_with_gemini(contents, mime_type)
+        if gemini_result:
+            transactions = gemini_result["transactions"]
             extraction_method = "gemini"
             avg_confidence = 95.0  # Gemini Vision is high-confidence
             logger.info(
                 f"Gemini Vision extracted {len(transactions)} transactions"
             )
+
+            # Use Gemini metadata if Tesseract didn't provide it (e.g. PDF path)
+            gemini_meta = gemini_result.get("metadata", {})
+            if not bank_name and gemini_meta.get("bank_name"):
+                bank_name = gemini_meta["bank_name"]
+                # Detect bank code from Gemini bank name
+                bank_name_lower = bank_name.lower() if bank_name else ""
+                if "комерцијална" in bank_name_lower or "komercijalna" in bank_name_lower:
+                    bank_code = "komercijalna"
+                elif "стопанска" in bank_name_lower or "stopanska" in bank_name_lower:
+                    bank_code = "stopanska"
+                elif "нлб" in bank_name_lower or "nlb" in bank_name_lower:
+                    bank_code = "nlb"
+                elif "халк" in bank_name_lower or "halk" in bank_name_lower:
+                    bank_code = "halkbank"
+                elif "шпаркасе" in bank_name_lower or "sparkasse" in bank_name_lower:
+                    bank_code = "sparkasse"
+                elif "прокредит" in bank_name_lower or "procredit" in bank_name_lower:
+                    bank_code = "procredit"
+                elif "тт" in bank_name_lower or "tt bank" in bank_name_lower:
+                    bank_code = "ttbank"
+                else:
+                    bank_code = "other"
+            if not statement_date and gemini_meta.get("statement_date"):
+                statement_date = gemini_meta["statement_date"]
+            if not account_number and gemini_meta.get("account_number"):
+                account_number = gemini_meta["account_number"]
 
         # Step 3: Fallback to Tesseract TSV extraction if Gemini unavailable/failed
         debug_tsv_lines: Dict[str, List[str]] = {}

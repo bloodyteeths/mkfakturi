@@ -39,6 +39,7 @@ class BankImportLog extends Model
         'user_id',
         'bank_code',
         'file_name',
+        'file_path',
         'file_size_bytes',
         'total_rows',
         'parsed_rows',

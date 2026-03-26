@@ -121,10 +121,13 @@ class BankStatementOcrService
             // Credit is positive (money in), debit is negative (money out)
             $amount = $credit > 0 ? $credit : -$debit;
 
+            // Use per-transaction date if available, fall back to statement date
+            $txDate = !empty($tx['date']) ? ($this->parseDate($tx['date']) ?? $date) : $date;
+
             $transactions[] = [
-                'transaction_date' => $date,
-                'booking_date' => $date,
-                'value_date' => $date,
+                'transaction_date' => $txDate,
+                'booking_date' => $txDate,
+                'value_date' => $txDate,
                 'amount' => $amount,
                 'currency' => 'MKD',
                 'description' => $tx['description'] ?? '',

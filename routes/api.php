@@ -1217,6 +1217,7 @@ Route::prefix('/v1')->group(function () {
                     // P0-03: Import Logging & Analytics
                     Route::get('/history', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'importHistory']);
                     Route::get('/stats', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'importStats']);
+                    Route::get('/history/{log}/download', [\App\Http\Controllers\V1\Admin\Banking\BankImportController::class, 'downloadFile']);
                 });
 
                 // Invoice Reconciliation

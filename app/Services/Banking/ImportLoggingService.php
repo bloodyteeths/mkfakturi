@@ -4,8 +4,10 @@ namespace App\Services\Banking;
 
 use App\Models\BankImportLog;
 use Carbon\Carbon;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * P0-03: Import Logging Service
@@ -33,13 +35,22 @@ class ImportLoggingService
         int $userId,
         string $bankCode,
         string $fileName,
-        int $fileSizeBytes
+        int $fileSizeBytes,
+        ?UploadedFile $file = null
     ): BankImportLog {
+        $filePath = null;
+
+        // Store original file to media disk (R2 in production) for history/audit
+        if ($file) {
+            $filePath = $this->storeStatementFile($file, $companyId);
+        }
+
         $log = BankImportLog::create([
             'company_id' => $companyId,
             'user_id' => $userId,
             'bank_code' => $bankCode,
             'file_name' => $fileName,
+            'file_path' => $filePath,
             'file_size_bytes' => $fileSizeBytes,
             'status' => BankImportLog::STATUS_PENDING,
         ]);
@@ -49,9 +60,45 @@ class ImportLoggingService
             'company_id' => $companyId,
             'bank_code' => $bankCode,
             'file_name' => $fileName,
+            'file_path' => $filePath,
         ]);
 
         return $log;
+    }
+
+    /**
+     * Store the original bank statement file to the media disk (R2).
+     *
+     * @param  UploadedFile  $file  The uploaded file
+     * @param  int  $companyId  The company ID for path namespacing
+     * @return string|null  The storage path, or null on failure
+     */
+    protected function storeStatementFile(UploadedFile $file, int $companyId): ?string
+    {
+        try {
+            $disk = config('filesystems.media_disk', 's3compat');
+            $extension = $file->getClientOriginalExtension() ?: 'bin';
+            $timestamp = now()->format('Y-m-d_His');
+            $safeName = preg_replace('/[^a-zA-Z0-9._-]/', '_', pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+            $path = "bank-statements/{$companyId}/{$timestamp}_{$safeName}.{$extension}";
+
+            Storage::disk($disk)->put($path, file_get_contents($file->getRealPath()));
+
+            Log::info('Bank statement file stored', [
+                'company_id' => $companyId,
+                'disk' => $disk,
+                'path' => $path,
+            ]);
+
+            return $path;
+        } catch (\Exception $e) {
+            Log::warning('Failed to store bank statement file', [
+                'company_id' => $companyId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     /**

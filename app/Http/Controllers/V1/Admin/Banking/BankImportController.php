@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -99,13 +100,14 @@ class BankImportController extends Controller
                 $parser = CsvParserFactory::createByBankCode($bankCode);
             }
 
-            // P0-03: Start import log
+            // P0-03: Start import log (store original file to R2)
             $importLog = $this->loggingService->startImport(
                 $company->id,
                 $request->user()->id,
                 $parser->getBankCode(),
                 $file->getClientOriginalName(),
-                (int) $file->getSize()
+                (int) $file->getSize(),
+                $file
             );
 
             // Parse transactions
@@ -450,6 +452,31 @@ class BankImportController extends Controller
     }
 
     /**
+     * Download the original bank statement file from storage.
+     */
+    public function downloadFile(Request $request, int $log): JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $company = $this->resolveCompany($request);
+        if (!$company) {
+            return response()->json(['error' => true, 'message' => 'Company not found'], 404);
+        }
+
+        $importLog = BankImportLog::forCompany($company->id)->findOrFail($log);
+
+        if (!$importLog->file_path) {
+            return response()->json(['error' => true, 'message' => 'File not available'], 404);
+        }
+
+        $disk = config('filesystems.media_disk', 's3compat');
+
+        if (!Storage::disk($disk)->exists($importLog->file_path)) {
+            return response()->json(['error' => true, 'message' => 'File not found in storage'], 404);
+        }
+
+        return Storage::disk($disk)->download($importLog->file_path, $importLog->file_name);
+    }
+
+    /**
      * Preview import from an image file using OCR.
      */
     private function previewFromImage(
@@ -472,13 +499,14 @@ class BankImportController extends Controller
                 ], 404);
             }
 
-            // P0-03: Start import log
+            // P0-03: Start import log (store original file to R2)
             $importLog = $this->loggingService->startImport(
                 $company->id,
                 $request->user()->id,
                 'ocr',
                 $file->getClientOriginalName(),
-                (int) $file->getSize()
+                (int) $file->getSize(),
+                $file
             );
 
             // Send file directly to OCR service (handles both images and PDFs natively)
