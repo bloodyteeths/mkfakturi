@@ -152,7 +152,11 @@ class MonitorServices extends Command
 
         $lines = [];
         foreach ($services as $name => $detail) {
-            $lines[] = "<p><strong>{$name}</strong>: {$detail}</p>";
+            if ($isDown) {
+                $lines[] = "<p><strong>{$name}</strong>: {$detail}</p>";
+            } else {
+                $lines[] = "<p><strong>{$name}</strong>: OK (was: {$detail})</p>";
+            }
         }
         $body = implode("\n", $lines);
 
