@@ -17,16 +17,15 @@ use Illuminate\Support\Facades\Schema;
  * - 721 (was "Приходи од стоки") → 741 (Приходи од продажба на стоки)
  * - 722 (was "Приходи од услуги") → 742 (Приходи од извоз)
  *
+ * IDEMPOTENT: Safe to re-run. Each step checks if already applied.
  * Journal entries use account_id (FK), so code changes are safe for existing data.
  */
 return new class extends Migration
 {
     /**
      * Code remappings: old_code => [new_code, new_name]
-     * Order matters for swaps — use temp codes to avoid unique constraint violations.
      */
     private array $codeRemaps = [
-        // 100 ↔ 102 swap (handled separately via temp code)
         '131' => ['130', 'Данок на додадена вредност'],
         '231' => ['230', 'Обврски за данокот на додадена вредност'],
         '720' => ['740', 'Приходи од продажба на добра (производи) и услуги во земјата'],
@@ -36,71 +35,58 @@ return new class extends Migration
 
     /**
      * Name-only updates for accounts whose codes stay the same.
-     * old_code => [old_name_pattern, new_name]
+     * code => new_name
      */
     private array $nameUpdates = [
         // Class 0
-        '001' => ['Гудвил', 'Гудвил (Goodwill)'],
-        '002' => ['Концесии', 'Концесии, патенти, лиценци, трговски и услужни марки'],
-        '003' => ['Софтвер', 'Софтвер и останати права'],
-        '010' => ['Земјишта', 'Земјишта'],
-        '011' => ['Градежни објекти', 'Градежни објекти'],
-        '012' => ['Постројки и опрема', 'Постројки и опрема'],
-        '013' => ['Транспортни средства', 'Алат, погонски и канцелариски инвентар, мебел и транспортни средства'],
-
+        '001' => 'Гудвил (Goodwill)',
+        '002' => 'Концесии, патенти, лиценци, трговски и услужни марки',
+        '003' => 'Софтвер и останати права',
+        '013' => 'Алат, погонски и канцелариски инвентар, мебел и транспортни средства',
         // Class 1
-        '103' => ['Девизна сметка', 'Девизни сметки'],
-        '105' => ['Други парични средства', 'Парични средства во благајна во странска валута'],
-        '120' => ['Побарувања од купувачи', 'Побарувања од купувачи во земјата'],
-        '121' => ['Побарувања од купувачи', 'Побарувања од купувачи во странство'],
-        '140' => ['Побарувања од вработени', 'Побарувања од вработени и органи на управување'],
-
+        '103' => 'Девизни сметки',
+        '105' => 'Парични средства во благајна во странска валута',
+        '120' => 'Побарувања од купувачи во земјата',
+        '121' => 'Побарувања од купувачи во странство',
+        '140' => 'Побарувања од вработени и органи на управување',
         // Class 2
-        '200' => ['Долгорочни заеми', 'Долгорочни кредити и заеми од поврзани друштва во земјата'],
-        '220' => ['Обврски кон добавувачи', 'Обврски кон добавувачите во земјата'],
-        '221' => ['Обврски кон странски', 'Обврски кон добавувачите во странство'],
-        '240' => ['Обврски за плати', 'Обврски за нето-плати и надоместоци на плати'],
-        '241' => ['Обврски за придонеси', 'Обврски за придонеси од плати и на плати'],
-
+        '200' => 'Долгорочни кредити и заеми од поврзани друштва во земјата',
+        '220' => 'Обврски кон добавувачите во земјата',
+        '221' => 'Обврски кон добавувачите во странство',
+        '240' => 'Обврски за нето-плати и надоместоци на плати',
+        '241' => 'Обврски за придонеси од плати и на плати',
         // Class 3
-        '300' => ['Суровини', 'Суровини и материјали'],
-        '303' => ['Набавна калкулација', 'Трговски стоки во магацин и продавници'],
-        '330' => ['Ситен инвентар', 'Ситен инвентар, амбалажа и авто гуми во употреба'],
-
+        '300' => 'Суровини и материјали',
+        '303' => 'Трговски стоки во магацин и продавници',
+        '330' => 'Ситен инвентар, амбалажа и авто гуми во употреба',
         // Class 4
-        '400' => ['Трошоци за суровини', 'Трошоци за суровини и материјали'],
-        '419' => ['Останати услуги', 'Останати нематеријални трошоци'],
-        '420' => ['Трошоци за плати', 'Плати - бруто'],
-        '421' => ['Придонеси', 'Придонеси на товар на работодавачот'],
-        '430' => ['Амортизација', 'Амортизација на нематеријални средства'],
-        '431' => ['Амортизација', 'Амортизација на материјални средства'],
-        '441' => ['Патни трошоци', 'Дневници за службени патувања и теренски додаток'],
-        '442' => ['Репрезентација', 'Трошоци за репрезентација'],
-        '450' => ['Даноци', 'Даноци, придонеси и други давачки'],
-        '460' => ['Финансиски расходи', 'Расходи врз основа на камати од работењето со поврзани друштва'],
-
+        '400' => 'Трошоци за суровини и материјали',
+        '419' => 'Останати нематеријални трошоци',
+        '420' => 'Плати - бруто',
+        '421' => 'Придонеси на товар на работодавачот',
+        '430' => 'Амортизација на нематеријални средства',
+        '431' => 'Амортизација на материјални средства',
+        '441' => 'Дневници за службени патувања и теренски додаток',
+        '442' => 'Трошоци за репрезентација',
+        '450' => 'Даноци, придонеси и други давачки',
+        '460' => 'Расходи врз основа на камати од работењето со поврзани друштва',
         // Class 6
-        '600' => ['Недовршено производство', 'Недовршени производи и услуги'],
-        '630' => ['Залихи на стоки', 'Стоки во магацин'],
-
+        '600' => 'Недовршени производи и услуги',
+        '630' => 'Стоки во магацин',
         // Class 7
-        '700' => ['Расходи на продадени', 'Расходи врз основа на продадени добра (производи) и услуги'],
-        '701' => ['Набавна вредност', 'Набавна вредност на продадени добра (стоки)'],
-        '760' => ['Други приходи', 'Добивки од продажба на нематеријални и материјални средства'],
-        '770' => ['Финансиски приходи', 'Приходи врз основа на камати од работењето со поврзани друштва'],
-
+        '700' => 'Расходи врз основа на продадени добра (производи) и услуги',
+        '701' => 'Набавна вредност на продадени добра (стоки)',
+        '760' => 'Добивки од продажба на нематеријални и материјални средства',
+        '770' => 'Приходи врз основа на камати од работењето со поврзани друштва',
         // Class 8
-        '800' => ['Добивка', 'Добивка пред оданочување'],
-        '801' => ['Загуба', 'Загуба пред оданочување'],
-        '810' => ['Данок на добивка', 'Данок на добивка'],
-        '820' => ['Нето добивка', 'Нето добивка за периодот'],
-        '821' => ['Нето загуба', 'Нето загуба за периодот'],
-
+        '800' => 'Добивка пред оданочување',
+        '801' => 'Загуба пред оданочување',
+        '820' => 'Нето добивка за периодот',
+        '821' => 'Нето загуба за периодот',
         // Class 9
-        '900' => ['Основна главнина', 'Основна главнина (запишан капитал)'],
-        '901' => ['Премии на акции', 'Премии на емисија и вложениот капитал'],
-        '902' => ['Резерви', 'Резерви'],
-        '910' => ['Почетна состојба', 'Почетна состојба на работењето'],
+        '900' => 'Основна главнина (запишан капитал)',
+        '901' => 'Премии на емисија и вложениот капитал',
+        '910' => 'Почетна состојба на работењето',
     ];
 
     public function up(): void
@@ -120,28 +106,36 @@ return new class extends Migration
 
         // ═══════════════════════════════════════════════════════════
         // Step 4: Swap payment_methods account_code values (100↔102)
-        // PaymentMethods reference account codes, not IDs.
-        // Since account 100 swapped with 102, payment methods must follow.
+        // IDEMPOTENT: Only swap if we detect old-style mapping
+        // (Cash methods pointing to 100, Bank methods pointing to 102)
         // ═══════════════════════════════════════════════════════════
 
         if (Schema::hasColumn('payment_methods', 'account_code')) {
-            DB::table('payment_methods')
+            // Check if swap is needed by looking for "Cash" method with code 100
+            // After swap, Cash should be 102 and Bank should be 100
+            $cashWith100 = DB::table('payment_methods')
                 ->where('account_code', '100')
-                ->update(['account_code' => 'T100']);
+                ->whereRaw("LOWER(name) IN ('cash', 'готовина', 'каса')")
+                ->exists();
 
-            DB::table('payment_methods')
-                ->where('account_code', '102')
-                ->update(['account_code' => '100']);
+            if ($cashWith100) {
+                // Old mapping detected — perform swap
+                DB::table('payment_methods')
+                    ->where('account_code', '100')
+                    ->update(['account_code' => 'T100']);
 
-            DB::table('payment_methods')
-                ->where('account_code', 'T100')
-                ->update(['account_code' => '102']);
+                DB::table('payment_methods')
+                    ->where('account_code', '102')
+                    ->update(['account_code' => '100']);
 
-            $swapped = DB::table('payment_methods')
-                ->whereIn('account_code', ['100', '102'])
-                ->count();
+                DB::table('payment_methods')
+                    ->where('account_code', 'T100')
+                    ->update(['account_code' => '102']);
 
-            Log::info("[AccountMigration] Swapped payment_methods account_code 100↔102 ({$swapped} records)");
+                Log::info("[AccountMigration] Swapped payment_methods account_code 100↔102");
+            } else {
+                Log::info("[AccountMigration] payment_methods already correct or no Cash/100 detected, skipping swap");
+            }
         }
     }
 
@@ -151,22 +145,27 @@ return new class extends Migration
 
         // ═══════════════════════════════════════════════════════════
         // Step 1: Swap 100 ↔ 102 (bank/cash semantic correction)
+        // IDEMPOTENT: Read name in PHP to detect if already swapped
         // Old: 100 = Готовина (cash), 102 = Жиро-сметка (bank)
-        // Official: 100 = Трансакциски сметки (bank), 102 = Благајна (cash)
+        // New: 100 = Трансакциски сметки (bank), 102 = Благајна (cash)
         // ═══════════════════════════════════════════════════════════
 
-        $has100 = DB::table('accounts')
+        $account100 = DB::table('accounts')
             ->where('company_id', $companyId)
             ->where('code', '100')
-            ->exists();
+            ->first();
 
-        $has102 = DB::table('accounts')
+        $account102 = DB::table('accounts')
             ->where('company_id', $companyId)
             ->where('code', '102')
-            ->exists();
+            ->first();
 
-        if ($has100 && $has102) {
-            // Both exist — swap via temp code
+        // Only swap if account 100 still has the OLD name (contains cash-related terms)
+        // PHP comparison avoids MySQL collation issues
+        $needsSwap = $account100 && $account102
+            && !str_contains($account100->name ?? '', 'трансакциски');
+
+        if ($needsSwap) {
             DB::table('accounts')
                 ->where('company_id', $companyId)
                 ->where('code', '100')
@@ -189,24 +188,26 @@ return new class extends Migration
                 ]);
 
             $updated += 2;
-        } elseif ($has100) {
-            // Only 100 exists — just rename (was cash, now bank with same code)
+        } elseif ($account100 && !$account102) {
+            // Only 100 exists — just set official name
             DB::table('accounts')
                 ->where('company_id', $companyId)
                 ->where('code', '100')
                 ->update(['name' => 'Парични средства на трансакциски сметки во денари']);
             $updated++;
-        } elseif ($has102) {
-            // Only 102 exists — just rename
+        } elseif (!$account100 && $account102) {
+            // Only 102 exists — just set official name
             DB::table('accounts')
                 ->where('company_id', $companyId)
                 ->where('code', '102')
                 ->update(['name' => 'Парични средства во благајна']);
             $updated++;
         }
+        // else: both exist but already swapped — names are already correct
 
         // ═══════════════════════════════════════════════════════════
         // Step 2: Code remaps (131→130, 231→230, 72x→74x)
+        // IDEMPOTENT: checks if old code exists and new doesn't
         // ═══════════════════════════════════════════════════════════
 
         foreach ($this->codeRemaps as $oldCode => [$newCode, $newName]) {
@@ -221,7 +222,6 @@ return new class extends Migration
                 ->exists();
 
             if ($hasOld && !$hasNew) {
-                // Safe to remap
                 DB::table('accounts')
                     ->where('company_id', $companyId)
                     ->where('code', $oldCode)
@@ -231,22 +231,17 @@ return new class extends Migration
                     ]);
                 $updated++;
             } elseif ($hasOld && $hasNew) {
-                // Target code already exists (conflict) — just update old code's name
-                Log::warning("[AccountMigration] Company {$companyId}: Cannot remap {$oldCode}→{$newCode} (target exists). Updating name only.");
-                DB::table('accounts')
-                    ->where('company_id', $companyId)
-                    ->where('code', $oldCode)
-                    ->update(['name' => $newName . ' (legacy ' . $oldCode . ')']);
-                $updated++;
+                Log::warning("[AccountMigration] Company {$companyId}: Cannot remap {$oldCode}→{$newCode} (target exists).");
             }
+            // else: already migrated (old doesn't exist), skip
         }
 
         // ═══════════════════════════════════════════════════════════
         // Step 3: Name-only updates (codes stay the same)
+        // IDEMPOTENT: unconditional SET to official name
         // ═══════════════════════════════════════════════════════════
 
-        foreach ($this->nameUpdates as $code => [$oldNamePattern, $newName]) {
-            // Skip name comparison (collation mismatch utf8mb3 vs utf8mb4) — just update unconditionally
+        foreach ($this->nameUpdates as $code => $newName) {
             $affected = DB::table('accounts')
                 ->where('company_id', $companyId)
                 ->where('code', $code)
@@ -261,9 +256,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // This migration updates ~50 account names per company.
-        // Reverting would require the old seeder data which is no longer available.
-        // The down() is intentionally a no-op — re-run the old seeder manually if needed.
         Log::info('[AccountMigration] down() called — no-op. Re-seed manually if needed.');
     }
 };
