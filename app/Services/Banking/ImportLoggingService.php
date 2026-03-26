@@ -45,15 +45,21 @@ class ImportLoggingService
             $filePath = $this->storeStatementFile($file, $companyId);
         }
 
-        $log = BankImportLog::create([
+        $attributes = [
             'company_id' => $companyId,
             'user_id' => $userId,
             'bank_code' => $bankCode,
             'file_name' => $fileName,
-            'file_path' => $filePath,
             'file_size_bytes' => $fileSizeBytes,
             'status' => BankImportLog::STATUS_PENDING,
-        ]);
+        ];
+
+        // Only include file_path if the column exists (defensive against pending migrations)
+        if ($filePath && \Schema::hasColumn('bank_import_logs', 'file_path')) {
+            $attributes['file_path'] = $filePath;
+        }
+
+        $log = BankImportLog::create($attributes);
 
         Log::info('P0-03: Import started', [
             'import_log_id' => $log->id,
