@@ -80,13 +80,19 @@
             <!-- Transaction Info -->
             <div class="flex-1">
               <div class="flex items-center space-x-4 mb-2">
-                <span class="text-lg font-semibold text-green-600">
-                  +{{ formatMoney(tx.amount, tx.currency) }}
+                <span class="text-lg font-semibold" :class="isCredit(tx) ? 'text-green-600' : 'text-red-600'">
+                  {{ isCredit(tx) ? '+' : '-' }}{{ formatMoney(tx.amount, tx.currency) }}
                 </span>
                 <span class="text-sm text-gray-500">
                   {{ formatDate(tx.transaction_date) }}
                 </span>
-                <!-- AI Category Badge (only show when no invoice match found) -->
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                  :class="isCredit(tx) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                >
+                  {{ isCredit(tx) ? $t('banking.credit', 'Credit') : $t('banking.debit', 'Debit') }}
+                </span>
+                <!-- AI Category Badge -->
                 <span
                   v-if="tx.ai_category && !tx.suggested_match"
                   class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
@@ -97,21 +103,20 @@
               </div>
               <p class="text-sm text-gray-900 mb-1">{{ tx.description }}</p>
               <p v-if="tx.counterparty_name" class="text-xs text-gray-500">
-                {{ $t('banking.from') }}: {{ tx.counterparty_name }}
+                {{ isCredit(tx) ? $t('banking.from') : $t('banking.to', 'To') }}: {{ tx.counterparty_name }}
               </p>
               <p v-if="tx.remittance_info" class="text-xs text-gray-400 mt-1">
                 {{ tx.remittance_info }}
               </p>
             </div>
 
-            <!-- Suggested Match -->
+            <!-- Suggested Match (credits only) -->
             <div v-if="tx.suggested_match" class="ml-6 p-4 rounded-lg min-w-[300px]" :class="tx.suggested_match.match_type === 'ai' ? 'bg-purple-50' : 'bg-blue-50'">
               <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center space-x-2">
                   <span class="text-sm font-medium" :class="tx.suggested_match.match_type === 'ai' ? 'text-purple-800' : 'text-blue-800'">
                     {{ $t('banking.suggested_match') }}
                   </span>
-                  <!-- AI badge -->
                   <span
                     v-if="tx.suggested_match.match_type === 'ai'"
                     class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700"
@@ -132,69 +137,60 @@
               <p class="text-sm text-gray-600">
                 {{ formatMoney(tx.suggested_match.invoice_total, tx.currency) }}
               </p>
-              <!-- Match explanation -->
               <p class="text-xs mt-1 italic" :class="tx.suggested_match.match_type === 'ai' ? 'text-purple-600' : 'text-blue-600'">
                 {{ getMatchExplanation(tx) }}
               </p>
-              <!-- Split indicator -->
-              <p
-                v-if="tx.suggested_match.is_split"
-                class="text-xs text-orange-600 mt-1 font-medium"
-              >
-                {{ $t('banking.split_payment_detected') }}
-              </p>
-              <div class="flex space-x-2 mt-3">
-                <BaseButton
-                  variant="primary"
-                  size="sm"
-                  @click="acceptMatch(tx, tx.suggested_match)"
-                >
+              <div class="flex flex-wrap gap-2 mt-3">
+                <BaseButton variant="primary" size="sm" @click="acceptMatch(tx, tx.suggested_match)">
                   {{ $t('general.accept') }}
                 </BaseButton>
-                <BaseButton
-                  v-if="tx.suggested_match.is_split || tx.amount > tx.suggested_match.invoice_total"
-                  variant="primary-outline"
-                  size="sm"
-                  @click="openSplitModal(tx)"
-                >
-                  {{ $t('banking.split') }}
-                </BaseButton>
-                <BaseButton
-                  variant="secondary"
-                  size="sm"
-                  @click="openManualMatchModal(tx)"
-                >
+                <BaseButton variant="secondary" size="sm" @click="openManualMatchModal(tx)">
                   {{ $t('banking.choose_different') }}
+                </BaseButton>
+                <BaseButton variant="primary-outline" size="sm" @click="markReviewed(tx)">
+                  {{ $t('banking.mark_reviewed', 'Mark Reviewed') }}
                 </BaseButton>
               </div>
             </div>
 
-            <!-- No Match Found -->
-            <div v-else class="ml-6">
-              <!-- AI Category reason for unmatched -->
-              <p
-                v-if="tx.ai_match_reason && !tx.suggested_match"
-                class="text-xs text-gray-500 italic mb-2"
-              >
-                {{ tx.ai_match_reason }}
-              </p>
-              <div class="flex space-x-2">
-                <BaseButton
-                  variant="primary-outline"
-                  size="sm"
-                  @click="openManualMatchModal(tx)"
-                >
+            <!-- No Match — Credit: match to invoice -->
+            <div v-else-if="isCredit(tx)" class="ml-6">
+              <div class="flex flex-wrap gap-2">
+                <BaseButton variant="primary-outline" size="sm" @click="openManualMatchModal(tx)">
                   <template #left="slotProps">
                     <BaseIcon name="LinkIcon" :class="slotProps.class" />
                   </template>
                   {{ $t('banking.match_manually') }}
                 </BaseButton>
-                <BaseButton
-                  variant="primary-outline"
-                  size="sm"
-                  @click="openSplitModal(tx)"
-                >
-                  {{ $t('banking.split') }}
+                <BaseButton variant="primary-outline" size="sm" @click="markReviewed(tx)">
+                  {{ $t('banking.mark_reviewed', 'Mark Reviewed') }}
+                </BaseButton>
+              </div>
+            </div>
+
+            <!-- No Match — Debit: record as expense, link to bill/payroll, or mark reviewed -->
+            <div v-else class="ml-6">
+              <div class="flex flex-wrap gap-2">
+                <BaseButton variant="primary-outline" size="sm" @click="openExpenseModal(tx)">
+                  <template #left="slotProps">
+                    <BaseIcon name="ReceiptPercentIcon" :class="slotProps.class" />
+                  </template>
+                  {{ $t('banking.record_expense', 'Record Expense') }}
+                </BaseButton>
+                <BaseButton variant="primary-outline" size="sm" @click="openBillModal(tx)">
+                  <template #left="slotProps">
+                    <BaseIcon name="DocumentTextIcon" :class="slotProps.class" />
+                  </template>
+                  {{ $t('banking.link_to_bill', 'Link to Bill') }}
+                </BaseButton>
+                <BaseButton variant="primary-outline" size="sm" @click="openPayrollModal(tx)">
+                  <template #left="slotProps">
+                    <BaseIcon name="UserGroupIcon" :class="slotProps.class" />
+                  </template>
+                  {{ $t('banking.link_to_payroll', 'Link to Payroll') }}
+                </BaseButton>
+                <BaseButton variant="primary-outline" size="sm" @click="markReviewed(tx)">
+                  {{ $t('banking.mark_reviewed', 'Mark Reviewed') }}
                 </BaseButton>
               </div>
             </div>
@@ -307,6 +303,173 @@
       @close="showSplitModal = false"
       @split-complete="onSplitComplete"
     />
+
+    <!-- Record as Expense Modal -->
+    <BaseModal
+      :show="showExpenseModal"
+      @close="showExpenseModal = false"
+      @update:show="showExpenseModal = $event"
+    >
+      <template #header>
+        <h3 class="text-lg font-semibold text-gray-900">
+          {{ $t('banking.record_expense', 'Record as Expense') }}
+        </h3>
+      </template>
+      <div class="p-6">
+        <div v-if="selectedTransaction" class="mb-4 p-4 bg-gray-50 rounded-lg">
+          <p class="text-sm text-gray-500">{{ $t('banking.matching_transaction') }}</p>
+          <p class="font-semibold text-red-600">
+            -{{ formatMoney(selectedTransaction.amount, selectedTransaction.currency) }}
+          </p>
+          <p class="text-sm text-gray-900">{{ selectedTransaction.description }}</p>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            {{ $t('expenses.category', 'Category') }} *
+          </label>
+          <select
+            v-model="expenseCategoryId"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option :value="null" disabled>{{ $t('banking.select_category', 'Select category...') }}</option>
+            <option v-for="cat in expenseCategories" :key="cat.id" :value="cat.id">
+              {{ cat.name }}
+            </option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            {{ $t('general.notes', 'Notes') }}
+          </label>
+          <textarea
+            v-model="expenseNotes"
+            rows="2"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <BaseButton variant="secondary" @click="showExpenseModal = false">
+            {{ $t('general.cancel') }}
+          </BaseButton>
+          <BaseButton variant="primary" :disabled="!expenseCategoryId" @click="confirmRecordExpense">
+            {{ $t('banking.record_expense', 'Record Expense') }}
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
+
+    <!-- Link to Bill Modal -->
+    <BaseModal
+      :show="showBillModal"
+      @close="showBillModal = false"
+      @update:show="showBillModal = $event"
+    >
+      <template #header>
+        <h3 class="text-lg font-semibold text-gray-900">
+          {{ $t('banking.link_to_bill', 'Link to Bill') }}
+        </h3>
+      </template>
+      <div class="p-6">
+        <div v-if="selectedTransaction" class="mb-4 p-4 bg-gray-50 rounded-lg">
+          <p class="text-sm text-gray-500">{{ $t('banking.matching_transaction') }}</p>
+          <p class="font-semibold text-red-600">
+            -{{ formatMoney(selectedTransaction.amount, selectedTransaction.currency) }}
+          </p>
+          <p class="text-sm text-gray-900">{{ selectedTransaction.description }}</p>
+        </div>
+        <div v-if="unpaidBills.length === 0" class="text-center py-4 text-gray-500">
+          {{ $t('banking.no_unpaid_bills', 'No unpaid bills found') }}
+        </div>
+        <div v-else class="space-y-2 max-h-96 overflow-y-auto">
+          <div
+            v-for="bill in unpaidBills"
+            :key="bill.id"
+            class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-blue-50"
+            :class="{ 'border-blue-500 bg-blue-50': selectedBillId === bill.id }"
+            @click="selectedBillId = bill.id"
+          >
+            <div>
+              <p class="font-medium text-gray-900">{{ bill.bill_number }}</p>
+              <p class="text-sm text-gray-500">{{ bill.supplier_name }}</p>
+              <p class="text-xs text-gray-400">{{ $t('general.due') }}: {{ formatDate(bill.due_date) }}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-semibold text-gray-900">{{ formatMoney(bill.total) }}</p>
+              <span
+                v-if="selectedTransaction && Math.abs(bill.total - selectedTransaction.amount) < 1"
+                class="text-xs text-green-600"
+              >
+                {{ $t('banking.exact_match') }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <BaseButton variant="secondary" @click="showBillModal = false">
+            {{ $t('general.cancel') }}
+          </BaseButton>
+          <BaseButton variant="primary" :disabled="!selectedBillId" @click="confirmLinkBill">
+            {{ $t('banking.link_to_bill', 'Link to Bill') }}
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
+
+    <!-- Link to Payroll Modal -->
+    <BaseModal
+      :show="showPayrollModal"
+      @close="showPayrollModal = false"
+      @update:show="showPayrollModal = $event"
+    >
+      <template #header>
+        <h3 class="text-lg font-semibold text-gray-900">
+          {{ $t('banking.link_to_payroll', 'Link to Payroll') }}
+        </h3>
+      </template>
+      <div class="p-6">
+        <div v-if="selectedTransaction" class="mb-4 p-4 bg-gray-50 rounded-lg">
+          <p class="text-sm text-gray-500">{{ $t('banking.matching_transaction') }}</p>
+          <p class="font-semibold text-red-600">
+            -{{ formatMoney(selectedTransaction.amount, selectedTransaction.currency) }}
+          </p>
+          <p class="text-sm text-gray-900">{{ selectedTransaction.description }}</p>
+        </div>
+        <div v-if="payrollRuns.length === 0" class="text-center py-4 text-gray-500">
+          {{ $t('banking.no_payroll_runs', 'No pending payroll runs found') }}
+        </div>
+        <div v-else class="space-y-2 max-h-96 overflow-y-auto">
+          <div
+            v-for="run in payrollRuns"
+            :key="run.id"
+            class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-blue-50"
+            :class="{ 'border-blue-500 bg-blue-50': selectedPayrollRunId === run.id }"
+            @click="selectedPayrollRunId = run.id"
+          >
+            <div>
+              <p class="font-medium text-gray-900">{{ run.period }}</p>
+              <p class="text-sm text-gray-500">{{ run.status }}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-semibold text-gray-900">{{ formatMoney(run.total_net) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <BaseButton variant="secondary" @click="showPayrollModal = false">
+            {{ $t('general.cancel') }}
+          </BaseButton>
+          <BaseButton variant="primary" :disabled="!selectedPayrollRunId" @click="confirmLinkPayroll">
+            {{ $t('banking.link_to_payroll', 'Link to Payroll') }}
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
   </BasePage>
 </template>
 
@@ -356,6 +519,18 @@ const filteredInvoices = computed(() => {
 const showSplitModal = ref(false)
 const splitTransaction = ref(null)
 const splitReconciliationId = ref(null)
+
+// Non-invoice reconciliation state
+const showExpenseModal = ref(false)
+const showBillModal = ref(false)
+const showPayrollModal = ref(false)
+const expenseCategories = ref([])
+const unpaidBills = ref([])
+const payrollRuns = ref([])
+const expenseCategoryId = ref(null)
+const expenseNotes = ref('')
+const selectedBillId = ref(null)
+const selectedPayrollRunId = ref(null)
 
 // Methods
 const fetchData = async (page = 1) => {
@@ -494,6 +669,120 @@ const onSplitComplete = async () => {
   splitTransaction.value = null
   splitReconciliationId.value = null
   await fetchData(meta.value.current_page)
+}
+
+const isCredit = (tx) => tx.transaction_type === 'credit'
+
+// Non-invoice reconciliation methods
+const fetchExpenseCategories = async () => {
+  try {
+    const response = await axios.get('/banking/reconciliation/expense-categories')
+    expenseCategories.value = response.data.data || []
+  } catch (error) {
+    console.error('Failed to fetch expense categories:', error)
+  }
+}
+
+const fetchUnpaidBills = async () => {
+  try {
+    const response = await axios.get('/banking/reconciliation/unpaid-bills')
+    unpaidBills.value = response.data.data || []
+  } catch (error) {
+    console.error('Failed to fetch unpaid bills:', error)
+  }
+}
+
+const fetchPayrollRuns = async () => {
+  try {
+    const response = await axios.get('/banking/reconciliation/payroll-runs')
+    payrollRuns.value = response.data.data || []
+  } catch (error) {
+    console.error('Failed to fetch payroll runs:', error)
+  }
+}
+
+const openExpenseModal = async (transaction) => {
+  selectedTransaction.value = transaction
+  expenseCategoryId.value = null
+  expenseNotes.value = transaction.description || ''
+  await fetchExpenseCategories()
+  showExpenseModal.value = true
+}
+
+const openBillModal = async (transaction) => {
+  selectedTransaction.value = transaction
+  selectedBillId.value = null
+  await fetchUnpaidBills()
+  showBillModal.value = true
+}
+
+const openPayrollModal = async (transaction) => {
+  selectedTransaction.value = transaction
+  selectedPayrollRunId.value = null
+  await fetchPayrollRuns()
+  showPayrollModal.value = true
+}
+
+const confirmRecordExpense = async () => {
+  if (!selectedTransaction.value || !expenseCategoryId.value) return
+  try {
+    await axios.post('/banking/reconciliation/record-expense', {
+      transaction_id: selectedTransaction.value.id,
+      expense_category_id: expenseCategoryId.value,
+      notes: expenseNotes.value,
+    })
+    notificationStore.showNotification({ type: 'success', message: t('banking.expense_recorded', 'Expense recorded successfully') })
+    showExpenseModal.value = false
+    await fetchData(meta.value.current_page)
+  } catch (error) {
+    console.error('Record expense failed:', error)
+    notificationStore.showNotification({ type: 'error', message: t('banking.action_failed', 'Action failed') })
+  }
+}
+
+const confirmLinkBill = async () => {
+  if (!selectedTransaction.value || !selectedBillId.value) return
+  try {
+    await axios.post('/banking/reconciliation/link-bill', {
+      transaction_id: selectedTransaction.value.id,
+      bill_id: selectedBillId.value,
+    })
+    notificationStore.showNotification({ type: 'success', message: t('banking.bill_linked', 'Transaction linked to bill') })
+    showBillModal.value = false
+    await fetchData(meta.value.current_page)
+  } catch (error) {
+    console.error('Link bill failed:', error)
+    notificationStore.showNotification({ type: 'error', message: t('banking.action_failed', 'Action failed') })
+  }
+}
+
+const confirmLinkPayroll = async () => {
+  if (!selectedTransaction.value || !selectedPayrollRunId.value) return
+  try {
+    await axios.post('/banking/reconciliation/link-payroll', {
+      transaction_id: selectedTransaction.value.id,
+      payroll_run_id: selectedPayrollRunId.value,
+    })
+    notificationStore.showNotification({ type: 'success', message: t('banking.payroll_linked', 'Transaction linked to payroll') })
+    showPayrollModal.value = false
+    await fetchData(meta.value.current_page)
+  } catch (error) {
+    console.error('Link payroll failed:', error)
+    notificationStore.showNotification({ type: 'error', message: t('banking.action_failed', 'Action failed') })
+  }
+}
+
+const markReviewed = async (transaction) => {
+  try {
+    await axios.post('/banking/reconciliation/mark-reviewed', {
+      transaction_id: transaction.id,
+    })
+    notificationStore.showNotification({ type: 'success', message: t('banking.marked_reviewed', 'Transaction marked as reviewed') })
+    await fetchData(meta.value.current_page)
+  } catch (error) {
+    console.error('Mark reviewed failed:', error)
+    notificationStore.showNotification({ type: 'error', message: t('banking.action_failed', 'Action failed') })
+  }
 }
 
 const getConfidenceClass = (confidence) => {

@@ -60,6 +60,10 @@ class BankTransaction extends Model
         'external_transaction_id',
         'ai_category',
         'ai_match_reason',
+        'linked_type',
+        'linked_id',
+        'reconciled_at',
+        'reconciliation_status',
     ];
 
     protected $casts = [
@@ -72,6 +76,7 @@ class BankTransaction extends Model
         'match_confidence' => 'decimal:2',
         'raw_data' => 'array',
         'is_duplicate' => 'boolean',
+        'reconciled_at' => 'datetime',
     ];
 
     protected $dates = [
@@ -113,6 +118,46 @@ class BankTransaction extends Model
     const SOURCE_MANUAL = 'manual';
 
     const SOURCE_OCR_IMPORT = 'ocr_import';
+
+    // Linked type constants (for non-invoice reconciliation)
+    const LINKED_EXPENSE = 'expense';
+
+    const LINKED_BILL_PAYMENT = 'bill_payment';
+
+    const LINKED_PAYROLL_RUN = 'payroll_run';
+
+    const LINKED_REVIEWED = 'reviewed';
+
+    /**
+     * Mark this transaction as reconciled with a linked record.
+     */
+    public function markAsReconciled(string $linkedType, ?int $linkedId = null): void
+    {
+        $this->update([
+            'linked_type' => $linkedType,
+            'linked_id' => $linkedId,
+            'reconciled_at' => now(),
+            'processing_status' => self::STATUS_PROCESSED,
+            'reconciliation_status' => 'reconciled',
+            'processed_at' => now(),
+        ]);
+    }
+
+    /**
+     * Check if this transaction is reconciled (matched to invoice OR linked to record).
+     */
+    public function isReconciled(): bool
+    {
+        return $this->matched_invoice_id !== null || $this->linked_type !== null;
+    }
+
+    /**
+     * Scope: only unreconciled transactions (no invoice match AND no linked record).
+     */
+    public function scopeUnreconciled($query)
+    {
+        return $query->whereNull('matched_invoice_id')->whereNull('linked_type');
+    }
 
     /**
      * Get the bank account that owns the transaction

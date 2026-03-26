@@ -882,21 +882,23 @@ class Matcher
     {
         $totalTransactions = DB::table('bank_transactions')
             ->where('company_id', $this->companyId)
-            ->where('transaction_type', 'credit')
             ->count();
 
-        $matchedTransactions = DB::table('bank_transactions')
+        // Reconciled = matched to invoice OR linked to expense/bill/payroll/reviewed
+        $reconciledTransactions = DB::table('bank_transactions')
             ->where('company_id', $this->companyId)
-            ->where('transaction_type', 'credit')
-            ->whereNotNull('matched_invoice_id')
+            ->where(function ($q) {
+                $q->whereNotNull('matched_invoice_id')
+                    ->orWhereNotNull('linked_type');
+            })
             ->count();
 
-        $matchRate = $totalTransactions > 0 ? ($matchedTransactions / $totalTransactions) * 100 : 0;
+        $matchRate = $totalTransactions > 0 ? ($reconciledTransactions / $totalTransactions) * 100 : 0;
 
         return [
             'total_transactions' => $totalTransactions,
-            'matched_transactions' => $matchedTransactions,
-            'unmatched_transactions' => $totalTransactions - $matchedTransactions,
+            'matched_transactions' => $reconciledTransactions,
+            'unmatched_transactions' => $totalTransactions - $reconciledTransactions,
             'match_rate' => round($matchRate, 1),
         ];
     }

@@ -1238,6 +1238,15 @@ Route::prefix('/v1')->group(function () {
                     // P0-14: Split payment endpoints
                     Route::post('/{id}/split', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'splitPayment']);
                     Route::get('/{id}/splits', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getSplits']);
+
+                    // Non-invoice reconciliation
+                    Route::post('/record-expense', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'recordAsExpense']);
+                    Route::post('/link-bill', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'linkToBill']);
+                    Route::post('/link-payroll', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'linkToPayroll']);
+                    Route::post('/mark-reviewed', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'markAsReviewed']);
+                    Route::get('/expense-categories', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getExpenseCategories']);
+                    Route::get('/unpaid-bills', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getUnpaidBills']);
+                    Route::get('/payroll-runs', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getPayrollRuns']);
                 });
 
                 // Matching Rules (P0-09)

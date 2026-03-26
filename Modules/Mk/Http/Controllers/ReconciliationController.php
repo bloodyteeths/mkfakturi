@@ -4,14 +4,20 @@ namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\BankTransaction;
+use App\Models\Bill;
+use App\Models\BillPayment;
 use App\Models\Company;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\Invoice;
+use App\Models\PayrollRun;
 use App\Models\Reconciliation;
 use App\Models\ReconciliationSplit;
 use App\Services\Reconciliation\ReconciliationPostingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Modules\Mk\Services\Matcher;
 
 /**
@@ -31,16 +37,18 @@ class ReconciliationController extends Controller
         $locale = $request->input('locale', app()->getLocale() ?: 'mk');
         $matcher = new Matcher($company->id, 90, 0.01, $locale);
 
-        // Get unmatched transactions (P0-13: explicit tenant scope)
+        // Get unreconciled transactions — both credits and debits (P0-13: explicit tenant scope)
         $transactions = BankTransaction::forCompany($company->id)
-            ->whereNull('matched_invoice_id')
-            ->where('transaction_type', BankTransaction::TYPE_CREDIT)
+            ->unreconciled()
             ->orderBy('transaction_date', 'desc')
             ->paginate($request->get('limit', 20));
 
-        // Get suggested matches for each transaction (without creating payments)
+        // Get suggested matches for credit transactions (without creating payments)
         $transactionsWithMatches = $transactions->getCollection()->map(function ($transaction) use ($matcher) {
-            $match = $matcher->suggestMatch($transaction);
+            // Only suggest invoice matches for credit (incoming) transactions
+            $match = $transaction->transaction_type === BankTransaction::TYPE_CREDIT
+                ? $matcher->suggestMatch($transaction)
+                : null;
 
             return [
                 'id' => $transaction->id,
@@ -371,6 +379,221 @@ class ReconciliationController extends Controller
 
         // Fall through to regular manual match
         return $this->manualMatch($request);
+    }
+
+    /**
+     * Record a bank transaction as an expense.
+     */
+    public function recordAsExpense(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_id' => 'required|integer|exists:bank_transactions,id',
+            'expense_category_id' => 'required|integer|exists:expense_categories,id',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $company = $this->getCompany();
+
+        $transaction = BankTransaction::forCompany($company->id)
+            ->where('id', $request->transaction_id)
+            ->unreconciled()
+            ->firstOrFail();
+
+        // Verify expense category belongs to this company
+        ExpenseCategory::where('company_id', $company->id)
+            ->where('id', $request->expense_category_id)
+            ->firstOrFail();
+
+        $expense = Expense::create([
+            'expense_date' => $transaction->transaction_date,
+            'amount' => (int) round(abs((float) $transaction->amount) * 100),
+            'expense_category_id' => $request->expense_category_id,
+            'company_id' => $company->id,
+            'creator_id' => Auth::id(),
+            'notes' => $request->notes ?? $transaction->description,
+        ]);
+
+        $transaction->markAsReconciled(BankTransaction::LINKED_EXPENSE, $expense->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction recorded as expense',
+            'expense_id' => $expense->id,
+        ]);
+    }
+
+    /**
+     * Link a bank transaction to an existing bill (creates a bill payment).
+     */
+    public function linkToBill(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_id' => 'required|integer|exists:bank_transactions,id',
+            'bill_id' => 'required|integer|exists:bills,id',
+        ]);
+
+        $company = $this->getCompany();
+
+        $transaction = BankTransaction::forCompany($company->id)
+            ->where('id', $request->transaction_id)
+            ->unreconciled()
+            ->firstOrFail();
+
+        $bill = Bill::where('company_id', $company->id)
+            ->where('id', $request->bill_id)
+            ->firstOrFail();
+
+        DB::transaction(function () use ($transaction, $bill, $company) {
+            // Generate payment number
+            $year = date('Y');
+            $sequence = BillPayment::where('company_id', $company->id)
+                ->whereYear('created_at', $year)
+                ->count() + 1;
+            $paymentNumber = sprintf('BPAY-%d-%06d', $year, $sequence);
+
+            $billPayment = BillPayment::create([
+                'bill_id' => $bill->id,
+                'company_id' => $company->id,
+                'amount' => (int) round(abs((float) $transaction->amount) * 100),
+                'payment_date' => $transaction->transaction_date,
+                'payment_number' => $paymentNumber,
+                'creator_id' => Auth::id(),
+            ]);
+
+            $bill->updatePaidStatus();
+
+            $transaction->markAsReconciled(BankTransaction::LINKED_BILL_PAYMENT, $billPayment->id);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction linked to bill',
+        ]);
+    }
+
+    /**
+     * Link a bank transaction to a payroll run (marks it as paid).
+     */
+    public function linkToPayroll(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_id' => 'required|integer|exists:bank_transactions,id',
+            'payroll_run_id' => 'required|integer|exists:payroll_runs,id',
+        ]);
+
+        $company = $this->getCompany();
+
+        $transaction = BankTransaction::forCompany($company->id)
+            ->where('id', $request->transaction_id)
+            ->unreconciled()
+            ->firstOrFail();
+
+        $payrollRun = PayrollRun::where('company_id', $company->id)
+            ->where('id', $request->payroll_run_id)
+            ->whereIn('status', ['approved', 'posted'])
+            ->firstOrFail();
+
+        $payrollRun->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+        ]);
+
+        $transaction->markAsReconciled(BankTransaction::LINKED_PAYROLL_RUN, $payrollRun->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction linked to payroll',
+        ]);
+    }
+
+    /**
+     * Mark a transaction as reviewed without creating any record.
+     */
+    public function markAsReviewed(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_id' => 'required|integer|exists:bank_transactions,id',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $company = $this->getCompany();
+
+        $transaction = BankTransaction::forCompany($company->id)
+            ->where('id', $request->transaction_id)
+            ->unreconciled()
+            ->firstOrFail();
+
+        if ($request->notes) {
+            $transaction->update(['processing_notes' => $request->notes]);
+        }
+
+        $transaction->markAsReconciled(BankTransaction::LINKED_REVIEWED);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction marked as reviewed',
+        ]);
+    }
+
+    /**
+     * Get expense categories for the company.
+     */
+    public function getExpenseCategories(): JsonResponse
+    {
+        $company = $this->getCompany();
+
+        $categories = ExpenseCategory::where('company_id', $company->id)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json(['data' => $categories]);
+    }
+
+    /**
+     * Get unpaid bills for the company.
+     */
+    public function getUnpaidBills(): JsonResponse
+    {
+        $company = $this->getCompany();
+
+        $bills = Bill::where('company_id', $company->id)
+            ->whereIn('paid_status', [Bill::PAID_STATUS_UNPAID, Bill::PAID_STATUS_PARTIALLY_PAID])
+            ->with('supplier:id,name')
+            ->orderBy('due_date', 'asc')
+            ->get(['id', 'bill_number', 'total', 'due_date', 'paid_status', 'supplier_id']);
+
+        return response()->json([
+            'data' => $bills->map(fn ($bill) => [
+                'id' => $bill->id,
+                'bill_number' => $bill->bill_number,
+                'total' => (float) $bill->total / 100,
+                'due_date' => $bill->due_date,
+                'paid_status' => $bill->paid_status,
+                'supplier_name' => $bill->supplier->name ?? 'Unknown',
+            ]),
+        ]);
+    }
+
+    /**
+     * Get payroll runs available for linking.
+     */
+    public function getPayrollRuns(): JsonResponse
+    {
+        $company = $this->getCompany();
+
+        $runs = PayrollRun::where('company_id', $company->id)
+            ->whereIn('status', ['approved', 'posted'])
+            ->orderBy('period_start', 'desc')
+            ->get(['id', 'period_year', 'period_month', 'total_net', 'status']);
+
+        return response()->json([
+            'data' => $runs->map(fn ($run) => [
+                'id' => $run->id,
+                'period' => sprintf('%d-%02d', $run->period_year, $run->period_month),
+                'total_net' => (float) $run->total_net / 100,
+                'status' => $run->status,
+            ]),
+        ]);
     }
 
     /**
