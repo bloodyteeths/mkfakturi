@@ -611,7 +611,7 @@ class PartnerAccountingReportsController extends Controller
             return [
                 'id' => 'cn_' . $cn->id,
                 'doc_type' => 'credit_note',
-                'date' => $cn->credit_note_date instanceof \DateTimeInterface ? $cn->credit_note_date->format('Y-m-d') : ($cn->credit_note_date ?? ''),
+                'date' => substr((string) ($cn->credit_note_date instanceof \DateTimeInterface ? $cn->credit_note_date->format('Y-m-d') : ($cn->credit_note_date ?? '')), 0, 10),
                 'number' => $cn->credit_note_number ?? '',
                 'party_name' => $cn->customer?->name ?? '',
                 'party_tax_id' => $cn->customer?->vat_number ?? $cn->customer?->tax_id ?? '',
@@ -645,7 +645,7 @@ class PartnerAccountingReportsController extends Controller
             return [
                 'id' => $bill->id,
                 'doc_type' => 'bill',
-                'date' => $bill->bill_date instanceof \DateTimeInterface ? $bill->bill_date->format('Y-m-d') : ($bill->bill_date ?? ''),
+                'date' => substr((string) ($bill->bill_date instanceof \DateTimeInterface ? $bill->bill_date->format('Y-m-d') : ($bill->bill_date ?? '')), 0, 10),
                 'number' => $bill->bill_number ?? '',
                 'party_name' => $bill->supplier?->name ?? '',
                 'party_tax_id' => $bill->supplier?->vat_number ?? $bill->supplier?->tax_id ?? '',
@@ -1042,10 +1042,10 @@ class PartnerAccountingReportsController extends Controller
 
         foreach ($invoices as $inv) {
             $entries->push([
-                'date' => $inv->invoice_date instanceof \DateTimeInterface ? $inv->invoice_date->format('Y-m-d') : ($inv->invoice_date ?? ''),
+                'date' => substr((string) ($inv->invoice_date instanceof \DateTimeInterface ? $inv->invoice_date->format('Y-m-d') : ($inv->invoice_date ?? '')), 0, 10),
                 'doc_name' => 'Фактура',
                 'doc_number' => $inv->invoice_number ?? '',
-                'doc_date' => $inv->invoice_date instanceof \DateTimeInterface ? $inv->invoice_date->format('Y-m-d') : ($inv->invoice_date ?? ''),
+                'doc_date' => substr((string) ($inv->invoice_date instanceof \DateTimeInterface ? $inv->invoice_date->format('Y-m-d') : ($inv->invoice_date ?? '')), 0, 10),
                 'party' => $inv->customer?->name ?? '',
                 'nabavna' => 0,
                 'prodazhna' => (int) ($inv->total ?? 0),
@@ -1065,10 +1065,10 @@ class PartnerAccountingReportsController extends Controller
 
         foreach ($creditNotes as $cn) {
             $entries->push([
-                'date' => $cn->credit_note_date instanceof \DateTimeInterface ? $cn->credit_note_date->format('Y-m-d') : ($cn->credit_note_date ?? ''),
+                'date' => substr((string) ($cn->credit_note_date instanceof \DateTimeInterface ? $cn->credit_note_date->format('Y-m-d') : ($cn->credit_note_date ?? '')), 0, 10),
                 'doc_name' => 'Кредит нота',
                 'doc_number' => $cn->credit_note_number ?? '',
-                'doc_date' => $cn->credit_note_date instanceof \DateTimeInterface ? $cn->credit_note_date->format('Y-m-d') : ($cn->credit_note_date ?? ''),
+                'doc_date' => substr((string) ($cn->credit_note_date instanceof \DateTimeInterface ? $cn->credit_note_date->format('Y-m-d') : ($cn->credit_note_date ?? '')), 0, 10),
                 'party' => $cn->customer?->name ?? '',
                 'nabavna' => 0,
                 'prodazhna' => -abs((int) ($cn->total ?? 0)),
@@ -1088,10 +1088,10 @@ class PartnerAccountingReportsController extends Controller
 
         foreach ($bills as $bill) {
             $entries->push([
-                'date' => $bill->bill_date instanceof \DateTimeInterface ? $bill->bill_date->format('Y-m-d') : ($bill->bill_date ?? ''),
+                'date' => substr((string) ($bill->bill_date instanceof \DateTimeInterface ? $bill->bill_date->format('Y-m-d') : ($bill->bill_date ?? '')), 0, 10),
                 'doc_name' => 'Влезна фактура',
                 'doc_number' => $bill->bill_number ?? '',
-                'doc_date' => $bill->bill_date instanceof \DateTimeInterface ? $bill->bill_date->format('Y-m-d') : ($bill->bill_date ?? ''),
+                'doc_date' => substr((string) ($bill->bill_date instanceof \DateTimeInterface ? $bill->bill_date->format('Y-m-d') : ($bill->bill_date ?? '')), 0, 10),
                 'party' => $bill->supplier?->name ?? '',
                 'nabavna' => (int) ($bill->total ?? 0),
                 'prodazhna' => 0,
@@ -1110,10 +1110,10 @@ class PartnerAccountingReportsController extends Controller
 
         foreach ($expenses as $exp) {
             $entries->push([
-                'date' => $exp->expense_date instanceof \DateTimeInterface ? $exp->expense_date->format('Y-m-d') : ($exp->expense_date ?? ''),
+                'date' => substr((string) ($exp->expense_date instanceof \DateTimeInterface ? $exp->expense_date->format('Y-m-d') : ($exp->expense_date ?? '')), 0, 10),
                 'doc_name' => 'Трошок',
                 'doc_number' => $exp->expense_number ?? ('EXP-' . $exp->id),
-                'doc_date' => $exp->expense_date instanceof \DateTimeInterface ? $exp->expense_date->format('Y-m-d') : ($exp->expense_date ?? ''),
+                'doc_date' => substr((string) ($exp->expense_date instanceof \DateTimeInterface ? $exp->expense_date->format('Y-m-d') : ($exp->expense_date ?? '')), 0, 10),
                 'party' => $exp->category?->name ?? '',
                 'nabavna' => (int) ($exp->amount ?? 0),
                 'prodazhna' => 0,
