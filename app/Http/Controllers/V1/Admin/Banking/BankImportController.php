@@ -9,7 +9,6 @@ use App\Models\BankTransaction;
 use App\Models\Company;
 use App\Services\Banking\BankStatementOcrException;
 use App\Services\Banking\BankStatementOcrService;
-use App\Services\PdfImageConverter;
 use App\Services\Banking\DeduplicationService;
 use App\Services\Banking\ImportLoggingService;
 use App\Services\Banking\Parsers\CsvParserFactory;
@@ -482,46 +481,10 @@ class BankImportController extends Controller
                 (int) $file->getSize()
             );
 
-            // Convert PDF to image if needed
+            // Send file directly to OCR service (handles both images and PDFs natively)
             $ocrFilePath = $file->getRealPath();
             $ocrFileName = $file->getClientOriginalName();
-            $tempPdfImage = null;
-
-            if (strtolower($file->getClientOriginalExtension()) === 'pdf') {
-                $converter = app(PdfImageConverter::class);
-                if (!$converter->isAvailable()) {
-                    $parseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
-                    $this->loggingService->failImport(
-                        $importLog,
-                        'PDF conversion is not available on this server',
-                        $parseTimeMs
-                    );
-
-                    return response()->json([
-                        'error' => true,
-                        'message' => 'PDF processing is not available. Please upload a JPG or PNG image instead.',
-                    ], 422);
-                }
-
-                $images = $converter->convertToImages($file->getRealPath(), ['dpi' => 200]);
-                if (empty($images)) {
-                    throw new BankStatementOcrException('Failed to convert PDF to image');
-                }
-
-                // Save first page as temp PNG for OCR
-                $tempPdfImage = tempnam(sys_get_temp_dir(), 'bank_ocr_') . '.png';
-                file_put_contents($tempPdfImage, base64_decode($images[0]['data']));
-                $ocrFilePath = $tempPdfImage;
-                $ocrFileName = pathinfo($ocrFileName, PATHINFO_FILENAME) . '.png';
-            }
-
-            // Send image to OCR service
             $ocrResult = $this->ocrService->parse($ocrFilePath, $ocrFileName);
-
-            // Clean up temp file
-            if ($tempPdfImage && file_exists($tempPdfImage)) {
-                unlink($tempPdfImage);
-            }
 
             $transactions = $ocrResult['transactions'];
 
