@@ -117,12 +117,13 @@ test.describe('Document Hub E2E — Bug Detection', () => {
     await page.waitForTimeout(1500)
     await ss(page, '01-list-page')
 
-    const content = await page.content()
+    // Check visible text only (not raw HTML — title tooltip may still hold debug info)
+    const visibleText = await page.innerText('body')
 
     // The list should NEVER show raw internal error paths to users
-    // BUG: "File not found in storage [public]: client-documents/2/2026-..." is shown
-    expect(content).not.toContain('File not found in storage')
-    expect(content).not.toContain('client-documents/')
+    // BUG: "File not found in storage [public]: client-documents/2/2026-..." was shown
+    expect(visibleText).not.toContain('File not found in storage')
+    expect(visibleText).not.toContain('client-documents/')
   })
 
   // ── Navigate to a reviewable document ──────────────────────
