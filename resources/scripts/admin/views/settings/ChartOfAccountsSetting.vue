@@ -12,87 +12,39 @@
       </BaseButton>
     </template>
 
-    <!-- Account Type Filter -->
-    <div class="mb-6 flex flex-wrap gap-2">
-      <BaseButton
-        v-for="type in accountTypes"
-        :key="type.value"
-        :variant="selectedType === type.value ? 'primary' : 'gray'"
-        size="sm"
-        @click="selectedType = type.value"
-      >
-        {{ type.label }}
-      </BaseButton>
+    <!-- Search + Account Type Filter -->
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <BaseInput
+        v-model="searchQuery"
+        :placeholder="$t('general.search') + '...'"
+        class="w-full sm:w-64"
+      />
+      <div class="flex flex-wrap gap-2">
+        <BaseButton
+          v-for="type in accountTypes"
+          :key="type.value"
+          :variant="selectedType === type.value ? 'primary' : 'gray'"
+          size="sm"
+          @click="selectedType = type.value"
+        >
+          {{ type.label }}
+        </BaseButton>
+      </div>
     </div>
 
-    <!-- Accounts Table -->
-    <BaseTable
-      ref="table"
-      class="mt-4"
-      :show-filter="false"
-      :data="fetchData"
-      :columns="accountColumns"
-    >
-      <template #cell-code="{ row }">
-        <span class="font-mono font-medium text-gray-900">
-          {{ row.data.code }}
-        </span>
-      </template>
+    <!-- Account count -->
+    <p class="mb-3 text-xs text-gray-400">
+      {{ filteredAccounts.length }} / {{ accountStore.accounts.length }}
+      {{ $t('settings.accounts.title').toLowerCase() }}
+    </p>
 
-      <template #cell-name="{ row }">
-        <div class="flex items-center">
-          <span
-            v-if="row.data.parent_id"
-            class="mr-2 text-gray-400"
-            :style="{ paddingLeft: `${getIndent(row.data)}px` }"
-          >
-            └─
-          </span>
-          {{ row.data.name }}
-        </div>
-      </template>
-
-      <template #cell-type="{ row }">
-        <BaseBadge
-          :bg-color="getTypeBadgeColor(row.data.type)"
-          :text-color="getTypeTextColor(row.data.type)"
-        >
-          {{ $t(`settings.accounts.type_${row.data.type}`) }}
-        </BaseBadge>
-      </template>
-
-      <template #cell-is_active="{ row }">
-        <BaseBadge
-          :bg-color="row.data.is_active ? 'bg-green-100' : 'bg-gray-100'"
-          :text-color="row.data.is_active ? 'text-green-800' : 'text-gray-800'"
-        >
-          {{ row.data.is_active ? $t('general.active') : $t('general.inactive') }}
-        </BaseBadge>
-      </template>
-
-      <template #cell-actions="{ row }">
-        <BaseDropdown>
-          <template #activator>
-            <div class="inline-block cursor-pointer">
-              <BaseIcon name="EllipsisHorizontalIcon" class="text-gray-500" />
-            </div>
-          </template>
-
-          <BaseDropdownItem @click="openEditModal(row.data)">
-            <BaseIcon name="PencilIcon" class="mr-3 text-gray-600" />
-            {{ $t('general.edit') }}
-          </BaseDropdownItem>
-
-          <BaseDropdownItem
-            v-if="!row.data.system_defined"
-            @click="onDeleteAccount(row.data)"
-          >
-            <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
-            {{ $t('general.delete') }}
-          </BaseDropdownItem>
-        </BaseDropdown>
-      </template>
-    </BaseTable>
+    <!-- Accounts Tree -->
+    <AccountTreeComponent
+      :accounts="filteredAccounts"
+      :editable="true"
+      @edit="openEditModal"
+      @delete="onDeleteAccount"
+    />
 
     <!-- Account Modal -->
     <BaseModal
@@ -102,11 +54,20 @@
     >
       <form @submit.prevent="submitAccount">
         <div class="grid gap-4">
+          <!-- System-defined notice -->
+          <div
+            v-if="accountForm.system_defined"
+            class="rounded-md bg-amber-50 p-3 text-sm text-amber-700"
+          >
+            {{ $t('settings.accounts.system_defined_notice') }}
+          </div>
+
           <div class="grid grid-cols-2 gap-4">
             <BaseInputGroup :label="$t('settings.accounts.code')" required>
               <BaseInput
                 v-model="accountForm.code"
                 :placeholder="$t('settings.accounts.code_placeholder')"
+                :disabled="accountForm.system_defined"
               />
             </BaseInputGroup>
 
@@ -118,6 +79,7 @@
                 track-by="value"
                 label="label"
                 value-prop="value"
+                :disabled="accountForm.system_defined"
               />
             </BaseInputGroup>
           </div>
@@ -138,6 +100,7 @@
               label="display_name"
               value-prop="id"
               :placeholder="$t('settings.accounts.no_parent')"
+              :disabled="accountForm.system_defined"
             />
           </BaseInputGroup>
 
@@ -174,15 +137,16 @@ import { useAccountStore } from '@/scripts/admin/stores/account'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { computed, ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AccountTreeComponent from '@/scripts/admin/components/accounting/AccountTreeComponent.vue'
 
 const { t } = useI18n()
 const accountStore = useAccountStore()
 const dialogStore = useDialogStore()
 
-const table = ref(null)
 const showModal = ref(false)
 const isSubmitting = ref(false)
 const selectedType = ref(null)
+const searchQuery = ref('')
 
 const accountForm = reactive({
   id: null,
@@ -210,8 +174,21 @@ const accountTypeOptions = computed(() =>
   accountTypes.value.filter((t) => t.value !== null)
 )
 
+const filteredAccounts = computed(() => {
+  let accounts = accountStore.accounts
+  if (selectedType.value) {
+    accounts = accounts.filter((a) => a.type === selectedType.value)
+  }
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    accounts = accounts.filter(
+      (a) => a.code.includes(q) || a.name.toLowerCase().includes(q)
+    )
+  }
+  return accounts
+})
+
 const parentOptions = computed(() => {
-  // Filter accounts that can be parents (exclude current account if editing)
   return accountStore.accounts
     .filter((a) => a.id !== accountForm.id)
     .map((a) => ({
@@ -220,97 +197,9 @@ const parentOptions = computed(() => {
     }))
 })
 
-const accountColumns = computed(() => [
-  {
-    key: 'code',
-    label: t('settings.accounts.code'),
-    thClass: 'w-24',
-    tdClass: 'font-medium text-gray-900',
-  },
-  {
-    key: 'name',
-    label: t('settings.accounts.name'),
-    thClass: 'extra',
-    tdClass: 'font-medium text-gray-900',
-  },
-  {
-    key: 'type',
-    label: t('settings.accounts.type'),
-    thClass: 'w-32',
-    tdClass: 'font-medium text-gray-900',
-  },
-  {
-    key: 'is_active',
-    label: t('settings.accounts.status'),
-    thClass: 'w-24',
-    tdClass: 'font-medium text-gray-900',
-  },
-  {
-    key: 'actions',
-    label: '',
-    tdClass: 'text-right text-sm font-medium',
-    sortable: false,
-  },
-])
-
 onMounted(() => {
   accountStore.fetchAccounts()
 })
-
-function getTypeBadgeColor(type) {
-  const colors = {
-    asset: 'bg-blue-100',
-    liability: 'bg-red-100',
-    equity: 'bg-purple-100',
-    revenue: 'bg-green-100',
-    expense: 'bg-orange-100',
-  }
-  return colors[type] || 'bg-gray-100'
-}
-
-function getTypeTextColor(type) {
-  const colors = {
-    asset: 'text-blue-800',
-    liability: 'text-red-800',
-    equity: 'text-purple-800',
-    revenue: 'text-green-800',
-    expense: 'text-orange-800',
-  }
-  return colors[type] || 'text-gray-800'
-}
-
-function getIndent(account) {
-  // Calculate indent based on parent hierarchy
-  let indent = 0
-  let parent = accountStore.accounts.find((a) => a.id === account.parent_id)
-  while (parent) {
-    indent += 20
-    parent = accountStore.accounts.find((a) => a.id === parent.parent_id)
-  }
-  return indent
-}
-
-async function fetchData({ page, filter, sort }) {
-  const params = {
-    orderByField: sort.fieldName || 'code',
-    orderBy: sort.order || 'asc',
-    page,
-  }
-
-  if (selectedType.value) {
-    params.type = selectedType.value
-  }
-
-  const response = await accountStore.fetchAccounts(params)
-
-  return {
-    data: response.data.data || [],
-    pagination: {
-      totalPages: 1,
-      currentPage: 1,
-    },
-  }
-}
 
 function resetForm() {
   accountForm.id = null
@@ -365,7 +254,8 @@ async function submitAccount() {
     }
 
     closeModal()
-    table.value && table.value.refresh()
+    // Refresh accounts to reflect changes in tree
+    accountStore.fetchAccounts()
   } finally {
     isSubmitting.value = false
   }
@@ -385,7 +275,7 @@ function onDeleteAccount(account) {
     .then(async (res) => {
       if (res) {
         await accountStore.deleteAccount(account.id)
-        table.value && table.value.refresh()
+        accountStore.fetchAccounts()
       }
     })
 }

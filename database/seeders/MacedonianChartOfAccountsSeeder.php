@@ -39,26 +39,45 @@ class MacedonianChartOfAccountsSeeder extends Seeder
         }
 
         $seeded = 0;
+        $skipped = 0;
 
         foreach ($companies as $company) {
-            $this->log("Seeding chart of accounts for company: {$company->name}");
+            // Skip companies that already have a full chart of accounts
+            $systemCount = Account::where('company_id', $company->id)
+                ->where('system_defined', true)
+                ->count();
 
-            // createAccounts() skips codes that already exist, so this is safe
-            // for both new companies and existing ones (fills in missing accounts)
-            $this->seedClass0($company->id);
-            $this->seedClass1($company->id);
-            $this->seedClass2($company->id);
-            $this->seedClass3($company->id);
-            $this->seedClass4($company->id);
-            $this->seedClass6($company->id);
-            $this->seedClass7($company->id);
-            $this->seedClass8($company->id);
-            $this->seedClass9($company->id);
-            $this->seedVatSubAccounts($company->id);
-            $this->seedAnalyticalAccounts($company->id);
+            if ($systemCount >= 1100) {
+                $this->log("  ⊘ {$company->name} already seeded ({$systemCount} accounts), skipping");
+                $skipped++;
+                continue;
+            }
+
+            $this->log("Seeding chart of accounts for company: {$company->name} ({$systemCount} existing)");
+
+            // Pre-load existing codes for bulk existence check (O(1) lookups)
+            $existingCodes = Account::where('company_id', $company->id)
+                ->pluck('code')
+                ->flip();
+
+            $this->seedClass0($company->id, $existingCodes);
+            $this->seedClass1($company->id, $existingCodes);
+            $this->seedClass2($company->id, $existingCodes);
+            $this->seedClass3($company->id, $existingCodes);
+            $this->seedClass4($company->id, $existingCodes);
+            $this->seedClass6($company->id, $existingCodes);
+            $this->seedClass7($company->id, $existingCodes);
+            $this->seedClass8($company->id, $existingCodes);
+            $this->seedClass9($company->id, $existingCodes);
+            $this->seedVatSubAccounts($company->id, $existingCodes);
+            $this->seedAnalyticalAccounts($company->id, $existingCodes);
 
             $this->log("  ✓ Seeded chart of accounts for {$company->name}");
             $seeded++;
+        }
+
+        if ($skipped > 0) {
+            $this->log("Skipped {$skipped} fully-seeded companies.");
         }
 
         $this->log('Macedonian Chart of Accounts seeded successfully!');
@@ -70,18 +89,32 @@ class MacedonianChartOfAccountsSeeder extends Seeder
      */
     public function seedForCompany(int $companyId): void
     {
-        // createAccounts() skips codes that already exist, so safe to call always
-        $this->seedClass0($companyId);
-        $this->seedClass1($companyId);
-        $this->seedClass2($companyId);
-        $this->seedClass3($companyId);
-        $this->seedClass4($companyId);
-        $this->seedClass6($companyId);
-        $this->seedClass7($companyId);
-        $this->seedClass8($companyId);
-        $this->seedClass9($companyId);
-        $this->seedVatSubAccounts($companyId);
-        $this->seedAnalyticalAccounts($companyId);
+        // Skip if company already has a full chart of accounts
+        $systemCount = Account::where('company_id', $companyId)
+            ->where('system_defined', true)
+            ->count();
+
+        if ($systemCount >= 1100) {
+            $this->log("Company {$companyId} already seeded ({$systemCount} accounts), skipping");
+            return;
+        }
+
+        // Pre-load existing codes for bulk existence check
+        $existingCodes = Account::where('company_id', $companyId)
+            ->pluck('code')
+            ->flip();
+
+        $this->seedClass0($companyId, $existingCodes);
+        $this->seedClass1($companyId, $existingCodes);
+        $this->seedClass2($companyId, $existingCodes);
+        $this->seedClass3($companyId, $existingCodes);
+        $this->seedClass4($companyId, $existingCodes);
+        $this->seedClass6($companyId, $existingCodes);
+        $this->seedClass7($companyId, $existingCodes);
+        $this->seedClass8($companyId, $existingCodes);
+        $this->seedClass9($companyId, $existingCodes);
+        $this->seedVatSubAccounts($companyId, $existingCodes);
+        $this->seedAnalyticalAccounts($companyId, $existingCodes);
 
         $this->log("Seeded chart of accounts for company {$companyId}");
     }
@@ -98,7 +131,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
     /**
      * КЛАСА 0: НЕТЕКОВНИ СРЕДСТВА
      */
-    private function seedClass0(int $companyId): void
+    private function seedClass0(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $accounts = [
             // 00 - НЕМАТЕРИЈАЛНИ СРЕДСТВА
@@ -159,13 +192,13 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '050', 'name' => 'Одложени даночни средства', 'type' => Account::TYPE_ASSET],
         ];
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
     /**
      * КЛАСА 1: ПАРИЧНИ СРЕДСТВА, ХАРТИИ ОД ВРЕДНОСТ, КРАТКОРОЧНИ ПОБАРУВАЊА
      */
-    private function seedClass1(int $companyId): void
+    private function seedClass1(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $accounts = [
             // 10 - ПАРИЧНИ СРЕДСТВА И ПАРИЧНИ ЕКВИВАЛЕНТИ
@@ -249,13 +282,13 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '198', 'name' => 'Останати однапред платени трошоци и пресметани приходи', 'type' => Account::TYPE_ASSET],
         ];
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
     /**
      * КЛАСА 2: ОБВРСКИ, РЕЗЕРВИРАЊА ЗА ТРОШОЦИ И РИЗИЦИ
      */
-    private function seedClass2(int $companyId): void
+    private function seedClass2(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $accounts = [
             // 21 - КРАТКОРОЧНИ ОБВРСКИ СПРЕМА ПОВРЗАНИ ДРУШТВА
@@ -342,13 +375,13 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '299', 'name' => 'Останати пасивни временски разграничувања', 'type' => Account::TYPE_LIABILITY],
         ];
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
     /**
      * КЛАСА 3: ЗАЛИХИ НА СУРОВИНИ, МАТЕРИЈАЛИ, РЕЗЕРВНИ ДЕЛОВИ И СИТЕН ИНВЕНТАР
      */
-    private function seedClass3(int $companyId): void
+    private function seedClass3(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $accounts = [
             // 30 - ПРЕСМЕТКА НА НАБАВКАТА НА ЗАЛИХИ
@@ -380,13 +413,13 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '358', 'name' => 'Вредносно усогласување на залихи на ситен инвентар, амбалажа и автогуми', 'type' => Account::TYPE_ASSET],
         ];
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
     /**
      * КЛАСА 4: ТРОШОЦИ И РАСХОДИ ОД РАБОТЕЊЕТО
      */
-    private function seedClass4(int $companyId): void
+    private function seedClass4(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $accounts = [
             // 40 - ТРОШОЦИ ЗА СУРОВИНИ, МАТЕРИЈАЛИ, ЕНЕРГИЈА, РЕЗЕРВНИ ДЕЛОВИ И СИТЕН ИНВЕНТАР
@@ -478,13 +511,13 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '492', 'name' => 'Распоред на трошоците непосредно врз товар на вкупниот приход', 'type' => Account::TYPE_EXPENSE],
         ];
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
     /**
      * КЛАСА 6: ЗАЛИХИ НА ПРОИЗВОДСТВО, ГОТОВИ ПРОИЗВОДИ И СТОКИ
      */
-    private function seedClass6(int $companyId): void
+    private function seedClass6(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $accounts = [
             // 60 - ПРОИЗВОДСТВО
@@ -527,13 +560,13 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '678', 'name' => 'Вредносно усогласување на нетековни средства за продажба', 'type' => Account::TYPE_ASSET],
         ];
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
     /**
      * КЛАСА 7: ПОКРИВАЊЕ НА РАСХОДИ И ПРИХОДИ
      */
-    private function seedClass7(int $companyId): void
+    private function seedClass7(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $accounts = [
             // 70 - РАСХОДИ НА ПРОДАДЕНИ ДОБРА И УСЛУГИ
@@ -591,13 +624,13 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '790', 'name' => 'Разлика на приходи и расходи од вкупното работење', 'type' => Account::TYPE_REVENUE],
         ];
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
     /**
      * КЛАСА 8: РЕЗУЛТАТИ ОД РАБОТЕЊЕТО
      */
-    private function seedClass8(int $companyId): void
+    private function seedClass8(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $accounts = [
             // 80 - ДОБИВКА/ЗАГУБА ПРЕД ОДАНОЧУВАЊЕ
@@ -628,13 +661,13 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '899', 'name' => 'Нераспоредена добивка', 'type' => Account::TYPE_EQUITY],
         ];
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
     /**
      * КЛАСА 9: КАПИТАЛ, РЕЗЕРВИ И ВОНБИЛАНСНА ЕВИДЕНЦИЈА
      */
-    private function seedClass9(int $companyId): void
+    private function seedClass9(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $accounts = [
             // 90 - ОСНОВНА ГЛАВНИНА - ЗАПИШАН КАПИТАЛ
@@ -678,7 +711,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '999', 'name' => 'Останата пасивна вонбилансна евиденција', 'type' => Account::TYPE_EQUITY],
         ];
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
     /**
@@ -690,7 +723,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
      * Loads database/data/analytical_accounts.php (711 accounts across all classes).
      * VAT accounts (130/230 children) are handled separately by seedVatSubAccounts().
      */
-    private function seedAnalyticalAccounts(int $companyId): void
+    private function seedAnalyticalAccounts(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $dataFile = database_path('data/analytical_accounts.php');
         if (! file_exists($dataFile)) {
@@ -710,10 +743,10 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ];
         }
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
-    private function seedVatSubAccounts(int $companyId): void
+    private function seedVatSubAccounts(int $companyId, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
         $accounts = [
             // Input VAT (under 130 — Данок на додадена вредност)
@@ -733,58 +766,52 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '2306', 'name' => 'Обврски за пресметан даночен долг по стапка од 10%', 'type' => Account::TYPE_LIABILITY, 'parent_code' => '230'],
         ];
 
-        $this->createAccounts($companyId, $accounts);
+        $this->createAccounts($companyId, $accounts, $existingCodes);
     }
 
     /**
-     * Helper method to create accounts (idempotent)
+     * Helper method to create accounts (idempotent).
+     * Uses bulk pre-loaded $existingCodes for O(1) lookups instead of individual SELECTs.
      */
-    private function createAccounts(int $companyId, array $accounts): void
+    private function createAccounts(int $companyId, array $accounts, ?\Illuminate\Support\Collection &$existingCodes = null): void
     {
+        // Fallback: if no pre-loaded codes, load them now (for backward compatibility)
+        if ($existingCodes === null) {
+            $existingCodes = Account::where('company_id', $companyId)
+                ->pluck('code')
+                ->flip();
+        }
+
         foreach ($accounts as $accountData) {
-            $existingAccount = Account::where('company_id', $companyId)
-                ->where('code', $accountData['code'])
-                ->first();
+            $code = $accountData['code'];
 
-            if ($existingAccount) {
-                // Fix name + parent on existing system_defined accounts (old placeholders)
-                if ($existingAccount->system_defined) {
-                    $updates = [];
-                    if ($existingAccount->name !== $accountData['name']) {
-                        $updates['name'] = $accountData['name'];
-                    }
-                    if (! empty($accountData['parent_code']) && ! $existingAccount->parent_id) {
-                        $parent = Account::where('company_id', $companyId)
-                            ->where('code', $accountData['parent_code'])
-                            ->first();
-                        if ($parent) {
-                            $updates['parent_id'] = $parent->id;
-                        }
-                    }
-                    if (! empty($updates)) {
-                        $existingAccount->update($updates);
-                    }
-                }
-            } else {
-                $parentId = null;
-                if (! empty($accountData['parent_code'])) {
-                    $parent = Account::where('company_id', $companyId)
-                        ->where('code', $accountData['parent_code'])
-                        ->first();
-                    $parentId = $parent?->id;
-                }
-
-                Account::create([
-                    'company_id' => $companyId,
-                    'code' => $accountData['code'],
-                    'name' => $accountData['name'],
-                    'description' => null,
-                    'type' => $accountData['type'],
-                    'parent_id' => $parentId,
-                    'is_active' => true,
-                    'system_defined' => true,
-                ]);
+            if ($existingCodes->has($code)) {
+                // Account already exists — skip (no name/parent fix needed on every deploy)
+                continue;
             }
+
+            // Resolve parent_id
+            $parentId = null;
+            if (! empty($accountData['parent_code'])) {
+                $parent = Account::where('company_id', $companyId)
+                    ->where('code', $accountData['parent_code'])
+                    ->first();
+                $parentId = $parent?->id;
+            }
+
+            Account::create([
+                'company_id' => $companyId,
+                'code' => $code,
+                'name' => $accountData['name'],
+                'description' => null,
+                'type' => $accountData['type'],
+                'parent_id' => $parentId,
+                'is_active' => true,
+                'system_defined' => true,
+            ]);
+
+            // Add to cache so subsequent accounts can reference this as parent
+            $existingCodes->put($code, true);
         }
     }
 

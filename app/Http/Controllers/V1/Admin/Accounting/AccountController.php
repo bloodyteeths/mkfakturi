@@ -174,6 +174,28 @@ class AccountController extends Controller
             'meta' => 'nullable|array',
         ]);
 
+        // Prevent changes to system-defined account structure
+        if ($account->system_defined) {
+            if ($request->has('code') && $request->code !== $account->code) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot change code of a system-defined account.',
+                ], 422);
+            }
+            if ($request->has('type') && $request->type !== $account->type) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot change type of a system-defined account.',
+                ], 422);
+            }
+            if ($request->has('parent_id') && $request->parent_id != $account->parent_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot change parent of a system-defined account.',
+                ], 422);
+            }
+        }
+
         // Check for duplicate code (if changing)
         if ($request->has('code') && $request->code !== $account->code) {
             if (Account::where('company_id', $companyId)
@@ -192,6 +214,15 @@ class AccountController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Account cannot be its own parent.',
+                ], 422);
+            }
+
+            // Check for circular reference
+            $descendantIds = $this->getAllDescendantIds($account);
+            if (in_array($request->parent_id, $descendantIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot set a descendant as parent (circular reference).',
                 ], 422);
             }
 
@@ -334,6 +365,23 @@ class AccountController extends Controller
             'message' => 'Account mapping saved successfully.',
             'data' => $mapping->load(['debitAccount', 'creditAccount']),
         ], $mapping->wasRecentlyCreated ? 201 : 200);
+    }
+
+    /**
+     * Get all descendant account IDs (children, grandchildren, etc.)
+     * Used to prevent circular references when changing parent_id.
+     */
+    protected function getAllDescendantIds(Account $account): array
+    {
+        $descendantIds = [];
+        $children = Account::where('parent_id', $account->id)->get();
+
+        foreach ($children as $child) {
+            $descendantIds[] = $child->id;
+            $descendantIds = array_merge($descendantIds, $this->getAllDescendantIds($child));
+        }
+
+        return $descendantIds;
     }
 
     /**

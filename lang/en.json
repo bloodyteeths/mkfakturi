@@ -5080,6 +5080,7 @@
             "no_parent": "No parent (root account)",
             "parent_account": "Parent Account",
             "status": "Status",
+            "system_defined_notice": "System-defined account — code, type, and parent cannot be changed.",
             "title": "Chart of Accounts",
             "type": "Type",
             "type_asset": "Asset",

@@ -3026,6 +3026,7 @@
             "no_parent": "Без матveч (осyeni hesap)",
             "description_placeholder": "Опцveолен açıklama hesapта",
             "status": "Durum",
+            "system_defined_notice": "Sistem hesabı — kod, tür ve üst hesap değiştirilemez.",
             "is_active": "Актveв",
             "is_active_description": "Hayırактveвнveте hesaplar yok evet кажуваат трансакцveскveте формve",
             "created_message": "Hesapта başarıyla oluşturuldu",

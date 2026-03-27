@@ -3103,6 +3103,7 @@
             "no_parent": "Pa матdheчnë (осi rinë llogaria)",
             "description_placeholder": "Опцdheajoлен përshkrimi në llogariaта",
             "status": "Statusi",
+            "system_defined_notice": "Llogari e sistemit — kodi, lloji dhe llogaria amë nuk mund të ndryshohen.",
             "is_active": "Aktive",
             "is_active_description": "Joактdheвнdheте llogaritë joма po се прdheкажуваат во трансакцdheскdheте формdhe",
             "created_message": "Llogariaта е me sukses креdheраnë",

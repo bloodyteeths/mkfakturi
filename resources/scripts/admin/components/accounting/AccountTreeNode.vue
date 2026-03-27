@@ -117,7 +117,7 @@ const props = defineProps({
 
 const emit = defineEmits(['select', 'edit', 'delete'])
 
-const isExpanded = ref(true)
+const isExpanded = ref(props.level > 0)
 
 const isSelected = computed(() => {
   return props.selectedId === props.node.id

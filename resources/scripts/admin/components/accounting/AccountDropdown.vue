@@ -22,8 +22,16 @@
       </template>
 
       <template #option="{ option }">
-        <div class="flex items-center">
-          <span class="font-mono text-sm text-gray-700 shrink-0">{{ option.code }}</span>
+        <div
+          class="flex items-center"
+          :style="{ paddingLeft: option.code && option.code.length > 3 ? '16px' : '0' }"
+        >
+          <span
+            class="font-mono text-sm shrink-0"
+            :class="option.code && option.code.length <= 3 ? 'font-bold text-gray-900' : 'text-gray-600'"
+          >
+            {{ option.code }}
+          </span>
           <span class="ml-2 text-sm text-gray-600 truncate">{{ option.name }}</span>
         </div>
       </template>
