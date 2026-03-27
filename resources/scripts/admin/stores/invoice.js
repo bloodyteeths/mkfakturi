@@ -99,6 +99,40 @@ export const useInvoiceStore = (useWindow = false) => {
         }
       },
 
+      fetchUnsettledAdvances(customerId) {
+        return new Promise((resolve, reject) => {
+          axios
+            .get('/invoices/unsettled-advances', { params: { customer_id: customerId } })
+            .then((response) => {
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      settleAdvances(invoiceId, advanceInvoiceIds) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/invoices/${invoiceId}/settle-advances`, {
+              advance_invoice_ids: advanceInvoiceIds,
+            })
+            .then((response) => {
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('invoices.advance_settled'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
       previewInvoice(params) {
         return new Promise((resolve, reject) => {
           axios

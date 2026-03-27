@@ -287,9 +287,11 @@ let isLoadingContent = computed(
   () => invoiceStore.isFetchingInvoice || invoiceStore.isFetchingInitialSettings
 )
 
-let pageTitle = computed(() =>
-  isEdit.value ? t('invoices.edit_invoice') : t('invoices.new_invoice')
-)
+let pageTitle = computed(() => {
+  if (isEdit.value) return t('invoices.edit_invoice')
+  if (invoiceStore.newInvoice.type === 'advance') return t('invoices.new_advance_invoice')
+  return t('invoices.new_invoice')
+})
 
 const salesTaxEnabled = computed(() => {
   return (
@@ -334,6 +336,12 @@ const v$ = useVuelidate(
 customFieldStore.resetCustomFields()
 v$.value.$reset
 invoiceStore.resetCurrentInvoice()
+
+// Set type from query param (e.g., ?type=advance)
+if (route.query.type === 'advance') {
+  invoiceStore.newInvoice.type = 'advance'
+}
+
 invoiceStore.fetchInvoiceInitialSettings(isEdit.value)
 
 watch(

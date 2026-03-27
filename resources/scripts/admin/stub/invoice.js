@@ -36,5 +36,6 @@ export default function () {
     selectedNote: null,
     selectedCurrency: '',
     project_id: null,
+    type: 'standard',
   }
 }

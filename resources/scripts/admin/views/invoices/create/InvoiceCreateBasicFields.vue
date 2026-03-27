@@ -50,6 +50,20 @@
         />
       </BaseInputGroup>
 
+      <BaseInputGroup
+        :label="$t('invoices.type')"
+        :content-loading="isLoading"
+      >
+        <BaseMultiselect
+          v-model="invoiceStore.newInvoice.type"
+          :options="invoiceTypeOptions"
+          :can-deselect="false"
+          :can-clear="false"
+          :disabled="isEdit"
+          :content-loading="isLoading"
+        />
+      </BaseInputGroup>
+
       <ExchangeRateConverter
         :store="invoiceStore"
         store-prop="newInvoice"
@@ -75,9 +89,12 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import ExchangeRateConverter from '@/scripts/admin/components/estimate-invoice-common/ExchangeRateConverter.vue'
 import { useInvoiceStore } from '@/scripts/admin/stores/invoice'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+
+const { t } = useI18n()
 
 const props = defineProps({
   v: {
@@ -96,6 +113,11 @@ const props = defineProps({
 
 const invoiceStore = useInvoiceStore()
 const companyStore = useCompanyStore()
+
+const invoiceTypeOptions = [
+  { label: t('invoices.type_standard'), value: 'standard' },
+  { label: t('invoices.type_advance'), value: 'advance' },
+]
 
 const selectedSettings = computed(() => companyStore.selectedCompanySettings || {})
 

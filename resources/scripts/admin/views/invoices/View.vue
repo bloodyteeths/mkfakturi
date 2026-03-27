@@ -47,7 +47,15 @@ const searchData = reactive({
   searchText: null,
 })
 
-const pageTitle = computed(() => invoiceData.value.invoice_number)
+const pageTitle = computed(() => {
+  let title = invoiceData.value.invoice_number
+  if (invoiceData.value.type === 'advance') {
+    title = `${t('invoices.type_advance')} — ${title}`
+  } else if (invoiceData.value.type === 'final') {
+    title = `${t('invoices.type_final')} — ${title}`
+  }
+  return title
+})
 
 const getOrderBy = computed(() => {
   if (searchData.orderBy === 'asc' || searchData.orderBy == null) {
@@ -494,9 +502,22 @@ onSearched = debounce(onSearched, 500)
                   font-medium
                   leading-5
                   text-gray-600
+                  flex items-center gap-1
                 "
               >
                 {{ invoice.invoice_number }}
+                <span
+                  v-if="invoice.type === 'advance'"
+                  class="inline-flex px-1 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800"
+                >
+                  {{ $t('invoices.type_advance') }}
+                </span>
+                <span
+                  v-if="invoice.type === 'final'"
+                  class="inline-flex px-1 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-800"
+                >
+                  {{ $t('invoices.type_final') }}
+                </span>
               </div>
               <BaseEstimateStatusBadge
                 :status="invoice.status"
@@ -567,6 +588,81 @@ onSearched = debounce(onSearched, 500)
                 frame-style
               "
             />
+          </div>
+        </BaseTab>
+
+        <!-- Advance Settlement Tab (only for final invoices with linked advances) -->
+        <BaseTab
+          v-if="invoiceData.type === 'final' && invoiceData.advance_invoices?.length"
+          tab-panel-container="py-4 mt-px"
+          :title="$t('invoices.settlement_details')"
+        >
+          <div class="p-4 space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900">
+              {{ $t('invoices.linked_advances') }}
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      {{ $t('invoices.invoice_number') }}
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      {{ $t('invoices.date') }}
+                    </th>
+                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                      {{ $t('invoices.total') }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr v-for="adv in invoiceData.advance_invoices" :key="adv.id">
+                    <td class="px-4 py-2 text-sm">
+                      <router-link
+                        :to="`/admin/invoices/${adv.id}/view`"
+                        class="text-primary-500 font-medium"
+                      >
+                        {{ adv.invoice_number }}
+                      </router-link>
+                    </td>
+                    <td class="px-4 py-2 text-sm text-gray-600">
+                      {{ adv.formatted_invoice_date }}
+                    </td>
+                    <td class="px-4 py-2 text-sm text-right font-medium">
+                      <BaseFormatMoney
+                        :amount="adv.total"
+                        :currency="invoiceData.currency"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot class="bg-gray-50">
+                  <tr>
+                    <td colspan="2" class="px-4 py-2 text-sm font-semibold text-gray-700">
+                      {{ $t('invoices.total_advances') }}
+                    </td>
+                    <td class="px-4 py-2 text-sm text-right font-bold text-amber-700">
+                      <BaseFormatMoney
+                        :amount="invoiceData.total_advances_amount"
+                        :currency="invoiceData.currency"
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" class="px-4 py-2 text-sm font-semibold text-gray-700">
+                      {{ $t('invoices.remaining_after_advances') }}
+                    </td>
+                    <td class="px-4 py-2 text-sm text-right font-bold text-green-700">
+                      <BaseFormatMoney
+                        :amount="invoiceData.remaining_after_advances"
+                        :currency="invoiceData.currency"
+                      />
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </div>
         </BaseTab>
 

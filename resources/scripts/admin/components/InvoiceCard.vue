@@ -4,12 +4,26 @@
       <!-- Header: Invoice Number & Status -->
       <div class="flex justify-between items-start mb-3">
         <div>
-          <router-link
-            :to="{ path: `/admin/invoices/${invoice.id}/view` }"
-            class="text-lg font-semibold text-primary-500 hover:text-primary-600"
-          >
-            {{ invoice.invoice_number }}
-          </router-link>
+          <div class="flex items-center gap-2">
+            <router-link
+              :to="{ path: `/admin/invoices/${invoice.id}/view` }"
+              class="text-lg font-semibold text-primary-500 hover:text-primary-600"
+            >
+              {{ invoice.invoice_number }}
+            </router-link>
+            <span
+              v-if="invoice.type === 'advance'"
+              class="inline-flex px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
+            >
+              {{ $t('invoices.type_advance') }}
+            </span>
+            <span
+              v-if="invoice.type === 'final'"
+              class="inline-flex px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"
+            >
+              {{ $t('invoices.type_final') }}
+            </span>
+          </div>
           <p class="text-sm text-gray-600 mt-1">
             {{ invoice.customer.name }}
           </p>

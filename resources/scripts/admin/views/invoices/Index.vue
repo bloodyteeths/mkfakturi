@@ -46,6 +46,18 @@
 
         <router-link
           v-if="userStore.hasAbilities(abilities.CREATE_INVOICE)"
+          to="invoices/create?type=advance"
+        >
+          <BaseButton variant="primary-outline">
+            <template #left="slotProps">
+              <BaseIcon name="PlusIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('invoices.new_advance_invoice') }}
+          </BaseButton>
+        </router-link>
+
+        <router-link
+          v-if="userStore.hasAbilities(abilities.CREATE_INVOICE)"
           to="invoices/create"
         >
           <BaseButton variant="primary">
@@ -111,6 +123,15 @@
             <BaseIcon name="HashtagIcon" :class="slotProps.class" />
           </template>
         </BaseInput>
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('invoices.type')">
+        <BaseMultiselect
+          v-model="filters.type"
+          :options="invoiceTypeOptions"
+          :placeholder="$t('general.select')"
+          @remove="filters.type = ''"
+        />
       </BaseInputGroup>
     </BaseFilterWrapper>
 
@@ -292,12 +313,26 @@
 
           <!-- Invoice Number  -->
           <template #cell-invoice_number="{ row }">
-            <router-link
-              :to="{ path: `invoices/${row.data.id}/view` }"
-              class="font-medium text-primary-500"
-            >
-              {{ row.data.invoice_number }}
-            </router-link>
+            <div class="flex items-center gap-2">
+              <router-link
+                :to="{ path: `invoices/${row.data.id}/view` }"
+                class="font-medium text-primary-500"
+              >
+                {{ row.data.invoice_number }}
+              </router-link>
+              <span
+                v-if="row.data.type === 'advance'"
+                class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
+              >
+                {{ $t('invoices.type_advance') }}
+              </span>
+              <span
+                v-if="row.data.type === 'final'"
+                class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"
+              >
+                {{ $t('invoices.type_final') }}
+              </span>
+            </div>
           </template>
 
           <!-- Invoice date  -->
@@ -424,7 +459,14 @@ let filters = reactive({
   to_date: '',
   invoice_number: '',
   project_id: route.query.project_id || '',
+  type: '',
 })
+
+const invoiceTypeOptions = [
+  { label: t('invoices.type_standard'), value: 'standard' },
+  { label: t('invoices.type_advance'), value: 'advance' },
+  { label: t('invoices.type_final'), value: 'final' },
+]
 
 const invoiceListData = ref([])
 
@@ -521,6 +563,7 @@ async function fetchData({ page, filter, sort }) {
     to_date: filters.to_date,
     invoice_number: filters.invoice_number,
     project_id: filters.project_id,
+    type: filters.type,
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,
@@ -593,6 +636,7 @@ function clearFilter() {
   filters.to_date = ''
   filters.invoice_number = ''
   filters.project_id = ''
+  filters.type = ''
 
   activeTab.value = t('general.all')
 }
