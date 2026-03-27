@@ -2172,43 +2172,51 @@ class IfrsAdapter
      */
     protected function mapCategoryToAccountCode(string $categoryName): string
     {
-        // Basic mapping - can be extended based on business needs
+        // Macedonian chart of accounts (Правилник 174/2011) — Class 4 expense codes
         $categoryLower = strtolower($categoryName);
 
-        if (str_contains($categoryLower, 'salary') || str_contains($categoryLower, 'wage')) {
-            return '5200'; // Salaries and Wages
+        if (str_contains($categoryLower, 'salary') || str_contains($categoryLower, 'wage') || str_contains($categoryLower, 'плат')) {
+            return '420'; // Вкалкулирани плати
         }
 
-        if (str_contains($categoryLower, 'rent')) {
-            return '5300'; // Rent Expense
+        if (str_contains($categoryLower, 'rent') || str_contains($categoryLower, 'наем') || str_contains($categoryLower, 'закуп')) {
+            return '414'; // Наемнини
         }
 
-        if (str_contains($categoryLower, 'utility') || str_contains($categoryLower, 'utilities')) {
-            return '5400'; // Utilities
+        if (str_contains($categoryLower, 'utility') || str_contains($categoryLower, 'utilities') || str_contains($categoryLower, 'енерг') || str_contains($categoryLower, 'комунал')) {
+            return '402'; // Потрошена енергија
         }
 
-        if (str_contains($categoryLower, 'marketing') || str_contains($categoryLower, 'advertising')) {
-            return '5500'; // Marketing and Advertising
+        if (str_contains($categoryLower, 'marketing') || str_contains($categoryLower, 'advertising') || str_contains($categoryLower, 'реклам') || str_contains($categoryLower, 'пропаганд')) {
+            return '442'; // Трошоци за промоција, пропаганда и реклама
         }
 
-        if (str_contains($categoryLower, 'travel')) {
-            return '5600'; // Travel Expenses
+        if (str_contains($categoryLower, 'travel') || str_contains($categoryLower, 'патув') || str_contains($categoryLower, 'дневниц')) {
+            return '440'; // Дневници за службени патувања
         }
 
-        if (str_contains($categoryLower, 'office') || str_contains($categoryLower, 'supplies')) {
-            return '5700'; // Office Supplies
+        if (str_contains($categoryLower, 'office') || str_contains($categoryLower, 'supplies') || str_contains($categoryLower, 'канцелар')) {
+            return '400'; // Потрошени суровини и материјали
         }
 
-        if (str_contains($categoryLower, 'insurance')) {
-            return '5800'; // Insurance
+        if (str_contains($categoryLower, 'insurance') || str_contains($categoryLower, 'осигур')) {
+            return '443'; // Премии за осигурување
         }
 
-        if (str_contains($categoryLower, 'legal') || str_contains($categoryLower, 'professional')) {
-            return '5900'; // Professional Fees
+        if (str_contains($categoryLower, 'legal') || str_contains($categoryLower, 'professional') || str_contains($categoryLower, 'интелектуал')) {
+            return '419'; // Останати услуги (вкл. интелектуални услуги)
+        }
+
+        if (str_contains($categoryLower, 'depreciation') || str_contains($categoryLower, 'амортиз')) {
+            return '430'; // Амортизација
+        }
+
+        if (str_contains($categoryLower, 'transport') || str_contains($categoryLower, 'превоз') || str_contains($categoryLower, 'транспорт')) {
+            return '410'; // Транспортни трошоци
         }
 
         // Default general expense
-        return '5000';
+        return '419'; // Останати услуги
     }
 
     /**
@@ -3835,7 +3843,7 @@ class IfrsAdapter
         '234'  => Account::CURRENT_LIABILITY,
         '240'  => Account::CURRENT_LIABILITY,
         '242'  => Account::CURRENT_LIABILITY,
-        '351'  => Account::NON_OPERATING_REVENUE,
+        '351'  => Account::INVENTORY,  // Ситен инвентар во употреба (small inventory in use)
     ];
 
     protected function findAccountByCode(int $entityId, string $code, string $name): Account
@@ -3864,16 +3872,16 @@ class IfrsAdapter
         if ($accountType === null) {
             $digit = (int) substr($accountCode, 0, 1);
             $accountType = match ($digit) {
-                0 => Account::NON_CURRENT_ASSET,
-                1 => Account::CURRENT_ASSET,
-                2 => Account::CURRENT_LIABILITY,
-                3 => Account::OPERATING_REVENUE,
-                4 => Account::OPERATING_EXPENSE,
-                5 => Account::DIRECT_EXPENSE,
-                6 => Account::DIRECT_EXPENSE,
-                7 => Account::OPERATING_REVENUE,
-                8 => Account::OPERATING_REVENUE,
-                9 => Account::EQUITY,
+                0 => Account::NON_CURRENT_ASSET,        // Нетековни средства
+                1 => Account::CURRENT_ASSET,             // Парични средства, побарувања
+                2 => Account::CURRENT_LIABILITY,          // Обврски
+                3 => Account::INVENTORY,                  // Залихи на суровини, материјали, ситен инвентар
+                4 => Account::OPERATING_EXPENSE,          // Трошоци и расходи од работењето
+                5 => Account::DIRECT_EXPENSE,             // Слободна (интерна употреба)
+                6 => Account::INVENTORY,                  // Залихи на производство, готови производи, стоки
+                7 => Account::OPERATING_REVENUE,          // Покривање на расходи и приходи
+                8 => Account::OPERATING_REVENUE,          // Резултати од работењето
+                9 => Account::EQUITY,                     // Капитал, резерви
                 default => Account::OPERATING_EXPENSE,
             };
         }
@@ -3885,6 +3893,429 @@ class IfrsAdapter
             'account_type' => $accountType,
             'currency_id' => 1,
         ]);
+    }
+
+    // ====================================================================
+    // Manufacturing GL Posting
+    // ====================================================================
+
+    /**
+     * Post material issuance to production (raw materials → WIP).
+     * DR 600 WIP / CR 630 Inventory (or item's inventory_account)
+     */
+    public function postMaterialConsumption(\Modules\Mk\Models\Manufacturing\ProductionOrderMaterial $material): void
+    {
+        $order = $material->productionOrder;
+        if (! $this->isEnabled($order->company_id)) {
+            return;
+        }
+
+        $amount = abs((int) $material->actual_total_cost) / 100;
+        if ($amount <= 0) {
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $entity = $this->getOrCreateEntityForCompany($order->company, $order->order_date);
+            $item = $material->item;
+
+            $wipAccount = $this->findAccountByCode($entity->id, '600', 'Производство (изградба) во тек');
+            $inventoryAccount = $this->getInventoryAccount($order->company_id, $entity->id, $item);
+
+            $transaction = Transaction::create([
+                'account_id' => $wipAccount->id,
+                'transaction_date' => $order->order_date ?? Carbon::now(),
+                'narration' => "Материјал за производство: {$order->order_number} — {$item->name}",
+                'transaction_type' => Transaction::JN,
+                'currency_id' => $this->getCurrencyId($order->company_id),
+                'entity_id' => $entity->id,
+                'compound' => true,
+                'main_account_amount' => $amount,
+                'credited' => false,
+            ]);
+
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $transaction->id,
+                'account_id' => $inventoryAccount->id,
+                'amount' => $amount,
+                'quantity' => 1,
+                'credited' => true,
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $transaction->load('lineItems');
+            $transaction->post();
+
+            DB::commit();
+
+            Log::info('Manufacturing material consumption posted to GL', [
+                'material_id' => $material->id,
+                'order' => $order->order_number,
+                'amount' => $amount,
+                'transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to post material consumption to GL', [
+                'material_id' => $material->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Post labor cost to WIP.
+     * DR 600 WIP / CR 524 Wages Payable
+     */
+    public function postProductionLabor(\Modules\Mk\Models\Manufacturing\ProductionOrderLabor $labor): void
+    {
+        $order = $labor->productionOrder;
+        if (! $this->isEnabled($order->company_id)) {
+            return;
+        }
+
+        $amount = abs((int) $labor->total_cost) / 100;
+        if ($amount <= 0) {
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $entity = $this->getOrCreateEntityForCompany($order->company, $order->order_date);
+
+            $wipAccount = $this->findAccountByCode($entity->id, '600', 'Производство (изградба) во тек');
+            $wagesAccount = $this->findAccountByCode($entity->id, '524', 'Обврски за плати');
+
+            $transaction = Transaction::create([
+                'account_id' => $wipAccount->id,
+                'transaction_date' => $labor->work_date ?? $order->order_date ?? Carbon::now(),
+                'narration' => "Трошок за работна сила: {$order->order_number} — {$labor->description}",
+                'transaction_type' => Transaction::JN,
+                'currency_id' => $this->getCurrencyId($order->company_id),
+                'entity_id' => $entity->id,
+                'compound' => true,
+                'main_account_amount' => $amount,
+                'credited' => false,
+            ]);
+
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $transaction->id,
+                'account_id' => $wagesAccount->id,
+                'amount' => $amount,
+                'quantity' => 1,
+                'credited' => true,
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $transaction->load('lineItems');
+            $transaction->post();
+
+            DB::commit();
+
+            Log::info('Manufacturing labor posted to GL', [
+                'labor_id' => $labor->id,
+                'order' => $order->order_number,
+                'transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to post production labor to GL', [
+                'labor_id' => $labor->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Post overhead absorption to WIP.
+     * DR 600 WIP / CR source expense account (default 549)
+     */
+    public function postProductionOverhead(\Modules\Mk\Models\Manufacturing\ProductionOrderOverhead $overhead): void
+    {
+        $order = $overhead->productionOrder;
+        if (! $this->isEnabled($order->company_id)) {
+            return;
+        }
+
+        $amount = abs((int) $overhead->amount) / 100;
+        if ($amount <= 0) {
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $entity = $this->getOrCreateEntityForCompany($order->company, $order->order_date);
+
+            $wipAccount = $this->findAccountByCode($entity->id, '600', 'Производство (изградба) во тек');
+            $overheadAccount = $this->findAccountByCode($entity->id, '549', 'Општи трошоци за производство');
+
+            $transaction = Transaction::create([
+                'account_id' => $wipAccount->id,
+                'transaction_date' => $order->order_date ?? Carbon::now(),
+                'narration' => "Општи трошоци: {$order->order_number} — {$overhead->description}",
+                'transaction_type' => Transaction::JN,
+                'currency_id' => $this->getCurrencyId($order->company_id),
+                'entity_id' => $entity->id,
+                'compound' => true,
+                'main_account_amount' => $amount,
+                'credited' => false,
+            ]);
+
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $transaction->id,
+                'account_id' => $overheadAccount->id,
+                'amount' => $amount,
+                'quantity' => 1,
+                'credited' => true,
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $transaction->load('lineItems');
+            $transaction->post();
+
+            DB::commit();
+
+            Log::info('Manufacturing overhead posted to GL', [
+                'overhead_id' => $overhead->id,
+                'order' => $order->order_number,
+                'transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to post production overhead to GL', [
+                'overhead_id' => $overhead->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Post production completion — transfer WIP to Finished Goods.
+     * DR 630 Finished Goods / CR 600 WIP
+     * For co-production: multiple DR lines with allocated costs (630 FG + 637 by-product)
+     */
+    public function postProductionCompletion(\Modules\Mk\Models\Manufacturing\ProductionOrder $order): void
+    {
+        if (! $this->isEnabled($order->company_id)) {
+            return;
+        }
+
+        $totalCost = abs((int) $order->total_production_cost) / 100;
+        if ($totalCost <= 0) {
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $entity = $this->getOrCreateEntityForCompany($order->company, $order->order_date);
+
+            $wipAccount = $this->findAccountByCode($entity->id, '600', 'Производство (изградба) во тек');
+
+            $outputs = $order->coProductionOutputs;
+
+            if ($outputs->isEmpty()) {
+                // Single output: DR 630 Finished Goods / CR 600 WIP
+                $fgAccount = $this->getInventoryAccount($order->company_id, $entity->id, $order->outputItem);
+
+                $transaction = Transaction::create([
+                    'account_id' => $fgAccount->id,
+                    'transaction_date' => $order->completed_at ?? Carbon::now(),
+                    'narration' => "Завршено производство: {$order->order_number}",
+                    'transaction_type' => Transaction::JN,
+                    'currency_id' => $this->getCurrencyId($order->company_id),
+                    'entity_id' => $entity->id,
+                    'compound' => true,
+                    'main_account_amount' => $totalCost,
+                    'credited' => false,
+                ]);
+
+                DB::table('ifrs_line_items')->insert([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $wipAccount->id,
+                    'amount' => $totalCost,
+                    'quantity' => 1,
+                    'credited' => true,
+                    'entity_id' => $entity->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                // Co-production: first output is main account
+                $primaryOutput = $outputs->firstWhere('is_primary', true) ?? $outputs->first();
+                $primaryItem = \App\Models\Item::find($primaryOutput->item_id);
+                $primaryAccount = $this->getInventoryAccount($order->company_id, $entity->id, $primaryItem);
+                $primaryAmount = abs((int) $primaryOutput->allocated_cost) / 100;
+
+                $transaction = Transaction::create([
+                    'account_id' => $primaryAccount->id,
+                    'transaction_date' => $order->completed_at ?? Carbon::now(),
+                    'narration' => "Сопроизводство: {$order->order_number}",
+                    'transaction_type' => Transaction::JN,
+                    'currency_id' => $this->getCurrencyId($order->company_id),
+                    'entity_id' => $entity->id,
+                    'compound' => true,
+                    'main_account_amount' => $primaryAmount,
+                    'credited' => false,
+                ]);
+
+                // DR lines for secondary outputs (by-products)
+                foreach ($outputs as $output) {
+                    if ($output->id === $primaryOutput->id) {
+                        continue;
+                    }
+
+                    $outputItem = \App\Models\Item::find($output->item_id);
+                    $outputAccount = $output->is_primary
+                        ? $this->getInventoryAccount($order->company_id, $entity->id, $outputItem)
+                        : $this->findAccountByCode($entity->id, '637', 'Нуспроизводи');
+                    $outputAmount = abs((int) $output->allocated_cost) / 100;
+
+                    DB::table('ifrs_line_items')->insert([
+                        'transaction_id' => $transaction->id,
+                        'account_id' => $outputAccount->id,
+                        'amount' => $outputAmount,
+                        'quantity' => 1,
+                        'credited' => false,
+                        'entity_id' => $entity->id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                // CR line for WIP
+                DB::table('ifrs_line_items')->insert([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $wipAccount->id,
+                    'amount' => $totalCost,
+                    'quantity' => 1,
+                    'credited' => true,
+                    'entity_id' => $entity->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            $transaction->load('lineItems');
+            $transaction->post();
+
+            $order->update(['ifrs_transaction_id' => $transaction->id]);
+
+            DB::commit();
+
+            Log::info('Production completion posted to GL', [
+                'order' => $order->order_number,
+                'total_cost' => $totalCost,
+                'transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to post production completion to GL', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Post abnormal wastage as expense.
+     * DR 580 Wastage Loss / CR 600 WIP
+     */
+    public function postAbnormalWastage(\Modules\Mk\Models\Manufacturing\ProductionOrder $order, int $amountCents): void
+    {
+        if (! $this->isEnabled($order->company_id)) {
+            return;
+        }
+
+        $amount = abs($amountCents) / 100;
+        if ($amount <= 0) {
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $entity = $this->getOrCreateEntityForCompany($order->company, $order->order_date);
+
+            $wastageAccount = $this->findAccountByCode($entity->id, '580', 'Загуби од утрасок');
+            $wipAccount = $this->findAccountByCode($entity->id, '600', 'Производство (изградба) во тек');
+
+            $transaction = Transaction::create([
+                'account_id' => $wastageAccount->id,
+                'transaction_date' => $order->completed_at ?? Carbon::now(),
+                'narration' => "Утрасок (ненормален): {$order->order_number}",
+                'transaction_type' => Transaction::JN,
+                'currency_id' => $this->getCurrencyId($order->company_id),
+                'entity_id' => $entity->id,
+                'compound' => true,
+                'main_account_amount' => $amount,
+                'credited' => false,
+            ]);
+
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $transaction->id,
+                'account_id' => $wipAccount->id,
+                'amount' => $amount,
+                'quantity' => 1,
+                'credited' => true,
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $transaction->load('lineItems');
+            $transaction->post();
+
+            DB::commit();
+
+            Log::info('Abnormal wastage posted to GL', [
+                'order' => $order->order_number,
+                'amount' => $amount,
+                'transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to post abnormal wastage to GL', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Reverse all GL entries for a cancelled production order.
+     */
+    public function reverseProductionOrder(\Modules\Mk\Models\Manufacturing\ProductionOrder $order): void
+    {
+        if (! $this->isEnabled($order->company_id)) {
+            return;
+        }
+
+        if (! $order->ifrs_transaction_id) {
+            return;
+        }
+
+        try {
+            $reversalId = $this->reverseJournalEntry($order->company, $order->ifrs_transaction_id);
+            if ($reversalId) {
+                $order->update(['ifrs_transaction_id' => null]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to reverse production GL entries', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }
 

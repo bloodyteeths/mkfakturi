@@ -234,18 +234,18 @@ class IfrsAccountingAuditTest extends TestCase
             'Share Capital (code 900) should map to AOP 066'
         );
 
-        // Code 131 (VAT Input) → AOP 049
+        // Code 130 (VAT Input) → AOP 049
         $this->assertEqualsWithDelta(
             IfrsAuditSeeder::EXPECTED['aop_049'],
             $this->findAop($aktiva, '049'), 1.0,
-            'VAT Input (code 131) should map to AOP 049'
+            'VAT Input (code 130) should map to AOP 049'
         );
 
-        // Code 231 (VAT Output, CONTROL) → AOP 101
+        // Code 230 (VAT Output, CONTROL) → AOP 101
         $this->assertEqualsWithDelta(
             IfrsAuditSeeder::EXPECTED['aop_101'],
             $this->findAop($pasiva, '101'), 1.0,
-            'VAT Output (code 231) should map to AOP 101'
+            'VAT Output (code 230) should map to AOP 101'
         );
     }
 
@@ -397,7 +397,7 @@ class IfrsAccountingAuditTest extends TestCase
             'Share capital (credit-normal) should be positive on pasiva side');
         $this->assertEqualsWithDelta(500000, $aop066, 1.0);
 
-        // CONTROL account 231 (VAT output, credit balance) → AOP 101, positive
+        // CONTROL account 230 (VAT output, credit balance) → AOP 101, positive
         $aop101 = $this->findAop($pasiva, '101');
         $this->assertEqualsWithDelta(18000, $aop101, 1.0,
             'VAT output (credit-normal CONTROL) should be positive on pasiva side');

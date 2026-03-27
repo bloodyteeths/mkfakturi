@@ -72,7 +72,7 @@ class IfrsAuditSeeder extends Seeder
         // Income Statement totals (2025 only)
         'is_total_revenue' => 192000,  // 100K + 75K + 12K + 5K
         'is_total_expenses' => 188000, // 50K + 120K + 15K + 3K
-        'is_aop_202' => 175000,        // Sales: 720→100K + 731→75K
+        'is_aop_202' => 175000,        // Sales: 740→100K + 731→75K
         'is_aop_203' => 12000,         // Other income: 760→12K
         'is_aop_211' => 50000,         // Rent services: 412→50K
         'is_aop_214' => 120000,        // Salaries: 420→120K
@@ -240,10 +240,10 @@ class IfrsAuditSeeder extends Seeder
         // Create chart of accounts (23 accounts)
         $accounts = [
             // Assets
-            ['code' => 100, 'name' => 'Каса', 'type' => Account::BANK],
-            ['code' => 102, 'name' => 'Жиро-сметка', 'type' => Account::BANK],
+            ['code' => 100, 'name' => 'Жиро-сметка', 'type' => Account::BANK],
+            ['code' => 102, 'name' => 'Парични средства во благајна', 'type' => Account::BANK],
             ['code' => 120, 'name' => 'Побарувања од купувачи', 'type' => Account::RECEIVABLE],
-            ['code' => 131, 'name' => 'ДДВ - Претходен данок', 'type' => Account::RECEIVABLE],
+            ['code' => 130, 'name' => 'Данок на додадена вредност', 'type' => Account::RECEIVABLE],
             ['code' => 310, 'name' => 'Суровини и материјали', 'type' => Account::INVENTORY],
             ['code' => 600, 'name' => 'Недовршено производство', 'type' => Account::INVENTORY],
             ['code' => 1520, 'name' => 'Опрема', 'type' => Account::NON_CURRENT_ASSET],
@@ -251,7 +251,7 @@ class IfrsAuditSeeder extends Seeder
 
             // Liabilities
             ['code' => 220, 'name' => 'Обврски кон добавувачи', 'type' => Account::PAYABLE],
-            ['code' => 231, 'name' => 'ДДВ - Обврска', 'type' => Account::CONTROL],
+            ['code' => 230, 'name' => 'Обврски за данокот на додадена вредност', 'type' => Account::CONTROL],
             ['code' => 240, 'name' => 'Обврски за плати', 'type' => Account::CURRENT_LIABILITY],
             ['code' => 280, 'name' => 'Долгорочни заеми', 'type' => Account::NON_CURRENT_LIABILITY],
 
@@ -260,7 +260,7 @@ class IfrsAuditSeeder extends Seeder
             ['code' => 940, 'name' => 'Задржана добивка', 'type' => Account::EQUITY],
 
             // Revenue
-            ['code' => 720, 'name' => 'Приходи од продажба', 'type' => Account::OPERATING_REVENUE],
+            ['code' => 740, 'name' => 'Приходи од продажба на добра (производи) и услуги во земјата', 'type' => Account::OPERATING_REVENUE],
             ['code' => 731, 'name' => 'Приходи од извоз', 'type' => Account::OPERATING_REVENUE],
             ['code' => 760, 'name' => 'Останати приходи', 'type' => Account::NON_OPERATING_REVENUE],
             ['code' => 770, 'name' => 'Приходи од камати', 'type' => Account::NON_OPERATING_REVENUE],
@@ -337,7 +337,7 @@ class IfrsAuditSeeder extends Seeder
                 'narration' => 'Sales revenue (2024)',
                 'line_items' => [
                     ['account_code' => '120', 'account_name' => 'AR', 'amount' => 200000, 'credited' => false],
-                    ['account_code' => '720', 'account_name' => 'Sales', 'amount' => 200000, 'credited' => true],
+                    ['account_code' => '740', 'account_name' => 'Sales', 'amount' => 200000, 'credited' => true],
                 ],
             ],
             [
@@ -363,8 +363,8 @@ class IfrsAuditSeeder extends Seeder
                 'narration' => 'Sale with 18% VAT',
                 'line_items' => [
                     ['account_code' => '120', 'account_name' => 'AR', 'amount' => 118000, 'credited' => false],
-                    ['account_code' => '720', 'account_name' => 'Sales', 'amount' => 100000, 'credited' => true],
-                    ['account_code' => '231', 'account_name' => 'VAT Output', 'amount' => 18000, 'credited' => true],
+                    ['account_code' => '740', 'account_name' => 'Sales', 'amount' => 100000, 'credited' => true],
+                    ['account_code' => '230', 'account_name' => 'VAT Output', 'amount' => 18000, 'credited' => true],
                 ],
             ],
             [
@@ -372,7 +372,7 @@ class IfrsAuditSeeder extends Seeder
                 'narration' => 'Rent expense with VAT',
                 'line_items' => [
                     ['account_code' => '412', 'account_name' => 'Rent', 'amount' => 50000, 'credited' => false],
-                    ['account_code' => '131', 'account_name' => 'VAT Input', 'amount' => 9000, 'credited' => false],
+                    ['account_code' => '130', 'account_name' => 'VAT Input', 'amount' => 9000, 'credited' => false],
                     ['account_code' => '220', 'account_name' => 'AP', 'amount' => 59000, 'credited' => true],
                 ],
             ],

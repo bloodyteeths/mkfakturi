@@ -478,7 +478,7 @@ class AopReportService
 
     /**
      * Extract per-account records with code, IFRS type, and period activity balance.
-     * Returns: [['code' => '720', 'type' => 'OPERATING_REVENUE', 'balance' => 5000], ...]
+     * Returns: [['code' => '740', 'type' => 'OPERATING_REVENUE', 'balance' => 5000], ...]
      * Uses the larger of period_debit/period_credit as the absolute balance.
      * Used for income statement — period amounts represent activity during the period.
      */

@@ -676,15 +676,15 @@ class JournalExportService
     protected function getDefaultAccountCode(string $mapping): string
     {
         $defaults = [
-            'accounts_receivable' => '1610', // Побарувања од купувачи - домашни
-            'revenue' => '4000', // Приходи од продажба
-            'tax_payable' => '2710', // ДДВ за уплата
-            'cash' => '1020', // Жиро сметка
-            'accounts_payable' => '2210', // Обврски - домашни добавувачи
-            'expense' => '5000', // Набавна вредност на продадена стока
+            'accounts_receivable' => '1201', // Купувачи на обртни средства (тековни средства)
+            'revenue' => '7400', // Приходи од продажба на производи на домашен пазар
+            'tax_payable' => '2300', // Обврски за ДДВ
+            'cash' => '1020', // Главна благајна
+            'accounts_payable' => '2200', // Добавувачи за постојани средства
+            'expense' => '4199', // Останати услуги
         ];
 
-        return $defaults[$mapping] ?? '5000';
+        return $defaults[$mapping] ?? '4199';
     }
 
     /**

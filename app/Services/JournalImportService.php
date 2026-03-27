@@ -25,10 +25,10 @@ class JournalImportService
         0 => ['ifrs' => IfrsAccount::NON_CURRENT_ASSET, 'app' => Account::TYPE_ASSET],
         1 => ['ifrs' => IfrsAccount::CURRENT_ASSET, 'app' => Account::TYPE_ASSET],
         2 => ['ifrs' => IfrsAccount::CURRENT_LIABILITY, 'app' => Account::TYPE_LIABILITY],
-        3 => ['ifrs' => IfrsAccount::OPERATING_REVENUE, 'app' => Account::TYPE_REVENUE],
+        3 => ['ifrs' => IfrsAccount::INVENTORY, 'app' => Account::TYPE_ASSET],  // Залихи на суровини, материјали, ситен инвентар
         4 => ['ifrs' => IfrsAccount::OPERATING_EXPENSE, 'app' => Account::TYPE_EXPENSE],
         5 => ['ifrs' => IfrsAccount::DIRECT_EXPENSE, 'app' => Account::TYPE_EXPENSE],
-        6 => ['ifrs' => IfrsAccount::DIRECT_EXPENSE, 'app' => Account::TYPE_EXPENSE],
+        6 => ['ifrs' => IfrsAccount::INVENTORY, 'app' => Account::TYPE_ASSET],  // Залихи на производство, готови производи, стоки
         7 => ['ifrs' => IfrsAccount::OPERATING_REVENUE, 'app' => Account::TYPE_REVENUE],
         8 => ['ifrs' => IfrsAccount::OPERATING_REVENUE, 'app' => Account::TYPE_REVENUE],
         9 => ['ifrs' => IfrsAccount::EQUITY, 'app' => Account::TYPE_EQUITY],
@@ -40,7 +40,7 @@ class JournalImportService
     protected const SPECIFIC_IFRS_TYPES = [
         '0192' => IfrsAccount::CONTRA_ASSET,  // Исправка на вредност (depreciation)
         '019'  => IfrsAccount::CONTRA_ASSET,
-        '100'  => IfrsAccount::BANK,           // Каса / Жиро сметка
+        '100'  => IfrsAccount::BANK,           // Жиро-сметка (Bank account)
         '120'  => IfrsAccount::RECEIVABLE,     // Побарувања од купувачи
         '130'  => IfrsAccount::RECEIVABLE,     // ДДВ претходен данок
         '162'  => IfrsAccount::RECEIVABLE,     // Дадени заеми
@@ -49,7 +49,7 @@ class JournalImportService
         '234'  => IfrsAccount::CURRENT_LIABILITY, // ПИО, здравствено
         '240'  => IfrsAccount::CURRENT_LIABILITY, // Обврски за плати
         '242'  => IfrsAccount::CURRENT_LIABILITY, // Обврски за придонеси
-        '351'  => IfrsAccount::NON_OPERATING_REVENUE, // Финансиски приходи
+        '351'  => IfrsAccount::INVENTORY,  // Ситен инвентар во употреба
     ];
 
     /**
