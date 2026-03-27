@@ -12,8 +12,7 @@
       </BaseBreadcrumb>
 
       <template #actions>
-        <div v-if="order" class="flex items-center space-x-2">
-          <!-- Download PDF button (always visible) -->
+        <div v-if="order" class="flex flex-wrap items-center gap-2">
           <BaseButton
             variant="primary-outline"
             :loading="isDownloading"
@@ -22,10 +21,10 @@
             <template #left="slotProps">
               <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
             </template>
-            {{ t('download_pdf') }}
+            <span class="hidden sm:inline">{{ t('download_pdf') }}</span>
+            <span class="sm:hidden">PDF</span>
           </BaseButton>
 
-          <!-- Approve button (draft / pending_approval) -->
           <BaseButton
             v-if="order.status === 'draft' || order.status === 'pending_approval'"
             variant="primary"
@@ -38,7 +37,6 @@
             {{ t('approve') }}
           </BaseButton>
 
-          <!-- Settle button (approved only) -->
           <BaseButton
             v-if="order.status === 'approved'"
             variant="primary"
@@ -51,7 +49,6 @@
             {{ t('settle') }}
           </BaseButton>
 
-          <!-- Reject button (draft / pending_approval) -->
           <BaseButton
             v-if="order.status === 'draft' || order.status === 'pending_approval'"
             variant="danger"
@@ -64,7 +61,6 @@
             {{ t('reject') }}
           </BaseButton>
 
-          <!-- Delete button (draft only) -->
           <BaseButton
             v-if="order.status === 'draft'"
             variant="danger"
@@ -105,7 +101,7 @@
         </div>
 
         <div class="p-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
             <div>
               <p class="text-xs text-gray-500 uppercase font-medium">{{ t('type') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-1">
@@ -135,7 +131,7 @@
       </div>
 
       <!-- Totals Summary Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
           <p class="text-xs text-blue-600 uppercase font-medium">{{ t('total_per_diem') }}</p>
           <p class="text-xl font-bold text-blue-800">{{ formatMoney(order.total_per_diem) }}</p>
@@ -314,7 +310,7 @@
         </div>
         <div class="space-y-4 p-6">
           <div v-for="item in order.cargo" :key="item.id" class="border border-gray-200 rounded-lg p-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <p class="text-xs text-gray-500 uppercase font-medium">{{ t('cmr_number') }}</p>
                 <p class="text-sm font-medium text-gray-900 mt-1">{{ item.cmr_number || '-' }}</p>
@@ -534,7 +530,13 @@ function transportLabel(type) {
 }
 
 function categoryLabel(cat) {
-  const labels = { transport: t('category_transport'), accommodation: t('category_accommodation'), meals: t('category_meals'), other: t('category_other') }
+  const labels = {
+    transport: t('category_transport'), accommodation: t('category_accommodation'),
+    meals: t('category_meals'), other: t('category_other'),
+    fuel: t('category_fuel'), tolls: t('category_tolls'),
+    forwarding: t('category_forwarding'), vehicle_maintenance: t('category_vehicle_maintenance'),
+    communication: t('category_communication'), per_diem: t('category_per_diem'),
+  }
   return labels[cat] || cat
 }
 

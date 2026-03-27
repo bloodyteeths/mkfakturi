@@ -143,7 +143,7 @@
             </button>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <BaseInputGroup :label="t('vehicle_type')" required>
               <BaseMultiselect
                 v-model="vehicle.vehicle_type"
@@ -168,7 +168,7 @@
             </BaseInputGroup>
           </div>
 
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
             <BaseInputGroup :label="t('capacity_tonnes')">
               <BaseInput v-model="vehicle.capacity_tonnes" type="number" step="0.1" min="0" placeholder="0" />
             </BaseInputGroup>
@@ -228,7 +228,7 @@
             </button>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <BaseInputGroup :label="t('crew_name')" required>
               <BaseInput v-model="member.name" type="text" :placeholder="t('crew_name')" />
             </BaseInputGroup>
@@ -286,13 +286,25 @@
             </button>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <BaseInputGroup :label="t('from_city')" required>
-              <BaseInput v-model="seg.from_city" type="text" :placeholder="t('from_city')" />
+              <input
+                v-model="seg.from_city"
+                type="text"
+                :list="form.type === 'domestic' ? 'mk-cities-list' : undefined"
+                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-sm"
+                :placeholder="t('from_city')"
+              />
             </BaseInputGroup>
 
             <BaseInputGroup :label="t('to_city')" required>
-              <BaseInput v-model="seg.to_city" type="text" :placeholder="t('to_city')" />
+              <input
+                v-model="seg.to_city"
+                type="text"
+                :list="form.type === 'domestic' ? 'mk-cities-list' : undefined"
+                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-sm"
+                :placeholder="t('to_city')"
+              />
             </BaseInputGroup>
 
             <div>
@@ -301,10 +313,11 @@
                   v-model="seg.country_code"
                   :options="countriesList"
                   label="name"
+                  track-by="name"
                   value-prop="code"
                   :searchable="true"
-                  :placeholder="t('country')"
-                  @change="onCountryChange(seg)"
+                  :placeholder="t('select_country')"
+                  @select="onCountryChange(seg)"
                 />
               </BaseInputGroup>
               <div v-if="form.type === 'foreign' && seg.per_diem_rate" class="mt-1">
@@ -315,7 +328,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
             <BaseInputGroup :label="t('departure')" required>
               <input
                 v-model="seg.departure_at"
@@ -424,7 +437,7 @@
             </BaseInputGroup>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
             <BaseInputGroup :label="t('sender_name')">
               <BaseInput v-model="cargo.sender_name" type="text" :placeholder="t('sender_name')" />
             </BaseInputGroup>
@@ -439,7 +452,7 @@
             </BaseInputGroup>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
             <BaseInputGroup :label="t('sender_address')">
               <BaseInput v-model="cargo.sender_address" type="text" :placeholder="t('sender_address')" />
             </BaseInputGroup>
@@ -488,7 +501,7 @@
             </button>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <BaseInputGroup :label="t('category')" required>
               <BaseMultiselect
                 v-model="exp.category"
@@ -508,7 +521,7 @@
                 v-model="exp.currency_code"
                 :options="currencyOptions"
                 :searchable="true"
-                @change="onExpenseCurrencyChange(exp)"
+                @select="onExpenseCurrencyChange(exp)"
               />
             </BaseInputGroup>
 
@@ -516,7 +529,7 @@
               <BaseInput v-model="exp.amount_display" type="number" step="0.01" min="0" :placeholder="'0.00'" />
             </BaseInputGroup>
 
-            <BaseInputGroup :label="t('exchange_rate')">
+            <BaseInputGroup v-if="exp.currency_code && exp.currency_code !== 'MKD'" :label="t('exchange_rate')">
               <BaseInput v-model="exp.exchange_rate" type="number" step="0.0001" min="0" :placeholder="'1.0000'" />
             </BaseInputGroup>
 
@@ -557,7 +570,7 @@
       <div class="bg-primary-50 rounded-lg shadow p-6 border border-primary-200">
         <h3 class="text-lg font-medium text-primary-900 mb-4">{{ t('financial_summary') }}</h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div class="space-y-3">
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">{{ t('total_per_diem') }}</span>
@@ -600,30 +613,36 @@
         </div>
       </div>
 
+      <!-- Macedonian cities datalist for domestic travel autocomplete -->
+      <datalist id="mk-cities-list">
+        <option v-for="city in mkCities" :key="city" :value="city" />
+      </datalist>
     </form>
 
     <!-- Sticky save bar -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 px-6 py-3">
-      <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <div class="flex items-center space-x-6 text-sm text-gray-600">
-          <span v-if="totalPerDiemMkd > 0">{{ t('per_diem') }}: <strong>{{ formatMoney(totalPerDiemMkd) }}</strong> MKD</span>
-          <span v-if="totalExpensesMkd > 0">{{ t('expenses') }}: <strong>{{ formatDecimal(totalExpensesMkd) }}</strong> MKD</span>
-          <span class="font-semibold text-gray-900">{{ t('grand_total') }}: {{ formatDecimal(grandTotalMkd) }} MKD</span>
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 px-4 sm:px-6 py-3">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div class="hidden sm:flex items-center space-x-6 text-sm text-gray-600">
+          <span v-if="totalPerDiemMkd > 0">{{ t('per_diem') }}: <strong>{{ formatMoney(totalPerDiemMkd) }}</strong></span>
+          <span v-if="totalExpensesMkd > 0">{{ t('expenses') }}: <strong>{{ formatDecimal(totalExpensesMkd) }}</strong></span>
         </div>
-        <div class="flex items-center space-x-3">
-          <span v-if="!canSave" class="text-xs text-red-500">{{ t('fill_required_fields') }}</span>
-          <BaseButton
-            type="button"
-            variant="primary"
-            :loading="isSaving"
-            :disabled="!canSave"
-            @click="saveTravelOrder"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="CheckIcon" :class="slotProps.class" />
-            </template>
-            {{ t('save_draft') }}
-          </BaseButton>
+        <div class="flex items-center justify-between w-full sm:w-auto gap-3">
+          <span class="font-semibold text-gray-900 text-sm">{{ t('grand_total') }}: {{ formatDecimal(grandTotalMkd) }} MKD</span>
+          <div class="flex items-center space-x-2">
+            <span v-if="!canSave" class="text-xs text-red-500 hidden sm:inline">{{ t('fill_required_fields') }}</span>
+            <BaseButton
+              type="button"
+              variant="primary"
+              :loading="isSaving"
+              :disabled="!canSave"
+              @click="saveTravelOrder"
+            >
+              <template #left="slotProps">
+                <BaseIcon name="CheckIcon" :class="slotProps.class" />
+              </template>
+              {{ t('save_draft') }}
+            </BaseButton>
+          </div>
         </div>
       </div>
     </div>
@@ -658,6 +677,18 @@ const expenseCategories = ref([])
 const countriesList = ref([])
 
 const defaultFuelNorms = { car: 8, van: 12, truck: 35, trailer: 0 }
+
+// Major Macedonian cities for domestic travel autocomplete
+const mkCities = [
+  'Скопје', 'Битола', 'Куманово', 'Прилеп', 'Тетово', 'Велес', 'Штип', 'Охрид',
+  'Гостивар', 'Струмица', 'Кавадарци', 'Кочани', 'Кичево', 'Струга', 'Гевгелија',
+  'Неготино', 'Радовиш', 'Дебар', 'Крива Паланка', 'Свети Николе', 'Берово',
+  'Виница', 'Делчево', 'Пробиштип', 'Валандово', 'Македонски Брод', 'Демир Хисар',
+  'Ресен', 'Крушево', 'Демир Капија', 'Богданци', 'Василево', 'Ново Село',
+  'Кратово', 'Дојран', 'Росоман', 'Пехчево', 'Маврово', 'Сарај',
+  'Аеродром', 'Бутел', 'Гази Баба', 'Ѓорче Петров', 'Карпош', 'Кисела Вода',
+  'Центар', 'Чаир', 'Шуто Оризари',
+]
 
 function getLocalDateTimeString(date = new Date()) {
   const year = date.getFullYear()
@@ -965,19 +996,25 @@ function removeExpense(index) { form.expenses.splice(index, 1) }
 // ==================== Auto-fill Handlers ====================
 
 function onCountryChange(seg) {
-  const code = seg.country_code
-  if (code && perDiemRates.value[code]) {
-    seg.per_diem_rate = perDiemRates.value[code].rate
-    seg.per_diem_currency = perDiemRates.value[code].currency || 'EUR'
-  }
+  // Called after @select fires — seg.country_code is already updated by v-model
+  setTimeout(() => {
+    const code = seg.country_code
+    if (code && perDiemRates.value[code]) {
+      seg.per_diem_rate = perDiemRates.value[code].rate
+      seg.per_diem_currency = perDiemRates.value[code].currency || 'EUR'
+    }
+  }, 0)
 }
 
 function onExpenseCurrencyChange(exp) {
-  if (exp.currency_code === 'MKD') {
-    exp.exchange_rate = 1
-  } else if (exchangeRates.value[exp.currency_code]) {
-    exp.exchange_rate = exchangeRates.value[exp.currency_code]
-  }
+  // Called after @select fires — exp.currency_code is already updated by v-model
+  setTimeout(() => {
+    if (exp.currency_code === 'MKD') {
+      exp.exchange_rate = 1
+    } else if (exchangeRates.value[exp.currency_code]) {
+      exp.exchange_rate = exchangeRates.value[exp.currency_code]
+    }
+  }, 0)
 }
 
 // Auto-chain: new segment starts where previous ended
