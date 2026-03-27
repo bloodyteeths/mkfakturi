@@ -740,6 +740,7 @@ class Invoice extends Model implements HasMedia
             'customer.billingAddress',
             'customer.currency',
             'items.taxes.taxType',
+            'advanceInvoices',
         ]);
 
         $taxes = collect();
