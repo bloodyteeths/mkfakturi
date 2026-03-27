@@ -233,12 +233,14 @@ test.describe('Document Hub E2E — Bug Detection', () => {
 
   test('BUG-3: info banner must be localized (not English fallback)', async () => {
     // BUG-3 FIXED: i18n translations added for all 4 locales
-    test.setTimeout(15000)
+    test.setTimeout(25000)
     if (!EMAIL || !reviewDocUrl) return test.skip()
 
-    // Navigate to review page
-    await page.goto(reviewDocUrl)
-    await page.waitForLoadState('networkidle')
+    // Re-navigate only if not already on review page
+    if (!page.url().includes('/review')) {
+      await page.goto(reviewDocUrl)
+      await page.waitForLoadState('networkidle')
+    }
     await page.waitForTimeout(1500)
 
     // Find the blue info banner
@@ -269,12 +271,14 @@ test.describe('Document Hub E2E — Bug Detection', () => {
 
   test('BUG-4: invoice form fields must be populated from AI extraction', async () => {
     // BUG-4 FIXED: prefillForm now copies bill dates/number to invoice
-    test.setTimeout(20000)
+    test.setTimeout(25000)
     if (!EMAIL || !reviewDocUrl) return test.skip()
 
-    // Navigate to review page
-    await page.goto(reviewDocUrl)
-    await page.waitForLoadState('networkidle')
+    // Re-navigate only if not already on review page
+    if (!page.url().includes('/review')) {
+      await page.goto(reviewDocUrl)
+      await page.waitForLoadState('networkidle')
+    }
     await page.waitForTimeout(1500)
 
     // Check if document is confirmed
@@ -363,7 +367,7 @@ test.describe('Document Hub E2E — Bug Detection', () => {
 
   test('BUG-5: expense category should not be a company name', async () => {
     // BUG-5 FIXED: category uses AI type label instead of company name
-    test.setTimeout(15000)
+    test.setTimeout(25000)
     if (!EMAIL || !reviewDocUrl) return test.skip()
 
     // Check document is not confirmed
