@@ -6970,6 +6970,7 @@
     "documents.stat_confirmed": "E konfirmuar",
     "documents.stat_failed": "Dështuar",
     "documents.status_pending": "Në pritje",
+    "documents.status_retrying": "Duke riprovuar...",
     "documents.status_extracted": "Për rishikim",
     "documents.status_confirmed": "E konfirmuar",
     "documents.status_failed": "Dështuar",

@@ -7204,6 +7204,7 @@
     "documents.status_pending": "Во чекање",
     "documents.status_classifying": "Се класифицира...",
     "documents.status_extracting": "Се извлекува...",
+    "documents.status_retrying": "Повторен обид...",
     "documents.status_extracted": "За преглед",
     "documents.status_confirmed": "Потврдено",
     "documents.status_failed": "Неуспешно",

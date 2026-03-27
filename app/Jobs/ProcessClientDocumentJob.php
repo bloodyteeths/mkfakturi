@@ -28,14 +28,14 @@ class ProcessClientDocumentJob implements ShouldQueue
     /**
      * Number of times the job may be attempted.
      */
-    public int $tries = 2;
+    public int $tries = 3;
 
     /**
      * Seconds to wait before retrying after a failure.
      *
      * @var array<int,int>
      */
-    public array $backoff = [60, 300];
+    public array $backoff = [30, 60, 300];
 
     public function __construct(int $documentId)
     {
@@ -79,18 +79,27 @@ class ProcessClientDocumentJob implements ShouldQueue
             $this->extractData($doc, $client, $mapper);
             $this->notifyOwner($doc);
         } catch (Invoice2DataServiceException $e) {
-            Log::warning('ProcessClientDocumentJob: service unavailable, will retry', [
+            $hasRetries = $this->attempts() < $this->tries;
+
+            Log::warning('ProcessClientDocumentJob: service unavailable', [
                 'document_id' => $doc->id,
                 'attempt' => $this->attempts(),
+                'will_retry' => $hasRetries,
                 'error' => $e->getMessage(),
             ]);
 
             $doc->update([
-                'processing_status' => ClientDocument::PROCESSING_FAILED,
+                'processing_status' => $hasRetries
+                    ? ClientDocument::PROCESSING_RETRYING
+                    : ClientDocument::PROCESSING_FAILED,
                 'error_message' => $e->getMessage(),
             ]);
 
-            $this->release($this->backoff[$this->attempts() - 1] ?? 300);
+            if ($hasRetries) {
+                $this->release($this->backoff[$this->attempts() - 1] ?? 300);
+            } else {
+                $this->notifyOwner($doc);
+            }
 
             return;
         } catch (RequestException $e) {
@@ -114,13 +123,21 @@ class ProcessClientDocumentJob implements ShouldQueue
                 return;
             }
 
-            // Server error — retry
+            // Server error — retry if attempts remain
+            $hasRetries = $this->attempts() < $this->tries;
+
             $doc->update([
-                'processing_status' => ClientDocument::PROCESSING_FAILED,
+                'processing_status' => $hasRetries
+                    ? ClientDocument::PROCESSING_RETRYING
+                    : ClientDocument::PROCESSING_FAILED,
                 'error_message' => $e->getMessage(),
             ]);
 
-            $this->release($this->backoff[$this->attempts() - 1] ?? 300);
+            if ($hasRetries) {
+                $this->release($this->backoff[$this->attempts() - 1] ?? 300);
+            } else {
+                $this->notifyOwner($doc);
+            }
 
             return;
         } catch (\Throwable $e) {
@@ -409,6 +426,25 @@ class ProcessClientDocumentJob implements ShouldQueue
                 'document_id' => $doc->id,
                 'error' => $e->getMessage(),
             ]);
+        }
+    }
+    /**
+     * Handle a job failure after all retries exhausted.
+     */
+    public function failed(?\Throwable $exception): void
+    {
+        $doc = ClientDocument::find($this->documentId);
+
+        if ($doc && ! in_array($doc->processing_status, [
+            ClientDocument::PROCESSING_EXTRACTED,
+            ClientDocument::PROCESSING_CONFIRMED,
+        ])) {
+            $doc->update([
+                'processing_status' => ClientDocument::PROCESSING_FAILED,
+                'error_message' => 'Processing failed after all retries: '.($exception?->getMessage() ?? 'unknown'),
+            ]);
+
+            $this->notifyOwner($doc);
         }
     }
 } // CLAUDE-CHECKPOINT

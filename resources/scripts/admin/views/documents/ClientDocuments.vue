@@ -543,7 +543,7 @@ const navigateToReview = (doc) => {
 }
 
 // Helpers
-const isProcessing = (doc) => ['pending', 'classifying', 'extracting'].includes(doc.processing_status)
+const isProcessing = (doc) => ['pending', 'classifying', 'extracting', 'retrying'].includes(doc.processing_status)
 
 const getFileIcon = (mimeType) => {
   if (mimeType?.startsWith('image/')) return PhotoIcon
@@ -582,6 +582,7 @@ const getProcessingLabel = (status) => {
     pending: t('documents.status_pending', 'Pending'),
     classifying: t('documents.status_classifying', 'AI classifying...'),
     extracting: t('documents.status_extracting', 'AI extracting...'),
+    retrying: t('documents.status_retrying', 'AI retrying...'),
     extracted: t('documents.status_extracted', 'Ready for Review'),
     confirmed: t('documents.status_confirmed', 'Confirmed'),
     failed: t('documents.status_failed', 'Failed'),
@@ -594,6 +595,7 @@ const getProcessingBadgeClass = (status) => {
     pending: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700',
     classifying: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700',
     extracting: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700',
+    retrying: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800',
     extracted: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800',
     confirmed: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800',
     failed: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800',

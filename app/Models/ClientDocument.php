@@ -50,6 +50,8 @@ class ClientDocument extends Model
 
     const PROCESSING_FAILED = 'failed';
 
+    const PROCESSING_RETRYING = 'retrying';
+
     // File constraints
     const ALLOWED_MIMETYPES = [
         'application/pdf',
@@ -278,6 +280,7 @@ class ClientDocument extends Model
         return $query->whereIn('processing_status', [
             self::PROCESSING_CLASSIFYING,
             self::PROCESSING_EXTRACTING,
+            self::PROCESSING_RETRYING,
         ]);
     }
 
