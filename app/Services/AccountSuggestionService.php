@@ -667,9 +667,9 @@ class AccountSuggestionService
      *
      * Uses official 3-digit Macedonian chart of accounts (Regulation 174/2011):
      * Class 7 - Revenue Coverage (ПОКРИВАЊЕ НА РАСХОДИ И ПРИХОДИ):
-     * - 720 = Приходи од продажба на производи во земјата (Products)
-     * - 721 = Приходи од продажба на услуги во земјата (Services)
-     * - 722 = Приходи од продажба на стока во земјата (Goods/Trade)
+     * - 740 = Приходи од продажба на добра (производи) и услуги во земјата (Products/Services)
+     * - 741 = Приходи од продажба на добра (стоки) во земјата (Goods/Trade)
+     * - 742 = Приходи од продажба на услуги во земјата (Services)
      */
     protected function classifyItemType(string $text): ?array
     {
@@ -983,8 +983,8 @@ class AccountSuggestionService
      * - 2210 = Обврски - домашни добавувачи (Supplier payables)
      * - 5000 = Набавна вредност на продадена стока (General expense)
      * Uses official 3-digit Macedonian chart of accounts (Regulation 174/2011):
-     * - 231 = Обврски за данок на додадена вредност (VAT payable)
-     * - 720 = Приходи од продажба на производи во земјата (Revenue)
+     * - 230 = Обврски за данокот на додадена вредност (VAT payable)
+     * - 740 = Приходи од продажба на добра (производи) и услуги во земјата (Revenue)
      * - 220 = Обврски кон добавувачи во земјата (Payables)
      * - 400 = Трошоци за суровини и материјали (Expenses)
      *

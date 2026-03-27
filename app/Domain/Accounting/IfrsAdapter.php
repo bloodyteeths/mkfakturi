@@ -1647,7 +1647,7 @@ class IfrsAdapter
             userAccountType: \App\Models\Account::TYPE_ASSET,
             ifrsAccountType: Account::BANK,
             fallbackName: 'Cash and Bank',
-            fallbackCode: '100', // Macedonian: Готовина
+            fallbackCode: '102', // Macedonian: Готовина (Cash = code 102 after 100↔102 swap)
             specificName: 'Cash'
         );
     }
@@ -1655,17 +1655,17 @@ class IfrsAdapter
     /**
      * Get the correct cash/bank account based on payment mode.
      * Routes payments to the proper Macedonian chart-of-accounts code:
-     *   CASH         → 100 (Готовина)
-     *   BANK_TRANSFER→ 102 (Жиро-сметка)
-     *   CREDIT_CARD  → 102 (Жиро-сметка — card settlements go to bank)
-     *   CHECK        → 100 (Готовина)
-     *   OTHER/null   → 100 (Готовина — fallback)
+     *   CASH         → 102 (Готовина)
+     *   BANK_TRANSFER→ 100 (Жиро-сметка)
+     *   CREDIT_CARD  → 100 (Жиро-сметка — card settlements go to bank)
+     *   CHECK        → 102 (Готовина)
+     *   OTHER/null   → 102 (Готовина — fallback)
      */
     protected function getCashAccountByPaymentMode(?string $paymentMode, int $companyId, int $entityId): Account
     {
         $map = [
-            'BANK_TRANSFER' => ['code' => '102', 'name' => 'Жиро-сметка', 'specific' => 'Жиро'],
-            'CREDIT_CARD'   => ['code' => '102', 'name' => 'Жиро-сметка', 'specific' => 'Жиро'],
+            'BANK_TRANSFER' => ['code' => '100', 'name' => 'Жиро-сметка', 'specific' => 'Жиро'],
+            'CREDIT_CARD'   => ['code' => '100', 'name' => 'Жиро-сметка', 'specific' => 'Жиро'],
         ];
 
         if ($paymentMode && isset($map[$paymentMode])) {
@@ -1682,7 +1682,7 @@ class IfrsAdapter
             );
         }
 
-        // CASH, CHECK, OTHER, null → default cash account (100)
+        // CASH, CHECK, OTHER, null → default cash account (102)
         return $this->getCashAccount($companyId, $entityId);
     }
 
