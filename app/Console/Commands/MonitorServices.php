@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Mail;
 /**
  * Monitor external service health and alert on failures.
  *
- * Checks: invoice2data (OCR), Gemini API, Postmark, Paddle.
- * Sends email alert on first failure, suppresses repeats for 1 hour.
- * Sends recovery email when service comes back up.
+ * Checks: invoice2data (OCR), Gemini API, Postmark.
+ * Sends email alert on first failure, suppresses repeats for 6 hours.
+ * Only alerts on DOWN — no recovery emails (reduces noise).
  */
 class MonitorServices extends Command
 {
@@ -37,10 +37,9 @@ class MonitorServices extends Command
     {
         $alertEmail = env('ADMIN_EMAIL', 'atillatkulu@gmail.com');
         $failures = [];
-        $recoveries = [];
 
         foreach ($this->getChecks() as $name => $check) {
-            $cacheKey = "service_monitor:{$name}:down";
+            $cacheKey = "service_monitor:{$name}:alerted";
 
             try {
                 [$ok, $detail] = $check();
@@ -49,38 +48,24 @@ class MonitorServices extends Command
                 $detail = $e->getMessage();
             }
 
-            $wasDown = Cache::get($cacheKey, false);
-
             if (! $ok) {
                 Log::warning("[ServiceMonitor] {$name} is DOWN", ['detail' => $detail]);
                 $this->error("{$name}: DOWN — {$detail}");
 
-                if (! $wasDown) {
-                    // First failure — mark as down and queue alert
+                if (! Cache::has($cacheKey)) {
+                    // First failure — suppress repeats for 6 hours
                     Cache::put($cacheKey, $detail, now()->addHours(6));
                     $failures[$name] = $detail;
                 }
-                // Already down — suppress repeat alerts
             } else {
                 $this->info("{$name}: OK");
-
-                if ($wasDown) {
-                    // Was down, now recovered
-                    Cache::forget($cacheKey);
-                    $recoveries[$name] = $wasDown; // previous error detail
-                    Log::info("[ServiceMonitor] {$name} recovered");
-                }
+                // Clear suppression so next failure triggers a new alert
+                Cache::forget($cacheKey);
             }
         }
 
-        // Send failure alert
         if (! empty($failures)) {
-            $this->sendAlert($alertEmail, $failures, 'down');
-        }
-
-        // Send recovery alert
-        if (! empty($recoveries)) {
-            $this->sendAlert($alertEmail, $recoveries, 'recovered');
+            $this->sendAlert($alertEmail, $failures);
         }
 
         return 0;
@@ -142,30 +127,20 @@ class MonitorServices extends Command
         return [false, "HTTP {$response->status()}: " . substr($response->body(), 0, 200)];
     }
 
-    private function sendAlert(string $to, array $services, string $type): void
+    private function sendAlert(string $to, array $services): void
     {
-        $isDown = $type === 'down';
-        $emoji = $isDown ? '🔴' : '🟢';
-        $subject = $isDown
-            ? 'Facturino: Service DOWN — ' . implode(', ', array_keys($services))
-            : 'Facturino: Service RECOVERED — ' . implode(', ', array_keys($services));
+        $subject = 'Facturino: Service DOWN — ' . implode(', ', array_keys($services));
 
         $lines = [];
         foreach ($services as $name => $detail) {
-            if ($isDown) {
-                $lines[] = "<p><strong>{$name}</strong>: {$detail}</p>";
-            } else {
-                $lines[] = "<p><strong>{$name}</strong>: OK (was: {$detail})</p>";
-            }
+            $lines[] = "<p><strong>{$name}</strong>: {$detail}</p>";
         }
         $body = implode("\n", $lines);
 
-        $action = $isDown
-            ? '<p style="color: #dc2626;">Immediate attention required.</p>'
-            : '<p style="color: #16a34a;">Services are back to normal.</p>';
+        $action = '<p style="color: #dc2626;">Immediate attention required.</p>';
 
         $html = <<<HTML
-        <p>{$emoji} <strong>{$subject}</strong></p>
+        <p>🔴 <strong>{$subject}</strong></p>
         {$body}
         {$action}
         <p><small>Sent by Facturino service monitor at {$this->now()}</small></p>
@@ -182,7 +157,6 @@ class MonitorServices extends Command
             });
 
             Log::info("[ServiceMonitor] Alert sent", [
-                'type' => $type,
                 'services' => array_keys($services),
                 'to' => $to,
             ]);
