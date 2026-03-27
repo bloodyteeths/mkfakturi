@@ -83,9 +83,9 @@ const copy = {
           icon: 'ai',
         },
         {
-          title: 'Залихи и магацинско работење',
-          body: 'Приемница, издатница, нарачки за набавка и автоматско книжење. Контрола на усогласеност.',
-          icon: 'warehouse',
+          title: 'Автоматско двојно книжење',
+          body: 'Секоја фактура, плаќање и трошок автоматски се книжи по Правилник 174/2011. Целосен контен план — 1,190 конта. Вие прегледувате, не внесувате.',
+          icon: 'ledger',
         },
         {
           title: 'Годишна завршна сметка',
@@ -108,8 +108,9 @@ const copy = {
     },
     comparison: {
       title: 'Facturino наспроти конкуренцијата',
-      sub: 'Единствена платформа со AI во Македонија',
+      sub: 'Единствена платформа со AI и автоматско книжење',
       rows: [
+        { feature: 'Автоматско книжење по Правилник 174/2011', facturino: '✓', others: '✗' },
         { feature: 'AI скенирање (сликај фактура → книжи)', facturino: '✓', others: '✗' },
         { feature: 'AI порамнување со банка', facturino: '✓', others: '✗' },
         { feature: 'AI чат асистент (на македонски)', facturino: '✓', others: '✗' },
@@ -194,9 +195,9 @@ const copy = {
           icon: 'ai',
         },
         {
-          title: 'Inventar dhe menaxhim i magazinës',
-          body: 'Fletëhyrje, fletëdalje, porosi furnizimi dhe regjistrim automatik. Kontroll i pajtueshmërisë.',
-          icon: 'warehouse',
+          title: 'Regjistrim automatik i dyfishtë',
+          body: 'Çdo faturë, pagesë dhe shpenzim regjistrohet automatikisht sipas Rregullores 174/2011. Plan kontabel i plotë — 1,190 llogari. Ju rishikoni, nuk futni.',
+          icon: 'ledger',
         },
         {
           title: 'Llogaria përfundimtare vjetore',
@@ -219,8 +220,9 @@ const copy = {
     },
     comparison: {
       title: 'Facturino kundrejt konkurrencës',
-      sub: 'Platforma e vetme me AI në Maqedoni',
+      sub: 'Platforma e vetme me AI dhe regjistrim automatik',
       rows: [
+        { feature: 'Regjistrim automatik sipas Rregullores 174/2011', facturino: '✓', others: '✗' },
         { feature: 'AI skanim (fotografo faturë → regjistro)', facturino: '✓', others: '✗' },
         { feature: 'AI pajtim me bankën', facturino: '✓', others: '✗' },
         { feature: 'AI asistent chat (në maqedonisht)', facturino: '✓', others: '✗' },
@@ -305,9 +307,9 @@ const copy = {
           icon: 'ai',
         },
         {
-          title: 'Stok ve depo yönetimi',
-          body: 'Giriş fişi, çıkış fişi, satın alma siparişleri ve otomatik muhasebe kaydı. Uyum kontrolü.',
-          icon: 'warehouse',
+          title: 'Otomatik çift taraflı kayıt',
+          body: 'Her fatura, ödeme ve gider Yönetmelik 174/2011\'e göre otomatik kaydedilir. Eksiksiz hesap planı — 1,190 hesap. Siz kontrol edin, girmeyin.',
+          icon: 'ledger',
         },
         {
           title: 'Yıl sonu kapanış hesabı',
@@ -330,8 +332,9 @@ const copy = {
     },
     comparison: {
       title: 'Facturino rakiplere karşı',
-      sub: 'Makedonya\'da AI\'lı tek platform',
+      sub: 'AI ve otomatik kayıt ile Makedonya\'da tek platform',
       rows: [
+        { feature: 'Yönetmelik 174/2011\'e göre otomatik kayıt', facturino: '✓', others: '✗' },
         { feature: 'AI tarama (fatura fotoğrafla → kaydet)', facturino: '✓', others: '✗' },
         { feature: 'AI banka mutabakatı', facturino: '✓', others: '✗' },
         { feature: 'AI sohbet asistanı (Makedoncada)', facturino: '✓', others: '✗' },
@@ -416,9 +419,9 @@ const copy = {
           icon: 'ai',
         },
         {
-          title: 'Inventory and warehouse management',
-          body: 'Goods received, issued, purchase orders and automatic posting. Compliance control.',
-          icon: 'warehouse',
+          title: 'Automatic double-entry posting',
+          body: 'Every invoice, payment and expense auto-posts per Regulation 174/2011. Full chart of accounts — 1,190 accounts. You review, not enter.',
+          icon: 'ledger',
         },
         {
           title: 'Year-end closing account',
@@ -441,8 +444,9 @@ const copy = {
     },
     comparison: {
       title: 'Facturino vs the competition',
-      sub: 'The only platform with AI in Macedonia',
+      sub: 'The only platform with AI and automatic posting',
       rows: [
+        { feature: 'Automatic posting per Regulation 174/2011', facturino: '✓', others: '✗' },
         { feature: 'AI scanning (photo invoice → post)', facturino: '✓', others: '✗' },
         { feature: 'AI bank reconciliation', facturino: '✓', others: '✗' },
         { feature: 'AI chat assistant (in Macedonian)', facturino: '✓', others: '✗' },
@@ -530,10 +534,10 @@ function IconAI() {
     </svg>
   )
 }
-function IconWarehouse() {
+function IconLedger() {
   return (
     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
     </svg>
   )
 }
@@ -578,7 +582,7 @@ const solutionIcons: Record<string, () => React.JSX.Element> = {
   bank: IconBank,
   invoice: IconInvoice,
   ai: IconAI,
-  warehouse: IconWarehouse,
+  ledger: IconLedger,
   yearend: IconYearEnd,
 }
 
