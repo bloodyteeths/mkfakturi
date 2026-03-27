@@ -79,6 +79,7 @@ class InvoicesController extends Controller
                 'to_date',
                 'orderByField',
                 'orderBy',
+                'type',
             ]))
             ->whereCompany();
 
