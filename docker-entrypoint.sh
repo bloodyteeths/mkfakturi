@@ -122,6 +122,11 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     echo "Seeding Leave Types..."
     php artisan db:seed --class=LeaveTypesSeeder --force || echo "LeaveTypesSeeder failed or table not ready"
 
+    # Seed per-diem rates and exchange rates (idempotent - safe to run multiple times)
+    echo "Seeding per-diem rates and exchange rates..."
+    php artisan db:seed --class=PerDiemRatesSeeder --force || echo "PerDiemRatesSeeder failed or table not ready"
+    php artisan db:seed --class=CurrencyExchangeRatesSeeder --force || echo "CurrencyExchangeRatesSeeder failed or table not ready"
+
     # Seed Deadline Templates (idempotent - safe to run multiple times)
     echo "Seeding Deadline Templates..."
     php artisan db:seed --class=DeadlineTemplatesSeeder --force || echo "DeadlineTemplatesSeeder failed or table not ready"
