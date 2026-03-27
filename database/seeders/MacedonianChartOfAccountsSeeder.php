@@ -43,8 +43,6 @@ class MacedonianChartOfAccountsSeeder extends Seeder
         foreach ($companies as $company) {
             $this->log("Seeding chart of accounts for company: {$company->name}");
 
-            $this->cleanupOldPlaceholderAccounts($company->id);
-
             // createAccounts() skips codes that already exist, so this is safe
             // for both new companies and existing ones (fills in missing accounts)
             $this->seedClass0($company->id);
@@ -57,6 +55,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             $this->seedClass8($company->id);
             $this->seedClass9($company->id);
             $this->seedVatSubAccounts($company->id);
+            $this->seedAnalyticalAccounts($company->id);
 
             $this->log("  ✓ Seeded chart of accounts for {$company->name}");
             $seeded++;
@@ -82,6 +81,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
         $this->seedClass8($companyId);
         $this->seedClass9($companyId);
         $this->seedVatSubAccounts($companyId);
+        $this->seedAnalyticalAccounts($companyId);
 
         $this->log("Seeded chart of accounts for company {$companyId}");
     }
@@ -685,6 +685,34 @@ class MacedonianChartOfAccountsSeeder extends Seeder
      * 4-digit analytical VAT sub-accounts (UKLO/Proagens standard, remapped to 2011).
      * Input VAT under 130, Output VAT under 230.
      */
+    /**
+     * Seed all 4-digit analytical accounts from the UKLO/Proagens data file.
+     * Loads database/data/analytical_accounts.php (711 accounts across all classes).
+     * VAT accounts (130/230 children) are handled separately by seedVatSubAccounts().
+     */
+    private function seedAnalyticalAccounts(int $companyId): void
+    {
+        $dataFile = database_path('data/analytical_accounts.php');
+        if (! file_exists($dataFile)) {
+            $this->log('  analytical_accounts.php not found, skipping 4-digit accounts', 'warn');
+
+            return;
+        }
+
+        $rows = require $dataFile;
+        $accounts = [];
+        foreach ($rows as [$code, $parentCode, $type, $name]) {
+            $accounts[] = [
+                'code' => $code,
+                'name' => $name,
+                'type' => $type,
+                'parent_code' => $parentCode,
+            ];
+        }
+
+        $this->createAccounts($companyId, $accounts);
+    }
+
     private function seedVatSubAccounts(int $companyId): void
     {
         $accounts = [
@@ -718,9 +746,28 @@ class MacedonianChartOfAccountsSeeder extends Seeder
                 ->where('code', $accountData['code'])
                 ->first();
 
-            if (!$existingAccount) {
+            if ($existingAccount) {
+                // Fix name + parent on existing system_defined accounts (old placeholders)
+                if ($existingAccount->system_defined) {
+                    $updates = [];
+                    if ($existingAccount->name !== $accountData['name']) {
+                        $updates['name'] = $accountData['name'];
+                    }
+                    if (! empty($accountData['parent_code']) && ! $existingAccount->parent_id) {
+                        $parent = Account::where('company_id', $companyId)
+                            ->where('code', $accountData['parent_code'])
+                            ->first();
+                        if ($parent) {
+                            $updates['parent_id'] = $parent->id;
+                        }
+                    }
+                    if (! empty($updates)) {
+                        $existingAccount->update($updates);
+                    }
+                }
+            } else {
                 $parentId = null;
-                if (!empty($accountData['parent_code'])) {
+                if (! empty($accountData['parent_code'])) {
                     $parent = Account::where('company_id', $companyId)
                         ->where('code', $accountData['parent_code'])
                         ->first();
@@ -741,45 +788,8 @@ class MacedonianChartOfAccountsSeeder extends Seeder
         }
     }
 
-    /**
-     * Clean up old placeholder 4-digit accounts
-     */
-    private function cleanupOldPlaceholderAccounts(int $companyId): void
-    {
-        // NOTE: 1300-1309 and 2300-2306 are EXCLUDED — they are legitimate
-        // 4-digit VAT analytical sub-accounts per UKLO/Proagens standard
-        $oldPlaceholderCodes = [
-            '1000', '1001', '1002', '1003', '1004', '1005', '1006', '1007', '1008', '1009',
-            '1100', '1101', '1200', '1201', '1202', '1203', '1400', '1500', '1600',
-            '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
-            '2100', '2200', '2201', '2202', '2203', '2204', '2205', '2400', '2500',
-            '3000', '3001', '3002', '3003', '3004', '3005', '3006', '3007', '3100', '3200',
-            '4000', '4001', '4002', '4003', '4004', '4005', '4006', '4007', '4008', '4009',
-            '4100', '4200', '4300', '4400', '4500', '4600', '4700', '4800', '4900',
-            '5000', '5001', '5002', '5003', '5004', '5005', '5006', '5007', '5008', '5009',
-            '5100', '5200', '5300', '5400', '5500',
-        ];
-
-        $deletedCount = 0;
-        foreach ($oldPlaceholderCodes as $code) {
-            $account = Account::where('company_id', $companyId)
-                ->where('code', $code)
-                ->first();
-
-            if ($account && $account->canDelete()) {
-                try {
-                    $account->delete();
-                    $deletedCount++;
-                } catch (\Exception $e) {
-                    $this->log("  Could not delete account {$code}: {$e->getMessage()}", 'warn');
-                }
-            }
-        }
-
-        if ($deletedCount > 0) {
-            $this->log("  Cleaned up {$deletedCount} old placeholder accounts");
-        }
-    }
+    // cleanupOldPlaceholderAccounts() removed — all 4-digit codes are now
+    // legitimate analytical accounts per UKLO/Proagens standard
 }
 
 // CLAUDE-CHECKPOINT
