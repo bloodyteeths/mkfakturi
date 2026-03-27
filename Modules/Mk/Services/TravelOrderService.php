@@ -495,13 +495,19 @@ class TravelOrderService
             $currencyCode = $exp['currency_code'] ?? 'MKD';
             $amount = (int) ($exp['amount'] ?? 0);
 
-            // Currency conversion
+            // Currency conversion — prefer user-provided rate, fall back to DB
             $exchangeRate = null;
             $amountMkd = $amount; // default: same as amount (MKD)
 
             if (strtoupper($currencyCode) !== 'MKD') {
-                $rate = CurrencyExchangeRate::latestRate($currencyCode);
-                $exchangeRate = $rate ? (float) $rate->rate_to_mkd : null;
+                // Use user-provided rate first, then DB lookup
+                $userRate = isset($exp['exchange_rate']) ? (float) $exp['exchange_rate'] : null;
+                if ($userRate && $userRate > 0) {
+                    $exchangeRate = $userRate;
+                } else {
+                    $rate = CurrencyExchangeRate::latestRate($currencyCode);
+                    $exchangeRate = $rate ? (float) $rate->rate_to_mkd : null;
+                }
                 if ($exchangeRate) {
                     $amountMkd = (int) round(($amount / 100) * $exchangeRate * 100);
                 }
@@ -513,11 +519,10 @@ class TravelOrderService
                 'amount' => $amount,
                 'currency_code' => $currencyCode,
                 'gl_account_code' => $glCode,
-                'exchange_rate' => $exchangeRate ?? ($exp['exchange_rate'] ?? null),
+                'exchange_rate' => $exchangeRate,
                 'amount_mkd' => $amountMkd,
                 'vat_amount' => $exp['vat_amount'] ?? null,
                 'receipt_number' => $exp['receipt_number'] ?? null,
-                'receipt_path' => $exp['receipt_path'] ?? null,
             ]);
         }
     }

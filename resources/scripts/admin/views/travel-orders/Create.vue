@@ -82,23 +82,7 @@
           </BaseInputGroup>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-          <BaseInputGroup :label="t('departure')" required>
-            <input
-              v-model="form.departure_date"
-              type="datetime-local"
-              class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-sm"
-            />
-          </BaseInputGroup>
-
-          <BaseInputGroup :label="t('return_date')" required>
-            <input
-              v-model="form.return_date"
-              type="datetime-local"
-              class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-sm"
-            />
-          </BaseInputGroup>
-
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           <BaseInputGroup :label="t('advance_amount')">
             <BaseInput
               v-model="form.advance_amount_display"
@@ -116,6 +100,14 @@
               :placeholder="t('notes_placeholder')"
             />
           </BaseInputGroup>
+        </div>
+
+        <!-- Auto-derived dates from segments -->
+        <div v-if="form.segments.length > 0 && form.segments[0].departure_at" class="mt-4 text-xs text-gray-500">
+          {{ t('departure') }}: <strong>{{ formatDateTime(form.departure_date) }}</strong>
+          &mdash;
+          {{ t('return_date') }}: <strong>{{ formatDateTime(form.return_date) }}</strong>
+          <span class="text-gray-400 ml-1">({{ t('auto_from_segments') }})</span>
         </div>
       </div>
 
@@ -785,8 +777,7 @@ const expenseCategoryOptions = computed(() => {
 // ==================== Computed ====================
 
 const canSave = computed(() => {
-  if (!form.transport_type_category || !form.type || !form.purpose || !form.departure_date || !form.return_date) return false
-  if (new Date(form.return_date) < new Date(form.departure_date)) return false
+  if (!form.transport_type_category || !form.type || !form.purpose) return false
   if (form.segments.length === 0) return false
   return form.segments.every(s => s.from_city && s.to_city && s.departure_at && s.arrival_at && s.transport_type)
 })
@@ -874,6 +865,13 @@ function formatDecimal(val) {
   if (!val && val !== 0) return '0.00'
   const fmtLocale = localeMap[i18nLocale.value] || 'mk-MK'
   return new Intl.NumberFormat(fmtLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val)
+}
+
+function formatDateTime(dt) {
+  if (!dt) return ''
+  const d = new Date(dt)
+  if (isNaN(d)) return dt
+  return d.toLocaleDateString(localeMap[i18nLocale.value] || 'mk-MK', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 function expenseCategoryLabel(cat) {
@@ -982,6 +980,7 @@ function onExpenseCurrencyChange(exp) {
   }
 }
 
+// Auto-chain: new segment starts where previous ended
 watch(
   () => form.segments.map(s => s.to_city),
   (newVals) => {
@@ -990,6 +989,21 @@ watch(
         form.segments[i].from_city = newVals[i - 1]
       }
     }
+  },
+  { deep: true }
+)
+
+// Auto-derive departure_date / return_date from first/last segment
+watch(
+  () => [
+    ...form.segments.map(s => s.departure_at),
+    ...form.segments.map(s => s.arrival_at),
+  ],
+  () => {
+    const deps = form.segments.map(s => s.departure_at).filter(Boolean).sort()
+    const arrs = form.segments.map(s => s.arrival_at).filter(Boolean).sort()
+    if (deps.length) form.departure_date = deps[0]
+    if (arrs.length) form.return_date = arrs[arrs.length - 1]
   },
   { deep: true }
 )
@@ -1008,15 +1022,29 @@ async function fetchEmployees() {
 async function fetchPerDiemRates() {
   try {
     const response = await window.axios.get('/travel-orders/per-diem-rates')
-    perDiemRates.value = response.data?.data || response.data || {}
+    const arr = response.data?.data || response.data || []
+    // Convert array to object keyed by country_code for fast lookup
+    const map = {}
+    for (const r of arr) {
+      map[r.country_code] = { rate: r.rate, currency: r.currency, name_mk: r.country_name_mk, name_en: r.country_name_en }
+    }
+    perDiemRates.value = map
+    // Also build countries list from same data
+    countriesList.value = arr.map(r => ({ code: r.country_code, name: r.country_name_en || r.country_code }))
   } catch { perDiemRates.value = {} }
 }
 
 async function fetchExchangeRates() {
   try {
     const response = await window.axios.get('/travel-orders/exchange-rates')
-    exchangeRates.value = response.data?.data || response.data || {}
-  } catch { exchangeRates.value = { EUR: 61.5, USD: 56.5, CHF: 63.0, GBP: 72.0 } }
+    const arr = response.data?.data || response.data || []
+    // Convert array to object keyed by currency_code
+    const map = {}
+    for (const r of arr) {
+      map[r.currency_code] = r.rate_to_mkd
+    }
+    exchangeRates.value = map
+  } catch { exchangeRates.value = { EUR: 61.5395, USD: 56.5516, CHF: 62.1109, GBP: 71.5 } }
 }
 
 async function fetchExpenseCategories() {
@@ -1024,24 +1052,6 @@ async function fetchExpenseCategories() {
     const response = await window.axios.get('/travel-orders/expense-categories')
     expenseCategories.value = response.data?.data || response.data || []
   } catch { expenseCategories.value = [] }
-}
-
-async function fetchCountries() {
-  try {
-    const response = await window.axios.get('/travel-orders/per-diem-rates')
-    const data = response.data?.data || response.data || {}
-    countriesList.value = Object.entries(data).map(([code, info]) => ({ code, name: info.name || code }))
-  } catch {
-    countriesList.value = [
-      { code: 'DE', name: 'Germany' }, { code: 'AT', name: 'Austria' }, { code: 'IT', name: 'Italy' },
-      { code: 'RS', name: 'Serbia' }, { code: 'BG', name: 'Bulgaria' }, { code: 'GR', name: 'Greece' },
-      { code: 'AL', name: 'Albania' }, { code: 'XK', name: 'Kosovo' }, { code: 'TR', name: 'Turkey' },
-      { code: 'HR', name: 'Croatia' }, { code: 'SI', name: 'Slovenia' }, { code: 'HU', name: 'Hungary' },
-      { code: 'RO', name: 'Romania' }, { code: 'CZ', name: 'Czech Republic' }, { code: 'PL', name: 'Poland' },
-      { code: 'FR', name: 'France' }, { code: 'NL', name: 'Netherlands' }, { code: 'BE', name: 'Belgium' },
-      { code: 'CH', name: 'Switzerland' }, { code: 'GB', name: 'United Kingdom' },
-    ]
-  }
 }
 
 // ==================== Save ====================
@@ -1119,7 +1129,6 @@ onMounted(() => {
   fetchPerDiemRates()
   fetchExchangeRates()
   fetchExpenseCategories()
-  fetchCountries()
 })
 
 // CLAUDE-CHECKPOINT
