@@ -68,6 +68,26 @@ class InvoiceResource extends JsonResource
             'sales_tax_type' => $this->sales_tax_type,
             'sales_tax_address_type' => $this->sales_tax_address_type,
             'overdue' => $this->overdue,
+            'type' => $this->type ?? 'standard',
+            'parent_invoice_id' => $this->parent_invoice_id,
+            'advance_invoices' => $this->whenLoaded('advanceInvoices', function () {
+                return $this->advanceInvoices->map(fn ($adv) => [
+                    'id' => $adv->id,
+                    'invoice_number' => $adv->invoice_number,
+                    'invoice_date' => $adv->invoice_date,
+                    'total' => $adv->total,
+                    'sub_total' => $adv->sub_total,
+                    'tax' => $adv->tax,
+                ]);
+            }),
+            'final_invoice' => $this->whenLoaded('finalInvoice', function () {
+                return [
+                    'id' => $this->finalInvoice->id,
+                    'invoice_number' => $this->finalInvoice->invoice_number,
+                ];
+            }),
+            'total_advances_amount' => $this->when($this->type === 'final', fn () => $this->getTotalAdvancesAmount()),
+            'remaining_after_advances' => $this->when($this->type === 'final', fn () => $this->getRemainingAfterAdvances()),
             'items' => $this->whenLoaded('items', function () {
                 return InvoiceItemResource::collection($this->items);
             }),

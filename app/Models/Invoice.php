@@ -47,6 +47,12 @@ class Invoice extends Model implements HasMedia
 
     public const STATUS_PAID = 'PAID';
 
+    public const TYPE_STANDARD = 'standard';
+
+    public const TYPE_ADVANCE = 'advance';
+
+    public const TYPE_FINAL = 'final';
+
     protected $dates = [
         'created_at',
         'updated_at',
@@ -176,6 +182,48 @@ class Invoice extends Model implements HasMedia
     public function reconciliations(): HasMany
     {
         return $this->hasMany(Reconciliation::class);
+    }
+
+    /**
+     * Get advance invoices settled against this final invoice.
+     */
+    public function advanceInvoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'parent_invoice_id');
+    }
+
+    /**
+     * Get the final invoice this advance was settled against.
+     */
+    public function finalInvoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'parent_invoice_id');
+    }
+
+    public function isAdvance(): bool
+    {
+        return $this->type === self::TYPE_ADVANCE;
+    }
+
+    public function isFinal(): bool
+    {
+        return $this->type === self::TYPE_FINAL;
+    }
+
+    /**
+     * Get total amount of settled advance invoices (in cents).
+     */
+    public function getTotalAdvancesAmount(): int
+    {
+        return (int) $this->advanceInvoices()->sum('total');
+    }
+
+    /**
+     * Get remaining due after advance deductions (in cents).
+     */
+    public function getRemainingAfterAdvances(): int
+    {
+        return $this->total - $this->getTotalAdvancesAmount();
     }
 
     public function getInvoicePdfUrlAttribute()
@@ -416,6 +464,8 @@ class Invoice extends Model implements HasMedia
             $query->where('customer_id', $customerId);
         })->when($filters['project_id'] ?? null, function ($query, $projectId) {
             $query->where('project_id', $projectId);
+        })->when($filters['type'] ?? null, function ($query, $type) {
+            $query->where('type', $type);
         })->when($filters['orderByField'] ?? null, function ($query, $orderByField) use ($filters) {
             $orderBy = $filters['orderBy'] ?? 'desc';
             $query->orderBy($orderByField, $orderBy);

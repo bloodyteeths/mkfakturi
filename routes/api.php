@@ -49,6 +49,7 @@ use App\Http\Controllers\V1\Admin\General\TimeFormatsController;
 use App\Http\Controllers\V1\Admin\General\TimezonesController;
 use App\Http\Controllers\V1\Admin\Invoice\ChangeInvoiceStatusController;
 use App\Http\Controllers\V1\Admin\Invoice\CloneInvoiceController;
+use App\Http\Controllers\V1\Admin\Invoice\AdvanceInvoiceController;
 use App\Http\Controllers\V1\Admin\Invoice\InvoicesController;
 use App\Http\Controllers\V1\Admin\Invoice\InvoiceTemplatesController;
 use App\Http\Controllers\V1\Admin\Invoice\SendInvoiceController;
@@ -349,6 +350,11 @@ Route::prefix('/v1')->group(function () {
             Route::post('/invoices/{invoice}/payment/cpay', [InvoicesController::class, 'initiateCpayPayment']);
 
             Route::post('/invoices/bulk-action', [InvoicesController::class, 'bulkAction']);
+
+            // Advance Invoice routes (must be before {invoice} param routes)
+            Route::get('/invoices/unsettled-advances', [AdvanceInvoiceController::class, 'unsettledAdvances']);
+            Route::post('/invoices/{invoice}/settle-advances', [AdvanceInvoiceController::class, 'settle']);
+            Route::post('/invoices/{invoice}/preview-settlement', [AdvanceInvoiceController::class, 'previewSettlement']);
 
             Route::post('/invoices/delete', [InvoicesController::class, 'delete'])->middleware('throttle:strict');
 

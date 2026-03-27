@@ -168,6 +168,235 @@ class IfrsAdapter
     }
 
     /**
+     * Post an Advance Invoice to the general ledger.
+     * Creates: DR Accounts Receivable, CR Advance Liability (222), CR VAT Output (230)
+     *
+     * Unlike standard invoices, advances credit account 222 (advance liability)
+     * instead of revenue (740). Revenue is only recognized on the final invoice.
+     *
+     * Legal basis: Член 14 ЗДДВ — VAT due on advance receipt.
+     */
+    public function postAdvanceInvoice(Invoice $invoice): void
+    {
+        if (! $this->isEnabled($invoice->company_id)) {
+            return;
+        }
+
+        if ($invoice->ifrs_transaction_id) {
+            return;
+        }
+
+        $periodLockService = app(PeriodLockService::class);
+        if ($periodLockService->isDateLocked($invoice->company_id, $invoice->invoice_date)) {
+            throw new PeriodLockedException(
+                "Cannot post to locked period: {$invoice->invoice_date}",
+                'period'
+            );
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $entity = $this->getOrCreateEntityForCompany($invoice->company, $invoice->invoice_date);
+            if (! $entity) {
+                throw new \Exception('Failed to get or create IFRS Entity for company');
+            }
+
+            $arAccount = $this->getAccountsReceivableAccount($invoice->company_id, $entity->id);
+            $advanceLiabilityAccount = $this->getAdvanceLiabilityAccount($invoice->company_id, $entity->id);
+
+            $transaction = Transaction::create([
+                'account_id' => $arAccount->id,
+                'transaction_date' => $invoice->invoice_date ?? Carbon::now(),
+                'narration' => "Advance Invoice #{$invoice->invoice_number} - {$invoice->customer->name}",
+                'transaction_type' => Transaction::IN,
+                'currency_id' => $this->getCurrencyId($invoice->company_id),
+                'entity_id' => $entity->id,
+            ]);
+
+            // DR Accounts Receivable (full amount incl. VAT)
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $transaction->id,
+                'account_id' => $arAccount->id,
+                'amount' => $invoice->total / 100,
+                'quantity' => 1,
+                'credited' => false,
+                'counterparty_name' => $invoice->customer->name ?? null,
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // CR Advance Liability (net amount — account 222)
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $transaction->id,
+                'account_id' => $advanceLiabilityAccount->id,
+                'amount' => $invoice->sub_total / 100,
+                'quantity' => 1,
+                'credited' => true,
+                'entity_id' => $entity->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // CR VAT Output (tax amount — account 230/2300)
+            if ($invoice->tax > 0) {
+                $this->postVatLineItems(
+                    $invoice->taxes()->get(),
+                    $invoice->tax,
+                    $transaction->id,
+                    $entity->id,
+                    $invoice->company_id,
+                    'output'
+                );
+            }
+
+            $transaction->load('lineItems');
+            $transaction->post();
+
+            if ($invoice->cost_center_id) {
+                $this->costCenterLedgerService->tagLedgerEntries($transaction->id, $invoice->cost_center_id);
+            }
+
+            $invoice->update(['ifrs_transaction_id' => $transaction->id]);
+
+            DB::commit();
+
+            Log::info('Advance invoice posted to ledger', [
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'ifrs_transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to post advance invoice to ledger', [
+                'invoice_id' => $invoice->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Post GL entries to reverse advance invoices when settled against a final invoice.
+     * For each advance: DR Advance Liability (222), DR VAT Output (reverse), CR Accounts Receivable.
+     *
+     * The final invoice itself is posted normally via postInvoice() (DR AR, CR Revenue, CR VAT).
+     * This method only handles the advance reversal side.
+     */
+    public function postAdvanceSettlement(Invoice $finalInvoice, $advanceInvoices): void
+    {
+        if (! $this->isEnabled($finalInvoice->company_id)) {
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $entity = $this->getOrCreateEntityForCompany($finalInvoice->company, $finalInvoice->invoice_date);
+            if (! $entity) {
+                throw new \Exception('Failed to get or create IFRS Entity for settlement');
+            }
+
+            $arAccount = $this->getAccountsReceivableAccount($finalInvoice->company_id, $entity->id);
+            $advanceLiabilityAccount = $this->getAdvanceLiabilityAccount($finalInvoice->company_id, $entity->id);
+
+            foreach ($advanceInvoices as $advance) {
+                $transaction = Transaction::create([
+                    'account_id' => $advanceLiabilityAccount->id,
+                    'transaction_date' => $finalInvoice->invoice_date ?? Carbon::now(),
+                    'narration' => "Settle advance #{$advance->invoice_number} against #{$finalInvoice->invoice_number}",
+                    'transaction_type' => Transaction::JN,
+                    'currency_id' => $this->getCurrencyId($finalInvoice->company_id),
+                    'entity_id' => $entity->id,
+                ]);
+
+                // DR Advance Liability (reverse the advance — net amount)
+                DB::table('ifrs_line_items')->insert([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $advanceLiabilityAccount->id,
+                    'amount' => $advance->sub_total / 100,
+                    'quantity' => 1,
+                    'credited' => false,
+                    'counterparty_name' => $finalInvoice->customer->name ?? null,
+                    'entity_id' => $entity->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // DR VAT Output (reverse the advance VAT)
+                if ($advance->tax > 0) {
+                    $this->postVatLineItems(
+                        $advance->taxes()->get(),
+                        $advance->tax,
+                        $transaction->id,
+                        $entity->id,
+                        $finalInvoice->company_id,
+                        'output',
+                        true // reversal = true (flips credit → debit)
+                    );
+                }
+
+                // CR Accounts Receivable (reduce by full advance amount)
+                DB::table('ifrs_line_items')->insert([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $arAccount->id,
+                    'amount' => $advance->total / 100,
+                    'quantity' => 1,
+                    'credited' => true,
+                    'counterparty_name' => $finalInvoice->customer->name ?? null,
+                    'entity_id' => $entity->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $transaction->load('lineItems');
+                $transaction->post();
+            }
+
+            DB::commit();
+
+            Log::info('Advance settlement posted to ledger', [
+                'final_invoice_id' => $finalInvoice->id,
+                'advance_count' => $advanceInvoices->count(),
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to post advance settlement to ledger', [
+                'final_invoice_id' => $finalInvoice->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Get or create Advance Liability account (222 — Обврски за примени аванси).
+     */
+    protected function getAdvanceLiabilityAccount(int $companyId, int $entityId): Account
+    {
+        $userAccount = \App\Models\Account::where('company_id', $companyId)
+            ->where('code', '222')
+            ->where('is_active', true)
+            ->first();
+
+        $accountName = $userAccount ? $userAccount->name : 'Обврски за примени аванси';
+
+        return Account::firstOrCreate(
+            [
+                'account_type' => Account::PAYABLE,
+                'category_id' => null,
+                'name' => $accountName,
+                'entity_id' => $entityId,
+            ],
+            [
+                'code' => '222',
+                'currency_id' => $this->getCurrencyId($companyId),
+            ]
+        );
+    }
+
+    /**
      * Post a Payment to the general ledger
      * Creates: DR Cash, CR Accounts Receivable
      *

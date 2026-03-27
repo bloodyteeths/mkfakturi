@@ -46,10 +46,15 @@ class InvoiceObserver
         // Only post to ledger if not in draft status and feature is enabled
         if ($this->shouldPostToLedger($invoice)) {
             try {
-                $this->ifrsAdapter->postInvoice($invoice);
+                if ($invoice->isAdvance()) {
+                    $this->ifrsAdapter->postAdvanceInvoice($invoice);
+                } else {
+                    $this->ifrsAdapter->postInvoice($invoice);
+                }
             } catch (\Exception $e) {
                 Log::error('InvoiceObserver: Failed to post invoice to ledger', [
                     'invoice_id' => $invoice->id,
+                    'type' => $invoice->type ?? 'standard',
                     'error' => $e->getMessage(),
                 ]);
                 // Don't throw - we don't want to block invoice creation
@@ -103,10 +108,15 @@ class InvoiceObserver
             $this->costCenterAssigner->assignIfMatched($invoice);
 
             try {
-                $this->ifrsAdapter->postInvoice($invoice);
+                if ($invoice->isAdvance()) {
+                    $this->ifrsAdapter->postAdvanceInvoice($invoice);
+                } else {
+                    $this->ifrsAdapter->postInvoice($invoice);
+                }
             } catch (\Exception $e) {
                 Log::error('InvoiceObserver: Failed to post updated invoice to ledger', [
                     'invoice_id' => $invoice->id,
+                    'type' => $invoice->type ?? 'standard',
                     'error' => $e->getMessage(),
                 ]);
             }

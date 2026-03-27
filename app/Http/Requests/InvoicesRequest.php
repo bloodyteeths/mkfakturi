@@ -98,6 +98,16 @@ class InvoicesRequest extends FormRequest
                 'nullable',
                 'boolean',
             ],
+            'type' => [
+                'nullable',
+                'string',
+                Rule::in(['standard', 'advance', 'final']),
+            ],
+            'parent_invoice_id' => [
+                'nullable',
+                'integer',
+                'exists:invoices,id',
+            ],
         ];
 
         $companyCurrency = CompanySetting::getSetting('currency', $this->header('company'));
@@ -335,6 +345,7 @@ class InvoicesRequest extends FormRequest
                 'base_due_amount' => $this->total * $exchange_rate,
                 'currency_id' => $currency,
                 'project_id' => $this->project_id,
+                'type' => $this->input('type', 'standard'),
             ])
             ->toArray();
     }
