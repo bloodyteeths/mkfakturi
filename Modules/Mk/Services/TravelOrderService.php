@@ -8,36 +8,24 @@ use Illuminate\Support\Facades\Log;
 use Modules\Mk\Models\TravelOrder;
 use Modules\Mk\Models\TravelSegment;
 use Modules\Mk\Models\TravelExpense;
+use Modules\Mk\Models\CurrencyExchangeRate;
 
 class TravelOrderService
 {
     protected TravelOrderGLService $glService;
+    protected PerDiemService $perDiemService;
 
-    public function __construct(TravelOrderGLService $glService)
+    public function __construct(TravelOrderGLService $glService, PerDiemService $perDiemService)
     {
         $this->glService = $glService;
+        $this->perDiemService = $perDiemService;
     }
 
     /**
-     * MK Legal Constants for domestic per-diem.
-     * Base salary: 33,370 MKD, rate: 8% = ~2,670 MKD/day
-     * Stored in cents: 2670 * 100 = 267000
-     */
-    private const DOMESTIC_PER_DIEM_BASE = 3337000; // 33,370 MKD in cents
-    private const DOMESTIC_PER_DIEM_RATE = 0.08;
-    private const DOMESTIC_PER_DIEM_FULL = 267000; // ~2,670 MKD in cents (full day)
-    private const DOMESTIC_PER_DIEM_HALF = 133500; // ~1,335 MKD in cents (half day)
-
-    /**
-     * Mileage rate: 30% of fuel price per km (~15 MKD/km)
+     * Mileage rate: 30% of fuel price per km (~15 MKD/km).
      * Stored in cents: 15 * 100 = 1500
      */
     private const MILEAGE_RATE_PER_KM = 1500; // 15 MKD/km in cents
-
-    /**
-     * Meal reduction when accommodation is provided: 50%.
-     */
-    private const MEAL_REDUCTION_RATE = 0.50;
 
     /**
      * List travel orders with filters and pagination.
@@ -45,7 +33,7 @@ class TravelOrderService
     public function list(int $companyId, array $filters = []): array
     {
         $query = TravelOrder::forCompany($companyId)
-            ->with(['employee:id,first_name,last_name', 'segments', 'expenses'])
+            ->with(['employee:id,first_name,last_name', 'segments', 'expenses', 'vehicles', 'crew'])
             ->orderBy('departure_date', 'desc');
 
         if (!empty($filters['status'])) {
@@ -54,6 +42,10 @@ class TravelOrderService
 
         if (!empty($filters['type'])) {
             $query->byType($filters['type']);
+        }
+
+        if (!empty($filters['transport_type_category'])) {
+            $query->where('transport_type_category', $filters['transport_type_category']);
         }
 
         if (!empty($filters['date_from'])) {
@@ -87,7 +79,7 @@ class TravelOrderService
     }
 
     /**
-     * Create a travel order with segments and expenses.
+     * Create a travel order with segments, expenses, vehicles, crew, and cargo.
      */
     public function create(int $companyId, array $data, int $userId): TravelOrder
     {
@@ -96,6 +88,8 @@ class TravelOrderService
                 'company_id' => $companyId,
                 'employee_id' => $data['employee_id'] ?? null,
                 'type' => $data['type'],
+                'transport_type_category' => $data['transport_type_category'] ?? 'business_trip',
+                'transport_mode' => $data['transport_mode'] ?? null,
                 'purpose' => $data['purpose'],
                 'departure_date' => $data['departure_date'],
                 'return_date' => $data['return_date'],
@@ -105,41 +99,15 @@ class TravelOrderService
                 'notes' => $data['notes'] ?? null,
             ]);
 
-            // Create segments
-            if (!empty($data['segments'])) {
-                foreach ($data['segments'] as $segmentData) {
-                    $order->segments()->create([
-                        'from_city' => $segmentData['from_city'],
-                        'to_city' => $segmentData['to_city'],
-                        'country_code' => $segmentData['country_code'] ?? null,
-                        'departure_at' => $segmentData['departure_at'],
-                        'arrival_at' => $segmentData['arrival_at'],
-                        'transport_type' => $segmentData['transport_type'] ?? 'car',
-                        'distance_km' => $segmentData['distance_km'] ?? null,
-                        'per_diem_rate' => $segmentData['per_diem_rate'] ?? null,
-                        'accommodation_provided' => $segmentData['accommodation_provided'] ?? false,
-                        'meals_provided' => $segmentData['meals_provided'] ?? false,
-                    ]);
-                }
-            }
+            $this->syncSegments($order, $data['segments'] ?? []);
+            $this->syncExpenses($order, $data['expenses'] ?? []);
+            $this->syncVehicles($order, $data['vehicles'] ?? []);
+            $this->syncCrew($order, $data['crew'] ?? []);
+            $this->syncCargo($order, $data['cargo'] ?? []);
 
-            // Create expenses
-            if (!empty($data['expenses'])) {
-                foreach ($data['expenses'] as $expenseData) {
-                    $order->expenses()->create([
-                        'category' => $expenseData['category'],
-                        'description' => $expenseData['description'],
-                        'amount' => (int) $expenseData['amount'],
-                        'currency_code' => $expenseData['currency_code'] ?? 'MKD',
-                        'receipt_path' => $expenseData['receipt_path'] ?? null,
-                    ]);
-                }
-            }
-
-            // Calculate per-diem and totals
             $this->recalculateTotals($order);
 
-            return $order->fresh(['segments', 'expenses', 'employee']);
+            return $order->fresh(['segments', 'expenses', 'employee', 'vehicles', 'crew', 'cargo']);
         });
     }
 
@@ -156,6 +124,8 @@ class TravelOrderService
             $order->update([
                 'employee_id' => $data['employee_id'] ?? $order->employee_id,
                 'type' => $data['type'] ?? $order->type,
+                'transport_type_category' => $data['transport_type_category'] ?? $order->transport_type_category,
+                'transport_mode' => $data['transport_mode'] ?? $order->transport_mode,
                 'purpose' => $data['purpose'] ?? $order->purpose,
                 'departure_date' => $data['departure_date'] ?? $order->departure_date,
                 'return_date' => $data['return_date'] ?? $order->return_date,
@@ -164,47 +134,39 @@ class TravelOrderService
                 'notes' => $data['notes'] ?? $order->notes,
             ]);
 
-            // Replace segments
             if (isset($data['segments'])) {
                 $order->segments()->delete();
-                foreach ($data['segments'] as $segmentData) {
-                    $order->segments()->create([
-                        'from_city' => $segmentData['from_city'],
-                        'to_city' => $segmentData['to_city'],
-                        'country_code' => $segmentData['country_code'] ?? null,
-                        'departure_at' => $segmentData['departure_at'],
-                        'arrival_at' => $segmentData['arrival_at'],
-                        'transport_type' => $segmentData['transport_type'] ?? 'car',
-                        'distance_km' => $segmentData['distance_km'] ?? null,
-                        'per_diem_rate' => $segmentData['per_diem_rate'] ?? null,
-                        'accommodation_provided' => $segmentData['accommodation_provided'] ?? false,
-                        'meals_provided' => $segmentData['meals_provided'] ?? false,
-                    ]);
-                }
+                $this->syncSegments($order, $data['segments']);
             }
 
-            // Replace expenses
             if (isset($data['expenses'])) {
                 $order->expenses()->delete();
-                foreach ($data['expenses'] as $expenseData) {
-                    $order->expenses()->create([
-                        'category' => $expenseData['category'],
-                        'description' => $expenseData['description'],
-                        'amount' => (int) $expenseData['amount'],
-                        'currency_code' => $expenseData['currency_code'] ?? 'MKD',
-                        'receipt_path' => $expenseData['receipt_path'] ?? null,
-                    ]);
-                }
+                $this->syncExpenses($order, $data['expenses']);
+            }
+
+            if (isset($data['vehicles'])) {
+                $order->vehicles()->delete();
+                $this->syncVehicles($order, $data['vehicles']);
+            }
+
+            if (isset($data['crew'])) {
+                $order->crew()->delete();
+                $this->syncCrew($order, $data['crew']);
+            }
+
+            if (isset($data['cargo'])) {
+                $order->cargo()->delete();
+                $this->syncCargo($order, $data['cargo']);
             }
 
             $this->recalculateTotals($order);
 
-            return $order->fresh(['segments', 'expenses', 'employee']);
+            return $order->fresh(['segments', 'expenses', 'employee', 'vehicles', 'crew', 'cargo']);
         });
     }
 
     /**
-     * Approve a travel order. Calculates totals and sets status.
+     * Approve a travel order.
      */
     public function approve(TravelOrder $order, int $approvedBy): TravelOrder
     {
@@ -219,11 +181,11 @@ class TravelOrderService
             'approved_by' => $approvedBy,
         ]);
 
-        return $order->fresh(['segments', 'expenses', 'employee']);
+        return $order->fresh(['segments', 'expenses', 'employee', 'vehicles', 'crew', 'cargo']);
     }
 
     /**
-     * Settle a travel order. Calculates reimbursement and posts GL entry.
+     * Settle a travel order. Calculates reimbursement and posts GL entries.
      */
     public function settle(TravelOrder $order): TravelOrder
     {
@@ -240,7 +202,7 @@ class TravelOrderService
             'reimbursement_amount' => $reimbursement,
         ]);
 
-        // Post journal entry to IFRS ledger (DR 441, CR 140/100)
+        // Post itemized journal entries to IFRS ledger
         try {
             $this->glService->postSettlement($order);
         } catch (\Exception $e) {
@@ -250,7 +212,7 @@ class TravelOrderService
             ]);
         }
 
-        return $order->fresh(['segments', 'expenses', 'employee']);
+        return $order->fresh(['segments', 'expenses', 'employee', 'vehicles', 'crew', 'cargo']);
     }
 
     /**
@@ -262,9 +224,7 @@ class TravelOrderService
             throw new \InvalidArgumentException('Only draft or pending approval orders can be rejected.');
         }
 
-        $order->update([
-            'status' => 'rejected',
-        ]);
+        $order->update(['status' => 'rejected']);
 
         return $order->fresh(['segments', 'expenses', 'employee']);
     }
@@ -284,56 +244,85 @@ class TravelOrderService
     /**
      * Calculate per-diem amounts for all segments.
      *
-     * MK domestic rules:
-     * - Half day (6-12h): 50% of daily rate
-     * - Full day (>12h or overnight): 100% of daily rate
-     * - 50% meal reduction if meals are provided
+     * MK rules:
+     * - Full day (>12h or per 24h): 100% of daily rate
+     * - Half day (8-12h): 50% of daily rate
+     * - Under 8h: no per-diem
+     * - Meal reductions: breakfast -10%, lunch -30%, dinner -30%
      */
     public function calculatePerDiem(TravelOrder $order): int
     {
         $totalPerDiem = 0;
-
         $order->load('segments');
 
         foreach ($order->segments as $segment) {
             $departure = Carbon::parse($segment->departure_at);
             $arrival = Carbon::parse($segment->arrival_at);
-            $hours = $departure->diffInHours($arrival);
+            $hours = $departure->floatDiffInHours($arrival);
 
-            // Calculate number of days
-            if ($hours < 6) {
-                $days = 0;
-                $dailyRate = 0;
-            } elseif ($hours <= 12) {
-                // Half day
-                $days = 0.5;
-                $dailyRate = self::DOMESTIC_PER_DIEM_HALF;
-            } else {
-                // Full day(s)
-                $days = max(1, ceil($hours / 24));
-                $dailyRate = self::DOMESTIC_PER_DIEM_FULL;
+            $countryCode = $segment->country_code ?? 'MK';
+            if ($order->type === 'domestic') {
+                $countryCode = 'MK';
             }
 
-            if ($order->type === 'foreign' && $segment->per_diem_rate) {
-                // Foreign per-diem: use country-based rate (stored as decimal, convert to cents)
-                $dailyRate = (int) ($segment->per_diem_rate * 100);
+            $meals = [
+                'breakfast' => (bool) $segment->breakfast_provided,
+                'lunch' => (bool) $segment->lunch_provided,
+                'dinner' => (bool) $segment->dinner_provided,
+            ];
+
+            // Backward compat: if old meals_provided is true but granular fields are all false
+            if ($segment->meals_provided && !$meals['breakfast'] && !$meals['lunch'] && !$meals['dinner']) {
+                $meals = ['breakfast' => true, 'lunch' => true, 'dinner' => false];
             }
 
-            $segmentPerDiem = (int) ($dailyRate * $days);
+            $date = $departure->toDateString();
+            $calc = $this->perDiemService->calculatePerDiem(
+                $hours,
+                $countryCode,
+                $meals,
+                $order->company_id,
+                $date
+            );
 
-            // 50% meal reduction if meals are provided
-            if ($segment->meals_provided && $segmentPerDiem > 0) {
-                $segmentPerDiem = (int) ($segmentPerDiem * self::MEAL_REDUCTION_RATE);
+            // If foreign segment has a custom per_diem_rate, use it instead of lookup
+            if ($order->type === 'foreign' && $segment->per_diem_rate > 0) {
+                $customRate = (float) $segment->per_diem_rate;
+                $currency = $segment->per_diem_currency ?: 'EUR';
+                $exchangeRate = $this->perDiemService->getExchangeRate($currency, $date) ?? 61.5395;
+
+                $days = $calc['days'];
+                $baseAmount = $customRate * $days;
+
+                // Apply meal reductions
+                $reductionPct = $calc['reductions'];
+                $finalAmount = max(0, $baseAmount - ($baseAmount * $reductionPct));
+                $amountMkd = round($finalAmount * $exchangeRate, 2);
+
+                $calc = [
+                    'amount' => round($finalAmount, 2),
+                    'amount_mkd' => $amountMkd,
+                    'currency' => $currency,
+                    'days' => $days,
+                    'rate' => $customRate,
+                    'reductions' => $reductionPct,
+                ];
             }
 
-            // Update segment
+            // Convert to cents for storage
+            $amountMkdCents = (int) round($calc['amount_mkd'] * 100);
+            $amountCents = (int) round($calc['amount'] * 100);
+
             $segment->update([
-                'per_diem_rate' => $dailyRate / 100,
-                'per_diem_days' => $days,
-                'per_diem_amount' => $segmentPerDiem,
+                'per_diem_rate' => $calc['rate'],
+                'per_diem_days' => $calc['days'],
+                'per_diem_amount' => $amountCents,
+                'per_diem_currency' => $calc['currency'],
+                'per_diem_amount_mkd' => $amountMkdCents,
             ]);
 
-            $totalPerDiem += $segmentPerDiem;
+            // For grand total, always use MKD amount
+            $totalPerDiem += $amountMkdCents;
         }
 
         return $totalPerDiem;
@@ -341,12 +330,10 @@ class TravelOrderService
 
     /**
      * Calculate mileage cost for car transport segments.
-     * Rate: 30% of fuel price per km (~15 MKD/km)
      */
     public function calculateMileage(TravelOrder $order): int
     {
         $totalMileage = 0;
-
         $order->load('segments');
 
         foreach ($order->segments as $segment) {
@@ -360,15 +347,86 @@ class TravelOrderService
     }
 
     /**
+     * Calculate total km from vehicle odometers or segment distances.
+     */
+    public function calculateTotalKm(TravelOrder $order): int
+    {
+        $order->load('vehicles', 'segments');
+
+        // Prefer odometer readings from vehicles
+        $odometerKm = 0;
+        $hasOdometer = false;
+        foreach ($order->vehicles as $vehicle) {
+            if ($vehicle->odometer_start !== null && $vehicle->odometer_end !== null) {
+                $odometerKm += max(0, $vehicle->odometer_end - $vehicle->odometer_start);
+                $hasOdometer = true;
+            }
+        }
+
+        if ($hasOdometer) {
+            return $odometerKm;
+        }
+
+        // Fallback: sum segment distances
+        return (int) $order->segments->sum('distance_km');
+    }
+
+    /**
+     * Calculate fuel consumption from vehicle data.
+     */
+    public function calculateFuelConsumption(TravelOrder $order): ?float
+    {
+        $order->load('vehicles');
+
+        $totalConsumed = 0;
+        $hasData = false;
+
+        foreach ($order->vehicles as $vehicle) {
+            $consumed = $vehicle->fuel_consumed;
+            if ($consumed !== null) {
+                $totalConsumed += $consumed;
+                $hasData = true;
+            }
+        }
+
+        return $hasData ? round($totalConsumed, 2) : null;
+    }
+
+    /**
      * Recalculate all totals on the order.
      */
     protected function recalculateTotals(TravelOrder $order): void
     {
         $totalPerDiem = $this->calculatePerDiem($order);
         $totalMileage = $this->calculateMileage($order);
+        $totalKm = $this->calculateTotalKm($order);
+        $totalFuelConsumed = $this->calculateFuelConsumption($order);
 
         $order->load('expenses');
-        $totalExpenses = $order->expenses->sum('amount');
+
+        // Calculate expense totals by category (in MKD cents)
+        $totalExpenses = 0;
+        $totalFuelCost = 0;
+        $totalTollCost = 0;
+        $totalForwardingCost = 0;
+
+        foreach ($order->expenses as $expense) {
+            // Use amount_mkd if available (foreign currency converted), else amount
+            $amountCents = $expense->amount_mkd ?? $expense->amount;
+            $totalExpenses += $amountCents;
+
+            switch ($expense->category) {
+                case 'fuel':
+                    $totalFuelCost += $amountCents;
+                    break;
+                case 'tolls':
+                    $totalTollCost += $amountCents;
+                    break;
+                case 'forwarding':
+                    $totalForwardingCost += $amountCents;
+                    break;
+            }
+        }
 
         $grandTotal = $totalPerDiem + $totalMileage + $totalExpenses;
 
@@ -376,6 +434,11 @@ class TravelOrderService
             'total_per_diem' => $totalPerDiem,
             'total_mileage_cost' => $totalMileage,
             'total_expenses' => $totalExpenses,
+            'total_km' => $totalKm,
+            'total_fuel_consumed' => $totalFuelConsumed,
+            'total_fuel_cost' => $totalFuelCost,
+            'total_toll_cost' => $totalTollCost,
+            'total_forwarding_cost' => $totalForwardingCost,
             'grand_total' => $grandTotal,
         ]);
     }
@@ -392,8 +455,123 @@ class TravelOrderService
             'pending_approval' => (clone $orders)->where('status', 'pending_approval')->count(),
             'total_per_diem' => (clone $orders)->whereIn('status', ['approved', 'settled'])->sum('total_per_diem'),
             'total_expenses' => (clone $orders)->whereIn('status', ['approved', 'settled'])->sum('total_expenses'),
+            'total_fuel_cost' => (clone $orders)->whereIn('status', ['approved', 'settled'])->sum('total_fuel_cost'),
             'total_grand' => (clone $orders)->whereIn('status', ['approved', 'settled'])->sum('grand_total'),
         ];
+    }
+
+    // ─── Private sync helpers ───
+
+    private function syncSegments(TravelOrder $order, array $segments): void
+    {
+        foreach ($segments as $seg) {
+            $order->segments()->create([
+                'from_city' => $seg['from_city'],
+                'to_city' => $seg['to_city'],
+                'country_code' => $seg['country_code'] ?? null,
+                'country_name' => $seg['country_name'] ?? null,
+                'departure_at' => $seg['departure_at'],
+                'arrival_at' => $seg['arrival_at'],
+                'transport_type' => $seg['transport_type'] ?? 'car',
+                'distance_km' => $seg['distance_km'] ?? null,
+                'per_diem_rate' => $seg['per_diem_rate'] ?? null,
+                'per_diem_currency' => $seg['per_diem_currency'] ?? null,
+                'accommodation_provided' => $seg['accommodation_provided'] ?? false,
+                'meals_provided' => $seg['meals_provided'] ?? false,
+                'breakfast_provided' => $seg['breakfast_provided'] ?? false,
+                'lunch_provided' => $seg['lunch_provided'] ?? false,
+                'dinner_provided' => $seg['dinner_provided'] ?? false,
+            ]);
+        }
+    }
+
+    private function syncExpenses(TravelOrder $order, array $expenses): void
+    {
+        $categoryGlMap = config('travel-expenses.categories', []);
+
+        foreach ($expenses as $exp) {
+            $category = $exp['category'] ?? 'other';
+            $glCode = $categoryGlMap[$category]['gl_code'] ?? '449';
+            $currencyCode = $exp['currency_code'] ?? 'MKD';
+            $amount = (int) ($exp['amount'] ?? 0);
+
+            // Currency conversion
+            $exchangeRate = null;
+            $amountMkd = $amount; // default: same as amount (MKD)
+
+            if (strtoupper($currencyCode) !== 'MKD') {
+                $rate = CurrencyExchangeRate::latestRate($currencyCode);
+                $exchangeRate = $rate ? (float) $rate->rate_to_mkd : null;
+                if ($exchangeRate) {
+                    $amountMkd = (int) round(($amount / 100) * $exchangeRate * 100);
+                }
+            }
+
+            $order->expenses()->create([
+                'category' => $category,
+                'description' => $exp['description'] ?? '',
+                'amount' => $amount,
+                'currency_code' => $currencyCode,
+                'gl_account_code' => $glCode,
+                'exchange_rate' => $exchangeRate ?? ($exp['exchange_rate'] ?? null),
+                'amount_mkd' => $amountMkd,
+                'vat_amount' => $exp['vat_amount'] ?? null,
+                'receipt_number' => $exp['receipt_number'] ?? null,
+                'receipt_path' => $exp['receipt_path'] ?? null,
+            ]);
+        }
+    }
+
+    private function syncVehicles(TravelOrder $order, array $vehicles): void
+    {
+        foreach ($vehicles as $v) {
+            $order->vehicles()->create([
+                'vehicle_type' => $v['vehicle_type'] ?? 'truck',
+                'make' => $v['make'] ?? null,
+                'model' => $v['model'] ?? null,
+                'registration_plate' => $v['registration_plate'],
+                'capacity_tonnes' => $v['capacity_tonnes'] ?? null,
+                'fuel_type' => $v['fuel_type'] ?? 'diesel',
+                'odometer_start' => $v['odometer_start'] ?? null,
+                'odometer_end' => $v['odometer_end'] ?? null,
+                'fuel_start_liters' => $v['fuel_start_liters'] ?? null,
+                'fuel_end_liters' => $v['fuel_end_liters'] ?? null,
+                'fuel_added_liters' => $v['fuel_added_liters'] ?? null,
+                'fuel_norm_per_100km' => $v['fuel_norm_per_100km'] ?? config('travel-expenses.fuel_norms.' . ($v['vehicle_type'] ?? 'truck')),
+            ]);
+        }
+    }
+
+    private function syncCrew(TravelOrder $order, array $crew): void
+    {
+        foreach ($crew as $c) {
+            $order->crew()->create([
+                'name' => $c['name'],
+                'role' => $c['role'] ?? 'driver',
+                'license_number' => $c['license_number'] ?? null,
+                'license_category' => $c['license_category'] ?? null,
+                'cpc_number' => $c['cpc_number'] ?? null,
+            ]);
+        }
+    }
+
+    private function syncCargo(TravelOrder $order, array $cargo): void
+    {
+        foreach ($cargo as $c) {
+            $order->cargo()->create([
+                'travel_segment_id' => $c['travel_segment_id'] ?? null,
+                'cmr_number' => $c['cmr_number'] ?? null,
+                'sender_name' => $c['sender_name'] ?? null,
+                'sender_address' => $c['sender_address'] ?? null,
+                'receiver_name' => $c['receiver_name'] ?? null,
+                'receiver_address' => $c['receiver_address'] ?? null,
+                'goods_description' => $c['goods_description'] ?? null,
+                'packages_count' => $c['packages_count'] ?? null,
+                'gross_weight_kg' => $c['gross_weight_kg'] ?? null,
+                'loading_place' => $c['loading_place'] ?? null,
+                'unloading_place' => $c['unloading_place'] ?? null,
+            ]);
+        }
     }
 }
 

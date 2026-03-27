@@ -1169,6 +1169,10 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'index']);
                 Route::get('/summary', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'summary']);
                 Route::get('/employees', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'employees']);
+                Route::get('/per-diem-rates', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'perDiemRates']);
+                Route::get('/per-diem-rate', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'perDiemRateForCountry']);
+                Route::get('/exchange-rates', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'exchangeRates']);
+                Route::get('/expense-categories', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'expenseCategories']);
                 Route::post('/', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'store']);
                 Route::get('/{id}', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'show']);
                 Route::put('/{id}', [\Modules\Mk\Http\Controllers\TravelOrderController::class, 'update']);

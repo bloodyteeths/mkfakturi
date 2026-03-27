@@ -331,7 +331,15 @@
                             </td>
                             <td class="text-right">{{ $seg->distance_km ? number_format($seg->distance_km, 1) : '-' }}</td>
                             <td class="text-center">{{ $seg->accommodation_provided ? 'Да' : 'Не' }}</td>
-                            <td class="text-center">{{ $seg->meals_provided ? 'Да' : 'Не' }}</td>
+                            <td class="text-center">
+                                @if($seg->breakfast_provided || $seg->lunch_provided || $seg->dinner_provided)
+                                    @if($seg->breakfast_provided)П@endif @if($seg->lunch_provided)Р@endif @if($seg->dinner_provided)В@endif
+                                @elseif($seg->meals_provided)
+                                    Да
+                                @else
+                                    Не
+                                @endif
+                            </td>
                             @if($order->type === 'foreign')
                                 <td>{{ $seg->country_code ?? '-' }}</td>
                             @endif
@@ -400,12 +408,25 @@
                         <td class="text-right">{{ $segHours }}</td>
                         <td class="text-right">{{ $seg->per_diem_days ?? '-' }}</td>
                         <td class="text-right">{{ $seg->per_diem_rate ? number_format($seg->per_diem_rate, 2) : '-' }}</td>
-                        <td class="text-right text-bold">{{ number_format(($seg->per_diem_amount ?? 0) / 100, 2) }}</td>
+                        <td class="text-right text-bold">
+                            {{ number_format(($seg->per_diem_amount ?? 0) / 100, 2) }}
+                            @if($seg->per_diem_currency && $seg->per_diem_currency !== 'MKD')
+                                <span style="font-size: 5.5px; color: #6b7280;">{{ $seg->per_diem_currency }}</span>
+                            @endif
+                        </td>
                     </tr>
-                    @if($seg->meals_provided)
+                    @php
+                        $mealReductions = [];
+                        if ($seg->breakfast_provided) $mealReductions[] = 'појадок -10%';
+                        if ($seg->lunch_provided) $mealReductions[] = 'ручек -30%';
+                        if ($seg->dinner_provided) $mealReductions[] = 'вечера -30%';
+                        // Backward compat: old meals_provided flag
+                        if (empty($mealReductions) && $seg->meals_provided) $mealReductions[] = 'оброци -50%';
+                    @endphp
+                    @if(count($mealReductions) > 0)
                         <tr>
                             <td></td>
-                            <td colspan="6" style="font-size: 6px; color: #6b7280;">&nbsp;&nbsp;↳ Намалување 50% за оброци</td>
+                            <td colspan="6" style="font-size: 6px; color: #6b7280;">&nbsp;&nbsp;↳ Намалување: {{ implode(', ', $mealReductions) }}</td>
                             <td></td>
                         </tr>
                     @endif
@@ -461,8 +482,9 @@
                         <th style="width: 4%;">#</th>
                         <th style="width: 20%;">Категорија</th>
                         <th style="width: 45%;">Опис</th>
-                        <th class="text-right" style="width: 18%;">Износ</th>
-                        <th style="width: 8%;">Валута</th>
+                        <th class="text-right" style="width: 12%;">Износ</th>
+                        <th style="width: 6%;">Валута</th>
+                        <th class="text-right" style="width: 10%;">МКД</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -471,20 +493,37 @@
                             <td>{{ $index + 1 }}</td>
                             <td>
                                 @switch($exp->category)
+                                    @case('per_diem') Дневници @break
+                                    @case('fuel') Гориво @break
+                                    @case('tolls') Патарини @break
+                                    @case('forwarding') Шпедиција @break
                                     @case('transport') Превоз @break
                                     @case('accommodation') Смештај @break
+                                    @case('vehicle_maintenance') Сервис @break
+                                    @case('communication') Комуникации @break
                                     @case('meals') Оброци @break
                                     @default Друго
                                 @endswitch
+                                @if($exp->gl_account_code)
+                                    <span style="font-size: 5.5px; color: #9ca3af;">({{ $exp->gl_account_code }})</span>
+                                @endif
                             </td>
                             <td>{{ $exp->description }}</td>
                             <td class="text-right text-bold">{{ number_format($exp->amount / 100, 2) }}</td>
                             <td>{{ $exp->currency_code }}</td>
+                            <td class="text-right">
+                                @if($exp->amount_mkd && $exp->currency_code !== 'MKD')
+                                    {{ number_format($exp->amount_mkd / 100, 2) }}
+                                @else
+                                    -
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                     <tr class="total-row">
                         <td colspan="3" class="text-right">Вкупно трошоци:</td>
                         <td class="text-right">{{ number_format($order->total_expenses / 100, 2) }}</td>
+                        <td></td>
                         <td></td>
                     </tr>
                 </tbody>
@@ -540,7 +579,7 @@
         <p style="margin-top: 4px; font-size: 6px; color: #9ca3af;">
             Согласно чл. 113 од ЗРО (Сл. Весник 145/2014) и чл. 35 од ОКД за приватниот сектор.
             @if($order->type === 'domestic')
-                Дневница: 8% од просечна нето плата (≈{{ number_format(2670, 0) }} МКД/ден). Километража: 30% од гориво (≈{{ number_format(15, 0) }} МКД/км).
+                Дневница: 8% од просечна нето плата (≈{{ number_format(3430, 0) }} МКД/ден). Километража: 30% од гориво (≈{{ number_format(15, 0) }} МКД/км). Намалувања за оброци: појадок -10%, ручек -30%, вечера -30%.
             @else
                 Дневница за странство: согласно Уредбата за издатоците за службени патувања во странство.
             @endif

@@ -232,6 +232,205 @@
         <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ t('notes') }}</h3>
         <p class="text-sm text-gray-600 whitespace-pre-line">{{ order.notes }}</p>
       </div>
+
+      <!-- Vehicles Section -->
+      <div v-if="hasVehicles" class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-3 bg-amber-50 border-b border-amber-200">
+          <h3 class="text-sm font-semibold text-amber-800">{{ t('vehicles') }} ({{ order.vehicles.length }})</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('vehicle_type') }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('vehicle_make') }} / {{ t('vehicle_model') }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('registration_plate') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('capacity_tonnes') }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('fuel_type') }}</th>
+                <th v-if="vehiclesWithFuel.length" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('odometer_start') }}</th>
+                <th v-if="vehiclesWithFuel.length" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('odometer_end') }}</th>
+                <th v-if="vehiclesWithFuel.length" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('total_km') }}</th>
+                <th v-if="vehiclesWithFuel.length" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('fuel_start') }}</th>
+                <th v-if="vehiclesWithFuel.length" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('fuel_end') }}</th>
+                <th v-if="vehiclesWithFuel.length" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('fuel_added') }}</th>
+                <th v-if="vehiclesWithFuel.length" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('fuel_consumed') }}</th>
+                <th v-if="vehiclesWithFuel.length" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('fuel_norm') }}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr v-for="v in order.vehicles" :key="v.id" class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm text-gray-900">{{ vehicleTypeLabel(v.vehicle_type) }}</td>
+                <td class="px-4 py-3 text-sm text-gray-900">{{ v.make }} {{ v.model }}</td>
+                <td class="px-4 py-3 text-sm font-mono text-gray-700">{{ v.registration_plate }}</td>
+                <td class="px-4 py-3 text-sm text-right text-gray-500">{{ v.capacity_tonnes || '-' }}</td>
+                <td class="px-4 py-3 text-sm text-gray-500">{{ fuelTypeLabel(v.fuel_type) }}</td>
+                <td v-if="vehiclesWithFuel.length" class="px-4 py-3 text-sm text-right text-gray-500">{{ v.odometer_start != null ? v.odometer_start : '-' }}</td>
+                <td v-if="vehiclesWithFuel.length" class="px-4 py-3 text-sm text-right text-gray-500">{{ v.odometer_end != null ? v.odometer_end : '-' }}</td>
+                <td v-if="vehiclesWithFuel.length" class="px-4 py-3 text-sm text-right font-medium text-gray-900">{{ vehicleTotalKm(v) != null ? vehicleTotalKm(v) : '-' }}</td>
+                <td v-if="vehiclesWithFuel.length" class="px-4 py-3 text-sm text-right text-gray-500">{{ v.fuel_start != null ? formatNumber(v.fuel_start) : '-' }}</td>
+                <td v-if="vehiclesWithFuel.length" class="px-4 py-3 text-sm text-right text-gray-500">{{ v.fuel_end != null ? formatNumber(v.fuel_end) : '-' }}</td>
+                <td v-if="vehiclesWithFuel.length" class="px-4 py-3 text-sm text-right text-gray-500">{{ v.fuel_added != null ? formatNumber(v.fuel_added) : '-' }}</td>
+                <td v-if="vehiclesWithFuel.length" class="px-4 py-3 text-sm text-right font-medium text-gray-900">{{ vehicleFuelConsumed(v) != null ? formatNumber(vehicleFuelConsumed(v)) : '-' }}</td>
+                <td v-if="vehiclesWithFuel.length" class="px-4 py-3 text-sm text-right text-gray-500">{{ v.fuel_norm_per_100km != null ? formatNumber(v.fuel_norm_per_100km) : '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Crew Section -->
+      <div v-if="hasCrew" class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-3 bg-indigo-50 border-b border-indigo-200">
+          <h3 class="text-sm font-semibold text-indigo-800">{{ t('crew') }} ({{ order.crew.length }})</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('crew_name') }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('crew_role') }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('license_number') }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('license_category') }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('cpc_number') }}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr v-for="c in order.crew" :key="c.id" class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm text-gray-900">{{ c.name }}</td>
+                <td class="px-4 py-3 text-sm text-gray-500">{{ crewRoleLabel(c.role) }}</td>
+                <td class="px-4 py-3 text-sm text-gray-500">{{ c.license_number || '-' }}</td>
+                <td class="px-4 py-3 text-sm text-gray-500">{{ c.license_category || '-' }}</td>
+                <td class="px-4 py-3 text-sm text-gray-500">{{ c.cpc_number || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Cargo / CMR Section -->
+      <div v-if="hasCargo" class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-3 bg-teal-50 border-b border-teal-200">
+          <h3 class="text-sm font-semibold text-teal-800">{{ t('cargo') }} ({{ order.cargo.length }})</h3>
+        </div>
+        <div class="space-y-4 p-6">
+          <div v-for="item in order.cargo" :key="item.id" class="border border-gray-200 rounded-lg p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <p class="text-xs text-gray-500 uppercase font-medium">{{ t('cmr_number') }}</p>
+                <p class="text-sm font-medium text-gray-900 mt-1">{{ item.cmr_number || '-' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 uppercase font-medium">{{ t('sender_name') }}</p>
+                <p class="text-sm font-medium text-gray-900 mt-1">{{ item.sender_name || '-' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 uppercase font-medium">{{ t('receiver_name') }}</p>
+                <p class="text-sm font-medium text-gray-900 mt-1">{{ item.receiver_name || '-' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 uppercase font-medium">{{ t('goods_description') }}</p>
+                <p class="text-sm font-medium text-gray-900 mt-1">{{ item.goods_description || '-' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 uppercase font-medium">{{ t('packages_count') }}</p>
+                <p class="text-sm font-medium text-gray-900 mt-1">{{ item.packages_count != null ? item.packages_count : '-' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 uppercase font-medium">{{ t('gross_weight') }}</p>
+                <p class="text-sm font-medium text-gray-900 mt-1">{{ item.gross_weight_kg != null ? formatNumber(item.gross_weight_kg, 0) + ' kg' : '-' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 uppercase font-medium">{{ t('loading_place') }}</p>
+                <p class="text-sm font-medium text-gray-900 mt-1">{{ item.loading_place || '-' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 uppercase font-medium">{{ t('unloading_place') }}</p>
+                <p class="text-sm font-medium text-gray-900 mt-1">{{ item.unloading_place || '-' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fuel Analysis Section -->
+      <div v-if="hasFuelData" class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-3 bg-orange-50 border-b border-orange-200">
+          <h3 class="text-sm font-semibold text-orange-800">{{ t('fuel_analysis') }}</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('registration_plate') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('total_km') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('fuel_consumed') }} (l)</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('fuel_norm_consumption') }} (l)</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('fuel_variance') }} (l)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr v-for="v in vehiclesWithFuel" :key="v.id" class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm font-mono text-gray-700">{{ v.registration_plate }}</td>
+                <td class="px-4 py-3 text-sm text-right text-gray-900">{{ vehicleTotalKm(v) != null ? vehicleTotalKm(v) : '-' }}</td>
+                <td class="px-4 py-3 text-sm text-right text-gray-900">{{ vehicleFuelConsumed(v) != null ? formatNumber(vehicleFuelConsumed(v)) : '-' }}</td>
+                <td class="px-4 py-3 text-sm text-right text-gray-900">{{ vehicleNormConsumption(v) != null ? formatNumber(vehicleNormConsumption(v)) : '-' }}</td>
+                <td class="px-4 py-3 text-sm text-right font-medium">
+                  <span v-if="vehicleFuelVariance(v) != null" :class="vehicleFuelVariance(v) >= 0 ? 'text-green-600' : 'text-red-600'">
+                    {{ formatNumber(vehicleFuelVariance(v)) }}
+                    <span class="text-xs font-normal ml-1">{{ vehicleFuelVariance(v) >= 0 ? t('under_norm') : t('over_norm') }}</span>
+                  </span>
+                  <span v-else class="text-gray-400">-</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- GL Posting Breakdown -->
+      <div v-if="hasGlPosting" class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-3 bg-slate-50 border-b border-slate-200">
+          <h3 class="text-sm font-semibold text-slate-800">{{ t('gl_posting') }}</h3>
+        </div>
+        <div class="p-6">
+          <div v-if="order.gl_entries && order.gl_entries.length > 0" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('gl_code') }}</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('description') }}</th>
+                  <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('gl_debit') }}</th>
+                  <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('gl_credit') }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr v-for="(entry, idx) in order.gl_entries" :key="idx" class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm font-mono text-gray-700">{{ entry.account_code }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-900">{{ entry.account_name || entry.description || '-' }}</td>
+                  <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                    {{ entry.debit_amount ? formatMoney(entry.debit_amount) : '' }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                    {{ entry.credit_amount ? formatMoney(entry.credit_amount) : '' }}
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot class="bg-gray-50 border-t-2 border-gray-300">
+                <tr>
+                  <td colspan="2" class="px-4 py-3 text-sm font-semibold text-gray-700 text-right">{{ t('grand_total') }}</td>
+                  <td class="px-4 py-3 text-sm text-right font-bold text-gray-900">
+                    {{ formatMoney(order.gl_entries.reduce((sum, e) => sum + (e.debit_amount || 0), 0)) }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-right font-bold text-gray-900">
+                    {{ formatMoney(order.gl_entries.reduce((sum, e) => sum + (e.credit_amount || 0), 0)) }}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <p v-else class="text-sm text-gray-500">-</p>
+        </div>
+      </div>
     </div>
 
     <!-- Not found -->
@@ -311,7 +510,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -509,10 +708,99 @@ async function deleteOrder() {
   }
 }
 
+// Transport-specific computed
+const isTransportOrder = computed(() => {
+  return order.value && order.value.transport_type_category !== 'business_trip'
+})
+
+const hasVehicles = computed(() => {
+  return isTransportOrder.value && order.value.vehicles?.length > 0
+})
+
+const hasCrew = computed(() => {
+  return order.value?.crew?.length > 0
+})
+
+const hasCargo = computed(() => {
+  return order.value?.cargo?.length > 0
+})
+
+const vehiclesWithFuel = computed(() => {
+  if (!hasVehicles.value) return []
+  return order.value.vehicles.filter(v =>
+    v.fuel_start != null || v.fuel_end != null || v.fuel_added != null
+  )
+})
+
+const hasFuelData = computed(() => {
+  return vehiclesWithFuel.value.length > 0
+})
+
+const hasGlPosting = computed(() => {
+  return order.value?.status === 'settled' && order.value?.ifrs_transaction_id
+})
+
+const glEntries = computed(() => {
+  if (!hasGlPosting.value || !order.value.gl_entries) return { debit: [], credit: [] }
+  const debit = order.value.gl_entries.filter(e => e.type === 'debit' || e.amount > 0)
+  const credit = order.value.gl_entries.filter(e => e.type === 'credit' || e.amount < 0)
+  return { debit, credit }
+})
+
+function vehicleTypeLabel(type) {
+  const map = { truck: t('vehicle_truck'), trailer: t('vehicle_trailer'), car: t('vehicle_car'), van: t('vehicle_van') }
+  return map[type] || type
+}
+
+function fuelTypeLabel(type) {
+  const map = { diesel: t('fuel_diesel'), petrol: t('fuel_petrol'), lpg: t('fuel_lpg'), cng: t('fuel_cng') }
+  return map[type] || type
+}
+
+function crewRoleLabel(role) {
+  const map = { driver: t('crew_driver'), co_driver: t('crew_co_driver'), member: t('crew_member') }
+  return map[role] || role
+}
+
+function vehicleTotalKm(v) {
+  if (v.odometer_start != null && v.odometer_end != null) {
+    return v.odometer_end - v.odometer_start
+  }
+  return null
+}
+
+function vehicleFuelConsumed(v) {
+  if (v.fuel_start != null && v.fuel_end != null) {
+    return (v.fuel_start || 0) + (v.fuel_added || 0) - (v.fuel_end || 0)
+  }
+  return null
+}
+
+function vehicleNormConsumption(v) {
+  const km = vehicleTotalKm(v)
+  if (km != null && v.fuel_norm_per_100km) {
+    return v.fuel_norm_per_100km * km / 100
+  }
+  return null
+}
+
+function vehicleFuelVariance(v) {
+  const norm = vehicleNormConsumption(v)
+  const actual = vehicleFuelConsumed(v)
+  if (norm != null && actual != null) {
+    return norm - actual
+  }
+  return null
+}
+
+function formatNumber(val, decimals = 1) {
+  if (val == null) return '-'
+  return Number(val).toFixed(decimals)
+}
+
 // Lifecycle
 onMounted(() => {
   fetchOrder()
 })
+// CLAUDE-CHECKPOINT
 </script>
-
-<!-- CLAUDE-CHECKPOINT -->

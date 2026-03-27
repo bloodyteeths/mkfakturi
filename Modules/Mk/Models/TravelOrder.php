@@ -20,6 +20,8 @@ class TravelOrder extends Model
         'employee_id',
         'travel_number',
         'type',
+        'transport_type_category',
+        'transport_mode',
         'purpose',
         'departure_date',
         'return_date',
@@ -28,6 +30,11 @@ class TravelOrder extends Model
         'total_per_diem',
         'total_expenses',
         'total_mileage_cost',
+        'total_km',
+        'total_fuel_consumed',
+        'total_fuel_cost',
+        'total_toll_cost',
+        'total_forwarding_cost',
         'grand_total',
         'reimbursement_amount',
         'cost_center_id',
@@ -45,6 +52,11 @@ class TravelOrder extends Model
             'total_per_diem' => 'integer',
             'total_expenses' => 'integer',
             'total_mileage_cost' => 'integer',
+            'total_km' => 'integer',
+            'total_fuel_consumed' => 'decimal:2',
+            'total_fuel_cost' => 'integer',
+            'total_toll_cost' => 'integer',
+            'total_forwarding_cost' => 'integer',
             'grand_total' => 'integer',
             'reimbursement_amount' => 'integer',
         ];
@@ -98,6 +110,21 @@ class TravelOrder extends Model
     public function approvedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function vehicles(): HasMany
+    {
+        return $this->hasMany(TravelOrderVehicle::class, 'travel_order_id');
+    }
+
+    public function crew(): HasMany
+    {
+        return $this->hasMany(TravelOrderCrew::class, 'travel_order_id');
+    }
+
+    public function cargo(): HasMany
+    {
+        return $this->hasMany(TravelOrderCargo::class, 'travel_order_id');
     }
 
     // ---- Scopes ----

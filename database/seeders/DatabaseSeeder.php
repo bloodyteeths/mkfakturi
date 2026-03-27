@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
         $this->call(MkVatSeeder::class);
         $this->call(PartnerSeeder::class); // Create Partner records for admin users
         $this->call(PartnerTablesSeeder::class); // Create sample partner data
+        $this->call(PerDiemRatesSeeder::class); // Per-diem rates per government decree
+        $this->call(CurrencyExchangeRatesSeeder::class); // NBRM exchange rates
 
         // DemoSeeder is intentionally NOT called here
         // It creates fake invoices/expenses for testing only

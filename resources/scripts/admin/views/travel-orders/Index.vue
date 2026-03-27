@@ -55,6 +55,18 @@
       </div>
     </div>
 
+    <!-- Transport Cost Summary Cards -->
+    <div v-if="totalFuelCost > 0 || totalTollCost > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div v-if="totalFuelCost > 0" class="bg-orange-50 rounded-lg shadow p-4 border border-orange-200">
+        <p class="text-xs text-orange-600 uppercase font-medium">{{ t('total_fuel_cost') }}</p>
+        <p class="text-2xl font-bold text-orange-800">{{ formatMoney(totalFuelCost) }}</p>
+      </div>
+      <div v-if="totalTollCost > 0" class="bg-purple-50 rounded-lg shadow p-4 border border-purple-200">
+        <p class="text-xs text-purple-600 uppercase font-medium">{{ t('total_toll_cost') }}</p>
+        <p class="text-2xl font-bold text-purple-800">{{ formatMoney(totalTollCost) }}</p>
+      </div>
+    </div>
+
     <!-- Filters -->
     <BaseFilterWrapper
       v-show="showFilters"
@@ -80,6 +92,17 @@
           label="label"
           value-prop="value"
           :placeholder="t('type')"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="t('transport_type_category')">
+        <BaseMultiselect
+          v-model="filters.transport_type_category"
+          :options="transportTypeCategoryOptions"
+          :searchable="false"
+          label="label"
+          value-prop="value"
+          :placeholder="t('transport_type_category')"
         />
       </BaseInputGroup>
 
@@ -133,7 +156,13 @@
                 {{ t('employee') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {{ t('transport_type_category') }}
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {{ t('departure') }}
+              </th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {{ t('total_km') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {{ t('grand_total') }}
@@ -162,8 +191,21 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ order.employee ? `${order.employee.first_name} ${order.employee.last_name}` : '-' }}
               </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span
+                  v-if="order.transport_type_category"
+                  :class="transportCategoryBadgeClass(order.transport_type_category)"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                >
+                  {{ t(order.transport_type_category) }}
+                </span>
+                <span v-else class="text-sm text-gray-400">-</span>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ formatDate(order.departure_date) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
+                {{ order.total_km > 0 ? order.total_km : '-' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">
                 {{ formatMoney(order.grand_total) }}
@@ -249,6 +291,7 @@ const currentPage = ref(1)
 const filters = reactive({
   status: null,
   type: null,
+  transport_type_category: null,
   date_from: null,
   date_to: null,
 })
@@ -265,6 +308,21 @@ const typeOptions = computed(() => [
   { value: 'domestic', label: t('domestic') },
   { value: 'foreign', label: t('foreign') },
 ])
+
+const transportTypeCategoryOptions = computed(() => [
+  { value: '', label: t('all') },
+  { value: 'goods_transport', label: t('goods_transport') },
+  { value: 'passenger_transport', label: t('passenger_transport') },
+  { value: 'business_trip', label: t('business_trip') },
+])
+
+const totalFuelCost = computed(() => {
+  return orders.value.reduce((sum, order) => sum + (order.total_fuel_cost || 0), 0)
+})
+
+const totalTollCost = computed(() => {
+  return orders.value.reduce((sum, order) => sum + (order.total_toll_cost || 0), 0)
+})
 
 // Methods
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
@@ -301,12 +359,22 @@ function statusLabel(status) {
   return t(key)
 }
 
+function transportCategoryBadgeClass(category) {
+  switch (category) {
+    case 'goods_transport': return 'bg-blue-100 text-blue-800'
+    case 'passenger_transport': return 'bg-green-100 text-green-800'
+    case 'business_trip': return 'bg-gray-100 text-gray-700'
+    default: return 'bg-gray-100 text-gray-700'
+  }
+}
+
 async function fetchOrders(page = 1) {
   isLoading.value = true
   try {
     const params = { page, limit: 15 }
     if (filters.status) params.status = filters.status
     if (filters.type) params.type = filters.type
+    if (filters.transport_type_category) params.transport_type_category = filters.transport_type_category
     if (filters.date_from) params.date_from = filters.date_from
     if (filters.date_to) params.date_to = filters.date_to
 
@@ -344,12 +412,13 @@ function viewOrder(id) {
 function clearFilters() {
   filters.status = null
   filters.type = null
+  filters.transport_type_category = null
   filters.date_from = null
   filters.date_to = null
   fetchOrders(1)
 }
 
-watch([() => filters.status, () => filters.type, () => filters.date_from, () => filters.date_to], () => {
+watch([() => filters.status, () => filters.type, () => filters.transport_type_category, () => filters.date_from, () => filters.date_to], () => {
   fetchOrders(1)
 })
 
@@ -358,6 +427,6 @@ onMounted(() => {
   fetchOrders()
   fetchSummary()
 })
-</script>
 
-<!-- CLAUDE-CHECKPOINT -->
+// CLAUDE-CHECKPOINT
+</script>

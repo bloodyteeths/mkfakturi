@@ -15,13 +15,20 @@ class TravelExpense extends Model
         'description',
         'amount',
         'currency_code',
-        'receipt_path',
+        'gl_account_code',
+        'exchange_rate',
+        'amount_mkd',
+        'vat_amount',
+        'receipt_number',
     ];
 
     protected function casts(): array
     {
         return [
             'amount' => 'integer',
+            'amount_mkd' => 'integer',
+            'vat_amount' => 'integer',
+            'exchange_rate' => 'decimal:6',
         ];
     }
 
