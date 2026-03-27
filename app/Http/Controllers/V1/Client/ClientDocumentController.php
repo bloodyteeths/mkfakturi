@@ -266,6 +266,46 @@ class ClientDocumentController extends Controller
     }
 
     /**
+     * Preview a document file inline (for iframe embedding).
+     */
+    public function preview(Request $request, int $id)
+    {
+        $user = $request->user();
+        $companyId = (int) ($request->header('company') ?: $request->query('company', 0));
+
+        $document = ClientDocument::where('company_id', $companyId)->findOrFail($id);
+
+        if (! $user->isOwner() && ! $user->hasCompany($document->company_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have access to this document.',
+            ], 403);
+        }
+
+        $disk = config('filesystems.media_disk');
+        if (! $document->file_path || ! Storage::disk($disk)->exists($document->file_path)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File not found.',
+            ], 404);
+        }
+
+        $stream = Storage::disk($disk)->readStream($document->file_path);
+
+        return response()->stream(function () use ($stream) {
+            fpassthru($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, 200, [
+            'Content-Type' => $document->mime_type,
+            'Content-Disposition' => 'inline; filename="'.addcslashes($document->original_filename, '"').'"',
+            'Cache-Control' => 'private, max-age=3600',
+        ]);
+    }
+    // CLAUDE-CHECKPOINT
+
+    /**
      * Get the AI processing status of a document (for polling).
      */
     public function processingStatus(Request $request, int $id): JsonResponse
@@ -360,7 +400,7 @@ class ClientDocumentController extends Controller
     private function inferEntityType(ClientDocument $doc): string
     {
         return match ($doc->ai_classification['type'] ?? 'other') {
-            'invoice' => 'bill',
+            'invoice' => 'invoice',
             'receipt' => 'expense',
             'bank_statement' => 'bank_transactions',
             'product_list' => 'items',

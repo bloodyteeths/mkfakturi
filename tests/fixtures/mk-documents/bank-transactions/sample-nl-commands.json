@@ -1,0 +1,103 @@
+[
+  {
+    "_comment": "Invoice creation in Macedonian",
+    "input": "Фактура за Марков ДООЕЛ, 10 часа консалтинг по 3000 денари",
+    "expected_intent": "create_invoice",
+    "expected_entity_type": "invoice",
+    "expected_entities": {
+      "customer_name": "Марков ДООЕЛ",
+      "items": [{"name": "консалтинг", "quantity": 10, "unit_price": 300000}],
+      "total_cents": 3000000
+    }
+  },
+  {
+    "_comment": "Bill creation in Macedonian",
+    "input": "Нова сметка од Телеком за интернет 2500 денари",
+    "expected_intent": "create_bill",
+    "expected_entity_type": "bill",
+    "expected_entities": {
+      "supplier_name": "Телеком",
+      "items": [{"name": "интернет", "quantity": 1, "unit_price": 250000}]
+    }
+  },
+  {
+    "_comment": "Expense in Macedonian",
+    "input": "Платив 5000 денари за канцелариски материјали",
+    "expected_intent": "create_expense",
+    "expected_entity_type": "expense",
+    "expected_entities": {
+      "amount": 500000,
+      "notes": "канцелариски материјали"
+    }
+  },
+  {
+    "_comment": "Payment recording",
+    "input": "Примив 15000 од Петров ДОО за фактура INV-2026-001",
+    "expected_intent": "record_payment",
+    "expected_entity_type": "payment",
+    "expected_entities": {
+      "customer_name": "Петров ДОО",
+      "amount": 1500000,
+      "invoice_reference": "INV-2026-001"
+    }
+  },
+  {
+    "_comment": "Question — should NOT create draft",
+    "input": "Колку ни е прометот овој месец?",
+    "expected_intent": "question",
+    "expected_entity_type": null,
+    "expected_entities": null
+  },
+  {
+    "_comment": "Multi-item invoice",
+    "input": "Фактура за Петров ДОО: 5 часа развој по 5000 ден и 3 часа тестирање по 2000 ден",
+    "expected_intent": "create_invoice",
+    "expected_entity_type": "invoice",
+    "expected_entities": {
+      "customer_name": "Петров ДОО",
+      "items": [
+        {"name": "развој", "quantity": 5, "unit_price": 500000},
+        {"name": "тестирање", "quantity": 3, "unit_price": 200000}
+      ],
+      "total_cents": 3100000
+    }
+  },
+  {
+    "_comment": "Ambiguous — should request clarification",
+    "input": "Фактура за Марков",
+    "expected_intent": "create_invoice",
+    "expected_entity_type": "invoice",
+    "notes": "If multiple 'Марков' customers exist, should ask for clarification"
+  },
+  {
+    "_comment": "Invoice with due date",
+    "input": "Фактура за Иванов ДООЕЛ за веб дизајн 45000 ден, рок до 15 април",
+    "expected_intent": "create_invoice",
+    "expected_entity_type": "invoice",
+    "expected_entities": {
+      "customer_name": "Иванов ДООЕЛ",
+      "items": [{"name": "веб дизајн", "quantity": 1, "unit_price": 4500000}],
+      "due_date": "2026-04-15"
+    }
+  },
+  {
+    "_comment": "Rent expense",
+    "input": "Трошок за кирија 30000 денари за месец март",
+    "expected_intent": "create_expense",
+    "expected_entity_type": "expense",
+    "expected_entities": {
+      "amount": 3000000,
+      "category": "rent"
+    }
+  },
+  {
+    "_comment": "Mixed Cyrillic/Latin",
+    "input": "Invoice for MARKOV DOOEL, 10 hours consulting at 3000 MKD",
+    "expected_intent": "create_invoice",
+    "expected_entity_type": "invoice",
+    "expected_entities": {
+      "customer_name": "MARKOV DOOEL",
+      "items": [{"name": "consulting", "quantity": 10, "unit_price": 300000}]
+    }
+  }
+]

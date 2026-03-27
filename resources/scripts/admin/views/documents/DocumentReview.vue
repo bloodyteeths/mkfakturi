@@ -81,6 +81,7 @@
             class="w-full h-full rounded-lg"
             style="min-height: 600px"
             @error="previewError = true"
+            @load="onIframeLoad"
           />
           <img
             v-else-if="document.mime_type?.startsWith('image/')"
@@ -128,6 +129,22 @@
                 {{ et.label }}
               </button>
             </div>
+          </div>
+
+          <!-- AI type hint: if it's classified as invoice, explain bill vs invoice -->
+          <div
+            v-if="document.ai_classification?.type === 'invoice'"
+            class="mt-2 flex items-start space-x-2 bg-blue-50 border border-blue-200 rounded-md px-3 py-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-xs text-blue-700">
+              {{ selectedEntityType === 'bill'
+                ? $t('documents.invoice_as_bill_hint', 'AI detected this as an Invoice. If this is a received invoice from a supplier, keep it as Bill. If it is an outgoing invoice you issued, switch to Invoice above.')
+                : $t('documents.invoice_type_hint', 'AI detected this as an Invoice. If this is a received invoice from a supplier, switch to Bill above.')
+              }}
+            </p>
           </div>
         </div>
 
@@ -641,7 +658,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDocumentHubStore } from '@/scripts/admin/stores/document-hub'
@@ -694,7 +711,7 @@ const form = reactive({
 const inferEntityType = (doc) => {
   const type = doc.ai_classification?.type || 'other'
   const map = {
-    invoice: 'bill',
+    invoice: 'invoice',
     receipt: 'expense',
     bank_statement: 'bank_transactions',
     product_list: 'items',
@@ -703,6 +720,91 @@ const inferEntityType = (doc) => {
   }
   return map[type] || 'bill'
 }
+
+// Detect JSON error responses in the iframe (file not found returns JSON)
+const onIframeLoad = (event) => {
+  try {
+    const iframe = event.target
+    const contentType = iframe?.contentDocument?.contentType
+    if (contentType && contentType.includes('application/json')) {
+      previewError.value = true
+    }
+  } catch {
+    // Cross-origin restriction — cannot inspect iframe content, preview is likely fine
+  }
+}
+
+// Cross-populate form data when entity type changes
+watch(selectedEntityType, (newType, oldType) => {
+  if (newType === oldType) return
+
+  // bill -> invoice: copy supplier to customer, bill totals/dates to invoice
+  if (oldType === 'bill' && newType === 'invoice') {
+    if (form.supplier.name && !form.customer.name) {
+      form.customer.name = form.supplier.name
+      form.customer.tax_id = form.supplier.tax_id || ''
+      form.customer.email = form.supplier.email || ''
+    }
+    if (form.bill.total && !form.invoice.total) {
+      form.invoice.invoice_number = form.bill.bill_number || ''
+      form.invoice.invoice_date = form.bill.bill_date || ''
+      form.invoice.due_date = form.bill.due_date || ''
+      form.invoice.sub_total = form.bill.sub_total || 0
+      form.invoice.tax = form.bill.tax || 0
+      form.invoice.total = form.bill.total || 0
+    }
+  }
+
+  // invoice -> bill: copy customer to supplier, invoice totals/dates to bill
+  if (oldType === 'invoice' && newType === 'bill') {
+    if (form.customer.name && !form.supplier.name) {
+      form.supplier.name = form.customer.name
+      form.supplier.tax_id = form.customer.tax_id || ''
+      form.supplier.email = form.customer.email || ''
+    }
+    if (form.invoice.total && !form.bill.total) {
+      form.bill.bill_number = form.invoice.invoice_number || ''
+      form.bill.bill_date = form.invoice.invoice_date || ''
+      form.bill.due_date = form.invoice.due_date || ''
+      form.bill.sub_total = form.invoice.sub_total || 0
+      form.bill.tax = form.invoice.tax || 0
+      form.bill.total = form.invoice.total || 0
+    }
+  }
+
+  // bill/invoice -> expense: copy total to expense amount, date to expense date
+  if ((oldType === 'bill' || oldType === 'invoice') && newType === 'expense') {
+    const sourceTotal = oldType === 'bill' ? form.bill.total : form.invoice.total
+    const sourceDate = oldType === 'bill' ? form.bill.bill_date : form.invoice.invoice_date
+    if (sourceTotal && !form.expense.amount) {
+      form.expense.amount = sourceTotal
+    }
+    if (sourceDate && !form.expense.expense_date) {
+      form.expense.expense_date = sourceDate
+    }
+    if (form.supplier.name && !form.expense.category) {
+      form.expense.category = form.supplier.name
+    }
+  }
+
+  // expense -> bill: copy expense amount to bill total
+  if (oldType === 'expense' && newType === 'bill') {
+    if (form.expense.amount && !form.bill.total) {
+      form.bill.total = form.expense.amount
+      form.bill.sub_total = form.expense.amount
+      form.bill.bill_date = form.expense.expense_date || ''
+    }
+  }
+
+  // expense -> invoice: copy expense amount to invoice total
+  if (oldType === 'expense' && newType === 'invoice') {
+    if (form.expense.amount && !form.invoice.total) {
+      form.invoice.total = form.expense.amount
+      form.invoice.sub_total = form.expense.amount
+      form.invoice.invoice_date = form.expense.expense_date || ''
+    }
+  }
+})
 
 // Available entity types for the selector
 const availableEntityTypes = computed(() => [
@@ -758,7 +860,7 @@ onMounted(async () => {
     const doc = await store.fetchDocument(id)
     document.value = doc
     const companyId = window.Ls?.get('selectedCompany') || doc.company_id
-    previewUrl.value = `/api/v1/client-documents/${id}/download?company=${companyId}`
+    previewUrl.value = `/api/v1/client-documents/${id}/preview?company=${companyId}`
 
     // Check if file exists on storage (server-side check)
     if (!doc.file_available) {
