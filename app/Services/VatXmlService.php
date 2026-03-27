@@ -36,6 +36,8 @@ class VatXmlService
 
     protected const STANDARD_VAT_RATE = 18.00;
 
+    protected const HOSPITALITY_VAT_RATE = 10.00;
+
     protected const REDUCED_VAT_RATE = 5.00;
 
     protected $company;
@@ -391,6 +393,7 @@ class VatXmlService
 
         $vatData = [
             'standard' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
+            'hospitality' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'reduced' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'zero' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'exempt' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
@@ -442,6 +445,8 @@ class VatXmlService
                     $dominantRate = $this->getDominantVatRate($invoice);
                     if ($dominantRate >= 15) {
                         $vatData['standard']['transaction_count']++;
+                    } elseif ($dominantRate >= 8) {
+                        $vatData['hospitality']['transaction_count']++;
                     } elseif ($dominantRate >= 3) {
                         $vatData['reduced']['transaction_count']++;
                     } else {
@@ -476,6 +481,7 @@ class VatXmlService
 
         $vatData = [
             'standard' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
+            'hospitality' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'reduced' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'zero' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'exempt' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
@@ -513,6 +519,8 @@ class VatXmlService
                 $dominantRate = $this->getDominantBillVatRate($bill);
                 if ($dominantRate >= 15) {
                     $vatData['standard']['transaction_count']++;
+                } elseif ($dominantRate >= 8) {
+                    $vatData['hospitality']['transaction_count']++;
                 } elseif ($dominantRate >= 3) {
                     $vatData['reduced']['transaction_count']++;
                 } else {
@@ -550,6 +558,9 @@ class VatXmlService
         } elseif ($rate >= 15) {
             $vatData['standard']['vat_amount'] += $amount;
             $vatData['standard']['taxable_base'] += $taxableBase;
+        } elseif ($rate >= 8) { // Hospitality rate (10%)
+            $vatData['hospitality']['vat_amount'] += $amount;
+            $vatData['hospitality']['taxable_base'] += $taxableBase;
         } elseif ($rate >= 3) {
             $vatData['reduced']['vat_amount'] += $amount;
             $vatData['reduced']['taxable_base'] += $taxableBase;
@@ -673,6 +684,9 @@ class VatXmlService
         } elseif ($rate >= 15) { // Standard rate (18%)
             $vatData['standard']['vat_amount'] += $amount;
             $vatData['standard']['taxable_base'] += $taxableBase;
+        } elseif ($rate >= 8) { // Hospitality rate (10%)
+            $vatData['hospitality']['vat_amount'] += $amount;
+            $vatData['hospitality']['taxable_base'] += $taxableBase;
         } elseif ($rate >= 3) { // Reduced rate (5%)
             $vatData['reduced']['vat_amount'] += $amount;
             $vatData['reduced']['taxable_base'] += $taxableBase;

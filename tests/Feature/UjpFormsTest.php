@@ -141,13 +141,19 @@ class UjpFormsTest extends TestCase
         $this->assertArrayHasKey('period_end', $data);
         $this->assertArrayHasKey('overrides', $data);
 
-        // Fields should have keys 1-32
+        // Fields: 1-19 (output + input), 30-32 (calculation)
         $fields = $data['fields'];
-        $this->assertArrayHasKey(1, $fields);
-        $this->assertArrayHasKey(10, $fields);
-        $this->assertArrayHasKey(19, $fields);
-        $this->assertArrayHasKey(31, $fields);
-        $this->assertArrayHasKey(32, $fields);
+        $this->assertArrayHasKey(1, $fields);   // Standard 18% base
+        $this->assertArrayHasKey(3, $fields);   // Hospitality 10% base
+        $this->assertArrayHasKey(5, $fields);   // Reduced 5% base
+        $this->assertArrayHasKey(10, $fields);  // Total output VAT
+        $this->assertArrayHasKey(19, $fields);  // Total input VAT
+        $this->assertArrayHasKey(30, $fields);  // Carryover
+        $this->assertArrayHasKey(31, $fields);  // Tax debt/claim
+        $this->assertArrayHasKey(32, $fields);  // Refund
+
+        // Should also include proportional deduction data
+        $this->assertArrayHasKey('proportional_deduction', $data);
     }
 
     public function test_ddv04_collect_has_nonzero_output_vat(): void

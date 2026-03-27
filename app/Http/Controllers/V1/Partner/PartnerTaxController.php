@@ -70,14 +70,27 @@ class PartnerTaxController extends Controller
 
             $this->validatePeriodLength($periodStart, $periodEnd, $validated['period_type']);
 
-            $this->vatService->initForPeriod($companyModel, $periodStart, $periodEnd, $validated['period_type']);
-            $vatData = $this->vatService->calculateVatForPeriod();
-            $inputVatData = $this->vatService->calculateInputVatForPeriod();
+            // Use DDV04FormService for proper field mapping
+            $ddv04Service = app(\App\Services\Tax\DDV04FormService::class);
+            $month = $validated['period_type'] === 'MONTHLY' ? $periodStart->month : null;
+            $quarter = $validated['period_type'] === 'QUARTERLY'
+                ? (int) ceil($periodStart->month / 3)
+                : null;
+            $overrides = $request->input('overrides', []);
 
-            $totalOutputVat = $vatData['standard']['vat_amount'] + $vatData['reduced']['vat_amount'];
-            $totalInputVat = $inputVatData['standard']['vat_amount'] + $inputVatData['reduced']['vat_amount'];
+            $formData = $ddv04Service->collect(
+                $companyModel,
+                $periodStart->year,
+                $month,
+                $quarter,
+                $overrides
+            );
+
+            $outputVat = $formData['output_vat'];
+            $inputVat = $formData['input_vat'];
 
             return response()->json([
+                'success' => true,
                 'data' => [
                     'company' => [
                         'id' => $companyModel->id,
@@ -89,14 +102,15 @@ class PartnerTaxController extends Controller
                         'end' => $periodEnd->format('Y-m-d'),
                         'type' => $validated['period_type'],
                     ],
-                    'standard' => $vatData['standard'],
-                    'reduced' => $vatData['reduced'],
-                    'zero' => $vatData['zero'],
-                    'exempt' => $vatData['exempt'],
-                    'total_output_vat' => $totalOutputVat,
-                    'total_input_vat' => $totalInputVat,
-                    'net_vat_due' => $totalOutputVat - $totalInputVat,
-                    'total_transactions' => array_sum(array_column($vatData, 'transaction_count')),
+                    'fields' => $formData['fields'],
+                    'overrides' => $formData['overrides'],
+                    'output_vat' => $outputVat,
+                    'input_vat' => $inputVat,
+                    'proportional_deduction' => $formData['proportional_deduction'],
+                    'total_output_vat' => $formData['fields'][10] ?? 0,
+                    'total_input_vat' => $formData['fields'][19] ?? 0,
+                    'net_vat_due' => $formData['fields'][31] ?? 0,
+                    'total_transactions' => array_sum(array_column($outputVat, 'transaction_count')),
                 ],
             ]);
         } catch (ValidationException $e) {
@@ -477,6 +491,39 @@ class PartnerTaxController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to fetch VAT status',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Suggest filing period type (monthly vs quarterly) for a company.
+     * Based on ЗДДВ Art. 40 — prior-year turnover threshold of MKD 25M.
+     */
+    public function vatPeriodSuggestion(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner) {
+            return response()->json(['success' => false, 'message' => 'Partner not found'], 404);
+        }
+        if (!$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'No access to this company'], 403);
+        }
+
+        $companyModel = Company::findOrFail($company);
+        $year = $request->input('year', now()->year);
+
+        try {
+            $ddv04Service = app(\App\Services\Tax\DDV04FormService::class);
+            $suggestion = $ddv04Service->suggestPeriodType($companyModel, (int) $year);
+
+            return response()->json([
+                'success' => true,
+                'data' => $suggestion,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
                 'message' => $e->getMessage(),
             ], 500);
         }

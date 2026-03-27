@@ -2007,6 +2007,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/vat-return/periods/{periodId}/returns', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatReturns']);
         Route::get('/vat-return/{id}/download-xml', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatDownloadXml']);
         Route::get('/vat-status', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatStatus']);
+        Route::get('/vat-return/period-suggestion', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'vatPeriodSuggestion']);
         // CIT (DB-VP)
         Route::post('/cit-return/preview', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'citPreview']);
         Route::post('/cit-return', [\App\Http\Controllers\V1\Partner\PartnerTaxController::class, 'citGenerate']);
