@@ -113,6 +113,10 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     echo "Re-running migrations after ghost fix..."
     php artisan migrate --force 2>&1 || echo "Re-run migrations done"
 
+    # Seed MK VAT rates (idempotent - adds zero-rated/exempt types, backfills categories)
+    echo "Seeding MK VAT rates..."
+    php artisan db:seed --class=MkVatSeeder --force || echo "MkVatSeeder failed or table not ready"
+
     # Seed Macedonian Chart of Accounts (idempotent - safe to run multiple times)
     echo "Seeding Macedonian Chart of Accounts..."
     php artisan db:seed --class=MacedonianChartOfAccountsSeeder --force
