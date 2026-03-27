@@ -21,6 +21,7 @@ export const useTaxTypeStore = (useWindow = false) => {
         description: '',
         compound_tax: false,
         collective_tax: 0,
+        category: null,
       },
     }),
 
@@ -39,6 +40,7 @@ export const useTaxTypeStore = (useWindow = false) => {
           description: '',
           compound_tax: false,
           collective_tax: 0,
+          category: null,
         }
       },
 

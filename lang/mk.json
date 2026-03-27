@@ -3351,7 +3351,15 @@
             "status": "Статус",
             "active": "Активен",
             "inactive": "Неактивен",
-            "taxes_attached": "Даноците се прикачени."
+            "taxes_attached": "Даноците се прикачени.",
+            "category": "Категорија",
+            "category_standard": "Стандардна",
+            "category_reduced": "Намалена",
+            "category_hospitality": "Угостителство",
+            "category_zero_rated": "Нулта стапка",
+            "category_exempt": "Ослободено",
+            "category_reverse_charge": "Обратен данок",
+            "calculation_type": "Вид пресметка"
         },
         "fiscal_devices": {
             "title": "Фискални апарати",
@@ -4041,6 +4049,7 @@
         "name_min_length": "Name must have at least {count} letters.",
         "prefix_min_length": "Prefix must have at least {count} letters.",
         "enter_valid_tax_rate": "Enter valid tax rate",
+        "tax_exceeds_subtotal": "Износот на данокот го надминува подзбирот за ставка :item.",
         "tax_required": "ДДВ тарифата е задолжителна",
         "numbers_only": "Numbers Only.",
         "characters_only": "Characters Only.",

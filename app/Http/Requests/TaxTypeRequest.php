@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\TaxType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\In;
 
 class TaxTypeRequest extends FormRequest
 {
@@ -48,6 +49,10 @@ class TaxTypeRequest extends FormRequest
             ],
             'collective_tax' => [
                 'nullable',
+            ],
+            'category' => [
+                'nullable',
+                Rule::in(TaxType::VALID_CATEGORIES),
             ],
         ];
 

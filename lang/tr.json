@@ -2496,7 +2496,15 @@
             "status": "Durum",
             "active": "Актveвен",
             "inactive": "Hayırактveвен",
-            "taxes_attached": "Evetamaцveте каченve."
+            "taxes_attached": "Evetamaцveте каченve.",
+            "category": "Kategori",
+            "category_standard": "Standart",
+            "category_reduced": "İndirimli",
+            "category_hospitality": "Konaklama",
+            "category_zero_rated": "Sıfır Oran",
+            "category_exempt": "Muaf",
+            "category_reverse_charge": "Ters Yükleme",
+            "calculation_type": "Hesaplama Türü"
         },
         "fiscal_devices": {
             "title": "Mali Cihazlar",
@@ -3437,6 +3445,7 @@
         "name_min_length": "İsim en az {count} harf içermelidir.",
         "prefix_min_length": "Önek en az {count} harf içermelidir.",
         "enter_valid_tax_rate": "Geçerli bir vergi oranı girin",
+        "tax_exceeds_subtotal": "Vergi tutarı :item kalemi için alt toplamı aşıyor.",
         "numbers_only": "Sadece Sayılar.",
         "characters_only": "Sadece Harfler.",
         "password_incorrect": "Parola ile onayı aynı olmalı",

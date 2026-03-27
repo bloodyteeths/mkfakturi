@@ -20,6 +20,16 @@
       :data="fetchData"
       :columns="taxTypeColumns"
     >
+    <template #cell-category="{ row }">
+      <span
+        v-if="row.data.category"
+        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+        :class="categoryBadgeClass(row.data.category)"
+      >
+        {{ $t(`settings.tax_types.category_${row.data.category}`) }}
+      </span>
+      <span v-else class="text-gray-400">-</span>
+    </template>
     <template #cell-calculation_type="{ row }">
       {{ $t(`settings.tax_types.${row.data.calculation_type}`) }}
     </template>
@@ -90,6 +100,12 @@ const taxTypeColumns = computed(() => {
       tdClass: 'font-medium text-gray-900',
     },
     {
+      key: 'category',
+      label: t('settings.tax_types.category'),
+      thClass: 'extra',
+      tdClass: 'font-medium text-gray-900',
+    },
+    {
       key: 'calculation_type',
       label: t('settings.tax_types.calculation_type'),
       thClass: 'extra',
@@ -138,6 +154,18 @@ const taxPerItemField = computed({
     })
   },
 })
+
+function categoryBadgeClass(category) {
+  const classes = {
+    standard: 'bg-blue-100 text-blue-800',
+    reduced: 'bg-green-100 text-green-800',
+    hospitality: 'bg-purple-100 text-purple-800',
+    zero_rated: 'bg-yellow-100 text-yellow-800',
+    exempt: 'bg-gray-100 text-gray-800',
+    reverse_charge: 'bg-red-100 text-red-800',
+  }
+  return classes[category] || 'bg-gray-100 text-gray-800'
+}
 
 function hasAtleastOneAbility() {
   return userStore.hasAbilities([

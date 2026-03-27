@@ -61,6 +61,53 @@ class BillRequest extends FormRequest
         return $rules;
     }
 
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $this->validateTaxAmounts($validator);
+        });
+    }
+
+    /**
+     * Validate that tax amounts don't exceed item subtotals.
+     */
+    protected function validateTaxAmounts($validator): void
+    {
+        $items = $this->input('items', []);
+        if (empty($items)) {
+            return;
+        }
+
+        foreach ($items as $index => $itemData) {
+            $quantity = (float) ($itemData['quantity'] ?? 0);
+            $price = (float) ($itemData['price'] ?? 0);
+            $itemSubTotal = $quantity * $price;
+
+            if ($itemSubTotal <= 0) {
+                continue;
+            }
+
+            $taxes = $itemData['taxes'] ?? [];
+            $totalTaxAmount = 0;
+
+            foreach ($taxes as $tax) {
+                $totalTaxAmount += (float) ($tax['amount'] ?? 0);
+            }
+
+            if ($totalTaxAmount > $itemSubTotal) {
+                $validator->errors()->add(
+                    "items.{$index}.taxes",
+                    __('validation.tax_exceeds_subtotal', [
+                        'item' => $itemData['name'] ?? "#{$index}",
+                    ])
+                );
+            }
+        }
+    }
+
     public function getBillPayload(): array
     {
         $companyCurrency = CompanySetting::getSetting('currency', $this->header('company'));

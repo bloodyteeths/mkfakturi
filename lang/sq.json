@@ -3238,7 +3238,15 @@
             "status": "Statusi",
             "active": "Aktiv",
             "inactive": "Joaktiv",
-            "taxes_attached": "Poноцdheте се прdheкаченdhe."
+            "taxes_attached": "Poноцdheте се прdheкаченdhe.",
+            "category": "Kategoria",
+            "category_standard": "Standarde",
+            "category_reduced": "E reduktuar",
+            "category_hospitality": "Hoteleri",
+            "category_zero_rated": "Shkalla zero",
+            "category_exempt": "E përjashtuar",
+            "category_reverse_charge": "Ngarkesë e kundërt",
+            "calculation_type": "Lloji i llogaritjes"
         },
         "fiscal_devices": {
             "title": "Pajisjet Fiskale",
@@ -3928,6 +3936,7 @@
         "name_min_length": "Name must have at least {count} letters.",
         "prefix_min_length": "Prefix must have at least {count} letters.",
         "enter_valid_tax_rate": "Enter valid tax rate",
+        "tax_exceeds_subtotal": "Shuma e tatimit e kalon nëntotalin për artikullin :item.",
         "tax_required": "TVSH тарdheфата е përderiлжdheтелnë",
         "numbers_only": "Numbers Only.",
         "characters_only": "Characters Only.",

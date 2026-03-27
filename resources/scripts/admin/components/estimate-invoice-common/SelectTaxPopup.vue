@@ -87,19 +87,28 @@
                     "
                     @click="selectTaxType(taxType, close)"
                   >
-                    <div class="flex justify-between px-2">
-                      <label
-                        class="
-                          m-0
-                          text-base
-                          font-semibold
-                          leading-tight
-                          text-gray-700
-                          cursor-pointer
-                        "
-                      >
-                        {{ taxType.name }}
-                      </label>
+                    <div class="flex justify-between items-center px-2">
+                      <div class="flex items-center gap-2">
+                        <label
+                          class="
+                            m-0
+                            text-base
+                            font-semibold
+                            leading-tight
+                            text-gray-700
+                            cursor-pointer
+                          "
+                        >
+                          {{ taxType.name }}
+                        </label>
+                        <span
+                          v-if="taxType.category"
+                          class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium"
+                          :class="categoryBadgeClass(taxType.category)"
+                        >
+                          {{ $t(`settings.tax_types.category_${taxType.category}`) }}
+                        </span>
+                      </div>
 
                       <label
                         class="
@@ -209,6 +218,18 @@ const textSearch = ref(null)
 
 const formatMoney = (amount) => {
   return companyStore.formatMoney(amount)
+}
+
+function categoryBadgeClass(category) {
+  const classes = {
+    standard: 'bg-blue-100 text-blue-800',
+    reduced: 'bg-green-100 text-green-800',
+    hospitality: 'bg-purple-100 text-purple-800',
+    zero_rated: 'bg-yellow-100 text-yellow-800',
+    exempt: 'bg-gray-100 text-gray-800',
+    reverse_charge: 'bg-red-100 text-red-800',
+  }
+  return classes[category] || 'bg-gray-100 text-gray-800'
 }
 
 const filteredTaxType = computed(() => {

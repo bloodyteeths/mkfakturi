@@ -6367,7 +6367,15 @@
             "tax_updated": "Tax Updated",
             "taxes_attached": "Taxes attached.",
             "title": "Tax Types",
-            "updated_message": "Tax type updated successfully"
+            "updated_message": "Tax type updated successfully",
+            "category": "Category",
+            "category_standard": "Standard",
+            "category_reduced": "Reduced",
+            "category_hospitality": "Hospitality",
+            "category_zero_rated": "Zero-rated",
+            "category_exempt": "Exempt",
+            "category_reverse_charge": "Reverse Charge",
+            "calculation_type": "Calculation Type"
         },
         "fiscal_devices": {
             "title": "Fiscal Devices",
@@ -7016,6 +7024,7 @@
         "vat_number_format_mk": "VAT Number (ЕДБ) must be exactly 13 digits.",
         "ends_with": "Ends With",
         "enter_valid_tax_rate": "Enter valid tax rate",
+        "tax_exceeds_subtotal": "Tax amount exceeds the subtotal for item :item.",
         "exists": "Exists",
         "file": "File",
         "filled": "Filled",

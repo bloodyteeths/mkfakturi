@@ -604,10 +604,18 @@ class VatXmlService
     }
 
     /**
-     * Check if a tax represents an exempt supply (vs zero-rate)
+     * Check if a tax represents an exempt supply (vs zero-rate).
+     * Uses category column first, falls back to name matching for legacy data.
      */
     protected function isExemptTax(Tax $tax): bool
     {
+        // Prefer category-based detection (reliable)
+        $category = $tax->taxType->category ?? null;
+        if ($category !== null) {
+            return $category === \App\Models\TaxType::CATEGORY_EXEMPT;
+        }
+
+        // Fallback: name-based detection for legacy types without category
         $name = mb_strtolower($tax->taxType->name ?? '', 'UTF-8');
 
         return str_contains($name, 'exempt')

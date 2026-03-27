@@ -127,6 +127,8 @@
                     <td class="border-0 total-table-attribute-label">
                         @if($tax->calculation_type === 'fixed')
                             {{$tax->name }} ({!! format_money_pdf($tax->fixed_amount, $invoice->customer->currency) !!})
+                        @elseif((float)$tax->percent === 0.0)
+                            {{$tax->name}}
                         @else
                             {{$tax->name.' ('.$tax->percent.'%)'}}
                         @endif
@@ -142,6 +144,8 @@
                     <td class="border-0 total-table-attribute-label">
                         @if($tax->calculation_type === 'fixed')
                             {{$tax->name }} ({!! format_money_pdf($tax->fixed_amount, $invoice->customer->currency) !!})
+                        @elseif((float)$tax->percent === 0.0)
+                            {{$tax->name}}
                         @else
                             {{$tax->name.' ('.$tax->percent.'%)'}}
                         @endif

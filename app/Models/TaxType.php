@@ -28,6 +28,44 @@ class TaxType extends Model
 
     public const TYPE_MODULE = 'MODULE';
 
+    // VAT categories — used to distinguish zero-rated from exempt at 0%
+    public const CATEGORY_STANDARD = 'standard';
+
+    public const CATEGORY_REDUCED = 'reduced';
+
+    public const CATEGORY_HOSPITALITY = 'hospitality';
+
+    public const CATEGORY_ZERO_RATED = 'zero_rated';
+
+    public const CATEGORY_EXEMPT = 'exempt';
+
+    public const CATEGORY_REVERSE_CHARGE = 'reverse_charge';
+
+    public const VALID_CATEGORIES = [
+        self::CATEGORY_STANDARD,
+        self::CATEGORY_REDUCED,
+        self::CATEGORY_HOSPITALITY,
+        self::CATEGORY_ZERO_RATED,
+        self::CATEGORY_EXEMPT,
+        self::CATEGORY_REVERSE_CHARGE,
+    ];
+
+    /**
+     * Check if this tax type is exempt (no input credit allowed).
+     */
+    public function isExempt(): bool
+    {
+        return $this->category === self::CATEGORY_EXEMPT;
+    }
+
+    /**
+     * Check if this tax type is zero-rated (input credit allowed).
+     */
+    public function isZeroRated(): bool
+    {
+        return $this->category === self::CATEGORY_ZERO_RATED;
+    }
+
     public function taxes(): HasMany
     {
         return $this->hasMany(Tax::class);

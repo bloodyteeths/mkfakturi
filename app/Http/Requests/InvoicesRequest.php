@@ -133,6 +133,7 @@ class InvoicesRequest extends FormRequest
         $validator->after(function ($validator) {
             $this->validatePeriodLock($validator);
             $this->validateStockAvailability($validator);
+            $this->validateTaxAmounts($validator);
         });
     }
 
@@ -267,6 +268,44 @@ class InvoicesRequest extends FormRequest
                     'requested' => $insufficient['requested'],
                 ])
             );
+        }
+    }
+
+    /**
+     * Validate that tax amounts don't exceed item subtotals.
+     * Prevents accidental tax > price scenarios (e.g. wrong tax type selected).
+     */
+    protected function validateTaxAmounts($validator): void
+    {
+        $items = $this->input('items', []);
+        if (empty($items)) {
+            return;
+        }
+
+        foreach ($items as $index => $itemData) {
+            $quantity = (float) ($itemData['quantity'] ?? 0);
+            $price = (float) ($itemData['price'] ?? 0);
+            $itemSubTotal = $quantity * $price;
+
+            if ($itemSubTotal <= 0) {
+                continue;
+            }
+
+            $taxes = $itemData['taxes'] ?? [];
+            $totalTaxAmount = 0;
+
+            foreach ($taxes as $tax) {
+                $totalTaxAmount += (float) ($tax['amount'] ?? 0);
+            }
+
+            if ($totalTaxAmount > $itemSubTotal) {
+                $validator->errors()->add(
+                    "items.{$index}.taxes",
+                    __('validation.tax_exceeds_subtotal', [
+                        'item' => $itemData['name'] ?? "#{$index}",
+                    ])
+                );
+            }
         }
     }
 

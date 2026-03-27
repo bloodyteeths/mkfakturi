@@ -83,6 +83,22 @@
           </BaseInputGroup>
 
           <BaseInputGroup
+            :label="$t('settings.tax_types.category')"
+            variant="horizontal"
+          >
+            <BaseSelectInput
+              v-model="taxTypeStore.currentTaxType.category"
+              :options="categoryOptions"
+              :allow-empty="true"
+              value-prop="id"
+              label-prop="label"
+              track-by="label"
+              :searchable="false"
+              :placeholder="$t('general.select')"
+            />
+          </BaseInputGroup>
+
+          <BaseInputGroup
             :label="$t('tax_types.description')"
             :error="
               v$.currentTaxType.description.$error &&
@@ -168,6 +184,15 @@ const defaultCurrency = computed(() => companyStore.selectedCompanyCurrency)
 
 const { t, tm } = useI18n()
 let isSaving = ref(false)
+
+const categoryOptions = computed(() => [
+  { id: 'standard', label: t('settings.tax_types.category_standard') },
+  { id: 'reduced', label: t('settings.tax_types.category_reduced') },
+  { id: 'hospitality', label: t('settings.tax_types.category_hospitality') },
+  { id: 'zero_rated', label: t('settings.tax_types.category_zero_rated') },
+  { id: 'exempt', label: t('settings.tax_types.category_exempt') },
+  { id: 'reverse_charge', label: t('settings.tax_types.category_reverse_charge') },
+])
 
 const rules = computed(() => {
   return {
