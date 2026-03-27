@@ -7561,5 +7561,8 @@
             "supplier": "Tedarikçi",
             "company": "Şirket"
         }
-    }
+    },
+    "documents.invoice_type_hint": "AI bunu Fatura olarak tespit etti. Tedarikçiden alınan bir fatura ise, yukarıdan Gelen Fatura'ya geçin.",
+    "documents.invoice_as_bill_hint": "AI bunu Fatura olarak tespit etti. Tedarikçiden alınan bir fatura ise, Gelen Fatura olarak tutun. Kestiğiniz bir fatura ise, yukarıdan Çıkan Fatura'ya geçin.",
+    "documents.processing_failed": "İşlem başarısız oldu. Yeniden işlemeyi deneyin."
 }

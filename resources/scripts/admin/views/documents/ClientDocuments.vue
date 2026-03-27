@@ -298,7 +298,7 @@
                     {{ doc.ai_classification.summary }}
                   </div>
                   <div v-else-if="doc.error_message" class="text-sm text-red-600 max-w-[350px] line-clamp-2" :title="doc.error_message">
-                    {{ doc.error_message }}
+                    {{ $t('documents.processing_failed', 'Processing failed. Try reprocessing.') }}
                   </div>
                   <span v-else class="text-xs text-gray-400">-</span>
                 </td>

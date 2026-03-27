@@ -7731,5 +7731,8 @@
             "supplier": "Supplier",
             "company": "Company"
         }
-    }
+    },
+    "documents.invoice_type_hint": "AI detected this as an Invoice. If this is a received invoice from a supplier, switch to Bill above.",
+    "documents.invoice_as_bill_hint": "AI detected this as an Invoice. If this is a received invoice from a supplier, keep it as Bill. If it is an outgoing invoice you issued, switch to Invoice above.",
+    "documents.processing_failed": "Processing failed. Try reprocessing."
 }

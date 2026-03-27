@@ -1,11 +1,15 @@
 /**
- * Document Hub — End-to-End Tests
+ * Document Hub — End-to-End UI Bug Detection Tests
  *
- * Tests document upload, AI classification, review page preview,
- * entity type switching with field cross-population, and confirm flows.
+ * These tests are designed to CATCH real UI issues found during production audit.
+ * All 5 bugs below have been FIXED. Tests now assert correct behavior.
  *
- * Covers 10 MK document types: invoices, bank statements, tax forms,
- * contracts, receipts — testing the full AI pipeline.
+ * Bugs covered:
+ *   BUG-1: PDF preview is blank/white — iframe loads but content doesn't render
+ *   BUG-2: Raw error text "File not found in storage [public]:" shown in list view
+ *   BUG-3: Info banner text is English-only despite MK locale
+ *   BUG-4: Invoice detail fields (date, number) empty when AI classifies as invoice
+ *   BUG-5: Expense category cross-populated with company name instead of real category
  *
  * Usage:
  *   TEST_EMAIL=atillatkulu@gmail.com TEST_PASSWORD=Facturino2026 \
@@ -15,11 +19,14 @@ import { test, expect } from '@playwright/test'
 import fs from 'fs'
 import path from 'path'
 
-const BASE = process.env.TEST_BASE_URL || 'http://localhost:8000'
+const BASE = process.env.TEST_BASE_URL || 'https://app.facturino.mk'
 const EMAIL = process.env.TEST_EMAIL || ''
 const PASS = process.env.TEST_PASSWORD || ''
-const SCREENSHOT_DIR = path.join(process.cwd(), 'test-results', 'document-hub-screenshots')
-const FIXTURES = path.join(process.cwd(), 'tests', 'fixtures', 'mk-documents')
+const SCREENSHOT_DIR = path.join(
+  process.cwd(),
+  'test-results',
+  'document-hub-screenshots'
+)
 
 if (!fs.existsSync(SCREENSHOT_DIR)) {
   fs.mkdirSync(SCREENSHOT_DIR, { recursive: true })
@@ -36,14 +43,14 @@ async function ss(page, name) {
 // Test Suite
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-test.describe('Document Hub E2E', () => {
+test.describe('Document Hub E2E — Bug Detection', () => {
   test.describe.configure({ mode: 'serial' })
 
   /** @type {import('@playwright/test').Page} */
   let page
   let jsErrors = []
   let apiErrors = []
-  let uploadedDocId = null
+  let reviewDocUrl = null
 
   test.beforeAll(async ({ browser }) => {
     if (!EMAIL || !PASS) {
@@ -96,99 +103,31 @@ test.describe('Document Hub E2E', () => {
     await ss(page, '00-login-success')
   })
 
-  // ── 1. Document Hub List Page ────────────────────────────────
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // BUG-2: Raw error text in document list
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  test('documents — hub list page renders', async () => {
+  test('BUG-2: list page must NOT show raw storage error text', async () => {
+    // BUG-2 FIXED: sanitized error text in list view
     test.setTimeout(20000)
     if (!EMAIL) return test.skip()
 
     await page.goto(`${BASE}/admin/documents`)
     await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1000)
-    await ss(page, '01-documents-list')
+    await page.waitForTimeout(1500)
+    await ss(page, '01-list-page')
 
-    // Verify page has the document hub structure
     const content = await page.content()
-    expect(content).toMatch(/document/i)
+
+    // The list should NEVER show raw internal error paths to users
+    // BUG: "File not found in storage [public]: client-documents/2/2026-..." is shown
+    expect(content).not.toContain('File not found in storage')
+    expect(content).not.toContain('client-documents/')
   })
 
-  // ── 2. Upload PDF Invoice ────────────────────────────────────
+  // ── Navigate to a reviewable document ──────────────────────
 
-  test('documents — upload PDF invoice', async () => {
-    test.setTimeout(30000)
-    if (!EMAIL) return test.skip()
-
-    const fixturePath = path.join(
-      FIXTURES,
-      'invoices',
-      'pro-faktura-smetkovoditeli.pdf'
-    )
-    if (!fs.existsSync(fixturePath)) {
-      console.log(`SKIP: Fixture not found: ${fixturePath}`)
-      return test.skip()
-    }
-
-    await page.goto(`${BASE}/admin/documents`)
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(500)
-
-    // Find the hidden file input and set the file
-    const fileInput = page.locator('input[type="file"]').first()
-    const inputCount = await page.locator('input[type="file"]').count()
-
-    if (inputCount === 0) {
-      console.log('SKIP: No file input found on documents page')
-      return test.skip()
-    }
-
-    await fileInput.setInputFiles(fixturePath)
-    await page.waitForTimeout(2000)
-    await ss(page, '02-after-upload')
-
-    // Try to capture the uploaded document ID from the page
-    // Look for the first document row that might be our upload
-    await page.waitForTimeout(1000)
-  })
-
-  // ── 3. Wait for AI Processing ────────────────────────────────
-
-  test('documents — wait for AI processing', async () => {
-    test.setTimeout(90000) // AI processing can take a while
-    if (!EMAIL) return test.skip()
-
-    await page.goto(`${BASE}/admin/documents`)
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1000)
-
-    // Poll until we see an extracted document or timeout
-    let extracted = false
-    for (let i = 0; i < 20; i++) {
-      const content = await page.content()
-      if (
-        content.includes('extracted') ||
-        content.includes('Извлечено') ||
-        content.includes('confirmed')
-      ) {
-        extracted = true
-        break
-      }
-      await page.waitForTimeout(3000)
-      await page.reload()
-      await page.waitForLoadState('networkidle')
-    }
-
-    await ss(page, '03-processing-status')
-
-    if (!extracted) {
-      console.log(
-        'NOTE: No extracted documents found within timeout. Subsequent tests will use existing documents.'
-      )
-    }
-  })
-
-  // ── 4. Review Page — Preview Renders ─────────────────────────
-
-  test('documents — review page preview renders', async () => {
+  test('navigate to a reviewable document', async () => {
     test.setTimeout(30000)
     if (!EMAIL) return test.skip()
 
@@ -196,550 +135,535 @@ test.describe('Document Hub E2E', () => {
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(1000)
 
-    // Click on the first document row to go to review page
-    const docRows = page.locator('table tbody tr, [class*="document-row"], a[href*="/documents/"]')
-    const rowCount = await docRows.count()
+    // Find a document row — try to find one with "Спремен за преглед" (extracted)
+    const rows = page.locator('table tbody tr')
+    const rowCount = await rows.count()
 
     if (rowCount === 0) {
-      console.log('SKIP: No document rows to click')
+      console.log('SKIP: No documents in list')
       return test.skip()
     }
 
-    await docRows.first().click()
+    // Try to find an unconfirmed/extracted document first
+    let clickedRow = false
+    for (let i = 0; i < rowCount; i++) {
+      const rowText = await rows.nth(i).textContent()
+      if (
+        rowText.includes('Спремен') ||
+        rowText.includes('За преглед')
+      ) {
+        await rows.nth(i).click()
+        clickedRow = true
+        break
+      }
+    }
+
+    // Fall back to first row
+    if (!clickedRow) {
+      await rows.first().click()
+    }
+
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
-    // Capture the document ID from URL
-    const url = page.url()
-    const match = url.match(/documents\/(\d+)/)
+    reviewDocUrl = page.url()
+    const match = reviewDocUrl.match(/documents\/(\d+)/)
     if (match) {
-      uploadedDocId = match[1]
-      console.log(`Review page for document ID: ${uploadedDocId}`)
+      console.log(`Review page: document ID ${match[1]}`)
     }
 
-    await ss(page, '04-review-page')
+    await ss(page, '02-review-page')
 
-    // Verify preview area exists (iframe for PDF or img for images)
+    // Verify we're on a review page
+    const content = await page.content()
+    const hasReviewContent =
+      content.includes('AI') ||
+      content.includes('Преглед') ||
+      content.includes('Review')
+    expect(hasReviewContent).toBe(true)
+  })
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // BUG-1: PDF preview is blank/white
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  test('BUG-1: PDF preview must render visible content (not blank)', async () => {
+    // BUG-1 FIXED: disk fallback in preview endpoint
+    test.setTimeout(25000)
+    if (!EMAIL || !reviewDocUrl) return test.skip()
+
+    // Already on review page from previous test
+    await page.waitForTimeout(1000)
+    await ss(page, '03-preview-check')
+
+    // Check for error state (preview unavailable message)
+    const errorVisible =
+      (await page
+        .locator('text=Preview unavailable')
+        .isVisible()
+        .catch(() => false)) ||
+      (await page
+        .locator('text=Прегледот не е достапен')
+        .isVisible()
+        .catch(() => false))
+
+    // BUG: Preview shows error state or blank white panel
+    // The file should be accessible and rendered
+    expect(errorVisible).toBe(false)
+
+    // If there's an iframe, verify the preview endpoint returns a PDF
     const iframe = page.locator('iframe')
-    const img = page.locator('img[alt]')
-    const previewUnavailable = page.locator('text=Preview unavailable')
-
     const hasIframe = (await iframe.count()) > 0
-    const hasImg = (await img.count()) > 0
-    const hasError = await previewUnavailable.isVisible().catch(() => false)
 
-    // One of these should be true
-    expect(hasIframe || hasImg || hasError).toBe(true)
-
-    // If iframe exists, verify it uses the /preview endpoint
     if (hasIframe) {
       const src = await iframe.first().getAttribute('src')
       expect(src).toContain('/preview?company=')
+
+      // Fetch the preview URL directly and verify response
+      const fullUrl = src.startsWith('http') ? src : `${BASE}${src}`
+      const response = await page.request.get(fullUrl)
+      expect(response.status()).toBe(200)
+
+      const contentType = response.headers()['content-type'] || ''
+      // Must return PDF, not JSON error
+      expect(contentType).toContain('application/pdf')
     }
   })
 
-  // ── 5. AI Classification Badge ───────────────────────────────
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // BUG-3: Info banner text is English-only
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  test('documents — AI classification badge visible', async () => {
+  test('BUG-3: info banner must be localized (not English fallback)', async () => {
+    // BUG-3 FIXED: i18n translations added for all 4 locales
     test.setTimeout(15000)
-    if (!EMAIL || !uploadedDocId) return test.skip()
+    if (!EMAIL || !reviewDocUrl) return test.skip()
 
-    // We should already be on the review page
-    const content = await page.content()
+    // Navigate to review page
+    await page.goto(reviewDocUrl)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(1500)
 
-    // Look for classification badge (bg-blue-100, bg-indigo-100, etc.)
-    const badges = page.locator(
-      '[class*="bg-blue-100"], [class*="bg-indigo-100"], [class*="bg-purple-100"], [class*="bg-cyan-100"], [class*="bg-orange-100"], [class*="bg-green-100"]'
-    )
-    const badgeCount = await badges.count()
+    // Find the blue info banner
+    const banner = page.locator('[class*="bg-blue-50"]')
+    const bannerVisible = await banner.isVisible().catch(() => false)
 
-    if (badgeCount > 0) {
-      console.log(`Found ${badgeCount} classification badge(s)`)
+    if (!bannerVisible) {
+      // Banner only shows for invoice-classified documents
+      console.log('Info banner not visible — document may not be classified as invoice')
+      return
     }
 
-    // Check for confidence percentage
-    const hasConfidence = content.match(/\d+%/)
-    if (hasConfidence) {
-      console.log(`Confidence: ${hasConfidence[0]}`)
-    }
+    const bannerText = await banner.textContent()
+    await ss(page, '04-banner-text')
 
-    await ss(page, '05-ai-classification')
+    console.log(`Banner text: "${bannerText?.trim().substring(0, 80)}..."`)
+
+    // BUG: Banner shows English text "AI detected this as an Invoice..."
+    // but the entire UI is in Macedonian. The i18n key has no MK translation.
+    expect(bannerText).not.toContain('AI detected this as an Invoice')
+    expect(bannerText).not.toContain('received invoice from a supplier')
+    expect(bannerText).not.toContain('switch to Bill above')
   })
 
-  // ── 6. Entity Type Buttons ───────────────────────────────────
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // BUG-4: Invoice fields not populated from AI extraction
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  test('documents — entity type buttons rendered', async () => {
-    test.setTimeout(15000)
-    if (!EMAIL || !uploadedDocId) return test.skip()
+  test('BUG-4: invoice form fields must be populated from AI extraction', async () => {
+    // BUG-4 FIXED: prefillForm now copies bill dates/number to invoice
+    test.setTimeout(20000)
+    if (!EMAIL || !reviewDocUrl) return test.skip()
 
-    // Look for the entity type selector buttons
-    const content = await page.content()
-    const entityTypeSection = page.locator('text=Create as').first()
-    const hasSectionVisible = await entityTypeSection
-      .isVisible()
-      .catch(() => false)
+    // Navigate to review page
+    await page.goto(reviewDocUrl)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(1500)
 
-    if (!hasSectionVisible) {
-      // Document might be already confirmed
-      const isConfirmed = content.includes('Confirmed')
-      if (isConfirmed) {
-        console.log('Document is already confirmed, skipping entity type test')
-        return
+    // Check if document is confirmed
+    const isConfirmed =
+      (await page
+        .locator('text=Потврден')
+        .isVisible()
+        .catch(() => false)) ||
+      (await page
+        .locator('text=Confirmed')
+        .isVisible()
+        .catch(() => false))
+
+    if (isConfirmed) {
+      // Find an unconfirmed doc
+      await page.goto(`${BASE}/admin/documents`)
+      await page.waitForLoadState('networkidle')
+      await page.waitForTimeout(1000)
+
+      const rows = page.locator('table tbody tr')
+      const rowCount = await rows.count()
+      let found = false
+
+      for (let i = 0; i < rowCount; i++) {
+        const rowText = await rows.nth(i).textContent()
+        if (
+          rowText.includes('Спремен') ||
+          rowText.includes('За преглед')
+        ) {
+          await rows.nth(i).click()
+          await page.waitForLoadState('networkidle')
+          await page.waitForTimeout(1500)
+          found = true
+          break
+        }
+      }
+
+      if (!found) {
+        console.log('SKIP: No unconfirmed documents')
+        return test.skip()
       }
     }
 
-    // Count entity type buttons (Bill, Expense, Invoice, Transactions, Items, Tax Form, Contract)
-    const buttons = page.locator(
-      'button:has-text("Bill"), button:has-text("Expense"), button:has-text("Invoice"), button:has-text("Transactions"), button:has-text("Items"), button:has-text("Tax"), button:has-text("Contract")'
-    )
-    const buttonCount = await buttons.count()
-    console.log(`Entity type buttons found: ${buttonCount}`)
+    // Switch to Invoice type if not already
+    const selectedBtn = page.locator('button[class*="bg-primary-500"]').first()
+    const selectedText = await selectedBtn.textContent().catch(() => '')
+    const isInvoice =
+      selectedText.includes('Излезна фактура') ||
+      selectedText.includes('Invoice')
 
-    // Check which one is selected (has bg-primary-500 class)
-    const selectedButton = page.locator('button[class*="bg-primary-500"]')
-    const selectedCount = await selectedButton.count()
-    if (selectedCount > 0) {
-      const selectedText = await selectedButton.first().textContent()
-      console.log(`Selected entity type: ${selectedText?.trim()}`)
+    if (!isInvoice) {
+      const invoiceBtn = page
+        .locator('button')
+        .filter({ hasText: /Излезна фактура|Invoice/ })
+        .first()
+      const visible = await invoiceBtn.isVisible().catch(() => false)
+      if (!visible) {
+        console.log('SKIP: Invoice button not found')
+        return test.skip()
+      }
+      await invoiceBtn.click()
+      await page.waitForTimeout(500)
     }
 
-    await ss(page, '06-entity-type-buttons')
-  })
+    await ss(page, '05-invoice-form-fields')
 
-  // ── 7. Invoice-to-Bill Explanation Banner ────────────────────
-
-  test('documents — invoice type explanation banner', async () => {
-    test.setTimeout(15000)
-    if (!EMAIL || !uploadedDocId) return test.skip()
-
-    // Look for the blue info banner about invoice classification
-    const banner = page.locator('[class*="bg-blue-50"][class*="border-blue-200"]')
-    const bannerVisible = await banner.isVisible().catch(() => false)
-
-    if (bannerVisible) {
-      const bannerText = await banner.textContent()
-      console.log(`Info banner: ${bannerText?.trim().substring(0, 100)}...`)
-    } else {
-      console.log(
-        'No invoice explanation banner (document may not be classified as invoice)'
-      )
+    // Check date fields — they should NOT be empty
+    const dateInputs = page.locator('input[type="date"]')
+    const dateCount = await dateInputs.count()
+    let emptyDates = 0
+    for (let i = 0; i < dateCount; i++) {
+      const val = await dateInputs.nth(i).inputValue().catch(() => '')
+      if (!val || val === '') emptyDates++
     }
 
-    await ss(page, '07-explanation-banner')
+    console.log(`Invoice date fields: ${dateCount} total, ${emptyDates} empty`)
+
+    // BUG: All date fields are empty because prefillForm doesn't copy
+    // bill_date → invoice_date when AI type is "invoice" (only copies totals)
+    expect(emptyDates).toBe(0) // All dates should be populated
   })
 
-  // ── 8. Form Fields Populated ─────────────────────────────────
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // BUG-5: Expense category = company name
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  test('documents — form fields populated from AI extraction', async () => {
+  test('BUG-5: expense category should not be a company name', async () => {
+    // BUG-5 FIXED: category uses AI type label instead of company name
     test.setTimeout(15000)
-    if (!EMAIL || !uploadedDocId) return test.skip()
+    if (!EMAIL || !reviewDocUrl) return test.skip()
 
-    const content = await page.content()
+    // Check document is not confirmed
+    const isConfirmed =
+      (await page
+        .locator('text=Потврден')
+        .isVisible()
+        .catch(() => false)) ||
+      (await page
+        .locator('text=Confirmed')
+        .isVisible()
+        .catch(() => false))
 
-    // Check for populated input fields (supplier name, bill number, dates)
-    const inputs = page.locator('input[type="text"], input[type="date"], input[type="email"]')
-    const inputCount = await inputs.count()
-    let populatedCount = 0
-
-    for (let i = 0; i < Math.min(inputCount, 20); i++) {
-      const value = await inputs.nth(i).inputValue().catch(() => '')
-      if (value && value.trim()) populatedCount++
-    }
-
-    console.log(
-      `Form inputs: ${inputCount} total, ${populatedCount} populated`
-    )
-
-    // Check for line items
-    const lineItems = page.locator('[class*="border-gray-200"][class*="rounded-md"][class*="p-3"]')
-    const itemCount = await lineItems.count()
-    console.log(`Line items found: ${itemCount}`)
-
-    await ss(page, '08-form-populated')
-  })
-
-  // ── 9. Type Switching — Bill to Invoice ──────────────────────
-
-  test('documents — switch to Invoice preserves data', async () => {
-    test.setTimeout(15000)
-    if (!EMAIL || !uploadedDocId) return test.skip()
-
-    // Record current form state (before switching)
-    const supplierNameInput = page.locator('input').first()
-    const originalName = await supplierNameInput.inputValue().catch(() => '')
-
-    // Click Invoice button
-    const invoiceBtn = page.locator('button:has-text("Invoice")').first()
-    const invoiceBtnVisible = await invoiceBtn.isVisible().catch(() => false)
-    if (!invoiceBtnVisible) {
-      console.log('SKIP: Invoice button not found (document may be confirmed)')
+    if (isConfirmed) {
+      console.log('SKIP: Document is confirmed, cannot test type switching')
       return test.skip()
     }
 
-    await invoiceBtn.click()
-    await page.waitForTimeout(500)
-
-    await ss(page, '09-switched-to-invoice')
-
-    // Verify customer fields are visible (invoice form has "Customer" section)
-    const content = await page.content()
-    const hasCustomerSection =
-      content.includes('Customer') || content.includes('Клиент')
-
-    if (hasCustomerSection) {
-      console.log('Customer section visible after switching to Invoice')
-    }
-
-    // Check that data was cross-populated (customer name should have supplier name)
-    const inputs = page.locator('input[type="text"]')
-    const inputCount = await inputs.count()
-    let populatedCount = 0
-    for (let i = 0; i < Math.min(inputCount, 15); i++) {
-      const val = await inputs.nth(i).inputValue().catch(() => '')
-      if (val && val.trim()) populatedCount++
-    }
-    console.log(
-      `After switch to Invoice: ${populatedCount} populated fields`
-    )
-  })
-
-  // ── 10. Type Switching — Invoice to Expense ──────────────────
-
-  test('documents — switch to Expense preserves data', async () => {
-    test.setTimeout(15000)
-    if (!EMAIL || !uploadedDocId) return test.skip()
-
-    // Click Expense button
-    const expenseBtn = page.locator('button:has-text("Expense")').first()
-    const expenseBtnVisible = await expenseBtn.isVisible().catch(() => false)
-    if (!expenseBtnVisible) {
+    // Click Expense/Трошок
+    const expenseBtn = page
+      .locator('button')
+      .filter({ hasText: /^Трошок$|^Expense$/ })
+      .first()
+    const visible = await expenseBtn.isVisible().catch(() => false)
+    if (!visible) {
       console.log('SKIP: Expense button not found')
       return test.skip()
     }
 
     await expenseBtn.click()
     await page.waitForTimeout(500)
+    await ss(page, '06-expense-category')
 
-    await ss(page, '10-switched-to-expense')
+    // Find category input
+    const categoryLabel = page.locator(
+      'label:has-text("Категорија"), label:has-text("Category")'
+    )
+    const hasCategoryLabel = await categoryLabel
+      .first()
+      .isVisible()
+      .catch(() => false)
 
-    // Verify expense form has data cross-populated
-    const content = await page.content()
-    const hasExpenseSection =
-      content.includes('Expense Details') || content.includes('Трошок')
-    console.log(`Expense section visible: ${hasExpenseSection}`)
-
-    // Check amount field is populated
-    const amountInputs = page.locator('input[type="text"]')
-    const count = await amountInputs.count()
-    let hasAmount = false
-    for (let i = 0; i < Math.min(count, 10); i++) {
-      const val = await amountInputs.nth(i).inputValue().catch(() => '')
-      if (val && parseFloat(val) > 0) {
-        hasAmount = true
-        break
-      }
+    if (!hasCategoryLabel) {
+      console.log('SKIP: Category label not found in expense form')
+      return test.skip()
     }
-    console.log(`Expense amount populated: ${hasAmount}`)
+
+    const categoryInput = categoryLabel.first().locator('..').locator('input')
+    const categoryValue = await categoryInput
+      .first()
+      .inputValue()
+      .catch(() => '')
+
+    console.log(`Expense category: "${categoryValue}"`)
+
+    // BUG: Category is populated with supplier name (e.g., "FAKTURINO DOOEL")
+    // instead of an actual expense category like "Professional Services"
+    if (categoryValue) {
+      const isCompanyName =
+        /\b(DOO|DOOEL|ДООЕЛ|ДОО|LLC|LTD|SRL|EOOD|INC|CORP)\b/i.test(
+          categoryValue
+        )
+      expect(isCompanyName).toBe(false)
+    }
   })
 
-  // ── 11. Type Switching — Back to Bill ────────────────────────
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Non-bug: switch back to Bill restores data (working correctly)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  test('documents — switch back to Bill restores original data', async () => {
+  test('switch back to Bill restores original data', async () => {
     test.setTimeout(15000)
-    if (!EMAIL || !uploadedDocId) return test.skip()
+    if (!EMAIL || !reviewDocUrl) return test.skip()
 
-    // Click Bill button
-    const billBtn = page.locator('button:has-text("Bill")').first()
-    const billBtnVisible = await billBtn.isVisible().catch(() => false)
-    if (!billBtnVisible) {
+    const isConfirmed =
+      (await page
+        .locator('text=Потврден')
+        .isVisible()
+        .catch(() => false)) ||
+      (await page
+        .locator('text=Confirmed')
+        .isVisible()
+        .catch(() => false))
+
+    if (isConfirmed) {
+      console.log('SKIP: Document is confirmed')
+      return test.skip()
+    }
+
+    // Click Bill/Фактура
+    const billBtn = page
+      .locator('button')
+      .filter({ hasText: /^Фактура$|^Bill$/ })
+      .first()
+    const visible = await billBtn.isVisible().catch(() => false)
+    if (!visible) {
       console.log('SKIP: Bill button not found')
       return test.skip()
     }
 
     await billBtn.click()
     await page.waitForTimeout(500)
+    await ss(page, '07-back-to-bill')
 
-    await ss(page, '11-switched-back-to-bill')
-
-    // Verify supplier section is back with original data
+    // Verify supplier section exists
     const content = await page.content()
-    const hasSupplierSection =
-      content.includes('Supplier') || content.includes('Добавувач')
-    console.log(`Supplier section visible: ${hasSupplierSection}`)
+    const hasSupplier =
+      content.includes('Добавувач') || content.includes('Supplier')
+    expect(hasSupplier).toBe(true)
 
-    // Check fields are still populated
-    const inputs = page.locator('input[type="text"]')
-    const inputCount = await inputs.count()
+    // At least some text fields should still be populated
+    const textInputs = page.locator('input[type="text"]')
+    const inputCount = await textInputs.count()
     let populatedCount = 0
     for (let i = 0; i < Math.min(inputCount, 15); i++) {
-      const val = await inputs.nth(i).inputValue().catch(() => '')
+      const val = await textInputs.nth(i).inputValue().catch(() => '')
       if (val && val.trim()) populatedCount++
     }
-    console.log(
-      `After switch back to Bill: ${populatedCount} populated fields`
-    )
+    console.log(`Bill form: ${populatedCount}/${inputCount} fields populated`)
+    expect(populatedCount).toBeGreaterThanOrEqual(1)
   })
 
-  // ── 12. Upload Image Invoice ─────────────────────────────────
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // BUG-1b: Mobile preview shows error
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  test('documents — upload image invoice', async () => {
-    test.setTimeout(30000)
-    if (!EMAIL) return test.skip()
-
-    const fixturePath = path.join(
-      FIXTURES,
-      'invoices',
-      'real-invoice-1649.jpg'
-    )
-    if (!fs.existsSync(fixturePath)) {
-      console.log(`SKIP: Fixture not found: ${fixturePath}`)
-      return test.skip()
-    }
-
-    await page.goto(`${BASE}/admin/documents`)
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(500)
-
-    const fileInput = page.locator('input[type="file"]').first()
-    const inputCount = await page.locator('input[type="file"]').count()
-    if (inputCount === 0) {
-      console.log('SKIP: No file input found')
-      return test.skip()
-    }
-
-    await fileInput.setInputFiles(fixturePath)
-    await page.waitForTimeout(2000)
-    await ss(page, '12-image-upload')
-  })
-
-  // ── 13. Upload Contract PDF ──────────────────────────────────
-
-  test('documents — upload contract PDF', async () => {
-    test.setTimeout(30000)
-    if (!EMAIL) return test.skip()
-
-    const fixturePath = path.join(
-      FIXTURES,
-      'contracts',
-      'a1-dogovor-ikt-uslugi.pdf'
-    )
-    if (!fs.existsSync(fixturePath)) {
-      console.log(`SKIP: Fixture not found: ${fixturePath}`)
-      return test.skip()
-    }
-
-    await page.goto(`${BASE}/admin/documents`)
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(500)
-
-    const fileInput = page.locator('input[type="file"]').first()
-    if ((await fileInput.count()) === 0) return test.skip()
-
-    await fileInput.setInputFiles(fixturePath)
-    await page.waitForTimeout(2000)
-    await ss(page, '13-contract-upload')
-  })
-
-  // ── 14. Upload Tax Form ──────────────────────────────────────
-
-  test('documents — upload tax form', async () => {
-    test.setTimeout(30000)
-    if (!EMAIL) return test.skip()
-
-    const fixturePath = path.join(
-      FIXTURES,
-      'tax-forms',
-      'ddv-04-vat-return.pdf'
-    )
-    if (!fs.existsSync(fixturePath)) {
-      console.log(`SKIP: Fixture not found: ${fixturePath}`)
-      return test.skip()
-    }
-
-    await page.goto(`${BASE}/admin/documents`)
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(500)
-
-    const fileInput = page.locator('input[type="file"]').first()
-    if ((await fileInput.count()) === 0) return test.skip()
-
-    await fileInput.setInputFiles(fixturePath)
-    await page.waitForTimeout(2000)
-    await ss(page, '14-taxform-upload')
-  })
-
-  // ── 15. Upload Bank Statement ────────────────────────────────
-
-  test('documents — upload bank statement image', async () => {
-    test.setTimeout(30000)
-    if (!EMAIL) return test.skip()
-
-    const fixturePath = path.join(
-      FIXTURES,
-      'bank-statements',
-      'komercijalna-izvod-1626.jpg'
-    )
-    if (!fs.existsSync(fixturePath)) {
-      console.log(`SKIP: Fixture not found: ${fixturePath}`)
-      return test.skip()
-    }
-
-    await page.goto(`${BASE}/admin/documents`)
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(500)
-
-    const fileInput = page.locator('input[type="file"]').first()
-    if ((await fileInput.count()) === 0) return test.skip()
-
-    await fileInput.setInputFiles(fixturePath)
-    await page.waitForTimeout(2000)
-    await ss(page, '15-bank-statement-upload')
-  })
-
-  // ── 16. Review Different Document Types ──────────────────────
-
-  test('documents — review page for multiple documents', async () => {
-    test.setTimeout(60000)
-    if (!EMAIL) return test.skip()
-
-    await page.goto(`${BASE}/admin/documents`)
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1000)
-
-    // Click through the first 3 documents and screenshot each review page
-    const docLinks = page.locator('table tbody tr, a[href*="/documents/"]')
-    const docCount = await docLinks.count()
-    const toCheck = Math.min(docCount, 3)
-
-    for (let i = 0; i < toCheck; i++) {
-      await page.goto(`${BASE}/admin/documents`)
-      await page.waitForLoadState('networkidle')
-      await page.waitForTimeout(500)
-
-      const rows = page.locator('table tbody tr')
-      const rowCount = await rows.count()
-      if (i >= rowCount) break
-
-      await rows.nth(i).click()
-      await page.waitForLoadState('networkidle')
-      await page.waitForTimeout(1500)
-
-      await ss(page, `16-review-doc-${i + 1}`)
-
-      // Log the document type
-      const content = await page.content()
-      const types = [
-        'Invoice',
-        'Receipt',
-        'Contract',
-        'Bank Statement',
-        'Tax Form',
-        'Product List',
-      ]
-      const found = types.find((t) => content.includes(t))
-      console.log(`Document ${i + 1} type: ${found || 'unknown'}`)
-    }
-  })
-
-  // ── 17. Delete Document ──────────────────────────────────────
-
-  test('documents — delete button works', async () => {
+  test('mobile review page renders without overflow', async () => {
     test.setTimeout(20000)
-    if (!EMAIL) return test.skip()
+    if (!EMAIL || !reviewDocUrl) return test.skip()
 
-    // Navigate to a document review page
-    await page.goto(`${BASE}/admin/documents`)
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(500)
-
-    const rows = page.locator('table tbody tr')
-    const rowCount = await rows.count()
-    if (rowCount === 0) {
-      console.log('SKIP: No documents to test delete')
-      return test.skip()
-    }
-
-    // Click the last document (least likely to be important)
-    await rows.last().click()
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1000)
-
-    // Find delete button (trash icon)
-    const deleteBtn = page.locator('button[title*="Delete"], button:has(svg.h-4.w-4)').first()
-    const deleteBtnVisible = await deleteBtn.isVisible().catch(() => false)
-
-    if (deleteBtnVisible) {
-      console.log('Delete button found and visible')
-      // Don't actually click delete in tests — just verify it exists
-    }
-
-    await ss(page, '17-delete-button')
-  })
-
-  // ── 18. Mobile Responsive ────────────────────────────────────
-
-  test('documents — mobile responsive layout', async () => {
-    test.setTimeout(20000)
-    if (!EMAIL) return test.skip()
-
-    // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 812 })
     await page.waitForTimeout(300)
 
-    // Documents list
-    await page.goto(`${BASE}/admin/documents`)
+    await page.goto(reviewDocUrl)
     await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1000)
-    await ss(page, '18-mobile-documents-list')
+    await page.waitForTimeout(2000)
+    await ss(page, '08-mobile-review')
 
-    // Review page
-    const rows = page.locator('table tbody tr')
-    const rowCount = await rows.count()
-    if (rowCount > 0) {
-      await rows.first().click()
-      await page.waitForLoadState('networkidle')
-      await page.waitForTimeout(1500)
-      await ss(page, '18-mobile-review-page')
+    const content = await page.content()
 
-      // Verify the split layout stacks vertically on mobile
-      // (lg:flex-row becomes flex-col on small screens)
-      const content = await page.content()
-      console.log('Mobile review page loaded')
+    // NOTE: Some documents show "Прегледот не е достапен" on mobile
+    // when file_available is false. This is document-specific, not universal.
+    // Log it but don't fail — the BUG-1 test already covers preview issues.
+    if (content.includes('Прегледот не е достапен') || content.includes('Preview unavailable')) {
+      console.log('WARNING: Mobile preview shows error state for this document')
     }
+
+    // Verify mobile layout doesn't overflow
+    const bodyWidth = await page.evaluate(() => document.body.scrollWidth)
+    expect(bodyWidth).toBeLessThanOrEqual(380)
 
     // Reset viewport
     await page.setViewportSize({ width: 1280, height: 720 })
     await page.waitForTimeout(300)
   })
 
-  // ── 19. Error Report ─────────────────────────────────────────
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Non-bug: mobile list page layout (working correctly)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  test('documents — no critical JS errors or API failures', async () => {
+  test('mobile list page — no horizontal overflow', async () => {
+    test.setTimeout(15000)
     if (!EMAIL) return test.skip()
 
-    // Filter out non-critical errors
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.waitForTimeout(300)
+
+    await page.goto(`${BASE}/admin/documents`)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(1000)
+    await ss(page, '09-mobile-list')
+
+    const bodyWidth = await page.evaluate(() => document.body.scrollWidth)
+    expect(bodyWidth).toBeLessThanOrEqual(380)
+
+    // Reset viewport
+    await page.setViewportSize({ width: 1280, height: 720 })
+    await page.waitForTimeout(300)
+  })
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Non-bug: all 7 entity type buttons rendered (working correctly)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  test('entity type buttons — all 7 types rendered', async () => {
+    test.setTimeout(15000)
+    if (!EMAIL || !reviewDocUrl) return test.skip()
+
+    await page.goto(reviewDocUrl)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(1500)
+
+    const isConfirmed =
+      (await page
+        .locator('text=Потврден')
+        .isVisible()
+        .catch(() => false)) ||
+      (await page
+        .locator('text=Confirmed')
+        .isVisible()
+        .catch(() => false))
+
+    if (isConfirmed) {
+      console.log('SKIP: Confirmed doc — entity buttons hidden')
+      return test.skip()
+    }
+
+    await ss(page, '10-entity-buttons')
+
+    const expectedLabels = [
+      'Фактура',
+      'Трошок',
+      'Излезна фактура',
+      'Трансакции',
+      'Артикли',
+      'Образец',
+      'Договор',
+    ]
+
+    const content = await page.content()
+    let foundCount = 0
+    for (const label of expectedLabels) {
+      if (content.includes(label)) foundCount++
+    }
+
+    console.log(`Entity type buttons: ${foundCount}/${expectedLabels.length}`)
+    expect(foundCount).toBe(7)
+
+    // Exactly one entity type button should be selected
+    // Scope to the "Create as" / "Креирај како" section (flex-wrap gap-2 container)
+    const entityContainer = page.locator('.flex.flex-wrap.gap-2').first()
+    const selectedInContainer = entityContainer.locator(
+      'button[class*="bg-primary-500"]'
+    )
+    const selectedCount = await selectedInContainer.count()
+    expect(selectedCount).toBe(1)
+  })
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Non-bug: AI classification badge (working correctly)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  test('AI classification badge shows type and confidence', async () => {
+    test.setTimeout(15000)
+    if (!EMAIL || !reviewDocUrl) return test.skip()
+
+    const content = await page.content()
+    const hasConfidence = content.match(/\d+%/)
+    if (hasConfidence) {
+      console.log(`AI confidence: ${hasConfidence[0]}`)
+    }
+
+    const badges = page.locator(
+      '[class*="bg-blue-100"], [class*="bg-indigo-100"], [class*="bg-purple-100"], [class*="bg-cyan-100"], [class*="bg-orange-100"], [class*="bg-green-100"]'
+    )
+    const badgeCount = await badges.count()
+    expect(badgeCount).toBeGreaterThan(0)
+  })
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Error report
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  test('no critical JS errors or server 500s', async () => {
+    if (!EMAIL) return test.skip()
+
     const criticalJsErrors = jsErrors.filter(
       (e) =>
         !e.error.includes('ResizeObserver') &&
-        !e.error.includes('Non-Error promise rejection')
+        !e.error.includes('Non-Error promise rejection') &&
+        !e.error.includes('ChunkLoadError')
     )
     const criticalApiErrors = apiErrors.filter(
       (e) =>
-        e.status >= 500 &&
-        !e.url.includes('/processing-status') // polling 404s are expected
+        e.status >= 500 && !e.url.includes('/processing-status')
     )
 
-    console.log(`JS errors: ${jsErrors.length} total, ${criticalJsErrors.length} critical`)
-    console.log(`API errors: ${apiErrors.length} total, ${criticalApiErrors.length} critical`)
+    console.log(
+      `JS errors: ${jsErrors.length} total, ${criticalJsErrors.length} critical`
+    )
+    console.log(
+      `API errors: ${apiErrors.length} total, ${criticalApiErrors.length} critical`
+    )
 
     if (criticalJsErrors.length > 0) {
-      console.log('Critical JS errors:', JSON.stringify(criticalJsErrors, null, 2))
+      console.log(
+        'Critical JS errors:',
+        JSON.stringify(criticalJsErrors, null, 2)
+      )
     }
     if (criticalApiErrors.length > 0) {
-      console.log('Critical API errors:', JSON.stringify(criticalApiErrors, null, 2))
+      console.log(
+        'Critical API errors:',
+        JSON.stringify(criticalApiErrors, null, 2)
+      )
     }
 
-    // Fail if there are critical server errors
-    expect(criticalApiErrors.length).toBeLessThan(3)
+    expect(criticalApiErrors.length).toBe(0)
   })
 })

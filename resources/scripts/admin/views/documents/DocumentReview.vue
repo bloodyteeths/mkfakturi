@@ -782,8 +782,9 @@ watch(selectedEntityType, (newType, oldType) => {
     if (sourceDate && !form.expense.expense_date) {
       form.expense.expense_date = sourceDate
     }
-    if (form.supplier.name && !form.expense.category) {
-      form.expense.category = form.supplier.name
+    if (!form.expense.category && document.value?.ai_classification?.type) {
+      const typeLabels = { invoice: 'Фактура', receipt: 'Фискална сметка', bank_statement: 'Банкарство', contract: 'Договор', tax_form: 'Даночен образец' }
+      form.expense.category = typeLabels[document.value.ai_classification.type] || ''
     }
   }
 
@@ -914,6 +915,16 @@ const prefillForm = (data, aiType) => {
     form.invoice.sub_total = data.bill.sub_total || 0
     form.invoice.tax = data.bill.tax || 0
     form.invoice.total = data.bill.total || 0
+  }
+  // Also copy dates and number from bill → invoice (AI puts all data in data.bill)
+  if (data.bill && !data.invoice?.invoice_number) {
+    form.invoice.invoice_number = data.bill.bill_number || ''
+  }
+  if (data.bill && !data.invoice?.invoice_date) {
+    form.invoice.invoice_date = data.bill.bill_date || ''
+  }
+  if (data.bill && !data.invoice?.due_date) {
+    form.invoice.due_date = data.bill.due_date || ''
   }
 
   // Expense

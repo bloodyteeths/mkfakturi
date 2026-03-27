@@ -282,8 +282,23 @@ class ClientDocumentController extends Controller
             ], 403);
         }
 
-        $disk = config('filesystems.media_disk');
-        if (! $document->file_path || ! Storage::disk($disk)->exists($document->file_path)) {
+        // Try media_disk first, fallback to public (files may have been stored before disk change)
+        $disk = null;
+        if ($document->file_path) {
+            $disksToTry = array_unique([config('filesystems.media_disk'), 'public']);
+            foreach ($disksToTry as $d) {
+                try {
+                    if (Storage::disk($d)->exists($document->file_path)) {
+                        $disk = $d;
+                        break;
+                    }
+                } catch (\Throwable $e) {
+                    // Disk might not be configured — skip
+                }
+            }
+        }
+
+        if (! $disk) {
             return response()->json([
                 'success' => false,
                 'message' => 'File not found.',
@@ -463,14 +478,19 @@ class ClientDocumentController extends Controller
      */
     private function formatDocument(ClientDocument $document): array
     {
-        // Check if file exists on current storage disk
+        // Check if file exists — try media_disk first, fallback to public
         $fileAvailable = false;
         if ($document->file_path) {
-            try {
-                $disk = config('filesystems.media_disk');
-                $fileAvailable = Storage::disk($disk)->exists($document->file_path);
-            } catch (\Throwable $e) {
-                $fileAvailable = false;
+            $disksToTry = array_unique([config('filesystems.media_disk'), 'public']);
+            foreach ($disksToTry as $d) {
+                try {
+                    if (Storage::disk($d)->exists($document->file_path)) {
+                        $fileAvailable = true;
+                        break;
+                    }
+                } catch (\Throwable $e) {
+                    // Disk might not be configured — skip
+                }
             }
         }
 
