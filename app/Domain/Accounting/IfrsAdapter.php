@@ -125,7 +125,8 @@ class IfrsAdapter
             ]);
 
             // If there's tax, create line(s) for tax payable — broken down by VAT rate
-            if ($invoice->tax > 0) {
+            // Skip VAT posting for reverse charge invoices (supplier issues without VAT per Art. 32-а)
+            if ($invoice->tax > 0 && ! $invoice->isReverseCharge()) {
                 $this->postVatLineItems(
                     $invoice->taxes()->get(),
                     $invoice->tax,
@@ -1892,6 +1893,121 @@ class IfrsAdapter
     }
 
     /**
+     * Post reverse charge VAT for recipient bill (Art. 32-а ЗДДВ).
+     *
+     * Creates TWO line items per tax rate:
+     *   DR 1302 (Input VAT - reverse charge) — claimable input
+     *   CR 2302 (Output VAT - reverse charge) — output liability
+     *
+     * Net effect on VAT payable = zero, but both sides must appear
+     * in DDV-04 (fields 7-9 for output, fields 15-16 for input).
+     */
+    private function postReverseChargeVat(
+        $taxes,
+        int $totalTaxCents,
+        int $transactionId,
+        int $entityId,
+        int $companyId
+    ): void {
+        $amount = $totalTaxCents;
+
+        // Try to get exact amounts from tax records
+        if ($taxes->isNotEmpty()) {
+            $amount = $taxes->sum('amount');
+        }
+
+        if ($amount <= 0) {
+            return;
+        }
+
+        // DR 1302 — Input VAT (reverse charge from foreign entity)
+        $rcInputAccount = $this->getReverseChargeInputAccount($companyId, $entityId);
+        DB::table('ifrs_line_items')->insert([
+            'transaction_id' => $transactionId,
+            'account_id' => $rcInputAccount->id,
+            'amount' => $amount / 100,
+            'quantity' => 1,
+            'credited' => false, // Debit
+            'entity_id' => $entityId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // CR 2302 — Output VAT (reverse charge liability)
+        $rcOutputAccount = $this->getReverseChargeOutputAccount($companyId, $entityId);
+        DB::table('ifrs_line_items')->insert([
+            'transaction_id' => $transactionId,
+            'account_id' => $rcOutputAccount->id,
+            'amount' => $amount / 100,
+            'quantity' => 1,
+            'credited' => true, // Credit
+            'entity_id' => $entityId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    /**
+     * Get or create reverse charge input VAT account (1302).
+     * Претходен данок за промет извршен од странски субјект
+     */
+    protected function getReverseChargeInputAccount(int $companyId, int $entityId): Account
+    {
+        $userAccount = \App\Models\Account::where('company_id', $companyId)
+            ->where('code', '1302')
+            ->where('is_active', true)
+            ->first();
+
+        if ($userAccount) {
+            return Account::firstOrCreate(
+                [
+                    'account_type' => Account::CURRENT_ASSET,
+                    'category_id' => null,
+                    'name' => $userAccount->name,
+                    'entity_id' => $entityId,
+                ],
+                [
+                    'code' => '1302',
+                    'currency_id' => $this->getCurrencyId($companyId),
+                ]
+            );
+        }
+
+        // Fallback to parent 130 if 1302 doesn't exist
+        return $this->getVatReceivableAccount($companyId, $entityId);
+    }
+
+    /**
+     * Get or create reverse charge output VAT account (2302).
+     * Даночен долг за промет извршен од странски субјект
+     */
+    protected function getReverseChargeOutputAccount(int $companyId, int $entityId): Account
+    {
+        $userAccount = \App\Models\Account::where('company_id', $companyId)
+            ->where('code', '2302')
+            ->where('is_active', true)
+            ->first();
+
+        if ($userAccount) {
+            return Account::firstOrCreate(
+                [
+                    'account_type' => Account::CONTROL,
+                    'category_id' => null,
+                    'name' => $userAccount->name,
+                    'entity_id' => $entityId,
+                ],
+                [
+                    'code' => '2302',
+                    'currency_id' => $this->getCurrencyId($companyId),
+                ]
+            );
+        }
+
+        // Fallback to parent 230 if 2302 doesn't exist
+        return $this->getTaxPayableAccount($companyId, $entityId);
+    }
+
+    /**
      * Get or create Fee Expense account
      */
     protected function getFeeExpenseAccount(int $companyId, int $entityId): Account
@@ -3082,8 +3198,21 @@ class IfrsAdapter
                 'updated_at' => now(),
             ]);
 
-            // If there's input VAT, debit VAT Receivable — broken down by VAT rate
-            if ($bill->tax > 0) {
+            // VAT posting — different logic for reverse charge bills (Art. 32-а ЗДДВ)
+            if ($bill->isReverseCharge() && $bill->tax > 0) {
+                // Reverse charge: recipient self-assesses BOTH output and input VAT
+                // DR 1302 (Input VAT - reverse charge) — claimable
+                // CR 2302 (Output VAT - reverse charge) — liability
+                // Net effect = zero, but both must appear in DDV-04
+                $this->postReverseChargeVat(
+                    $bill->taxes()->get(),
+                    $bill->tax,
+                    $transaction->id,
+                    $entity->id,
+                    $bill->company_id
+                );
+            } elseif ($bill->tax > 0) {
+                // Standard: debit VAT Receivable (input VAT)
                 $this->postVatLineItems(
                     $bill->taxes()->get(),
                     $bill->tax,
@@ -3095,10 +3224,12 @@ class IfrsAdapter
             }
 
             // Line Item: Credit Accounts Payable
+            // For reverse charge, AP = sub_total only (no VAT charged by supplier)
+            $apAmount = $bill->isReverseCharge() ? $bill->sub_total : $bill->total;
             DB::table('ifrs_line_items')->insert([
                 'transaction_id' => $transaction->id,
                 'account_id' => $apAccount->id,
-                'amount' => $bill->total / 100, // Total includes tax
+                'amount' => $apAmount / 100,
                 'quantity' => 1,
                 'credited' => true, // Credit entry
                 'counterparty_name' => $bill->supplier->name ?? null,
@@ -3335,9 +3466,14 @@ class IfrsAdapter
         }
 
         // Skip transfer movements - they are GL-neutral (same inventory account)
+        // Skip production movements - GL is posted by ManufacturingService directly
         if (in_array($movement->source_type, [
             StockMovement::SOURCE_TRANSFER_IN,
             StockMovement::SOURCE_TRANSFER_OUT,
+            StockMovement::SOURCE_PRODUCTION_CONSUME,
+            StockMovement::SOURCE_PRODUCTION_OUTPUT,
+            StockMovement::SOURCE_PRODUCTION_BYPRODUCT,
+            StockMovement::SOURCE_PRODUCTION_WASTAGE,
         ])) {
             return;
         }

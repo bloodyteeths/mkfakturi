@@ -80,6 +80,7 @@ class InvoicesController extends Controller
                 'orderByField',
                 'orderBy',
                 'type',
+                'is_reverse_charge',
             ]))
             ->whereCompany();
 

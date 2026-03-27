@@ -108,6 +108,10 @@ class InvoicesRequest extends FormRequest
                 'integer',
                 'exists:invoices,id',
             ],
+            'is_reverse_charge' => [
+                'nullable',
+                'boolean',
+            ],
         ];
 
         $companyCurrency = CompanySetting::getSetting('currency', $this->header('company'));
@@ -346,6 +350,7 @@ class InvoicesRequest extends FormRequest
                 'currency_id' => $currency,
                 'project_id' => $this->project_id,
                 'type' => $this->input('type', 'standard'),
+                'is_reverse_charge' => (bool) $this->input('is_reverse_charge', false),
             ])
             ->toArray();
     }

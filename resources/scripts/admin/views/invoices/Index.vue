@@ -332,6 +332,12 @@
               >
                 {{ $t('invoices.type_final') }}
               </span>
+              <span
+                v-if="row.data.is_reverse_charge"
+                class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800"
+              >
+                {{ $t('invoices.reverse_charge_short') }}
+              </span>
             </div>
           </template>
 

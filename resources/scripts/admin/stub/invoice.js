@@ -37,5 +37,6 @@ export default function () {
     selectedCurrency: '',
     project_id: null,
     type: 'standard',
+    is_reverse_charge: false,
   }
 }

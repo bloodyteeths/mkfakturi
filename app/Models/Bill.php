@@ -331,6 +331,11 @@ class Bill extends Model implements HasMedia
         $query->orderBy($orderByField, $orderBy);
     }
 
+    public function isReverseCharge(): bool
+    {
+        return (bool) $this->is_reverse_charge;
+    }
+
     /**
      * Scope: Apply filters
      */

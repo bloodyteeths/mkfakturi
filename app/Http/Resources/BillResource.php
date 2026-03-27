@@ -34,6 +34,7 @@ class BillResource extends JsonResource
             'base_sub_total' => $this->base_sub_total,
             'base_tax' => $this->base_tax,
             'base_due_amount' => $this->base_due_amount,
+            'is_reverse_charge' => (bool) ($this->is_reverse_charge ?? false),
             'is_duplicate' => (bool) $this->is_duplicate,
             'duplicate_of_id' => $this->duplicate_of_id,
             'supplier' => $this->whenLoaded('supplier', function () {

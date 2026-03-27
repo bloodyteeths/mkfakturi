@@ -255,6 +255,14 @@
         @endif
     </table>
 
+    {{-- Reverse Charge Notice (Article 32-а ЗДДВ) --}}
+    @if($invoice->is_reverse_charge)
+        <div style="margin-top: 6px; padding: 4px; border: 1px solid #c0392b; background: #fdedec; font-size: 9px;">
+            <strong>ПРЕНЕСУВАЊЕ НА ДАНОЧНА ОБВРСКА</strong> — Член 32-а од Законот за данокот на додадена вредност.
+            Даночен должник е примателот на прометот. ДДВ не е пресметан на оваа фактура.
+        </div>
+    @endif
+
     {{-- Advance Invoice Notice (Article 14 ЗДДВ) --}}
     @if($invoice->type === 'advance')
         <div style="margin-top: 6px; padding: 4px; border: 1px solid #e6a817; background: #fef9e7; font-size: 9px;">

@@ -69,6 +69,7 @@ class InvoiceResource extends JsonResource
             'sales_tax_address_type' => $this->sales_tax_address_type,
             'overdue' => $this->overdue,
             'type' => $this->type ?? 'standard',
+            'is_reverse_charge' => (bool) ($this->is_reverse_charge ?? false),
             'parent_invoice_id' => $this->parent_invoice_id,
             'advance_invoices' => $this->whenLoaded('advanceInvoices', function () {
                 return $this->advanceInvoices->map(fn ($adv) => [

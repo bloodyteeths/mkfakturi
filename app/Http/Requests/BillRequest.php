@@ -39,6 +39,7 @@ class BillRequest extends FormRequest
             'currency_id' => ['required', 'integer'],
             'project_id' => ['nullable', 'integer', 'exists:projects,id'],
             'allow_duplicate' => ['nullable', 'boolean'],
+            'is_reverse_charge' => ['nullable', 'boolean'],
         ];
 
         if ($this->isMethod('PUT') && $this->route('bill')) {
@@ -128,6 +129,7 @@ class BillRequest extends FormRequest
                 'base_tax' => $this->tax * $exchangeRate,
                 'base_due_amount' => $this->total * $exchangeRate,
                 'project_id' => $this->project_id,
+                'is_reverse_charge' => (bool) $this->input('is_reverse_charge', false),
             ])
             ->toArray();
     }

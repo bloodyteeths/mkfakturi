@@ -75,6 +75,17 @@
               :show-action="false"
             />
           </BaseInputGroup>
+
+          <BaseInputGroup :label="$t('invoices.reverse_charge')">
+            <div class="flex items-center gap-2 mt-1">
+              <BaseSwitch
+                v-model="bill.is_reverse_charge"
+              />
+              <span v-if="bill.is_reverse_charge" class="text-xs text-red-600 font-medium">
+                {{ $t('invoices.reverse_charge_notice') }}
+              </span>
+            </div>
+          </BaseInputGroup>
         </div>
 
         <div class="mt-6">
@@ -383,6 +394,7 @@ const bill = reactive({
   notes: '',
   scanned_receipt_path: null,
   project_id: null,
+  is_reverse_charge: false,
 })
 
 const items = reactive([
@@ -604,6 +616,7 @@ function buildPayload() {
     notes: bill.notes || '',
     project_id: bill.project_id,
     scanned_receipt_path: bill.scanned_receipt_path || null,
+    is_reverse_charge: bill.is_reverse_charge || false,
     // All amounts in cents
     discount_val: calculatedDiscountVal.value,
     sub_total: calculatedSubTotal.value,

@@ -66,6 +66,14 @@ class TaxType extends Model
         return $this->category === self::CATEGORY_ZERO_RATED;
     }
 
+    /**
+     * Check if this tax type is reverse charge (Art. 32-а ЗДДВ).
+     */
+    public function isReverseCharge(): bool
+    {
+        return $this->category === self::CATEGORY_REVERSE_CHARGE;
+    }
+
     public function taxes(): HasMany
     {
         return $this->hasMany(Tax::class);

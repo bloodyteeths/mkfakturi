@@ -210,6 +210,11 @@ class Invoice extends Model implements HasMedia
         return $this->type === self::TYPE_FINAL;
     }
 
+    public function isReverseCharge(): bool
+    {
+        return (bool) $this->is_reverse_charge;
+    }
+
     /**
      * Get total amount of settled advance invoices (in cents).
      */
@@ -466,6 +471,8 @@ class Invoice extends Model implements HasMedia
             $query->where('project_id', $projectId);
         })->when($filters['type'] ?? null, function ($query, $type) {
             $query->where('type', $type);
+        })->when(isset($filters['is_reverse_charge']), function ($query) use ($filters) {
+            $query->where('is_reverse_charge', (bool) $filters['is_reverse_charge']);
         })->when($filters['orderByField'] ?? null, function ($query, $orderByField) use ($filters) {
             $orderBy = $filters['orderBy'] ?? 'desc';
             $query->orderBy($orderByField, $orderBy);

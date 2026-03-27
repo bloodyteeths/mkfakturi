@@ -204,10 +204,11 @@ class DDV04FormService extends TaxFormService
         $f[5] = $outputVat['zero']['taxable_base'] ?? 0;
         // Field 6: Exempt - taxable base
         $f[6] = $outputVat['exempt']['taxable_base'] ?? 0;
-        // Fields 7-9: Reverse charge (default 0, can be overridden)
-        $f[7] = $overrides[7] ?? 0;
-        $f[8] = $overrides[8] ?? 0;
-        $f[9] = $overrides[9] ?? 0;
+        // Fields 7-9: Reverse charge output VAT (Art. 32-а ЗДДВ)
+        // Auto-calculated from reverse_charge category, with manual override
+        $f[7] = $overrides[7] ?? ($outputVat['reverse_charge']['taxable_base'] ?? 0);
+        $f[8] = $overrides[8] ?? ($outputVat['reverse_charge']['vat_amount'] ?? 0);
+        $f[9] = $overrides[9] ?? 0; // Other output VAT (rare, manual only)
         // Field 10: Total output VAT
         $f[10] = $f[2] + $f[4] + $f[7] + $f[8] + $f[9];
 
@@ -220,9 +221,11 @@ class DDV04FormService extends TaxFormService
         $f[13] = $inputVat['reduced']['taxable_base'] ?? 0;
         // Field 14: Reduced rate input - VAT amount
         $f[14] = $inputVat['reduced']['vat_amount'] ?? 0;
-        // Fields 15-18: Import/reverse charge input (default 0)
-        $f[15] = $overrides[15] ?? 0;
-        $f[16] = $overrides[16] ?? 0;
+        // Fields 15-16: Reverse charge input VAT (Art. 32-а ЗДДВ)
+        // Auto-calculated from reverse_charge bills, with manual override
+        $f[15] = $overrides[15] ?? ($inputVat['reverse_charge']['taxable_base'] ?? 0);
+        $f[16] = $overrides[16] ?? ($inputVat['reverse_charge']['vat_amount'] ?? 0);
+        // Fields 17-18: Import VAT (manual only)
         $f[17] = $overrides[17] ?? 0;
         $f[18] = $overrides[18] ?? 0;
         // Field 19: Total input VAT

@@ -64,6 +64,21 @@
         />
       </BaseInputGroup>
 
+      <BaseInputGroup
+        :label="$t('invoices.reverse_charge')"
+        :content-loading="isLoading"
+      >
+        <div class="flex items-center gap-2 mt-1">
+          <BaseSwitch
+            v-model="invoiceStore.newInvoice.is_reverse_charge"
+            :content-loading="isLoading"
+          />
+          <span v-if="invoiceStore.newInvoice.is_reverse_charge" class="text-xs text-red-600 font-medium">
+            {{ $t('invoices.reverse_charge_notice') }}
+          </span>
+        </div>
+      </BaseInputGroup>
+
       <ExchangeRateConverter
         :store="invoiceStore"
         store-prop="newInvoice"

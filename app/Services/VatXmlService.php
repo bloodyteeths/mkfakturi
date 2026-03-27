@@ -394,6 +394,7 @@ class VatXmlService
             'reduced' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'zero' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'exempt' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
+            'reverse_charge' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
         ];
 
         // Check if we're in a proper Laravel context with database connection
@@ -478,6 +479,7 @@ class VatXmlService
             'reduced' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'zero' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
             'exempt' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
+            'reverse_charge' => ['taxable_base' => 0, 'vat_amount' => 0, 'transaction_count' => 0],
         ];
 
         if (! isset($this->company->id)) {
@@ -542,7 +544,10 @@ class VatXmlService
             $taxableBase = $tax->billItem->total ?? 0;
         }
 
-        if ($rate >= 15) {
+        if ($this->isReverseChargeTax($tax)) {
+            $vatData['reverse_charge']['vat_amount'] += $amount;
+            $vatData['reverse_charge']['taxable_base'] += $taxableBase;
+        } elseif ($rate >= 15) {
             $vatData['standard']['vat_amount'] += $amount;
             $vatData['standard']['taxable_base'] += $taxableBase;
         } elseif ($rate >= 3) {
@@ -624,6 +629,25 @@ class VatXmlService
     }
 
     /**
+     * Check if a tax represents a reverse charge supply (Art. 32-а ЗДДВ).
+     * Uses category column first, falls back to name matching for legacy data.
+     */
+    protected function isReverseChargeTax(Tax $tax): bool
+    {
+        $category = $tax->taxType->category ?? null;
+        if ($category !== null) {
+            return $category === \App\Models\TaxType::CATEGORY_REVERSE_CHARGE;
+        }
+
+        // Fallback: name-based detection
+        $name = mb_strtolower($tax->taxType->name ?? '', 'UTF-8');
+
+        return str_contains($name, 'reverse charge')
+            || str_contains($name, 'обратен данок')
+            || str_contains($name, 'пренесување');
+    }
+
+    /**
      * Categorize VAT amount by rate
      */
     protected function categorizeVatAmount(Tax $tax, array &$vatData): void
@@ -642,7 +666,11 @@ class VatXmlService
             $taxableBase = $tax->invoiceItem->total ?? 0;
         }
 
-        if ($rate >= 15) { // Standard rate (18%)
+        // Reverse charge takes priority over rate-based categorization
+        if ($this->isReverseChargeTax($tax)) {
+            $vatData['reverse_charge']['vat_amount'] += $amount;
+            $vatData['reverse_charge']['taxable_base'] += $taxableBase;
+        } elseif ($rate >= 15) { // Standard rate (18%)
             $vatData['standard']['vat_amount'] += $amount;
             $vatData['standard']['taxable_base'] += $taxableBase;
         } elseif ($rate >= 3) { // Reduced rate (5%)
