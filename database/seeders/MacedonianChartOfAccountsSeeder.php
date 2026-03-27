@@ -56,6 +56,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             $this->seedClass7($company->id);
             $this->seedClass8($company->id);
             $this->seedClass9($company->id);
+            $this->seedVatSubAccounts($company->id);
 
             $this->log("  ✓ Seeded chart of accounts for {$company->name}");
             $seeded++;
@@ -80,6 +81,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
         $this->seedClass7($companyId);
         $this->seedClass8($companyId);
         $this->seedClass9($companyId);
+        $this->seedVatSubAccounts($companyId);
 
         $this->log("Seeded chart of accounts for company {$companyId}");
     }
@@ -680,6 +682,33 @@ class MacedonianChartOfAccountsSeeder extends Seeder
     }
 
     /**
+     * 4-digit analytical VAT sub-accounts (UKLO/Proagens standard, remapped to 2011).
+     * Input VAT under 130, Output VAT under 230.
+     */
+    private function seedVatSubAccounts(int $companyId): void
+    {
+        $accounts = [
+            // Input VAT (under 130 — Данок на додадена вредност)
+            ['code' => '1300', 'name' => 'Претходен данок по влезни фактури по стапка од 18%', 'type' => Account::TYPE_ASSET, 'parent_code' => '130'],
+            ['code' => '1301', 'name' => 'Претходен данок со право на одбивка по стапка од 5%', 'type' => Account::TYPE_ASSET, 'parent_code' => '130'],
+            ['code' => '1302', 'name' => 'Претходен данок за промет извршен од странски субјект', 'type' => Account::TYPE_ASSET, 'parent_code' => '130'],
+            ['code' => '1303', 'name' => 'Исправка на претходен данок поради пренамена на добро', 'type' => Account::TYPE_ASSET, 'parent_code' => '130'],
+            ['code' => '1304', 'name' => 'Побарување на претходен данок за пресметковниот период', 'type' => Account::TYPE_ASSET, 'parent_code' => '130'],
+            ['code' => '1305', 'name' => 'Побарување на претходен данок за даночниот период', 'type' => Account::TYPE_ASSET, 'parent_code' => '130'],
+            ['code' => '1306', 'name' => 'Претходен данок по стапка од 10% (угостителство)', 'type' => Account::TYPE_ASSET, 'parent_code' => '130'],
+            ['code' => '1309', 'name' => 'Друг претходен данок', 'type' => Account::TYPE_ASSET, 'parent_code' => '130'],
+
+            // Output VAT (under 230 — Обврски за данокот на додадена вредност)
+            ['code' => '2300', 'name' => 'Обврски за пресметан даночен долг по стапка од 18%', 'type' => Account::TYPE_LIABILITY, 'parent_code' => '230'],
+            ['code' => '2301', 'name' => 'Обврски за пресметан даночен долг по стапка од 5%', 'type' => Account::TYPE_LIABILITY, 'parent_code' => '230'],
+            ['code' => '2302', 'name' => 'Даночен долг за промет извршен од странски субјект', 'type' => Account::TYPE_LIABILITY, 'parent_code' => '230'],
+            ['code' => '2306', 'name' => 'Обврски за пресметан даночен долг по стапка од 10%', 'type' => Account::TYPE_LIABILITY, 'parent_code' => '230'],
+        ];
+
+        $this->createAccounts($companyId, $accounts);
+    }
+
+    /**
      * Helper method to create accounts (idempotent)
      */
     private function createAccounts(int $companyId, array $accounts): void
@@ -690,12 +719,21 @@ class MacedonianChartOfAccountsSeeder extends Seeder
                 ->first();
 
             if (!$existingAccount) {
+                $parentId = null;
+                if (!empty($accountData['parent_code'])) {
+                    $parent = Account::where('company_id', $companyId)
+                        ->where('code', $accountData['parent_code'])
+                        ->first();
+                    $parentId = $parent?->id;
+                }
+
                 Account::create([
                     'company_id' => $companyId,
                     'code' => $accountData['code'],
                     'name' => $accountData['name'],
                     'description' => null,
                     'type' => $accountData['type'],
+                    'parent_id' => $parentId,
                     'is_active' => true,
                     'system_defined' => true,
                 ]);
@@ -708,11 +746,13 @@ class MacedonianChartOfAccountsSeeder extends Seeder
      */
     private function cleanupOldPlaceholderAccounts(int $companyId): void
     {
+        // NOTE: 1300-1309 and 2300-2306 are EXCLUDED — they are legitimate
+        // 4-digit VAT analytical sub-accounts per UKLO/Proagens standard
         $oldPlaceholderCodes = [
             '1000', '1001', '1002', '1003', '1004', '1005', '1006', '1007', '1008', '1009',
-            '1100', '1101', '1200', '1201', '1202', '1203', '1300', '1400', '1500', '1600',
+            '1100', '1101', '1200', '1201', '1202', '1203', '1400', '1500', '1600',
             '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
-            '2100', '2200', '2201', '2202', '2203', '2204', '2205', '2300', '2400', '2500',
+            '2100', '2200', '2201', '2202', '2203', '2204', '2205', '2400', '2500',
             '3000', '3001', '3002', '3003', '3004', '3005', '3006', '3007', '3100', '3200',
             '4000', '4001', '4002', '4003', '4004', '4005', '4006', '4007', '4008', '4009',
             '4100', '4200', '4300', '4400', '4500', '4600', '4700', '4800', '4900',

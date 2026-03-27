@@ -124,20 +124,16 @@ class IfrsAdapter
                 'updated_at' => now(),
             ]);
 
-            // If there's tax, create a line for tax payable
+            // If there's tax, create line(s) for tax payable — broken down by VAT rate
             if ($invoice->tax > 0) {
-                $taxPayableAccount = $this->getTaxPayableAccount($invoice->company_id, $entity->id);
-                DB::table('ifrs_line_items')->insert([
-                    'transaction_id' => $transaction->id,
-                    'account_id' => $taxPayableAccount->id,
-                    'amount' => $invoice->tax / 100,
-                    'quantity' => 1,
-                    'credited' => true, // Credit entry
-    
-                    'entity_id' => $entity->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                $this->postVatLineItems(
+                    $invoice->taxes()->get(),
+                    $invoice->tax,
+                    $transaction->id,
+                    $entity->id,
+                    $invoice->company_id,
+                    'output'
+                );
             }
 
             // Reload the transaction with lineItems to ensure they're visible
@@ -1527,19 +1523,143 @@ class IfrsAdapter
     // CLAUDE-CHECKPOINT
 
     /**
-     * Get or create Tax Payable account
+     * Get or create Tax Payable account (output VAT).
+     * When $vatRate is provided, routes to 4-digit sub-account (e.g., 2300 for 18%).
      */
-    protected function getTaxPayableAccount(int $companyId, int $entityId): Account
+    protected function getTaxPayableAccount(int $companyId, int $entityId, ?float $vatRate = null): Account
     {
+        if ($vatRate !== null) {
+            $code = $this->vatRateToOutputCode($vatRate);
+            if ($code !== '230') {
+                $userAccount = \App\Models\Account::where('company_id', $companyId)
+                    ->where('code', $code)
+                    ->where('is_active', true)
+                    ->first();
+
+                if ($userAccount) {
+                    return Account::firstOrCreate(
+                        [
+                            'account_type' => Account::CONTROL,
+                            'category_id' => null,
+                            'name' => $userAccount->name,
+                            'entity_id' => $entityId,
+                        ],
+                        [
+                            'code' => $userAccount->code,
+                            'currency_id' => $this->getCurrencyId($companyId),
+                        ]
+                    );
+                }
+            }
+        }
+
         return $this->mapUserAccountToIfrs(
             companyId: $companyId,
             entityId: $entityId,
             userAccountType: \App\Models\Account::TYPE_LIABILITY,
             ifrsAccountType: Account::CONTROL,
             fallbackName: 'Tax Payable',
-            fallbackCode: '230', // Macedonian: Обврски за данокот на додадена вредност
+            fallbackCode: '230',
             specificName: 'Tax'
         );
+    }
+
+    /**
+     * Map VAT rate to 4-digit output VAT account code (under 230).
+     */
+    private function vatRateToOutputCode(float $vatRate): string
+    {
+        return match (true) {
+            abs($vatRate - 18.0) < 0.01 => '2300',
+            abs($vatRate - 5.0) < 0.01 => '2301',
+            abs($vatRate - 10.0) < 0.01 => '2306',
+            default => '230',
+        };
+    }
+
+    /**
+     * Map VAT rate to 4-digit input VAT account code (under 130).
+     */
+    private function vatRateToInputCode(float $vatRate): string
+    {
+        return match (true) {
+            abs($vatRate - 18.0) < 0.01 => '1300',
+            abs($vatRate - 5.0) < 0.01 => '1301',
+            abs($vatRate - 10.0) < 0.01 => '1306',
+            default => '130',
+        };
+    }
+
+    /**
+     * Post VAT line items broken down by rate to 4-digit sub-accounts.
+     * Falls back to parent 130/230 if individual tax records are unavailable.
+     *
+     * @param  \Illuminate\Support\Collection  $taxes  Tax records from invoice/bill
+     * @param  int  $totalTaxCents  Total tax in cents (fallback amount)
+     * @param  string  $direction  'input' (bills) or 'output' (invoices)
+     * @param  bool  $reversal  true for credit notes (flips debit/credit)
+     */
+    private function postVatLineItems(
+        $taxes,
+        int $totalTaxCents,
+        int $transactionId,
+        int $entityId,
+        int $companyId,
+        string $direction,
+        bool $reversal = false
+    ): void {
+        $credited = $direction === 'output';
+        if ($reversal) {
+            $credited = ! $credited;
+        }
+
+        $posted = false;
+
+        if ($taxes->isNotEmpty()) {
+            $taxesByRate = $taxes->groupBy(fn ($tax) => (string) (float) ($tax->percent ?? 0));
+
+            foreach ($taxesByRate as $rate => $rateTaxes) {
+                $taxAmount = $rateTaxes->sum('amount');
+                if ($taxAmount <= 0) {
+                    continue;
+                }
+
+                $vatRate = (float) $rate;
+                $vatAccount = $direction === 'output'
+                    ? $this->getTaxPayableAccount($companyId, $entityId, $vatRate)
+                    : $this->getVatReceivableAccount($companyId, $entityId, $vatRate);
+
+                DB::table('ifrs_line_items')->insert([
+                    'transaction_id' => $transactionId,
+                    'account_id' => $vatAccount->id,
+                    'amount' => $taxAmount / 100,
+                    'quantity' => 1,
+                    'credited' => $credited,
+                    'entity_id' => $entityId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $posted = true;
+            }
+        }
+
+        // Fallback: no individual tax records → use parent account with total
+        if (! $posted) {
+            $vatAccount = $direction === 'output'
+                ? $this->getTaxPayableAccount($companyId, $entityId)
+                : $this->getVatReceivableAccount($companyId, $entityId);
+
+            DB::table('ifrs_line_items')->insert([
+                'transaction_id' => $transactionId,
+                'account_id' => $vatAccount->id,
+                'amount' => $totalTaxCents / 100,
+                'quantity' => 1,
+                'credited' => $credited,
+                'entity_id' => $entityId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 
     /**
@@ -2725,20 +2845,16 @@ class IfrsAdapter
                 'updated_at' => now(),
             ]);
 
-            // If there's input VAT, debit VAT Receivable (input VAT is an asset)
+            // If there's input VAT, debit VAT Receivable — broken down by VAT rate
             if ($bill->tax > 0) {
-                $vatReceivableAccount = $this->getVatReceivableAccount($bill->company_id, $entity->id);
-                DB::table('ifrs_line_items')->insert([
-                    'transaction_id' => $transaction->id,
-                    'account_id' => $vatReceivableAccount->id,
-                    'amount' => $bill->tax / 100,
-                    'quantity' => 1,
-                    'credited' => false, // Debit entry
-    
-                    'entity_id' => $entity->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                $this->postVatLineItems(
+                    $bill->taxes()->get(),
+                    $bill->tax,
+                    $transaction->id,
+                    $entity->id,
+                    $bill->company_id,
+                    'input'
+                );
             }
 
             // Line Item: Credit Accounts Payable
@@ -2916,17 +3032,43 @@ class IfrsAdapter
     }
 
     /**
-     * Get or create VAT Receivable account (for input VAT on purchases)
+     * Get or create VAT Receivable account (input VAT on purchases).
+     * When $vatRate is provided, routes to 4-digit sub-account (e.g., 1300 for 18%).
      */
-    protected function getVatReceivableAccount(int $companyId, int $entityId): Account
+    protected function getVatReceivableAccount(int $companyId, int $entityId, ?float $vatRate = null): Account
     {
+        if ($vatRate !== null) {
+            $code = $this->vatRateToInputCode($vatRate);
+            if ($code !== '130') {
+                $userAccount = \App\Models\Account::where('company_id', $companyId)
+                    ->where('code', $code)
+                    ->where('is_active', true)
+                    ->first();
+
+                if ($userAccount) {
+                    return Account::firstOrCreate(
+                        [
+                            'account_type' => Account::CURRENT_ASSET,
+                            'category_id' => null,
+                            'name' => $userAccount->name,
+                            'entity_id' => $entityId,
+                        ],
+                        [
+                            'code' => $userAccount->code,
+                            'currency_id' => $this->getCurrencyId($companyId),
+                        ]
+                    );
+                }
+            }
+        }
+
         return $this->mapUserAccountToIfrs(
             companyId: $companyId,
             entityId: $entityId,
             userAccountType: \App\Models\Account::TYPE_ASSET,
             ifrsAccountType: Account::CURRENT_ASSET,
             fallbackName: 'VAT Receivable',
-            fallbackCode: '130', // Macedonian: Данок на додадена вредност (претходен данок)
+            fallbackCode: '130',
             specificName: 'VAT'
         );
     }
