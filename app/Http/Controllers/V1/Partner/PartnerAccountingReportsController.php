@@ -727,6 +727,88 @@ class PartnerAccountingReportsController extends Controller
     }
 
     /**
+     * Invoice Register (UJP format) — Книга на влезни/излезни фактури with per-rate columns.
+     */
+    public function invoiceRegister(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner || !$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        if (!$fromDate || !$toDate) {
+            return response()->json(['error' => 'Потребни се и почетен и краен датум.'], 422);
+        }
+
+        $service = app(\App\Services\Tax\InvoiceRegisterService::class);
+
+        $output = $service->getOutputRegister($company, $fromDate, $toDate);
+        $input = $service->getInputRegister($company, $fromDate, $toDate);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'output' => $output,
+                'input' => $input,
+                'output_summary' => $service->summarizeByRate($output),
+                'input_summary' => $service->summarizeByRate($input),
+                'period' => ['from_date' => $fromDate, 'to_date' => $toDate],
+            ],
+        ]);
+    }
+
+    /**
+     * Export Invoice Register as UJP-format PDF.
+     */
+    public function invoiceRegisterExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner || !$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'Access denied');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+        $companyModel->load('address');
+
+        $fromDate = $request->query('from_date', now()->startOfMonth()->toDateString());
+        $toDate = $request->query('to_date', now()->toDateString());
+        $bookType = $request->query('type', 'output');
+
+        $service = app(\App\Services\Tax\InvoiceRegisterService::class);
+
+        $entries = $bookType === 'input'
+            ? $service->getInputRegister($company, $fromDate, $toDate)
+            : $service->getOutputRegister($company, $fromDate, $toDate);
+
+        $currency = \App\Models\Currency::find(
+            CompanySetting::getSetting('currency', $company)
+        );
+
+        $templateName = $bookType === 'input' ? 'kniga-vlezni' : 'kniga-izlezni';
+
+        view()->share([
+            'company' => $companyModel,
+            'entries' => $entries,
+            'bookType' => $bookType,
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'currency' => $currency,
+            'rates' => \App\Services\Tax\InvoiceRegisterService::rates(),
+        ]);
+
+        $pdf = PDF::loadView("app.pdf.reports.ujp.{$templateName}");
+        $typeSlug = $bookType === 'input' ? 'vlezni' : 'izlezni';
+
+        return $pdf->download("kniga_{$typeSlug}_fakturi_{$fromDate}_{$toDate}.pdf");
+    }
+
+    /**
      * Export General Ledger as PDF
      */
     public function generalLedgerExport(Request $request, int $company): Response

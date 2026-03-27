@@ -3480,6 +3480,8 @@
             "reset_all": "Reset",
             "vat_books_load_error": "Error loading VAT books",
             "pdf_export_error": "Error generating PDF",
+            "ujp_format": "UJP Format",
+            "invoice_register": "Invoice Register",
             "vat_books_prompt": "Select period for VAT books",
             "vat_books_hint": "Input and output invoice books with VAT details.",
             "ios_statement": "IOS Statement",

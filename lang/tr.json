@@ -5296,6 +5296,8 @@
             "reset_all": "Sıfırla",
             "vat_books_load_error": "KDV defterleri yüklenirken hata oluştu",
             "pdf_export_error": "PDF oluşturulurken hata oluştu",
+            "ujp_format": "UJP Formatı",
+            "invoice_register": "Fatura Kaydı",
             "vat_books_prompt": "KDV defterleri için dönem seçin",
             "vat_books_hint": "KDV detaylarıyla alış ve satış faturası defterleri.",
             "ios_statement": "Açık Kalemler Özeti",

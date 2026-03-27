@@ -964,6 +964,45 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/inventory-list', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryList']);
             });
 
+            // Manufacturing Module
+            // ----------------------------------
+            Route::prefix('manufacturing')->middleware('tier:business')->group(function () {
+                // BOMs / Нормативи
+                Route::get('/boms', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'index']);
+                Route::post('/boms', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'store']);
+                Route::get('/boms/{bom}', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'show']);
+                Route::put('/boms/{bom}', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'update']);
+                Route::delete('/boms/{bom}', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'destroy']);
+                Route::post('/boms/{bom}/duplicate', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'duplicate']);
+                Route::get('/boms/{bom}/cost', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'cost']);
+
+                // Production Orders / Работни налози
+                Route::get('/orders', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'index']);
+                Route::post('/orders', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'store']);
+                Route::get('/orders/{order}', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'show']);
+                Route::put('/orders/{order}', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'update']);
+                Route::post('/orders/{order}/start', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'start']);
+                Route::post('/orders/{order}/complete', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'complete']);
+                Route::post('/orders/{order}/cancel', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'cancel']);
+
+                // Material consumption (during production)
+                Route::post('/orders/{order}/materials', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'addMaterial']);
+                Route::post('/orders/{order}/labor', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'addLabor']);
+                Route::post('/orders/{order}/overhead', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'addOverhead']);
+
+                // Reports & PDFs
+                Route::get('/reports/cost-analysis', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'costAnalysis']);
+                Route::get('/reports/variance', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'varianceReport']);
+                Route::get('/reports/wastage', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'wastageReport']);
+                Route::get('/orders/{order}/pdf/order', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'orderPdf']);
+                Route::get('/orders/{order}/pdf/costing', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'costingPdf']);
+                Route::get('/orders/{order}/pdf/co-production', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'coProductionPdf']);
+                Route::get('/orders/{order}/pdf/priemnica', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'priemnicaPdf']);
+                Route::get('/orders/{order}/pdf/izdatnica', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'izdatnicaPdf']);
+                Route::get('/orders/{order}/pdf/trebovnica', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'trebovnicaPdf']);
+                Route::get('/boms/{bom}/pdf/normativ', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'normativPdf']);
+            });
+
             // Daily Closing & Period Lock (Phase 3)
             // ----------------------------------
             Route::prefix('accounting')->group(function () {
@@ -1813,6 +1852,8 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/equity-changes/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'equityChangesExport']);
         Route::get('/vat-books', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'vatBooks']);
         Route::get('/vat-books/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'vatBooksExport']);
+        Route::get('/invoice-register', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'invoiceRegister']);
+        Route::get('/invoice-register/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'invoiceRegisterExport']);
         Route::get('/trade-book', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'tradeBook']);
         Route::get('/trade-book/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'tradeBookExport']);
 

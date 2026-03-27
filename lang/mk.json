@@ -6076,6 +6076,8 @@
             "reset_all": "Ресетирај",
             "vat_books_load_error": "Грешка при вчитување на ДДВ книгите",
             "pdf_export_error": "Грешка при генерирање на PDF",
+            "ujp_format": "УЈП формат",
+            "invoice_register": "Книга на фактури",
             "vat_books_prompt": "Изберете период за ДДВ книгите",
             "vat_books_hint": "Книга на влезни и излезни фактури со ДДВ податоци.",
             "ios_statement": "ИОС Извод",

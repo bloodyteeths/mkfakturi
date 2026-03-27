@@ -15,6 +15,12 @@
             </template>
             PDF
           </BaseButton>
+          <BaseButton variant="primary-outline" :loading="isExportingUjp" @click="exportUjpPdf">
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="DocumentTextIcon" />
+            </template>
+            {{ $t('partner.accounting.ujp_format', 'УЈП формат') }}
+          </BaseButton>
         </div>
       </template>
     </BasePageHeader>
@@ -346,6 +352,7 @@ const selectedCompanyId = ref(null)
 const activeTab = ref('output')
 const isLoading = ref(false)
 const isExportingPdf = ref(false)
+const isExportingUjp = ref(false)
 const showPdfPreview = ref(false)
 const previewPdfUrl = ref(null)
 const pdfBlob = ref(null)
@@ -609,6 +616,38 @@ function closePdfPreview() {
     previewPdfUrl.value = null
   }
   pdfBlob.value = null
+}
+
+async function exportUjpPdf() {
+  if (!selectedCompanyId.value) return
+  isExportingUjp.value = true
+  try {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/invoice-register/export`, {
+      params: {
+        type: activeTab.value,
+        from_date: filters.value.start_date,
+        to_date: filters.value.end_date,
+      },
+      responseType: 'blob',
+    })
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+    const bookType = activeTab.value === 'output' ? 'izlezni' : 'vlezni'
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `kniga_${bookType}_fakturi_${filters.value.start_date}_${filters.value.end_date}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('partner.accounting.pdf_export_error', 'Грешка при генерирање на PDF'),
+    })
+  } finally {
+    isExportingUjp.value = false
+  }
 }
 </script>
 

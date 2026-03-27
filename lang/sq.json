@@ -5762,6 +5762,8 @@
             "reset_all": "Rivendos",
             "vat_books_load_error": "Gabim gjatë ngarkimit të librave të TVSH-së",
             "pdf_export_error": "Gabim gjatë gjenerimit të PDF-së",
+            "ujp_format": "Formati UJP",
+            "invoice_register": "Regjistri i faturave",
             "vat_books_prompt": "Zgjidhni periudhën për librat e TVSH-së",
             "vat_books_hint": "Libri i faturave hyrëse dhe dalëse me detaje të TVSH-së.",
             "ios_statement": "Pasqyrë e Artikujve të Hapur",
