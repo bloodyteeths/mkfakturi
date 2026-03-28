@@ -194,9 +194,21 @@ class Supplier extends Model
                 $query->where('name', 'LIKE', '%'.$term.'%')
                     ->orWhere('email', 'LIKE', '%'.$term.'%')
                     ->orWhere('phone', 'LIKE', '%'.$term.'%')
-                    ->orWhere('contact_name', 'LIKE', '%'.$term.'%');
+                    ->orWhere('contact_name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('tax_id', 'LIKE', '%'.$term.'%')
+                    ->orWhere('vat_number', 'LIKE', '%'.$term.'%');
             });
         }
+    }
+
+    /**
+     * Scope: Filter suppliers with outstanding balance
+     */
+    public function scopeWhereHasOutstanding($query)
+    {
+        $query->whereHas('bills', function ($q) {
+            $q->whereRaw('total > COALESCE((SELECT SUM(amount) FROM bill_payments WHERE bill_payments.bill_id = bills.id AND bill_payments.deleted_at IS NULL), 0)');
+        });
     }
 
     /**
@@ -228,6 +240,10 @@ class Supplier extends Model
 
         if ($filters->get('phone')) {
             $query->wherePhone($filters->get('phone'));
+        }
+
+        if ($filters->get('has_outstanding')) {
+            $query->whereHasOutstanding();
         }
 
         if ($filters->get('orderByField') || $filters->get('orderBy')) {

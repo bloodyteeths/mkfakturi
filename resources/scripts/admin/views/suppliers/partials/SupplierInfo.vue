@@ -61,6 +61,65 @@
       </BaseDescriptionListItem>
     </BaseDescriptionList>
 
+    <!-- Tax & Registration -->
+    <BaseDescriptionList v-if="selectedSupplier.tax_id || selectedSupplier.vat_number || selectedSupplier.activity_code" class="mt-5">
+      <BaseDescriptionListItem
+        v-if="selectedSupplier.tax_id"
+        :content-loading="contentLoading"
+        :label="$t('suppliers.tax_id')"
+        :value="selectedSupplier.tax_id"
+      />
+      <BaseDescriptionListItem
+        v-if="selectedSupplier.vat_number"
+        :content-loading="contentLoading"
+        :label="$t('suppliers.vat_number')"
+        :value="selectedSupplier.vat_number"
+      />
+      <BaseDescriptionListItem
+        v-if="selectedSupplier.activity_code"
+        :content-loading="contentLoading"
+        :label="$t('suppliers.activity_code')"
+        :value="selectedSupplier.activity_code"
+      />
+      <BaseDescriptionListItem
+        v-if="selectedSupplier.authorized_person"
+        :content-loading="contentLoading"
+        :label="$t('suppliers.authorized_person')"
+        :value="selectedSupplier.authorized_person"
+      />
+    </BaseDescriptionList>
+
+    <!-- Banking -->
+    <BaseHeading v-if="selectedSupplier.bank_account || selectedSupplier.iban" class="mt-8">
+      {{ $t('suppliers.banking') }}
+    </BaseHeading>
+    <BaseDescriptionList v-if="selectedSupplier.bank_account || selectedSupplier.iban" class="mt-3">
+      <BaseDescriptionListItem
+        v-if="selectedSupplier.bank_account"
+        :content-loading="contentLoading"
+        :label="$t('suppliers.bank_account')"
+        :value="selectedSupplier.bank_account"
+      />
+      <BaseDescriptionListItem
+        v-if="selectedSupplier.bank_name"
+        :content-loading="contentLoading"
+        :label="$t('suppliers.bank_name')"
+        :value="selectedSupplier.bank_name"
+      />
+      <BaseDescriptionListItem
+        v-if="selectedSupplier.iban"
+        :content-loading="contentLoading"
+        :label="$t('suppliers.iban')"
+        :value="selectedSupplier.iban"
+      />
+      <BaseDescriptionListItem
+        v-if="selectedSupplier.bic"
+        :content-loading="contentLoading"
+        :label="$t('suppliers.bic')"
+        :value="selectedSupplier.bic"
+      />
+    </BaseDescriptionList>
+
     <!-- Linked Customer -->
     <BaseHeading class="mt-8">
       {{ $t('suppliers.linked_customer') }}

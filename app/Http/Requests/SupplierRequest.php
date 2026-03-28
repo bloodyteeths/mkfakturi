@@ -26,18 +26,29 @@ class SupplierRequest extends FormRequest
             ? ['nullable', 'string', 'regex:/^\d{13}$/']
             : ['nullable', 'string', 'max:255'];
 
-        $rules = [
+        $emailUnique = Rule::unique('suppliers')->where('company_id', $this->header('company'));
+        if ($this->isMethod('PUT') && $this->route('supplier')) {
+            $emailUnique = $emailUnique->ignore($this->route('supplier')->id);
+        }
+
+        return [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
-                'required',
+                'nullable',
                 'email',
-                Rule::unique('suppliers')->where('company_id', $this->header('company')),
+                $emailUnique,
             ],
             'phone' => ['nullable', 'string', 'max:255'],
             'contact_name' => ['nullable', 'string', 'max:255'],
             'tax_id' => $taxIdRules,
             'vat_number' => $vatRules,
             'company_registration_number' => ['nullable', 'string', 'max:255'],
+            'activity_code' => ['nullable', 'string', 'max:10'],
+            'authorized_person' => ['nullable', 'string', 'max:255'],
+            'bank_account' => ['nullable', 'string', 'max:255'],
+            'bank_name' => ['nullable', 'string', 'max:255'],
+            'iban' => ['nullable', 'string', 'max:34'],
+            'bic' => ['nullable', 'string', 'max:11'],
             'website' => ['nullable', 'string', 'max:255'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:255'],
@@ -51,18 +62,6 @@ class SupplierRequest extends FormRequest
             'zip' => ['nullable', 'string', 'max:255'],
             'allow_duplicate' => ['nullable', 'boolean'],
         ];
-
-        if ($this->isMethod('PUT') && $this->route('supplier')) {
-            $rules['email'] = [
-                'required',
-                'email',
-                Rule::unique('suppliers')
-                    ->where('company_id', $this->header('company'))
-                    ->ignore($this->route('supplier')->id),
-            ];
-        }
-
-        return $rules;
     }
 
     public function messages(): array

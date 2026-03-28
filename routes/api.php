@@ -489,6 +489,13 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/payroll-reports/export-tax-summary', [PayrollReportController::class, 'exportTaxSummary']);
                 Route::get('/payroll-reports/download-mpin-xml', [PayrollReportController::class, 'downloadMpinXml']);
                 Route::get('/payroll-reports/download-ddv04-xml', [PayrollReportController::class, 'downloadDdv04Xml']);
+                Route::get('/payroll-reports/download-pddgi-xml', [PayrollReportController::class, 'downloadPddGiXml']);
+                Route::get('/payroll-reports/download-pp50/{payrollRun}/{type}', [PayrollReportController::class, 'downloadPP50']);
+                Route::get('/payroll-reports/download-pp30/{payrollRun}', [PayrollReportController::class, 'downloadPP30']);
+                Route::get('/payroll-reports/download-rekapitular/{payrollRun}', [PayrollReportController::class, 'downloadRekapitular']);
+                Route::get('/payroll-reports/download-m1/{employee}', [PayrollReportController::class, 'downloadM1Form']);
+                Route::get('/payroll-reports/download-m2/{employee}', [PayrollReportController::class, 'downloadM2Form']);
+                Route::get('/payroll-reports/salary-certificate/{employee}', [PayrollReportController::class, 'downloadSalaryCertificate']);
 
                 // Leave Management
                 Route::prefix('leave-types')->group(function () {

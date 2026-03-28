@@ -30,6 +30,32 @@
         />
 
         <BaseButton
+          v-show="suppliersStore.supplierTotalCount"
+          variant="primary-outline"
+          @click="showAgingReport"
+        >
+          {{ $t('suppliers.aging_report') }}
+        </BaseButton>
+
+        <label
+          v-if="userStore.hasAbilities(abilities.CREATE_SUPPLIER)"
+          class="cursor-pointer"
+        >
+          <BaseButton
+            variant="primary-outline"
+            tag="span"
+          >
+            {{ $t('suppliers.import') }}
+          </BaseButton>
+          <input
+            type="file"
+            accept=".csv,.txt"
+            class="hidden"
+            @change="handleImport"
+          />
+        </label>
+
+        <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_SUPPLIER)"
           variant="primary"
           @click="$router.push('/admin/suppliers/create')"
@@ -68,6 +94,16 @@
           name="phone"
           autocomplete="off"
         />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('suppliers.has_outstanding')" class="text-left">
+        <div class="flex items-center mt-2">
+          <BaseCheckbox
+            v-model="filters.has_outstanding"
+            variant="primary"
+          />
+          <span class="ml-2 text-sm text-gray-600">{{ $t('suppliers.only_with_balance') }}</span>
+        </div>
       </BaseInputGroup>
     </BaseFilterWrapper>
 
@@ -164,16 +200,26 @@
           {{ row.data.phone || '-' }}
         </template>
 
-        <template #cell-email="{ row }">
-          {{ row.data.email || '-' }}
-        </template>
-
         <template #cell-tax_id="{ row }">
           {{ row.data.tax_id || '-' }}
         </template>
 
-        <template #cell-created_at="{ row }">
-          <span>{{ row.data.formatted_created_at }}</span>
+        <template #cell-vat_number="{ row }">
+          {{ row.data.vat_number || '-' }}
+        </template>
+
+        <template #cell-city="{ row }">
+          {{ row.data.city || '-' }}
+        </template>
+
+        <template #cell-due_amount="{ row }">
+          <span
+            v-if="row.data.due_amount > 0"
+            class="text-red-600 font-medium"
+          >
+            {{ formatAmount(row.data.due_amount) }}
+          </span>
+          <span v-else class="text-green-600">-</span>
         </template>
 
         <template v-if="hasAtLeastOneAbility()" #cell-actions="{ row }">
@@ -196,8 +242,10 @@ import abilities from '@/scripts/admin/stub/abilities'
 import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useDialogStore } from '@/scripts/stores/dialog'
+import { useNotificationStore } from '@/scripts/stores/notification'
 import SupplierDropdown from '@/scripts/admin/components/dropdowns/SupplierIndexDropdown.vue'
 import ExportButton from '@/scripts/admin/components/ExportButton.vue'
+import axios from 'axios'
 
 const { t } = useI18n()
 const suppliersStore = useSuppliersStore()
@@ -212,6 +260,7 @@ const filters = reactive({
   name: '',
   contact_name: '',
   phone: '',
+  has_outstanding: false,
 })
 
 const showEmptyScreen = computed(
@@ -247,9 +296,10 @@ const columns = computed(() => {
       tdClass: 'font-medium text-gray-900',
     },
     { key: 'phone', label: t('suppliers.phone') },
-    { key: 'email', label: t('suppliers.email') },
     { key: 'tax_id', label: t('suppliers.tax_id') },
-    { key: 'created_at', label: t('suppliers.added_on') },
+    { key: 'vat_number', label: t('suppliers.vat_number') },
+    { key: 'city', label: t('suppliers.city') },
+    { key: 'due_amount', label: t('suppliers.outstanding') },
     {
       key: 'actions',
       label: '',
@@ -260,11 +310,20 @@ const columns = computed(() => {
   ]
 })
 
+function formatAmount(amount) {
+  if (!amount) return '-'
+  return new Intl.NumberFormat('mk-MK', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount / 100)
+}
+
 async function fetchData({ page, filter, sort }) {
   let data = {
     name: filters.name,
     contact_name: filters.contact_name,
     phone: filters.phone,
+    has_outstanding: filters.has_outstanding ? 1 : undefined,
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,
@@ -304,6 +363,7 @@ function clearFilter() {
   filters.name = ''
   filters.contact_name = ''
   filters.phone = ''
+  filters.has_outstanding = false
 }
 
 function toggleFilter() {
@@ -324,6 +384,39 @@ function hasAtLeastOneAbility() {
     abilities.EDIT_SUPPLIER,
     abilities.VIEW_SUPPLIER,
   ])
+}
+
+function showAgingReport() {
+  const url = `/api/v1/suppliers/aging/pdf?download=true`
+  window.open(url, '_blank')
+}
+
+async function handleImport(event) {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  try {
+    const response = await axios.post('/suppliers/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    const notificationStore = useNotificationStore()
+    notificationStore.showNotification({
+      type: 'success',
+      message: response.data.message || t('suppliers.import_success'),
+    })
+    refreshTable()
+  } catch (err) {
+    const notificationStore = useNotificationStore()
+    notificationStore.showNotification({
+      type: 'error',
+      message: err.response?.data?.message || t('general.something_went_wrong'),
+    })
+  }
+
+  event.target.value = ''
 }
 
 function removeMultipleSuppliers() {

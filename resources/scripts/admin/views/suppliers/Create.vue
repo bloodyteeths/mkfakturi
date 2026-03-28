@@ -43,7 +43,6 @@
 
             <BaseInputGroup
               :label="$t('suppliers.email')"
-              required
               :error="v$.form.email.$error && v$.form.email.$errors[0].$message"
             >
               <BaseInput
@@ -96,6 +95,10 @@
             <BaseInputGroup :label="$t('suppliers.company_registration_number')">
               <BaseInput v-model="form.company_registration_number" type="text" />
             </BaseInputGroup>
+
+            <BaseInputGroup :label="$t('suppliers.activity_code')">
+              <BaseInput v-model="form.activity_code" type="text" :placeholder="$t('suppliers.activity_code_placeholder')" />
+            </BaseInputGroup>
           </BaseInputGrid>
         </div>
 
@@ -118,6 +121,37 @@
 
             <BaseInputGroup :label="$t('suppliers.contact_phone')">
               <BaseInput v-model="form.contact_phone" type="text" />
+            </BaseInputGroup>
+
+            <BaseInputGroup :label="$t('suppliers.authorized_person')">
+              <BaseInput v-model="form.authorized_person" type="text" :placeholder="$t('suppliers.authorized_person_placeholder')" />
+            </BaseInputGroup>
+          </BaseInputGrid>
+        </div>
+
+        <BaseDivider class="mb-5 md:mb-8" />
+
+        <!-- Banking -->
+        <div class="grid grid-cols-5 gap-4 mb-8">
+          <h6 class="col-span-5 text-lg font-semibold text-left lg:col-span-1">
+            {{ $t('suppliers.banking') }}
+          </h6>
+
+          <BaseInputGrid class="col-span-5 lg:col-span-4">
+            <BaseInputGroup :label="$t('suppliers.bank_account')">
+              <BaseInput v-model="form.bank_account" type="text" :placeholder="$t('suppliers.bank_account_placeholder')" />
+            </BaseInputGroup>
+
+            <BaseInputGroup :label="$t('suppliers.bank_name')">
+              <BaseInput v-model="form.bank_name" type="text" />
+            </BaseInputGroup>
+
+            <BaseInputGroup :label="$t('suppliers.iban')">
+              <BaseInput v-model="form.iban" type="text" placeholder="MK07..." />
+            </BaseInputGroup>
+
+            <BaseInputGroup :label="$t('suppliers.bic')">
+              <BaseInput v-model="form.bic" type="text" />
             </BaseInputGroup>
           </BaseInputGrid>
         </div>
@@ -238,9 +272,15 @@ const form = reactive({
   vat_number: '',
   tax_id: '',
   company_registration_number: '',
+  activity_code: '',
   contact_name: '',
   contact_email: '',
   contact_phone: '',
+  authorized_person: '',
+  bank_account: '',
+  bank_name: '',
+  iban: '',
+  bic: '',
   address_line_1: '',
   address_line_2: '',
   city: '',
@@ -256,7 +296,6 @@ const rules = {
       required: helpers.withMessage(t('validation.required'), required),
     },
     email: {
-      required: helpers.withMessage(t('validation.required'), required),
       email: helpers.withMessage(t('validation.email_incorrect'), email),
     },
   },
@@ -300,9 +339,15 @@ function hydrateForm(data) {
   form.vat_number = data.vat_number || ''
   form.tax_id = data.tax_id || ''
   form.company_registration_number = data.company_registration_number || ''
+  form.activity_code = data.activity_code || ''
   form.contact_name = data.contact_name || ''
   form.contact_email = data.contact_email || ''
   form.contact_phone = data.contact_phone || ''
+  form.authorized_person = data.authorized_person || ''
+  form.bank_account = data.bank_account || ''
+  form.bank_name = data.bank_name || ''
+  form.iban = data.iban || ''
+  form.bic = data.bic || ''
   form.address_line_1 = data.address_line_1 || ''
   form.address_line_2 = data.address_line_2 || ''
   form.city = data.city || ''
