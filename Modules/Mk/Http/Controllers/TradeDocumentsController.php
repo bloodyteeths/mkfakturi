@@ -139,7 +139,7 @@ class TradeDocumentsController extends Controller
         }
 
         $query = Nivelacija::whereCompany($company)
-            ->with(['sourceBill:id,bill_number', 'warehouse:id,name', 'creator:id,name'])
+            ->with(['sourceBill:id,bill_number', 'warehouse:id,name', 'creator'])
             ->orderBy('document_date', 'desc');
 
         if ($status = $request->query('status')) {
@@ -230,6 +230,15 @@ class TradeDocumentsController extends Controller
             ]);
         }
 
+        // Validate all item_ids belong to this company
+        $itemIds = array_column($validated['items'], 'item_id');
+        $existingCount = \App\Models\Item::where('company_id', $company)
+            ->whereIn('id', $itemIds)
+            ->count();
+        if ($existingCount !== count($itemIds)) {
+            return response()->json(['error' => 'Некои артикли не се пронајдени во оваа компанија.'], 422);
+        }
+
         $nivelacija = Nivelacija::create([
             'company_id' => $company,
             'document_date' => $validated['document_date'],
@@ -263,7 +272,7 @@ class TradeDocumentsController extends Controller
         }
 
         $nivelacija = Nivelacija::whereCompany($company)
-            ->with(['items.item.unit', 'sourceBill:id,bill_number', 'warehouse:id,name', 'approver:id,name', 'creator:id,name'])
+            ->with(['items.item.unit', 'sourceBill:id,bill_number', 'warehouse:id,name', 'approver', 'creator'])
             ->where('id', $id)
             ->first();
 
@@ -418,7 +427,7 @@ class TradeDocumentsController extends Controller
         $companyModel->load('address');
 
         $nivelacija = Nivelacija::whereCompany($company)
-            ->with(['items.item.unit', 'sourceBill:id,bill_number', 'warehouse:id,name', 'approver:id,name'])
+            ->with(['items.item.unit', 'sourceBill:id,bill_number', 'warehouse:id,name', 'approver'])
             ->where('id', $id)
             ->first();
 

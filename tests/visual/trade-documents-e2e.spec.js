@@ -86,6 +86,7 @@ test.describe.configure({ mode: 'serial' })
 
 let page
 let testBillId = null
+let testItemId = null
 let testNivelacijaId = null
 
 test.beforeAll(async ({ browser }) => {
@@ -105,13 +106,27 @@ test.beforeAll(async ({ browser }) => {
   await page.waitForURL(/\/admin/, { timeout: 30000 })
   console.log('✓ Logged in successfully')
 
-  // Find a bill to use for testing
-  const billResult = await apiGet(page, `${BASE}/api/v1/partner/companies/2/bills?limit=5`)
+  // Find a bill to use for testing (bills use company header, not URL param)
+  const billResult = await apiGet(page, `${BASE}/api/v1/bills?limit=5&status=COMPLETED`)
   if (billResult.status === 200) {
     const bills = billResult.data?.data || billResult.data?.bills?.data || []
     if (bills.length > 0) {
       testBillId = bills[0].id
-      console.log(`✓ Found test bill: ID ${testBillId}`)
+      console.log(`✓ Found test bill: ID ${testBillId}, number: ${bills[0].bill_number}`)
+    } else {
+      console.log('⚠ No completed bills found for company 2')
+    }
+  } else {
+    console.log(`⚠ Bills API returned ${billResult.status}: ${JSON.stringify(billResult.data).substring(0, 300)}`)
+  }
+
+  // Find a real item_id for nivelacija tests
+  const itemResult = await apiGet(page, `${BASE}/api/v1/items?limit=1`)
+  if (itemResult.status === 200) {
+    const items = itemResult.data?.data || []
+    if (items.length > 0) {
+      testItemId = items[0].id
+      console.log(`✓ Found test item: ID ${testItemId}, name: ${items[0].name}`)
     }
   }
 })
@@ -318,6 +333,7 @@ test('6. Нивелации list API returns valid structure', async () => {
 // ═══════════════════════════════════════════════
 
 test('7. Create draft нивелација', async () => {
+  const itemId = testItemId || 1
   const result = await apiPost(
     page,
     `${BASE}/api/v1/partner/companies/2/accounting/nivelacii`,
@@ -327,7 +343,7 @@ test('7. Create draft нивелација', async () => {
       reason: 'E2E тест — промена на цена',
       items: [
         {
-          item_id: 1,
+          item_id: itemId,
           quantity_on_hand: 10,
           old_retail_price: 100000,
           new_retail_price: 120000,
