@@ -46,6 +46,9 @@ class Item extends Model
         return [
             'price' => 'integer',
             'cost' => 'integer',
+            'retail_price' => 'integer',
+            'wholesale_price' => 'integer',
+            'markup_percent' => 'decimal:2',
             'track_quantity' => 'boolean',
             'allow_negative_stock' => 'boolean',
         ];

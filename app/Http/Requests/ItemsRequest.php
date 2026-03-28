@@ -103,6 +103,22 @@ class ItemsRequest extends FormRequest
                 'integer',
                 'exists:accounts,id',
             ],
+            'retail_price' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
+            'wholesale_price' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
+            'markup_percent' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:999.99',
+            ],
             'allow_duplicate' => [
                 'nullable',
                 'boolean',

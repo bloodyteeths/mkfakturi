@@ -2,7 +2,7 @@
 <html lang="mk">
 
 <head>
-    <title>Приемен лист во трговијата на мало (Образец ПЛТ)</title>
+    <title>Калкулација на големопродажна цена (Образец КАП)</title>
     <style type="text/css">
         body {
             font-family: "DejaVu Sans";
@@ -44,13 +44,13 @@
             margin: 4px 0;
         }
 
-        .plt-table {
+        .kap-table {
             width: 100%;
             border: 1px solid #888;
             margin-top: 5px;
         }
 
-        .plt-table th {
+        .kap-table th {
             background: #2d2040;
             color: #ffffff;
             padding: 4px 3px;
@@ -61,7 +61,7 @@
             border-right: 1px solid #444;
         }
 
-        .plt-table th:last-child {
+        .kap-table th:last-child {
             border-right: none;
         }
 
@@ -148,6 +148,30 @@
             text-align: right;
             margin-top: 5px;
         }
+
+        .dependent-costs {
+            width: 100%;
+            margin: 6px 0;
+            border: 1px solid #ccc;
+        }
+
+        .dependent-costs td {
+            padding: 3px 6px;
+            font-size: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dependent-costs .dc-label {
+            font-weight: bold;
+            color: #555;
+            width: 60%;
+            background: #f8f8f8;
+        }
+
+        .dependent-costs .dc-value {
+            text-align: right;
+            width: 40%;
+        }
     </style>
 </head>
 
@@ -171,13 +195,13 @@
                 </p>
             </td>
             <td style="width: 30%; text-align: right; vertical-align: top;">
-                <p class="company-detail" style="font-weight: bold;">Образец "ПЛТ"</p>
+                <p class="company-detail" style="font-weight: bold;">Образец „КАП"</p>
                 <p class="company-detail">Правилник Сл. весник 51/04; 89/04</p>
             </td>
         </tr>
     </table>
 
-    <p class="heading-text">ПРИЕМЕН ЛИСТ ВО ТРГОВИЈАТА НА МАЛО</p>
+    <p class="heading-text">КАЛКУЛАЦИЈА НА ГОЛЕМОПРОДАЖНА ЦЕНА</p>
 
     {{-- Document info --}}
     <table style="width: 100%; margin: 6px 0;">
@@ -193,7 +217,25 @@
         </tr>
     </table>
 
-    <table class="plt-table">
+    {{-- Dependent Costs Summary --}}
+    @if(!empty($dependent_costs) && array_sum($dependent_costs) > 0)
+    <table class="dependent-costs">
+        @foreach($dependent_costs as $costLabel => $costAmount)
+        @if($costAmount > 0)
+        <tr>
+            <td class="dc-label">{{ $costLabel }}</td>
+            <td class="dc-value">{!! format_money_pdf($costAmount, $currency) !!}</td>
+        </tr>
+        @endif
+        @endforeach
+        <tr>
+            <td class="dc-label" style="font-weight: bold;">Вкупно зависни трошоци:</td>
+            <td class="dc-value" style="font-weight: bold;">{!! format_money_pdf(array_sum($dependent_costs), $currency) !!}</td>
+        </tr>
+    </table>
+    @endif
+
+    <table class="kap-table">
         <thead>
             {{-- Group header row --}}
             <tr>
@@ -201,7 +243,7 @@
                     Р.бр.
                     <span class="col-header-sub">1</span>
                 </th>
-                <th rowspan="2" style="width: 13%;">
+                <th rowspan="2" style="width: 14%;">
                     Назив на<br>стоките
                     <span class="col-header-sub">2</span>
                 </th>
@@ -209,25 +251,26 @@
                     Ед.<br>мера
                     <span class="col-header-sub">3</span>
                 </th>
-                <th rowspan="2" style="width: 4%;">
+                <th rowspan="2" style="width: 5%;">
                     Кол.
                     <span class="col-header-sub">4</span>
                 </th>
                 <th class="group-header" colspan="2">
-                    Набавна вредност на стоките
+                    Фактурна вредност без ДДВ
+                </th>
+                <th rowspan="2" style="width: 7%;">
+                    Зависни<br>трошоци
+                    <span class="col-header-sub">7</span>
+                </th>
+                <th rowspan="2" style="width: 8%;">
+                    Набавна<br>вредност<br>без ДДВ
+                    <span class="col-header-sub">8 (6+7)</span>
                 </th>
                 <th class="group-header" colspan="2">
                     Маржа / Разлика во цена
                 </th>
                 <th class="group-header" colspan="2">
-                    Стапка на ДДВ
-                </th>
-                <th class="group-header" colspan="2">
-                    Продажна вредност на стоките
-                </th>
-                <th rowspan="2" style="width: 7%;">
-                    Вкупен ДДВ<br>во продажна<br>вредност
-                    <span class="col-header-sub">13</span>
+                    Големопродажна цена без ДДВ
                 </th>
             </tr>
             <tr>
@@ -241,91 +284,80 @@
                 </th>
                 <th style="width: 4%;">
                     %
-                    <span class="col-header-sub">7</span>
+                    <span class="col-header-sub">9</span>
                 </th>
                 <th style="width: 7%;">
                     Износ
-                    <span class="col-header-sub">8</span>
-                </th>
-                <th style="width: 7%;">
-                    ДДВ при<br>набавка
-                    <span class="col-header-sub">9</span>
-                </th>
-                <th style="width: 4%;">
-                    Стапка<br>%
                     <span class="col-header-sub">10</span>
                 </th>
-                <th style="width: 6%;">
+                <th style="width: 7%;">
                     Единечна<br>цена
                     <span class="col-header-sub">11</span>
                 </th>
-                <th style="width: 7%;">
-                    Износ<br>(4×11)
+                <th style="width: 8%;">
+                    Износ<br>(8+10)
                     <span class="col-header-sub">12</span>
                 </th>
             </tr>
         </thead>
         <tbody>
             @php
+                $totalFakturna = 0;
+                $totalZavisni = 0;
                 $totalNabavna = 0;
                 $totalMarzha = 0;
-                $totalNabavnaVat = 0;
                 $totalProdazhna = 0;
-                $totalProdazhnaVat = 0;
             @endphp
 
             @foreach($items as $i => $item)
             @php
                 $qty = $item['quantity'] ?? 0;
-                $unitPriceNabavna = $item['unit_price'] ?? 0;
+                $unitPrice = $item['unit_price'] ?? 0;
+                $fakturnaIznos = $item['fakturna_iznos'] ?? 0;
+                $zavisniTroshoci = $item['zavisni_troshoci'] ?? 0;
                 $nabavnaIznos = $item['nabavna_iznos'] ?? 0;
                 $marzha = $item['marzha'] ?? 0;
                 $marzhaPercent = $item['marzha_percent'] ?? 0;
-                $vatAmount = $item['vat_amount'] ?? 0;
-                $vatRate = $item['vat_rate'] ?? 0;
                 $unitPriceProdazhna = $item['unit_price_prodazhna'] ?? 0;
                 $prodazhnaIznos = $item['prodazhna_iznos'] ?? 0;
-                $prodazhnaVat = $item['prodazhna_vat'] ?? 0;
 
+                $totalFakturna += $fakturnaIznos;
+                $totalZavisni += $zavisniTroshoci;
                 $totalNabavna += $nabavnaIznos;
                 $totalMarzha += $marzha;
-                $totalNabavnaVat += $vatAmount;
                 $totalProdazhna += $prodazhnaIznos;
-                $totalProdazhnaVat += $prodazhnaVat;
             @endphp
             <tr class="entry-row">
                 <td class="cell-center">{{ $i + 1 }}</td>
                 <td>{{ $item['name'] ?? '' }}</td>
                 <td class="cell-center">{{ $item['unit'] ?? 'ком.' }}</td>
                 <td class="cell-center">{{ number_format($qty, $qty == floor($qty) ? 0 : 2) }}</td>
-                <td class="cell-number">{!! format_money_pdf($unitPriceNabavna, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($unitPrice, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($fakturnaIznos, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($zavisniTroshoci, $currency) !!}</td>
                 <td class="cell-number">{!! format_money_pdf($nabavnaIznos, $currency) !!}</td>
                 <td class="cell-center">{{ number_format($marzhaPercent, $marzhaPercent == floor($marzhaPercent) ? 0 : 2) }}%</td>
                 <td class="cell-number">{!! format_money_pdf($marzha, $currency) !!}</td>
-                <td class="cell-number">{!! format_money_pdf($vatAmount, $currency) !!}</td>
-                <td class="cell-center">{{ $vatRate > 0 ? number_format($vatRate, $vatRate == floor($vatRate) ? 0 : 2) . '%' : '-' }}</td>
                 <td class="cell-number">{!! format_money_pdf($unitPriceProdazhna, $currency) !!}</td>
                 <td class="cell-number">{!! format_money_pdf($prodazhnaIznos, $currency) !!}</td>
-                <td class="cell-number">{!! format_money_pdf($prodazhnaVat, $currency) !!}</td>
             </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr class="total-row">
                 <td colspan="5" style="text-align: left;">ВКУПНО</td>
+                <td class="cell-number">{!! format_money_pdf($totalFakturna, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($totalZavisni, $currency) !!}</td>
                 <td class="cell-number">{!! format_money_pdf($totalNabavna, $currency) !!}</td>
                 <td></td>
                 <td class="cell-number">{!! format_money_pdf($totalMarzha, $currency) !!}</td>
-                <td class="cell-number">{!! format_money_pdf($totalNabavnaVat, $currency) !!}</td>
-                <td></td>
                 <td></td>
                 <td class="cell-number">{!! format_money_pdf($totalProdazhna, $currency) !!}</td>
-                <td class="cell-number">{!! format_money_pdf($totalProdazhnaVat, $currency) !!}</td>
             </tr>
         </tfoot>
     </table>
 
-    <p class="form-ref">Образец "ПЛТ" — Приемен лист во трговијата на мало / Правилник за евиденција Сл. весник 51/04; 89/04</p>
+    <p class="form-ref">Образец „КАП" — Калкулација на големопродажна цена / Правилник за евиденција Сл. весник 51/04; 89/04</p>
 
     <table class="signature-section">
         <tr>

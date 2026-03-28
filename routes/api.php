@@ -514,6 +514,8 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/{id}/send-invoice', [FiscalDeviceController::class, 'sendInvoice']);
                 Route::get('/{id}/daily-report', [FiscalDeviceController::class, 'dailyReport']);
                 Route::get('/{id}/receipts', [FiscalDeviceController::class, 'receipts']);
+                Route::post('/{id}/record-receipt', [FiscalDeviceController::class, 'recordReceipt']);
+                Route::post('/{id}/record-z-report', [FiscalDeviceController::class, 'recordZReport']);
             });
 
             // Fiscal Monitor — Fraud Detection (Item #7)
@@ -526,6 +528,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/alerts', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'alerts']);
                 Route::patch('/alerts/{id}', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'updateAlert']);
                 Route::get('/audit-report', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'auditReport']);
+                Route::get('/devices/{id}', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'deviceDetail']);
             });
 
             // Company Lookup (Central Registry)
@@ -1014,11 +1017,22 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/smart-reorder', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'smartReorder']);
                 Route::get('/net-requirements', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'netRequirements']);
 
-                // Gantt scheduling
+                // Gantt scheduling + auto-schedule
                 Route::get('/gantt', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'ganttData']);
                 Route::patch('/orders/{order}/reschedule', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'reschedule']);
+                Route::post('/auto-schedule', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'autoSchedule']);
+
+                // Dependency chains
+                Route::put('/orders/{order}/dependencies', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'setDependencies']);
+
+                // Barcode scanning
+                Route::post('/orders/{order}/scan', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'scanBarcode']);
+
+                // QC disposition (rework/scrap)
+                Route::post('/orders/{order}/qc-checks/{check}/dispose', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'disposeQcCheck']);
 
                 // Reports & PDFs
+                Route::get('/reports/qc-metrics', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'qcMetrics']);
                 Route::get('/reports/cost-analysis', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'costAnalysis']);
                 Route::get('/reports/variance', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'varianceReport']);
                 Route::get('/reports/wastage', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'wastageReport']);
@@ -1912,6 +1926,28 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         // Образец ЕТУ — Трговски услуги
         Route::get('/etu', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'etuData']);
         Route::get('/etu/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'etuExport']);
+
+        // КАП — Калкулација на големопродажна цена (per-bill)
+        Route::get('/kap/{bill}', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'kapData']);
+        Route::get('/kap/{bill}/export', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'kapExport']);
+
+        // Нивелација CRUD
+        Route::prefix('nivelacii')->group(function () {
+            Route::get('/', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiIndex']);
+            Route::post('/', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiStore']);
+            Route::get('/pending-check', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiPendingCheck']);
+            Route::get('/{id}', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiShow']);
+            Route::put('/{id}', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiUpdate']);
+            Route::post('/{id}/approve', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiApprove']);
+            Route::post('/{id}/void', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiVoid']);
+            Route::get('/{id}/export', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiExport']);
+        });
+
+        // Преносница PDF (uses existing InventoryDocument)
+        Route::get('/prenosnica/{document}/export', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'prenosnicaExport']);
+
+        // Apply prices from ПЛТ/КАП calculation
+        Route::post('/apply-prices', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'applyPrices']);
 
         // F1: Compensations (Partner)
         Route::prefix('compensations')->group(function () {

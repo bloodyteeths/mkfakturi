@@ -1363,18 +1363,21 @@ class PartnerAccountingReportsController extends Controller
 
             // Get VAT info from item taxes
             $vatRate = 0;
-            $vatAmount = 0;
+            $vatAmountNabavna = 0;
             foreach ($billItem->taxes as $tax) {
                 $vatRate = $tax->taxType->percent ?? 0;
-                $vatAmount += (int) ($tax->amount ?? 0);
+                $vatAmountNabavna += (int) ($tax->amount ?? 0);
             }
 
-            // Продажна = набавна + ДДВ + маржа (approximate: use total)
-            $prodazhnaIznos = $nabavnaIznos + $vatAmount;
-            $unitPriceProdazhna = $qty > 0 ? (int) round($prodazhnaIznos / $qty) : 0;
+            // Маржа (markup) — per item setting or company default
+            $markupPercent = $billItem->item?->markup_percent ?? config('mk.pricing.default_markup_percent', 25);
+            $marzha = (int) round($nabavnaIznos * $markupPercent / 100);
 
-            // ДДВ во продажна вредност (пресметковна стапка)
-            $prodazhnaVat = $vatAmount;
+            // Продажна = (набавна + маржа) + ДДВ(набавна + маржа)
+            $prodazhnaBezDdv = $nabavnaIznos + $marzha;
+            $ddvVoProdazhna = $vatRate > 0 ? (int) round($prodazhnaBezDdv * $vatRate / 100) : 0;
+            $prodazhnaIznos = $prodazhnaBezDdv + $ddvVoProdazhna;
+            $unitPriceProdazhna = $qty > 0 ? (int) round($prodazhnaIznos / $qty) : 0;
 
             $items[] = [
                 'name' => $billItem->item?->name ?? $billItem->name ?? '',
@@ -1382,11 +1385,14 @@ class PartnerAccountingReportsController extends Controller
                 'quantity' => $qty,
                 'unit_price' => $unitPrice,
                 'nabavna_iznos' => $nabavnaIznos,
-                'vat_amount' => $vatAmount,
+                'marzha' => $marzha,
+                'marzha_percent' => $markupPercent,
+                'vat_amount' => $vatAmountNabavna,
                 'vat_rate' => $vatRate,
+                'prodazhna_bez_ddv' => $prodazhnaBezDdv,
                 'unit_price_prodazhna' => $unitPriceProdazhna,
                 'prodazhna_iznos' => $prodazhnaIznos,
-                'prodazhna_vat' => $prodazhnaVat,
+                'prodazhna_vat' => $ddvVoProdazhna,
             ];
         }
 

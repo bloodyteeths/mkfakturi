@@ -40,6 +40,9 @@ class ItemResource extends JsonResource
             'inventory_account_id' => $this->inventory_account_id,
             'cogs_account_id' => $this->cogs_account_id,
             'purchase_account_id' => $this->purchase_account_id,
+            'retail_price' => $this->retail_price,
+            'wholesale_price' => $this->wholesale_price,
+            'markup_percent' => $this->markup_percent,
             'formatted_created_at' => $this->formattedCreatedAt,
             'unit' => $this->whenLoaded('unit', function () {
                 return UnitResource::make($this->unit);

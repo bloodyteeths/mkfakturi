@@ -38,6 +38,12 @@ window.Facturino.addMessages(mfgMessages)
 import fiscalMonitorMessages from '@/scripts/admin/i18n/fiscal-monitor.js'
 window.Facturino.addMessages(fiscalMonitorMessages)
 
+import tradeMessages from '@/scripts/admin/i18n/trade.js'
+window.Facturino.addMessages(tradeMessages)
+
+import fiscalPrinterMessages from '@/scripts/admin/i18n/fiscal-printer.js'
+window.Facturino.addMessages(fiscalPrinterMessages)
+
 // Register service worker for PWA support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

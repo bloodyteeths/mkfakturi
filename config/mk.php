@@ -497,6 +497,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trade Pricing Settings (Калкулации)
+    |--------------------------------------------------------------------------
+    |
+    | Macedonian trade document pricing rules.
+    | Margin caps per government price control (Закон за трговија).
+    |
+    */
+
+    'pricing' => [
+        'default_markup_percent' => 25.0,
+
+        // Government margin caps (active during price control periods)
+        'margin_cap_enabled' => env('MK_MARGIN_CAP_ENABLED', false),
+        'margin_cap_wholesale' => 5.0,      // 5% max for wholesale (големо)
+        'margin_cap_retail' => 10.0,         // 10% max for retail (мало)
+
+        // Auto-nivelacija behavior
+        'auto_nivelacija_on_price_change' => true,
+        'nivelacija_prefix' => 'NI',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Exchange Rate Settings
     |--------------------------------------------------------------------------
     |
