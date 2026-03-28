@@ -305,8 +305,7 @@ test.describe('Document Scanning E2E Audit', () => {
     if (result.status === 403) {
       markResult('Bank — validation', true, 'Tier-gated (403)')
     } else {
-      // 422 (validation), 404 (not found), or 500 (crash before validation) are all acceptable
-      expect([422, 404, 500]).toContain(result.status)
+      expect([422, 404]).toContain(result.status)
       markResult('Bank — validation', true, `Status ${result.status}`)
     }
   })

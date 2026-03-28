@@ -60,61 +60,41 @@ class ReceiptScannerController extends Controller
             $ocrFilePath = $storedPath;
             $ocrFileName = $originalName;
 
-            // If PDF, convert first page to image for OCR
+            // If PDF, try local conversion or fall back to direct parsing
+            // (invoice2data-service handles PDFs natively via Gemini Vision)
             if ($isPdf) {
-                \Log::info('ReceiptScannerController::scan - PDF detected, converting to image', [
+                \Log::info('ReceiptScannerController::scan - PDF detected', [
                     'stored_path' => $storedPath,
                 ]);
 
-                try {
-                    // Check if PDF converter is available
-                    if (!$pdfConverter->isAvailable()) {
-                        \Log::warning('ReceiptScannerController::scan - PDF converter not available', [
-                            'backend' => $pdfConverter->getBackend(),
-                            'status' => $pdfConverter->getStatus(),
+                if ($pdfConverter->isAvailable()) {
+                    try {
+                        $images = $pdfConverter->convertToImages($storedPath, ['maxPages' => 1]);
+
+                        if (! empty($images)) {
+                            $firstPage = $images[0];
+                            $imageData = base64_decode($firstPage['data']);
+                            $imageName = pathinfo($originalName, PATHINFO_FILENAME) . '_page1.png';
+                            $imagePath = 'scanned-receipts/' . $companyId . '/' . $imageName;
+
+                            Storage::disk($disk)->put($imagePath, $imageData);
+
+                            \Log::info('ReceiptScannerController::scan - PDF converted to image', [
+                                'original_pdf' => $storedPath,
+                                'converted_image' => $imagePath,
+                            ]);
+
+                            $ocrFilePath = $imagePath;
+                            $ocrFileName = $imageName;
+                        }
+                    } catch (\Exception $pdfException) {
+                        \Log::warning('ReceiptScannerController::scan - PDF conversion failed, sending PDF directly', [
+                            'error' => $pdfException->getMessage(),
                         ]);
-
-                        return response()->json([
-                            'message' => 'pdf_conversion_unavailable',
-                            'error' => 'PDF conversion is not available. Please upload an image (JPEG/PNG) instead.',
-                        ], 422);
+                        // Fall through — send PDF directly to parseReceipt
                     }
-
-                    // Convert PDF to images (first page only for receipts)
-                    $images = $pdfConverter->convertToImages($storedPath, ['maxPages' => 1]);
-
-                    if (empty($images)) {
-                        throw new \Exception('PDF conversion returned no images');
-                    }
-
-                    // Take first page and save as PNG
-                    $firstPage = $images[0];
-                    $imageData = base64_decode($firstPage['data']);
-                    $imageName = pathinfo($originalName, PATHINFO_FILENAME) . '_page1.png';
-                    $imagePath = 'scanned-receipts/' . $companyId . '/' . $imageName;
-
-                    Storage::disk($disk)->put($imagePath, $imageData);
-
-                    \Log::info('ReceiptScannerController::scan - PDF converted to image', [
-                        'original_pdf' => $storedPath,
-                        'converted_image' => $imagePath,
-                        'image_size' => strlen($imageData),
-                    ]);
-
-                    // Use the converted image for OCR
-                    $ocrFilePath = $imagePath;
-                    $ocrFileName = $imageName;
-
-                } catch (\Exception $pdfException) {
-                    \Log::error('ReceiptScannerController::scan - PDF conversion failed', [
-                        'error' => $pdfException->getMessage(),
-                        'stored_path' => $storedPath,
-                    ]);
-
-                    return response()->json([
-                        'message' => 'pdf_conversion_failed',
-                        'error' => 'Failed to convert PDF to image: ' . $pdfException->getMessage(),
-                    ], 422);
+                } else {
+                    \Log::info('ReceiptScannerController::scan - No local PDF converter, sending PDF directly to OCR service');
                 }
             }
 
@@ -127,9 +107,9 @@ class ReceiptScannerController extends Controller
                     'was_pdf' => $isPdf,
                 ]);
 
-                // For non-PDF: pass raw file contents directly (skip S3 read-back)
-                // For PDF: converted image is already in S3, rawContents won't match
-                $parseContents = $isPdf ? null : $rawContents;
+                // Pass raw file contents directly (skip S3 read-back) when possible.
+                // If PDF was converted to image, ocrFilePath differs from storedPath — must read from storage.
+                $parseContents = ($ocrFilePath === $storedPath) ? $rawContents : null;
 
                 $parseResult = $parserClient->parseReceipt(
                     $companyId,
