@@ -35,7 +35,7 @@ class MonitorServices extends Command
 
     public function handle(): int
     {
-        $alertEmail = env('ADMIN_EMAIL', 'atillatkulu@gmail.com');
+        $alertEmail = config('mail.admin_email');
         $failures = [];
 
         foreach ($this->getChecks() as $name => $check) {

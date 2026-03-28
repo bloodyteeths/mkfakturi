@@ -442,7 +442,7 @@ class Handler extends ExceptionHandler
     protected function notifyUserError(Throwable $exception, array $context): void
     {
         try {
-            $adminEmail = env('ADMIN_EMAIL');
+            $adminEmail = config('mail.admin_email');
             if (empty($adminEmail)) {
                 return;
             }

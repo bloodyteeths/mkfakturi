@@ -4,6 +4,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Alert Email
+    |--------------------------------------------------------------------------
+    |
+    | The email address that receives service monitor alerts and user error
+    | notifications. Set via ADMIN_EMAIL environment variable.
+    |
+    */
+
+    'admin_email' => env('ADMIN_EMAIL', 'atillatkulu@gmail.com'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Mailer
     |--------------------------------------------------------------------------
     |

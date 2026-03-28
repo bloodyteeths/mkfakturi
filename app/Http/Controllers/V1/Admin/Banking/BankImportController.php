@@ -187,6 +187,8 @@ class BankImportController extends Controller
                     'import_log_id' => $importLog?->id,
                 ],
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e; // Let Laravel return 422 with field errors
         } catch (\Exception $e) {
             $parseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
 
