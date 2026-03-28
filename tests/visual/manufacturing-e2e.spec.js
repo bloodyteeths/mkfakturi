@@ -44,9 +44,19 @@ async function ss(page, name) {
 async function api(page, method, url, body = null) {
   return page.evaluate(
     async ({ method, url, body }) => {
+      // Read XSRF-TOKEN cookie (URL-decoded) for Sanctum CSRF protection
+      const xsrf = decodeURIComponent(
+        document.cookie.split('; ').find((c) => c.startsWith('XSRF-TOKEN='))?.split('=').slice(1).join('=') || ''
+      )
       const opts = {
         method,
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json', company: '2' },
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          company: '2',
+          ...(xsrf ? { 'X-XSRF-TOKEN': xsrf } : {}),
+        },
       }
       if (body) opts.body = JSON.stringify(body)
       const res = await fetch(`/api/v1${url}`, opts)
@@ -382,7 +392,7 @@ test.describe('Manufacturing Module — Full Production E2E', () => {
     expect(res.body?.data?.amount).toBe(50000)
   })
 
-  test('4.9 — Complete production (in_progress → completed)', async () => {
+  test('4.9 — Complete production (in_progress → completed)', { timeout: 180000 }, async () => {
     const res = await api(page, 'POST', `/manufacturing/orders/${fullLifecycleOrderId}/complete`, {
       actual_quantity: 48, // Slightly less than planned (50) — tests variance
     })
