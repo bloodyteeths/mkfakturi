@@ -47,6 +47,14 @@ class UserRequest extends FormRequest
             'companies.*.role' => [
                 'required',
             ],
+            'companies.*.is_legal_representative' => [
+                'nullable',
+                'boolean',
+            ],
+            'companies.*.is_signing_authority' => [
+                'nullable',
+                'boolean',
+            ],
             'is_existing_user' => [
                 'nullable',
                 'boolean',

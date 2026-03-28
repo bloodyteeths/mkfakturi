@@ -732,7 +732,7 @@
         "link_suggestion": "Добавувачот \"{name}\" има ист ЕМБС. Дали сакате да ги поврзете?",
         "linked_successfully": "Добавувачот е успешно поврзан",
         "unlinked_successfully": "Поврзаноста е раскината",
-        "ledger_card": "Картица на коминтент",
+        "ledger_card": "Картица на купувач",
         "net_balance": "Нето салдо",
         "receivable": "Побарување",
         "payable": "Обврска",
@@ -819,7 +819,7 @@
         "link_suggestion": "Клиентот \"{name}\" има ист ЕМБС. Дали сакате да ги поврзете?",
         "linked_successfully": "Клиентот е успешно поврзан",
         "unlinked_successfully": "Поврзаноста е раскината",
-        "ledger_card": "Картица на коминтент",
+        "ledger_card": "Картица на добавувач",
         "cannot_delete_linked": "Не може да се избрише поврзан добавувач. Прво раскинете ја поврзаноста.",
         "search_customer": "Пребарај клиент...",
         "no_matching_suppliers": "Нема добавувачи што се совпаѓаат со пребарувањето"
@@ -2206,7 +2206,25 @@
         "deleted": "Трошокот е успешно избришан",
         "expenses": "Трошоци",
         "empty_description": "Евидентирајте ги вашите трошоци",
-        "expense_number": "Број на трошок"
+        "expense_number": "Број на трошок",
+        "vat_rate": "ДДВ стапка",
+        "vat_amount": "ДДВ износ",
+        "tax_base": "Основица (без ДДВ)",
+        "select_vat_rate": "Изберете ДДВ стапка",
+        "cost_center": "Место на трошок",
+        "select_cost_center": "Изберете место на трошок",
+        "status_draft": "Нацрт",
+        "status_approved": "Одобрен",
+        "status_posted": "Книжен",
+        "approve_expense": "Одобри трошок",
+        "approved_message": "Трошокот е успешно одобрен",
+        "clone_expense": "Дуплирај трошок",
+        "cloned_message": "Трошокот е успешно дуплиран",
+        "print_expense": "Печати трошок",
+        "nalog_za_isplata": "Налог за исплата",
+        "kniga_primeni_fakturi": "Книга на примени фактури",
+        "financial_details": "Финансиски детали",
+        "vat_recap": "Рекапитулација на ДДВ"
     },
     "login": {
         "email": "Е-пошта",
@@ -2368,7 +2386,17 @@
         "invited": "Поканата е успешно испратена",
         "users": "Корисници",
         "empty_description": "Додајте корисници на вашата компанија",
-        "select_companies": "Изберете компании"
+        "select_companies": "Изберете компании",
+        "roles": {
+            "super_admin": "Супер админ",
+            "admin": "Администратор",
+            "user": "Корисник",
+            "partner": "Партнер",
+            "accountant": "Сметководител"
+        },
+        "mk_compliance_section": "Законски означувања (МК)",
+        "legal_representative": "Управител (Законски застапник)",
+        "signing_authority": "Овластено лице за потпишување"
     },
     "reports": {
         "cash_flow": {
@@ -2425,6 +2453,28 @@
         "download_pdf": "Преземи PDF",
         "view_pdf": "Прегледај PDF",
         "update_report": "Ажурирај извештај",
+        "trade_documents": {
+            "title": "Трговски документи",
+            "document_type": "Тип на документ",
+            "date_range": "Период",
+            "from_date": "Од датум",
+            "to_date": "До датум",
+            "loading": "Вчитување трговски документи...",
+            "no_documents": "Нема трговски документи за избраниот период",
+            "showing_count": "Прикажани {count} документи",
+            "col_date": "Датум",
+            "col_type": "Тип",
+            "col_number": "Број на документ",
+            "col_party": "Субјект / Опис",
+            "col_amount": "Износ",
+            "col_actions": "Акции",
+            "type_all": "Сите документи",
+            "type_et": "ЕТ - Евиденција во трговија",
+            "type_kap": "КАП - Калкулација на големопрод. цена",
+            "type_plt": "ПЛТ - Приемен лист",
+            "type_nivelacija": "Нивелација - Промена на цена",
+            "type_prenosnica": "Преносница - Пренос меѓу магацини"
+        },
         "report": "Извештај | Извештаи",
         "profit_loss": {
             "profit_loss": "Добивка и загуба",
@@ -2727,6 +2777,13 @@
             "privacy_data": "Приватност и податоци",
             "fiscal_devices": "Фискални апарати",
             "invite_company": "Покани компанија"
+        },
+        "groups": {
+            "account": "Профил",
+            "business": "Бизнис",
+            "team": "Тим",
+            "integrations": "Интеграции",
+            "system": "Систем"
         },
         "invite_company_description": "Поканете компанија да се поврзе со вашата сметка.",
         "privacy_data": {
@@ -4313,7 +4370,8 @@
         "string": "Ова поле мора да биде текст",
         "timezone": "Ова поле мора да биде валидна временска зона",
         "uploaded": "Прикачувањето не успеа",
-        "uuid": "Ова поле мора да биде валиден UUID"
+        "uuid": "Ова поле мора да биде валиден UUID",
+        "password_match": "Лозинките мора да се совпаѓаат"
     },
     "errors": {
         "400": "Лошо барање",
@@ -4469,6 +4527,10 @@
         "uploading": "Прикачува...",
         "supported_formats": "Поддржани формати: CSV, XLS, XLSX",
         "file_formats": "Формати на фајлови",
+        "source_auto_detect": "Автоматско откривање",
+        "source_generic_csv": "Генерички / Рачен CSV",
+        "source_system": "Изворен систем",
+        "source_system_hint": "Изберете го софтверот од кој се извезени податоците за подобро мапирање на полиња.",
         "supported_sources": "Поддржани извори",
         "generic_formats": "Општи формати",
         "file_uploaded_successfully": "Фајлот е успешно прикачен",

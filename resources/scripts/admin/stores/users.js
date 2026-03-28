@@ -24,6 +24,7 @@ export const useUsersStore = (useWindow = false) => {
         name: '',
         email: '',
         password: null,
+        confirm_password: null,
         phone: null,
         companies: [],
       },
@@ -35,6 +36,7 @@ export const useUsersStore = (useWindow = false) => {
           name: '',
           email: '',
           password: null,
+          confirm_password: null,
           phone: null,
           role: null,
           companies: [],
@@ -204,6 +206,46 @@ export const useUsersStore = (useWindow = false) => {
               reject(err)
             })
         })
+      },
+
+      resendInvitation(userId) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/users/${userId}/resend-invitation`)
+            .then((response) => {
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      toggleActive(userId) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/users/${userId}/toggle-active`)
+            .then((response) => {
+              const notificationStore = useNotificationStore()
+              const user = response.data.data
+              let pos = this.users.findIndex((u) => u.id === user.id)
+              if (pos >= 0) this.users[pos] = user
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('users.updated_message'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      exportCsv() {
+        window.open(`/api/v1/admin/users/export/csv`, '_blank')
       },
 
       searchUsers(params) {

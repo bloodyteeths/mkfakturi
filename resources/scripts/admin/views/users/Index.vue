@@ -126,12 +126,23 @@
           />
         </BaseInputGroup>
 
-        <BaseInputGroup class="flex-1 mt-2" :label="$t('users.phone')">
+        <BaseInputGroup class="flex-1 mt-2 mr-4" :label="$t('users.phone')">
           <BaseInput
             v-model="filters.phone"
             type="text"
             name="phone"
             autocomplete="off"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup class="flex-1 mt-2" :label="$t('users.role')">
+          <BaseMultiselect
+            v-model="filters.role"
+            :options="roleOptions"
+            label="label"
+            value-prop="value"
+            :can-deselect="true"
+            :placeholder="$t('users.select_role')"
           />
         </BaseInputGroup>
       </BaseFilterWrapper>
@@ -228,6 +239,25 @@
 
           <template #cell-phone="{ row }">
             <span>{{ row.data.phone ? row.data.phone : '-' }} </span>
+          </template>
+
+          <template #cell-role="{ row }">
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+              :class="{
+                'bg-purple-100 text-purple-800': row.data.role === 'super admin',
+                'bg-blue-100 text-blue-800': row.data.role === 'admin',
+                'bg-gray-100 text-gray-800': row.data.role === 'user',
+                'bg-green-100 text-green-800': row.data.role === 'partner',
+                'bg-yellow-100 text-yellow-800': row.data.role === 'accountant',
+              }"
+            >
+              {{ row.data.role || '-' }}
+            </span>
+          </template>
+
+          <template #cell-company_names="{ row }">
+            <span class="text-sm text-gray-600">{{ row.data.company_names || '-' }}</span>
           </template>
 
           <template #cell-created_at="{ row }">
@@ -427,6 +457,7 @@ let filters = reactive({
   name: '',
   email: '',
   phone: '',
+  role: null,
 })
 
 let activityFilters = reactive({
@@ -439,6 +470,14 @@ const eventOptions = computed(() => [
   { value: 'created', label: t('activity_log.created') },
   { value: 'updated', label: t('activity_log.updated') },
   { value: 'deleted', label: t('activity_log.deleted') },
+])
+
+const roleOptions = computed(() => [
+  { value: 'super admin', label: t('users.roles.super_admin') },
+  { value: 'admin', label: t('users.roles.admin') },
+  { value: 'user', label: t('users.roles.user') },
+  { value: 'partner', label: t('users.roles.partner') },
+  { value: 'accountant', label: t('users.roles.accountant') },
 ])
 
 const entityTypeOptions = computed(() => [
@@ -472,6 +511,16 @@ const userTableColumns = computed(() => {
     {
       key: 'phone',
       label: t('users.phone'),
+    },
+    {
+      key: 'role',
+      label: t('users.role'),
+      sortable: false,
+    },
+    {
+      key: 'company_names',
+      label: t('users.companies'),
+      sortable: false,
     },
     {
       key: 'created_at',
@@ -576,6 +625,7 @@ async function fetchData({ page, filter, sort }) {
     display_name: filters.name !== null ? filters.name : '',
     phone: filters.phone !== null ? filters.phone : '',
     email: filters.email !== null ? filters.email : '',
+    role: filters.role || '',
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,
@@ -636,6 +686,7 @@ function clearFilter() {
   filters.name = ''
   filters.email = ''
   filters.phone = null
+  filters.role = null
 }
 
 function toggleFilter() {

@@ -569,7 +569,7 @@
         "link_suggestion": "Tedarikçi \"{name}\" aynı Vergi No'ya sahip. Bağlamak ister misiniz?",
         "linked_successfully": "Tedarikçi başarıyla bağlandı",
         "unlinked_successfully": "Bağlantı kaldırıldı",
-        "ledger_card": "Cari Kart",
+        "ledger_card": "Müşteri Hesap Kartı",
         "net_balance": "Net Bakiye",
         "receivable": "Alacak",
         "payable": "Borç",
@@ -1443,7 +1443,25 @@
         "deleted": "Giderот başarıyla silindi",
         "expenses": "Giderler",
         "empty_description": "Евveдентveрајте вашveте giderler",
-        "expense_number": "Numara gider"
+        "expense_number": "Numara gider",
+        "vat_rate": "KDV Oranı",
+        "vat_amount": "KDV Tutarı",
+        "tax_base": "Matrah (KDV hariç)",
+        "select_vat_rate": "KDV oranı seçin",
+        "cost_center": "Maliyet Merkezi",
+        "select_cost_center": "Maliyet merkezi seçin",
+        "status_draft": "Taslak",
+        "status_approved": "Onaylandı",
+        "status_posted": "Kaydedildi",
+        "approve_expense": "Gideri onayla",
+        "approved_message": "Gider başarıyla onaylandı",
+        "clone_expense": "Gideri kopyala",
+        "cloned_message": "Gider başarıyla kopyalandı",
+        "print_expense": "Gideri yazdır",
+        "nalog_za_isplata": "Ödeme Emri",
+        "kniga_primeni_fakturi": "Alınan Faturalar Defteri",
+        "financial_details": "Mali Detaylar",
+        "vat_recap": "KDV Özeti"
     },
     "login": {
         "email": "E-posta",
@@ -1605,7 +1623,17 @@
         "invited": "Davetта başarıyla gönderildi",
         "users": "Kullanıcılar",
         "empty_description": "Ekleте kullanıcılar sizin şirket",
-        "select_companies": "Seçin компанveve"
+        "select_companies": "Seçin компанveve",
+        "roles": {
+            "super_admin": "Süper Yönetici",
+            "admin": "Yönetici",
+            "user": "Kullanıcı",
+            "partner": "Partner",
+            "accountant": "Muhasebeci"
+        },
+        "mk_compliance_section": "Yasal Atamalar (MK)",
+        "legal_representative": "Yasal Temsilci (Управител)",
+        "signing_authority": "İmza Yetkili Kişi"
     },
     "reports": {
         "cash_flow": {
@@ -1910,6 +1938,13 @@
             "privacy_data": "Прveватamaст ve altındaатоцve",
             "fiscal_devices": "Mali Cihazlar",
             "invite_company": "Şirket Davet Et"
+        },
+        "groups": {
+            "account": "Hesap",
+            "business": "İşletme",
+            "team": "Ekip",
+            "integrations": "Entegrasyonlar",
+            "system": "Sistem"
         },
         "address_information": {
             "section_description": "  You can update Your Address information using form below."
@@ -3671,7 +3706,8 @@
         "string": "Ова alan olmalıdır текст",
         "timezone": "Ова alan olmalıdır валveд временска зо",
         "uploaded": "Прveкачувањето не успеа",
-        "uuid": "Ова alan olmalıdır валveден UUID"
+        "uuid": "Ова alan olmalıdır валveден UUID",
+        "password_match": "Şifreler eşleşmelidir"
     },
     "errors": {
         "400": "Лошо барање",
@@ -4239,7 +4275,7 @@
         "link_suggestion": "Müşteri \"{name}\" aynı Vergi No'ya sahip. Bağlamak ister misiniz?",
         "linked_successfully": "Müşteri başarıyla bağlandı",
         "unlinked_successfully": "Bağlantı kaldırıldı",
-        "ledger_card": "Cari Kart",
+        "ledger_card": "Tedarikçi Hesap Kartı",
         "cannot_delete_linked": "Bağlı tedarikçi silinemez. Önce bağlantıyı kaldırın.",
         "search_customer": "Müşteri ara...",
         "no_matching_suppliers": "Aramayla eşleşen tedarikçi bulunamadı"
@@ -5952,6 +5988,10 @@
         "browse_files": "Преlisteј фајловve",
         "uploading": "Прveкачува...",
         "file_formats": "Biçimve фајловve",
+        "source_auto_detect": "Otomatik algilama",
+        "source_generic_csv": "Genel / Manuel CSV",
+        "source_system": "Kaynak sistem",
+        "source_system_hint": "Daha iyi alan eslemesi icin verilerinizin disa aktarildigi yazilimi secin.",
         "supported_sources": "Пdanдржанve veзрve",
         "generic_formats": "Општve biçimve",
         "file_uploaded_successfully": "Фајлот е başarılı качен",

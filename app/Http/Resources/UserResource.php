@@ -34,11 +34,19 @@ class UserResource extends JsonResource
             'is_owner' => $this->isOwner(),
             'roles' => $this->roles,
             'formatted_created_at' => $this->formattedCreatedAt,
+            'is_active' => $this->is_active ?? true,
+            'last_login_at' => $this->last_login_at,
+            'formatted_last_login' => $this->last_login_at
+                ? $this->last_login_at->format('Y-m-d H:i')
+                : null,
             'currency' => $this->whenLoaded('currency', function () {
                 return new CurrencyResource($this->currency);
             }),
             'companies' => $this->whenLoaded('companies', function () {
                 return CompanyResource::collection($this->companies);
+            }),
+            'company_names' => $this->whenLoaded('companies', function () {
+                return $this->companies->pluck('name')->implode(', ');
             }),
             // Include onboarding status for partner users
             'onboarding_completed_at' => $this->when(

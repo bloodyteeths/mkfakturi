@@ -868,10 +868,17 @@ Route::prefix('/v1')->group(function () {
                     // Support Contacts (from contact form)
                     Route::get('/contacts', [\App\Http\Controllers\V1\SupportContactController::class, 'indexAll']);
                     Route::get('/contacts/statistics', [\App\Http\Controllers\V1\SupportContactController::class, 'statistics']);
+                    Route::post('/contacts/bulk-status', [\App\Http\Controllers\V1\SupportContactController::class, 'bulkUpdateStatus']);
+                    Route::post('/contacts/bulk-delete', [\App\Http\Controllers\V1\SupportContactController::class, 'bulkDelete']);
+                    Route::get('/contacts/export', [\App\Http\Controllers\V1\SupportContactController::class, 'export']);
                     Route::get('/contacts/{supportContact}', [\App\Http\Controllers\V1\SupportContactController::class, 'show']);
                     Route::post('/contacts/{supportContact}/status', [\App\Http\Controllers\V1\SupportContactController::class, 'updateStatus']);
                     Route::post('/contacts/{supportContact}/reply', [\App\Http\Controllers\V1\SupportContactController::class, 'reply']);
                     Route::get('/contacts/{supportContact}/attachments/{index}', [\App\Http\Controllers\V1\SupportContactController::class, 'downloadAttachment']);
+                    Route::post('/contacts/{supportContact}/assign', [\App\Http\Controllers\V1\SupportContactController::class, 'assign']);
+                    Route::get('/contacts/{supportContact}/replies', [\App\Http\Controllers\V1\SupportContactController::class, 'listReplies']);
+                    Route::post('/contacts/{supportContact}/replies', [\App\Http\Controllers\V1\SupportContactController::class, 'addReply']);
+                    Route::delete('/contacts/{supportContact}', [\App\Http\Controllers\V1\SupportContactController::class, 'destroy']);
 
                     Route::get('/tickets', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'listAllTickets']);
                     Route::get('/statistics', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'getStatistics']);
@@ -937,7 +944,12 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/journal-entries/{transaction}/reverse', [AccountingReportsController::class, 'reverseJournalEntry']);
                 Route::get('/cash-flow', [AccountingReportsController::class, 'cashFlow']);
                 Route::get('/equity-changes', [AccountingReportsController::class, 'equityChanges']);
+                Route::get('/cash-book', [AccountingReportsController::class, 'cashBook']);
+                Route::get('/cash-book/export', [AccountingReportsController::class, 'cashBookExport']);
+                Route::get('/vat-books', [AccountingReportsController::class, 'vatBooks']);
+                Route::get('/vat-books/export', [AccountingReportsController::class, 'vatBooksExport']);
                 Route::post('/backfill-invoices', [AccountingReportsController::class, 'backfillInvoices']);
+                // CLAUDE-CHECKPOINT: Added cash-book and vat-books routes
 
                 // Fixed Assets
                 Route::prefix('fixed-assets')->group(function () {
@@ -964,8 +976,18 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/export/trial-balance/{hash}', [\App\Http\Controllers\V1\Admin\Report\ReportExportController::class, 'trialBalance']);
                 Route::get('/export/tax-summary/{hash}', [\App\Http\Controllers\V1\Admin\Report\ReportExportController::class, 'taxSummary']);
                 Route::get('/export/expenses/{hash}', [\App\Http\Controllers\V1\Admin\Report\ReportExportController::class, 'expenses']);
+                Route::get('/export/cash-flow/{hash}', [\App\Http\Controllers\V1\Admin\Report\ReportExportController::class, 'cashFlow']); // CLAUDE-CHECKPOINT
+                Route::get('/export/equity-changes/{hash}', [\App\Http\Controllers\V1\Admin\Report\ReportExportController::class, 'equityChanges']); // CLAUDE-CHECKPOINT
                 Route::get('/projects/{id}', [\App\Http\Controllers\V1\Admin\Report\ProjectReportController::class, 'show']);
             });
+
+            // Trade Documents (КАП, ПЛТ, Нивелација, Преносница, ЕТ)
+            // ----------------------------------
+            Route::prefix('trade-documents')->group(function () {
+                Route::get('/', [\App\Http\Controllers\V1\Admin\Report\TradeDocumentsReportController::class, 'index']);
+                Route::get('/trade-book/export', [\App\Http\Controllers\V1\Admin\Report\TradeDocumentsReportController::class, 'tradeBookExport']);
+            });
+            // CLAUDE-CHECKPOINT: Added trade documents report routes
 
             // Migration Wizard (Laravel Excel)
             // Feature flag: FEATURE_MIGRATION_WIZARD
@@ -1003,7 +1025,11 @@ Route::prefix('/v1')->group(function () {
 
                 // Inventory List (for physical counting)
                 Route::get('/inventory-list', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryList']);
+
+                // Inventory Count List PDF (Попис на залихи)
+                Route::get('/inventory-count-list/pdf', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryCountListPdf']);
             });
+            // CLAUDE-CHECKPOINT
 
             // Manufacturing Module
             // ----------------------------------
@@ -1263,6 +1289,10 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/history', [\Modules\Mk\Http\Controllers\CollectionController::class, 'history']);
                 Route::get('/effectiveness', [\Modules\Mk\Http\Controllers\CollectionController::class, 'effectiveness']);
                 Route::get('/opomena/{invoiceId}', [\Modules\Mk\Http\Controllers\CollectionController::class, 'opomena']);
+                Route::get('/ios', [\Modules\Mk\Http\Controllers\CollectionController::class, 'ios']);
+                Route::get('/ios/{customerId}/pdf', [\Modules\Mk\Http\Controllers\CollectionController::class, 'iosPdf']);
+                Route::post('/ios/bulk-send', [\Modules\Mk\Http\Controllers\CollectionController::class, 'iosBulkSend']);
+                Route::get('/interest-note/{customerId}/pdf', [\Modules\Mk\Http\Controllers\CollectionController::class, 'interestNotePdf']);
             });
 
             // ----------------------------------
@@ -1296,6 +1326,11 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/{id}/approve', [\Modules\Mk\Http\Controllers\BudgetController::class, 'approve']);
                 Route::post('/{id}/lock', [\Modules\Mk\Http\Controllers\BudgetController::class, 'lock']);
                 Route::get('/{id}/vs-actual', [\Modules\Mk\Http\Controllers\BudgetController::class, 'budgetVsActual']);
+                Route::post('/{id}/clone', [\Modules\Mk\Http\Controllers\BudgetController::class, 'clone']);
+                Route::post('/{id}/archive', [\Modules\Mk\Http\Controllers\BudgetController::class, 'archive']);
+                Route::get('/{id}/export-csv', [\Modules\Mk\Http\Controllers\BudgetController::class, 'exportCsv']);
+                Route::get('/{id}/export-pdf', [\Modules\Mk\Http\Controllers\BudgetController::class, 'exportPdf']);
+                Route::get('/{id}/export-comparison-pdf', [\Modules\Mk\Http\Controllers\BudgetController::class, 'exportComparisonPdf']);
                 Route::delete('/{id}', [\Modules\Mk\Http\Controllers\BudgetController::class, 'destroy']);
             });
 
@@ -1528,7 +1563,10 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/{id}/complete', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'complete']);
                     Route::post('/{id}/approve', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'approve']);
                     Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'destroy']);
+                    Route::get('/{id}/pdf', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'pdf']);
+                    Route::get('/{id}/report-pdf', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'reportPdf']);
                 });
+                // CLAUDE-CHECKPOINT
 
                 // Dashboard Summary
                 Route::get('/dashboard-summary', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'dashboardSummary']);
@@ -1592,11 +1630,12 @@ Route::prefix('/v1')->group(function () {
         // We only want to gate 'store' (creation), so we'll split it
         Route::get('/users', [UsersController::class, 'index']);
         Route::get('/users/usage', [UsersController::class, 'usage']);
+        Route::get('/users/export/csv', [UsersController::class, 'export']);
         Route::get('/users/{user}', [UsersController::class, 'show']);
         Route::post('/users', [UsersController::class, 'store'])->middleware('user-limit'); // FG-01-31
         Route::put('/users/{user}', [UsersController::class, 'update']);
         Route::patch('/users/{user}', [UsersController::class, 'update']);
-        Route::delete('/users/{user}', [UsersController::class, 'destroy']);
+        Route::post('/users/{user}/resend-invitation', [UsersController::class, 'resendInvitation']);
 
         // Modules
         // ----------------------------------
@@ -1808,22 +1847,66 @@ Route::middleware(['auth:sanctum'])->prefix('v1/partner/subscription')->group(fu
 Route::middleware(['auth:sanctum'])->prefix('billing')->group(function () {
     Route::get('/subscription', function (\Illuminate\Http\Request $request) {
         $user = $request->user();
-        $companyId = $user->companies()->first()?->id ?? $user->company_id ?? 1;
+        // Use company header like other API routes, fallback to first company
+        $companyId = $request->header('company') ?: ($user->companies()->first()?->id ?? $user->company_id);
 
-        return app(\Modules\Mk\Billing\Controllers\SubscriptionController::class)->index($companyId);
+        if (! $companyId) {
+            return response()->json(['data' => null]);
+        }
+
+        return app(\Modules\Mk\Billing\Controllers\SubscriptionController::class)->index((int) $companyId);
     });
 
     Route::get('/invoices', function (\Illuminate\Http\Request $request) {
         $user = $request->user();
-        $companyId = $user->companies()->first()?->id ?? $user->company_id ?? 1;
+        $companyId = $request->header('company') ?: ($user->companies()->first()?->id ?? $user->company_id);
 
-        // Return billing invoices (from Paddle subscription)
         $company = \App\Models\Company::find($companyId);
-        if (! $company || ! $company->subscription) {
+        if (! $company) {
             return response()->json(['data' => []]);
         }
 
-        return response()->json(['data' => []]);  // TODO: Implement Paddle invoice fetching
+        // Fetch billing history from CompanySubscription payment records
+        $subscription = \App\Models\CompanySubscription::where('company_id', $company->id)
+            ->latest()
+            ->first();
+
+        if (! $subscription || ! $subscription->provider_subscription_id) {
+            return response()->json(['data' => []]);
+        }
+
+        // Try fetching Stripe invoices
+        try {
+            if ($subscription->provider === 'stripe' && $company->stripe_id) {
+                \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+                $stripeInvoices = \Stripe\Invoice::all([
+                    'customer' => $company->stripe_id,
+                    'limit' => 24,
+                ]);
+
+                $invoices = collect($stripeInvoices->data)->map(function ($inv) {
+                    return [
+                        'id' => $inv->id,
+                        'date' => $inv->created ? date('Y-m-d', $inv->created) : null,
+                        'description' => $inv->lines->data[0]->description ?? 'Subscription',
+                        'amount' => number_format($inv->amount_paid / 100, 2),
+                        'currency' => strtoupper($inv->currency),
+                        'status' => $inv->status === 'paid' ? 'paid' : ($inv->status === 'open' ? 'pending' : $inv->status),
+                        'pdf_url' => $inv->invoice_pdf,
+                        'invoice_number' => $inv->number,
+                    ];
+                });
+
+                return response()->json(['data' => $invoices]);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to fetch Stripe invoices', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return response()->json(['data' => []]);
     });
 });
 

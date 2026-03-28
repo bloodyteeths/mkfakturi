@@ -18,6 +18,33 @@
       </BaseDropdownItem>
     </router-link>
 
+    <!-- resend invitation -->
+    <BaseDropdownItem @click="resendInvitation(row.id)">
+      <BaseIcon
+        name="EnvelopeIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('users.resend_invitation') }}
+    </BaseDropdownItem>
+
+    <!-- toggle active/inactive -->
+    <BaseDropdownItem @click="toggleActive(row.id)">
+      <BaseIcon
+        :name="row.is_active ? 'NoSymbolIcon' : 'CheckCircleIcon'"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ row.is_active ? $t('users.deactivate') : $t('users.activate') }}
+    </BaseDropdownItem>
+
+    <!-- ovlastuvanje PDF -->
+    <BaseDropdownItem @click="downloadOvlastuvanje(row.id)">
+      <BaseIcon
+        name="DocumentTextIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('users.ovlastuvanje') }}
+    </BaseDropdownItem>
+
     <!-- delete user  -->
     <BaseDropdownItem @click="removeUser(row.id)">
       <BaseIcon
@@ -62,6 +89,31 @@ const router = useRouter()
 const usersStore = useUsersStore()
 
 const $utils = inject('utils')
+
+async function resendInvitation(id) {
+  try {
+    await usersStore.resendInvitation(id)
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('users.invitation_sent'),
+    })
+  } catch (err) {
+    // error handled in store
+  }
+}
+
+async function toggleActive(id) {
+  try {
+    await usersStore.toggleActive(id)
+    props.loadData && props.loadData()
+  } catch (err) {
+    // error handled in store
+  }
+}
+
+function downloadOvlastuvanje(id) {
+  window.open(`/api/v1/admin/users/${id}/ovlastuvanje`, '_blank')
+}
 
 function removeUser(id) {
   dialogStore

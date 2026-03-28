@@ -945,7 +945,7 @@
         "link_suggestion": "Supplier \"{name}\" has the same Tax ID. Would you like to link them?",
         "linked_successfully": "Supplier linked successfully",
         "unlinked_successfully": "Link removed",
-        "ledger_card": "Partner Ledger Card",
+        "ledger_card": "Customer Ledger Card",
         "net_balance": "Net Balance",
         "receivable": "Receivable",
         "payable": "Payable",
@@ -1448,7 +1448,25 @@
         "updated": "Updated",
         "updated_message": "Expense updated successfully",
         "upload_receipt": "Upload Receipt",
-        "view_expense": "View Expense"
+        "view_expense": "View Expense",
+        "vat_rate": "VAT Rate",
+        "vat_amount": "VAT Amount",
+        "tax_base": "Tax Base (excl. VAT)",
+        "select_vat_rate": "Select VAT rate",
+        "cost_center": "Cost Center",
+        "select_cost_center": "Select cost center",
+        "status_draft": "Draft",
+        "status_approved": "Approved",
+        "status_posted": "Posted",
+        "approve_expense": "Approve expense",
+        "approved_message": "Expense approved successfully",
+        "clone_expense": "Clone expense",
+        "cloned_message": "Expense cloned successfully",
+        "print_expense": "Print expense",
+        "nalog_za_isplata": "Payment Order",
+        "kniga_primeni_fakturi": "Received Invoices Book",
+        "financial_details": "Financial Details",
+        "vat_recap": "VAT Recap"
     },
     "general": {
         "action_failed": "Action Failed",
@@ -1805,8 +1823,9 @@
             "item_price": "Price per unit (numbers only, no currency symbols)",
             "payment_amount": "Amount paid (numbers only, no currency symbols)"
         },
-        "field_due_date": "Field Due Date",
+        "field_due_date": "Due Date",
         "field_email": "Email",
+        "field_expense_date": "Expense Date",
         "field_invoice_date": "Field Invoice Date",
         "field_invoice_number": "Field Invoice Number",
         "field_item_description": "Field Item Description",
@@ -2213,6 +2232,10 @@
             "upload_complete": "File uploaded successfully",
             "validation_complete": "Validation complete"
         },
+        "source_auto_detect": "Auto-detect",
+        "source_generic_csv": "Generic / Manual CSV",
+        "source_system": "Source System",
+        "source_system_hint": "Select the software your data was exported from for better field mapping.",
         "suggestion": "Suggestion",
         "supported_formats": "Supported Formats",
         "supported_sources": "Supported Sources",
@@ -5142,6 +5165,28 @@
             "to_date": "To Date"
         },
         "taxes_report": "Taxes Report",
+        "trade_documents": {
+            "title": "Trade Documents",
+            "document_type": "Document Type",
+            "date_range": "Date Range",
+            "from_date": "From Date",
+            "to_date": "To Date",
+            "loading": "Loading trade documents...",
+            "no_documents": "No trade documents found for the selected period",
+            "showing_count": "Showing {count} documents",
+            "col_date": "Date",
+            "col_type": "Type",
+            "col_number": "Document No.",
+            "col_party": "Party / Description",
+            "col_amount": "Amount",
+            "col_actions": "Actions",
+            "type_all": "All Documents",
+            "type_et": "ET - Trade Log",
+            "type_kap": "KAP - Wholesale Calculation",
+            "type_plt": "PLT - Purchase List",
+            "type_nivelacija": "Nivelacija - Price Change",
+            "type_prenosnica": "Prenosnica - Transfer"
+        },
         "this_month": "This Month",
         "this_quarter": "This Quarter",
         "this_week": "This Week",
@@ -6118,6 +6163,13 @@
             "two_factor": "Two-Factor Authentication",
             "update_app": "Update App"
         },
+        "groups": {
+            "account": "Account",
+            "business": "Business",
+            "team": "Team",
+            "integrations": "Integrations",
+            "system": "System"
+        },
         "notes": {
             "add_note": "Add Note",
             "content": "Content",
@@ -6961,7 +7013,7 @@
         "link_suggestion": "Customer \"{name}\" has the same Tax ID. Would you like to link them?",
         "linked_successfully": "Customer linked successfully",
         "unlinked_successfully": "Link removed",
-        "ledger_card": "Partner Ledger Card",
+        "ledger_card": "Supplier Ledger Card",
         "cannot_delete_linked": "Cannot delete a linked supplier. Unlink first.",
         "search_customer": "Search customer...",
         "no_matching_suppliers": "No suppliers match the search criteria"
@@ -7149,7 +7201,17 @@
         "users_list": "Users List",
         "users_used": "users",
         "user_limit_reached": "User limit reached. Upgrade your plan to add more users.",
-        "view_user": "View User"
+        "view_user": "View User",
+        "roles": {
+            "super_admin": "Super Admin",
+            "admin": "Admin",
+            "user": "User",
+            "partner": "Partner",
+            "accountant": "Accountant"
+        },
+        "mk_compliance_section": "Macedonian Compliance Designations",
+        "legal_representative": "Legal Representative (Управител)",
+        "signing_authority": "Signing Authority (Овластено лице)"
     },
     "validation": {
         "accepted": "Accepted",
@@ -7307,7 +7369,8 @@
         "url": "URL",
         "uuid": "Uuid",
         "valid_driver_key": "Please enter a valid {driver} key.",
-        "valid_exchange_rate": "Please enter a valid exchange rate."
+        "valid_exchange_rate": "Please enter a valid exchange rate.",
+        "password_match": "Passwords must match"
     },
     "tax": {
         "cit": {

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\UserCountService;
 use Illuminate\Http\Request;
 
+
 class UsersController extends Controller
 {
     /**
@@ -26,7 +27,8 @@ class UsersController extends Controller
 
         $user = $request->user();
 
-        $query = User::applyFilters($request->all())
+        $query = User::with('companies')
+            ->applyFilters($request->all())
             ->where('id', '<>', $user->id);
 
         $totalCount = (clone $query)->count();
@@ -134,4 +136,21 @@ class UsersController extends Controller
             'success' => true,
         ]);
     }
+
+    /**
+     * Resend invitation email to a user.
+     */
+    public function resendInvitation(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+
+        $companyId = $request->header('company');
+        $user->sendInvitationEmail($companyId);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Invitation resent successfully.',
+        ]);
+    }
+
 }

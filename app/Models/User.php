@@ -73,6 +73,11 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
         'avatar',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+        'last_login_at' => 'datetime',
+    ];
+
     /**
      * Cache user permissions
      */
@@ -124,7 +129,20 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
         $email = $request->email;
         $password = $request->password;
 
-        return \Auth::attempt(['email' => $email, 'password' => $password], $remember);
+        $result = \Auth::attempt(['email' => $email, 'password' => $password], $remember);
+
+        if ($result) {
+            \Auth::user()->recordLastLogin();
+        }
+
+        return $result;
+    }
+
+    public function recordLastLogin(): void
+    {
+        $this->timestamps = false;
+        $this->update(['last_login_at' => now()]);
+        $this->timestamps = true;
     }
 
     public function getFormattedCreatedAtAttribute($value)
@@ -177,7 +195,8 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
 
     public function companies(): BelongsToMany
     {
-        return $this->belongsToMany(Company::class, 'user_company', 'user_id', 'company_id');
+        return $this->belongsToMany(Company::class, 'user_company', 'user_id', 'company_id')
+            ->withPivot('is_legal_representative', 'is_signing_authority');
     }
 
     public function expenses(): HasMany
@@ -272,6 +291,11 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
         return $query->where('email', 'LIKE', '%'.$email.'%');
     }
 
+    public function scopeWhereRole($query, $role)
+    {
+        return $query->where('role', $role);
+    }
+
     public function scopePaginateData($query, $limit)
     {
         if ($limit == 'all') {
@@ -299,6 +323,14 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
 
         if ($filters->get('phone')) {
             $query->wherePhone($filters->get('phone'));
+        }
+
+        if ($filters->get('role')) {
+            $query->whereRole($filters->get('role'));
+        }
+
+        if ($filters->has('is_active') && $filters->get('is_active') !== null && $filters->get('is_active') !== '') {
+            $query->where('is_active', filter_var($filters->get('is_active'), FILTER_VALIDATE_BOOLEAN));
         }
 
         if ($filters->get('orderByField') || $filters->get('orderBy')) {
@@ -567,7 +599,16 @@ class User extends Authenticatable implements CanUseTickets, HasMedia // CLAUDE-
     public function attachCompanies($companies)
     {
         $companies = collect($companies);
-        $this->companies()->syncWithoutDetaching($companies->pluck('id'));
+
+        // Build pivot data with legal fields
+        $syncData = [];
+        foreach ($companies as $company) {
+            $syncData[$company['id']] = [
+                'is_legal_representative' => $company['is_legal_representative'] ?? false,
+                'is_signing_authority' => $company['is_signing_authority'] ?? false,
+            ];
+        }
+        $this->companies()->syncWithoutDetaching($syncData);
 
         foreach ($companies as $company) {
             BouncerFacade::scope()->to($company['id']);

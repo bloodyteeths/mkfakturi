@@ -775,7 +775,7 @@
         "link_suggestion": "Furnitori \"{name}\" ka të njëjtin NIPT. Dëshironi t'i lidhni?",
         "linked_successfully": "Furnitori u lidh me sukses",
         "unlinked_successfully": "Lidhja u shkëput",
-        "ledger_card": "Kartela e partnerit",
+        "ledger_card": "Kartela e klientit",
         "net_balance": "Bilanci neto",
         "receivable": "Arkëtueshme",
         "payable": "Pagueshme",
@@ -847,7 +847,7 @@
         "link_suggestion": "Klienti \"{name}\" ka të njëjtin NIPT. Dëshironi t'i lidhni?",
         "linked_successfully": "Klienti u lidh me sukses",
         "unlinked_successfully": "Lidhja u shkëput",
-        "ledger_card": "Kartela e partnerit",
+        "ledger_card": "Kartela e furnitorit",
         "cannot_delete_linked": "Nuk mund të fshihet furnitori i lidhur. Shkëputni lidhjen së pari.",
         "search_customer": "Kërko klient...",
         "no_matching_suppliers": "Nuk ka furnitorë që përputhen me kërkimin"
@@ -2354,7 +2354,17 @@
         "invited": "Покаnëта е me sukses dheспратеnë",
         "users": "Përdoruesit",
         "empty_description": "Shtoте përdoruesit në juajата kompania",
-        "select_companies": "Dheзберете компанdhedhe"
+        "select_companies": "Dheзберете компанdhedhe",
+        "roles": {
+            "super_admin": "Super Admin",
+            "admin": "Administrator",
+            "user": "Përdorues",
+            "partner": "Partner",
+            "accountant": "Kontabilist"
+        },
+        "mk_compliance_section": "Përcaktimet ligjore (MK)",
+        "legal_representative": "Përfaqësues ligjor (Управител)",
+        "signing_authority": "Person i autorizuar për nënshkrim"
     },
     "reports": {
         "cash_flow": {
@@ -2411,6 +2421,28 @@
         "download_pdf": "Преземdhe PDF",
         "view_pdf": "Shiko PDF",
         "update_report": "Përditëso raport",
+        "trade_documents": {
+            "title": "Dokumentet tregtare",
+            "document_type": "Lloji i dokumentit",
+            "date_range": "Periudha",
+            "from_date": "Nga data",
+            "to_date": "Deri data",
+            "loading": "Duke ngarkuar dokumentet tregtare...",
+            "no_documents": "Nuk ka dokumente tregtare per periudhen e zgjedhur",
+            "showing_count": "Duke shfaqur {count} dokumente",
+            "col_date": "Data",
+            "col_type": "Lloji",
+            "col_number": "Nr. dokumentit",
+            "col_party": "Subjekti / Pershkrimi",
+            "col_amount": "Shuma",
+            "col_actions": "Veprimet",
+            "type_all": "Te gjitha dokumentet",
+            "type_et": "ET - Evidenca tregtare",
+            "type_kap": "KAP - Kalkulimi i cmimit me shumice",
+            "type_plt": "PLT - Lista e pranimit",
+            "type_nivelacija": "Nivelacion - Ndryshimi i cmimit",
+            "type_prenosnica": "Transferim - Transfer ndermjet magazinave"
+        },
         "report": "Raport | Raporte",
         "profit_loss": {
             "profit_loss": "Fitim dhe përгуба",
@@ -2658,6 +2690,13 @@
             "partner_settings": "Управување me партjoрdhe",
             "privacy_data": "Privatësia dhe поpoтоцdhe",
             "fiscal_devices": "Pajisjet Fiskale"
+        },
+        "groups": {
+            "account": "Llogaria",
+            "business": "Biznesi",
+            "team": "Ekipi",
+            "integrations": "Integrimet",
+            "system": "Sistemi"
         },
         "invite_company_description": "Покаjoте kompania po се поврзе me juajата llogaria.",
         "privacy_data": {
@@ -4200,7 +4239,8 @@
         "string": "Kjo fusha мора po бdheде teksti",
         "timezone": "Kjo fusha мора po бdheде валdheдnë временска зajo",
         "uploaded": "Прdheкачувањето jo успеа",
-        "uuid": "Kjo fusha мора po бdheде валdhedita UUID"
+        "uuid": "Kjo fusha мора po бdheде валdhedita UUID",
+        "password_match": "Fjalëkalimet duhet të përputhen"
     },
     "errors": {
         "400": "Лошо kërkesë",
@@ -4356,6 +4396,10 @@
         "uploading": "Duke ngarkuar...",
         "supported_formats": "Пngaдржанdhe formatidhe: CSV, XLS, XLSX",
         "file_formats": "Formatidhe në фајловdhe",
+        "source_auto_detect": "Zbulim automatik",
+        "source_generic_csv": "CSV e pergjithshme / Manuale",
+        "source_system": "Sistemi burimor",
+        "source_system_hint": "Zgjidhni softuerin nga i cili jane eksportuar te dhenat per hartezim me te mire te fushave.",
         "supported_sources": "Пngaдржанdhe dheзворdhe",
         "generic_formats": "Општdhe formatidhe",
         "file_uploaded_successfully": "Skedari u ngarkua me sukses",

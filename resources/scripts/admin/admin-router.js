@@ -53,18 +53,13 @@ const NotesSetting = () =>
 const ExpenseCategory = () =>
   import('@/scripts/admin/views/settings/ExpenseCategorySetting.vue')
 // ExchangeRateSetting removed - using free Frankfurter API (no config needed)
-// MailConfig removed - using centralized Postmark setup
 const FileDisk = () =>
   import('@/scripts/admin/views/settings/FileDiskSetting.vue')
 const Backup = () => import('@/scripts/admin/views/settings/BackupSetting.vue')
-const UpdateApp = () =>
-  import('@/scripts/admin/views/settings/UpdateAppSetting.vue')
 const RolesSettings = () =>
   import('@/scripts/admin/views/settings/RolesSettings.vue')
 const PDFGenerationSettings = () =>
   import('@/scripts/admin/views/settings/PDFGenerationSetting.vue')
-const AiInsightsSetting = () =>
-  import('@/scripts/admin/views/settings/AiInsightsSetting.vue')
 const FeatureFlagsSettings = () =>
   import('@/scripts/admin/views/settings/FeatureFlagsSettings.vue')
 const PartnerSettings = () =>
@@ -101,6 +96,7 @@ const ItemCreate = () => import('@/scripts/admin/views/items/Create.vue')
 // Expenses
 const ExpensesIndex = () => import('@/scripts/admin/views/expenses/Index.vue')
 const ExpenseCreate = () => import('@/scripts/admin/views/expenses/Create.vue')
+const ExpenseView = () => import('@/scripts/admin/views/expenses/View.vue')
 
 // Users
 const UserIndex = () => import('@/scripts/admin/views/users/Index.vue')
@@ -753,12 +749,6 @@ export default [
             name: 'preferences',
             component: Preferences,
           },
-          // Removed: AI Insights - no backend implementation
-          // {
-          //   path: 'ai-insights',
-          //   name: 'ai.insights',
-          //   component: AiInsightsSetting,
-          // },
           {
             path: 'customization',
             name: 'customization',
@@ -773,22 +763,15 @@ export default [
           {
             path: 'roles-settings',
             name: 'roles.settings',
+            meta: { isOwner: true },
             component: RolesSettings,
           },
-          // Exchange rate provider settings removed - using free Frankfurter API
           {
             path: 'tax-types',
             name: 'tax.types',
             meta: { ability: abilities.VIEW_TAX_TYPE },
             component: TaxTypes,
           },
-          // Removed: VAT Return - no backend generation logic
-          // {
-          //   path: 'vat-return',
-          //   name: 'vat.return',
-          //   meta: { ability: abilities.VIEW_TAX_TYPE },
-          //   component: VatReturn,
-          // },
           {
             path: 'notes',
             name: 'notes',
@@ -798,6 +781,7 @@ export default [
           {
             path: 'payment-mode',
             name: 'payment.mode',
+            meta: { ability: abilities.VIEW_PAYMENT },
             component: PaymentMode,
           },
           {
@@ -812,27 +796,18 @@ export default [
             meta: { ability: abilities.VIEW_EXPENSE },
             component: ExpenseCategory,
           },
-
-          // Removed: Mail Configuration - using centralized Postmark setup
           {
             path: 'file-disk',
             name: 'file-disk',
-            meta: { isOwner: true },
+            meta: { isOwner: true, requiresSuperAdmin: true },
             component: FileDisk,
           },
           {
             path: 'backup',
             name: 'backup',
-            meta: { isOwner: true },
+            meta: { isOwner: true, requiresSuperAdmin: true },
             component: Backup,
           },
-          // Removed: Update App - external service offline
-          // {
-          //   path: 'update-app',
-          //   name: 'updateapp',
-          //   meta: { isOwner: true },
-          //   component: UpdateApp,
-          // },
           {
             path: 'pdf-generation',
             name: 'pdf.generation',
@@ -856,13 +831,6 @@ export default [
             meta: { requiresSuperAdmin: true },
             component: FeatureFlagsSettings,
           },
-          // Certificates route removed - no UI component available
-          // {
-          //   path: 'certificates',
-          //   name: 'settings.certificates',
-          //   meta: { isOwner: true },
-          //   component: () => import('@/js/pages/settings/CertUpload.vue'),
-          // },
           {
             path: 'daily-closing',
             name: 'settings.daily-closing',
@@ -968,6 +936,12 @@ export default [
         name: 'expenses.create',
         meta: { ability: abilities.CREATE_EXPENSE },
         component: ExpenseCreate,
+      },
+      {
+        path: 'expenses/:id/view',
+        name: 'expenses.view',
+        meta: { ability: abilities.VIEW_EXPENSE },
+        component: ExpenseView,
       },
       {
         path: 'expenses/:id/edit',
@@ -1633,6 +1607,12 @@ export default [
         component: () => import('@/scripts/admin/views/budgets/Create.vue'),
       },
       {
+        path: 'budgets/:id/edit',
+        name: 'budgets.edit',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/budgets/Edit.vue'),
+      },
+      {
         path: 'budgets/:id',
         name: 'budgets.view',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
@@ -1874,6 +1854,12 @@ export default [
         name: 'reports.profit-loss',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
         component: ProfitLossReport,
+      },
+      {
+        path: 'reports/trade-documents',
+        name: 'reports.trade-documents',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('./views/reports/TradeDocuments.vue'),
       },
       {
         path: 'accounting/fixed-assets',
