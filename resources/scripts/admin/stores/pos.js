@@ -122,7 +122,7 @@ export const usePosStore = defineStore('pos', () => {
 
   async function loadCatalog() {
     try {
-      const { data } = await axios.get('/api/v1/pos/catalog')
+      const { data } = await axios.get('/pos/catalog')
       catalog.value = data.items || []
       categories.value = data.categories || []
       taxTypes.value = data.tax_types || []
@@ -136,7 +136,7 @@ export const usePosStore = defineStore('pos', () => {
 
   async function lookupBarcode(code) {
     try {
-      const { data } = await axios.get(`/api/v1/pos/barcode/${encodeURIComponent(code)}`)
+      const { data } = await axios.get(`/pos/barcode/${encodeURIComponent(code)}`)
       if (data.item) {
         addItem(data.item)
         return { success: true, item: data.item }
@@ -165,7 +165,7 @@ export const usePosStore = defineStore('pos', () => {
         fiscal_device_id: fiscalDeviceId,
       }
 
-      const { data } = await axios.post('/api/v1/pos/sale', saleData)
+      const { data } = await axios.post('/pos/sale', saleData)
 
       lastSale.value = {
         invoice: data.invoice,
@@ -193,7 +193,7 @@ export const usePosStore = defineStore('pos', () => {
 
   async function processReturn(invoiceId, items = null, reason = '') {
     try {
-      const { data } = await axios.post('/api/v1/pos/return', {
+      const { data } = await axios.post('/pos/return', {
         invoice_id: invoiceId,
         items,
         reason,
@@ -207,7 +207,7 @@ export const usePosStore = defineStore('pos', () => {
   // --- Shift Management ---
   async function openShift(openingCash, fiscalDeviceId = null) {
     try {
-      const { data } = await axios.post('/api/v1/pos/shift/open', {
+      const { data } = await axios.post('/pos/shift/open', {
         opening_cash: openingCash,
         fiscal_device_id: fiscalDeviceId,
       })
@@ -220,7 +220,7 @@ export const usePosStore = defineStore('pos', () => {
 
   async function closeShift(closingCash, notes = '') {
     try {
-      const { data } = await axios.post('/api/v1/pos/shift/close', {
+      const { data } = await axios.post('/pos/shift/close', {
         closing_cash: closingCash,
         notes,
       })
@@ -234,7 +234,7 @@ export const usePosStore = defineStore('pos', () => {
 
   async function fetchCurrentShift() {
     try {
-      const { data } = await axios.get('/api/v1/pos/shift/current')
+      const { data } = await axios.get('/pos/shift/current')
       currentShift.value = data.shift
       return data
     } catch (e) {
