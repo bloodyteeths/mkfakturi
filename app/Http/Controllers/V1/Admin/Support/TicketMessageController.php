@@ -70,14 +70,6 @@ class TicketMessageController extends Controller
         // Update ticket timestamp
         $ticket->touch();
 
-        // If ticket was resolved, re-open it
-        if ($ticket->is_resolved) {
-            $ticket->update([
-                'is_resolved' => false,
-                'status' => 'open',
-            ]);
-        }
-
         $message->load('user');
 
         // Send notification based on who replied
