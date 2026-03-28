@@ -242,7 +242,7 @@ const { t } = useI18n()
 const router = useRouter()
 const posStore = usePosStore()
 const fiscal = useFiscalPrinter()
-const fiscalDeviceStore = useFiscalDeviceStore()
+let fiscalDeviceStore = null
 
 const showPayment = ref(false)
 const showShiftOpen = ref(false)
@@ -301,7 +301,7 @@ async function handlePayment() {
       // Auto-fiscalize if fiscal printer is connected
       if (fiscal.isConnected.value && sale.invoice?.id) {
         try {
-          const deviceId = fiscalDeviceStore.fiscalDevices.find(d => d.is_active)?.id || null
+          const deviceId = fiscalDeviceStore?.fiscalDevices?.find(d => d.is_active)?.id || null
           if (deviceId) {
             await fiscal.fiscalizeInvoice(sale.invoice, deviceId)
           }
@@ -346,7 +346,7 @@ async function handleCloseShift({ closingCash, notes }) {
 async function handlePrintReceipt() {
   if (!fiscal.isConnected.value || !posStore.lastSale?.invoice) return
   try {
-    const deviceId = fiscalDeviceStore.fiscalDevices.find(d => d.is_active)?.id || null
+    const deviceId = fiscalDeviceStore?.fiscalDevices?.find(d => d.is_active)?.id || null
     if (deviceId) {
       await fiscal.fiscalizeInvoice(posStore.lastSale.invoice, deviceId)
     }
@@ -424,7 +424,12 @@ onMounted(async () => {
   await posStore.fetchCurrentShift()
   posStore.loadParkedSales()
   posStore.loadTableOrders()
-  fiscalDeviceStore.fetchFiscalDevices().catch(() => {})
+  try {
+    fiscalDeviceStore = useFiscalDeviceStore()
+    fiscalDeviceStore.fetchFiscalDevices().catch(() => {})
+  } catch (e) {
+    console.warn('Fiscal device store init failed:', e.message)
+  }
   document.addEventListener('keydown', handleKeydown)
 })
 
