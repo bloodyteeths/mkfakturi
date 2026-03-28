@@ -120,4 +120,7 @@ export default {
   // Period Closings (Phase 3: Daily Closing & Period Lock)
   VIEW_CLOSINGS: 'view-financial-reports', // View closings uses financial reports permission
   MANAGE_CLOSINGS: 'manage-closings', // Create/delete daily closings and period locks
+
+  // Fiscal Monitor (Cash Register Fraud Detection)
+  VIEW_FISCAL_MONITOR: 'view-fiscal-monitor',
 }

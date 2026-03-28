@@ -1324,12 +1324,20 @@ export default [
       {
         path: 'fiscal-monitor',
         name: 'fiscal-monitor.index',
+        meta: { isOwner: true, ability: abilities.VIEW_FISCAL_MONITOR },
         component: () => import('@/scripts/admin/views/fiscal-monitor/Index.vue'),
       },
       {
         path: 'fiscal-monitor/audit',
         name: 'fiscal-monitor.audit',
+        meta: { isOwner: true, ability: abilities.VIEW_FISCAL_MONITOR },
         component: () => import('@/scripts/admin/views/fiscal-monitor/AuditReport.vue'),
+      },
+      {
+        path: 'fiscal-monitor/device/:id',
+        name: 'fiscal-monitor.device',
+        meta: { isOwner: true, ability: abilities.VIEW_FISCAL_MONITOR },
+        component: () => import('@/scripts/admin/views/fiscal-monitor/DeviceDetail.vue'),
       },
 
       // Manufacturing Module

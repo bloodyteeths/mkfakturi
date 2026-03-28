@@ -3,6 +3,8 @@
 namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\FiscalDevice;
+use App\Models\FiscalReceipt;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +18,8 @@ use Modules\Mk\Services\FiscalFraudDetectionService;
  *
  * Endpoints for logging fiscal device events, viewing fraud alerts,
  * real-time device status dashboard, and audit reports.
+ *
+ * Access: owner OR users with 'view-fiscal-monitor' ability.
  */
 class FiscalFraudController extends Controller
 {
@@ -25,11 +29,36 @@ class FiscalFraudController extends Controller
     }
 
     /**
+     * Check if the current user has permission to access the fiscal monitor.
+     * Owners and users with 'view-fiscal-monitor' ability can access.
+     */
+    private function authorizeAccess(Request $request): void
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            abort(401);
+        }
+
+        if ($user->isOwner()) {
+            return;
+        }
+
+        if ($user->can('view-fiscal-monitor')) {
+            return;
+        }
+
+        abort(403, 'You do not have permission to access the Fiscal Monitor.');
+    }
+
+    /**
      * GET /fiscal-monitor/dashboard
      * Real-time status of all fiscal devices + open alerts.
      */
     public function dashboard(Request $request): JsonResponse
     {
+        $this->authorizeAccess($request);
+
         $companyId = (int) $request->header('company');
         $data = $this->fraudService->getDashboard($companyId);
 
@@ -39,6 +68,7 @@ class FiscalFraudController extends Controller
     /**
      * POST /fiscal-monitor/events
      * Log a fiscal device event (open, close, void, z_report, etc.).
+     * Any authenticated user can log events (cashiers at their workstation).
      */
     public function logEvent(Request $request): JsonResponse
     {
@@ -56,6 +86,12 @@ class FiscalFraudController extends Controller
         }
 
         $companyId = (int) $request->header('company');
+
+        // Verify the device belongs to this company
+        $device = FiscalDevice::forCompany($companyId)->find($validated['fiscal_device_id']);
+        if (!$device) {
+            return response()->json(['error' => 'Device not found for this company'], 404);
+        }
 
         $event = $this->fraudService->logEvent(
             $companyId,
@@ -81,6 +117,8 @@ class FiscalFraudController extends Controller
      */
     public function events(Request $request): JsonResponse
     {
+        $this->authorizeAccess($request);
+
         $companyId = (int) $request->header('company');
 
         $query = FiscalDeviceEvent::forCompany($companyId)
@@ -115,6 +153,8 @@ class FiscalFraudController extends Controller
      */
     public function alerts(Request $request): JsonResponse
     {
+        $this->authorizeAccess($request);
+
         $companyId = (int) $request->header('company');
 
         $query = FiscalFraudAlert::forCompany($companyId)
@@ -148,6 +188,8 @@ class FiscalFraudController extends Controller
      */
     public function updateAlert(Request $request, int $id): JsonResponse
     {
+        $this->authorizeAccess($request);
+
         try {
             $validated = $request->validate([
                 'status' => 'required|string|in:acknowledged,investigated,resolved,false_positive',
@@ -179,6 +221,8 @@ class FiscalFraudController extends Controller
      */
     public function auditReport(Request $request): JsonResponse
     {
+        $this->authorizeAccess($request);
+
         $companyId = (int) $request->header('company');
 
         $from = $request->filled('from')
@@ -194,6 +238,132 @@ class FiscalFraudController extends Controller
         $report = $this->fraudService->getAuditReport($companyId, $from, $to, $deviceId, $userId);
 
         return response()->json(['data' => $report]);
+    }
+
+    /**
+     * GET /fiscal-monitor/devices/{id}
+     * Detailed view for a single device: event log, alerts, daily stats.
+     */
+    public function deviceDetail(Request $request, int $id): JsonResponse
+    {
+        $this->authorizeAccess($request);
+
+        $companyId = (int) $request->header('company');
+        $device = FiscalDevice::forCompany($companyId)->findOrFail($id);
+
+        // Last event to determine open/closed status
+        $lastEvent = FiscalDeviceEvent::forDevice($device->id)
+            ->orderByDesc('event_at')
+            ->first();
+
+        $isOpen = $lastEvent && $lastEvent->event_type === FiscalDeviceEvent::TYPE_OPEN;
+
+        // Recent events (last 100)
+        $recentEvents = FiscalDeviceEvent::forDevice($device->id)
+            ->with(['user:id,name'])
+            ->orderByDesc('event_at')
+            ->limit(100)
+            ->get()
+            ->map(fn ($e) => [
+                'id' => $e->id,
+                'event_type' => $e->event_type,
+                'user' => $e->user ? ['id' => $e->user->id, 'name' => $e->user->name] : null,
+                'cash_amount' => $e->cash_amount,
+                'notes' => $e->notes,
+                'source' => $e->source,
+                'event_at' => $e->event_at->toDateTimeString(),
+            ]);
+
+        // Open alerts for this device
+        $alerts = FiscalFraudAlert::where('fiscal_device_id', $device->id)
+            ->unresolved()
+            ->with(['user:id,name'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Daily stats for last 30 days
+        $thirtyDaysAgo = Carbon::now()->subDays(30);
+        $dailyStats = FiscalDeviceEvent::forDevice($device->id)
+            ->where('event_at', '>=', $thirtyDaysAgo)
+            ->selectRaw("DATE(event_at) as date")
+            ->selectRaw("SUM(CASE WHEN event_type = 'open' THEN 1 ELSE 0 END) as opens")
+            ->selectRaw("SUM(CASE WHEN event_type = 'close' THEN 1 ELSE 0 END) as closes")
+            ->selectRaw("SUM(CASE WHEN event_type = 'receipt' THEN 1 ELSE 0 END) as receipts")
+            ->selectRaw("SUM(CASE WHEN event_type = 'void' THEN 1 ELSE 0 END) as voids")
+            ->selectRaw("SUM(CASE WHEN event_type = 'z_report' THEN 1 ELSE 0 END) as z_reports")
+            ->selectRaw("COUNT(*) as total_events")
+            ->groupByRaw("DATE(event_at)")
+            ->orderByDesc('date')
+            ->get();
+
+        // Receipt totals per day (from fiscal_receipts)
+        $dailyRevenue = FiscalReceipt::forDevice($device->id)
+            ->where('created_at', '>=', $thirtyDaysAgo)
+            ->selectRaw("DATE(created_at) as date")
+            ->selectRaw("SUM(amount) as total_amount")
+            ->selectRaw("SUM(vat_amount) as total_vat")
+            ->selectRaw("COUNT(*) as receipt_count")
+            ->groupByRaw("DATE(created_at)")
+            ->orderByDesc('date')
+            ->get()
+            ->keyBy('date');
+
+        // Merge revenue into daily stats
+        $dailyStatsWithRevenue = $dailyStats->map(fn ($day) => [
+            'date' => $day->date,
+            'opens' => (int) $day->opens,
+            'closes' => (int) $day->closes,
+            'receipts' => (int) $day->receipts,
+            'voids' => (int) $day->voids,
+            'z_reports' => (int) $day->z_reports,
+            'total_events' => (int) $day->total_events,
+            'revenue' => (int) ($dailyRevenue[$day->date]->total_amount ?? 0),
+            'vat' => (int) ($dailyRevenue[$day->date]->total_vat ?? 0),
+            'fiscal_receipts' => (int) ($dailyRevenue[$day->date]->receipt_count ?? 0),
+        ]);
+
+        // Users who operated this device
+        $operators = FiscalDeviceEvent::forDevice($device->id)
+            ->whereNotNull('user_id')
+            ->with('user:id,name,email')
+            ->selectRaw('user_id, COUNT(*) as event_count, MIN(event_at) as first_event, MAX(event_at) as last_event')
+            ->groupBy('user_id')
+            ->orderByDesc('event_count')
+            ->get()
+            ->map(fn ($row) => [
+                'user_id' => $row->user_id,
+                'user_name' => $row->user?->name,
+                'user_email' => $row->user?->email,
+                'event_count' => (int) $row->event_count,
+                'first_event' => $row->first_event,
+                'last_event' => $row->last_event,
+            ]);
+
+        return response()->json([
+            'data' => [
+                'device' => [
+                    'id' => $device->id,
+                    'name' => $device->name,
+                    'serial_number' => $device->serial_number,
+                    'device_type' => $device->device_type,
+                    'connection_type' => $device->connection_type,
+                    'is_active' => $device->is_active,
+                    'ip_address' => $device->ip_address,
+                    'port' => $device->port,
+                    'metadata' => $device->metadata,
+                ],
+                'status' => $isOpen ? 'open' : 'closed',
+                'last_event' => $lastEvent ? [
+                    'type' => $lastEvent->event_type,
+                    'at' => $lastEvent->event_at->toDateTimeString(),
+                    'user_id' => $lastEvent->user_id,
+                ] : null,
+                'recent_events' => $recentEvents,
+                'alerts' => $alerts,
+                'daily_stats' => $dailyStatsWithRevenue,
+                'operators' => $operators,
+            ],
+        ]);
     }
 }
 
