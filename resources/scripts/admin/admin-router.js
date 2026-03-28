@@ -6,6 +6,7 @@ const LayoutInstallation = () =>
 const Login = () => import('@/scripts/admin/views/auth/Login.vue')
 const LayoutBasic = () => import('@/scripts/admin/layouts/LayoutBasic.vue')
 const LayoutLogin = () => import('@/scripts/admin/layouts/LayoutLogin.vue')
+const LayoutPOS = () => import('@/scripts/admin/layouts/LayoutPOS.vue')
 const ResetPassword = () =>
   import('@/scripts/admin/views/auth/ResetPassword.vue')
 const ForgotPassword = () =>
@@ -82,6 +83,8 @@ const AccountReviewSetting = () =>
   import('@/scripts/admin/views/settings/AccountReviewSetting.vue')
 const FiscalDevicesSetting = () =>
   import('@/scripts/admin/views/settings/FiscalDevicesSetting.vue')
+const POSSetting = () =>
+  import('@/scripts/admin/views/settings/POSSetting.vue')
 const ViberNotificationsSetting = () =>
   import('@/scripts/admin/views/settings/ViberNotificationsSetting.vue')
 const WooCommerceSetting = () =>
@@ -333,6 +336,19 @@ export default [
     name: 'public-pricing',
     component: PricingPage,
     meta: { requiresAuth: false, isPublic: true },
+  },
+  // POS — Full-screen layout (no sidebar)
+  {
+    path: '/admin/pos',
+    component: LayoutPOS,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'pos',
+        component: () => import('@/scripts/admin/views/pos/Index.vue'),
+      },
+    ],
   },
   {
     path: '/admin',
@@ -789,6 +805,12 @@ export default [
             name: 'settings.fiscal-devices',
             meta: { isOwner: true },
             component: FiscalDevicesSetting,
+          },
+          {
+            path: 'pos',
+            name: 'settings.pos',
+            meta: { isOwner: true },
+            component: POSSetting,
           },
           {
             path: 'viber-notifications',

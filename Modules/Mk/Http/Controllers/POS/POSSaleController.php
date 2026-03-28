@@ -1,0 +1,824 @@
+<?php
+
+namespace Modules\Mk\Http\Controllers\POS;
+
+use App\Http\Controllers\Controller;
+use App\Models\CompanySetting;
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\Item;
+use App\Models\ItemCategory;
+use App\Models\Payment;
+use App\Models\TaxType;
+use App\Services\SerialNumberFormatter;
+use App\Services\UsageLimitService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+
+class POSSaleController extends Controller
+{
+    /**
+     * POST /api/v1/pos/sale
+     *
+     * Create invoice + items + payment in one atomic operation.
+     * Triggers: StockInvoiceItemObserver (stock deduction), InvoiceObserver (IFRS posting),
+     * PaymentObserver (payment IFRS posting). All existing observers fire automatically.
+     */
+    public function sale(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        // --- Validate ---
+        try {
+            $validated = $request->validate([
+                'items' => 'required|array|min:1',
+                'items.*.item_id' => 'required|integer|exists:items,id',
+                'items.*.quantity' => 'required|numeric|gt:0',
+                'items.*.price' => 'nullable|integer',
+                'items.*.discount' => 'nullable|numeric|min:0|max:100',
+                'customer_id' => 'nullable|integer|exists:customers,id',
+                'payment_method' => 'required|string|in:cash,card,mixed',
+                'cash_received' => 'nullable|integer|min:0',
+                'fiscal_device_id' => 'nullable|integer|exists:fiscal_devices,id',
+                'warehouse_id' => 'nullable|integer|exists:warehouses,id',
+                'notes' => 'nullable|string|max:500',
+            ]);
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+
+        // --- Check POS transaction limit ---
+        $company = \App\Models\Company::find($companyId);
+        $usageService = app(UsageLimitService::class);
+
+        if (! $usageService->canUse($company, 'pos_transactions_per_month')) {
+            return response()->json(
+                $usageService->buildLimitExceededResponse($company, 'pos_transactions_per_month'),
+                402
+            );
+        }
+
+        // --- Resolve customer (walk-in or specified) ---
+        $customerId = $validated['customer_id'] ?? null;
+        if (! $customerId) {
+            $customerId = $this->getOrCreateWalkInCustomer($companyId);
+        }
+
+        $customer = Customer::find($customerId);
+        if (! $customer) {
+            return response()->json(['error' => 'Customer not found'], 404);
+        }
+
+        // --- Build items with tax calculation ---
+        $invoiceItems = [];
+        $subTotal = 0;
+        $totalTax = 0;
+        $stockWarnings = [];
+        $taxPerItem = CompanySetting::getSetting('tax_per_item', $companyId) ?? 'NO';
+
+        foreach ($validated['items'] as $itemData) {
+            $item = Item::where('id', $itemData['item_id'])
+                ->where('company_id', $companyId)
+                ->with('taxes')
+                ->first();
+
+            if (! $item) {
+                return response()->json([
+                    'error' => "Item #{$itemData['item_id']} not found in this company",
+                ], 422);
+            }
+
+            $price = $itemData['price'] ?? $item->retail_price ?? $item->price ?? 0;
+            $quantity = (float) $itemData['quantity'];
+            $discountPercent = (float) ($itemData['discount'] ?? 0);
+            $discountVal = (int) round($price * $quantity * $discountPercent / 100);
+            $itemSubTotal = (int) ($price * $quantity) - $discountVal;
+
+            // Calculate tax from item's default taxes
+            $itemTaxes = [];
+            $itemTaxAmount = 0;
+
+            foreach ($item->taxes as $tax) {
+                $taxType = TaxType::find($tax->tax_type_id);
+                if ($taxType) {
+                    $taxAmount = (int) round($itemSubTotal * $taxType->percent / 100);
+                    $itemTaxAmount += $taxAmount;
+                    $itemTaxes[] = [
+                        'tax_type_id' => $taxType->id,
+                        'name' => $taxType->name,
+                        'percent' => $taxType->percent,
+                        'amount' => $taxAmount,
+                        'compound_tax' => $taxType->compound_tax ?? false,
+                    ];
+                }
+            }
+
+            $itemTotal = $itemSubTotal + $itemTaxAmount;
+
+            $invoiceItems[] = [
+                'item_id' => $item->id,
+                'name' => $item->name,
+                'description' => $item->description ?? '',
+                'quantity' => $quantity,
+                'price' => $price,
+                'discount' => $discountPercent,
+                'discount_val' => $discountVal,
+                'tax' => $itemTaxAmount,
+                'total' => $itemTotal,
+                'unit_name' => $item->unit?->name ?? '',
+                'warehouse_id' => $validated['warehouse_id'] ?? null,
+                'taxes' => $itemTaxes,
+            ];
+
+            $subTotal += $itemSubTotal;
+            $totalTax += $itemTaxAmount;
+
+            // Check stock warnings (low stock after sale)
+            if ($item->track_quantity) {
+                $currentQty = (float) $item->quantity;
+                $remainingQty = $currentQty - $quantity;
+                $minimumQty = (float) ($item->minimum_stock_level ?? $item->minimum_quantity ?? 0);
+                if ($remainingQty <= $minimumQty) {
+                    $stockWarnings[] = [
+                        'item_id' => $item->id,
+                        'name' => $item->name,
+                        'remaining_qty' => $remainingQty,
+                        'minimum_qty' => $minimumQty,
+                    ];
+                }
+            }
+        }
+
+        $total = $subTotal + $totalTax;
+
+        // --- Generate invoice number ---
+        $invoiceNumber = (new SerialNumberFormatter())
+            ->setModel(new Invoice())
+            ->setCompany($companyId)
+            ->setCustomer($customerId)
+            ->getNextNumber();
+
+        // --- Create invoice + items + payment atomically ---
+        try {
+            $result = DB::transaction(function () use (
+                $request, $companyId, $customerId, $customer, $invoiceItems,
+                $subTotal, $totalTax, $total, $invoiceNumber, $validated, $taxPerItem
+            ) {
+                // Build a fake request object that Invoice::createInvoice() expects
+                $invoiceRequest = new \Illuminate\Http\Request();
+                $invoiceRequest->headers->set('company', $companyId);
+                $invoiceRequest->setUserResolver(fn () => $request->user());
+
+                $companyCurrency = CompanySetting::getSetting('currency', $companyId);
+                $customerCurrency = $customer->currency_id ?? $companyCurrency;
+
+                $invoiceData = [
+                    'invoice_date' => now()->format('Y-m-d'),
+                    'due_date' => now()->format('Y-m-d'),
+                    'customer_id' => $customerId,
+                    'invoice_number' => $invoiceNumber,
+                    'sub_total' => $subTotal,
+                    'total' => $total,
+                    'tax' => $totalTax,
+                    'discount' => 0,
+                    'discount_val' => 0,
+                    'discount_type' => 'fixed',
+                    'template_name' => 'invoice1',
+                    'notes' => $validated['notes'] ?? 'POS Sale',
+                    'currency_id' => $customerCurrency,
+                    'exchange_rate' => 1,
+                    'invoiceSend' => true,  // Status = SENT (triggers IFRS posting)
+                    'items' => $invoiceItems,
+                    'type' => 'standard',
+                    'is_reverse_charge' => false,
+                ];
+
+                $invoiceRequest->replace($invoiceData);
+
+                // Manually set the payload method on request so Invoice::createInvoice works
+                $invoiceRequest->macro('getInvoicePayload', function () use ($invoiceData, $companyId, $request, $customerCurrency, $taxPerItem) {
+                    return [
+                        'invoice_date' => $invoiceData['invoice_date'],
+                        'due_date' => $invoiceData['due_date'],
+                        'customer_id' => $invoiceData['customer_id'],
+                        'invoice_number' => $invoiceData['invoice_number'],
+                        'sub_total' => $invoiceData['sub_total'],
+                        'total' => $invoiceData['total'],
+                        'tax' => $invoiceData['tax'],
+                        'discount' => 0,
+                        'discount_val' => 0,
+                        'discount_type' => 'fixed',
+                        'template_name' => 'invoice1',
+                        'notes' => $invoiceData['notes'],
+                        'type' => 'standard',
+                        'is_reverse_charge' => false,
+                        'creator_id' => $request->user()->id ?? null,
+                        'status' => Invoice::STATUS_SENT,
+                        'paid_status' => Invoice::STATUS_UNPAID,
+                        'company_id' => $companyId,
+                        'tax_per_item' => $taxPerItem,
+                        'discount_per_item' => CompanySetting::getSetting('discount_per_item', $companyId) ?? 'NO',
+                        'due_amount' => $invoiceData['total'],
+                        'sent' => false,
+                        'viewed' => false,
+                        'exchange_rate' => 1,
+                        'base_total' => $invoiceData['total'],
+                        'base_discount_val' => 0,
+                        'base_sub_total' => $invoiceData['sub_total'],
+                        'base_tax' => $invoiceData['tax'],
+                        'base_due_amount' => $invoiceData['total'],
+                        'currency_id' => $customerCurrency,
+                        'project_id' => null,
+                    ];
+                });
+
+                // Create invoice (fires InvoiceObserver + StockInvoiceItemObserver)
+                $invoice = Invoice::createInvoice($invoiceRequest);
+
+                // --- Create payment ---
+                $paymentMethodId = $this->resolvePaymentMethodId($companyId, $validated['payment_method']);
+
+                $paymentNumber = (new SerialNumberFormatter())
+                    ->setModel(new Payment())
+                    ->setCompany($companyId)
+                    ->setCustomer($customerId)
+                    ->getNextNumber();
+
+                $paymentRequest = new \Illuminate\Http\Request();
+                $paymentRequest->headers->set('company', $companyId);
+                $paymentRequest->setUserResolver(fn () => $request->user());
+
+                $paymentData = [
+                    'payment_date' => now()->format('Y-m-d'),
+                    'customer_id' => $customerId,
+                    'amount' => $total,
+                    'payment_number' => $paymentNumber,
+                    'invoice_id' => $invoice->id,
+                    'payment_method_id' => $paymentMethodId,
+                    'notes' => 'POS Payment',
+                    'currency_id' => $customerCurrency,
+                    'exchange_rate' => 1,
+                ];
+
+                $paymentRequest->replace($paymentData);
+                $paymentRequest->macro('getPaymentPayload', function () use ($paymentData, $companyId, $request, $customerCurrency) {
+                    return [
+                        'payment_date' => $paymentData['payment_date'],
+                        'customer_id' => $paymentData['customer_id'],
+                        'amount' => $paymentData['amount'],
+                        'payment_number' => $paymentData['payment_number'],
+                        'invoice_id' => $paymentData['invoice_id'],
+                        'payment_method_id' => $paymentData['payment_method_id'],
+                        'notes' => $paymentData['notes'],
+                        'creator_id' => $request->user()->id ?? null,
+                        'company_id' => $companyId,
+                        'exchange_rate' => 1,
+                        'base_amount' => $paymentData['amount'],
+                        'currency_id' => $customerCurrency,
+                        'project_id' => null,
+                    ];
+                });
+
+                $payment = Payment::createPayment($paymentRequest);
+
+                return [
+                    'invoice' => $invoice,
+                    'payment' => $payment,
+                ];
+            });
+
+            // --- Increment POS transaction usage ---
+            $usageService->incrementUsage($company, 'pos_transactions_per_month');
+
+            // --- Build fiscal data for WebSerial ---
+            $fiscalData = $this->buildFiscalData($result['invoice']);
+
+            // --- Calculate change ---
+            $cashReceived = $validated['cash_received'] ?? $total;
+            $change = max(0, $cashReceived - $total);
+
+            return response()->json([
+                'invoice' => $result['invoice'],
+                'payment' => [
+                    'id' => $result['payment']->id,
+                    'amount' => $result['payment']->amount,
+                    'payment_number' => $result['payment']->payment_number,
+                    'change' => $change,
+                ],
+                'fiscal_data' => $fiscalData,
+                'stock_warnings' => $stockWarnings,
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('POS sale failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'company_id' => $companyId,
+            ]);
+
+            return response()->json([
+                'error' => 'Sale failed: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * GET /api/v1/pos/catalog
+     *
+     * Fast item lookup optimized for POS — cached, minimal fields.
+     */
+    public function catalog(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        $items = Item::where('company_id', $companyId)
+            ->select([
+                'id', 'name', 'barcode', 'sku', 'price', 'retail_price',
+                'unit_id', 'category_id', 'track_quantity', 'quantity',
+                'description',
+            ])
+            ->with([
+                'unit:id,name',
+                'taxes' => function ($q) {
+                    $q->select('id', 'item_id', 'tax_type_id', 'amount', 'percent');
+                },
+                'taxes.taxType:id,name,percent',
+            ])
+            ->orderBy('name')
+            ->get()
+            ->map(function ($item) {
+                $taxPercent = 0;
+                if ($item->taxes->isNotEmpty()) {
+                    $tax = $item->taxes->first();
+                    $taxPercent = $tax->taxType?->percent ?? $tax->percent ?? 0;
+                }
+
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'barcode' => $item->barcode,
+                    'sku' => $item->sku,
+                    'retail_price' => $item->retail_price ?? $item->price ?? 0,
+                    'price' => $item->price ?? 0,
+                    'unit_name' => $item->unit?->name ?? '',
+                    'category_id' => $item->category_id,
+                    'tax_percent' => $taxPercent,
+                    'track_quantity' => (bool) $item->track_quantity,
+                    'quantity' => (float) ($item->quantity ?? 0),
+                ];
+            });
+
+        $categories = ItemCategory::where('company_id', $companyId)
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        $taxTypes = TaxType::where(function ($q) use ($companyId) {
+            $q->where('company_id', $companyId)->orWhereNull('company_id');
+        })
+            ->select('id', 'name', 'percent')
+            ->orderBy('name')
+            ->get();
+
+        // POS usage stats
+        $company = \App\Models\Company::find($companyId);
+        $usageService = app(UsageLimitService::class);
+        $posUsage = $usageService->getUsage($company, 'pos_transactions_per_month');
+
+        return response()->json([
+            'items' => $items,
+            'categories' => $categories,
+            'tax_types' => $taxTypes,
+            'pos_usage' => $posUsage,
+        ]);
+    }
+
+    /**
+     * GET /api/v1/pos/barcode/{code}
+     *
+     * Instant barcode/SKU lookup — returns single item or 404.
+     */
+    public function barcodeLookup(Request $request, string $code): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        $item = Item::where('company_id', $companyId)
+            ->where(function ($q) use ($code) {
+                $q->where('barcode', $code)
+                    ->orWhere('sku', $code);
+            })
+            ->with([
+                'unit:id,name',
+                'taxes' => function ($q) {
+                    $q->select('id', 'item_id', 'tax_type_id', 'amount', 'percent');
+                },
+                'taxes.taxType:id,name,percent',
+            ])
+            ->first();
+
+        if (! $item) {
+            return response()->json(['error' => 'Item not found'], 404);
+        }
+
+        $taxPercent = 0;
+        if ($item->taxes->isNotEmpty()) {
+            $tax = $item->taxes->first();
+            $taxPercent = $tax->taxType?->percent ?? $tax->percent ?? 0;
+        }
+
+        return response()->json([
+            'item' => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'barcode' => $item->barcode,
+                'sku' => $item->sku,
+                'retail_price' => $item->retail_price ?? $item->price ?? 0,
+                'price' => $item->price ?? 0,
+                'unit_name' => $item->unit?->name ?? '',
+                'category_id' => $item->category_id,
+                'tax_percent' => $taxPercent,
+                'track_quantity' => (bool) $item->track_quantity,
+                'quantity' => (float) ($item->quantity ?? 0),
+            ],
+        ]);
+    }
+
+    /**
+     * Get or create a walk-in "POS Customer" for the company.
+     */
+    protected function getOrCreateWalkInCustomer(int $companyId): int
+    {
+        $posCustomer = Customer::where('company_id', $companyId)
+            ->where('name', 'POS Купувач')
+            ->first();
+
+        if ($posCustomer) {
+            return $posCustomer->id;
+        }
+
+        $companyCurrency = CompanySetting::getSetting('currency', $companyId);
+
+        $posCustomer = Customer::create([
+            'name' => 'POS Купувач',
+            'company_id' => $companyId,
+            'currency_id' => $companyCurrency,
+            'type' => 'customer',
+        ]);
+
+        return $posCustomer->id;
+    }
+
+    /**
+     * Resolve payment method ID from string (cash/card).
+     */
+    protected function resolvePaymentMethodId(int $companyId, string $method): ?int
+    {
+        $search = match ($method) {
+            'cash' => ['Cash', 'Готовина', 'cash'],
+            'card' => ['Card', 'Картичка', 'Credit Card', 'Debit Card', 'card'],
+            default => ['Cash', 'Готовина', 'cash'],
+        };
+
+        $paymentMethod = \App\Models\PaymentMethod::where('company_id', $companyId)
+            ->where(function ($q) use ($search) {
+                foreach ($search as $term) {
+                    $q->orWhere('name', 'LIKE', "%{$term}%");
+                }
+            })
+            ->first();
+
+        return $paymentMethod?->id;
+    }
+
+    /**
+     * POST /api/v1/pos/return
+     *
+     * Process a POS return/storno — creates credit note, reverses stock.
+     */
+    public function returnSale(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        try {
+            $validated = $request->validate([
+                'invoice_id' => 'required|integer|exists:invoices,id',
+                'items' => 'nullable|array',
+                'items.*.invoice_item_id' => 'required|integer',
+                'items.*.quantity' => 'required|numeric|gt:0',
+                'reason' => 'nullable|string|max:500',
+            ]);
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+
+        $invoice = Invoice::where('id', $validated['invoice_id'])
+            ->where('company_id', $companyId)
+            ->with('items')
+            ->first();
+
+        if (! $invoice) {
+            return response()->json(['error' => 'Invoice not found'], 404);
+        }
+
+        // Determine which items to return (all if not specified)
+        $returnItems = [];
+        if (! empty($validated['items'])) {
+            foreach ($validated['items'] as $ri) {
+                $invoiceItem = $invoice->items->firstWhere('id', $ri['invoice_item_id']);
+                if ($invoiceItem) {
+                    $returnItems[] = [
+                        'item' => $invoiceItem,
+                        'quantity' => min($ri['quantity'], $invoiceItem->quantity),
+                    ];
+                }
+            }
+        } else {
+            // Full return
+            foreach ($invoice->items as $item) {
+                $returnItems[] = [
+                    'item' => $item,
+                    'quantity' => $item->quantity,
+                ];
+            }
+        }
+
+        if (empty($returnItems)) {
+            return response()->json(['error' => 'No items to return'], 422);
+        }
+
+        // Calculate return totals
+        $returnSubTotal = 0;
+        $returnTax = 0;
+        foreach ($returnItems as $ri) {
+            $ratio = $ri['quantity'] / $ri['item']->quantity;
+            $returnSubTotal += (int) round(($ri['item']->total - $ri['item']->tax) * $ratio);
+            $returnTax += (int) round($ri['item']->tax * $ratio);
+        }
+        $returnTotal = $returnSubTotal + $returnTax;
+
+        // Build fiscal storno data
+        $stornoData = $this->buildStornoFiscalData($invoice, $returnItems, $returnTotal, $returnTax);
+
+        return response()->json([
+            'storno' => true,
+            'original_invoice_id' => $invoice->id,
+            'original_invoice_number' => $invoice->invoice_number,
+            'return_total' => $returnTotal,
+            'return_tax' => $returnTax,
+            'return_items' => collect($returnItems)->map(fn ($ri) => [
+                'name' => $ri['item']->name,
+                'quantity' => $ri['quantity'],
+                'price' => $ri['item']->price,
+                'total' => (int) round($ri['item']->total * ($ri['quantity'] / $ri['item']->quantity)),
+            ]),
+            'fiscal_data' => $stornoData,
+            'reason' => $validated['reason'] ?? 'POS Return',
+        ]);
+    }
+
+    /**
+     * POST /api/v1/pos/shift/open
+     *
+     * Open a new cashier shift.
+     */
+    public function openShift(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+        $userId = $request->user()->id;
+
+        try {
+            $validated = $request->validate([
+                'opening_cash' => 'required|integer|min:0',
+                'fiscal_device_id' => 'nullable|integer|exists:fiscal_devices,id',
+            ]);
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+
+        // Check for already open shift
+        $existingShift = DB::table('pos_shifts')
+            ->where('company_id', $companyId)
+            ->where('user_id', $userId)
+            ->whereNull('closed_at')
+            ->first();
+
+        if ($existingShift) {
+            return response()->json([
+                'error' => 'You already have an open shift. Close it first.',
+                'shift' => $existingShift,
+            ], 409);
+        }
+
+        $shiftId = DB::table('pos_shifts')->insertGetId([
+            'company_id' => $companyId,
+            'user_id' => $userId,
+            'fiscal_device_id' => $validated['fiscal_device_id'] ?? null,
+            'opened_at' => now(),
+            'opening_cash' => $validated['opening_cash'],
+            'total_sales' => 0,
+            'total_returns' => 0,
+            'transactions_count' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $shift = DB::table('pos_shifts')->find($shiftId);
+
+        return response()->json(['shift' => $shift], 201);
+    }
+
+    /**
+     * POST /api/v1/pos/shift/close
+     *
+     * Close the current cashier shift with summary.
+     */
+    public function closeShift(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+        $userId = $request->user()->id;
+
+        try {
+            $validated = $request->validate([
+                'closing_cash' => 'required|integer|min:0',
+                'notes' => 'nullable|string|max:500',
+            ]);
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+
+        $shift = DB::table('pos_shifts')
+            ->where('company_id', $companyId)
+            ->where('user_id', $userId)
+            ->whereNull('closed_at')
+            ->first();
+
+        if (! $shift) {
+            return response()->json(['error' => 'No open shift found'], 404);
+        }
+
+        // Calculate shift totals from invoices created during shift
+        $shiftInvoices = Invoice::where('company_id', $companyId)
+            ->where('creator_id', $userId)
+            ->where('notes', 'LIKE', '%POS%')
+            ->where('created_at', '>=', $shift->opened_at)
+            ->get();
+
+        $totalSales = $shiftInvoices->sum('total');
+        $transactionsCount = $shiftInvoices->count();
+
+        $expectedCash = $shift->opening_cash + $totalSales - ($shift->total_returns ?? 0);
+        $cashDifference = $validated['closing_cash'] - $expectedCash;
+
+        DB::table('pos_shifts')
+            ->where('id', $shift->id)
+            ->update([
+                'closed_at' => now(),
+                'closing_cash' => $validated['closing_cash'],
+                'total_sales' => $totalSales,
+                'transactions_count' => $transactionsCount,
+                'cash_difference' => $cashDifference,
+                'notes' => $validated['notes'] ?? null,
+                'updated_at' => now(),
+            ]);
+
+        $updatedShift = DB::table('pos_shifts')->find($shift->id);
+
+        return response()->json([
+            'shift' => $updatedShift,
+            'summary' => [
+                'duration_minutes' => now()->diffInMinutes($shift->opened_at),
+                'total_sales' => $totalSales,
+                'total_returns' => $shift->total_returns ?? 0,
+                'transactions_count' => $transactionsCount,
+                'opening_cash' => $shift->opening_cash,
+                'closing_cash' => $validated['closing_cash'],
+                'expected_cash' => $expectedCash,
+                'cash_difference' => $cashDifference,
+            ],
+        ]);
+    }
+
+    /**
+     * GET /api/v1/pos/shift/current
+     *
+     * Get the current open shift for this user.
+     */
+    public function currentShift(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+        $userId = $request->user()->id;
+
+        $shift = DB::table('pos_shifts')
+            ->where('company_id', $companyId)
+            ->where('user_id', $userId)
+            ->whereNull('closed_at')
+            ->first();
+
+        if (! $shift) {
+            return response()->json(['shift' => null]);
+        }
+
+        // Live stats
+        $salesSinceOpen = Invoice::where('company_id', $companyId)
+            ->where('creator_id', $userId)
+            ->where('notes', 'LIKE', '%POS%')
+            ->where('created_at', '>=', $shift->opened_at)
+            ->selectRaw('SUM(total) as total_sales, COUNT(*) as count')
+            ->first();
+
+        return response()->json([
+            'shift' => $shift,
+            'live_stats' => [
+                'total_sales' => (int) ($salesSinceOpen->total_sales ?? 0),
+                'transactions_count' => (int) ($salesSinceOpen->count ?? 0),
+                'duration_minutes' => now()->diffInMinutes($shift->opened_at),
+            ],
+        ]);
+    }
+
+    /**
+     * Build fiscal storno receipt data for ISL protocol.
+     */
+    protected function buildStornoFiscalData(Invoice $invoice, array $returnItems, int $returnTotal, int $returnTax): array
+    {
+        $items = [];
+        foreach ($returnItems as $ri) {
+            $invoiceItem = $ri['item'];
+            $taxPercent = 0;
+            if ($invoiceItem->taxes && $invoiceItem->taxes->isNotEmpty()) {
+                $taxPercent = $invoiceItem->taxes->first()->taxType?->percent ?? 0;
+            }
+
+            $vatGroup = match (true) {
+                $taxPercent >= 18 => 'А',
+                $taxPercent >= 10 => 'В',
+                $taxPercent >= 5 => 'Б',
+                default => 'Г',
+            };
+
+            $items[] = [
+                'name' => mb_substr($invoiceItem->name, 0, 32),
+                'quantity' => $ri['quantity'],
+                'price' => $invoiceItem->price / 100,
+                'vat_group' => $vatGroup,
+                'tax_percent' => $taxPercent,
+                'total' => round($invoiceItem->total * ($ri['quantity'] / $invoiceItem->quantity)) / 100,
+            ];
+        }
+
+        return [
+            'storno' => true,
+            'original_receipt_number' => $invoice->invoice_number,
+            'items' => $items,
+            'total' => $returnTotal / 100,
+            'tax' => $returnTax / 100,
+        ];
+    }
+
+    /**
+     * Build fiscal receipt data from invoice for WebSerial ISL protocol.
+     * Maps to Macedonian fiscal device VAT groups: А=18%, Б=5%, В=10%, Г=0%
+     */
+    protected function buildFiscalData(Invoice $invoice): array
+    {
+        $items = [];
+        $invoice->load('items.taxes.taxType');
+
+        foreach ($invoice->items as $item) {
+            $taxPercent = 0;
+            if ($item->taxes->isNotEmpty()) {
+                $taxPercent = $item->taxes->first()->taxType?->percent ?? 0;
+            }
+
+            // Map to MK fiscal VAT groups
+            $vatGroup = match (true) {
+                $taxPercent >= 18 => 'А',  // Standard 18%
+                $taxPercent >= 10 => 'В',  // Hospitality 10%
+                $taxPercent >= 5 => 'Б',   // Reduced 5%
+                default => 'Г',            // Zero/Exempt 0%
+            };
+
+            $items[] = [
+                'name' => mb_substr($item->name, 0, 32),  // ISL max 32 chars
+                'quantity' => $item->quantity,
+                'price' => $item->price / 100,  // Convert cents to MKD
+                'vat_group' => $vatGroup,
+                'tax_percent' => $taxPercent,
+                'total' => $item->total / 100,
+            ];
+        }
+
+        return [
+            'items' => $items,
+            'total' => $invoice->total / 100,
+            'tax' => $invoice->tax / 100,
+            'invoice_id' => $invoice->id,
+            'invoice_number' => $invoice->invoice_number,
+        ];
+    }
+}
+
+// CLAUDE-CHECKPOINT

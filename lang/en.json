@@ -2959,6 +2959,7 @@
         "expenses": "Expenses",
         "fiscal_monitor": "Fiscal Monitor",
         "fiscal_receipts": "Fiscal Receipts",
+        "pos": "Point of Sale",
         "invoices": "Invoices",
         "items": "Items",
         "leave": "Leave Management",

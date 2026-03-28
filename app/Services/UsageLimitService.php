@@ -275,6 +275,7 @@ class UsageLimitService
             'proformas_per_month',
             'client_documents_per_month',
             'efaktura_per_month',
+            'pos_transactions_per_month',
         ];
 
         return in_array($feature, $monthlyFeatures);

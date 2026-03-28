@@ -533,6 +533,19 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/devices/{id}', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'deviceDetail']);
             });
 
+            // POS — Point of Sale (no invoice-limit middleware, uses own POS transaction limit)
+            // ----------------------------------
+
+            Route::prefix('pos')->group(function () {
+                Route::post('/sale', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'sale']);
+                Route::post('/return', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'returnSale']);
+                Route::get('/catalog', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'catalog']);
+                Route::get('/barcode/{code}', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'barcodeLookup']);
+                Route::post('/shift/open', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'openShift']);
+                Route::post('/shift/close', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'closeShift']);
+                Route::get('/shift/current', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'currentShift']);
+            });
+
             // Company Lookup (Central Registry)
             // ----------------------------------
 
@@ -1029,6 +1042,9 @@ Route::prefix('/v1')->group(function () {
 
                 // Barcode scanning
                 Route::post('/orders/{order}/scan', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'scanBarcode']);
+
+                // Order duplication
+                Route::post('/orders/{order}/duplicate', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'duplicate']);
 
                 // QC disposition (rework/scrap)
                 Route::post('/orders/{order}/qc-checks/{check}/dispose', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'disposeQcCheck']);

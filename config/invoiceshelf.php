@@ -299,6 +299,16 @@ return [
             'model' => '',
         ],
         [
+            'title' => 'pos_settings.title',
+            'group' => '',
+            'name' => 'POS Settings',
+            'link' => '/admin/settings/pos',
+            'icon' => 'ShoppingCartIcon',
+            'owner_only' => true,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'Viber Notifications',
             'group' => '',
             'name' => 'Viber Notifications',
@@ -458,6 +468,17 @@ return [
             'model' => '',
         ],
         // ── Operations (collapsible submenu) ──
+        [
+            'title' => 'navigation.pos',
+            'group' => 2,
+            'submenu' => 'operations',
+            'link' => '/admin/pos',
+            'icon' => 'ShoppingCartIcon',
+            'name' => 'POS',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+        ],
         [
             'title' => 'navigation.compensations',
             'group' => 2,

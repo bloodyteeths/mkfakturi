@@ -69,6 +69,7 @@ return [
                 'deadlines_custom' => 1,
                 'client_documents_per_month' => 2,
                 'efaktura_per_month' => 0,    // Not available on free
+                'pos_transactions_per_month' => 30,  // ~1/day to evaluate
             ],
         ],
 
@@ -115,6 +116,7 @@ return [
                 'deadlines_custom' => 5,
                 'client_documents_per_month' => 10,
                 'efaktura_per_month' => 5,    // E-Faktura: 5/month (key Starter differentiator)
+                'pos_transactions_per_month' => 60,  // ~2/day, micro-kiosk
             ],
         ],
 
@@ -161,6 +163,7 @@ return [
                 'deadlines_custom' => 50,
                 'client_documents_per_month' => 100,
                 'efaktura_per_month' => null,  // Unlimited e-faktura on Standard+
+                'pos_transactions_per_month' => 500,  // ~17/day, regular shop
             ],
         ],
 
@@ -210,6 +213,7 @@ return [
                 'deadlines_custom' => 200,
                 'client_documents_per_month' => 500,
                 'efaktura_per_month' => null,
+                'pos_transactions_per_month' => 3000,  // ~100/day, busy store
             ],
         ],
 
@@ -261,6 +265,7 @@ return [
                 'deadlines_custom' => null,
                 'client_documents_per_month' => null,
                 'efaktura_per_month' => null,
+                'pos_transactions_per_month' => null,  // Unlimited
             ],
         ],
         /*
@@ -317,6 +322,7 @@ return [
                 'deadlines_custom' => 5,
                 'client_documents_per_month' => 10,
                 'efaktura_per_month' => 0,
+                'pos_transactions_per_month' => 0,  // No POS for accountant basic
             ],
         ],
     ],
