@@ -1662,7 +1662,7 @@ class PartnerAccountingReportsController extends Controller
             $totalVat += $entry['vat_amount'];
             $totalCollected += $entry['collected'];
 
-            $result[] = array_merge($entry->toArray(), ['seq' => $i + 1]);
+            $result[] = array_merge($entry, ['seq' => $i + 1]);
         }
 
         return response()->json([
