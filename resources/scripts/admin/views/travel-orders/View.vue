@@ -170,8 +170,7 @@
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('distance') }}</th>
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('days') }}</th>
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('per_diem') }}</th>
-                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('accommodation_provided') }}</th>
-                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('meals_provided') }}</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('accommodation_tier') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -183,12 +182,10 @@
                 <td class="px-4 py-3 text-sm text-right text-gray-500">{{ seg.per_diem_days || '-' }}</td>
                 <td class="px-4 py-3 text-sm text-right font-medium text-blue-700">{{ formatMoney(seg.per_diem_amount) }}</td>
                 <td class="px-4 py-3 text-sm text-center">
-                  <span v-if="seg.accommodation_provided" class="text-green-600">&#10003;</span>
-                  <span v-else class="text-gray-300">-</span>
-                </td>
-                <td class="px-4 py-3 text-sm text-center">
-                  <span v-if="seg.meals_provided" class="text-green-600">&#10003;</span>
-                  <span v-else class="text-gray-300">-</span>
+                  <span v-if="seg.accommodation_tier && seg.accommodation_tier !== 'none'" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                    {{ t('tier_' + seg.accommodation_tier) || seg.accommodation_tier }}
+                  </span>
+                  <span v-else class="text-gray-300">{{ t('tier_none') || '-' }}</span>
                 </td>
               </tr>
             </tbody>

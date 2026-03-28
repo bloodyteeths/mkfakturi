@@ -182,10 +182,19 @@ export default {
       amount_mkd: 'Износ (МКД)',
       receipt_number: 'Број на сметка',
       vat_amount: 'ДДВ',
-      // Meal granularity
-      breakfast_provided: 'Појадок (-10%)',
-      lunch_provided: 'Ручек (-30%)',
-      dinner_provided: 'Вечера (-30%)',
+      // Accommodation tiers per Уредба Art. 10
+      accommodation_tier: 'Тип на смештај',
+      tier_none: 'Без смештај / оброци',
+      tier_bed_breakfast: 'Смештај со појадок',
+      tier_half_board: 'Полупансион / полн пансион',
+      tier_training: 'Обука/семинар >30 дена',
+      tier_trade_fair: 'Саем/настан >30 дена',
+      arrival_before_departure: 'Пристигнувањето мора да биде после заминувањето',
+      carry_over: 'пренос',
+      // Legacy meal fields (deprecated)
+      breakfast_provided: 'Појадок',
+      lunch_provided: 'Ручек',
+      dinner_provided: 'Вечера',
       meal_reduction: 'Намалување за оброци',
       // Per-diem auto-fill
       per_diem_rate_auto: 'Автоматска дневница',
@@ -420,10 +429,19 @@ export default {
       amount_mkd: 'Amount (MKD)',
       receipt_number: 'Receipt Number',
       vat_amount: 'VAT',
-      // Meal granularity
-      breakfast_provided: 'Breakfast (-10%)',
-      lunch_provided: 'Lunch (-30%)',
-      dinner_provided: 'Dinner (-30%)',
+      // Accommodation tiers per Regulation Art. 10
+      accommodation_tier: 'Accommodation Type',
+      tier_none: 'No accommodation / meals',
+      tier_bed_breakfast: 'Bed & Breakfast',
+      tier_half_board: 'Half / Full Board',
+      tier_training: 'Training/Seminar >30 days',
+      tier_trade_fair: 'Trade Fair/Event >30 days',
+      arrival_before_departure: 'Arrival must be after departure',
+      carry_over: 'carry-over',
+      // Legacy meal fields (deprecated)
+      breakfast_provided: 'Breakfast',
+      lunch_provided: 'Lunch',
+      dinner_provided: 'Dinner',
       meal_reduction: 'Meal Reduction',
       // Per-diem auto-fill
       per_diem_rate_auto: 'Automatic Per Diem',
@@ -658,10 +676,19 @@ export default {
       amount_mkd: 'Tutar (MKD)',
       receipt_number: 'Fi\u015f Numaras\u0131',
       vat_amount: 'KDV',
-      // Meal granularity
-      breakfast_provided: 'Kahvalt\u0131 (-10%)',
-      lunch_provided: '\u00d6\u011fle Yeme\u011fi (-30%)',
-      dinner_provided: 'Ak\u015fam Yeme\u011fi (-30%)',
+      // Accommodation tiers
+      accommodation_tier: 'Konaklama T\u00fcr\u00fc',
+      tier_none: 'Konaklama / yemek yok',
+      tier_bed_breakfast: 'Oda + kahvalt\u0131',
+      tier_half_board: 'Yar\u0131m / tam pansiyon',
+      tier_training: 'E\u011fitim/seminer >30 g\u00fcn',
+      tier_trade_fair: 'Fuar/etkinlik >30 g\u00fcn',
+      arrival_before_departure: 'Var\u0131\u015f, kalk\u0131\u015ftan sonra olmal\u0131d\u0131r',
+      carry_over: 'devir',
+      // Legacy meal fields
+      breakfast_provided: 'Kahvalt\u0131',
+      lunch_provided: '\u00d6\u011fle Yeme\u011fi',
+      dinner_provided: 'Ak\u015fam Yeme\u011fi',
       meal_reduction: 'Yemek \u0130ndirimi',
       // Per-diem auto-fill
       per_diem_rate_auto: 'Otomatik Harc\u0131rah',
@@ -896,10 +923,19 @@ export default {
       amount_mkd: 'Shuma (MKD)',
       receipt_number: 'Numri i Fatur\u00ebs',
       vat_amount: 'TVSH',
-      // Meal granularity
-      breakfast_provided: 'M\u00ebngjesi (-10%)',
-      lunch_provided: 'Dreka (-30%)',
-      dinner_provided: 'Darka (-30%)',
+      // Accommodation tiers
+      accommodation_tier: 'Lloji i akomodimit',
+      tier_none: 'Pa akomodim / vakte',
+      tier_bed_breakfast: 'Fjetje + m\u00ebngjesi',
+      tier_half_board: 'Gjys\u00ebm / pension i plot\u00eb',
+      tier_training: 'Trajnim/seminar >30 dit\u00eb',
+      tier_trade_fair: 'Panairi/event >30 dit\u00eb',
+      arrival_before_departure: 'Mbërritja duhet të jetë pas nisjes',
+      carry_over: 'bartje',
+      // Legacy meal fields
+      breakfast_provided: 'M\u00ebngjesi',
+      lunch_provided: 'Dreka',
+      dinner_provided: 'Darka',
       meal_reduction: 'Zbritja p\u00ebr Vakte',
       // Per-diem auto-fill
       per_diem_rate_auto: 'Dieta Automatike',

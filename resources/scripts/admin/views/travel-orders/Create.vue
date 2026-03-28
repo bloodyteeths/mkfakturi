@@ -360,34 +360,36 @@
             </BaseInputGroup>
           </div>
 
-          <div class="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4">
-            <label class="flex items-center space-x-2 text-sm">
-              <input type="checkbox" v-model="seg.accommodation_provided" class="h-4 w-4 rounded border-gray-300 text-primary-600" />
-              <span>{{ t('accommodation_provided') }}</span>
-            </label>
-            <label class="flex items-center space-x-2 text-sm">
-              <input type="checkbox" v-model="seg.breakfast_provided" class="h-4 w-4 rounded border-gray-300 text-primary-600" />
-              <span>{{ t('breakfast') }} <span class="text-gray-400">(-10%)</span></span>
-            </label>
-            <label class="flex items-center space-x-2 text-sm">
-              <input type="checkbox" v-model="seg.lunch_provided" class="h-4 w-4 rounded border-gray-300 text-primary-600" />
-              <span>{{ t('lunch') }} <span class="text-gray-400">(-30%)</span></span>
-            </label>
-            <label class="flex items-center space-x-2 text-sm">
-              <input type="checkbox" v-model="seg.dinner_provided" class="h-4 w-4 rounded border-gray-300 text-primary-600" />
-              <span>{{ t('dinner') }} <span class="text-gray-400">(-30%)</span></span>
-            </label>
+          <!-- Validation: arrival must be after departure -->
+          <div v-if="seg.departure_at && seg.arrival_at && new Date(seg.arrival_at) <= new Date(seg.departure_at)" class="mt-3 bg-red-50 border border-red-200 rounded-lg p-2">
+            <span class="text-sm text-red-600">{{ t('arrival_before_departure') || 'Arrival must be after departure' }}</span>
           </div>
 
-          <!-- Per-diem calculation info -->
-          <div v-if="segmentPerDiem(seg)" class="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <!-- Accommodation tier per Уредба Art. 10 (Сл. весник 50/00, amended 46/2025) -->
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('accommodation_tier') }}</label>
+            <select
+              v-model="seg.accommodation_tier"
+              class="w-full md:w-auto border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-sm"
+            >
+              <option value="none">{{ t('tier_none') }} (100%)</option>
+              <option value="bed_breakfast">{{ t('tier_bed_breakfast') }} (50%)</option>
+              <option value="half_board">{{ t('tier_half_board') }} (20%)</option>
+              <option value="training">{{ t('tier_training') }} (5%)</option>
+              <option value="trade_fair">{{ t('tier_trade_fair') }} (50%)</option>
+            </select>
+          </div>
+
+          <!-- Per-diem calculation info (uses carry-over from previous segments) -->
+          <div v-if="segmentPerDiemResults[index]" class="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div class="flex items-center justify-between text-sm">
               <div class="flex flex-wrap gap-x-4 gap-y-1">
-                <span class="text-blue-700">{{ segmentPerDiem(seg).hours }}h = {{ segmentPerDiem(seg).days }} {{ t('days') }}</span>
-                <span class="text-blue-700">{{ segmentPerDiem(seg).rate }} {{ segmentPerDiem(seg).currency }}</span>
-                <span v-if="segmentPerDiem(seg).reductions > 0" class="text-orange-600">-{{ segmentPerDiem(seg).reductions }}%</span>
+                <span class="text-blue-700">{{ segmentPerDiemResults[index].hours }}h = {{ segmentPerDiemResults[index].days }} {{ t('days') }}</span>
+                <span class="text-blue-700">{{ segmentPerDiemResults[index].rate }} {{ segmentPerDiemResults[index].currency }}</span>
+                <span v-if="segmentPerDiemResults[index].tierFactor < 1" class="text-orange-600">x{{ (segmentPerDiemResults[index].tierFactor * 100).toFixed(0) }}%</span>
+                <span v-if="index > 0 && segmentPerDiemResults[index - 1]?.remainder > 0" class="text-purple-600 text-xs">+{{ segmentPerDiemResults[index - 1].remainder }}h {{ t('carry_over') || 'carry' }}</span>
               </div>
-              <span class="font-bold text-blue-800">{{ formatMoney(segmentPerDiem(seg).mkdAmount) }} MKD</span>
+              <span class="font-bold text-blue-800">{{ formatMoney(segmentPerDiemResults[index].mkdAmount) }} MKD</span>
             </div>
           </div>
         </div>
@@ -710,7 +712,7 @@ const form = reactive({
   advance_amount_display: '',
   notes: '',
   vehicles: [createVehicle()],
-  segments: [createSegment()],
+  segments: [{ ...createSegment(), departure_at: getLocalDateTimeString() }],
   crew: [],
   cargo_items: [],
   expenses: [],
@@ -815,11 +817,20 @@ const canSave = computed(() => {
 
 const advanceInCents = computed(() => Math.round(parseFloat(form.advance_amount_display || 0) * 100))
 
+// Compute per-diem for all segments with Article 13 carry-over
+const segmentPerDiemResults = computed(() => {
+  const results = []
+  let carry = 0
+  for (const seg of form.segments) {
+    const pd = segmentPerDiem(seg, carry)
+    results.push(pd)
+    carry = pd ? pd.remainder : carry
+  }
+  return results
+})
+
 const totalPerDiemMkd = computed(() => {
-  return form.segments.reduce((sum, seg) => {
-    const pd = segmentPerDiem(seg)
-    return sum + (pd ? pd.mkdAmount : 0)
-  }, 0)
+  return segmentPerDiemResults.value.reduce((sum, pd) => sum + (pd ? pd.mkdAmount : 0), 0)
 })
 
 const totalDistanceKm = computed(() => {
@@ -859,10 +870,10 @@ function createVehicle() {
 function createSegment() {
   return {
     from_city: '', to_city: '', country_code: '',
-    departure_at: getLocalDateTimeString(), arrival_at: getLocalDateTimeString(),
+    departure_at: '', arrival_at: '',
     transport_type: 'car', distance_km: '',
     per_diem_rate: '', per_diem_currency: 'EUR',
-    accommodation_provided: false, breakfast_provided: false, lunch_provided: false, dinner_provided: false,
+    accommodation_tier: 'none',
   }
 }
 
@@ -922,7 +933,27 @@ function expenseMkdAmount(exp) {
   return amount * rate
 }
 
-function segmentPerDiem(seg) {
+// Per diem day calculation per Уредба (Сл. весник 50/00):
+// Full per diem per 24h, remainder >12h = +1 full, 8-12h = +0.5, <8h = carry forward
+function calcPerDiemDays(hours, carryHours = 0) {
+  const totalHours = hours + carryHours
+  if (totalHours < 8) return { days: 0, remainder: totalHours }
+  const fullDays = Math.floor(totalHours / 24)
+  const remainder = totalHours - fullDays * 24
+  if (fullDays === 0 && totalHours > 12) return { days: 1, remainder: 0 }
+  if (remainder > 12) return { days: fullDays + 1, remainder: 0 }
+  if (remainder >= 8) return { days: fullDays + 0.5, remainder: 0 }
+  return { days: Math.max(fullDays, 0), remainder }
+}
+
+// Accommodation tier factors per Уредба Art. 10
+const TIER_FACTORS = { none: 1.0, bed_breakfast: 0.5, half_board: 0.2, training: 0.05, trade_fair: 0.5 }
+
+// Domestic per diem: 8% of avg salary (~46,489 MKD, Q4 2025 ДЗС)
+const DOMESTIC_FULL = 3719
+const DOMESTIC_HALF = 1860
+
+function segmentPerDiem(seg, carryHours = 0) {
   if (!seg.departure_at || !seg.arrival_at) return null
   const dep = new Date(seg.departure_at)
   const arr = new Date(seg.arrival_at)
@@ -930,7 +961,7 @@ function segmentPerDiem(seg) {
   if (diffMs <= 0) return null
 
   const hours = Math.round(diffMs / (1000 * 60 * 60) * 10) / 10
-  const days = hours <= 8 ? 0 : hours <= 12 ? 0.5 : Math.ceil(hours / 24)
+  const { days, remainder } = calcPerDiemDays(hours, carryHours)
 
   let rate = 0
   let currency = 'MKD'
@@ -938,17 +969,23 @@ function segmentPerDiem(seg) {
     rate = parseFloat(seg.per_diem_rate) || 0
     currency = seg.per_diem_currency || 'EUR'
   } else {
-    rate = hours > 12 ? 3430 : hours > 8 ? 1715 : 0
+    rate = days >= 1 ? DOMESTIC_FULL : days === 0.5 ? DOMESTIC_HALF : 0
     currency = 'MKD'
   }
 
-  let reductions = 0
-  if (seg.breakfast_provided) reductions += 10
-  if (seg.lunch_provided) reductions += 30
-  if (seg.dinner_provided) reductions += 30
+  const tierFactor = TIER_FACTORS[seg.accommodation_tier || 'none'] || 1.0
 
-  let baseAmount = form.type === 'foreign' ? rate * days : rate
-  const netAmount = baseAmount - baseAmount * (reductions / 100)
+  // Calculate base: for foreign rate*days, for domestic use flat rates
+  let baseAmount
+  if (form.type === 'foreign') {
+    baseAmount = rate * days
+  } else {
+    const wholeDays = Math.floor(days)
+    const hasHalf = (days - wholeDays) >= 0.5
+    baseAmount = wholeDays * DOMESTIC_FULL + (hasHalf ? DOMESTIC_HALF : 0)
+  }
+
+  const netAmount = baseAmount * tierFactor
 
   let mkdAmount
   if (currency === 'MKD') {
@@ -958,7 +995,7 @@ function segmentPerDiem(seg) {
     mkdAmount = Math.round(netAmount * exRate * 100)
   }
 
-  return { hours, days, rate, currency, reductions, baseAmount, netAmount, mkdAmount }
+  return { hours, days, rate, currency, tierFactor, baseAmount, netAmount, mkdAmount, remainder }
 }
 
 function estimatedFuelConsumption(vehicle) {
@@ -981,7 +1018,20 @@ function removeCrew(index) { form.crew.splice(index, 1) }
 function addSegment() {
   const newSeg = createSegment()
   if (form.segments.length > 0) {
-    newSeg.from_city = form.segments[form.segments.length - 1].to_city || ''
+    const prev = form.segments[form.segments.length - 1]
+    newSeg.from_city = prev.to_city || ''
+    // Accountant suggestion: auto-continue departure from previous arrival
+    if (prev.arrival_at) {
+      newSeg.departure_at = prev.arrival_at
+    }
+    // Auto-continue country for foreign trips
+    if (form.type === 'foreign' && prev.country_code) {
+      newSeg.country_code = prev.country_code
+      if (perDiemRates.value[prev.country_code]) {
+        newSeg.per_diem_rate = perDiemRates.value[prev.country_code].rate
+        newSeg.per_diem_currency = perDiemRates.value[prev.country_code].currency || 'EUR'
+      }
+    }
   }
   form.segments.push(newSeg)
 }
@@ -990,7 +1040,20 @@ function removeSegment(index) { form.segments.splice(index, 1) }
 function addCargo() { form.cargo_items.push(createCargo()) }
 function removeCargo(index) { form.cargo_items.splice(index, 1) }
 
-function addExpense() { form.expenses.push(createExpense()) }
+function addExpense() {
+  const exp = createExpense()
+  // Default currency to the trip's primary currency for foreign trips
+  if (form.type === 'foreign' && form.segments.length > 0) {
+    const firstForeignSeg = form.segments.find(s => s.per_diem_currency && s.per_diem_currency !== 'MKD')
+    if (firstForeignSeg) {
+      exp.currency_code = firstForeignSeg.per_diem_currency
+      if (exchangeRates.value[exp.currency_code]) {
+        exp.exchange_rate = exchangeRates.value[exp.currency_code]
+      }
+    }
+  }
+  form.expenses.push(exp)
+}
 function removeExpense(index) { form.expenses.splice(index, 1) }
 
 // ==================== Auto-fill Handlers ====================
@@ -1104,6 +1167,7 @@ async function saveTravelOrder() {
     per_diem_currency: s.per_diem_currency || null,
     accommodation_provided: s.accommodation_provided,
     breakfast_provided: s.breakfast_provided, lunch_provided: s.lunch_provided, dinner_provided: s.dinner_provided,
+    accommodation_tier: s.accommodation_tier || 'none',
   }))
 
   const expenses = form.expenses.map(e => ({
