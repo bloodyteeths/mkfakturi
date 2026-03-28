@@ -2,11 +2,14 @@
 
 namespace Modules\Mk\Services;
 
+use App\Models\Company;
 use App\Models\FiscalDevice;
 use App\Models\FiscalReceipt;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Modules\Mk\Models\FiscalDeviceEvent;
 use Modules\Mk\Models\FiscalFraudAlert;
 
@@ -443,7 +446,63 @@ class FiscalFraudDetectionService
             'company_id' => $companyId,
         ]);
 
+        // Send email notification for critical/high severity alerts
+        if (in_array($severity, ['critical', 'high'])) {
+            $this->sendAlertEmail($alert, $companyId, $deviceId, $alertType);
+        }
+
         return $alert;
+    }
+
+    /**
+     * Send email notification for critical/high fraud alerts.
+     * Rate-limited to 1 email per device+alertType per hour.
+     */
+    private function sendAlertEmail(FiscalFraudAlert $alert, int $companyId, int $deviceId, string $alertType): void
+    {
+        $cacheKey = "fraud_alert_email:{$deviceId}:{$alertType}";
+        if (Cache::has($cacheKey)) {
+            return;
+        }
+
+        try {
+            $recipients = collect([config('mail.admin_email')]);
+
+            $company = Company::find($companyId);
+            if ($company && $company->owner) {
+                $recipients->push($company->owner->email);
+            }
+
+            $recipients = $recipients->filter()->unique()->values();
+
+            if ($recipients->isEmpty()) {
+                return;
+            }
+
+            $device = FiscalDevice::find($deviceId);
+            $deviceName = $device ? ($device->name ?? $device->serial_number) : "ID:{$deviceId}";
+
+            Mail::raw(
+                "Фискален Монитор — {$alert->severity} аларм\n\n" .
+                "Апарат: {$deviceName}\n" .
+                "Тип: {$alertType}\n\n" .
+                "{$alert->description}\n\n" .
+                "Проверете на: " . config('app.url') . "/admin/fiscal-monitor",
+                function ($message) use ($recipients, $alert, $deviceName) {
+                    $message->to($recipients->toArray())
+                        ->subject("[Facturino] Fiscal Alert: {$alert->severity} — {$deviceName}")
+                        ->from(config('mail.from.address'), config('mail.from.name'));
+                    $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+                }
+            );
+
+            Cache::put($cacheKey, true, 3600); // 1 hour
+        } catch (\Throwable $e) {
+            Log::error('Failed to send fraud alert email', [
+                'alert_id' => $alert->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

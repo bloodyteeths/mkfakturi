@@ -17,6 +17,28 @@
       </template>
     </BasePageHeader>
 
+    <!-- Tab Navigation -->
+    <div class="flex border-b border-gray-200 mt-4">
+      <button
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent text-gray-500 hover:text-gray-700"
+        @click="$router.push('/admin/fiscal-monitor')"
+      >
+        {{ $t('fiscal_monitor.tab_dashboard') }}
+      </button>
+      <button
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent text-gray-500 hover:text-gray-700"
+        @click="$router.push('/admin/fiscal-monitor/audit')"
+      >
+        {{ $t('fiscal_monitor.tab_audit') }}
+      </button>
+      <button
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent text-gray-500 hover:text-gray-700"
+        @click="$router.push('/admin/fiscal-receipts')"
+      >
+        {{ $t('fiscal_monitor.tab_receipts') }}
+      </button>
+    </div>
+
     <!-- Device Info -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
       <BaseCard class="p-4">
@@ -36,6 +58,41 @@
         <p class="text-base font-medium text-gray-900">
           {{ data.last_event ? formatDateTime(data.last_event.at) : '—' }}
         </p>
+      </BaseCard>
+    </div>
+
+    <!-- Business Hours Config -->
+    <div class="mt-6">
+      <BaseCard class="p-4">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">{{ $t('fiscal_monitor.business_hours') }}</h3>
+        <div class="flex items-center gap-4">
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">{{ $t('fiscal_monitor.opening_hour') }}</label>
+            <input
+              v-model.number="businessHours.open"
+              type="number"
+              min="0"
+              max="23"
+              class="w-20 border-gray-300 rounded-md shadow-sm text-sm"
+            />
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">{{ $t('fiscal_monitor.closing_hour') }}</label>
+            <input
+              v-model.number="businessHours.close"
+              type="number"
+              min="0"
+              max="23"
+              class="w-20 border-gray-300 rounded-md shadow-sm text-sm"
+            />
+          </div>
+          <div class="flex items-end">
+            <BaseButton size="sm" variant="primary" @click="saveBusinessHours">
+              {{ $t('fiscal_monitor.save') }}
+            </BaseButton>
+          </div>
+          <span v-if="savedMsg" class="text-sm text-green-600">{{ savedMsg }}</span>
+        </div>
       </BaseCard>
     </div>
 
@@ -137,7 +194,7 @@
 
       <!-- Filters -->
       <div class="flex gap-3 mb-3">
-        <select v-model="eventFilter" class="border-gray-300 rounded-md shadow-sm text-sm" @change="filterEvents">
+        <select v-model="eventFilter" class="border-gray-300 rounded-md shadow-sm text-sm">
           <option value="">{{ $t('fiscal_monitor.all_events') }}</option>
           <option value="open">{{ $t('fiscal_monitor.event_open') }}</option>
           <option value="close">{{ $t('fiscal_monitor.event_close') }}</option>
@@ -149,9 +206,9 @@
       </div>
 
       <BaseCard class="p-4">
-        <div class="space-y-2 max-h-96 overflow-y-auto">
+        <div class="space-y-2">
           <div
-            v-for="event in filteredEvents"
+            v-for="event in paginatedEvents"
             :key="event.id"
             class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0"
           >
@@ -177,6 +234,27 @@
             {{ $t('fiscal_monitor.no_events') }}
           </div>
         </div>
+
+        <!-- Pagination -->
+        <div v-if="totalEventPages > 1" class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+          <button
+            class="text-sm text-indigo-600 hover:text-indigo-800 disabled:text-gray-300"
+            :disabled="eventPage === 1"
+            @click="eventPage--"
+          >
+            {{ $t('fiscal_monitor.previous') }}
+          </button>
+          <span class="text-sm text-gray-500">
+            {{ $t('fiscal_monitor.page_of', { page: eventPage, total: totalEventPages }) }}
+          </span>
+          <button
+            class="text-sm text-indigo-600 hover:text-indigo-800 disabled:text-gray-300"
+            :disabled="eventPage >= totalEventPages"
+            @click="eventPage++"
+          >
+            {{ $t('fiscal_monitor.next') }}
+          </button>
+        </div>
       </BaseCard>
     </div>
   </BasePage>
@@ -187,7 +265,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
@@ -203,11 +281,29 @@ const data = ref({})
 const device = ref({})
 const deviceStatus = ref('closed')
 const eventFilter = ref('')
+const eventPage = ref(1)
+const eventsPerPage = 20
+const businessHours = ref({ open: 8, close: 20 })
+const savedMsg = ref('')
 
 const filteredEvents = computed(() => {
   const events = data.value.recent_events || []
   if (!eventFilter.value) return events
   return events.filter(e => e.event_type === eventFilter.value)
+})
+
+const totalEventPages = computed(() => {
+  return Math.max(1, Math.ceil(filteredEvents.value.length / eventsPerPage))
+})
+
+const paginatedEvents = computed(() => {
+  const start = (eventPage.value - 1) * eventsPerPage
+  return filteredEvents.value.slice(start, start + eventsPerPage)
+})
+
+// Reset page when filter changes
+watch(eventFilter, () => {
+  eventPage.value = 1
 })
 
 onMounted(async () => {
@@ -217,6 +313,14 @@ onMounted(async () => {
       data.value = res.data.data
       device.value = res.data.data.device || {}
       deviceStatus.value = res.data.data.status || 'closed'
+
+      // Load business hours from device metadata
+      if (device.value.metadata?.business_hours) {
+        businessHours.value = {
+          open: device.value.metadata.business_hours.open ?? 8,
+          close: device.value.metadata.business_hours.close ?? 20,
+        }
+      }
     }
   } catch (err) {
     console.error('Failed to load device detail:', err)
@@ -229,6 +333,18 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+async function saveBusinessHours() {
+  try {
+    await axios.patch(`fiscal-devices/${route.params.id}`, {
+      metadata: { business_hours: businessHours.value },
+    })
+    savedMsg.value = t('fiscal_monitor.saved_successfully')
+    setTimeout(() => { savedMsg.value = '' }, 3000)
+  } catch (err) {
+    console.error('Failed to save business hours:', err)
+  }
+}
 
 function getEventLabel(type) {
   const labels = {

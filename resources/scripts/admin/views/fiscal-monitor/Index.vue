@@ -6,12 +6,6 @@
         <BaseBreadcrumbItem :title="$t('fiscal_monitor.title')" to="#" active />
       </BaseBreadcrumb>
       <template #actions>
-        <BaseButton variant="primary-outline" @click="$router.push('/admin/fiscal-monitor/audit')">
-          <template #left="slotProps">
-            <BaseIcon name="DocumentTextIcon" :class="slotProps.class" />
-          </template>
-          {{ $t('fiscal_monitor.audit_report') }}
-        </BaseButton>
         <BaseButton variant="primary" class="ml-2" @click="refreshDashboard">
           <template #left="slotProps">
             <BaseIcon name="ArrowPathIcon" :class="slotProps.class" />
@@ -20,6 +14,31 @@
         </BaseButton>
       </template>
     </BasePageHeader>
+
+    <!-- Tab Navigation -->
+    <div class="flex border-b border-gray-200 mt-4">
+      <button
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="activeTab === 'dashboard' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+        @click="activeTab = 'dashboard'"
+      >
+        {{ $t('fiscal_monitor.tab_dashboard') }}
+      </button>
+      <button
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="activeTab === 'audit' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+        @click="$router.push('/admin/fiscal-monitor/audit')"
+      >
+        {{ $t('fiscal_monitor.tab_audit') }}
+      </button>
+      <button
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="activeTab === 'receipts' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+        @click="$router.push('/admin/fiscal-receipts')"
+      >
+        {{ $t('fiscal_monitor.tab_receipts') }}
+      </button>
+    </div>
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
@@ -137,7 +156,7 @@
 
       <div v-if="dashboard.alerts?.length" class="space-y-3">
         <BaseCard
-          v-for="alert in dashboard.alerts"
+          v-for="alert in visibleAlerts"
           :key="alert.id"
           class="p-4"
           :class="{
@@ -182,13 +201,24 @@
                 v-if="alert.status !== 'resolved' && alert.status !== 'false_positive'"
                 size="sm"
                 variant="primary-outline"
-                @click="resolveAlert(alert)"
+                @click="openResolveModal(alert)"
               >
                 {{ $t('fiscal_monitor.resolve') }}
               </BaseButton>
             </div>
           </div>
         </BaseCard>
+
+        <!-- Show More / Less -->
+        <div v-if="dashboard.alerts.length > 5" class="text-center">
+          <button
+            class="text-sm text-indigo-600 hover:text-indigo-800"
+            @click="showAllAlerts = !showAllAlerts"
+          >
+            {{ showAllAlerts ? $t('fiscal_monitor.show_less') : $t('fiscal_monitor.show_more') }}
+            ({{ $t('fiscal_monitor.showing_of', { count: visibleAlerts.length, total: dashboard.alerts.length }) }})
+          </button>
+        </div>
       </div>
 
       <div v-else-if="!isLoading" class="text-center py-8 text-gray-400">
@@ -239,21 +269,67 @@
             </BaseButton>
           </div>
         </div>
-        <div class="mt-2">
+        <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             v-model="newEvent.notes"
             type="text"
             class="w-full border-gray-300 rounded-md shadow-sm text-sm"
             :placeholder="$t('fiscal_monitor.notes_placeholder')"
           />
+          <!-- Void reason dropdown (only when event_type is void) -->
+          <select
+            v-if="newEvent.event_type === 'void'"
+            v-model="newEvent.void_reason"
+            class="w-full border-gray-300 rounded-md shadow-sm text-sm"
+          >
+            <option value="">{{ $t('fiscal_monitor.void_reason') }}</option>
+            <option value="customer_request">{{ $t('fiscal_monitor.reason_customer_request') }}</option>
+            <option value="error">{{ $t('fiscal_monitor.reason_error') }}</option>
+            <option value="duplicate">{{ $t('fiscal_monitor.reason_duplicate') }}</option>
+            <option value="other">{{ $t('fiscal_monitor.reason_other') }}</option>
+          </select>
         </div>
       </BaseCard>
+    </div>
+
+    <!-- Resolve Alert Modal -->
+    <div
+      v-if="showResolveModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      @click.self="showResolveModal = false"
+    >
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('fiscal_monitor.resolution_modal_title') }}</h3>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('fiscal_monitor.resolution_status') }}</label>
+          <select v-model="resolveStatus" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+            <option value="resolved">{{ $t('fiscal_monitor.mark_resolved') }}</option>
+            <option value="false_positive">{{ $t('fiscal_monitor.mark_false_positive') }}</option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('fiscal_monitor.resolution_notes_prompt') }}</label>
+          <textarea
+            v-model="resolveNotes"
+            rows="3"
+            class="w-full border-gray-300 rounded-md shadow-sm text-sm"
+          />
+        </div>
+        <div class="flex justify-end gap-2">
+          <BaseButton variant="primary-outline" @click="showResolveModal = false">
+            {{ $t('fiscal_monitor.cancel') }}
+          </BaseButton>
+          <BaseButton variant="primary" @click="confirmResolve">
+            {{ $t('fiscal_monitor.confirm') }}
+          </BaseButton>
+        </div>
+      </div>
     </div>
   </BasePage>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -263,14 +339,24 @@ const { t } = useI18n()
 const companyStore = useCompanyStore()
 const notificationStore = useNotificationStore()
 
+const activeTab = ref('dashboard')
 const isLoading = ref(true)
 const dashboard = ref({ devices: [], alerts: [], summary: {} })
-const newEvent = ref({ fiscal_device_id: '', event_type: 'open', cash_amount: null, notes: '' })
+const newEvent = ref({ fiscal_device_id: '', event_type: 'open', cash_amount: null, notes: '', void_reason: '' })
+const showAllAlerts = ref(false)
+const showResolveModal = ref(false)
+const resolveAlertId = ref(null)
+const resolveNotes = ref('')
+const resolveStatus = ref('resolved')
 let refreshInterval = null
+
+const visibleAlerts = computed(() => {
+  const alerts = dashboard.value.alerts || []
+  return showAllAlerts.value ? alerts : alerts.slice(0, 5)
+})
 
 onMounted(async () => {
   await refreshDashboard()
-  // Auto-refresh every 60 seconds
   refreshInterval = setInterval(refreshDashboard, 60000)
 })
 
@@ -301,6 +387,9 @@ async function submitEvent() {
     if (newEvent.value.cash_amount) {
       payload.cash_amount = Math.round(newEvent.value.cash_amount * 100)
     }
+    if (newEvent.value.event_type === 'void' && newEvent.value.void_reason) {
+      payload.metadata = { void_reason: newEvent.value.void_reason }
+    }
 
     await axios.post('fiscal-monitor/events', payload)
 
@@ -309,7 +398,7 @@ async function submitEvent() {
       message: t('fiscal_monitor.event_logged'),
     })
 
-    newEvent.value = { fiscal_device_id: '', event_type: 'open', cash_amount: null, notes: '' }
+    newEvent.value = { fiscal_device_id: '', event_type: 'open', cash_amount: null, notes: '', void_reason: '' }
     await refreshDashboard()
   } catch (err) {
     notificationStore.showNotification({
@@ -331,11 +420,16 @@ async function updateAlertStatus(alertId, status, notes) {
   }
 }
 
-function resolveAlert(alert) {
-  const notes = prompt(t('fiscal_monitor.resolution_notes_prompt'))
-  if (notes !== null) {
-    updateAlertStatus(alert.id, 'resolved', notes)
-  }
+function openResolveModal(alert) {
+  resolveAlertId.value = alert.id
+  resolveNotes.value = ''
+  resolveStatus.value = 'resolved'
+  showResolveModal.value = true
+}
+
+async function confirmResolve() {
+  await updateAlertStatus(resolveAlertId.value, resolveStatus.value, resolveNotes.value)
+  showResolveModal.value = false
 }
 
 function getEventLabel(type) {

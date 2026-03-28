@@ -3,8 +3,10 @@
 namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\FiscalDevice;
 use App\Models\FiscalReceipt;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -238,6 +240,44 @@ class FiscalFraudController extends Controller
         $report = $this->fraudService->getAuditReport($companyId, $from, $to, $deviceId, $userId);
 
         return response()->json(['data' => $report]);
+    }
+
+    /**
+     * GET /fiscal-monitor/audit-report-pdf
+     * Export audit report as PDF (Записник за контрола на фискални апарати).
+     */
+    public function exportAuditReport(Request $request)
+    {
+        $this->authorizeAccess($request);
+
+        $companyId = (int) $request->header('company');
+        $company = Company::find($companyId);
+
+        $from = $request->filled('from')
+            ? Carbon::parse($request->query('from'))
+            : Carbon::now()->subDays(30);
+        $to = $request->filled('to')
+            ? Carbon::parse($request->query('to'))
+            : Carbon::now();
+
+        $deviceId = $request->filled('device_id') ? (int) $request->query('device_id') : null;
+        $userId = $request->filled('user_id') ? (int) $request->query('user_id') : null;
+
+        $report = $this->fraudService->getAuditReport($companyId, $from, $to, $deviceId, $userId);
+
+        $generatedAt = Carbon::now('Europe/Skopje')->format('d.m.Y H:i');
+        $totalEvents = $report['total_events'] ?? 0;
+
+        $pdf = Pdf::loadView('app.pdf.reports.fiscal-audit', [
+            'company' => $company,
+            'report' => $report,
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+            'generatedAt' => $generatedAt,
+            'totalEvents' => $totalEvents,
+        ]);
+
+        return $pdf->download("fiscal-audit-{$from->toDateString()}-{$to->toDateString()}.pdf");
     }
 
     /**

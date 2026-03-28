@@ -142,7 +142,16 @@ class FiscalDeviceController extends Controller
             'port' => 'nullable|integer|min:1|max:65535',
             'serial_port' => 'nullable|string|max:100',
             'is_active' => 'nullable|boolean',
+            'metadata' => 'nullable|array',
+            'metadata.business_hours' => 'nullable|array',
+            'metadata.business_hours.open' => 'nullable|integer|min:0|max:23',
+            'metadata.business_hours.close' => 'nullable|integer|min:0|max:23',
         ]);
+
+        // Merge metadata with existing (don't overwrite other metadata keys)
+        if (isset($validated['metadata'])) {
+            $validated['metadata'] = array_merge($device->metadata ?? [], $validated['metadata']);
+        }
 
         $device->update($validated);
 
@@ -415,7 +424,7 @@ class FiscalDeviceController extends Controller
             'amount' => $validated['amount'],
             'vat_amount' => $validated['vat_amount'],
             'fiscal_id' => $validated['fiscal_id'],
-            'raw_response' => $validated['raw_response'],
+            'raw_response' => $validated['raw_response'] ?? null,
             'source' => $validated['source'],
             'metadata' => json_encode(['source' => $validated['source']]),
             'operator_id' => auth()->id(),
