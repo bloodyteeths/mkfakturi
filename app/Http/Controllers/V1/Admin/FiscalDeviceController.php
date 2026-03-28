@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Services\FiscalDevices\ErpNetFpClient;
 use Modules\Mk\Services\FiscalDevices\FiscalDeviceManager;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Fiscal Device Controller
@@ -377,6 +378,13 @@ class FiscalDeviceController extends Controller
             'vat_amount' => 'required|integer',
             'raw_response' => 'nullable|string|max:10000',
             'source' => 'required|string|in:webserial,erpnet-fp,manual',
+            'operator_name' => 'nullable|string|max:100',
+            'unique_sale_number' => 'nullable|string|max:30',
+            'payment_type' => 'nullable|string|in:cash,card,check,bank_transfer',
+            'tax_breakdown' => 'nullable|array',
+            'items_snapshot' => 'nullable|array',
+            'device_receipt_datetime' => 'nullable|date',
+            'device_registration_number' => 'nullable|string|max:50',
         ]);
 
         // Verify the invoice belongs to the current company
@@ -410,6 +418,14 @@ class FiscalDeviceController extends Controller
             'raw_response' => $validated['raw_response'],
             'source' => $validated['source'],
             'metadata' => json_encode(['source' => $validated['source']]),
+            'operator_id' => auth()->id(),
+            'operator_name' => $validated['operator_name'] ?? null,
+            'unique_sale_number' => $validated['unique_sale_number'] ?? null,
+            'payment_type' => $validated['payment_type'] ?? 'cash',
+            'tax_breakdown' => $validated['tax_breakdown'] ?? null,
+            'items_snapshot' => $validated['items_snapshot'] ?? null,
+            'device_receipt_datetime' => $validated['device_receipt_datetime'] ?? null,
+            'device_registration_number' => $validated['device_registration_number'] ?? null,
         ]);
 
         Log::info('Fiscal receipt recorded', [
@@ -482,7 +498,11 @@ class FiscalDeviceController extends Controller
         $companyId = $request->header('company');
 
         $query = FiscalReceipt::forCompany($companyId)
-            ->with(['fiscalDevice:id,name,device_type', 'invoice:id,invoice_number,total,status'])
+            ->with([
+                'fiscalDevice:id,name,device_type',
+                'invoice:id,invoice_number,total,status',
+                'operator:id,name',
+            ])
             ->orderBy($request->get('orderByField', 'created_at'), $request->get('orderBy', 'desc'));
 
         if ($request->filled('fiscal_device_id')) {
@@ -491,6 +511,14 @@ class FiscalDeviceController extends Controller
 
         if ($request->filled('source')) {
             $query->where('source', $request->input('source'));
+        }
+
+        if ($request->filled('payment_type')) {
+            $query->where('payment_type', $request->input('payment_type'));
+        }
+
+        if ($request->has('is_storno')) {
+            $query->where('is_storno', filter_var($request->input('is_storno'), FILTER_VALIDATE_BOOLEAN));
         }
 
         if ($request->filled('from_date')) {
@@ -504,6 +532,193 @@ class FiscalDeviceController extends Controller
         $receipts = $query->paginate($request->get('limit', 25));
 
         return response()->json($receipts);
+    }
+    /**
+     * Create a storno (reversal) receipt for an existing fiscal receipt.
+     */
+    public function stornoReceipt(Request $request, int $deviceId, int $receiptId): JsonResponse
+    {
+        $companyId = $request->header('company');
+        $device = FiscalDevice::forCompany($companyId)->findOrFail($deviceId);
+
+        $receipt = FiscalReceipt::where('fiscal_device_id', $device->id)
+            ->where('company_id', $companyId)
+            ->findOrFail($receiptId);
+
+        // Cannot storno a receipt that is already a storno
+        if ($receipt->is_storno) {
+            return response()->json([
+                'error' => 'Cannot storno a receipt that is already a storno.',
+            ], 422);
+        }
+
+        // Cannot storno a receipt that already has a storno
+        $existingStorno = FiscalReceipt::where('storno_of_receipt_id', $receipt->id)->first();
+        if ($existingStorno) {
+            return response()->json([
+                'error' => 'This receipt already has a storno.',
+                'storno_receipt' => $existingStorno,
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'operator_name' => 'nullable|string|max:100',
+            'fiscal_id' => 'nullable|string|max:100',
+            'receipt_number' => 'nullable|string|max:50',
+            'unique_sale_number' => 'nullable|string|max:30',
+            'device_receipt_datetime' => 'nullable|date',
+            'device_registration_number' => 'nullable|string|max:50',
+        ]);
+
+        // Negate tax breakdown values
+        $negatedTaxBreakdown = null;
+        if ($receipt->tax_breakdown) {
+            $negatedTaxBreakdown = [];
+            foreach ($receipt->tax_breakdown as $group => $values) {
+                $negatedTaxBreakdown[$group] = [
+                    'base' => -($values['base'] ?? 0),
+                    'tax' => -($values['tax'] ?? 0),
+                ];
+            }
+        }
+
+        // Negate items snapshot amounts
+        $negatedItems = null;
+        if ($receipt->items_snapshot) {
+            $negatedItems = array_map(function ($item) {
+                return array_merge($item, [
+                    'quantity' => -($item['quantity'] ?? 0),
+                    'amount' => -($item['amount'] ?? 0),
+                ]);
+            }, $receipt->items_snapshot);
+        }
+
+        $stornoReceipt = FiscalReceipt::create([
+            'company_id' => $companyId,
+            'fiscal_device_id' => $device->id,
+            'invoice_id' => $receipt->invoice_id,
+            'receipt_number' => $validated['receipt_number'] ?? 'S-' . $receipt->receipt_number,
+            'amount' => -$receipt->amount,
+            'vat_amount' => -$receipt->vat_amount,
+            'fiscal_id' => $validated['fiscal_id'] ?? '',
+            'source' => $receipt->source,
+            'is_storno' => true,
+            'storno_of_receipt_id' => $receipt->id,
+            'operator_id' => auth()->id(),
+            'operator_name' => $validated['operator_name'] ?? null,
+            'unique_sale_number' => $validated['unique_sale_number'] ?? null,
+            'payment_type' => $receipt->payment_type,
+            'tax_breakdown' => $negatedTaxBreakdown,
+            'items_snapshot' => $negatedItems,
+            'device_receipt_datetime' => $validated['device_receipt_datetime'] ?? null,
+            'device_registration_number' => $validated['device_registration_number'] ?? $receipt->device_registration_number,
+        ]);
+
+        Log::info('Storno receipt created', [
+            'storno_receipt_id' => $stornoReceipt->id,
+            'original_receipt_id' => $receipt->id,
+            'device_id' => $device->id,
+        ]);
+
+        return response()->json(['data' => $stornoReceipt->load('stornoOfReceipt')], 201);
+    }
+
+    /**
+     * Export fiscal receipts as CSV or JSON for UJP compliance.
+     */
+    public function exportReceipts(Request $request): JsonResponse|StreamedResponse
+    {
+        $companyId = $request->header('company');
+
+        $validated = $request->validate([
+            'from_date' => 'nullable|date',
+            'to_date' => 'nullable|date',
+            'format' => 'nullable|string|in:csv,json',
+        ]);
+
+        $format = $validated['format'] ?? 'csv';
+
+        $query = FiscalReceipt::forCompany($companyId)
+            ->with([
+                'fiscalDevice:id,name,device_type,serial_number',
+                'invoice:id,invoice_number',
+                'operator:id,name',
+            ])
+            ->orderBy('created_at', 'asc');
+
+        if (! empty($validated['from_date'])) {
+            $query->whereDate('created_at', '>=', $validated['from_date']);
+        }
+
+        if (! empty($validated['to_date'])) {
+            $query->whereDate('created_at', '<=', $validated['to_date']);
+        }
+
+        $receipts = $query->get();
+
+        if ($format === 'json') {
+            return response()->json(['data' => $receipts]);
+        }
+
+        // CSV export
+        $filename = 'fiscal-receipts-' . now()->format('Y-m-d') . '.csv';
+
+        return new StreamedResponse(function () use ($receipts) {
+            $handle = fopen('php://output', 'w');
+
+            // Header row
+            fputcsv($handle, [
+                'Receipt #',
+                'Fiscal ID',
+                'ENU',
+                'Date',
+                'Operator',
+                'Device',
+                'Invoice #',
+                'Payment Type',
+                'Amount',
+                'VAT',
+                'Tax A',
+                'Tax B',
+                'Tax V',
+                'Tax G',
+                'Storno',
+                'Source',
+            ]);
+
+            foreach ($receipts as $receipt) {
+                $taxA = $receipt->tax_breakdown['A']['tax'] ?? '';
+                $taxB = $receipt->tax_breakdown['B']['tax'] ?? '';
+                $taxV = $receipt->tax_breakdown['V']['tax'] ?? '';
+                $taxG = $receipt->tax_breakdown['G']['tax'] ?? '';
+
+                fputcsv($handle, [
+                    $receipt->receipt_number,
+                    $receipt->fiscal_id,
+                    $receipt->unique_sale_number ?? '',
+                    $receipt->device_receipt_datetime
+                        ? $receipt->device_receipt_datetime->format('Y-m-d H:i:s')
+                        : $receipt->created_at->format('Y-m-d H:i:s'),
+                    $receipt->operator_name ?? ($receipt->operator->name ?? ''),
+                    $receipt->fiscalDevice->name ?? '',
+                    $receipt->invoice->invoice_number ?? '',
+                    $receipt->payment_type ?? '',
+                    $receipt->amount / 100,
+                    $receipt->vat_amount / 100,
+                    $taxA !== '' ? $taxA / 100 : '',
+                    $taxB !== '' ? $taxB / 100 : '',
+                    $taxV !== '' ? $taxV / 100 : '',
+                    $taxG !== '' ? $taxG / 100 : '',
+                    $receipt->is_storno ? 'Yes' : 'No',
+                    $receipt->source ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 }
 

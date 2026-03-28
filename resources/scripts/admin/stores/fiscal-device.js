@@ -150,6 +150,13 @@ export const useFiscalDeviceStore = (useWindow = false) => {
         })
       },
 
+      /**
+       * Record a fiscal receipt on the server.
+       * Passes through all fields including new compliance fields
+       * (operator_name, unique_sale_number, payment_type, tax_breakdown,
+       * items_snapshot, device_receipt_datetime, device_registration_number).
+       * New fields are optional — backend ignores unknown fields gracefully.
+       */
       recordReceipt(deviceId, receiptData) {
         return axios.post(`/fiscal-devices/${deviceId}/record-receipt`, receiptData)
       },
@@ -165,3 +172,5 @@ export const useFiscalDeviceStore = (useWindow = false) => {
     },
   })()
 }
+
+// CLAUDE-CHECKPOINT

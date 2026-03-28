@@ -209,8 +209,14 @@ export function useFiscalPrinter() {
 
   /**
    * Fiscalize an invoice via WebSerial → fiscal printer, then record on server.
+   *
+   * @param {Object} invoice - Invoice object with items, total, payment_method, etc.
+   * @param {number|string} deviceId - Fiscal device ID for server record
+   * @param {Object} [options] - Optional overrides
+   * @param {string} [options.operatorName] - Operator name (falls back to current user)
+   * @param {Array}  [options.invoiceItems] - Explicit items array (falls back to invoice.items)
    */
-  async function fiscalizeInvoice(invoice, deviceId) {
+  async function fiscalizeInvoice(invoice, deviceId, options = {}) {
     if (!canFiscalize.value) {
       throw new Error('Cannot fiscalize: device not ready')
     }
@@ -226,7 +232,34 @@ export function useFiscalPrinter() {
 
       _log('receipt', `#${result.receiptNumber}`)
 
-      // POST result to server for record-keeping
+      // Build items snapshot from invoice items for audit trail
+      const sourceItems = options.invoiceItems || invoice.items || []
+      const itemsSnapshot = sourceItems.map((item) => ({
+        name: item.name || item.description || 'Item',
+        quantity: parseFloat(item.quantity || 1),
+        price: item.price, // cents
+        tax_rate: parseInt(item.tax?.percent || item.vat_rate || 18),
+        total: item.total || item.price * parseFloat(item.quantity || 1),
+      }))
+
+      // Build device receipt datetime using local time (avoid UTC trap with toISOString)
+      let deviceReceiptDatetime = null
+      if (result.deviceDatetime) {
+        // Device returned its own datetime string
+        deviceReceiptDatetime = result.deviceDatetime
+      } else {
+        // Fall back to local time
+        const d = new Date()
+        const pad = (n) => String(n).padStart(2, '0')
+        deviceReceiptDatetime = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+      }
+
+      // Resolve operator name: explicit option > auth user > fallback
+      const operatorName = options.operatorName
+        || window.__auth_user?.name
+        || 'Operator 1'
+
+      // POST result to server for record-keeping (new fields are optional on backend)
       const serverResponse = await axios.post(
         `/fiscal-devices/${deviceId}/record-receipt`,
         {
@@ -237,6 +270,14 @@ export function useFiscalPrinter() {
           vat_amount: invoice.tax || invoice.vat_total || 0,
           raw_response: result.rawResponse,
           source: 'webserial',
+          // New compliance fields
+          operator_name: operatorName,
+          unique_sale_number: result.uniqueSaleNumber || null,
+          payment_type: result.paymentType || 'cash',
+          tax_breakdown: result.taxBreakdown || null,
+          items_snapshot: itemsSnapshot.length > 0 ? itemsSnapshot : null,
+          device_receipt_datetime: deviceReceiptDatetime,
+          device_registration_number: result.deviceRegistrationNumber || deviceInfo.value?.fiscalMemorySerial || null,
         }
       )
 

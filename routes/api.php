@@ -424,6 +424,8 @@ Route::prefix('/v1')->group(function () {
             Route::post('/expenses/{expense}/upload/receipts', UploadReceiptController::class);
 
             Route::post('/expenses/delete', [ExpensesController::class, 'delete'])->middleware('throttle:strict');
+            Route::post('/expenses/{expense}/clone', [ExpensesController::class, 'clone']);
+            Route::post('/expenses/{expense}/approve', [ExpensesController::class, 'approve']);
 
             Route::apiResource('expenses', ExpensesController::class);
 
@@ -787,6 +789,8 @@ Route::prefix('/v1')->group(function () {
             Route::post('/bills/{bill}/mark-as-completed', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'markAsCompleted']);
             Route::get('/bills/{bill}/download-pdf', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'downloadPdf']);
             Route::get('/bills/{bill}/pp30', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'pp30Pdf']);
+            Route::get('/bills/{bill}/journal-entry', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'journalEntry']);
+            Route::get('/bills/{bill}/priemnica', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'priemnica']);
             Route::post('/bills/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'delete']);
             Route::apiResource('bills', \App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class);
 
@@ -868,6 +872,9 @@ Route::prefix('/v1')->group(function () {
                     // Support Contacts (from contact form)
                     Route::get('/contacts', [\App\Http\Controllers\V1\SupportContactController::class, 'indexAll']);
                     Route::get('/contacts/statistics', [\App\Http\Controllers\V1\SupportContactController::class, 'statistics']);
+                    Route::post('/contacts/bulk-status', [\App\Http\Controllers\V1\SupportContactController::class, 'bulkUpdateStatus']);
+                    Route::post('/contacts/bulk-delete', [\App\Http\Controllers\V1\SupportContactController::class, 'bulkDelete']);
+                    Route::get('/contacts/export', [\App\Http\Controllers\V1\SupportContactController::class, 'export']);
                     Route::get('/contacts/{supportContact}', [\App\Http\Controllers\V1\SupportContactController::class, 'show']);
                     Route::post('/contacts/{supportContact}/status', [\App\Http\Controllers\V1\SupportContactController::class, 'updateStatus']);
                     Route::post('/contacts/{supportContact}/reply', [\App\Http\Controllers\V1\SupportContactController::class, 'reply']);
@@ -1194,6 +1201,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/eligible-documents', [\Modules\Mk\Http\Controllers\CompensationController::class, 'eligibleDocuments']);
                 Route::post('/', [\Modules\Mk\Http\Controllers\CompensationController::class, 'store']);
                 Route::get('/{id}', [\Modules\Mk\Http\Controllers\CompensationController::class, 'show']);
+                Route::put('/{id}', [\Modules\Mk\Http\Controllers\CompensationController::class, 'update']);
                 Route::post('/{id}/confirm', [\Modules\Mk\Http\Controllers\CompensationController::class, 'confirm']);
                 Route::post('/{id}/cancel', [\Modules\Mk\Http\Controllers\CompensationController::class, 'cancel']);
                 Route::get('/{id}/pdf', [\Modules\Mk\Http\Controllers\CompensationController::class, 'pdf']);
@@ -1301,6 +1309,10 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/history', [\Modules\Mk\Http\Controllers\CollectionController::class, 'history']);
                 Route::get('/effectiveness', [\Modules\Mk\Http\Controllers\CollectionController::class, 'effectiveness']);
                 Route::get('/opomena/{invoiceId}', [\Modules\Mk\Http\Controllers\CollectionController::class, 'opomena']);
+                Route::get('/ios', [\Modules\Mk\Http\Controllers\CollectionController::class, 'ios']);
+                Route::get('/ios/{customerId}/pdf', [\Modules\Mk\Http\Controllers\CollectionController::class, 'iosPdf']);
+                Route::post('/ios/bulk-send', [\Modules\Mk\Http\Controllers\CollectionController::class, 'iosBulkSend']);
+                Route::get('/interest-note/{customerId}/pdf', [\Modules\Mk\Http\Controllers\CollectionController::class, 'interestNotePdf']);
             });
 
             // ----------------------------------
@@ -1392,6 +1404,17 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/transactions/bulk-delete', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'bulkDeleteTransactions']);
                 Route::post('/transactions/{id}/unmatch', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'unmatchTransaction']);
                 Route::get('/transactions/export', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'exportTransactions']);
+                Route::post('/transactions/bulk-categorize', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'bulkCategorize']);
+
+                // Document generation & reports
+                Route::get('/ios', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'generateIos']);
+                Route::get('/statement-report', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'bankStatementReport']);
+                Route::get('/pp10', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'generatePp10']);
+                Route::get('/compensation', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'generateCompensation']);
+                Route::get('/pp40', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'generatePp40']);
+                Route::get('/sepa-export/{batch}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'exportSepa']);
+                Route::get('/daily-cash-report', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'dailyCashReport']);
+
 
                 // CSV Import
                 Route::prefix('import')->group(function () {
@@ -1427,6 +1450,7 @@ Route::prefix('/v1')->group(function () {
                     Route::get('/expense-categories', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getExpenseCategories']);
                     Route::get('/unpaid-bills', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getUnpaidBills']);
                     Route::get('/payroll-runs', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getPayrollRuns']);
+                    Route::post('/generate-pp30', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'generatePp30']);
                 });
 
                 // Matching Rules (P0-09)
@@ -1678,11 +1702,21 @@ Route::prefix('/v1')->group(function () {
         Route::prefix('/partners')->middleware(['super-admin'])->group(function () {
             Route::get('/stats', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'stats']);
             Route::get('/permissions', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'permissions']); // AC-13
+            Route::post('/bulk-action', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'bulkAction']);
+            Route::get('/export', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'export']);
             Route::get('/', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'index']);
             Route::post('/', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'store']);
             Route::get('/{partner}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'show']);
             Route::put('/{partner}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'update']);
             Route::delete('/{partner}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'destroy']);
+
+            // KYC Documents
+            Route::get('/{partner}/kyc-documents', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'kycDocuments']);
+            Route::put('/{partner}/kyc-documents/{document}', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'updateKycDocument']);
+
+            // Commission Management
+            Route::post('/{partner}/commissions/adjust', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'adjustCommission']);
+            Route::post('/{partner}/payouts/create', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'createManualPayout']);
 
             // AC-09: Company Assignment
             Route::get('/{partner}/available-companies', [\App\Http\Controllers\V1\Admin\Partner\PartnerManagementController::class, 'availableCompanies']);

@@ -110,6 +110,15 @@ export const PAYMENT_METHOD_MAP = {
   wire: PAYMENT_TYPE.BANK,
 }
 
+// --- Reverse map: ISL payment code → human-readable payment type ---
+export const ISL_PAYMENT_TO_TYPE = {
+  P: 'cash',
+  N: 'check',
+  C: 'card',
+  D: 'card',
+  B: 'bank_transfer',
+}
+
 // --- Default serial port settings ---
 export const SERIAL_DEFAULTS = {
   baudRate: 9600,

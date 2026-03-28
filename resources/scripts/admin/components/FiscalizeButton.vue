@@ -81,7 +81,13 @@ async function handleConnect() {
 async function handleFiscalize() {
   if (!selectedDeviceId.value) return
   try {
-    const result = await fiscalizeInvoice(props.invoice, selectedDeviceId.value)
+    const result = await fiscalizeInvoice(
+      props.invoice,
+      selectedDeviceId.value,
+      {
+        invoiceItems: props.invoice.items || [],
+      }
+    )
     showSuccess.value = true
     alreadyFiscalized.value = true
     emit('fiscalized', result)
@@ -191,3 +197,5 @@ async function handleRefreshStatus() {
     </span>
   </div>
 </template>
+
+<!-- CLAUDE-CHECKPOINT -->

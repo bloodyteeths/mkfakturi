@@ -13,7 +13,7 @@
 import { IslProtocol } from './isl-protocol.js'
 import { WebSerialTransport } from './webserial-transport.js'
 import { decodeStatus, isReceiptOpen } from './status-decoder.js'
-import { CMD, VAT_RATE_TO_GROUP, PAYMENT_METHOD_MAP, PAYMENT_TYPE, TAX_GROUP, USB_VENDOR_IDS, TIMING, MAX_ITEM_NAME_LENGTH } from './constants.js'
+import { CMD, VAT_RATE_TO_GROUP, PAYMENT_METHOD_MAP, PAYMENT_TYPE, TAX_GROUP, USB_VENDOR_IDS, TIMING, MAX_ITEM_NAME_LENGTH, ISL_PAYMENT_TO_TYPE } from './constants.js'
 import { encodeCP1251 } from './charset-encoder.js'
 
 export class FiscalPrinterService {
@@ -160,7 +160,10 @@ export class FiscalPrinterService {
     const totalMKD = (receiptData.total / 100).toFixed(2)
     const paymentData = `\t${paymentChar}${totalMKD}`
 
-    await this._sendCommand(CMD.TOTAL_AND_PAYMENT, paymentData)
+    const paymentResponse = await this._sendCommand(CMD.TOTAL_AND_PAYMENT, paymentData)
+
+    // Parse tax breakdown from payment response if available
+    const taxBreakdown = this._parseTaxBreakdown(paymentResponse.dataString)
 
     // Step 4: Close fiscal receipt (CMD 0x38)
     const closeResponse = await this._sendCommand(CMD.CLOSE_FISCAL_RECEIPT)
@@ -168,11 +171,26 @@ export class FiscalPrinterService {
     // Parse close response: typically "receiptNumber" or "receiptNumber\tfiscalId"
     const closeParts = closeResponse.dataString.split('\t')
 
+    // Try to get device date/time (non-fatal if it fails)
+    let deviceDatetime = null
+    try {
+      deviceDatetime = await this.getDateTime()
+    } catch (_e) {
+      // Non-fatal — composable will fall back to local time
+    }
+
     return {
       receiptNumber: (closeParts[0] || '').trim(),
       fiscalId: (closeParts[1] || '').trim(),
+      taxBreakdown,
+      paymentTypeCode: paymentChar,
+      paymentType: ISL_PAYMENT_TO_TYPE[paymentChar] || 'cash',
+      uniqueSaleNumber: usn || null,
+      deviceDatetime,
+      deviceRegistrationNumber: this._deviceInfo?.fiscalMemorySerial || null,
       rawResponse: JSON.stringify({
         data: closeResponse.dataString,
+        paymentData: paymentResponse.dataString,
         status: closeResponse.status ? Array.from(closeResponse.status) : [],
       }),
     }
@@ -331,6 +349,50 @@ export class FiscalPrinterService {
       }
     } catch (_e) {
       // Status check failure is non-fatal here
+    }
+  }
+
+  /**
+   * Parse fiscal receipt payment/close response to extract tax breakdown.
+   *
+   * ISL CMD 0x35 response format (varies by device):
+   *   "AllReceipt\tTaxA\tTaxB\tTaxC\tTaxD\tTaxE\tTaxF\tTaxG\tTaxH"
+   * Some devices return comma-separated values instead.
+   * Tax groups map to MK VAT: A=18%, B=5%, V(C)=10%, G(D)=0%
+   *
+   * @param {string} responseData - Raw response string from CMD 0x35
+   * @returns {Object|null} Tax breakdown or null if unparseable
+   */
+  _parseTaxBreakdown(responseData) {
+    if (!responseData) return null
+
+    try {
+      // Try tab-separated first, then comma-separated
+      let parts = responseData.split('\t')
+      if (parts.length < 2) {
+        parts = responseData.split(',')
+      }
+      if (parts.length < 2) return null
+
+      // Parse amounts — device returns MKD with 2 decimals
+      const parseAmount = (val) => {
+        const num = parseFloat((val || '0').trim())
+        return isNaN(num) ? 0 : num
+      }
+
+      return {
+        total: parseAmount(parts[0]),
+        A: { amount: parseAmount(parts[1]) }, // 18%
+        B: { amount: parseAmount(parts[2]) }, // 5%
+        V: { amount: parseAmount(parts[3]) }, // 10%
+        G: { amount: parseAmount(parts[4]) }, // 0%
+        D: { amount: parseAmount(parts[5]) },
+        E: { amount: parseAmount(parts[6]) },
+        ZH: { amount: parseAmount(parts[7]) },
+        Z: { amount: parseAmount(parts[8]) },
+      }
+    } catch (_e) {
+      return null
     }
   }
 
