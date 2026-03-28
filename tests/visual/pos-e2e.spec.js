@@ -77,31 +77,13 @@ test.describe('POS — E2E', () => {
     const context = await browser.newContext()
     page = await context.newPage()
 
-    // Login via Sanctum
-    await page.goto(`${BASE}/sanctum/csrf-cookie`)
-    await page.waitForTimeout(1000)
-
-    const xsrf = await ensureCsrf(page)
-    const loginRes = await page.evaluate(
-      async ({ base, email, pass, xsrf }) => {
-        const res = await fetch(`${base}/api/v1/auth/login`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': xsrf,
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-          body: JSON.stringify({ username: email, password: pass, device_name: 'e2e-pos' }),
-        })
-        return { status: res.status, data: await res.json().catch(() => null) }
-      },
-      { base: BASE, email: EMAIL, pass: PASS, xsrf }
-    )
-
-    expect(loginRes.status).toBe(200)
-    await page.waitForTimeout(3000) // Sanctum rate-limiting
+    // Login via UI form (API login requires 'email' field, form is more reliable)
+    await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
+    await page.waitForTimeout(3000)
+    await page.fill('input[type="email"]', EMAIL)
+    await page.fill('input[type="password"]', PASS)
+    await page.click('button[type="submit"]')
+    await page.waitForTimeout(5000) // Wait for redirect + Sanctum session
   })
 
   test.afterAll(async () => {
