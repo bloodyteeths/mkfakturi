@@ -183,7 +183,140 @@
         </router-link>
       </div>
 
-      <!-- ROW 2: AI Assistant + Production Pipeline -->
+      <!-- ROW 2: Production Cost Trend Chart -->
+      <div class="mt-4 lg:mt-6">
+        <div class="rounded-lg bg-white p-5 shadow">
+          <div class="mb-4 flex items-center justify-between">
+            <h3 class="text-base font-semibold text-gray-900">{{ t('manufacturing.dash_cost_trend') }}</h3>
+            <div class="flex items-center gap-4 text-xs text-gray-500">
+              <span class="flex items-center"><span class="mr-1.5 inline-block h-2.5 w-2.5 rounded-full bg-indigo-500"></span>{{ t('manufacturing.total_production_cost') }}</span>
+              <span class="flex items-center"><span class="mr-1.5 inline-block h-2.5 w-2.5 rounded-full bg-red-400"></span>{{ t('manufacturing.total_wastage_cost') }}</span>
+              <span class="flex items-center"><span class="mr-1.5 inline-block h-2.5 w-2.5 rounded-full bg-emerald-500"></span>{{ t('manufacturing.quantity') }}</span>
+            </div>
+          </div>
+          <div class="h-[220px]">
+            <canvas ref="costChartRef"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 3: Material Availability + Production Timeline -->
+      <div class="mt-4 grid grid-cols-1 gap-4 lg:mt-6 lg:grid-cols-2 lg:gap-6">
+
+        <!-- Material Availability (traffic lights) -->
+        <div class="rounded-lg bg-white shadow">
+          <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+            <h3 class="text-base font-semibold text-gray-900">{{ t('manufacturing.dash_material_avail') }}</h3>
+            <router-link to="/admin/manufacturing/boms" class="text-sm font-medium text-primary-500 hover:text-primary-600">
+              {{ t('manufacturing.dash_view_all') }}
+            </router-link>
+          </div>
+          <div v-if="data.material_availability && data.material_availability.length > 0" class="divide-y divide-gray-100">
+            <div
+              v-for="bom in data.material_availability"
+              :key="bom.bom_id"
+              class="flex items-center px-5 py-3 transition hover:bg-gray-50 cursor-pointer"
+              @click="$router.push(`/admin/manufacturing/boms/${bom.bom_id}`)"
+            >
+              <!-- Traffic light -->
+              <div class="flex-shrink-0">
+                <span
+                  class="inline-block h-3.5 w-3.5 rounded-full"
+                  :class="{
+                    'bg-green-500': bom.status === 'green',
+                    'bg-yellow-400': bom.status === 'yellow',
+                    'bg-red-500': bom.status === 'red',
+                  }"
+                ></span>
+              </div>
+              <div class="ml-3 flex-1 min-w-0">
+                <p class="truncate text-sm font-medium text-gray-900">{{ bom.output_item || bom.bom_name }}</p>
+                <p class="text-xs text-gray-500">{{ bom.bom_code }} · {{ bom.material_count }} {{ t('manufacturing.lines').toLowerCase() }}</p>
+              </div>
+              <div class="ml-3 flex-shrink-0">
+                <span
+                  class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                  :class="{
+                    'bg-green-100 text-green-800': bom.status === 'green',
+                    'bg-yellow-100 text-yellow-800': bom.status === 'yellow',
+                    'bg-red-100 text-red-800': bom.status === 'red',
+                  }"
+                >
+                  {{ bom.status === 'green' ? t('manufacturing.stock_ok') : bom.status === 'yellow' ? t('manufacturing.dash_stock_low') : t('manufacturing.shortage') }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="px-5 py-8 text-center">
+            <ClipboardDocumentListIcon class="mx-auto h-8 w-8 text-gray-300" />
+            <p class="mt-2 text-xs text-gray-500">{{ t('manufacturing.empty_boms') }}</p>
+          </div>
+        </div>
+
+        <!-- Production Timeline (mini-Gantt) -->
+        <div class="rounded-lg bg-white shadow">
+          <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+            <h3 class="text-base font-semibold text-gray-900">{{ t('manufacturing.dash_timeline') }}</h3>
+            <router-link to="/admin/manufacturing/orders" class="text-sm font-medium text-primary-500 hover:text-primary-600">
+              {{ t('manufacturing.dash_view_all') }}
+            </router-link>
+          </div>
+          <div v-if="data.timeline && data.timeline.length > 0" class="p-5">
+            <div class="space-y-2">
+              <div
+                v-for="order in data.timeline"
+                :key="order.id"
+                class="flex items-center gap-3 rounded-lg p-2 transition hover:bg-gray-50 cursor-pointer"
+                @click="$router.push(`/admin/manufacturing/orders/${order.id}`)"
+              >
+                <!-- Status dot -->
+                <span
+                  class="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                  :class="{
+                    'bg-gray-400': order.status === 'draft',
+                    'bg-blue-500': order.status === 'in_progress' && !order.is_overdue,
+                    'bg-red-500 animate-pulse': order.is_overdue,
+                  }"
+                ></span>
+                <!-- Order info -->
+                <div class="flex-1 min-w-0">
+                  <p class="truncate text-sm font-medium" :class="order.is_overdue ? 'text-red-700' : 'text-gray-900'">
+                    {{ order.item_name || order.order_number }}
+                  </p>
+                  <p class="text-xs text-gray-500">{{ order.planned_quantity }} {{ t('manufacturing.unit') }} · {{ order.start }} → {{ order.end }}</p>
+                </div>
+                <!-- Gantt bar -->
+                <div class="hidden w-32 sm:block">
+                  <div class="relative h-4 overflow-hidden rounded-full bg-gray-100">
+                    <div
+                      class="absolute inset-y-0 left-0 rounded-full"
+                      :class="{
+                        'bg-gray-300': order.status === 'draft',
+                        'bg-blue-400': order.status === 'in_progress' && !order.is_overdue,
+                        'bg-red-400': order.is_overdue,
+                      }"
+                      :style="{ width: ganttWidth(order) + '%' }"
+                    ></div>
+                  </div>
+                </div>
+                <!-- Status badge -->
+                <span
+                  :class="statusBadge(order.status)"
+                  class="hidden flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold md:inline-flex"
+                >
+                  {{ t('manufacturing.status_' + order.status) }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="px-5 py-8 text-center">
+            <CalendarDaysIcon class="mx-auto h-8 w-8 text-gray-300" />
+            <p class="mt-2 text-xs text-gray-500">{{ t('manufacturing.dash_no_scheduled') }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 4: AI Assistant + Production Pipeline -->
       <div class="mt-4 grid grid-cols-1 gap-4 lg:mt-6 lg:grid-cols-2 lg:gap-6">
 
         <!-- AI Production Assistant -->
@@ -456,9 +589,23 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController,
+  BarElement,
+  BarController,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js'
 import {
   CogIcon,
   PlayIcon,
@@ -480,7 +627,14 @@ import {
   ShieldExclamationIcon,
   ArrowTrendingUpIcon,
   InformationCircleIcon,
+  CalendarDaysIcon,
 } from '@heroicons/vue/24/outline'
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale, LinearScale, PointElement, LineElement, LineController,
+  BarElement, BarController, Title, Tooltip, Legend, Filler,
+)
 
 const { t } = useI18n()
 const companyStore = useCompanyStore()
@@ -501,6 +655,9 @@ const data = ref({
   boms: { total: 0, active: 0 },
   recent_orders: [],
   top_products: [],
+  chart: { labels: [], production_cost: [], wastage_cost: [], quantity: [], order_count: [] },
+  material_availability: [],
+  timeline: [],
   period: { month: '', label: '' },
 })
 
@@ -511,6 +668,10 @@ const parsedOrder = ref(null)
 const aiLoading = ref(false)
 const aiInsights = ref([])
 
+// ===== Chart =====
+const costChartRef = ref(null)
+let chartInstance = null
+
 // ===== Documents dropdown =====
 const showDocsDropdown = ref(false)
 const docsDropdownRef = ref(null)
@@ -520,14 +681,6 @@ function handleClickOutside(e) {
     showDocsDropdown.value = false
   }
 }
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
 
 // ===== Computed =====
 const currencySymbol = computed(() => companyStore.selectedCompanyCurrency?.symbol || 'ден')
@@ -611,6 +764,102 @@ function statusBadge(status) {
     completed: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
   }[status] || 'bg-gray-100 text-gray-800'
+}
+
+// ===== Gantt helpers =====
+function ganttWidth(order) {
+  if (!order.start || !order.end) return 30
+  const start = new Date(order.start).getTime()
+  const end = new Date(order.end).getTime()
+  const now = Date.now()
+  const total = end - start
+  if (total <= 0) return 100
+  const elapsed = now - start
+  const pct = Math.round((elapsed / total) * 100)
+  return Math.max(5, Math.min(pct, 100))
+}
+
+// ===== Chart rendering =====
+function renderCostChart() {
+  if (!costChartRef.value) return
+  const chart = data.value.chart
+  if (!chart || !chart.labels || chart.labels.length === 0) return
+
+  if (chartInstance) {
+    chartInstance.destroy()
+    chartInstance = null
+  }
+
+  const ctx = costChartRef.value.getContext('2d')
+  chartInstance = new ChartJS(ctx, {
+    type: 'bar',
+    data: {
+      labels: chart.labels,
+      datasets: [
+        {
+          label: t('manufacturing.total_production_cost'),
+          data: chart.production_cost.map(v => Math.round(v / 100)),
+          backgroundColor: 'rgba(99, 102, 241, 0.7)',
+          borderColor: 'rgb(99, 102, 241)',
+          borderWidth: 1,
+          borderRadius: 4,
+          order: 2,
+        },
+        {
+          label: t('manufacturing.total_wastage_cost'),
+          data: chart.wastage_cost.map(v => Math.round(v / 100)),
+          backgroundColor: 'rgba(248, 113, 113, 0.7)',
+          borderColor: 'rgb(248, 113, 113)',
+          borderWidth: 1,
+          borderRadius: 4,
+          order: 3,
+        },
+        {
+          type: 'line',
+          label: t('manufacturing.quantity'),
+          data: chart.quantity,
+          borderColor: 'rgb(16, 185, 129)',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: 'rgb(16, 185, 129)',
+          fill: true,
+          yAxisID: 'y1',
+          order: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              if (ctx.dataset.yAxisID === 'y1') return `${ctx.dataset.label}: ${ctx.raw}`
+              return `${ctx.dataset.label}: ${ctx.raw.toLocaleString('mk-MK')} ${currencySymbol.value}`
+            },
+          },
+        },
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: {
+          beginAtZero: true,
+          ticks: { callback: (v) => v.toLocaleString('mk-MK') },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+        },
+        y1: {
+          position: 'right',
+          beginAtZero: true,
+          grid: { display: false },
+          ticks: { precision: 0 },
+        },
+      },
+    },
+  })
 }
 
 // ===== API calls =====
@@ -742,10 +991,20 @@ async function fetchAiInsights() {
 }
 
 onMounted(async () => {
+  document.addEventListener('click', handleClickOutside)
   await fetchDashboard()
-  // Auto-generate insights after dashboard loads
   if (!isEmpty.value) {
     fetchAiInsights()
+    await nextTick()
+    renderCostChart()
+  }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+  if (chartInstance) {
+    chartInstance.destroy()
+    chartInstance = null
   }
 })
 </script>

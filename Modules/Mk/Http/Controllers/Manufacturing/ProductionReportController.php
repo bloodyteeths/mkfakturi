@@ -112,6 +112,94 @@ class ProductionReportController extends Controller
             ? (int) round($totalProductionCostMonth / (float) $totalQuantityMonth)
             : 0;
 
+        // ---- Monthly trend chart (last 6 months) ----
+        $chartMonths = [];
+        $chartLabels = [];
+        $chartProductionCost = [];
+        $chartWastageCost = [];
+        $chartQuantity = [];
+        $chartOrderCount = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $month = $now->copy()->subMonths($i);
+            $mStart = $month->copy()->startOfMonth()->toDateString();
+            $mEnd = $month->copy()->endOfMonth()->toDateString();
+            $chartLabels[] = $month->translatedFormat('M');
+
+            $monthOrders = ProductionOrder::where('company_id', $companyId)
+                ->where('status', ProductionOrder::STATUS_COMPLETED)
+                ->whereBetween('completed_at', [$mStart, $mEnd])
+                ->get();
+
+            $chartProductionCost[] = $monthOrders->sum('total_production_cost');
+            $chartWastageCost[] = $monthOrders->sum('total_wastage_cost');
+            $chartQuantity[] = (float) $monthOrders->sum('actual_quantity');
+            $chartOrderCount[] = $monthOrders->count();
+        }
+
+        // ---- Material availability per active BOM ----
+        $stockService = app(\App\Services\StockService::class);
+        $activeBoms = Bom::where('company_id', $companyId)
+            ->where('is_active', true)
+            ->with(['outputItem:id,name', 'lines.item:id,name'])
+            ->limit(10)
+            ->get();
+
+        $materialAvailability = $activeBoms->map(function ($bom) use ($companyId, $stockService) {
+            $status = 'green'; // all good
+            $shortages = [];
+
+            foreach ($bom->lines as $line) {
+                if (! $line->item) {
+                    continue;
+                }
+                $stock = $stockService->getItemStock($companyId, $line->item->id);
+                $currentQty = $stock['current_quantity'] ?? 0;
+                $neededQty = (float) $line->quantity;
+
+                if ($currentQty < $neededQty) {
+                    $status = 'red';
+                    $shortages[] = [
+                        'item_name' => $line->item->name,
+                        'needed' => $neededQty,
+                        'available' => $currentQty,
+                        'deficit' => round($neededQty - $currentQty, 2),
+                    ];
+                } elseif ($currentQty < $neededQty * 1.5 && $status !== 'red') {
+                    $status = 'yellow';
+                }
+            }
+
+            return [
+                'bom_id' => $bom->id,
+                'bom_name' => $bom->name,
+                'bom_code' => $bom->code,
+                'output_item' => $bom->outputItem?->name,
+                'status' => $status,
+                'material_count' => $bom->lines->count(),
+                'shortages' => $shortages,
+            ];
+        })->toArray();
+
+        // ---- Active orders timeline (for mini-Gantt) ----
+        $timelineOrders = ProductionOrder::where('company_id', $companyId)
+            ->whereIn('status', [ProductionOrder::STATUS_DRAFT, ProductionOrder::STATUS_IN_PROGRESS])
+            ->with('outputItem:id,name')
+            ->orderBy('order_date')
+            ->limit(12)
+            ->get()
+            ->map(fn ($o) => [
+                'id' => $o->id,
+                'order_number' => $o->order_number,
+                'item_name' => $o->outputItem?->name,
+                'status' => $o->status,
+                'start' => $o->order_date?->format('Y-m-d'),
+                'end' => $o->expected_completion_date?->format('Y-m-d')
+                    ?? $o->order_date?->copy()->addDays(7)->format('Y-m-d'),
+                'planned_quantity' => $o->planned_quantity,
+                'is_overdue' => $o->expected_completion_date && $o->expected_completion_date->lt($now),
+            ]);
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -136,6 +224,15 @@ class ProductionReportController extends Controller
                 ],
                 'recent_orders' => $recentOrders,
                 'top_products' => $topProducts,
+                'chart' => [
+                    'labels' => $chartLabels,
+                    'production_cost' => $chartProductionCost,
+                    'wastage_cost' => $chartWastageCost,
+                    'quantity' => $chartQuantity,
+                    'order_count' => $chartOrderCount,
+                ],
+                'material_availability' => $materialAvailability,
+                'timeline' => $timelineOrders,
                 'period' => [
                     'month' => $now->format('Y-m'),
                     'label' => $now->translatedFormat('F Y'),

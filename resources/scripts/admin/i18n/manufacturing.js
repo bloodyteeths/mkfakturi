@@ -233,6 +233,13 @@ export default {
       dash_ai_suggestion: 'AI препорака',
       dash_ai_all_good: 'Сè е в ред',
       dash_ai_all_good_desc: 'Вашето производство работи нормално. Нема предупредувања или аномалии.',
+
+      // Dashboard chart, material availability, timeline
+      dash_cost_trend: 'Тренд на производствени трошоци',
+      dash_material_avail: 'Достапност на материјали',
+      dash_stock_low: 'Ниска залиха',
+      dash_timeline: 'Распоред на производство',
+      dash_no_scheduled: 'Нема закажани работни налози',
     },
   },
   en: {
@@ -456,6 +463,13 @@ export default {
       dash_ai_suggestion: 'AI recommendation',
       dash_ai_all_good: 'All good',
       dash_ai_all_good_desc: 'Your production is running normally. No warnings or anomalies.',
+
+      // Dashboard chart, material availability, timeline
+      dash_cost_trend: 'Production Cost Trend',
+      dash_material_avail: 'Material Availability',
+      dash_stock_low: 'Low Stock',
+      dash_timeline: 'Production Schedule',
+      dash_no_scheduled: 'No scheduled production orders',
     },
   },
   sq: {
@@ -679,6 +693,13 @@ export default {
       dash_ai_suggestion: 'Rekomandim AI',
       dash_ai_all_good: 'Gjithçka në rregull',
       dash_ai_all_good_desc: 'Prodhimi juaj po funksionon normalisht. Nuk ka paralajmërime.',
+
+      // Dashboard chart, material availability, timeline
+      dash_cost_trend: 'Trendi i kostove të prodhimit',
+      dash_material_avail: 'Disponueshmëria e materialeve',
+      dash_stock_low: 'Stok i ulët',
+      dash_timeline: 'Orari i prodhimit',
+      dash_no_scheduled: 'Nuk ka urdhëra prodhimi të planifikuara',
     },
   },
   tr: {
@@ -902,6 +923,13 @@ export default {
       dash_ai_suggestion: 'AI önerisi',
       dash_ai_all_good: 'Her şey yolunda',
       dash_ai_all_good_desc: 'Üretiminiz normal çalışıyor. Uyarı veya anomali yok.',
+
+      // Dashboard chart, material availability, timeline
+      dash_cost_trend: 'Üretim Maliyet Trendi',
+      dash_material_avail: 'Malzeme Durumu',
+      dash_stock_low: 'Düşük Stok',
+      dash_timeline: 'Üretim Takvimi',
+      dash_no_scheduled: 'Planlanmış üretim emri yok',
     },
   },
 }
