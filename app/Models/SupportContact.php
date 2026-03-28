@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SupportContact extends Model
 {
@@ -61,6 +62,23 @@ class SupportContact extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    /**
+     * Get the admin user assigned to handle this contact.
+     */
+    public function assignedTo(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    /**
+     * Get the replies for this support contact.
+     */
+    public function replies(): HasMany
+    {
+        return $this->hasMany(SupportContactReply::class);
+    }
+    // CLAUDE-CHECKPOINT
 
     /**
      * Scope a query to only include new contacts.
