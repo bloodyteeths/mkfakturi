@@ -144,12 +144,14 @@
           <BaseTab :title="$t('general.all')" filter="" />
           <BaseTab :title="$t('general.draft')" filter="DRAFT" />
           <BaseTab :title="$t('general.sent')" filter="SENT" />
+          <BaseTab :title="$t('estimates.accepted')" filter="ACCEPTED" />
+          <BaseTab :title="$t('estimates.rejected')" filter="REJECTED" />
         </BaseTabGroup>
 
         <BaseDropdown
           v-if="
             estimateStore.selectedEstimates.length &&
-            userStore.hasAbilities(abilities.DELETE_ESTIMATE)
+            userStore.hasAbilities([abilities.DELETE_ESTIMATE, abilities.SEND_ESTIMATE])
           "
           class="absolute float-right"
         >
@@ -169,12 +171,18 @@
             </span>
           </template>
 
-          <BaseDropdownItem @click="bulkMarkAsSent">
+          <BaseDropdownItem
+            v-if="userStore.hasAbilities(abilities.SEND_ESTIMATE)"
+            @click="bulkMarkAsSent"
+          >
             <BaseIcon name="CheckCircleIcon" class="mr-3 text-gray-600" />
             {{ $t('estimates.mark_as_sent') }}
           </BaseDropdownItem>
 
-          <BaseDropdownItem @click="removeMultipleEstimates">
+          <BaseDropdownItem
+            v-if="userStore.hasAbilities(abilities.DELETE_ESTIMATE)"
+            @click="removeMultipleEstimates"
+          >
             <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
             {{ $t('general.delete') }}
           </BaseDropdownItem>

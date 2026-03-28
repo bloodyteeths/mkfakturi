@@ -90,7 +90,6 @@
     <BaseDropdownItem
       v-if="
         row.status !== 'SENT' &&
-        route.name !== 'estimates.view' &&
         userStore.hasAbilities(abilities.SEND_ESTIMATE)
       "
       @click="onMarkAsSent(row.id)"
@@ -105,8 +104,7 @@
     <!-- Send Estimate  -->
     <BaseDropdownItem
       v-if="
-        row.status !== 'SENT' &&
-        route.name !== 'estimates.view' &&
+        row.status === 'DRAFT' &&
         userStore.hasAbilities(abilities.SEND_ESTIMATE)
       "
       @click="sendEstimate(row)"
@@ -274,7 +272,6 @@ async function onMarkAsSent(id) {
 function canResendEstimate(row) {
   return (
     (row.status == 'SENT' || row.status == 'VIEWED') &&
-    route.name !== 'estimates.view' &&
     userStore.hasAbilities(abilities.SEND_ESTIMATE)
   )
 }

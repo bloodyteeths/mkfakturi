@@ -31,6 +31,19 @@
           {{ $t('estimates.send_estimate') }}
         </BaseButton>
 
+        <BaseButton
+          v-if="
+            (estimateData.status === 'SENT' || estimateData.status === 'VIEWED') &&
+            userStore.hasAbilities(abilities.SEND_ESTIMATE)
+          "
+          :content-loading="isLoadingEstimate"
+          variant="primary-outline"
+          class="text-sm"
+          @click="onSendEstimate"
+        >
+          {{ $t('estimates.resend_estimate') }}
+        </BaseButton>
+
         <EstimateDropDown class="ml-3" :row="estimateData" />
       </template>
     </BasePageHeader>

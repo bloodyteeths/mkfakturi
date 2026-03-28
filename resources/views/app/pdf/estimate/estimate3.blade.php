@@ -253,6 +253,15 @@
                     @if($estimate->company && $estimate->company->address && $estimate->company->address->phone)
                         <div class="info-row"><strong>Телефон:</strong> {{ $estimate->company->address->phone }}</div>
                     @endif
+                    @php
+                        $bankAccount = $estimate->company ? $estimate->company->bankAccounts()->first() : null;
+                    @endphp
+                    @if($bankAccount)
+                        <div class="info-row"><strong>Жиро сметка:</strong> {{ $bankAccount->account_number ?? $bankAccount->iban }}</div>
+                        @if($bankAccount->bank_name)
+                            <div class="info-row"><strong>Депонент банка:</strong> {{ $bankAccount->bank_name }}</div>
+                        @endif
+                    @endif
                 </td>
 
                 {{-- Buyer --}}
@@ -317,9 +326,10 @@
         <thead>
             <tr>
                 <th style="width:5%;">#</th>
-                <th style="width:40%;">Опис</th>
-                <th style="width:10%;" class="text-center">Кол.</th>
-                <th style="width:15%;" class="text-right">Цена</th>
+                <th style="width:35%;">Опис</th>
+                <th style="width:8%;" class="text-center">Ед. мерка</th>
+                <th style="width:8%;" class="text-center">Кол.</th>
+                <th style="width:14%;" class="text-right">Цена</th>
                 @if($estimate->discount_per_item === 'YES')
                 <th style="width:10%;" class="text-right">Попуст</th>
                 @endif
@@ -336,7 +346,8 @@
                             <br><span class="item-description">{{ $item->description }}</span>
                         @endif
                     </td>
-                    <td class="text-center">{{ $item->quantity }} {{ $item->unit_name ?? '' }}</td>
+                    <td class="text-center">{{ $item->unit_name ?? 'парче' }}</td>
+                    <td class="text-center">{{ $item->quantity }}</td>
                     <td class="text-right">{!! format_money_pdf($item->price, $estimate->customer->currency) !!}</td>
                     @if($estimate->discount_per_item === 'YES')
                     <td class="text-right">
@@ -396,6 +407,19 @@
         </table>
         <div style="clear: both;"></div>
     </div>
+
+    {{-- Payment & Delivery Terms --}}
+    @if($estimate->reference_number || $estimate->formattedExpiryDate)
+    <div style="margin-top: 12px; font-size: 10px; padding: 8px; border-top: 1px solid #E8E8E8;">
+        <div style="font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-bottom: 4px;">Услови</div>
+        @if($estimate->formattedExpiryDate)
+            <div style="margin-bottom: 2px;"><strong style="color:#999; display:inline-block; width:125px;">Рок на важност:</strong> Понудата важи до {{ $estimate->formattedExpiryDate }}</div>
+        @endif
+        @if($estimate->reference_number)
+            <div style="margin-bottom: 2px;"><strong style="color:#999; display:inline-block; width:125px;">Референца:</strong> {{ $estimate->reference_number }}</div>
+        @endif
+    </div>
+    @endif
 
     {{-- Notes --}}
     @if($notes)
