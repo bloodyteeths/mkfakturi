@@ -50,6 +50,14 @@
                 @if($company->tax_id)
                     <p class="company-detail"><strong>ЕМБС:</strong> {{ $company->tax_id }}</p>
                 @endif
+                @php
+                    $bankAccount = $company->settings()->where('option', 'bank_account_number')->first()?->value
+                        ?? $company->settings()->where('option', 'bank_account')->first()?->value
+                        ?? null;
+                @endphp
+                @if($bankAccount)
+                    <p class="company-detail"><strong>Жиро-сметка:</strong> {{ $bankAccount }}</p>
+                @endif
             </td>
             <td style="width: 40%; text-align: right;">
                 <p class="company-detail"><strong>Датум:</strong> {{ $today }}</p>
@@ -76,12 +84,18 @@
         @if($customer->email)
             <p>{{ $customer->email }}</p>
         @endif
+        @if(!empty($customer->tax_id))
+            <p style="font-size: 10px; color: #555;"><strong>ЕДБ:</strong> {{ $customer->tax_id }}</p>
+        @endif
+        @if(!empty($customer->vat_number))
+            <p style="font-size: 10px; color: #555;"><strong>ДДВ бр.:</strong> {{ $customer->vat_number }}</p>
+        @endif
     </div>
 
     {{-- Body --}}
     <div class="body-text">
         <p>Почитувани,</p>
-        <p>Ве известуваме дека за следните фактури е пресметана законска камата поради задоцнето плаќање. Каматата е пресметана по годишна стапка од <strong>{{ number_format($annual_rate, 2) }}%</strong>.</p>
+        <p>Ве известуваме дека за следните фактури е пресметана законска камата поради задоцнето плаќање. Каматата е пресметана по годишна стапка од <strong>{{ number_format($annual_rate, 2, ',', '.') }}%</strong>, за период до <strong>{{ $today }}</strong>.</p>
     </div>
 
     {{-- Multi-Invoice Interest Table --}}
@@ -91,6 +105,7 @@
                 <th class="center" style="width: 30px;">№</th>
                 <th>Фактура</th>
                 <th class="center">Достасување</th>
+                <th class="center">Период</th>
                 <th class="center">Дена</th>
                 <th class="right">Главнина ({{ $currency_symbol }})</th>
                 <th class="center">Стапка</th>
@@ -109,24 +124,35 @@
                             -
                         @endif
                     </td>
+                    <td class="center" style="font-size: 9px;">
+                        @if($calc->invoice && $calc->invoice->due_date)
+                            {{ \Carbon\Carbon::parse($calc->invoice->due_date)->format('d.m.Y') }} —<br>{{ \Carbon\Carbon::parse($calc->calculation_date)->format('d.m.Y') }}
+                        @else
+                            -
+                        @endif
+                    </td>
                     <td class="center">{{ $calc->days_overdue }}</td>
-                    <td class="right">{{ number_format($calc->principal_amount / 100, 2, '.', ',') }}</td>
-                    <td class="center">{{ number_format($calc->annual_rate, 2) }}%</td>
-                    <td class="right interest-col"><strong>{{ number_format($calc->interest_amount / 100, 2, '.', ',') }}</strong></td>
+                    <td class="right">{{ number_format($calc->principal_amount / 100, 2, ',', '.') }}</td>
+                    <td class="center">{{ number_format($calc->annual_rate, 2, ',', '.') }}%</td>
+                    <td class="right interest-col"><strong>{{ number_format($calc->interest_amount / 100, 2, ',', '.') }}</strong></td>
                 </tr>
             @endforeach
             <tr class="subtotal-row">
-                <td colspan="4" style="text-align: right;">ВКУПНО ГЛАВНИНА / КАМАТА</td>
-                <td class="right">{{ number_format($total_principal / 100, 2, '.', ',') }} {{ $currency_symbol }}</td>
+                <td colspan="5" style="text-align: right;">ВКУПНО ГЛАВНИНА / КАМАТА</td>
+                <td class="right">{{ number_format($total_principal / 100, 2, ',', '.') }} {{ $currency_symbol }}</td>
                 <td></td>
-                <td class="right interest-col">{{ number_format($total_interest / 100, 2, '.', ',') }} {{ $currency_symbol }}</td>
+                <td class="right interest-col">{{ number_format($total_interest / 100, 2, ',', '.') }} {{ $currency_symbol }}</td>
             </tr>
             <tr class="total-row">
-                <td colspan="6" style="text-align: right;">ВКУПНО ЗА ПЛАЌАЊЕ (главнина + камата)</td>
-                <td class="right">{{ number_format($grand_total / 100, 2, '.', ',') }} {{ $currency_symbol }}</td>
+                <td colspan="7" style="text-align: right;">ВКУПНО ЗА ПЛАЌАЊЕ (главнина + камата)</td>
+                <td class="right">{{ number_format($grand_total / 100, 2, ',', '.') }} {{ $currency_symbol }}</td>
             </tr>
         </tbody>
     </table>
+
+    <p style="margin: 10px 0; font-size: 11px;">
+        <strong>Словима:</strong> {{ $amount_in_words ?? '' }}
+    </p>
 
     <div class="body-text">
         <p>Ве молиме горенаведениот износ да го платите во рок од <strong>8 (осум) дена</strong> од приемот на оваа каматна нота.</p>

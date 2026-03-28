@@ -205,7 +205,8 @@ class InterestCalculationService
             'grand_total' => $totalPrincipal + $totalInterest,
             'annual_rate' => $this->getAnnualRate($companyId),
             'today' => Carbon::today()->format('d.m.Y'),
-            'note_number' => 'КН-' . $customerId . '-' . time(),
+            'note_number' => $this->generateNoteNumber($companyId),
+            'amount_in_words' => $this->amountInWords($totalPrincipal + $totalInterest),
             'calculation_ids' => $calculations->pluck('id')->toArray(),
         ];
     }
@@ -303,6 +304,107 @@ class InterestCalculationService
             ],
             'by_customer' => $byCustomer->values()->toArray(),
         ];
+    }
+    /**
+     * Generate sequential note number for interest notes.
+     * Format: КН-001/2026
+     */
+    private function generateNoteNumber(int $companyId): string
+    {
+        $year = Carbon::today()->year;
+
+        $count = DB::table('interest_calculations')
+            ->where('company_id', $companyId)
+            ->whereIn('status', ['invoiced', 'paid'])
+            ->whereYear('updated_at', $year)
+            ->count();
+
+        // Use count as a base (each generation creates a new note)
+        $nextNumber = $count + 1;
+
+        return sprintf('КН-%03d/%d', $nextNumber, $year);
+    }
+
+    /**
+     * Convert amount in cents to Macedonian words.
+     */
+    private function amountInWords(int $cents): string
+    {
+        $amount = $cents / 100;
+        $whole = (int) floor($amount);
+        $decimal = (int) round(($amount - $whole) * 100);
+
+        $ones = ['', 'еден', 'два', 'три', 'четири', 'пет', 'шест', 'седум', 'осум', 'девет'];
+        $teens = ['десет', 'единаесет', 'дванаесет', 'тринаесет', 'четиринаесет', 'петнаесет', 'шеснаесет', 'седумнаесет', 'осумнаесет', 'деветнаесет'];
+        $tens = ['', '', 'дваесет', 'триесет', 'четириесет', 'педесет', 'шеесет', 'седумдесет', 'осумдесет', 'деведесет'];
+        $hundreds = ['', 'сто', 'двесте', 'триста', 'четиристо', 'петсто', 'шестсто', 'седумсто', 'осумсто', 'деветсто'];
+
+        if ($whole === 0) {
+            $words = 'нула';
+        } else {
+            $words = '';
+
+            if ($whole >= 1000000) {
+                $millions = (int) floor($whole / 1000000);
+                if ($millions === 1) {
+                    $words .= 'еден милион ';
+                } else {
+                    $words .= $ones[$millions] . ' милиони ';
+                }
+                $whole %= 1000000;
+            }
+
+            if ($whole >= 1000) {
+                $thousands = (int) floor($whole / 1000);
+                if ($thousands === 1) {
+                    $words .= 'илјада ';
+                } else {
+                    if ($thousands >= 100) {
+                        $words .= $hundreds[(int) floor($thousands / 100)] . ' ';
+                        $thousands %= 100;
+                    }
+                    if ($thousands >= 10 && $thousands < 20) {
+                        $words .= $teens[$thousands - 10] . ' илјади ';
+                        $thousands = 0;
+                    } elseif ($thousands >= 20) {
+                        $words .= $tens[(int) floor($thousands / 10)] . ' ';
+                        $thousands %= 10;
+                    }
+                    if ($thousands > 0) {
+                        $words .= $ones[$thousands] . ' илјади ';
+                    } elseif (strpos($words, 'илјади') === false && strpos($words, 'илјада') === false) {
+                        $words .= 'илјади ';
+                    }
+                }
+                $whole %= 1000;
+            }
+
+            if ($whole >= 100) {
+                $words .= $hundreds[(int) floor($whole / 100)] . ' ';
+                $whole %= 100;
+            }
+
+            if ($whole >= 10 && $whole < 20) {
+                $words .= $teens[$whole - 10] . ' ';
+                $whole = 0;
+            } elseif ($whole >= 20) {
+                $words .= $tens[(int) floor($whole / 10)] . ' ';
+                $whole %= 10;
+            }
+
+            if ($whole > 0) {
+                $words .= $ones[$whole] . ' ';
+            }
+
+            $words = trim($words);
+        }
+
+        $words .= ' денари';
+        if ($decimal > 0) {
+            $words .= " и {$decimal}/100";
+        }
+
+        return mb_strtoupper(mb_substr($words, 0, 1)) . mb_substr($words, 1);
     }
 }
 

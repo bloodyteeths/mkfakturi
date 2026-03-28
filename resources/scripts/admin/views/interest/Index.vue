@@ -16,7 +16,7 @@
     </BasePageHeader>
 
     <!-- Summary Cards -->
-    <div v-if="summary" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div v-if="summary" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
       <div class="bg-white rounded-lg shadow p-4">
         <p class="text-xs text-gray-500 uppercase">{{ t('total_interest') }}</p>
         <p class="text-2xl font-bold text-gray-900">{{ formatMoney(summary.total_interest) }}</p>
@@ -35,6 +35,11 @@
         <p class="text-xs text-gray-500 uppercase">{{ t('status_paid') }}</p>
         <p class="text-2xl font-bold text-green-600">{{ formatMoney(summary.paid?.amount || 0) }}</p>
         <p class="text-xs text-gray-400">{{ summary.paid?.count || 0 }} {{ t('items') }}</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <p class="text-xs text-gray-500 uppercase">{{ t('status_waived') }}</p>
+        <p class="text-2xl font-bold text-gray-400">{{ formatMoney(summary.waived?.amount || 0) }}</p>
+        <p class="text-xs text-gray-400">{{ summary.waived?.count || 0 }} {{ t('items') }}</p>
       </div>
     </div>
 
@@ -234,32 +239,41 @@
                     @change="toggleSelectAll"
                   />
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('customer_name')">
                   {{ t('customer') }}
+                  <span v-if="sortField === 'customer_name'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('invoice_number')">
                   {{ t('invoice_number') }}
+                  <span v-if="sortField === 'invoice_number'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('due_date')">
                   {{ t('due_date') }}
+                  <span v-if="sortField === 'due_date'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
                 </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('principal_amount')">
                   {{ t('principal') }}
+                  <span v-if="sortField === 'principal_amount'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
                 </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('days_overdue')">
                   {{ t('days_overdue') }}
+                  <span v-if="sortField === 'days_overdue'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
                 </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('annual_rate')">
                   {{ t('rate') }}
+                  <span v-if="sortField === 'annual_rate'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
                 </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('interest_amount')">
                   {{ t('interest_amount') }}
+                  <span v-if="sortField === 'interest_amount'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('calculation_date')">
                   {{ t('calculation_date') }}
+                  <span v-if="sortField === 'calculation_date'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
                 </th>
-                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('status')">
                   {{ t('status') }}
+                  <span v-if="sortField === 'status'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
                 </th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ t('actions') }}
@@ -285,10 +299,17 @@
                   {{ calc.customer?.name || '-' }}
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-primary-500">
-                  {{ calc.invoice?.invoice_number || '-' }}
+                  <router-link
+                    v-if="calc.invoice?.id"
+                    :to="`/admin/invoices/${calc.invoice.id}/view`"
+                    class="hover:underline"
+                  >
+                    {{ calc.invoice?.invoice_number || '-' }}
+                  </router-link>
+                  <span v-else>-</span>
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ calc.invoice?.due_date || '-' }}
+                  {{ formatDateMK(calc.invoice?.due_date) }}
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-right text-gray-900">
                   {{ formatMoney(calc.principal_amount) }}
@@ -303,7 +324,7 @@
                   {{ formatMoney(calc.interest_amount) }}
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ calc.calculation_date || '-' }}
+                  {{ formatDateMK(calc.calculation_date) }}
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-center">
                   <span :class="statusBadgeClass(calc.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
@@ -331,13 +352,47 @@
           </p>
           <div class="flex space-x-1">
             <BaseButton
-              v-for="page in meta.last_page"
-              :key="page"
-              :variant="page === meta.current_page ? 'primary' : 'primary-outline'"
+              v-if="meta.current_page > 1"
+              variant="primary-outline"
               size="sm"
-              @click="fetchCalculations(page)"
+              @click="fetchCalculations(1)"
             >
-              {{ page }}
+              &laquo;
+            </BaseButton>
+            <BaseButton
+              v-if="meta.current_page > 1"
+              variant="primary-outline"
+              size="sm"
+              @click="fetchCalculations(meta.current_page - 1)"
+            >
+              &lsaquo;
+            </BaseButton>
+            <template v-for="page in paginationPages" :key="page">
+              <span v-if="page === '...'" class="px-2 py-1 text-gray-400 text-sm">&hellip;</span>
+              <BaseButton
+                v-else
+                :variant="page === meta.current_page ? 'primary' : 'primary-outline'"
+                size="sm"
+                @click="fetchCalculations(page)"
+              >
+                {{ page }}
+              </BaseButton>
+            </template>
+            <BaseButton
+              v-if="meta.current_page < meta.last_page"
+              variant="primary-outline"
+              size="sm"
+              @click="fetchCalculations(meta.current_page + 1)"
+            >
+              &rsaquo;
+            </BaseButton>
+            <BaseButton
+              v-if="meta.current_page < meta.last_page"
+              variant="primary-outline"
+              size="sm"
+              @click="fetchCalculations(meta.last_page)"
+            >
+              &raquo;
             </BaseButton>
           </div>
         </div>
@@ -412,6 +467,10 @@ const isSending = ref(false)
 const selectedIds = ref([])
 const asOfDate = ref(null)
 
+// Sort state
+const sortField = ref('calculation_date')
+const sortDir = ref('desc')
+
 // Rate override state
 const customRate = ref(13.25)
 const isCustomRate = ref(false)
@@ -436,6 +495,23 @@ const allSelected = computed(() => {
   return selectableItems.length > 0 && selectedIds.value.length === selectableItems.length
 })
 
+const paginationPages = computed(() => {
+  if (!meta.value) return []
+  const current = meta.value.current_page
+  const last = meta.value.last_page
+  const pages = []
+  const delta = 2
+
+  for (let i = 1; i <= last; i++) {
+    if (i === 1 || i === last || (i >= current - delta && i <= current + delta)) {
+      pages.push(i)
+    } else if (pages[pages.length - 1] !== '...') {
+      pages.push('...')
+    }
+  }
+  return pages
+})
+
 // Methods
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
 const fmtLocale = localeMap[locale] || 'mk-MK'
@@ -446,6 +522,16 @@ function formatMoney(cents) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(cents / 100)
+}
+
+function formatDateMK(dateStr) {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return dateStr
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const yyyy = d.getFullYear()
+  return `${dd}.${mm}.${yyyy}`
 }
 
 function statusBadgeClass(status) {
@@ -478,11 +564,23 @@ function toggleSelectAll(event) {
   }
 }
 
+function toggleSort(field) {
+  if (sortField.value === field) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortDir.value = 'asc'
+  }
+  fetchCalculations(1)
+}
+
 // Data loading
 async function fetchCalculations(page = 1) {
   isLoading.value = true
   try {
     const params = { page, limit: 15 }
+    params.sort_field = sortField.value
+    params.sort_dir = sortDir.value
     if (filters.status) params.status = filters.status
     if (filters.customer_id) params.customer_id = filters.customer_id
     if (filters.date_from) params.date_from = filters.date_from
@@ -582,38 +680,54 @@ async function resetRate() {
 }
 
 // CSV Export
-function exportCsv() {
-  if (calculations.value.length === 0) return
+async function exportCsv() {
+  try {
+    const params = { limit: 'all' }
+    if (filters.status) params.status = filters.status
+    if (filters.customer_id) params.customer_id = filters.customer_id
+    if (filters.date_from) params.date_from = filters.date_from
+    if (filters.date_to) params.date_to = filters.date_to
 
-  const headers = [
-    t('customer'), t('invoice_number'), t('due_date'),
-    t('principal'), t('days_overdue'), t('rate'),
-    t('interest_amount'), t('status'), t('calculation_date')
-  ]
+    const response = await window.axios.get('/interest', { params })
+    const allCalcs = response.data.data || []
 
-  const rows = calculations.value.map(calc => [
-    calc.customer?.name || '',
-    calc.invoice?.invoice_number || '',
-    calc.invoice?.due_date || '',
-    (calc.principal_amount / 100).toFixed(2),
-    calc.days_overdue,
-    calc.annual_rate,
-    (calc.interest_amount / 100).toFixed(2),
-    statusLabel(calc.status),
-    calc.calculation_date || '',
-  ])
+    if (allCalcs.length === 0) return
 
-  const csvContent = [headers, ...rows]
-    .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
-    .join('\n')
+    const headers = [
+      t('customer'), t('invoice_number'), t('due_date'),
+      t('principal'), t('days_overdue'), t('rate'),
+      t('interest_amount'), t('status'), t('calculation_date')
+    ]
 
-  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `interest-${new Date().toISOString().slice(0,10)}.csv`
-  link.click()
-  URL.revokeObjectURL(url)
+    const rows = allCalcs.map(calc => [
+      calc.customer?.name || '',
+      calc.invoice?.invoice_number || '',
+      calc.invoice?.due_date ? formatDateMK(calc.invoice.due_date) : '',
+      (calc.principal_amount / 100).toFixed(2),
+      calc.days_overdue,
+      calc.annual_rate,
+      (calc.interest_amount / 100).toFixed(2),
+      statusLabel(calc.status),
+      calc.calculation_date ? formatDateMK(calc.calculation_date) : '',
+    ])
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `interest-${new Date().toISOString().slice(0,10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('error_loading'),
+    })
+  }
 }
 
 // Actions
@@ -803,17 +917,7 @@ function onDropdownRevert(row) {
 }
 
 // Lifecycle
-onMounted(async () => {
-  // Auto-calculate on page load so overdue invoices show immediately
-  isCalculating.value = true
-  try {
-    await window.axios.post('/interest/calculate', {})
-  } catch {
-    // Silent — may have zero overdue invoices
-  } finally {
-    isCalculating.value = false
-  }
-
+onMounted(() => {
   fetchCalculations(1)
   fetchSummary()
   fetchCustomers()

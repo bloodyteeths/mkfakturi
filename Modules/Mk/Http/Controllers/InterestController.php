@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Modules\Mk\Models\InterestCalculation;
+use Illuminate\Validation\ValidationException;
 use Modules\Mk\Services\InterestCalculationService;
 
 class InterestController extends Controller
@@ -29,8 +30,7 @@ class InterestController extends Controller
         $companyId = (int) $request->header('company');
 
         $query = InterestCalculation::forCompany($companyId)
-            ->with(['customer:id,name', 'invoice:id,invoice_number,total,due_amount,due_date'])
-            ->orderBy('calculation_date', 'desc');
+            ->with(['customer:id,name', 'invoice:id,invoice_number,total,due_amount,due_date']);
 
         if ($status = $request->query('status')) {
             $query->byStatus($status);
@@ -46,6 +46,32 @@ class InterestController extends Controller
 
         if ($dateTo = $request->query('date_to')) {
             $query->where('calculation_date', '<=', $dateTo);
+        }
+
+        $sortField = $request->query('sort_field', 'calculation_date');
+        $sortDir = $request->query('sort_dir', 'desc');
+
+        // Whitelist sortable fields to prevent SQL injection
+        $allowedSorts = [
+            'calculation_date', 'principal_amount', 'days_overdue',
+            'annual_rate', 'interest_amount', 'status',
+            'customer_name', 'invoice_number', 'due_date',
+        ];
+
+        if (in_array($sortField, $allowedSorts) && in_array($sortDir, ['asc', 'desc'])) {
+            if ($sortField === 'customer_name') {
+                $query->join('customers', 'interest_calculations.customer_id', '=', 'customers.id')
+                      ->orderBy('customers.name', $sortDir)
+                      ->select('interest_calculations.*');
+            } elseif ($sortField === 'invoice_number' || $sortField === 'due_date') {
+                $query->join('invoices', 'interest_calculations.invoice_id', '=', 'invoices.id')
+                      ->orderBy("invoices.{$sortField}", $sortDir)
+                      ->select('interest_calculations.*');
+            } else {
+                $query->orderBy($sortField, $sortDir);
+            }
+        } else {
+            $query->orderBy('calculation_date', 'desc');
         }
 
         $limit = $request->query('limit', 15);
@@ -148,6 +174,8 @@ class InterestController extends Controller
                 ->update(['status' => 'invoiced']);
 
             return $pdf->download("kamatna-nota-{$data['note_number']}.pdf");
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -201,6 +229,8 @@ class InterestController extends Controller
                 'message' => "Interest note sent to {$customer->email}.",
                 'email' => $customer->email,
             ]);
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
