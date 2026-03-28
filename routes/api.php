@@ -967,6 +967,9 @@ Route::prefix('/v1')->group(function () {
             // Manufacturing Module
             // ----------------------------------
             Route::prefix('manufacturing')->middleware('tier:business')->group(function () {
+                // Dashboard summary
+                Route::get('/dashboard', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'dashboard']);
+
                 // BOMs / Нормативи
                 Route::get('/boms', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'index']);
                 Route::post('/boms', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'store']);

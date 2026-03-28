@@ -24,6 +24,127 @@ class ProductionReportController extends Controller
     ) {}
 
     /**
+     * Dashboard summary — KPIs, pipeline, recent orders, material alerts.
+     */
+    public function dashboard(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $now = Carbon::now();
+        $startOfMonth = $now->copy()->startOfMonth()->toDateString();
+        $endOfMonth = $now->copy()->endOfMonth()->toDateString();
+
+        // Status counts (pipeline)
+        $statusCounts = ProductionOrder::where('company_id', $companyId)
+            ->selectRaw("status, COUNT(*) as count")
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+
+        // This month completed orders
+        $completedThisMonth = ProductionOrder::where('company_id', $companyId)
+            ->where('status', ProductionOrder::STATUS_COMPLETED)
+            ->whereBetween('completed_at', [$startOfMonth, $endOfMonth])
+            ->with('outputItem:id,name')
+            ->get();
+
+        $totalProductionCostMonth = $completedThisMonth->sum('total_production_cost');
+        $totalWastageCostMonth = $completedThisMonth->sum('total_wastage_cost');
+        $totalQuantityMonth = $completedThisMonth->sum('actual_quantity');
+
+        // Active (in_progress) cost accumulation
+        $activeOrders = ProductionOrder::where('company_id', $companyId)
+            ->where('status', ProductionOrder::STATUS_IN_PROGRESS)
+            ->with('outputItem:id,name')
+            ->get();
+
+        $activeProductionCost = $activeOrders->sum('total_production_cost');
+
+        // Recent orders (last 8, any status)
+        $recentOrders = ProductionOrder::where('company_id', $companyId)
+            ->with(['outputItem:id,name', 'bom:id,name,code'])
+            ->orderByDesc('updated_at')
+            ->limit(8)
+            ->get()
+            ->map(fn ($o) => [
+                'id' => $o->id,
+                'order_number' => $o->order_number,
+                'item_name' => $o->outputItem?->name,
+                'bom_code' => $o->bom?->code,
+                'status' => $o->status,
+                'planned_quantity' => $o->planned_quantity,
+                'actual_quantity' => $o->actual_quantity,
+                'total_production_cost' => $o->total_production_cost,
+                'order_date' => $o->order_date?->format('Y-m-d'),
+                'expected_completion_date' => $o->expected_completion_date?->format('Y-m-d'),
+            ]);
+
+        // Overdue orders (in_progress past expected_completion_date)
+        $overdueCount = ProductionOrder::where('company_id', $companyId)
+            ->where('status', ProductionOrder::STATUS_IN_PROGRESS)
+            ->whereNotNull('expected_completion_date')
+            ->where('expected_completion_date', '<', $now->toDateString())
+            ->count();
+
+        // BOM count + active BOM count
+        $bomTotal = Bom::where('company_id', $companyId)->count();
+        $bomActive = Bom::where('company_id', $companyId)->where('is_active', true)->count();
+
+        // Top products by production volume (this month)
+        $topProducts = $completedThisMonth->groupBy('output_item_id')
+            ->map(fn ($group) => [
+                'item_name' => $group->first()->outputItem?->name ?? '-',
+                'quantity' => $group->sum('actual_quantity'),
+                'cost' => $group->sum('total_production_cost'),
+                'orders' => $group->count(),
+            ])
+            ->sortByDesc('quantity')
+            ->values()
+            ->take(5)
+            ->toArray();
+
+        // Wastage rate
+        $wastagePercent = $totalProductionCostMonth > 0
+            ? round(($totalWastageCostMonth / $totalProductionCostMonth) * 100, 1)
+            : 0;
+
+        // Average cost per unit this month
+        $avgCostPerUnit = $totalQuantityMonth > 0
+            ? (int) round($totalProductionCostMonth / (float) $totalQuantityMonth)
+            : 0;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'kpis' => [
+                    'total_production_cost_month' => $totalProductionCostMonth,
+                    'active_orders' => $statusCounts[ProductionOrder::STATUS_IN_PROGRESS] ?? 0,
+                    'completed_this_month' => $completedThisMonth->count(),
+                    'wastage_percent' => $wastagePercent,
+                    'active_production_cost' => $activeProductionCost,
+                    'avg_cost_per_unit' => $avgCostPerUnit,
+                    'overdue_count' => $overdueCount,
+                ],
+                'pipeline' => [
+                    'draft' => $statusCounts[ProductionOrder::STATUS_DRAFT] ?? 0,
+                    'in_progress' => $statusCounts[ProductionOrder::STATUS_IN_PROGRESS] ?? 0,
+                    'completed' => $statusCounts[ProductionOrder::STATUS_COMPLETED] ?? 0,
+                    'cancelled' => $statusCounts[ProductionOrder::STATUS_CANCELLED] ?? 0,
+                ],
+                'boms' => [
+                    'total' => $bomTotal,
+                    'active' => $bomActive,
+                ],
+                'recent_orders' => $recentOrders,
+                'top_products' => $topProducts,
+                'period' => [
+                    'month' => $now->format('Y-m'),
+                    'label' => $now->translatedFormat('F Y'),
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Cost analysis report — period-based production cost breakdown.
      */
     public function costAnalysis(Request $request): JsonResponse

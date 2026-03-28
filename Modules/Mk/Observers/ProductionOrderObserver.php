@@ -26,8 +26,15 @@ class ProductionOrderObserver
      */
     public function updated(ProductionOrder $order): void
     {
-        // Only act on status changes to completed
+        // Only act on status changes
         if (! $order->wasChanged('status')) {
+            return;
+        }
+
+        // GL posting is handled by ManufacturingService::completeProduction() / cancelProduction()
+        // AFTER the DB transaction commits. Doing it here (inside Eloquent event = inside transaction)
+        // causes MySQL lock wait timeouts on the cache table. Skip if inside a transaction.
+        if (\Illuminate\Support\Facades\DB::transactionLevel() > 0) {
             return;
         }
 

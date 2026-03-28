@@ -900,8 +900,6 @@ class IfrsAdapter
                 'closing_debit' => 0, 'closing_credit' => 0,
             ];
 
-            $mkNames = self::MK_ACCOUNT_TYPES;
-
             foreach ($rows as $row) {
                 $openingBalance = round($row->pre_debit - $row->pre_credit, 2);
                 $closingBalance = round($openingBalance + $row->period_debit - $row->period_credit, 2);
@@ -914,7 +912,8 @@ class IfrsAdapter
                 $periodDebit = round($row->period_debit, 2);
                 $periodCredit = round($row->period_credit, 2);
 
-                $translatedName = $mkNames[$row->account_type] ?? $row->name;
+                // Use actual account name from DB; fall back to type translation only if name is empty
+                $translatedName = $row->name ?: (self::MK_ACCOUNT_TYPES[$row->account_type] ?? $row->account_type);
 
                 $accounts[] = [
                     'code' => $row->code,
