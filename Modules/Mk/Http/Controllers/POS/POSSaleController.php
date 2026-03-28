@@ -1011,6 +1011,92 @@ class POSSaleController extends Controller
     }
 
     /**
+     * POST /api/v1/pos/casys-checkout
+     *
+     * Generate a CASYS CPay payment URL + QR code for POS card payments.
+     * Uses the company's own CASYS merchant credentials (not platform-level).
+     */
+    public function casysCheckout(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        try {
+            $validated = $request->validate([
+                'amount' => 'required|integer|min:100',
+                'description' => 'nullable|string|max:100',
+                'invoice_id' => 'nullable|integer|exists:invoices,id',
+            ]);
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+
+        $cpayService = app(\Modules\Mk\Services\CpayMerchantService::class);
+
+        if (! $cpayService->isConfigured($companyId)) {
+            return response()->json([
+                'error' => 'CASYS not configured. Enter your Merchant ID and Auth Key in POS Settings.',
+            ], 422);
+        }
+
+        // Generate unique order reference
+        $orderId = 'CPOS-' . $companyId . '-' . time() . '-' . rand(100, 999);
+        $description = $validated['description'] ?? 'POS Payment';
+
+        try {
+            $checkout = $cpayService->createCheckout(
+                $companyId,
+                $validated['amount'],
+                $orderId,
+                $description
+            );
+
+            // Generate QR code
+            $qrDataUri = $cpayService->generateQrDataUri($checkout);
+
+            return response()->json([
+                'order_id' => $orderId,
+                'checkout_url' => $checkout['checkout_url'],
+                'form_fields' => $checkout['form_fields'],
+                'qr_data_uri' => $qrDataUri,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('CASYS checkout generation failed', [
+                'error' => $e->getMessage(),
+                'company_id' => $companyId,
+            ]);
+
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * GET /api/v1/pos/casys-status/{orderId}
+     *
+     * Poll for CASYS payment status (pending/completed/failed).
+     */
+    public function casysStatus(Request $request, string $orderId): JsonResponse
+    {
+        $companyId = $request->header('company');
+        $cpayService = app(\Modules\Mk\Services\CpayMerchantService::class);
+
+        $status = $cpayService->getPaymentStatus($orderId);
+
+        if (! $status) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        // Verify company ownership
+        if (($status['company_id'] ?? null) != $companyId) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        return response()->json([
+            'status' => $status['status'],
+            'amount' => $status['amount'] ?? 0,
+        ]);
+    }
+
+    /**
      * Build fiscal storno receipt data for ISL protocol.
      */
     protected function buildStornoFiscalData(Invoice $invoice, array $returnItems, int $returnTotal, int $returnTax): array

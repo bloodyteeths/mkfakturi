@@ -93,6 +93,38 @@
         :description="t('pos_settings.casys_qr_desc')"
         class="mt-4"
       />
+
+      <!-- CASYS credentials (only when CASYS QR is ON) -->
+      <template v-if="casysQrToggle">
+        <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl ring-1 ring-blue-200 dark:ring-blue-800">
+          <p class="text-sm text-blue-700 dark:text-blue-300 mb-3">
+            {{ t('pos_settings.casys_setup_info') }}
+          </p>
+          <BaseInputGrid>
+            <BaseInputGroup :label="t('pos_settings.casys_merchant_id')">
+              <BaseInput
+                v-model="form.pos_casys_merchant_id"
+                placeholder="e.g. 1234567890"
+              />
+            </BaseInputGroup>
+            <BaseInputGroup :label="t('pos_settings.casys_merchant_name')">
+              <BaseInput
+                v-model="form.pos_casys_merchant_name"
+                :placeholder="t('pos_settings.casys_merchant_name_placeholder')"
+              />
+            </BaseInputGroup>
+          </BaseInputGrid>
+          <BaseInputGrid class="mt-3">
+            <BaseInputGroup :label="t('pos_settings.casys_auth_key')">
+              <BaseInput
+                v-model="form.pos_casys_auth_key"
+                type="password"
+                placeholder="••••••••"
+              />
+            </BaseInputGroup>
+          </BaseInputGrid>
+        </div>
+      </template>
     </BaseSettingCard>
 
     <!-- Section 4: Restaurant -->
@@ -189,6 +221,9 @@ const form = reactive({
   pos_barcode_camera: 'NO',
   pos_split_payment: 'NO',
   pos_casys_qr: 'NO',
+  pos_casys_merchant_id: '',
+  pos_casys_merchant_name: '',
+  pos_casys_auth_key: '',
   pos_restaurant_mode: 'NO',
   pos_table_count: '20',
   pos_kitchen_printing: 'NO',
@@ -236,6 +271,9 @@ async function saveSettings() {
           pos_barcode_camera: form.pos_barcode_camera,
           pos_split_payment: form.pos_split_payment,
           pos_casys_qr: form.pos_casys_qr,
+          pos_casys_merchant_id: form.pos_casys_merchant_id,
+          pos_casys_merchant_name: form.pos_casys_merchant_name,
+          pos_casys_auth_key: form.pos_casys_auth_key,
           pos_restaurant_mode: form.pos_restaurant_mode,
           pos_table_count: form.pos_table_count,
           pos_kitchen_printing: form.pos_kitchen_printing,
@@ -271,6 +309,9 @@ onMounted(() => {
     if (s.pos_barcode_camera) form.pos_barcode_camera = s.pos_barcode_camera
     if (s.pos_split_payment) form.pos_split_payment = s.pos_split_payment
     if (s.pos_casys_qr) form.pos_casys_qr = s.pos_casys_qr
+    if (s.pos_casys_merchant_id) form.pos_casys_merchant_id = s.pos_casys_merchant_id
+    if (s.pos_casys_merchant_name) form.pos_casys_merchant_name = s.pos_casys_merchant_name
+    if (s.pos_casys_auth_key) form.pos_casys_auth_key = s.pos_casys_auth_key
     if (s.pos_restaurant_mode) form.pos_restaurant_mode = s.pos_restaurant_mode
     if (s.pos_table_count) form.pos_table_count = s.pos_table_count
     if (s.pos_kitchen_printing) form.pos_kitchen_printing = s.pos_kitchen_printing

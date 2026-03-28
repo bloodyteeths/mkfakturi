@@ -18,10 +18,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       en: 'POS Software Macedonia \u2014 Free Register with Fiscal Printer | Facturino',
     },
     description: {
-      mk: 'Бесплатен POS софтвер за малопродажба и угостителство во Македонија. Фискален печатач без драјвери (WebSerial), автоматско книжење, залиха и е-Фактура. Замена за Vector, Accent, Jongis \u2014 работи на таблет и компјутер без инсталација.',
-      sq: 'POS falas per shitje me pakice dhe hoteleri ne Maqedoni. Printer fiskal pa driver (WebSerial), regjistrim automatik, stok dhe e-Fature. Zevendesim per Vector, Accent, Jongis \u2014 punon ne tablet dhe kompjuter pa instalim.',
-      tr: 'Makedonya\'da perakende ve restoran icin ucretsiz POS yazilimi. Surucusuz fiskal yazici (WebSerial), otomatik muhasebe, stok ve e-Fatura. Vector, Accent, Jongis yerine \u2014 tablette ve bilgisayarda kurulum gerektirmez.',
-      en: 'Free POS software for retail and hospitality in Macedonia. Driverless fiscal printer (WebSerial), automatic IFRS accounting, real-time inventory and e-Invoice. Replaces Vector, Accent, Jongis \u2014 runs on tablet and desktop, no installation.',
+      mk: 'Бесплатен POS софтвер за малопродажба и угостителство во Македонија. Фискален печатач без драјвери (WebSerial), автоматско книжење, залиха и е-Фактура. Алтернатива за Vector, Accent, Jongis, PANTHEON \u2014 работи на таблет и компјутер без инсталација.',
+      sq: 'POS falas per shitje me pakice dhe hoteleri ne Maqedoni. Printer fiskal pa driver (WebSerial), regjistrim automatik, stok dhe e-Fature. Alternativ per Vector, Accent, Jongis, PANTHEON \u2014 punon ne tablet dhe kompjuter pa instalim.',
+      tr: 'Makedonya\'da perakende ve restoran icin ucretsiz POS yazilimi. Surucusuz fiskal yazici (WebSerial), otomatik muhasebe, stok ve e-Fatura. Vector, Accent, Jongis, PANTHEON alternatifi \u2014 tablette ve bilgisayarda kurulum gerektirmez.',
+      en: 'Free POS software for retail and hospitality in Macedonia. Driverless fiscal printer (WebSerial), automatic IFRS accounting, real-time inventory and e-Invoice. Alternative to Vector, Accent, Jongis, PANTHEON \u2014 runs on tablet and desktop, no installation.',
     },
   })
 }
@@ -45,7 +45,7 @@ const copy = {
       items: [
         {
           icon: '\u{1F4B8}',
-          title: 'Vector чини 300\u20AC + техничар',
+          title: 'Десктоп POS чини 300\u20AC + техничар',
           desc: 'Плаќате 300\u20AC за десктоп програм, па уште 50\u20AC за инсталација. А работи само на Windows.',
         },
         {
@@ -150,7 +150,7 @@ const copy = {
     ],
     comparison: {
       title: 'Facturino POS vs. конкуренција',
-      headers: ['Функција', 'Facturino', 'Vector (300\u20AC)', 'Accent', 'PANTHEON'],
+      headers: ['Функција', 'Facturino', 'Десктоп POS (~300\u20AC)', 'Локален POS (~200\u20AC)', 'ERP системи (500+\u20AC/год)'],
       rows: [
         ['Цена', 'Бесплатно*', '300\u20AC + техничар', '~200\u20AC', '500-1,200\u20AC/год'],
         ['Работи на таблет', '\u2705 Било кој уред', '\u274C Само Windows', '\u274C Windows', '\u274C Windows'],
@@ -184,7 +184,7 @@ const copy = {
           a: 'Да! Отворете Chrome на Android или iPad таблет. Touch-оптимизиран интерфејс со големи копчиња. Android таблет од 5,000 МКД е доволен.',
         },
         {
-          q: 'Што ако веќе имам Vector/Accent?',
+          q: 'Што ако веќе имам друг POS?',
           a: 'Можете да ги увезете артиклите и категориите преку CSV. Нема потреба од техничар \u2014 отворете Facturino, внесете ги артиклите и започнете.',
         },
         {
@@ -198,7 +198,7 @@ const copy = {
       ],
     },
     bottomCta: {
-      title: 'Заменете го Vector за 2 минути',
+      title: 'Заменете го вашиот POS за 2 минути',
       sub: 'Отворете Chrome. Внесете артикли. Скенирајте. Наплатете. Без инсталација, без техничар, без чекање.',
       button: 'Започни бесплатно',
     },
@@ -217,7 +217,7 @@ const copy = {
       items: [
         {
           icon: '\u{1F4B8}',
-          title: 'Vector kushton 300\u20AC + teknik',
+          title: 'POS desktop kushton 300\u20AC + teknik',
           desc: 'Paguani 300\u20AC per program desktop, plus 50\u20AC per instalim. Dhe punon vetem ne Windows.',
         },
         {
@@ -322,7 +322,7 @@ const copy = {
     ],
     comparison: {
       title: 'Facturino POS vs. konkurrenca',
-      headers: ['Vecoria', 'Facturino', 'Vector (300\u20AC)', 'Accent', 'PANTHEON'],
+      headers: ['Vecoria', 'Facturino', 'POS Desktop (~300\u20AC)', 'POS Lokal (~200\u20AC)', 'Sisteme ERP (500+\u20AC/vit)'],
       rows: [
         ['Cmimi', 'Falas*', '300\u20AC + teknik', '~200\u20AC', '500-1,200\u20AC/vit'],
         ['Punon ne tablet', '\u2705 Cdo pajisje', '\u274C Vetem Windows', '\u274C Windows', '\u274C Windows'],
@@ -356,7 +356,7 @@ const copy = {
           a: 'Po! Hapni Chrome ne Android ose iPad. Nderfaqe touch me butona te medhenj. Tablet Android nga 5,000 MKD mjafton.',
         },
         {
-          q: 'Po nese tashme kam Vector/Accent?',
+          q: 'Po nese tashme kam POS tjeter?',
           a: 'Mund ti importoni artikujt dhe kategorite me CSV. Pa nevoje per teknik \u2014 hapni Facturino, vendosni artikujt dhe filloni.',
         },
         {
@@ -370,7 +370,7 @@ const copy = {
       ],
     },
     bottomCta: {
-      title: 'Zevendesoni Vector per 2 minuta',
+      title: 'Zevendesoni POS-in tuaj per 2 minuta',
       sub: 'Hapni Chrome. Vendosni artikujt. Skanoni. Arketoni. Pa instalim, pa teknik, pa pritje.',
       button: 'Fillo falas',
     },
@@ -389,7 +389,7 @@ const copy = {
       items: [
         {
           icon: '\u{1F4B8}',
-          title: 'Vector 300\u20AC + teknisyen',
+          title: 'Masaustu POS 300\u20AC + teknisyen',
           desc: 'Masaustu program icin 300\u20AC, kurulum icin 50\u20AC daha. Ve sadece Windows\'da calisiyor.',
         },
         {
@@ -494,7 +494,7 @@ const copy = {
     ],
     comparison: {
       title: 'Facturino POS vs. rakipler',
-      headers: ['Ozellik', 'Facturino', 'Vector (300\u20AC)', 'Accent', 'PANTHEON'],
+      headers: ['Ozellik', 'Facturino', 'Masaustu POS (~300\u20AC)', 'Yerel POS (~200\u20AC)', 'ERP Sistemleri (500+\u20AC/yil)'],
       rows: [
         ['Fiyat', 'Ucretsiz*', '300\u20AC + teknisyen', '~200\u20AC', '500-1,200\u20AC/yil'],
         ['Tablette calisir', '\u2705 Her cihaz', '\u274C Sadece Windows', '\u274C Windows', '\u274C Windows'],
@@ -528,7 +528,7 @@ const copy = {
           a: 'Evet! Android veya iPad\'de Chrome acin. Buyuk butonlarla dokunma arayuzu. 5.000 MKD Android tablet yeterli.',
         },
         {
-          q: 'Zaten Vector/Accent varsa?',
+          q: 'Zaten baska POS varsa?',
           a: 'Urunleri ve kategorileri CSV ile aktarabilirsiniz. Teknisyen gerekmez \u2014 Facturino\'yu acin, urunleri girin ve baslayin.',
         },
         {
@@ -542,7 +542,7 @@ const copy = {
       ],
     },
     bottomCta: {
-      title: 'Vector\'u 2 dakikada degistirin',
+      title: 'POS\'unuzu 2 dakikada degistirin',
       sub: 'Chrome\'u acin. Urunleri girin. Tarayin. Tahsil edin. Kurulum yok, teknisyen yok, bekleme yok.',
       button: 'Ucretsiz basla',
     },
@@ -561,7 +561,7 @@ const copy = {
       items: [
         {
           icon: '\u{1F4B8}',
-          title: 'Vector costs \u20AC300 + technician',
+          title: 'Desktop POS costs \u20AC300 + technician',
           desc: 'You pay \u20AC300 for a desktop program, plus \u20AC50 for installation. And it only runs on Windows.',
         },
         {
@@ -666,7 +666,7 @@ const copy = {
     ],
     comparison: {
       title: 'Facturino POS vs. competition',
-      headers: ['Feature', 'Facturino', 'Vector (\u20AC300)', 'Accent', 'PANTHEON'],
+      headers: ['Feature', 'Facturino', 'Desktop POS (~\u20AC300)', 'Local POS (~\u20AC200)', 'ERP Systems (\u20AC500+/year)'],
       rows: [
         ['Price', 'Free*', '\u20AC300 + technician', '~\u20AC200', '\u20AC500-1,200/year'],
         ['Works on tablet', '\u2705 Any device', '\u274C Windows only', '\u274C Windows', '\u274C Windows'],
@@ -700,7 +700,7 @@ const copy = {
           a: 'Yes! Open Chrome on an Android or iPad tablet. Touch-optimized interface with large buttons. A 5,000 MKD Android tablet is enough.',
         },
         {
-          q: 'What if I already have Vector/Accent?',
+          q: 'What if I already have another POS?',
           a: 'You can import items and categories via CSV. No technician needed \u2014 open Facturino, enter your items and start selling.',
         },
         {
@@ -714,7 +714,7 @@ const copy = {
       ],
     },
     bottomCta: {
-      title: 'Replace Vector in 2 minutes',
+      title: 'Replace your POS in 2 minutes',
       sub: 'Open Chrome. Enter items. Scan. Charge. No installation, no technician, no waiting.',
       button: 'Start free',
     },

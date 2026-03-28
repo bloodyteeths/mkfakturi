@@ -546,6 +546,8 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/shift/open', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'openShift']);
                 Route::post('/shift/close', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'closeShift']);
                 Route::get('/shift/current', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'currentShift']);
+                Route::post('/casys-checkout', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'casysCheckout']);
+                Route::get('/casys-status/{orderId}', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'casysStatus']);
             });
 
             // Company Lookup (Central Registry)

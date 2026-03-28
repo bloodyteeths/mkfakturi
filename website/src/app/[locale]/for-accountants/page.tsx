@@ -127,7 +127,7 @@ const copy = {
         { feature: '14 дена бесплатен пробен период', facturino: '✓', others: '✗' },
       ],
       facturinoLabel: 'Facturino',
-      othersLabel: 'PANTHEON / Zonel',
+      othersLabel: 'ERP / Desktop',
     },
     pricing: {
       title: 'Пакети за сметководители',
@@ -239,7 +239,7 @@ const copy = {
         { feature: '14 ditë provë falas', facturino: '✓', others: '✗' },
       ],
       facturinoLabel: 'Facturino',
-      othersLabel: 'PANTHEON / Zonel',
+      othersLabel: 'ERP / Desktop',
     },
     pricing: {
       title: 'Paketat për kontabilistë',
@@ -351,7 +351,7 @@ const copy = {
         { feature: '14 gün ücretsiz deneme', facturino: '✓', others: '✗' },
       ],
       facturinoLabel: 'Facturino',
-      othersLabel: 'PANTHEON / Zonel',
+      othersLabel: 'ERP / Desktop',
     },
     pricing: {
       title: 'Muhasebeciler için paketler',
@@ -463,7 +463,7 @@ const copy = {
         { feature: '14-day free trial', facturino: '✓', others: '✗' },
       ],
       facturinoLabel: 'Facturino',
-      othersLabel: 'PANTHEON / Zonel',
+      othersLabel: 'ERP / Desktop',
     },
     pricing: {
       title: 'Plans for accountants',

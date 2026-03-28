@@ -131,6 +131,7 @@
       :change="posStore.changeAmount"
       :is-processing="posStore.isProcessing"
       :split-enabled="posStore.posSettings.split_payment"
+      :casys-enabled="posStore.posSettings.casys_qr"
       @update:payment-method="posStore.paymentMethod = $event"
       @update:cash-received="posStore.cashReceived = $event"
       @update:split-amounts="splitAmounts = $event"

@@ -149,6 +149,41 @@
             </span>
           </div>
         </div>
+        <!-- Card with CASYS QR option -->
+        <div v-if="localMethod === 'card' && casysEnabled" class="space-y-3">
+          <div v-if="!casysQr" class="text-center">
+            <button
+              class="w-full py-3 rounded-xl text-sm font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 active:scale-[0.98] transition-all"
+              :disabled="casysLoading"
+              @click="generateCasysQr"
+            >
+              <template v-if="casysLoading">
+                <span class="inline-block w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin mr-2 align-middle"></span>
+                {{ t('pos.generating_qr') || 'Generating QR...' }}
+              </template>
+              <template v-else>
+                {{ t('pos.generate_casys_qr') || 'Generate QR for Card Payment (CASYS)' }}
+              </template>
+            </button>
+            <p class="text-xs text-gray-400 mt-2">{{ t('pos.casys_qr_hint') || 'Customer scans QR to pay with their bank card' }}</p>
+          </div>
+
+          <!-- QR code display -->
+          <div v-if="casysQr" class="text-center space-y-3">
+            <div class="bg-white p-4 rounded-2xl inline-block ring-1 ring-gray-200">
+              <img :src="casysQr.qr_data_uri" alt="Payment QR" class="w-64 h-64 mx-auto" />
+            </div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-300">
+              {{ t('pos.scan_to_pay') || 'Customer: scan this QR to pay' }}
+            </p>
+            <div class="flex items-center justify-center gap-2 text-xs">
+              <span class="inline-block w-2 h-2 rounded-full animate-pulse" :class="casysStatus === 'completed' ? 'bg-emerald-500' : casysStatus === 'failed' ? 'bg-red-500' : 'bg-amber-500'"></span>
+              <span :class="casysStatus === 'completed' ? 'text-emerald-600 font-bold' : casysStatus === 'failed' ? 'text-red-600' : 'text-amber-600'">
+                {{ casysStatus === 'completed' ? (t('pos.payment_received') || 'Payment received!') : casysStatus === 'failed' ? (t('pos.payment_failed') || 'Payment failed') : (t('pos.waiting_for_payment') || 'Waiting for payment...') }}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Confirm button -->
@@ -175,8 +210,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import axios from 'axios'
 import NumPad from './NumPad.vue'
 
 const { t } = useI18n()
@@ -188,6 +224,7 @@ const props = defineProps({
   change: { type: Number, default: 0 },
   isProcessing: { type: Boolean, default: false },
   splitEnabled: { type: Boolean, default: false },
+  casysEnabled: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['update:payment-method', 'update:cash-received', 'update:split-amounts', 'confirm', 'close'])
@@ -304,6 +341,56 @@ function onSplitNumpadClear() {
   emitSplitAmounts()
 }
 
+// --- CASYS QR payment ---
+const casysQr = ref(null)
+const casysLoading = ref(false)
+const casysStatus = ref('pending')
+let casysPollingInterval = null
+
+async function generateCasysQr() {
+  casysLoading.value = true
+  try {
+    const { data } = await axios.post('pos/casys-checkout', {
+      amount: props.total,
+      description: 'POS Sale',
+    })
+    casysQr.value = data
+    casysStatus.value = 'pending'
+    // Start polling for payment status
+    startCasysPolling(data.order_id)
+  } catch (e) {
+    alert(e.response?.data?.error || 'Failed to generate CASYS QR')
+  } finally {
+    casysLoading.value = false
+  }
+}
+
+function startCasysPolling(orderId) {
+  stopCasysPolling()
+  casysPollingInterval = setInterval(async () => {
+    try {
+      const { data } = await axios.get(`pos/casys-status/${orderId}`)
+      casysStatus.value = data.status
+      if (data.status === 'completed') {
+        stopCasysPolling()
+        // Auto-confirm payment
+        emit('confirm')
+      } else if (data.status === 'failed') {
+        stopCasysPolling()
+      }
+    } catch {
+      // Ignore polling errors
+    }
+  }, 3000)
+}
+
+function stopCasysPolling() {
+  if (casysPollingInterval) {
+    clearInterval(casysPollingInterval)
+    casysPollingInterval = null
+  }
+}
+
 // --- Confirm validation ---
 const canConfirm = computed(() => {
   if (localMethod.value === 'cash') return localCash.value >= props.total
@@ -322,6 +409,10 @@ const quickAmounts = computed(() => {
     if (rounded >= total && rounded <= total * 3) amounts.add(rounded)
   }
   return [...amounts].sort((a, b) => a - b).slice(0, 4)
+})
+
+onUnmounted(() => {
+  stopCasysPolling()
 })
 
 function formatPrice(cents) {
