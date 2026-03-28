@@ -156,15 +156,16 @@ test.describe('Fiscal Printer — E2E', () => {
     expect(res.data).toHaveProperty('supported_types')
 
     const types = res.data.supported_types
-    expect(Object.keys(types).length).toBeGreaterThanOrEqual(7)
+    expect(types.length).toBeGreaterThanOrEqual(7)
 
-    // Check known device types exist
+    // Check known device types exist (array of {type, label, default_connection})
+    const typeNames = types.map(t => t.type)
     const expectedTypes = ['daisy', 'david', 'razvigorec', 'severec', 'expert-sx', 'pelisterec', 'alpha']
     for (const t of expectedTypes) {
-      expect(types).toHaveProperty(t)
+      expect(typeNames).toContain(t)
     }
 
-    console.log(`Devices: ${res.data.data?.length || 0} registered, ${Object.keys(types).length} supported types ✓`)
+    console.log(`Devices: ${res.data.data?.length || 0} registered, ${types.length} supported types ✓`)
   })
 
   test('2. Create test device — POST returns 201', async () => {
@@ -436,11 +437,12 @@ test.describe('Fiscal Printer — E2E', () => {
     expect(res.status).toBe(200)
 
     const types = res.data.supported_types
-    // All Macedonian devices should default to webserial
+    // All Macedonian devices should default to webserial (array of objects)
     const webserialTypes = ['daisy', 'david', 'razvigorec', 'severec', 'expert-sx', 'pelisterec', 'alpha']
-    for (const t of webserialTypes) {
-      if (types[t]) {
-        expect(types[t].default_connection).toBe('webserial')
+    for (const name of webserialTypes) {
+      const found = types.find(t => t.type === name)
+      if (found) {
+        expect(found.default_connection).toBe('webserial')
       }
     }
 
