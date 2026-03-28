@@ -507,6 +507,9 @@
     </table>
     @endif
 
+    {{-- CASYS QR Payment --}}
+    @include('app.pdf.invoice.partials.casys-qr')
+
     {{-- Legal Footer --}}
     <div class="footer">
         <p><strong>Фактурата е валидна без печат и потпис согласно Законот за даночна постапка.</strong></p>

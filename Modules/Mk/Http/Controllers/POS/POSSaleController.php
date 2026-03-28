@@ -422,12 +422,21 @@ class POSSaleController extends Controller
             'show_vat' => CompanySetting::getSetting('pos_show_vat', $companyId) !== 'NO',
         ];
 
+        // Warehouses for stock deduction selection
+        $warehouses = \App\Models\Warehouse::where('company_id', $companyId)
+            ->where('is_active', true)
+            ->select('id', 'name', 'is_default')
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get();
+
         return response()->json([
             'items' => $items,
             'categories' => $categories,
             'tax_types' => $taxTypes,
             'pos_usage' => $posUsage,
             'pos_settings' => $posSettings,
+            'warehouses' => $warehouses,
         ]);
     }
 

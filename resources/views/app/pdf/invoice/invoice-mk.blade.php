@@ -356,6 +356,9 @@
     </table>
     @endif
 
+    {{-- CASYS QR Payment --}}
+    @include('app.pdf.invoice.partials.casys-qr')
+
     {{-- Footer / Legal Text --}}
     <div class="footer" style="margin-top: 6px; border-top: 1px solid #ccc; padding-top: 3px;">
         <div style="text-align: center; font-size: 8px;">

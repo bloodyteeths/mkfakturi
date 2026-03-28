@@ -60,14 +60,17 @@
           </div>
 
           <!-- Qty controls -->
-          <div class="flex items-center gap-1.5 shrink-0 bg-gray-50 dark:bg-gray-800 rounded-lg p-0.5">
+          <div class="flex items-center gap-1.5 shrink-0 bg-gray-50 dark:bg-gray-800 rounded-lg p-0.5 relative">
             <button
               class="w-11 h-11 flex items-center justify-center rounded-md text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 hover:shadow-sm active:scale-90 transition-all font-bold text-xl"
               @click="$emit('update-qty', { index, qty: item.quantity - 1 })"
             >
               -
             </button>
-            <span class="w-10 text-center text-sm font-bold text-gray-800 dark:text-gray-200">{{ item.quantity }}</span>
+            <span
+              class="w-10 text-center text-sm font-bold text-gray-800 dark:text-gray-200 cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 rounded-md py-1 transition-colors select-none"
+              @click.stop="openNumpad(index, item)"
+            >{{ item.quantity }}</span>
             <button
               class="w-11 h-11 flex items-center justify-center rounded-md text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 hover:shadow-sm active:scale-90 transition-all font-bold text-xl"
               @click="$emit('update-qty', { index, qty: item.quantity + 1 })"
@@ -93,6 +96,43 @@
         </div>
       </div>
     </div>
+
+    <!-- Numpad Overlay for quantity editing -->
+    <Teleport to="body">
+      <div
+        v-if="editingItemIndex !== null"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm"
+        @click.self="closeNumpad"
+      >
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-5 w-72" @click.stop>
+          <div class="text-center mb-3">
+            <div class="text-xs text-gray-400 mb-1">{{ editingItemName }}</div>
+            <div class="text-3xl font-black text-gray-900 dark:text-white tabular-nums tracking-wider min-h-[44px] flex items-center justify-center">
+              {{ numpadBuffer || '0' }}
+            </div>
+          </div>
+          <NumPad
+            @input="onNumpadInput"
+            @clear="onNumpadClear"
+            @backspace="onNumpadBackspace"
+          />
+          <div class="flex gap-2 mt-3">
+            <button
+              class="flex-1 py-3 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              @click="closeNumpad"
+            >
+              {{ t('general.cancel') || 'Cancel' }}
+            </button>
+            <button
+              class="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-primary-500 hover:bg-primary-600 active:bg-primary-700 transition-colors"
+              @click="confirmNumpad"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Totals + Pay -->
     <div class="border-t border-gray-100 dark:border-gray-800 shrink-0 bg-gray-50/50 dark:bg-gray-900">
@@ -142,7 +182,9 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import NumPad from './NumPad.vue'
 
 const { t } = useI18n()
 
@@ -158,7 +200,49 @@ defineProps({
   parkedCount: { type: Number, default: 0 },
 })
 
-defineEmits(['update-qty', 'remove', 'clear', 'pay', 'park', 'show-parked'])
+const emit = defineEmits(['update-qty', 'remove', 'clear', 'pay', 'park', 'show-parked'])
+
+// --- Tap-to-edit quantity via NumPad ---
+const editingItemIndex = ref(null)
+const editingItemName = ref('')
+const numpadBuffer = ref('')
+
+function openNumpad(index, item) {
+  editingItemIndex.value = index
+  editingItemName.value = item.name
+  numpadBuffer.value = String(item.quantity)
+}
+
+function closeNumpad() {
+  editingItemIndex.value = null
+  editingItemName.value = ''
+  numpadBuffer.value = ''
+}
+
+function onNumpadInput(digit) {
+  const next = numpadBuffer.value + digit
+  const num = parseInt(next, 10)
+  if (num <= 9999) {
+    numpadBuffer.value = next
+  }
+}
+
+function onNumpadClear() {
+  numpadBuffer.value = ''
+}
+
+function onNumpadBackspace() {
+  numpadBuffer.value = numpadBuffer.value.slice(0, -1)
+}
+
+function confirmNumpad() {
+  const qty = parseInt(numpadBuffer.value, 10)
+  if (editingItemIndex.value !== null) {
+    const finalQty = (!qty || qty < 1) ? 1 : Math.min(qty, 9999)
+    emit('update-qty', { index: editingItemIndex.value, qty: finalQty })
+  }
+  closeNumpad()
+}
 
 function formatPrice(cents) {
   if (!cents) return '0 МКД'

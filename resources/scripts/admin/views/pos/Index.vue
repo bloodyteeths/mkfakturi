@@ -7,9 +7,12 @@
       :fiscal-connected="fiscal.isConnected.value"
       :return-enabled="posStore.posSettings.return_enabled"
       :restaurant-mode="posStore.posSettings.restaurant_mode"
+      :warehouses="posStore.warehouses"
+      :selected-warehouse="posStore.selectedWarehouse"
       @open-shift="showShiftOpen = true"
       @close-shift="showShiftClose = true"
       @open-return="showReturn = true"
+      @warehouse-change="posStore.selectedWarehouse = $event"
       @exit="exitPos"
     />
 
@@ -64,6 +67,7 @@
         <PosSearchBar
           ref="searchBarRef"
           v-model="posStore.searchQuery"
+          :barcode-camera-enabled="posStore.posSettings.barcode_camera"
           @barcode="handleBarcode"
         />
 

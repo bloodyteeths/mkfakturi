@@ -74,6 +74,27 @@
         {{ fiscalConnected ? 'Fiscal' : 'No Fiscal' }}
       </div>
 
+      <!-- Warehouse selector (only if > 1 warehouse) -->
+      <div v-if="warehouses.length > 1" class="flex items-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+        </svg>
+        <select
+          :value="selectedWarehouse"
+          class="bg-gray-800 text-gray-300 text-[11px] font-medium border-0 ring-1 ring-gray-700 rounded-lg pl-2 pr-6 py-1 focus:ring-blue-500 focus:outline-none cursor-pointer appearance-none"
+          style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%239ca3af%22 stroke-width=%222%22><path d=%22M6 9l6 6 6-6%22/></svg>'); background-repeat: no-repeat; background-position: right 6px center;"
+          @change="$emit('warehouse-change', Number($event.target.value))"
+        >
+          <option
+            v-for="wh in warehouses"
+            :key="wh.id"
+            :value="wh.id"
+          >
+            {{ wh.name }}
+          </option>
+        </select>
+      </div>
+
       <!-- Shift indicator -->
       <div v-if="shift" class="flex items-center gap-1.5 text-[11px] font-medium bg-blue-500/20 text-blue-300 ring-1 ring-blue-500/30 px-2.5 py-1 rounded-full">
         <span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>
@@ -133,9 +154,11 @@ const props = defineProps({
   fiscalConnected: { type: Boolean, default: false },
   returnEnabled: { type: Boolean, default: false },
   restaurantMode: { type: Boolean, default: false },
+  warehouses: { type: Array, default: () => [] },
+  selectedWarehouse: { type: Number, default: null },
 })
 
-defineEmits(['open-shift', 'close-shift', 'exit', 'open-return'])
+defineEmits(['open-shift', 'close-shift', 'exit', 'open-return', 'warehouse-change'])
 
 const showMenu = ref(false)
 const clock = ref('')

@@ -21,6 +21,14 @@ export const usePosStore = defineStore('pos', () => {
     } catch (e) { /* ignore quota errors */ }
   }, { deep: true })
 
+  // Persist selected warehouse to localStorage
+  watch(selectedWarehouse, (wh) => {
+    try {
+      if (wh) localStorage.setItem('pos_selected_warehouse', String(wh))
+      else localStorage.removeItem('pos_selected_warehouse')
+    } catch (e) { /* ignore */ }
+  })
+
   const customer = ref(null)
   const paymentMethod = ref('cash')
   const cashReceived = ref(0)
@@ -35,6 +43,10 @@ export const usePosStore = defineStore('pos', () => {
   const searchQuery = ref('')
   const selectedCategory = ref(null)
   const catalogLoaded = ref(false)
+  const warehouses = ref([])
+  const selectedWarehouse = ref(
+    (() => { try { const v = localStorage.getItem('pos_selected_warehouse'); return v ? Number(v) : null } catch { return null } })()
+  )
   const posSettings = ref({
     numpad_enabled: true,
     sound_enabled: true,
@@ -157,6 +169,15 @@ export const usePosStore = defineStore('pos', () => {
       taxTypes.value = data.tax_types || []
       posUsage.value = data.pos_usage || posUsage.value
       if (data.pos_settings) posSettings.value = data.pos_settings
+      warehouses.value = data.warehouses || []
+      // Default to the default warehouse or the first one (validate persisted selection)
+      if (warehouses.value.length) {
+        const valid = warehouses.value.find(w => w.id === selectedWarehouse.value)
+        if (!valid) {
+          const defaultWh = warehouses.value.find(w => w.is_default)
+          selectedWarehouse.value = defaultWh ? defaultWh.id : warehouses.value[0].id
+        }
+      }
     } catch (e) {
       console.error('Failed to load POS catalog:', e)
     } finally {
@@ -193,6 +214,7 @@ export const usePosStore = defineStore('pos', () => {
         payment_method: paymentMethod.value,
         cash_received: paymentMethod.value === 'cash' ? cashReceived.value : cartTotal.value,
         fiscal_device_id: fiscalDeviceId,
+        warehouse_id: selectedWarehouse.value || null,
       }
 
       // Add split payment amounts
@@ -394,7 +416,7 @@ export const usePosStore = defineStore('pos', () => {
     cart, customer, paymentMethod, cashReceived, isProcessing,
     catalog, categories, taxTypes, lastSale, posUsage,
     currentShift, parkedSales, searchQuery, selectedCategory,
-    catalogLoaded, posSettings,
+    catalogLoaded, posSettings, warehouses, selectedWarehouse,
     // Getters
     cartItemCount, cartSubTotal, cartTax, cartDiscount, cartTotal,
     changeAmount, filteredCatalog, isLimitApproaching, isLimitReached,

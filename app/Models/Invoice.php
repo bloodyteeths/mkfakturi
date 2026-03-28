@@ -798,6 +798,36 @@ class Invoice extends Model implements HasMedia
         $stamp = $company->stamp ?: ($company->stamp_path ?: null);
         $signature = $company->signature ?: ($company->signature_path ?: null);
 
+        // Generate CASYS QR code for online payment if enabled
+        $casysQrDataUri = null;
+        try {
+            $casysEnabled = CompanySetting::getSetting('casys_enabled', $company->id) === 'YES';
+            $invoiceQrEnabled = CompanySetting::getSetting('casys_invoice_qr', $company->id) === 'YES';
+
+            if ($casysEnabled && $invoiceQrEnabled && $this->due_amount > 0) {
+                $cpayService = app(\Modules\Mk\Services\CpayMerchantService::class);
+
+                if ($cpayService->isConfigured($company->id)) {
+                    $orderId = 'INV-' . $this->id . '-' . substr(md5($this->invoice_number . $this->total), 0, 8);
+                    $description = 'Фактура ' . $this->invoice_number;
+
+                    $checkoutData = $cpayService->createCheckout(
+                        $company->id,
+                        $this->due_amount,
+                        $orderId,
+                        $description
+                    );
+
+                    $casysQrDataUri = $cpayService->generateQrDataUri($checkoutData, 300);
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::warning('CASYS QR generation failed for invoice PDF', [
+                'invoice_id' => $this->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         view()->share([
             'invoice' => $this,
             'customFields' => $customFields,
@@ -809,6 +839,7 @@ class Invoice extends Model implements HasMedia
             'stamp' => $stamp,
             'signature' => $signature,
             'taxes' => $taxes,
+            'casysQrDataUri' => $casysQrDataUri,
         ]);
 
         $template = PdfTemplateUtils::findFormattedTemplate('invoice', $invoiceTemplate, '');
@@ -1080,3 +1111,4 @@ class Invoice extends Model implements HasMedia
         });
     }
 }
+// CLAUDE-CHECKPOINT

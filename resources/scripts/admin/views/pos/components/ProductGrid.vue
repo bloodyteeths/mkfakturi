@@ -29,9 +29,12 @@
         <!-- Subtle gradient overlay on hover -->
         <div class="absolute inset-0 bg-gradient-to-br from-primary-50/0 to-primary-50/0 group-hover:from-primary-50/50 group-hover:to-transparent dark:group-hover:from-primary-950/20 dark:group-hover:to-transparent transition-all duration-200 rounded-xl pointer-events-none"></div>
 
-        <!-- Item photo -->
-        <div v-if="item.image_url" class="relative w-full h-16 mb-2 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-          <img :src="item.image_url" :alt="item.name" class="w-full h-full object-cover" loading="lazy" />
+        <!-- Item photo / placeholder -->
+        <div class="relative w-full h-16 mb-2 rounded-lg overflow-hidden flex-shrink-0" :class="item.image_url ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800/60 flex items-center justify-center'">
+          <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="w-full h-full object-cover rounded" loading="lazy" />
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
         </div>
 
         <!-- Item name -->
