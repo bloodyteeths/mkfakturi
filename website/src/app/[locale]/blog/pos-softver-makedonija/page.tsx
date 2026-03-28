@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildPageMetadata } from '@/lib/metadata'
 import Link from 'next/link'
@@ -318,6 +319,14 @@ export default async function PosSoftverMakedonija({
             <span className="flex items-center gap-1.5"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{t.readTime}</span>
           </div>
           <p className="text-lg md:text-xl text-gray-600 leading-relaxed">{t.intro}</p>
+        </div>
+      </section>
+
+      <section className="pb-8">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-100">
+            <Image src="/images/pos/hero-shop-owner.png" alt="Macedonian shop owner using POS software on tablet" width={800} height={500} className="w-full h-auto" />
+          </div>
         </div>
       </section>
 

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import PageHero from '@/components/PageHero'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
@@ -781,8 +782,8 @@ export default async function PosPage({
     <main id="main-content">
       {/* ── Hero ── */}
       <PageHero
-        image="/assets/images/hero_features.png"
-        alt="Facturino POS system on tablet and desktop"
+        image="/images/pos/hero-shop-owner.png"
+        alt="Macedonian shop owner using Facturino POS on tablet with fiscal printer"
         title={t.hero.title}
         subtitle={t.hero.subtitle}
         cta={{ label: t.hero.cta, href: `https://app.facturino.mk/signup` }}
@@ -849,6 +850,37 @@ export default async function PosPage({
         </div>
       </section>
 
+      {/* ── POS Screenshot + Lifestyle Gallery ── */}
+      <section className="py-10 md:py-16 bg-white">
+        <div className="container mx-auto max-w-6xl px-4">
+          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-indigo-500/10 border border-gray-100">
+            <Image
+              src="/images/pos/pos-cart-screenshot.png"
+              alt="Facturino POS checkout screen with product photos and cart"
+              width={1200}
+              height={750}
+              className="w-full h-auto"
+              priority
+            />
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+            <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+              <Image src="/images/pos/bakery-scanning.png" alt="Bakery owner scanning barcode" width={400} height={250} className="w-full h-auto" />
+            </div>
+            <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+              <Image src="/images/pos/cafe-tablet-pos.png" alt="Cafe bartender using tablet POS" width={400} height={250} className="w-full h-auto" />
+            </div>
+            <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+              <Image src="/images/pos/bazaar-vendor.png" alt="Market vendor with fiscal printer" width={400} height={250} className="w-full h-auto" />
+            </div>
+            <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+              <Image src="/images/pos/fiscal-printer-closeup.png" alt="Fiscal receipt printer closeup" width={400} height={250} className="w-full h-auto" />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Feature Sections ── */}
       {t.features.map((section, idx) => {
         const isEven = idx % 2 === 0
@@ -892,6 +924,21 @@ export default async function PosPage({
           </section>
         )
       })}
+
+      {/* ── Multi-Location Visual ── */}
+      <section className="py-8 md:py-12 bg-gray-50">
+        <div className="container mx-auto max-w-5xl px-4">
+          <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-100">
+            <Image
+              src="/images/pos/multi-location.png"
+              alt="Business owner viewing multi-location POS analytics dashboard"
+              width={1200}
+              height={675}
+              className="w-full h-auto"
+            />
+          </div>
+        </div>
+      </section>
 
       {/* ── Comparison Table ── */}
       <section className="py-10 md:py-20 bg-white">
