@@ -503,24 +503,27 @@ test.describe('POS Phase 2 — E2E', () => {
     expect(typeof res.data.pos_usage.used).toBe('number')
   })
 
-  test('34. pos_usage remaining is non-negative', async () => {
+  test('34. pos_usage remaining is non-negative or null (unlimited)', async () => {
     const res = await apiGet(page, 'pos/catalog')
     expect(res.status).toBe(200)
-    expect(res.data.pos_usage.remaining).toBeGreaterThanOrEqual(0)
+    const remaining = res.data.pos_usage.remaining
+    // null means unlimited (super admin / Max tier), otherwise must be >= 0
+    if (remaining !== null) {
+      expect(remaining).toBeGreaterThanOrEqual(0)
+    }
   })
 
-  test('35. sale endpoint returns 402 with limit info when exhausted', async () => {
-    // This test verifies the 402 response structure (won't actually exhaust limit)
-    // Just verify the response format by checking a valid sale works (not 402)
+  test('35. pos_usage structure is consistent', async () => {
     const res = await apiGet(page, 'pos/catalog')
     expect(res.status).toBe(200)
     const usage = res.data.pos_usage
-    // If remaining > 0, sale should succeed (not 402)
-    if (usage.remaining > 0) {
-      expect(usage.remaining).toBeGreaterThan(0)
+    // used is always a number
+    expect(typeof usage.used).toBe('number')
+    // limit is null (unlimited) or a positive number
+    if (usage.limit !== null) {
+      expect(usage.limit).toBeGreaterThan(0)
+      expect(usage.used).toBeLessThanOrEqual(usage.limit)
     }
-    // Structure check: usage has expected shape
-    expect(usage.used).toBeLessThanOrEqual(usage.limit || Infinity)
   })
 })
 
