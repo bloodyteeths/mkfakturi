@@ -68,6 +68,29 @@ class ExpenseRequest extends FormRequest
             'currency_id' => [
                 'required',
             ],
+            'vat_rate' => [
+                'nullable',
+                'numeric',
+                'in:0,5,10,18',
+            ],
+            'vat_amount' => [
+                'nullable',
+                'integer',
+            ],
+            'tax_base' => [
+                'nullable',
+                'integer',
+            ],
+            'status' => [
+                'nullable',
+                'string',
+                'in:draft,approved,posted',
+            ],
+            'cost_center_id' => [
+                'nullable',
+                'integer',
+                'exists:cost_centers,id',
+            ],
             'attachment_receipt' => [
                 'nullable',
                 'file',
@@ -146,14 +169,29 @@ class ExpenseRequest extends FormRequest
         $current_currency = $this->currency_id;
         $exchange_rate = $company_currency != $current_currency ? $this->exchange_rate : 1;
 
+        $amount = $this->amount;
+        $vatRate = $this->vat_rate ?? 18;
+        $taxBase = $this->tax_base;
+        $vatAmount = $this->vat_amount;
+
+        // Auto-calculate VAT fields if not explicitly provided
+        if ($taxBase === null && $vatAmount === null && $amount) {
+            $taxBase = (int) round($amount / (1 + $vatRate / 100));
+            $vatAmount = $amount - $taxBase;
+        }
+
         return collect($this->validated())
-            ->except(['allow_duplicate']) // Remove non-model field
+            ->except(['allow_duplicate'])
             ->merge([
                 'creator_id' => $this->user()->id,
                 'company_id' => $this->header('company'),
                 'exchange_rate' => $exchange_rate,
-                'base_amount' => $this->amount * $exchange_rate,
+                'base_amount' => $amount * $exchange_rate,
                 'currency_id' => $current_currency,
+                'vat_rate' => $vatRate,
+                'vat_amount' => $vatAmount,
+                'tax_base' => $taxBase,
+                'status' => $this->status ?? 'draft',
             ])
             ->toArray();
     }

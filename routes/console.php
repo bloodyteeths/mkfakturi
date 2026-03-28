@@ -220,6 +220,14 @@ if (InstallUtils::isDbCreated()) {
         ->name('welcome-send-drip')
         ->withoutOverlapping();
 
+    // Auto-send collection reminders for overdue invoices
+    // Based on active auto_send templates per company
+    Schedule::command('collections:auto-send')
+        ->dailyAt('09:00')
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->withoutOverlapping();
+
     // Send deadline reminder notifications - runs daily at 09:00 (P8-02)
     // Reminds company owners and partners about upcoming deadlines
     // Also updates overdue/due_today statuses

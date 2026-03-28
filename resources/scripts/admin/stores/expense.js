@@ -249,6 +249,44 @@ export const useExpenseStore = (useWindow = false) => {
             })
         })
       },
+      cloneExpense(id) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/expenses/${id}/clone`)
+            .then((response) => {
+              const notificationStore = useNotificationStore()
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('expenses.cloned_message'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      approveExpense(id) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/expenses/${id}/approve`)
+            .then((response) => {
+              const notificationStore = useNotificationStore()
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('expenses.approved_message'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
       fetchPaymentModes(params) {
         return new Promise((resolve, reject) => {
           axios

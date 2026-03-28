@@ -45,6 +45,11 @@ class Expense extends Model implements HasMedia
         'creator_id',
         'ifrs_transaction_id',
         'cost_center_id',
+        'vat_rate',
+        'vat_amount',
+        'tax_base',
+        'status',
+        'expense_number',
     ];
 
     protected $appends = [
@@ -59,6 +64,8 @@ class Expense extends Model implements HasMedia
         return [
             'notes' => 'string',
             'exchange_rate' => 'float',
+            'vat_rate' => 'float',
+            'status' => 'string',
         ];
     }
 
@@ -232,6 +239,16 @@ class Expense extends Model implements HasMedia
         return $query->where('expenses.customer_id', $customer_id);
     }
 
+    public function scopeWhereSupplier($query, $supplierId)
+    {
+        return $query->where('expenses.supplier_id', $supplierId);
+    }
+
+    public function scopeWhereStatus($query, $status)
+    {
+        return $query->where('expenses.status', $status);
+    }
+
     public function scopeApplyFilters($query, array $filters)
     {
         $filters = collect($filters);
@@ -267,6 +284,14 @@ class Expense extends Model implements HasMedia
         if ($filters->get('project_id')) {
             $query->where('project_id', $filters->get('project_id'));
         }
+
+        if ($filters->get('supplier_id')) {
+            $query->whereSupplier($filters->get('supplier_id'));
+        }
+
+        if ($filters->get('status')) {
+            $query->whereStatus($filters->get('status'));
+        }
     }
 
     public function scopeWhereExpense($query, $expense_id)
@@ -277,10 +302,14 @@ class Expense extends Model implements HasMedia
     public function scopeWhereSearch($query, $search)
     {
         foreach (explode(' ', $search) as $term) {
-            $query->whereHas('category', function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%'.$term.'%');
-            })
-                ->orWhere('notes', 'LIKE', '%'.$term.'%');
+            $query->where(function ($q) use ($term) {
+                $q->whereHas('category', function ($query) use ($term) {
+                    $query->where('name', 'LIKE', '%'.$term.'%');
+                })
+                    ->orWhere('notes', 'LIKE', '%'.$term.'%')
+                    ->orWhere('invoice_number', 'LIKE', '%'.$term.'%')
+                    ->orWhere('expense_number', 'LIKE', '%'.$term.'%');
+            });
         }
     }
 
@@ -321,7 +350,24 @@ class Expense extends Model implements HasMedia
 
     public static function createExpense($request)
     {
-        $expense = self::create($request->getExpensePayload());
+        $companyId = $request->header('company');
+        $payload = $request->getExpensePayload();
+
+        // Auto-generate expense number
+        if (empty($payload['expense_number'])) {
+            $lastNumber = self::where('company_id', $companyId)
+                ->whereNotNull('expense_number')
+                ->orderByRaw("CAST(REPLACE(expense_number, 'EXP-', '') AS UNSIGNED) DESC")
+                ->value('expense_number');
+
+            $nextNum = 1;
+            if ($lastNumber) {
+                $nextNum = (int) str_replace('EXP-', '', $lastNumber) + 1;
+            }
+            $payload['expense_number'] = 'EXP-'.str_pad($nextNum, 6, '0', STR_PAD_LEFT);
+        }
+
+        $expense = self::create($payload);
 
         $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
 

@@ -144,6 +144,54 @@
         <p class="sub-heading-text">ИЗВЕШТАЈ ЗА РАСХОДИ</p>
         <p class="form-label">За период: {{ $from_date }} - {{ $to_date }}</p>
 
+        @if(isset($expenses))
+        {{-- Detailed line-item report --}}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="text-align: center; width: 4%;">Р.б.</th>
+                    <th style="text-align: center; width: 10%;">Датум</th>
+                    <th style="text-align: left; width: 18%;">Категорија</th>
+                    <th style="text-align: left; width: 16%;">Добавувач</th>
+                    <th style="text-align: left; width: 10%;">Бр. факт.</th>
+                    <th style="text-align: right; width: 10%;">Основица</th>
+                    <th style="text-align: center; width: 5%;">ДДВ%</th>
+                    <th style="text-align: right; width: 10%;">ДДВ</th>
+                    <th style="text-align: right; width: 12%;">Износ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $totalBase = 0; $totalVat = 0; $totalAmount = 0; $i = 0; @endphp
+                @foreach ($expenses as $expense)
+                @php
+                    $i++;
+                    $totalBase += $expense->tax_base ?? 0;
+                    $totalVat += $expense->vat_amount ?? 0;
+                    $totalAmount += $expense->amount;
+                @endphp
+                <tr class="data-row">
+                    <td class="num-col">{{ $i }}</td>
+                    <td style="text-align: center;">{{ \Carbon\Carbon::parse($expense->expense_date)->format('d.m.Y') }}</td>
+                    <td>{{ $expense->category->name ?? '-' }}</td>
+                    <td>{{ $expense->supplier->name ?? '-' }}</td>
+                    <td>{{ $expense->invoice_number ?? '-' }}</td>
+                    <td class="amount-col">{!! format_money_pdf($expense->tax_base ?? 0, $currency) !!}</td>
+                    <td style="text-align: center;">{{ $expense->vat_rate ?? 18 }}%</td>
+                    <td class="amount-col">{!! format_money_pdf($expense->vat_amount ?? 0, $currency) !!}</td>
+                    <td class="amount-col">{!! format_money_pdf($expense->amount, $currency) !!}</td>
+                </tr>
+                @endforeach
+                <tr class="total-row">
+                    <td colspan="5">ВКУПНО РАСХОДИ</td>
+                    <td class="amount-col">{!! format_money_pdf($totalBase, $currency) !!}</td>
+                    <td></td>
+                    <td class="amount-col">{!! format_money_pdf($totalVat, $currency) !!}</td>
+                    <td class="amount-col">{!! format_money_pdf($totalAmount, $currency) !!}</td>
+                </tr>
+            </tbody>
+        </table>
+        @else
+        {{-- Legacy category-summary report (backwards compatible) --}}
         <table class="data-table">
             <thead>
                 <tr>
@@ -166,6 +214,7 @@
                 </tr>
             </tbody>
         </table>
+        @endif
 
         <!-- Signatures -->
         <table class="signature-section">

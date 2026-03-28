@@ -4,6 +4,27 @@
       <template #actions>
         <BaseButton
           variant="primary-outline"
+          @click="exportCsv"
+          :loading="isExporting"
+          v-if="activeTab === 'overdue'"
+        >
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+          </template>
+          {{ t('export_csv') }}
+        </BaseButton>
+        <BaseButton
+          variant="primary-outline"
+          @click="activeTab = 'ios'"
+          v-if="activeTab !== 'ios'"
+        >
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="DocumentDuplicateIcon" />
+          </template>
+          {{ t('ios_title') }}
+        </BaseButton>
+        <BaseButton
+          variant="primary-outline"
           @click="activeTab = 'templates'"
           v-if="activeTab !== 'templates'"
         >
@@ -35,8 +56,8 @@
       </template>
     </BasePageHeader>
 
-    <!-- Summary Cards -->
-    <div v-if="summary" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    <!-- Summary Cards (overdue tab only) -->
+    <div v-if="summary && activeTab === 'overdue'" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
       <div class="bg-white rounded-lg shadow p-4">
         <p class="text-xs text-gray-500 uppercase">{{ t('total_overdue') }}</p>
         <p class="text-2xl font-bold text-red-600">{{ formatMoney(summary.total_overdue_amount) }}</p>
@@ -64,7 +85,7 @@
     <div v-if="activeTab === 'overdue'">
       <!-- Filters -->
       <div class="p-4 bg-white rounded-lg shadow mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
           <BaseInputGroup :label="t('filter_level')">
             <BaseMultiselect
               v-model="filters.escalation_level"
@@ -82,6 +103,12 @@
               type="text"
               @input="debouncedLoadOverdue"
             />
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('due_date_from')">
+            <BaseInput v-model="filters.due_date_from" type="date" />
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('due_date_to')">
+            <BaseInput v-model="filters.due_date_to" type="date" />
           </BaseInputGroup>
           <div class="flex items-end">
             <BaseButton variant="primary-outline" @click="loadOverdue">
@@ -111,6 +138,17 @@
         </div>
       </div>
 
+      <!-- Bulk Action Bar -->
+      <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-3 bg-primary-50 border border-primary-200 rounded-lg mb-4">
+        <span class="text-sm font-medium text-primary-700">{{ selectedIds.length }} {{ t('invoice_count').toLowerCase() }}</span>
+        <BaseButton size="sm" variant="primary" :loading="isBulkSending" @click="bulkSendReminders">
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="PaperAirplaneIcon" />
+          </template>
+          {{ t('bulk_send') }}
+        </BaseButton>
+      </div>
+
       <!-- Loading -->
       <div v-if="isLoading" class="bg-white rounded-lg shadow overflow-hidden">
         <div class="p-6 space-y-4">
@@ -137,56 +175,43 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('customer') }}</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('invoice_number') }}</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('due_date') }}</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('amount_due') }}</th>
+                <th class="px-4 py-3 w-8"><input type="checkbox" v-model="selectAll" @change="toggleSelectAll" class="rounded border-gray-300" /></th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 select-none" @click="toggleSort('customer_name')">{{ t('customer') }}<span v-if="sortField === 'customer_name'" class="ml-1">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 select-none" @click="toggleSort('invoice_number')">{{ t('invoice_number') }}<span v-if="sortField === 'invoice_number'" class="ml-1">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 select-none" @click="toggleSort('due_date')">{{ t('due_date') }}<span v-if="sortField === 'due_date'" class="ml-1">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 select-none" @click="toggleSort('due_amount')">{{ t('amount_due') }}<span v-if="sortField === 'due_amount'" class="ml-1">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('interest') }}</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('total_with_interest') }}</th>
-                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('days_overdue') }}</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700 select-none" @click="toggleSort('days_overdue')">{{ t('days_overdue') }}<span v-if="sortField === 'days_overdue'" class="ml-1">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('escalation') }}</th>
                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ t('reminders_sent') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('last_reminder') }}</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('general.actions') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-              <tr v-for="inv in overdueInvoices" :key="inv.id" class="hover:bg-gray-50">
+              <tr v-for="inv in sortedInvoices" :key="inv.id" class="hover:bg-gray-50">
+                <td class="px-4 py-3"><input type="checkbox" :checked="selectedIds.includes(inv.id)" @change="toggleSelect(inv.id)" :disabled="!inv.can_send" class="rounded border-gray-300" /></td>
                 <td class="px-4 py-3 text-sm text-gray-900">{{ inv.customer_name }}</td>
-                <td class="px-4 py-3 text-sm text-gray-600">{{ inv.invoice_number }}</td>
+                <td class="px-4 py-3 text-sm">
+                  <router-link :to="`/admin/invoices/${inv.id}/view`" class="text-primary-500 hover:text-primary-700 font-medium">{{ inv.invoice_number }}</router-link>
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(inv.due_date) }}</td>
                 <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">{{ formatMoney(inv.due_amount) }}</td>
                 <td class="px-4 py-3 text-sm text-right text-red-600">{{ formatMoney(inv.interest) }}</td>
                 <td class="px-4 py-3 text-sm text-right font-bold text-red-700">{{ formatMoney(inv.total_with_interest) }}</td>
                 <td class="px-4 py-3 text-center">
-                  <span :class="daysOverdueClass(inv.days_overdue)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">
-                    {{ inv.days_overdue }}
-                  </span>
+                  <span :class="daysOverdueClass(inv.days_overdue)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">{{ inv.days_overdue }}</span>
                 </td>
                 <td class="px-4 py-3 text-center">
-                  <span :class="levelBadgeClass(inv.escalation_level)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">
-                    {{ t(inv.escalation_level) }}
-                  </span>
+                  <span :class="levelBadgeClass(inv.escalation_level)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">{{ t(inv.escalation_level) }}</span>
                 </td>
                 <td class="px-4 py-3 text-center text-sm text-gray-500">{{ inv.reminder_count || 0 }}</td>
+                <td class="px-4 py-3 text-sm text-gray-500">{{ inv.last_reminder_at ? formatDate(inv.last_reminder_at) : '-' }}</td>
                 <td class="px-4 py-3 text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-1">
-                    <BaseButton
-                      size="sm"
-                      variant="primary"
-                      @click="openSendDialog(inv)"
-                      :disabled="!inv.can_send"
-                      :title="inv.can_send ? '' : t('cooldown_active')"
-                    >
-                      {{ t('send_reminder') }}
-                    </BaseButton>
-                    <BaseButton
-                      size="sm"
-                      variant="primary-outline"
-                      @click="downloadOpomena(inv.id)"
-                      :title="t('download_opomena')"
-                    >
-                      {{ t('opomena') }}
-                    </BaseButton>
+                    <BaseButton size="sm" variant="primary" @click="openSendDialog(inv)" :disabled="!inv.can_send" :title="inv.can_send ? '' : t('cooldown_active')">{{ t('send_reminder') }}</BaseButton>
+                    <BaseButton size="sm" variant="primary-outline" @click="downloadOpomena(inv.id)" :loading="downloadingOpomena === inv.id" :title="t('download_opomena')">{{ t('opomena') }}</BaseButton>
                   </div>
                   <p v-if="!inv.can_send" class="text-xs text-amber-600 mt-1">{{ t('cooldown_active') }}</p>
                 </td>
@@ -207,6 +232,11 @@
       </div>
     </div>
 
+    <!-- IOS Tab -->
+    <div v-if="activeTab === 'ios'">
+      <CollectionIos ref="iosRef" />
+    </div>
+
     <!-- Templates Tab -->
     <div v-if="activeTab === 'templates'">
       <CollectionTemplates ref="templatesRef" />
@@ -224,7 +254,6 @@
       </template>
       <div v-if="selectedInvoice" class="p-6 space-y-5">
         <p class="text-sm text-gray-600">{{ t('confirm_send') }}</p>
-
         <div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
           <div class="grid grid-cols-2 divide-x divide-gray-200">
             <div class="p-4">
@@ -251,27 +280,18 @@
             </div>
           </div>
         </div>
-
         <div class="grid grid-cols-2 gap-4">
           <BaseInputGroup label="Email">
             <BaseInput v-model="sendEmail" type="email" placeholder="email@example.com" />
           </BaseInputGroup>
           <BaseInputGroup :label="t('escalation')">
-            <BaseMultiselect
-              v-model="sendLevel"
-              :options="sendLevelOptions"
-              label="label"
-              value-prop="value"
-              open-direction="top"
-            />
+            <BaseMultiselect v-model="sendLevel" :options="sendLevelOptions" label="label" value-prop="value" open-direction="top" />
           </BaseInputGroup>
         </div>
-
         <label class="flex items-center gap-2">
           <input type="checkbox" v-model="attachOpomena" class="rounded border-gray-300 text-primary-600" />
           <span class="text-sm text-gray-700">{{ t('attach_opomena') }}</span>
         </label>
-
         <div v-if="!sendEmail" class="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
           <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-red-500 flex-shrink-0" />
           <p class="text-sm text-red-700">{{ t('error_sending') }}: Email is required</p>
@@ -300,6 +320,7 @@ import { useModalStore } from '@/scripts/stores/modal'
 import collectionMessages from '@/scripts/admin/i18n/collections.js'
 import CollectionTemplates from './Templates.vue'
 import CollectionHistory from './History.vue'
+import CollectionIos from './Ios.vue'
 
 const { locale } = useI18n()
 const notificationStore = useNotificationStore()
@@ -318,6 +339,9 @@ const fmtLocale = computed(() => localeMap[locale.value] || 'mk-MK')
 const activeTab = ref('overdue')
 const isLoading = ref(false)
 const isSending = ref(false)
+const isExporting = ref(false)
+const isBulkSending = ref(false)
+const downloadingOpomena = ref(null)
 const overdueInvoices = ref([])
 const summary = ref(null)
 const aging = ref(null)
@@ -327,10 +351,16 @@ const selectedInvoice = ref(null)
 const sendLevel = ref('friendly')
 const sendEmail = ref('')
 const attachOpomena = ref(true)
+const selectedIds = ref([])
+const selectAll = ref(false)
+const sortField = ref('days_overdue')
+const sortOrder = ref('desc')
 
 const filters = reactive({
   escalation_level: null,
   search: '',
+  due_date_from: '',
+  due_date_to: '',
   page: 1,
 })
 
@@ -349,7 +379,43 @@ const sendLevelOptions = computed(() => [
   { value: 'legal', label: t('level_legal') },
 ])
 
-// Debounce search
+const sortedInvoices = computed(() => {
+  const arr = [...overdueInvoices.value]
+  arr.sort((a, b) => {
+    let va = a[sortField.value]
+    let vb = b[sortField.value]
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = (vb || '').toLowerCase() }
+    if (va < vb) return sortOrder.value === 'asc' ? -1 : 1
+    if (va > vb) return sortOrder.value === 'asc' ? 1 : -1
+    return 0
+  })
+  return arr
+})
+
+function toggleSort(field) {
+  if (sortField.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortOrder.value = 'desc'
+  }
+}
+
+function toggleSelectAll() {
+  if (selectAll.value) {
+    selectedIds.value = sortedInvoices.value.filter(i => i.can_send).map(i => i.id)
+  } else {
+    selectedIds.value = []
+  }
+}
+
+function toggleSelect(id) {
+  const idx = selectedIds.value.indexOf(id)
+  if (idx >= 0) selectedIds.value.splice(idx, 1)
+  else selectedIds.value.push(id)
+  selectAll.value = selectedIds.value.length === sortedInvoices.value.filter(i => i.can_send).length
+}
+
 let searchTimeout = null
 function debouncedLoadOverdue() {
   clearTimeout(searchTimeout)
@@ -360,8 +426,8 @@ function debouncedLoadOverdue() {
 }
 
 function formatMoney(cents) {
-  if (cents === null || cents === undefined) return '0.00'
-  return (cents / 100).toLocaleString(fmtLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  if (cents === null || cents === undefined) return '0 ден.'
+  return (cents / 100).toLocaleString(fmtLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ден.'
 }
 
 function formatDate(d) {
@@ -392,18 +458,19 @@ async function loadOverdue() {
     const params = {}
     if (filters.escalation_level) params.escalation_level = filters.escalation_level
     if (filters.search) params.search = filters.search
+    if (filters.due_date_from) params.due_date_from = filters.due_date_from
+    if (filters.due_date_to) params.due_date_to = filters.due_date_to
     params.page = filters.page
     const { data } = await window.axios.get('/collections/overdue', { params })
     overdueInvoices.value = data.data || []
     summary.value = data.summary || null
     aging.value = data.aging || null
     pagination.value = data.pagination || null
+    selectedIds.value = []
+    selectAll.value = false
   } catch (e) {
     console.error('Failed to load overdue invoices', e)
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('error_loading') || 'Failed to load overdue invoices',
-    })
+    notificationStore.showNotification({ type: 'error', message: t('error_loading') || 'Failed to load overdue invoices' })
   } finally {
     isLoading.value = false
   }
@@ -438,10 +505,7 @@ async function confirmSend() {
       attach_opomena: attachOpomena.value,
     })
     closeSendDialog()
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('reminder_sent_success') || 'Reminder sent successfully.',
-    })
+    notificationStore.showNotification({ type: 'success', message: t('reminder_sent_success') || 'Reminder sent successfully.' })
     loadOverdue()
   } catch (e) {
     console.error('Failed to send reminder', e)
@@ -452,11 +516,35 @@ async function confirmSend() {
   }
 }
 
+async function bulkSendReminders() {
+  if (selectedIds.value.length === 0) return
+  if (!confirm(t('bulk_send') + ` (${selectedIds.value.length})?`)) return
+  isBulkSending.value = true
+  let sent = 0, failed = 0
+  for (const id of selectedIds.value) {
+    const inv = overdueInvoices.value.find(i => i.id === id)
+    if (!inv || !inv.customer_email) { failed++; continue }
+    try {
+      await window.axios.post('/collections/send-reminder', {
+        invoice_id: id, level: inv.escalation_level, email: inv.customer_email, attach_opomena: true,
+      })
+      sent++
+    } catch (e) { failed++ }
+  }
+  isBulkSending.value = false
+  selectedIds.value = []
+  selectAll.value = false
+  notificationStore.showNotification({
+    type: sent > 0 ? 'success' : 'error',
+    message: `${t('bulk_send')}: ${sent} ✓` + (failed > 0 ? `, ${failed} ✗` : ''),
+  })
+  loadOverdue()
+}
+
 async function downloadOpomena(invoiceId) {
+  downloadingOpomena.value = invoiceId
   try {
-    const response = await window.axios.get(`/collections/opomena/${invoiceId}`, {
-      responseType: 'blob',
-    })
+    const response = await window.axios.get(`/collections/opomena/${invoiceId}`, { responseType: 'blob' })
     if (response.data.type && !response.data.type.includes('pdf')) {
       const text = await response.data.text()
       const err = JSON.parse(text)
@@ -473,13 +561,42 @@ async function downloadOpomena(invoiceId) {
     console.error('Failed to download opomena', e)
     let msg = t('error_loading')
     if (e.response?.data instanceof Blob) {
-      try {
-        const text = await e.response.data.text()
-        const err = JSON.parse(text)
-        msg = err.message || msg
-      } catch (_) {}
+      try { const text = await e.response.data.text(); const err = JSON.parse(text); msg = err.message || msg } catch (_) {}
     }
     notificationStore.showNotification({ type: 'error', message: msg })
+  } finally {
+    downloadingOpomena.value = null
+  }
+}
+
+async function exportCsv() {
+  isExporting.value = true
+  try {
+    const rows = sortedInvoices.value
+    const headers = [t('customer'), t('invoice_number'), t('due_date'), t('amount_due'), t('interest'), t('total_with_interest'), t('days_overdue'), t('escalation'), t('reminders_sent')]
+    const csvRows = [headers.join(',')]
+    for (const inv of rows) {
+      csvRows.push([
+        `"${(inv.customer_name || '').replace(/"/g, '""')}"`,
+        `"${inv.invoice_number}"`,
+        inv.due_date,
+        (inv.due_amount / 100).toFixed(2),
+        (inv.interest / 100).toFixed(2),
+        (inv.total_with_interest / 100).toFixed(2),
+        inv.days_overdue,
+        inv.escalation_level,
+        inv.reminder_count || 0,
+      ].join(','))
+    }
+    const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `collections-overdue-${new Date().toISOString().slice(0,10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  } finally {
+    isExporting.value = false
   }
 }
 

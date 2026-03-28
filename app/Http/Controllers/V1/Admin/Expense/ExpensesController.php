@@ -23,7 +23,7 @@ class ExpensesController extends Controller
 
         $limit = $request->has('limit') ? $request->limit : 10;
 
-        $expenses = Expense::with(['category', 'creator', 'fields', 'customer:id,name'])
+        $expenses = Expense::with(['category', 'creator', 'fields', 'customer:id,name', 'supplier:id,name'])
             ->whereCompany()
             ->applyFilters($request->all())
             ->latest()
@@ -121,7 +121,7 @@ class ExpensesController extends Controller
     {
         $this->authorize('view', $expense);
 
-        $expense->load(['currency', 'category', 'customer', 'company', 'creator', 'paymentMethod', 'fields.customField']);
+        $expense->load(['currency', 'category', 'customer', 'company', 'creator', 'paymentMethod', 'supplier', 'fields.customField']);
 
         return new ExpenseResource($expense);
     }
@@ -180,5 +180,39 @@ class ExpensesController extends Controller
         return response()->json([
             'success' => true,
         ]);
+    }
+
+    public function clone(Expense $expense)
+    {
+        $this->authorize('create', Expense::class);
+
+        $clone = $expense->replicate(['id', 'expense_number', 'created_at', 'updated_at', 'ifrs_transaction_id']);
+        $clone->expense_date = now()->format('Y-m-d');
+        $clone->status = 'draft';
+        $clone->save();
+
+        // Auto-generate expense number
+        $companyId = $clone->company_id;
+        $lastNumber = Expense::where('company_id', $companyId)
+            ->whereNotNull('expense_number')
+            ->orderByRaw("CAST(REPLACE(expense_number, 'EXP-', '') AS UNSIGNED) DESC")
+            ->value('expense_number');
+
+        $nextNum = 1;
+        if ($lastNumber) {
+            $nextNum = (int) str_replace('EXP-', '', $lastNumber) + 1;
+        }
+        $clone->update(['expense_number' => 'EXP-'.str_pad($nextNum, 6, '0', STR_PAD_LEFT)]);
+
+        return new ExpenseResource($clone);
+    }
+
+    public function approve(Expense $expense)
+    {
+        $this->authorize('update', $expense);
+
+        $expense->update(['status' => 'approved']);
+
+        return new ExpenseResource($expense);
     }
 }

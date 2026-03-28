@@ -137,7 +137,7 @@
               class="focus:border focus:border-solid focus:border-primary-500"
               :invalid="v$.currentExpense.amount.$error"
               :currency="expenseStore.currentExpense.selectedCurrency"
-              @input="v$.currentExpense.amount.$touch()"
+              @input="onAmountChange()"
             />
           </BaseInputGroup>
           <BaseInputGroup
@@ -175,6 +175,75 @@
             :is-edit="isEdit"
             :customer-currency="expenseStore.currentExpense.currency_id"
           />
+
+          <!-- Supplier (Добавувач) -->
+          <BaseInputGroup
+            :content-loading="isFetchingInitialData"
+            :label="$t('expenses.supplier')"
+          >
+            <BaseSupplierSelectInput
+              v-model="expenseStore.currentExpense.supplier_id"
+              :content-loading="isFetchingInitialData"
+              :placeholder="$t('expenses.select_supplier')"
+            />
+          </BaseInputGroup>
+
+          <!-- Invoice Number -->
+          <BaseInputGroup
+            :content-loading="isFetchingInitialData"
+            :label="$t('expenses.invoice_number')"
+          >
+            <BaseInput
+              v-model="expenseStore.currentExpense.invoice_number"
+              :content-loading="isFetchingInitialData"
+              :placeholder="$t('expenses.invoice_number_placeholder')"
+            />
+          </BaseInputGroup>
+
+          <!-- VAT Rate -->
+          <BaseInputGroup
+            :content-loading="isFetchingInitialData"
+            :label="$t('expenses.vat_rate')"
+          >
+            <BaseMultiselect
+              v-model="expenseStore.currentExpense.vat_rate"
+              :options="[
+                { label: '18% (стандардна)', value: 18 },
+                { label: '10% (повластена)', value: 10 },
+                { label: '5% (повластена)', value: 5 },
+                { label: '0% (ослободено)', value: 0 },
+              ]"
+              value-prop="value"
+              label="label"
+              :can-deselect="false"
+              :placeholder="$t('expenses.select_vat_rate')"
+              @update:modelValue="onVatRateChange"
+            />
+          </BaseInputGroup>
+
+          <!-- VAT Amount (auto-calculated) -->
+          <BaseInputGroup
+            :content-loading="isFetchingInitialData"
+            :label="$t('expenses.vat_amount')"
+          >
+            <BaseMoney
+              :modelValue="expenseStore.currentExpense.vat_amount / 100"
+              :currency="expenseStore.currentExpense.selectedCurrency"
+              disabled
+            />
+          </BaseInputGroup>
+
+          <!-- Tax Base (auto-calculated) -->
+          <BaseInputGroup
+            :content-loading="isFetchingInitialData"
+            :label="$t('expenses.tax_base')"
+          >
+            <BaseMoney
+              :modelValue="expenseStore.currentExpense.tax_base / 100"
+              :currency="expenseStore.currentExpense.selectedCurrency"
+              disabled
+            />
+          </BaseInputGroup>
 
           <BaseInputGroup
             :content-loading="isFetchingInitialData"
@@ -220,6 +289,21 @@
                 </BaseSelectAction>
               </template> -->
             </BaseMultiselect>
+          </BaseInputGroup>
+
+          <!-- Cost Center -->
+          <BaseInputGroup
+            :content-loading="isFetchingInitialData"
+            :label="$t('expenses.cost_center')"
+          >
+            <BaseMultiselect
+              v-model="expenseStore.currentExpense.cost_center_id"
+              :options="costCenters"
+              :searchable="true"
+              label="name"
+              value-prop="id"
+              :placeholder="$t('expenses.select_cost_center')"
+            />
           </BaseInputGroup>
 
           <BaseInputGroup
@@ -322,6 +406,7 @@ import ExpenseCustomFields from '@/scripts/admin/components/custom-fields/Create
 import CategoryModal from '@/scripts/admin/components/modal-components/CategoryModal.vue'
 import ExpenseDuplicateWarningModal from '@/scripts/admin/components/modal-components/ExpenseDuplicateWarningModal.vue'
 import ExchangeRateConverter from '@/scripts/admin/components/estimate-invoice-common/ExchangeRateConverter.vue'
+import BaseSupplierSelectInput from '@/scripts/components/base/BaseSupplierSelectInput.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 const customerStore = useCustomerStore()
@@ -339,6 +424,7 @@ let isSaving = ref(false)
 let isFetchingInitialData = ref(false)
 const expenseValidationScope = 'newExpense'
 const isAttachmentReceiptRemoved = ref(false)
+const costCenters = ref([])
 
 // Duplicate warning state
 const showDuplicateWarning = ref(false)
@@ -466,6 +552,30 @@ async function searchCustomer(search) {
   return res.data.data
 }
 
+function onVatRateChange() {
+  const amount = expenseStore.currentExpense.amount
+  const vatRate = expenseStore.currentExpense.vat_rate || 0
+  if (amount > 0) {
+    const taxBase = Math.round(amount / (1 + vatRate / 100))
+    expenseStore.currentExpense.tax_base = taxBase
+    expenseStore.currentExpense.vat_amount = amount - taxBase
+  }
+}
+
+function onAmountChange() {
+  v$.value.currentExpense.amount.$touch()
+  onVatRateChange()
+}
+
+async function fetchCostCenters() {
+  try {
+    const response = await window.axios.get('/cost-centers', { params: { limit: 'all' } })
+    costCenters.value = response.data?.data || []
+  } catch {
+    costCenters.value = []
+  }
+}
+
 async function loadData() {
   if (!isEdit.value) {
     expenseStore.currentExpense.currency_id =
@@ -476,6 +586,7 @@ async function loadData() {
 
   isFetchingInitialData.value = true
   await expenseStore.fetchPaymentModes({ limit: 'all' })
+  fetchCostCenters()
 
   if (isEdit.value) {
     const expenseData = await expenseStore.fetchExpense(route.params.id)

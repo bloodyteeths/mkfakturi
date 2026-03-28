@@ -24,6 +24,14 @@
           </template>
         </BaseButton>
 
+        <BaseInput
+          v-show="expenseStore.totalExpenses"
+          v-model="filters.search"
+          :placeholder="$t('general.search')"
+          class="w-48"
+          type="search"
+        />
+
         <ExportButton
           v-show="expenseStore.totalExpenses"
           type="expenses"
@@ -89,6 +97,29 @@
           calendar-button-icon="calendar"
         />
       </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('expenses.supplier')">
+        <BaseSupplierSelectInput
+          v-model="filters.supplier_id"
+          :placeholder="$t('expenses.select_supplier')"
+          value-prop="id"
+          label="name"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('general.status')">
+        <BaseMultiselect
+          v-model="filters.status"
+          :options="[
+            { label: $t('general.draft'), value: 'draft' },
+            { label: $t('general.approved'), value: 'approved' },
+            { label: $t('general.posted'), value: 'posted' },
+          ]"
+          value-prop="value"
+          label="label"
+          :placeholder="$t('general.select_status')"
+        />
+      </BaseInputGroup>
     </BaseFilterWrapper>
 
     <!-- Empty Table Placeholder -->
@@ -139,6 +170,14 @@
           </template>
 
           <BaseDropdownItem
+            v-if="userStore.hasAbilities(abilities.EDIT_EXPENSE)"
+            @click="approveMultipleExpenses"
+          >
+            <BaseIcon name="CheckCircleIcon" class="h-5 mr-3 text-gray-600" />
+            {{ $t('general.approve') }}
+          </BaseDropdownItem>
+
+          <BaseDropdownItem
             v-if="userStore.hasAbilities(abilities.DELETE_EXPENSE)"
             @click="removeMultipleExpenses"
           >
@@ -175,9 +214,13 @@
           </div>
         </template>
 
+        <template #cell-expense_number="{ row }">
+          {{ row.data.expense_number || '-' }}
+        </template>
+
         <template #cell-name="{ row }">
           <router-link
-            :to="{ path: `expenses/${row.data.id}/edit` }"
+            :to="{ path: `expenses/${row.data.id}/view` }"
             class="font-medium text-primary-500"
           >
             {{ row.data.expense_category.name }}
@@ -195,18 +238,31 @@
           {{ row.data.formatted_expense_date }}
         </template>
 
-        <template #cell-user_name="{ row }">
+        <template #cell-supplier_name="{ row }">
           <BaseText
-            :text="row.data.customer ? row.data.customer.name : '-'"
+            :text="row.data.supplier ? row.data.supplier.name : '-'"
           />
         </template>
 
-        <template #cell-notes="{ row }">
-          <div class="notes">
-            <div class="truncate note w-60">
-              {{ row.data.notes ? row.data.notes : '-' }}
-            </div>
-          </div>
+        <template #cell-invoice_number="{ row }">
+          {{ row.data.invoice_number || '-' }}
+        </template>
+
+        <template #cell-expense_status="{ row }">
+          <span
+            :class="[
+              'px-2 py-1 text-xs font-medium rounded-full',
+              row.data.status === 'posted' ? 'bg-green-100 text-green-800' :
+              row.data.status === 'approved' ? 'bg-blue-100 text-blue-800' :
+              'bg-gray-100 text-gray-800'
+            ]"
+          >
+            {{
+              row.data.status === 'posted' ? $t('general.posted') :
+              row.data.status === 'approved' ? $t('general.approved') :
+              $t('general.draft')
+            }}
+          </span>
         </template>
 
         <template v-if="hasAbilities()" #cell-actions="{ row }">
@@ -237,6 +293,7 @@ import abilities from '@/scripts/admin/stub/abilities'
 import UFOIcon from '@/scripts/components/icons/empty/UFOIcon.vue'
 import ExpenseDropdown from '@/scripts/admin/components/dropdowns/ExpenseIndexDropdown.vue'
 import ExportButton from '@/scripts/admin/components/ExportButton.vue'
+import BaseSupplierSelectInput from '@/scripts/components/base/BaseSupplierSelectInput.vue'
 
 const companyStore = useCompanyStore()
 const expenseStore = useExpenseStore()
@@ -254,6 +311,9 @@ const filters = reactive({
   to_date: '',
   customer_id: '',
   project_id: route.query.project_id || '',
+  supplier_id: '',
+  status: '',
+  search: '',
 })
 
 const { t } = useI18n()
@@ -287,6 +347,12 @@ const expenseColumns = computed(() => {
       sortable: false,
     },
     {
+      key: 'expense_number',
+      label: t('expenses.expense_number'),
+      thClass: 'extra',
+      tdClass: 'font-medium text-gray-500',
+    },
+    {
       key: 'expense_date',
       label: t('expenses.date'),
       thClass: 'extra',
@@ -298,8 +364,24 @@ const expenseColumns = computed(() => {
       thClass: 'extra',
       tdClass: 'cursor-pointer font-medium text-primary-500',
     },
-    { key: 'user_name', label: t('expenses.customer') },
-    { key: 'notes', label: t('expenses.note') },
+    {
+      key: 'supplier_name',
+      label: t('expenses.supplier'),
+      thClass: 'extra',
+      tdClass: 'font-medium text-gray-900',
+    },
+    {
+      key: 'invoice_number',
+      label: t('expenses.invoice_number'),
+      thClass: 'extra',
+      tdClass: 'font-medium text-gray-500',
+    },
+    {
+      key: 'expense_status',
+      label: t('general.status'),
+      thClass: 'extra',
+      tdClass: 'font-medium',
+    },
     { key: 'amount', label: t('expenses.amount') },
     {
       key: 'actions',
@@ -375,6 +457,9 @@ function clearFilter() {
   filters.to_date = ''
   filters.customer_id = ''
   filters.project_id = ''
+  filters.supplier_id = ''
+  filters.status = ''
+  filters.search = ''
 }
 
 function toggleFilter() {
@@ -390,6 +475,13 @@ function hasAbilities() {
     abilities.DELETE_EXPENSE,
     abilities.EDIT_EXPENSE,
   ])
+}
+
+async function approveMultipleExpenses() {
+  for (const id of expenseStore.selectedExpenses) {
+    await expenseStore.approveExpense(id)
+  }
+  refreshTable()
 }
 
 function removeMultipleExpenses() {

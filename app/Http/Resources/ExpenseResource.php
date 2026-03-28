@@ -32,6 +32,14 @@ class ExpenseResource extends JsonResource
             'base_amount' => $this->base_amount,
             'payment_method_id' => $this->payment_method_id,
             'project_id' => $this->project_id,
+            'supplier_id' => $this->supplier_id,
+            'invoice_number' => $this->invoice_number,
+            'vat_rate' => $this->vat_rate,
+            'vat_amount' => $this->vat_amount,
+            'tax_base' => $this->tax_base,
+            'status' => $this->status,
+            'expense_number' => $this->expense_number,
+            'cost_center_id' => $this->cost_center_id,
             'customer' => $this->whenLoaded('customer', function () {
                 return new CustomerResource($this->customer);
             }),
@@ -52,6 +60,12 @@ class ExpenseResource extends JsonResource
             }),
             'payment_method' => $this->whenLoaded('paymentMethod', function () {
                 return new PaymentMethodResource($this->paymentMethod);
+            }),
+            'supplier' => $this->whenLoaded('supplier', function () {
+                return [
+                    'id' => $this->supplier->id,
+                    'name' => $this->supplier->name,
+                ];
             }),
         ];
     }
