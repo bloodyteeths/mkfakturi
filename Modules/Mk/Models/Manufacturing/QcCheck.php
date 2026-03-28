@@ -18,6 +18,10 @@ class QcCheck extends Model
     const RESULT_FAIL = 'fail';
     const RESULT_CONDITIONAL = 'conditional';
 
+    const DISPOSITION_NONE = 'none';
+    const DISPOSITION_REWORK = 'rework';
+    const DISPOSITION_SCRAP = 'scrap';
+
     protected $fillable = [
         'production_order_id',
         'company_id',
@@ -30,6 +34,9 @@ class QcCheck extends Model
         'notes',
         'checklist',
         'defects',
+        'disposition',
+        'rework_order_id',
+        'scrap_quantity',
     ];
 
     protected function casts(): array
@@ -57,6 +64,11 @@ class QcCheck extends Model
     public function inspector(): BelongsTo
     {
         return $this->belongsTo(User::class, 'inspector_id');
+    }
+
+    public function reworkOrder(): BelongsTo
+    {
+        return $this->belongsTo(\Modules\Mk\Models\Manufacturing\ProductionOrder::class, 'rework_order_id');
     }
 
     public function isPassed(): bool

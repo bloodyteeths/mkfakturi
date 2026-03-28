@@ -340,9 +340,13 @@ class ProductionReportController extends Controller
 
         if (empty($bySupplier)) {
             return response()->json([
-                'success' => false,
-                'message' => 'No items with assigned suppliers. Set preferred suppliers on items first.',
-            ], 422);
+                'success' => true,
+                'data' => [
+                    'count' => 0,
+                    'purchase_orders' => [],
+                    'message' => 'No items with assigned suppliers. Set preferred suppliers on items first.',
+                ],
+            ]);
         }
 
         $createdPos = [];
@@ -901,6 +905,120 @@ class ProductionReportController extends Controller
     {
         $locale = CompanySetting::getSetting('language', $companyId) ?: 'mk';
         App::setLocale($locale);
+    }
+
+    /**
+     * QC Metrics — aggregated quality data for the dashboard.
+     */
+    public function qcMetrics(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $now = Carbon::now();
+
+        $from = $request->query('from', $now->copy()->subMonths(6)->startOfMonth()->toDateString());
+        $to = $request->query('to', $now->toDateString());
+
+        $checks = \Modules\Mk\Models\Manufacturing\QcCheck::where('company_id', $companyId)
+            ->whereBetween('check_date', [$from, $to])
+            ->get();
+
+        // Overall metrics
+        $totalInspected = (float) $checks->sum('quantity_inspected');
+        $totalPassed = (float) $checks->sum('quantity_passed');
+        $totalRejected = (float) $checks->sum('quantity_rejected');
+        $passRate = $totalInspected > 0 ? round(($totalPassed / $totalInspected) * 100, 1) : 100;
+        $rejectRate = $totalInspected > 0 ? round(($totalRejected / $totalInspected) * 100, 1) : 0;
+
+        $resultCounts = $checks->groupBy('result')->map->count();
+
+        // Monthly trend (last 6 months)
+        $trendLabels = [];
+        $trendPassRate = [];
+        $trendRejectRate = [];
+        $trendInspections = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $month = $now->copy()->subMonths($i);
+            $mStart = $month->copy()->startOfMonth()->toDateString();
+            $mEnd = $month->copy()->endOfMonth()->toDateString();
+            $trendLabels[] = $month->translatedFormat('M');
+
+            $monthChecks = $checks->filter(function ($c) use ($mStart, $mEnd) {
+                $d = $c->check_date->format('Y-m-d');
+
+                return $d >= $mStart && $d <= $mEnd;
+            });
+
+            $mInspected = (float) $monthChecks->sum('quantity_inspected');
+            $mPassed = (float) $monthChecks->sum('quantity_passed');
+            $mRejected = (float) $monthChecks->sum('quantity_rejected');
+
+            $trendPassRate[] = $mInspected > 0 ? round(($mPassed / $mInspected) * 100, 1) : 100;
+            $trendRejectRate[] = $mInspected > 0 ? round(($mRejected / $mInspected) * 100, 1) : 0;
+            $trendInspections[] = (int) $mInspected;
+        }
+
+        // Worst products by pass rate
+        $orderIds = $checks->pluck('production_order_id')->unique();
+        $orders = ProductionOrder::whereIn('id', $orderIds)
+            ->with('outputItem:id,name')
+            ->get()
+            ->keyBy('id');
+
+        $byProduct = $checks->groupBy(function ($c) use ($orders) {
+            return $orders[$c->production_order_id]?->output_item_id ?? 0;
+        })->map(function ($group) use ($orders) {
+            $first = $group->first();
+            $order = $orders[$first->production_order_id] ?? null;
+            $inspected = (float) $group->sum('quantity_inspected');
+            $passed = (float) $group->sum('quantity_passed');
+
+            return [
+                'item_name' => $order?->outputItem?->name ?? '-',
+                'inspections' => $group->count(),
+                'quantity_inspected' => $inspected,
+                'pass_rate' => $inspected > 0 ? round(($passed / $inspected) * 100, 1) : 100,
+            ];
+        })
+            ->sortBy('pass_rate')
+            ->values()
+            ->take(5)
+            ->toArray();
+
+        // Top defect types
+        $defectTypes = [];
+        foreach ($checks as $check) {
+            foreach ($check->defects ?? [] as $defect) {
+                $type = $defect['type'] ?? 'unknown';
+                $qty = (int) ($defect['quantity'] ?? 1);
+                $defectTypes[$type] = ($defectTypes[$type] ?? 0) + $qty;
+            }
+        }
+        arsort($defectTypes);
+        $topDefects = array_slice($defectTypes, 0, 10, true);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'summary' => [
+                    'total_checks' => $checks->count(),
+                    'total_inspected' => $totalInspected,
+                    'total_passed' => $totalPassed,
+                    'total_rejected' => $totalRejected,
+                    'pass_rate' => $passRate,
+                    'reject_rate' => $rejectRate,
+                    'result_counts' => $resultCounts,
+                ],
+                'trend' => [
+                    'labels' => $trendLabels,
+                    'pass_rate' => $trendPassRate,
+                    'reject_rate' => $trendRejectRate,
+                    'inspections' => $trendInspections,
+                ],
+                'worst_products' => $byProduct,
+                'top_defects' => $topDefects,
+            ],
+        ]);
     }
 }
 

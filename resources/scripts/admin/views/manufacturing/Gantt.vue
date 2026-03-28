@@ -30,6 +30,16 @@
             {{ t('manufacturing.gantt_today') }}
           </button>
 
+          <!-- Auto-schedule -->
+          <button
+            @click="autoSchedule"
+            :disabled="autoScheduling"
+            class="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-primary-700 disabled:opacity-50"
+          >
+            <span v-if="autoScheduling" class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent inline-block mr-1"></span>
+            {{ t('manufacturing.auto_schedule') }}
+          </button>
+
           <router-link to="/admin/manufacturing">
             <BaseButton variant="primary-outline" size="sm">
               {{ t('manufacturing.title') }}
@@ -133,6 +143,18 @@
               :key="'bar-' + order.id"
               class="relative h-10 border-b border-gray-50"
             >
+              <!-- Dependency indicator -->
+              <div
+                v-if="order.depends_on && order.depends_on.length > 0"
+                class="absolute top-2 z-30 flex h-3 w-3 items-center justify-center"
+                :style="{ left: (barLeft(order) - 14) + 'px' }"
+                :title="t('manufacturing.blocked_by') + ': ' + order.depends_on.map(id => orders.find(o => o.id === id)?.order_number || id).join(', ')"
+              >
+                <svg class="h-3 w-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 005.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 01-2.828-2.828l3-3z"/>
+                </svg>
+              </div>
+
               <div
                 class="absolute top-1.5 z-20 flex h-7 cursor-grab items-center rounded-md px-2 text-xs font-medium shadow-sm transition-shadow hover:shadow-md"
                 :class="barClass(order)"
@@ -152,6 +174,23 @@
                 ></div>
               </div>
             </div>
+
+            <!-- Dependency arrows (SVG overlay) -->
+            <svg v-if="dependencyLines.length > 0" class="absolute inset-0 z-10 pointer-events-none" :style="{ width: timelineWidth + 'px', height: (orders.length * 40) + 'px' }">
+              <defs>
+                <marker id="dep-arrow" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
+                  <path d="M0,0 L6,2 L0,4" fill="#f97316" />
+                </marker>
+              </defs>
+              <line
+                v-for="(line, idx) in dependencyLines"
+                :key="'dep-' + idx"
+                :x1="line.x1" :y1="line.y1"
+                :x2="line.x2" :y2="line.y2"
+                stroke="#f97316" stroke-width="1.5" stroke-dasharray="4,3"
+                marker-end="url(#dep-arrow)"
+              />
+            </svg>
           </div>
         </div>
       </div>
@@ -187,6 +226,7 @@ const loading = ref(true)
 const orders = ref([])
 const workCenters = ref([])
 const zoom = ref('day')
+const autoScheduling = ref(false)
 
 const timelineHeaderRef = ref(null)
 const timelineBodyRef = ref(null)
@@ -294,12 +334,44 @@ function barDays(order) {
   return Math.max(1, daysBetween(order.start, order.end))
 }
 
+function barLeft(order) {
+  const startDiff = daysBetween(rangeStart.value, order.start)
+  return startDiff * dayWidth.value
+}
+
 function barClass(order) {
   if (order.is_overdue) return 'bg-red-100 border border-red-400 text-red-800'
   if (order.status === 'completed') return 'bg-green-100 border border-green-300 text-green-800'
   if (order.status === 'in_progress') return 'bg-blue-100 border border-blue-300 text-blue-800'
   return 'bg-gray-100 border border-gray-300 text-gray-700' // draft
 }
+
+// Dependency lines: connect right edge of dependency to left edge of dependent
+const dependencyLines = computed(() => {
+  const lines = []
+  const orderIndex = {}
+  orders.value.forEach((o, i) => { orderIndex[o.id] = i })
+
+  for (const order of orders.value) {
+    if (!order.depends_on || order.depends_on.length === 0) continue
+    const toIdx = orderIndex[order.id]
+    if (toIdx === undefined) continue
+    const toX = barLeft(order)
+    const toY = toIdx * 40 + 20
+
+    for (const depId of order.depends_on) {
+      const fromIdx = orderIndex[depId]
+      if (fromIdx === undefined) continue
+      const dep = orders.value[fromIdx]
+      const fromDuration = Math.max(1, daysBetween(dep.start, dep.end))
+      const fromX = barLeft(dep) + fromDuration * dayWidth.value - 4
+      const fromY = fromIdx * 40 + 20
+
+      lines.push({ x1: fromX, y1: fromY, x2: toX, y2: toY })
+    }
+  }
+  return lines
+})
 
 function statusDotClass(status) {
   return {
@@ -456,6 +528,32 @@ async function fetchGanttData() {
     console.error('Failed to fetch gantt data:', error)
   } finally {
     loading.value = false
+  }
+}
+
+async function autoSchedule() {
+  const draftCount = orders.value.filter(o => o.status === 'draft').length
+  if (draftCount === 0) {
+    window.$utils?.showNotification?.({ type: 'warning', message: t('manufacturing.auto_schedule_no_orders') })
+    return
+  }
+  if (!confirm(t('manufacturing.auto_schedule_confirm'))) return
+
+  autoScheduling.value = true
+  try {
+    const res = await window.axios.post('/manufacturing/auto-schedule')
+    const count = res.data?.data?.count || 0
+    window.$utils?.showNotification?.({
+      type: count > 0 ? 'success' : 'warning',
+      message: count > 0 ? t('manufacturing.auto_schedule_success', { count }) : t('manufacturing.auto_schedule_no_orders'),
+    })
+    if (count > 0) {
+      await fetchGanttData()
+    }
+  } catch (error) {
+    window.$utils?.showNotification?.({ type: 'error', message: error.response?.data?.message || 'Auto-schedule failed' })
+  } finally {
+    autoScheduling.value = false
   }
 }
 

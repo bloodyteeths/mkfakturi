@@ -15,6 +15,66 @@
 
     <!-- Mobile-first card grid -->
     <div v-else class="mt-4 space-y-3">
+
+      <!-- Barcode Scanner Panel -->
+      <div class="rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 p-4 shadow">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100">
+            <svg class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+          </div>
+          <h3 class="text-sm font-semibold text-gray-900">{{ t('manufacturing.scan_barcode') }}</h3>
+        </div>
+
+        <!-- Order selector -->
+        <div class="mb-3">
+          <select
+            v-model="scanOrderId"
+            class="w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            <option :value="null">{{ t('manufacturing.scan_select_order') }}</option>
+            <option v-for="o in inProgressOrders" :key="o.id" :value="o.id">
+              {{ o.order_number }} — {{ o.item_name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Barcode input + quantity -->
+        <div class="flex gap-2">
+          <input
+            ref="barcodeInput"
+            v-model="barcodeValue"
+            @keydown.enter.prevent="onBarcodeScan"
+            :placeholder="t('manufacturing.scan_placeholder')"
+            :disabled="!scanOrderId"
+            class="flex-1 rounded-lg border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100"
+          />
+          <input
+            v-model.number="scanQty"
+            type="number"
+            min="0.01"
+            step="0.01"
+            :disabled="!scanOrderId"
+            class="w-20 rounded-lg border-gray-300 text-center text-sm shadow-sm"
+            :placeholder="t('manufacturing.scan_qty')"
+          />
+          <button
+            @click="onBarcodeScan"
+            :disabled="!scanOrderId || !barcodeValue || scanning"
+            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
+          >
+            <span v-if="scanning" class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent inline-block"></span>
+            <span v-else>OK</span>
+          </button>
+        </div>
+
+        <!-- Last scan result -->
+        <div v-if="lastScan" class="mt-2 rounded-lg px-3 py-2 text-sm" :class="lastScan.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+          {{ lastScan.message }}
+        </div>
+      </div>
+
       <!-- Filter bar -->
       <div class="flex items-center gap-2 rounded-lg bg-white p-3 shadow">
         <button
@@ -163,7 +223,7 @@
       </div>
     </teleport>
 
-    <!-- Quick QC Modal -->
+    <!-- Quick QC Modal with Disposition -->
     <teleport to="body">
       <div v-if="showQcQuick" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-50">
         <div class="w-full max-w-md rounded-t-2xl sm:rounded-lg bg-white p-6 shadow-xl">
@@ -192,6 +252,28 @@
                 <BaseInput v-model="quickQc.quantity_rejected" type="number" step="1" min="0" />
               </BaseInputGroup>
             </div>
+
+            <!-- Disposition (only for fail/conditional) -->
+            <div v-if="quickQc.result !== 'pass' && parseFloat(quickQc.quantity_rejected) > 0" class="rounded-lg border border-orange-200 bg-orange-50 p-3">
+              <p class="text-xs font-medium text-orange-800 mb-2">{{ t('manufacturing.qc_disposition') }}</p>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  @click="quickQc.disposition = 'rework'"
+                  class="rounded-lg border-2 px-3 py-2.5 text-center text-sm font-medium transition"
+                  :class="quickQc.disposition === 'rework' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600'"
+                >
+                  {{ t('manufacturing.qc_disposition_rework') }}
+                </button>
+                <button
+                  @click="quickQc.disposition = 'scrap'"
+                  class="rounded-lg border-2 px-3 py-2.5 text-center text-sm font-medium transition"
+                  :class="quickQc.disposition === 'scrap' ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-200 text-gray-600'"
+                >
+                  {{ t('manufacturing.qc_disposition_scrap') }}
+                </button>
+              </div>
+            </div>
+
             <BaseInputGroup :label="t('manufacturing.notes')">
               <textarea v-model="quickQc.notes" rows="2" class="w-full rounded-md border-gray-300 text-sm shadow-sm"></textarea>
             </BaseInputGroup>
@@ -212,7 +294,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
@@ -224,12 +306,22 @@ const orders = ref([])
 const acting = ref(null)
 const activeFilter = ref('in_progress')
 
+// Barcode scanning
+const barcodeInput = ref(null)
+const barcodeValue = ref('')
+const scanOrderId = ref(null)
+const scanQty = ref(1)
+const scanning = ref(false)
+const lastScan = ref(null)
+
 // Modals
 const showOutputModal = ref(false)
 const showQcQuick = ref(false)
 const selectedOrder = ref(null)
 const outputQty = ref(0)
-const quickQc = ref({ result: 'pass', quantity_passed: 0, quantity_rejected: 0, notes: '' })
+const quickQc = ref({ result: 'pass', quantity_passed: 0, quantity_rejected: 0, notes: '', disposition: null })
+
+const inProgressOrders = computed(() => orders.value.filter(o => o.status === 'in_progress'))
 
 const filters = computed(() => [
   { key: 'in_progress', label: t('manufacturing.status_in_progress'), count: orders.value.filter(o => o.status === 'in_progress').length },
@@ -254,6 +346,34 @@ function progressPercent(order) {
   if (!order.planned_quantity || order.planned_quantity <= 0) return 0
   const actual = parseFloat(order.actual_quantity) || 0
   return Math.min(100, Math.round((actual / parseFloat(order.planned_quantity)) * 100))
+}
+
+// ===== Barcode Scanning =====
+async function onBarcodeScan() {
+  if (!scanOrderId.value || !barcodeValue.value || scanning.value) return
+  scanning.value = true
+  lastScan.value = null
+
+  try {
+    const res = await window.axios.post(`/manufacturing/orders/${scanOrderId.value}/scan`, {
+      barcode: barcodeValue.value.trim(),
+      quantity: scanQty.value || 1,
+    })
+    lastScan.value = {
+      success: true,
+      message: t('manufacturing.scan_success', { qty: res.data?.data?.quantity, item: res.data?.data?.item?.name }),
+    }
+    barcodeValue.value = ''
+  } catch (error) {
+    lastScan.value = {
+      success: false,
+      message: error.response?.data?.message || t('manufacturing.scan_not_found'),
+    }
+  } finally {
+    scanning.value = false
+    await nextTick()
+    barcodeInput.value?.focus()
+  }
 }
 
 // ===== Actions =====
@@ -332,6 +452,7 @@ function openQcQuick(order) {
     quantity_passed: order.planned_quantity,
     quantity_rejected: 0,
     notes: '',
+    disposition: null,
   }
   showQcQuick.value = true
 }
@@ -340,8 +461,11 @@ async function submitQuickQc() {
   if (!selectedOrder.value) return
   acting.value = selectedOrder.value.id
   try {
-    await window.axios.post(`/manufacturing/orders/${selectedOrder.value.id}/qc-checks`, {
-      check_date: new Date().toISOString().slice(0, 10),
+    const today = new Date()
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+    const qcRes = await window.axios.post(`/manufacturing/orders/${selectedOrder.value.id}/qc-checks`, {
+      check_date: dateStr,
       result: quickQc.value.result,
       quantity_inspected: parseFloat(quickQc.value.quantity_passed) + parseFloat(quickQc.value.quantity_rejected),
       quantity_passed: parseFloat(quickQc.value.quantity_passed),
@@ -350,6 +474,23 @@ async function submitQuickQc() {
       checklist: [],
       defects: [],
     })
+
+    // Process disposition if set
+    if (quickQc.value.disposition && qcRes.data?.data?.id) {
+      const checkId = qcRes.data.data.id
+      try {
+        await window.axios.post(`/manufacturing/orders/${selectedOrder.value.id}/qc-checks/${checkId}/dispose`, {
+          disposition: quickQc.value.disposition,
+        })
+        const dispMsg = quickQc.value.disposition === 'rework'
+          ? t('manufacturing.qc_rework_created')
+          : t('manufacturing.qc_scrap_recorded')
+        notificationStore.showNotification({ type: 'success', message: dispMsg })
+      } catch (dispError) {
+        notificationStore.showNotification({ type: 'warning', message: dispError.response?.data?.message || 'Disposition failed' })
+      }
+    }
+
     notificationStore.showNotification({ type: 'success', message: t('manufacturing.qc_saved') })
     showQcQuick.value = false
   } catch (error) {

@@ -161,6 +161,32 @@ class ProductionOrder extends Model
         return $this->hasMany(QcCheck::class);
     }
 
+    /**
+     * Orders this order depends on (must complete before this can start).
+     */
+    public function dependsOn(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'production_order_dependencies',
+            'order_id',
+            'depends_on_order_id'
+        );
+    }
+
+    /**
+     * Orders that depend on this order.
+     */
+    public function dependedOnBy(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'production_order_dependencies',
+            'depends_on_order_id',
+            'order_id'
+        );
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -243,7 +269,35 @@ class ProductionOrder extends Model
 
     public function canStart(): bool
     {
-        return $this->isDraft();
+        if (! $this->isDraft()) {
+            return false;
+        }
+
+        // Check all dependencies are completed
+        if (\Illuminate\Support\Facades\Schema::hasTable('production_order_dependencies')) {
+            $unmetDeps = $this->dependsOn()
+                ->where('status', '!=', self::STATUS_COMPLETED)
+                ->count();
+            if ($unmetDeps > 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get unmet dependency order numbers (for error messages).
+     */
+    public function getUnmetDependencies(): \Illuminate\Support\Collection
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('production_order_dependencies')) {
+            return collect();
+        }
+
+        return $this->dependsOn()
+            ->where('status', '!=', self::STATUS_COMPLETED)
+            ->get(['production_orders.id', 'production_orders.order_number', 'production_orders.status']);
     }
 
     public function canComplete(): bool

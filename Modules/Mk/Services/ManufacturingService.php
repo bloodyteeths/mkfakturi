@@ -153,8 +153,15 @@ class ManufacturingService
      */
     public function startProduction(ProductionOrder $order): void
     {
-        if (! $order->canStart()) {
+        if (! $order->isDraft()) {
             throw new \RuntimeException('Order cannot be started from status: '.$order->status);
+        }
+
+        // Check dependency chain
+        $unmet = $order->getUnmetDependencies();
+        if ($unmet->isNotEmpty()) {
+            $blocking = $unmet->pluck('order_number')->join(', ');
+            throw new \RuntimeException("Cannot start: blocked by incomplete dependencies: {$blocking}");
         }
 
         $order->update(['status' => ProductionOrder::STATUS_IN_PROGRESS]);
@@ -514,6 +521,109 @@ class ManufacturingService
             'total_production_cost' => $orders->sum('total_production_cost'),
             'total_variance' => $orders->sum('total_variance'),
             'orders' => $orders,
+        ];
+    }
+    // ====================================================================
+    // Disposition: Rework / Scrap
+    // ====================================================================
+
+    /**
+     * Process QC check disposition (rework or scrap).
+     */
+    public function processDisposition(
+        \Modules\Mk\Models\Manufacturing\QcCheck $check,
+        string $disposition
+    ): \Modules\Mk\Models\Manufacturing\QcCheck {
+        if ($check->disposition !== 'none') {
+            throw new \RuntimeException('Disposition already processed for this QC check.');
+        }
+
+        if (! in_array($check->result, ['fail', 'conditional'])) {
+            throw new \RuntimeException('Disposition only applies to failed or conditional QC checks.');
+        }
+
+        return DB::transaction(function () use ($check, $disposition) {
+            $order = $check->productionOrder;
+            $rejectedQty = (float) $check->quantity_rejected;
+
+            if ($disposition === 'rework' && $rejectedQty > 0) {
+                // Create a new draft production order from the same BOM
+                $reworkOrder = $this->createProductionOrder(
+                    $order->bom,
+                    $rejectedQty,
+                    [
+                        'output_warehouse_id' => $order->output_warehouse_id,
+                        'notes' => "Rework from {$order->order_number} (QC #{$check->id})",
+                    ]
+                );
+
+                $check->update([
+                    'disposition' => 'rework',
+                    'rework_order_id' => $reworkOrder->id,
+                ]);
+            } elseif ($disposition === 'scrap') {
+                $check->update([
+                    'disposition' => 'scrap',
+                    'scrap_quantity' => $rejectedQty,
+                ]);
+            }
+
+            return $check->fresh(['reworkOrder']);
+        });
+    }
+
+    // ====================================================================
+    // Barcode Scanning
+    // ====================================================================
+
+    /**
+     * Look up item by barcode and record material consumption.
+     */
+    public function scanAndConsume(
+        ProductionOrder $order,
+        string $barcode,
+        float $quantity = 1.0
+    ): array {
+        if (! $order->isInProgress()) {
+            throw new \RuntimeException('Can only scan materials for in-progress orders.');
+        }
+
+        $companyId = $order->company_id;
+
+        // Find item by barcode
+        $item = \App\Models\Item::where('company_id', $companyId)
+            ->where('barcode', $barcode)
+            ->first();
+
+        if (! $item) {
+            throw new \RuntimeException("No item found with barcode: {$barcode}");
+        }
+
+        // Check if this item is in the BOM materials
+        $material = $order->materials()->where('item_id', $item->id)->first();
+
+        if (! $material) {
+            throw new \RuntimeException("Item '{$item->name}' is not in this order's bill of materials.");
+        }
+
+        // Record consumption
+        $consumed = $this->recordMaterialConsumption(
+            $order,
+            $material->id,
+            $quantity,
+            0,
+            $material->warehouse_id,
+            "Scanned: {$barcode}"
+        );
+
+        return [
+            'item' => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'barcode' => $item->barcode,
+            ],
+            'material' => $consumed,
+            'quantity' => $quantity,
         ];
     }
 }

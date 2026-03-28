@@ -180,7 +180,7 @@ class ProductionOrderController extends Controller
                 ProductionOrder::STATUS_IN_PROGRESS,
                 ProductionOrder::STATUS_COMPLETED,
             ])
-            ->with(['outputItem:id,name', 'bom:id,name,code', 'workCenter:id,name'])
+            ->with(['outputItem:id,name', 'bom:id,name,code', 'workCenter:id,name', 'dependsOn:production_orders.id'])
             ->orderBy('order_date')
             ->get()
             ->map(fn ($o) => [
@@ -204,6 +204,7 @@ class ProductionOrderController extends Controller
                     ProductionOrder::STATUS_DRAFT,
                     ProductionOrder::STATUS_IN_PROGRESS,
                 ]),
+                'depends_on' => $o->dependsOn->pluck('id')->toArray(),
             ]);
 
         // Work centers for grouping
@@ -356,7 +357,188 @@ class ProductionOrderController extends Controller
         ], 201);
     }
 
-    // CLAUDE-CHECKPOINT: Added qcChecks() and addQcCheck() for quality control gates
+    /**
+     * Process disposition for a QC check (rework or scrap).
+     */
+    public function disposeQcCheck(Request $request, int $orderId, int $checkId): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $order = ProductionOrder::where('company_id', $companyId)->findOrFail($orderId);
+
+        $check = $order->qcChecks()->findOrFail($checkId);
+
+        $request->validate([
+            'disposition' => 'required|in:rework,scrap',
+        ]);
+
+        try {
+            $check = $this->service->processDisposition($check, $request->disposition);
+
+            return response()->json([
+                'success' => true,
+                'data' => $check,
+                'message' => $request->disposition === 'rework'
+                    ? 'Rework order created successfully.'
+                    : 'Scrap recorded successfully.',
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Scan barcode to record material consumption.
+     */
+    public function scanBarcode(Request $request, int $orderId): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $order = ProductionOrder::where('company_id', $companyId)->findOrFail($orderId);
+
+        $request->validate([
+            'barcode' => 'required|string|max:255',
+            'quantity' => 'nullable|numeric|min:0.01',
+        ]);
+
+        try {
+            $result = $this->service->scanAndConsume(
+                $order,
+                $request->barcode,
+                (float) ($request->quantity ?? 1)
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => $result,
+                'message' => "Consumed {$result['quantity']} × {$result['item']['name']}",
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Set dependency chain for a production order.
+     */
+    public function setDependencies(Request $request, int $id): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $order = ProductionOrder::where('company_id', $companyId)->findOrFail($id);
+
+        $request->validate([
+            'depends_on' => 'present|array',
+            'depends_on.*' => 'integer',
+        ]);
+
+        $dependsOnIds = $request->depends_on ?? [];
+
+        // Validate all referenced orders belong to same company
+        if (! empty($dependsOnIds)) {
+            $validIds = ProductionOrder::where('company_id', $companyId)
+                ->whereIn('id', $dependsOnIds)
+                ->pluck('id')
+                ->toArray();
+
+            if (count($validIds) !== count($dependsOnIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Some dependency orders not found.',
+                ], 422);
+            }
+
+            // Self-reference check
+            if (in_array($order->id, $dependsOnIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An order cannot depend on itself.',
+                ], 422);
+            }
+
+            // Simple circular dependency check
+            if ($this->wouldCreateCycle($order->id, $dependsOnIds, $companyId)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This would create a circular dependency.',
+                ], 422);
+            }
+        }
+
+        // Sync the pivot table
+        $order->dependsOn()->sync($dependsOnIds);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $order->id,
+                'depends_on' => $order->dependsOn()->pluck('production_orders.id'),
+            ],
+            'message' => 'Dependencies updated.',
+        ]);
+    }
+
+    /**
+     * Auto-schedule draft orders based on work center capacity.
+     */
+    public function autoSchedule(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $workCenterId = $request->work_center_id ? (int) $request->work_center_id : null;
+
+        $scheduler = app(\Modules\Mk\Services\AutoScheduleService::class);
+        $result = $scheduler->schedule($companyId, $workCenterId);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'count' => count($result),
+                'orders' => $result,
+            ],
+            'message' => count($result) > 0
+                ? count($result).' orders scheduled successfully.'
+                : 'No draft orders to schedule.',
+        ]);
+    }
+
+    /**
+     * Check if adding dependencies would create a cycle.
+     */
+    private function wouldCreateCycle(int $orderId, array $newDeps, int $companyId): bool
+    {
+        // BFS from each newDep — if we reach $orderId, it's a cycle
+        $visited = [];
+        $queue = $newDeps;
+
+        while (! empty($queue)) {
+            $current = array_shift($queue);
+            if ($current === $orderId) {
+                return true;
+            }
+            if (isset($visited[$current])) {
+                continue;
+            }
+            $visited[$current] = true;
+
+            $deps = \Illuminate\Support\Facades\DB::table('production_order_dependencies')
+                ->where('order_id', $current)
+                ->pluck('depends_on_order_id')
+                ->toArray();
+
+            foreach ($deps as $dep) {
+                if (! isset($visited[$dep])) {
+                    $queue[] = $dep;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // CLAUDE-CHECKPOINT: Added disposition, barcode scan, dependencies, auto-schedule
 
     // ====================================================================
     // Child Resource Endpoints

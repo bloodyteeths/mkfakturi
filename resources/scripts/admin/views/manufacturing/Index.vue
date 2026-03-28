@@ -289,6 +289,61 @@
         </div>
       </div>
 
+      <!-- ROW 3.5: QC Quality Metrics -->
+      <div v-if="qcData && qcData.summary && qcData.summary.total_checks > 0" class="mt-4 lg:mt-6">
+        <div class="rounded-lg bg-white shadow">
+          <div class="border-b border-gray-100 px-5 py-4">
+            <h3 class="text-base font-semibold text-gray-900">{{ t('manufacturing.qc_metrics') }}</h3>
+          </div>
+          <div class="p-5">
+            <!-- KPI cards -->
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div class="rounded-lg bg-green-50 p-3 text-center">
+                <p class="text-2xl font-bold" :class="qcData.summary.pass_rate >= 90 ? 'text-green-700' : qcData.summary.pass_rate >= 70 ? 'text-yellow-700' : 'text-red-700'">
+                  {{ qcData.summary.pass_rate }}%
+                </p>
+                <p class="text-xs text-gray-500 mt-1">{{ t('manufacturing.qc_pass_rate') }}</p>
+              </div>
+              <div class="rounded-lg bg-red-50 p-3 text-center">
+                <p class="text-2xl font-bold text-red-700">{{ qcData.summary.reject_rate }}%</p>
+                <p class="text-xs text-gray-500 mt-1">{{ t('manufacturing.qc_reject_rate') }}</p>
+              </div>
+              <div class="rounded-lg bg-blue-50 p-3 text-center">
+                <p class="text-2xl font-bold text-blue-700">{{ qcData.summary.total_checks }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ t('manufacturing.qc_total_inspections') }}</p>
+              </div>
+              <div class="rounded-lg bg-purple-50 p-3 text-center">
+                <p class="text-2xl font-bold text-purple-700">{{ Math.round(qcData.summary.total_inspected) }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ t('manufacturing.unit') }}</p>
+              </div>
+            </div>
+
+            <!-- Quality trend chart -->
+            <div v-if="qcData.trend" class="mt-5">
+              <h4 class="text-sm font-medium text-gray-700 mb-2">{{ t('manufacturing.qc_quality_trend') }}</h4>
+              <canvas ref="qcChartRef" height="120"></canvas>
+            </div>
+
+            <!-- Worst products -->
+            <div v-if="qcData.worst_products && qcData.worst_products.length > 0" class="mt-5">
+              <h4 class="text-sm font-medium text-gray-700 mb-2">{{ t('manufacturing.qc_worst_products') }}</h4>
+              <div class="space-y-2">
+                <div v-for="(p, i) in qcData.worst_products" :key="i" class="flex items-center justify-between text-sm">
+                  <span class="text-gray-700 truncate flex-1">{{ p.item_name }}</span>
+                  <span class="ml-2 text-xs text-gray-400">{{ p.inspections }} insp.</span>
+                  <span
+                    class="ml-3 rounded-full px-2 py-0.5 text-xs font-semibold"
+                    :class="p.pass_rate >= 90 ? 'bg-green-100 text-green-700' : p.pass_rate >= 70 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'"
+                  >
+                    {{ p.pass_rate }}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ROW 4: Material Availability + Production Timeline -->
       <div class="mt-4 grid grid-cols-1 gap-4 lg:mt-6 lg:grid-cols-2 lg:gap-6">
 
@@ -770,6 +825,11 @@ const data = ref({
   period: { month: '', label: '' },
 })
 
+// ===== QC Metrics =====
+const qcData = ref(null)
+const qcChartRef = ref(null)
+let qcChartInstance = null
+
 // ===== Reorder state =====
 const reordering = ref(false)
 
@@ -818,9 +878,10 @@ async function reorderShortages() {
     }
   } catch (error) {
     console.error('Smart reorder failed:', error)
+    const msg = error.response?.data?.message || t('manufacturing.error_loading')
     window.$utils?.showNotification?.({
       type: 'error',
-      message: t('manufacturing.error_loading'),
+      message: msg,
     })
   } finally {
     reordering.value = false
@@ -1184,11 +1245,64 @@ async function fetchAiInsights() {
   }
 }
 
+async function fetchQcMetrics() {
+  try {
+    const res = await window.axios.get('/manufacturing/reports/qc-metrics')
+    qcData.value = res.data?.data || null
+    await nextTick()
+    renderQcChart()
+  } catch (e) {
+    // QC metrics are optional — fail silently
+  }
+}
+
+function renderQcChart() {
+  if (!qcChartRef.value || !qcData.value?.trend) return
+  if (qcChartInstance) { qcChartInstance.destroy(); qcChartInstance = null }
+
+  qcChartInstance = new ChartJS(qcChartRef.value, {
+    type: 'line',
+    data: {
+      labels: qcData.value.trend.labels,
+      datasets: [
+        {
+          label: t('manufacturing.qc_pass_rate'),
+          data: qcData.value.trend.pass_rate,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+        },
+        {
+          label: t('manufacturing.qc_reject_rate'),
+          data: qcData.value.trend.reject_rate,
+          borderColor: '#ef4444',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, usePointStyle: true } } },
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } },
+        x: { grid: { display: false } },
+      },
+    },
+  })
+}
+
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
   await fetchDashboard()
   if (!isEmpty.value) {
     fetchAiInsights()
+    fetchQcMetrics()
     await nextTick()
     renderCostChart()
   }
@@ -1196,6 +1310,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+  if (qcChartInstance) { qcChartInstance.destroy(); qcChartInstance = null }
   if (chartInstance) {
     chartInstance.destroy()
     chartInstance = null
