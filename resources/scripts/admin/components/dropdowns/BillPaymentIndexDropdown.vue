@@ -83,11 +83,11 @@ function bp(key) {
 }
 
 function printPP30(payment) {
-  window.open(`/api/v1/admin/bills/${payment.bill_id}/pp30`, '_blank')
+  window.open(`/api/v1/bills/${payment.bill_id}/pp30`, '_blank')
 }
 
 function printRashodenNalog(payment) {
-  window.open(`/api/v1/admin/bill-payments/${payment.id}/rashoden-nalog`, '_blank')
+  window.open(`/api/v1/bill-payments/${payment.id}/rashoden-nalog`, '_blank')
 }
 
 function removeBillPayment(payment) {

@@ -130,7 +130,7 @@ async function cancelCession() {
 }
 
 function downloadPdf() {
-  window.open(`/api/v1/admin/cessions/${route.params.id}/pdf`, '_blank')
+  window.open(`/api/v1/cessions/${route.params.id}/pdf`, '_blank')
 }
 
 onMounted(fetchCession)

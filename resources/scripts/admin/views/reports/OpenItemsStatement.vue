@@ -139,7 +139,7 @@ async function generate() {
 }
 
 function downloadPdf() {
-  const url = `/api/v1/admin/reports/ios/${partnerType.value}/${partnerId.value}/pdf?as_of_date=${asOfDate.value}`
+  const url = `/api/v1/reports/ios/${partnerType.value}/${partnerId.value}/pdf?as_of_date=${asOfDate.value}`
   window.open(url, '_blank')
 }
 </script>

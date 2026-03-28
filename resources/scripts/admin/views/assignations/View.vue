@@ -130,7 +130,7 @@ async function cancelAssignation() {
 }
 
 function downloadPdf() {
-  window.open(`/api/v1/admin/assignations/${route.params.id}/pdf`, '_blank')
+  window.open(`/api/v1/assignations/${route.params.id}/pdf`, '_blank')
 }
 
 onMounted(fetchAssignation)

@@ -116,7 +116,7 @@ async function generate() {
 }
 
 function downloadPdf() {
-  const url = `/api/v1/admin/reports/cash-journal/pdf?from_date=${fromDate.value}&to_date=${toDate.value}`
+  const url = `/api/v1/reports/cash-journal/pdf?from_date=${fromDate.value}&to_date=${toDate.value}`
   window.open(url, '_blank')
 }
 </script>
