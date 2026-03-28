@@ -473,6 +473,7 @@ class UsageLimitService
             'deadlines_custom' => 'Custom Deadlines',
             'client_documents_per_month' => 'Document Uploads',
             'efaktura_per_month' => 'E-Faktura',
+            'pos_transactions_per_month' => 'POS transactions',
         ];
 
         // Map feature keys to config upgrade message keys
@@ -492,6 +493,7 @@ class UsageLimitService
             'deadlines_custom' => 'deadlines_custom',
             'client_documents_per_month' => 'client_documents_per_month',
             'efaktura_per_month' => 'efaktura_per_month',
+            'pos_transactions_per_month' => 'pos_limit',
         ];
 
         $featureName = $featureNames[$feature] ?? $feature;
@@ -520,4 +522,4 @@ class UsageLimitService
         ];
     }
 }
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT

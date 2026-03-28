@@ -220,6 +220,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { usePosStore } from '@/scripts/admin/stores/pos'
 import { useFiscalPrinter } from '@/scripts/admin/composables/useFiscalPrinter'
+import { useFiscalDeviceStore } from '@/scripts/admin/stores/fiscal-device'
 import PosTopBar from './components/TopBar.vue'
 import PosSearchBar from './components/SearchBar.vue'
 import PosProductGrid from './components/ProductGrid.vue'
@@ -235,6 +236,7 @@ const { t } = useI18n()
 const router = useRouter()
 const posStore = usePosStore()
 const fiscal = useFiscalPrinter()
+const fiscalDeviceStore = useFiscalDeviceStore()
 
 const showPayment = ref(false)
 const showShiftOpen = ref(false)
@@ -285,14 +287,27 @@ async function handlePayment() {
       // Auto-fiscalize if fiscal printer is connected
       if (fiscal.isConnected.value && sale.invoice?.id) {
         try {
-          await fiscal.fiscalizeInvoice(sale.invoice, null)
+          const deviceId = fiscalDeviceStore.fiscalDevices.find(d => d.is_active)?.id || null
+          if (deviceId) {
+            await fiscal.fiscalizeInvoice(sale.invoice, deviceId)
+          }
         } catch (fiscalErr) {
           console.warn('Fiscal print failed (sale still recorded):', fiscalErr.message)
         }
       }
     }
   } catch (e) {
-    alert(t('pos.sale_failed') + ': ' + e.message)
+    if (e.response?.status === 402) {
+      // Show upgrade prompt instead of alert
+      const data = e.response.data
+      if (confirm(
+        (data.message || t('pos.limit_reached')) + '\n\n' + t('pos.upgrade_prompt', { plan: data.suggested_plan?.name || 'Business', limit: data.suggested_plan?.pos_limit || '3000', price: data.suggested_plan?.price || '59' })
+      )) {
+        window.location.href = '/admin/settings/billing'
+      }
+    } else {
+      alert(t('pos.sale_failed') + ': ' + (e.response?.data?.error || e.message))
+    }
   }
 }
 
@@ -317,7 +332,10 @@ async function handleCloseShift({ closingCash, notes }) {
 async function handlePrintReceipt() {
   if (!fiscal.isConnected.value || !posStore.lastSale?.invoice) return
   try {
-    await fiscal.fiscalizeInvoice(posStore.lastSale.invoice, null)
+    const deviceId = fiscalDeviceStore.fiscalDevices.find(d => d.is_active)?.id || null
+    if (deviceId) {
+      await fiscal.fiscalizeInvoice(posStore.lastSale.invoice, deviceId)
+    }
   } catch (e) {
     console.warn('Reprint failed:', e.message)
   }
@@ -392,6 +410,7 @@ onMounted(async () => {
   await posStore.fetchCurrentShift()
   posStore.loadParkedSales()
   posStore.loadTableOrders()
+  fiscalDeviceStore.fetchFiscalDevices().catch(() => {})
   document.addEventListener('keydown', handleKeydown)
 })
 

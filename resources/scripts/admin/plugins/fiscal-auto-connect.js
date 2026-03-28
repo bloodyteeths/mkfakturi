@@ -28,7 +28,7 @@ export function fiscalAutoConnectPlugin(app, router) {
       } catch (e) {
         console.warn('Fiscal auto-connect plugin:', e.message)
       }
-    }, 1500)
+    }, 2500)
   })
 }
 

@@ -379,6 +379,14 @@ class FiscalDeviceController extends Controller
             'source' => 'required|string|in:webserial,erpnet-fp,manual',
         ]);
 
+        // Verify the invoice belongs to the current company
+        if (!empty($validated['invoice_id'])) {
+            $invoice = \App\Models\Invoice::find($validated['invoice_id']);
+            if (!$invoice || $invoice->company_id != $companyId) {
+                return response()->json(['error' => 'Invoice not found for this company'], 404);
+            }
+        }
+
         // Prevent duplicate fiscalization of same invoice on same device
         $existingReceipt = FiscalReceipt::where('fiscal_device_id', $device->id)
             ->where('invoice_id', $validated['invoice_id'])

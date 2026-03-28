@@ -60,7 +60,7 @@
           </div>
 
           <!-- Qty controls -->
-          <div class="flex items-center gap-0.5 shrink-0 bg-gray-50 dark:bg-gray-800 rounded-lg p-0.5">
+          <div class="flex items-center gap-1.5 shrink-0 bg-gray-50 dark:bg-gray-800 rounded-lg p-0.5">
             <button
               class="w-11 h-11 flex items-center justify-center rounded-md text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 hover:shadow-sm active:scale-90 transition-all font-bold text-xl"
               @click="$emit('update-qty', { index, qty: item.quantity - 1 })"
@@ -83,7 +83,7 @@
 
           <!-- Remove -->
           <button
-            class="w-9 h-9 flex items-center justify-center opacity-60 hover:opacity-100 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all shrink-0"
+            class="w-11 h-11 flex items-center justify-center opacity-80 hover:opacity-100 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all shrink-0"
             @click="$emit('remove', index)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

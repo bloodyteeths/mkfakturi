@@ -1,10 +1,26 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import axios from 'axios'
 
 export const usePosStore = defineStore('pos', () => {
   // --- State ---
   const cart = ref([])
+
+  // Restore cart from localStorage on init
+  try {
+    const savedCart = localStorage.getItem('pos_cart_backup')
+    if (savedCart) {
+      cart.value = JSON.parse(savedCart)
+    }
+  } catch (e) { /* ignore parse errors */ }
+
+  // Persist cart to localStorage on changes
+  watch(cart, (newCart) => {
+    try {
+      localStorage.setItem('pos_cart_backup', JSON.stringify(newCart))
+    } catch (e) { /* ignore quota errors */ }
+  }, { deep: true })
+
   const customer = ref(null)
   const paymentMethod = ref('cash')
   const cashReceived = ref(0)
@@ -202,6 +218,7 @@ export const usePosStore = defineStore('pos', () => {
       }
 
       clearCart()
+      localStorage.removeItem('pos_cart_backup')
       return lastSale.value
     } catch (e) {
       const error = e.response?.data?.error || e.message
@@ -331,7 +348,7 @@ export const usePosStore = defineStore('pos', () => {
       id: Date.now(),
       items: [...cart.value],
       customer: customer.value,
-      parkedAt: new Date().toISOString(),
+      parkedAt: Date.now(),
       total: cartTotal.value,
     }
     parkedSales.value.push(parked)
@@ -354,7 +371,19 @@ export const usePosStore = defineStore('pos', () => {
   function loadParkedSales() {
     try {
       const saved = localStorage.getItem('pos_parked_sales')
-      if (saved) parkedSales.value = JSON.parse(saved)
+      if (saved) {
+        const stored = JSON.parse(saved)
+        const now = Date.now()
+        // Filter out parked sales older than 24 hours
+        parkedSales.value = stored.filter(s => {
+          const parkedTime = typeof s.parkedAt === 'number' ? s.parkedAt : new Date(s.parkedAt).getTime()
+          return !parkedTime || (now - parkedTime < 24 * 60 * 60 * 1000)
+        })
+        // Persist back the filtered list
+        if (parkedSales.value.length !== stored.length) {
+          localStorage.setItem('pos_parked_sales', JSON.stringify(parkedSales.value))
+        }
+      }
     } catch (e) {
       parkedSales.value = []
     }

@@ -21,6 +21,18 @@ use Illuminate\Validation\ValidationException;
 class POSSaleController extends Controller
 {
     /**
+     * Validate that the authenticated user belongs to the requested company.
+     */
+    private function validateCompanyAccess(Request $request): int
+    {
+        $companyId = (int) $request->header('company');
+        if (!$request->user()->companies()->where('companies.id', $companyId)->exists()) {
+            abort(403, 'Unauthorized company access');
+        }
+        return $companyId;
+    }
+
+    /**
      * POST /api/v1/pos/sale
      *
      * Create invoice + items + payment in one atomic operation.
@@ -29,7 +41,7 @@ class POSSaleController extends Controller
      */
     public function sale(Request $request): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->validateCompanyAccess($request);
 
         // --- Validate ---
         try {
@@ -56,11 +68,30 @@ class POSSaleController extends Controller
         $company = \App\Models\Company::find($companyId);
         $usageService = app(UsageLimitService::class);
 
-        if (! $usageService->canUse($company, 'pos_transactions_per_month')) {
+        $user = $request->user();
+        $isSuperAdmin = $user->role === 'super admin' || $user->is_owner;
+        $isPartner = $user->partner_id !== null;
+        if (!$isSuperAdmin && !$isPartner && !$usageService->canUse($company, 'pos_transactions_per_month')) {
             return response()->json(
                 $usageService->buildLimitExceededResponse($company, 'pos_transactions_per_month'),
                 402
             );
+        }
+
+        // --- Verify warehouse belongs to company ---
+        if (!empty($validated['warehouse_id'])) {
+            $warehouse = \App\Models\Warehouse::where('id', $validated['warehouse_id'])->where('company_id', $companyId)->first();
+            if (!$warehouse) {
+                return response()->json(['error' => 'Warehouse not found'], 422);
+            }
+        }
+
+        // --- Verify fiscal device belongs to company ---
+        if (!empty($validated['fiscal_device_id'])) {
+            $fiscalDevice = DB::table('fiscal_devices')->where('id', $validated['fiscal_device_id'])->where('company_id', $companyId)->first();
+            if (!$fiscalDevice) {
+                return response()->json(['error' => 'Fiscal device not found'], 422);
+            }
         }
 
         // --- Resolve customer (walk-in or specified) ---
@@ -69,7 +100,7 @@ class POSSaleController extends Controller
             $customerId = $this->getOrCreateWalkInCustomer($companyId);
         }
 
-        $customer = Customer::find($customerId);
+        $customer = Customer::where('id', $customerId)->where('company_id', $companyId)->first();
         if (! $customer) {
             return response()->json(['error' => 'Customer not found'], 404);
         }
@@ -172,7 +203,8 @@ class POSSaleController extends Controller
         try {
             $result = DB::transaction(function () use (
                 $request, $companyId, $customerId, $customer, $invoiceItems,
-                $subTotal, $totalTax, $total, $invoiceNumber, $validated, $taxPerItem
+                $subTotal, $totalTax, $total, $invoiceNumber, $validated, $taxPerItem,
+                $usageService, $company
             ) {
                 // Build a fake request object that Invoice::createInvoice() expects
                 $invoiceRequest = new \Illuminate\Http\Request();
@@ -269,6 +301,9 @@ class POSSaleController extends Controller
                     );
                 }
 
+                // --- Increment POS transaction usage inside transaction ---
+                $usageService->incrementUsage($company, 'pos_transactions_per_month');
+
                 return [
                     'invoice' => $invoice,
                     'payment' => $payments[0],
@@ -278,9 +313,6 @@ class POSSaleController extends Controller
 
             // --- Build fiscal data for WebSerial ---
             $fiscalData = $this->buildFiscalData($result['invoice']);
-
-            // --- Increment POS transaction usage (after successful transaction) ---
-            $usageService->incrementUsage($company, 'pos_transactions_per_month');
 
             // --- Calculate change ---
             $cashReceived = $validated['cash_received'] ?? $total;
@@ -318,7 +350,7 @@ class POSSaleController extends Controller
      */
     public function catalog(Request $request): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->validateCompanyAccess($request);
 
         $items = Item::where('company_id', $companyId)
             ->select([
@@ -406,7 +438,7 @@ class POSSaleController extends Controller
      */
     public function barcodeLookup(Request $request, string $code): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->validateCompanyAccess($request);
 
         $item = Item::where('company_id', $companyId)
             ->where(function ($q) use ($code) {
@@ -456,7 +488,7 @@ class POSSaleController extends Controller
      */
     public function invoiceLookup(Request $request): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->validateCompanyAccess($request);
         $number = $request->input('number');
 
         if (! $number) {
@@ -601,6 +633,7 @@ class POSSaleController extends Controller
                 'base_amount' => $paymentData['amount'],
                 'currency_id' => $customerCurrency,
                 'project_id' => null,
+                'gateway_status' => 'completed',
             ];
         });
 
@@ -615,7 +648,8 @@ class POSSaleController extends Controller
      */
     public function returnSale(Request $request): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->validateCompanyAccess($request);
+        $company = \App\Models\Company::find($companyId);
 
         try {
             $validated = $request->validate([
@@ -642,7 +676,7 @@ class POSSaleController extends Controller
         $returnItems = [];
         if (! empty($validated['items'])) {
             foreach ($validated['items'] as $ri) {
-                $invoiceItem = $invoice->items->firstWhere('id', $ri['invoice_item_id']);
+                $invoiceItem = $invoice->items->firstWhere('item_id', $ri['item_id']);
                 if ($invoiceItem) {
                     $returnItems[] = [
                         'item' => $invoiceItem,
@@ -809,10 +843,25 @@ class POSSaleController extends Controller
                 // --- 3. Update original invoice paid status ---
                 $invoice->updateInvoiceStatus($returnTotal);
 
+                // --- 4. Update shift total_returns ---
+                $openShift = DB::table('pos_shifts')
+                    ->where('company_id', $companyId)
+                    ->where('user_id', $request->user()->id)
+                    ->whereNull('closed_at')
+                    ->first();
+                if ($openShift) {
+                    DB::table('pos_shifts')->where('id', $openShift->id)
+                        ->increment('total_returns', $creditNote->total);
+                }
+
                 return [
                     'credit_note' => $creditNote,
                 ];
             });
+
+            // --- Decrement POS transaction usage for return ---
+            $usageService = app(UsageLimitService::class);
+            $usageService->decrementUsage($company, 'pos_transactions_per_month');
 
             // Build fiscal storno data
             $stornoData = $this->buildStornoFiscalData($invoice, $returnItems, $returnTotal, $returnTax);
@@ -856,7 +905,7 @@ class POSSaleController extends Controller
      */
     public function openShift(Request $request): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->validateCompanyAccess($request);
         $userId = $request->user()->id;
 
         try {
@@ -907,7 +956,7 @@ class POSSaleController extends Controller
      */
     public function closeShift(Request $request): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->validateCompanyAccess($request);
         $userId = $request->user()->id;
 
         try {
@@ -979,7 +1028,7 @@ class POSSaleController extends Controller
      */
     public function currentShift(Request $request): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->validateCompanyAccess($request);
         $userId = $request->user()->id;
 
         $shift = DB::table('pos_shifts')
@@ -1018,7 +1067,7 @@ class POSSaleController extends Controller
      */
     public function casysCheckout(Request $request): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->validateCompanyAccess($request);
 
         try {
             $validated = $request->validate([
@@ -1076,7 +1125,7 @@ class POSSaleController extends Controller
      */
     public function casysStatus(Request $request, string $orderId): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->validateCompanyAccess($request);
         $cpayService = app(\Modules\Mk\Services\CpayMerchantService::class);
 
         $status = $cpayService->getPaymentStatus($orderId);

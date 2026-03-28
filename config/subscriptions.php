@@ -599,6 +599,12 @@ return [
             'free' => 'E-Faktura is not available on the Free plan. Upgrade to Starter for 5 e-Faktura per month.',
             'starter' => 'You\'ve reached your e-Faktura limit (5/month). Upgrade to Standard for unlimited e-Faktura sending.',
         ],
+        'pos_limit' => [
+            'en' => 'You\'ve reached your monthly POS sales limit. Upgrade to get more transactions.',
+            'mk' => 'Го достигнавте месечниот лимит за POS продажби. Надградете за повеќе трансакции.',
+            'sq' => 'Keni arritur limitin mujor te shitjeve POS. Permiresoni per me shume transaksione.',
+            'tr' => 'Aylik POS satis limitinize ulastiniz. Daha fazla islem icin yukseltin.',
+        ],
     ],
     /*
     |--------------------------------------------------------------------------
