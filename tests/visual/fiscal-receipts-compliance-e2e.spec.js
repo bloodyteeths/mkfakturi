@@ -121,12 +121,41 @@ test.describe('Fiscal Receipts — UJP Compliance E2E', () => {
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage()
-    await page.goto(`${BASE}/login`)
+    // Login via API (more reliable than UI form for E2E)
+    await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
+    await page.waitForTimeout(2000)
+
+    // Get CSRF cookie
+    await page.evaluate(async (base) => {
+      await fetch(`${base}/sanctum/csrf-cookie`, { credentials: 'include' })
+    }, BASE)
+    await page.waitForTimeout(1000)
+
+    // Login via API
+    const loginResult = await page.evaluate(
+      async ({ base, email, pass }) => {
+        const cookies = document.cookie.split(';').map(c => c.trim())
+        const xsrf = cookies.find(c => c.startsWith('XSRF-TOKEN='))
+        const token = xsrf ? decodeURIComponent(xsrf.split('=')[1]) : ''
+        const res = await fetch(`${base}/api/v1/auth/login`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-XSRF-TOKEN': token,
+          },
+          body: JSON.stringify({ email, password: pass }),
+        })
+        return { status: res.status, data: await res.json().catch(() => null) }
+      },
+      { base: BASE, email: EMAIL, pass: PASS }
+    )
+    expect(loginResult.status).toBe(200)
+
+    // Navigate to dashboard to fully establish session
+    await page.goto(`${BASE}/admin/dashboard`, { waitUntil: 'networkidle' })
     await page.waitForTimeout(3000)
-    await page.fill('input[type="email"]', EMAIL)
-    await page.fill('input[type="password"]', PASS)
-    await page.click('button[type="submit"]')
-    await page.waitForTimeout(5000)
   })
 
   test.afterAll(async () => {
