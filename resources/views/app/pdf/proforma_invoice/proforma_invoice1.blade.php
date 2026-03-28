@@ -257,12 +257,12 @@
         /* Footer */
         .footer {
             margin-top: 30px;
-            padding: 15px;
-            background: #f7fafc;
-            border-top: 1px solid #e2e8f0;
+            padding: 12px 15px;
+            background: #667eea;
             text-align: center;
             font-size: 9px;
-            color: #a0aec0;
+            color: white;
+            font-weight: bold;
         }
 
         /* Utility */
