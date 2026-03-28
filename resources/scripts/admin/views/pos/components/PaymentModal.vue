@@ -51,10 +51,10 @@
             {{ t('pos.cash_received') || 'Cash Received' }}
           </label>
           <input
-            v-model.number="localCash"
+            v-model.number="displayCash"
             type="number"
             min="0"
-            step="100"
+            step="1"
             class="w-full px-4 py-3.5 text-2xl font-bold text-center bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none tabular-nums transition-colors"
             @input="$emit('update:cash-received', localCash)"
           />
@@ -125,6 +125,12 @@ defineEmits(['update:payment-method', 'update:cash-received', 'confirm', 'close'
 
 const localMethod = ref(props.paymentMethod)
 const localCash = ref(props.cashReceived || props.total)
+
+// Display value in MKD (not cents) for the input field
+const displayCash = computed({
+  get: () => Math.round(localCash.value / 100),
+  set: (val) => { localCash.value = Math.round((val || 0) * 100) },
+})
 
 const localChange = computed(() => Math.max(0, localCash.value - props.total))
 
