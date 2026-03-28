@@ -1525,6 +1525,11 @@ Route::prefix('/v1')->group(function () {
 
                 // Dashboard Summary
                 Route::get('/dashboard-summary', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'dashboardSummary']);
+                Route::get('/dashboard', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'dashboard']);
+
+                // Demand Forecast
+                Route::get('/demand-forecast', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'demandForecast']);
+                Route::post('/demand-forecast/ai-analyze', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'demandForecastAI']);
 
                 // WAC Audit & Correction
                 Route::prefix('wac-audit')->group(function () {

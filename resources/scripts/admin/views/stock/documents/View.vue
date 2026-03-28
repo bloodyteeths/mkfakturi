@@ -45,6 +45,15 @@
           <!-- Approved actions -->
           <template v-if="document.status === 'approved'">
             <BaseButton
+              variant="primary-outline"
+              @click="downloadPdf"
+            >
+              <template #left="slotProps">
+                <BaseIcon name="DocumentArrowDownIcon" :class="slotProps.class" />
+              </template>
+              PDF
+            </BaseButton>
+            <BaseButton
               variant="danger"
               :loading="isVoiding"
               @click="voidDocument"
@@ -260,6 +269,14 @@ function formatQuantity(qty) {
 }
 
 /**
+ * Download the document as PDF in a new tab.
+ */
+function downloadPdf() {
+  if (!document.value) return
+  window.open(`/api/v1/stock/documents/${document.value.id}/pdf`, '_blank')
+}
+
+/**
  * Load document from API.
  */
 async function loadDocument() {
@@ -383,4 +400,5 @@ async function deleteDocument() {
 onMounted(() => {
   loadDocument()
 })
+// CLAUDE-CHECKPOINT
 </script>

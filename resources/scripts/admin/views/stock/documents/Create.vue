@@ -126,6 +126,25 @@
           </div>
         </template>
 
+        <!-- Barcode Scanner -->
+        <div class="flex items-center gap-2 mb-4 p-3 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <svg class="w-5 h-5 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h.75c.621 0 1.125.504 1.125 1.125v14.25c0 .621-.504 1.125-1.125 1.125h-.75a1.125 1.125 0 01-1.125-1.125V4.875zm4.5 0c0-.621.504-1.125 1.125-1.125h.75c.621 0 1.125.504 1.125 1.125v14.25c0 .621-.504 1.125-1.125 1.125h-.75a1.125 1.125 0 01-1.125-1.125V4.875zm5.25 0c0-.621.504-1.125 1.125-1.125h.75c.621 0 1.125.504 1.125 1.125v14.25c0 .621-.504 1.125-1.125 1.125h-.75a1.125 1.125 0 01-1.125-1.125V4.875zm3.75 0c0-.621.504-1.125 1.125-1.125h.75c.621 0 1.125.504 1.125 1.125v14.25c0 .621-.504 1.125-1.125 1.125h-.75a1.125 1.125 0 01-1.125-1.125V4.875z" />
+          </svg>
+          <input
+            ref="barcodeInput"
+            v-model="barcodeValue"
+            @keydown.enter.prevent="handleBarcodeScan"
+            placeholder="Скенирај баркод..."
+            class="flex-1 bg-transparent border-none focus:ring-0 text-sm"
+            :disabled="isScanningBarcode"
+          />
+          <span v-if="isScanningBarcode" class="animate-spin h-4 w-4 border-2 border-primary-500 border-t-transparent rounded-full"></span>
+          <span v-if="scanMessage" class="text-xs whitespace-nowrap" :class="scanStatus === 'found' ? 'text-green-600' : 'text-red-600'">
+            {{ scanMessage }}
+          </span>
+        </div>
+
         <div v-if="form.items.length === 0" class="text-center py-8">
           <BaseIcon name="CubeIcon" class="h-8 w-8 text-gray-400 mx-auto mb-2" />
           <p class="text-gray-500">Нема додадени ставки. Кликнете "Додај ставка" за да започнете.</p>
@@ -303,7 +322,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStockStore } from '@/scripts/admin/stores/stock'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -323,6 +342,12 @@ const isSaving = ref(false)
 const saveAction = ref('draft')
 const warehouses = ref([])
 const trackedItems = ref([])
+
+const barcodeInput = ref(null)
+const barcodeValue = ref('')
+const isScanningBarcode = ref(false)
+const scanStatus = ref('')
+const scanMessage = ref('')
 
 const documentTypes = [
   {
@@ -387,6 +412,76 @@ function getItemTotal(item) {
     return Math.round(parseFloat(item.quantity) * item.wac)
   }
   return null
+}
+
+/**
+ * Handle barcode scan: search items by barcode, add to list if found.
+ */
+async function handleBarcodeScan() {
+  const barcode = barcodeValue.value.trim()
+  if (!barcode) return
+
+  isScanningBarcode.value = true
+  scanStatus.value = ''
+  scanMessage.value = ''
+
+  try {
+    const res = await axios.get('/items', {
+      params: { search: barcode, track_quantity: true, limit: 10 },
+    })
+    const results = res.data?.data || res.data || []
+
+    // Try exact barcode match first, then fallback to first result
+    const matched = results.find(i => i.barcode === barcode) || results[0]
+
+    if (matched) {
+      // Check if item already exists in the list
+      const existingIndex = form.items.findIndex(i => i.item_id === matched.id)
+      if (existingIndex >= 0) {
+        // Increment quantity
+        form.items[existingIndex].quantity = (parseFloat(form.items[existingIndex].quantity) || 0) + 1
+        scanStatus.value = 'found'
+        scanMessage.value = `+1 ${matched.name}`
+      } else {
+        // Add new item row
+        const newItem = {
+          item_id: matched.id,
+          quantity: 1,
+          unit_cost: null,
+          notes: '',
+          wac: null,
+          available_stock: null,
+        }
+        form.items.push(newItem)
+        const newIndex = form.items.length - 1
+
+        // Auto-fill cost/stock info
+        await onItemSelected(newIndex, matched.id)
+
+        scanStatus.value = 'found'
+        scanMessage.value = `${matched.name}`
+      }
+    } else {
+      scanStatus.value = 'not_found'
+      scanMessage.value = 'Не е пронајден'
+    }
+  } catch (err) {
+    console.error('Barcode scan error:', err)
+    scanStatus.value = 'not_found'
+    scanMessage.value = 'Грешка при пребарување'
+  } finally {
+    isScanningBarcode.value = false
+    barcodeValue.value = ''
+    // Re-focus barcode input for next scan
+    nextTick(() => {
+      barcodeInput.value?.focus()
+    })
+    // Clear scan message after 3 seconds
+    setTimeout(() => {
+      scanStatus.value = ''
+      scanMessage.value = ''
+    }, 3000)
+  }
 }
 
 /**

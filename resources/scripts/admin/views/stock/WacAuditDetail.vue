@@ -65,6 +65,12 @@
             {{ analysis.cascade_impact.affected_movements }} movements affected,
             value drift: {{ formatCurrency(analysis.cascade_impact.total_value_drift_cents) }}
           </div>
+          <div v-if="analysis.confidence !== undefined" class="mt-2 flex items-center gap-2">
+            <span class="text-xs font-medium text-gray-500">{{ $t('stock.ai_confidence') }}:</span>
+            <span :class="confidenceClass(analysis.confidence)">
+              {{ typeof analysis.confidence === 'number' ? (analysis.confidence * 100).toFixed(0) + '%' : analysis.confidence }}
+            </span>
+          </div>
           <div v-if="analysis.error" class="text-sm text-red-600">{{ analysis.error }}</div>
         </div>
       </div>
@@ -218,10 +224,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useStockStore } from '@/scripts/admin/stores/stock.js'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
+const { t } = useI18n()
 const route = useRoute()
 const stockStore = useStockStore()
 const notificationStore = useNotificationStore()
@@ -266,17 +274,20 @@ const rowClass = (d) => {
 }
 
 const errorCategoryLabel = (category) => {
-  const map = {
-    wrong_unit_cost: 'Wrong unit cost',
-    wrong_quantity: 'Wrong quantity',
-    wrong_date_order: 'Wrong date order',
-    missing_movement: 'Missing movement',
-    duplicate_movement: 'Duplicate movement',
-    rounding_error: 'Rounding error',
-    cascade: 'Cascade',
-  }
-  return map[category] || category || ''
+  if (!category) return ''
+  const key = `stock.error_category_${category}`
+  const translated = t(key)
+  // Fallback to formatted category if no translation found
+  return translated !== key ? translated : category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 }
+
+const confidenceClass = (confidence) => {
+  if (!confidence) return 'text-xs font-medium text-gray-500'
+  if (confidence >= 0.8) return 'text-xs font-semibold text-green-600'
+  if (confidence >= 0.5) return 'text-xs font-semibold text-yellow-600'
+  return 'text-xs font-semibold text-red-600'
+}
+// CLAUDE-CHECKPOINT
 
 const formatCurrency = (cents) => {
   if (cents === null || cents === undefined) return '-'

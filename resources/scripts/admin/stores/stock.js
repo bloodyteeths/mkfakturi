@@ -50,6 +50,11 @@ export const useStockStore = (useWindow = false) => {
         grand_total: { quantity: 0, value: 0 }
       },
       isLoadingValuation: false,
+      // Demand Forecast state
+      demandForecasts: [],
+      demandAIAnalysis: null,
+      aiAnalysisLoading: false,
+      isLoadingForecast: false,
       // WAC Audit state
       wacAuditRuns: [],
       wacAuditTotal: 0,
@@ -512,6 +517,36 @@ export const useStockStore = (useWindow = false) => {
         } catch (err) {
           handleError(err)
           throw err
+        }
+      },
+
+      // Demand Forecast actions
+      async fetchDemandForecast(itemIds = null) {
+        this.isLoadingForecast = true
+        try {
+          const params = itemIds ? { item_ids: itemIds } : {}
+          const response = await axios.get('/stock/demand-forecast', { params })
+          this.demandForecasts = response.data.data || []
+          return this.demandForecasts
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoadingForecast = false
+        }
+      },
+
+      async analyzeDemandAI() {
+        this.aiAnalysisLoading = true
+        try {
+          const response = await axios.post('/stock/demand-forecast/ai-analyze')
+          this.demandAIAnalysis = response.data.data || null
+          return this.demandAIAnalysis
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.aiAnalysisLoading = false
         }
       },
 

@@ -96,6 +96,25 @@
         </div>
       </div>
 
+      <!-- Barcode Scanner (only when editable) -->
+      <div v-if="isEditable" class="mb-4">
+        <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <svg class="w-5 h-5 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h.75c.621 0 1.125.504 1.125 1.125v14.25c0 .621-.504 1.125-1.125 1.125h-.75a1.125 1.125 0 01-1.125-1.125V4.875zm4.5 0c0-.621.504-1.125 1.125-1.125h.75c.621 0 1.125.504 1.125 1.125v14.25c0 .621-.504 1.125-1.125 1.125h-.75a1.125 1.125 0 01-1.125-1.125V4.875zm5.25 0c0-.621.504-1.125 1.125-1.125h.75c.621 0 1.125.504 1.125 1.125v14.25c0 .621-.504 1.125-1.125 1.125h-.75a1.125 1.125 0 01-1.125-1.125V4.875zm3.75 0c0-.621.504-1.125 1.125-1.125h.75c.621 0 1.125.504 1.125 1.125v14.25c0 .621-.504 1.125-1.125 1.125h-.75a1.125 1.125 0 01-1.125-1.125V4.875z" />
+          </svg>
+          <input
+            ref="barcodeInput"
+            v-model="barcodeValue"
+            @keydown.enter.prevent="handleBarcodeScan"
+            placeholder="Скенирај баркод за брзо пребројување..."
+            class="flex-1 bg-transparent border-none focus:ring-0 text-sm"
+          />
+          <span v-if="scanMessage" class="text-xs whitespace-nowrap" :class="scanStatus === 'found' ? 'text-green-600' : 'text-red-600'">
+            {{ scanMessage }}
+          </span>
+        </div>
+      </div>
+
       <!-- Items Table -->
       <div class="bg-white shadow overflow-hidden rounded-lg">
         <div class="overflow-x-auto">
@@ -160,7 +179,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
@@ -174,6 +193,11 @@ const items = ref([])
 const isLoading = ref(false)
 const isSaving = ref(false)
 const isActing = ref(false)
+
+const barcodeInput = ref(null)
+const barcodeValue = ref('')
+const scanStatus = ref('')
+const scanMessage = ref('')
 
 const isEditable = computed(() => {
   return stockCount.value && ['draft', 'in_progress'].includes(stockCount.value.status)
@@ -227,6 +251,58 @@ const recalcVariance = (item) => {
   } else {
     item.variance_quantity = null
     item.variance_percentage = null
+  }
+}
+
+/**
+ * Handle barcode scan: find item in the stocktake list by barcode/SKU, increment counted_quantity.
+ */
+const handleBarcodeScan = async () => {
+  const barcode = barcodeValue.value.trim()
+  if (!barcode) return
+
+  scanStatus.value = ''
+  scanMessage.value = ''
+
+  try {
+    // Search items API to resolve barcode to an item
+    const res = await window.axios.get('/items', {
+      params: { search: barcode, limit: 10 },
+    })
+    const results = res.data?.data || res.data || []
+    const matched = results.find(i => i.barcode === barcode) || results.find(i => i.sku === barcode) || results[0]
+
+    if (matched) {
+      // Find this item in the stocktake items list
+      const countItem = items.value.find(i => i.item_id === matched.id)
+      if (countItem) {
+        // Increment counted quantity by 1
+        const current = countItem.counted_quantity !== null && countItem.counted_quantity !== '' ? parseFloat(countItem.counted_quantity) : 0
+        countItem.counted_quantity = current + 1
+        recalcVariance(countItem)
+        scanStatus.value = 'found'
+        scanMessage.value = `+1 ${matched.name}`
+      } else {
+        scanStatus.value = 'not_found'
+        scanMessage.value = 'Артиклот не е во пописот'
+      }
+    } else {
+      scanStatus.value = 'not_found'
+      scanMessage.value = 'Не е пронајден'
+    }
+  } catch (err) {
+    console.error('Barcode scan error:', err)
+    scanStatus.value = 'not_found'
+    scanMessage.value = 'Грешка при пребарување'
+  } finally {
+    barcodeValue.value = ''
+    nextTick(() => {
+      barcodeInput.value?.focus()
+    })
+    setTimeout(() => {
+      scanStatus.value = ''
+      scanMessage.value = ''
+    }, 3000)
   }
 }
 

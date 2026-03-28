@@ -306,11 +306,16 @@ function formatNumber(num) {
 function getSourceClasses(sourceType) {
   const classes = {
     initial: 'bg-gray-100 text-gray-700',
+    opening_balance: 'bg-gray-100 text-gray-700',
+    purchase: 'bg-green-100 text-green-700',
     bill: 'bg-green-100 text-green-700',
     bill_item: 'bg-green-100 text-green-700',
+    sale: 'bg-red-100 text-red-700',
     invoice: 'bg-red-100 text-red-700',
     invoice_item: 'bg-red-100 text-red-700',
     adjustment: 'bg-amber-100 text-amber-700',
+    adjustment_in: 'bg-amber-100 text-amber-700',
+    adjustment_out: 'bg-amber-100 text-amber-700',
     transfer_in: 'bg-blue-100 text-blue-700',
     transfer_out: 'bg-purple-100 text-purple-700',
     inventory_document: 'bg-slate-100 text-slate-700',
@@ -321,6 +326,7 @@ function getSourceClasses(sourceType) {
     production_wastage: 'bg-rose-100 text-rose-700',
     wac_correction: 'bg-indigo-100 text-indigo-700',
     return: 'bg-cyan-100 text-cyan-700',
+    nivelacija: 'bg-violet-100 text-violet-700',
   }
   return classes[sourceType] || 'bg-gray-100 text-gray-700'
 }
@@ -328,11 +334,16 @@ function getSourceClasses(sourceType) {
 function getSourceDotClass(sourceType) {
   const dots = {
     initial: 'bg-gray-500',
+    opening_balance: 'bg-gray-500',
+    purchase: 'bg-green-500',
     bill: 'bg-green-500',
     bill_item: 'bg-green-500',
+    sale: 'bg-red-500',
     invoice: 'bg-red-500',
     invoice_item: 'bg-red-500',
     adjustment: 'bg-amber-500',
+    adjustment_in: 'bg-amber-500',
+    adjustment_out: 'bg-amber-500',
     transfer_in: 'bg-blue-500',
     transfer_out: 'bg-purple-500',
     inventory_document: 'bg-slate-500',
@@ -343,14 +354,17 @@ function getSourceDotClass(sourceType) {
     production_wastage: 'bg-rose-500',
     wac_correction: 'bg-indigo-500',
     return: 'bg-cyan-500',
+    nivelacija: 'bg-violet-500',
   }
   return dots[sourceType] || 'bg-gray-500'
 }
 
 function getRowClass(sourceType) {
   if (sourceType === 'wac_correction') return 'bg-indigo-50'
+  if (sourceType === 'nivelacija') return 'bg-violet-50'
   return ''
 }
+// CLAUDE-CHECKPOINT
 
 function getSourceLabel(sourceType) {
   // Try translation first, fallback to formatted type
@@ -406,6 +420,7 @@ function clearFilters() {
 function exportToCsv() {
   if (!stockStore.itemCard.movements.length) return
 
+  const BOM = '\uFEFF'
   const headers = [
     t('stock.date'),
     t('stock.source'),
@@ -421,7 +436,7 @@ function exportToCsv() {
 
   const rows = stockStore.itemCard.movements.map((m) => [
     m.date,
-    m.source_type,
+    getSourceLabel(m.source_type),
     m.reference || '',
     m.description || '',
     m.quantity > 0 ? m.quantity : '',
@@ -432,17 +447,17 @@ function exportToCsv() {
     m.balance_value ? (m.balance_value / 100).toFixed(2) : '',
   ])
 
-  const csvContent = [
-    headers.join(','),
-    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
-  ].join('\n')
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
-  link.download = `stock_card_${stockStore.itemCard.item?.sku || 'item'}_${new Date().toISOString().split('T')[0]}.csv`
-  link.click()
+  const itemName = (stockStore.itemCard.item?.name || 'item').replace(/[^a-zA-Z0-9\u0400-\u04FF\u0410-\u044F -]/g, '')
+  const csv = BOM + [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `lagerska-kartica-${itemName}-${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
 }
+// CLAUDE-CHECKPOINT
 
 onMounted(async () => {
   // Stock module is always enabled - load warehouses

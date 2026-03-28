@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\StockMovement;
 use App\Models\Warehouse;
+use App\Services\DemandForecastService;
 use App\Services\StockService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -617,6 +618,143 @@ class StockController extends Controller
     }
 
     /**
+     * Stock Overview Dashboard — KPIs, charts, recent movements, top items.
+     */
+    public function dashboard(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        // Get all trackable items with stock
+        $items = Item::where('company_id', $companyId)
+            ->where('track_quantity', true)
+            ->with(['unit'])
+            ->get();
+
+        $totalValue = 0;
+        $totalItems = 0;
+        $lowStockCount = 0;
+        $criticalStockCount = 0;
+        $topItemsByValue = [];
+
+        foreach ($items as $item) {
+            $stock = $this->stockService->getItemStock($companyId, $item->id);
+            $qty = $stock['quantity'];
+            $val = $stock['total_value'];
+
+            if ($qty != 0 || $val != 0) {
+                $totalItems++;
+                $totalValue += $val;
+
+                $topItemsByValue[] = [
+                    'item_id' => $item->id,
+                    'name' => $item->name,
+                    'sku' => $item->sku,
+                    'quantity' => $qty,
+                    'unit_name' => $item->unit?->name,
+                    'total_value' => $val,
+                ];
+            }
+
+            if ($qty <= 0) {
+                $criticalStockCount++;
+            } elseif ($item->minimum_quantity && $item->minimum_quantity > 0 && $qty <= $item->minimum_quantity) {
+                $lowStockCount++;
+            }
+        }
+
+        // Top 5 items by value
+        usort($topItemsByValue, fn ($a, $b) => $b['total_value'] <=> $a['total_value']);
+        $topItemsByValue = array_slice($topItemsByValue, 0, 5);
+
+        // Warehouses with stock
+        $warehouses = Warehouse::where('company_id', $companyId)
+            ->where('is_active', true)
+            ->get();
+
+        $warehousesWithStock = 0;
+        $warehouseValues = [];
+        foreach ($warehouses as $warehouse) {
+            $whValue = 0;
+            $hasStock = false;
+            $whMovements = StockMovement::where('company_id', $companyId)
+                ->where('warehouse_id', $warehouse->id)
+                ->selectRaw('item_id, SUM(quantity) as total_qty')
+                ->groupBy('item_id')
+                ->havingRaw('SUM(quantity) != 0')
+                ->get();
+
+            if ($whMovements->isNotEmpty()) {
+                $hasStock = true;
+                foreach ($whMovements as $m) {
+                    $itemStock = $this->stockService->getItemStock($companyId, $m->item_id, $warehouse->id);
+                    $whValue += $itemStock['total_value'];
+                }
+            }
+
+            if ($hasStock) {
+                $warehousesWithStock++;
+                $warehouseValues[] = [
+                    'warehouse_id' => $warehouse->id,
+                    'name' => $warehouse->name,
+                    'value' => $whValue,
+                ];
+            }
+        }
+
+        // Recent 10 movements
+        $recentMovements = StockMovement::where('company_id', $companyId)
+            ->with(['item:id,name', 'warehouse:id,name'])
+            ->orderBy('movement_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(fn ($m) => [
+                'id' => $m->id,
+                'date' => $m->movement_date->format('Y-m-d'),
+                'item_name' => $m->item?->name,
+                'warehouse_name' => $m->warehouse?->name,
+                'source_type' => $m->source_type,
+                'source_type_label' => $m->source_type_label,
+                'quantity' => $m->quantity,
+                'is_stock_in' => $m->isStockIn(),
+            ]);
+
+        // Movement trend — daily count for last 30 days
+        $thirtyDaysAgo = now()->subDays(30)->startOfDay();
+        $movementTrend = StockMovement::where('company_id', $companyId)
+            ->where('movement_date', '>=', $thirtyDaysAgo)
+            ->selectRaw('DATE(movement_date) as date, COUNT(*) as count')
+            ->groupByRaw('DATE(movement_date)')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date')
+            ->toArray();
+
+        // Fill in missing days with 0
+        $trendData = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $trendData[] = [
+                'date' => $date,
+                'count' => $movementTrend[$date] ?? 0,
+            ];
+        }
+
+        return response()->json([
+            'total_items' => $totalItems,
+            'total_value' => $totalValue,
+            'warehouses_count' => $warehousesWithStock,
+            'low_stock_count' => $lowStockCount,
+            'critical_stock_count' => $criticalStockCount,
+            'recent_movements' => $recentMovements,
+            'top_items_by_value' => $topItemsByValue,
+            'movement_trend' => $trendData,
+            'stock_by_warehouse' => $warehouseValues,
+        ]);
+    }
+    // CLAUDE-CHECKPOINT
+
+    /**
      * Generate PDF for an item's stock card (lagerska kartica).
      *
      * Reuses the itemCard logic to fetch movement history, then renders
@@ -729,6 +867,36 @@ class StockController extends Controller
         $filename = "lagerska-kartica-{$item->sku}-" . date('Y-m-d') . '.pdf';
 
         return $pdf->stream($filename);
+    }
+
+    /**
+     * Get demand forecast for low stock items.
+     * Uses moving average of last 90 days consumption.
+     */
+    public function demandForecast(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+        $itemIds = $request->query('item_ids');
+
+        $service = app(DemandForecastService::class);
+        $forecasts = $service->forecastItems((int) $companyId, $itemIds);
+
+        return response()->json(['data' => $forecasts]);
+    }
+
+    /**
+     * AI-enhanced demand analysis for critical items.
+     * Triggers Gemini analysis for items with < 14 days of stock.
+     */
+    public function demandForecastAI(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        $service = app(DemandForecastService::class);
+        $forecasts = $service->forecastItems((int) $companyId);
+        $analysis = $service->analyzeWithAI((int) $companyId, $forecasts);
+
+        return response()->json(['data' => $analysis]);
     }
 }
 

@@ -426,36 +426,35 @@ async function fetchData({ page, filter, sort }) {
 function exportToCsv() {
   if (!inventoryData.value.length) return
 
+  const BOM = '\uFEFF'
   const headers = [
-    t('items.name'),
-    t('items.sku'),
-    t('stock.warehouse'),
-    t('stock.quantity'),
-    t('stock.unit_cost'),
-    t('stock.total_value')
+    t('stock.sku') || 'Шифра',
+    t('items.name') || 'Назив',
+    t('stock.warehouse') || 'Магацин',
+    t('stock.quantity') || 'Количина',
+    t('stock.unit_cost') + ' (МКД)',
+    t('stock.total_value') + ' (МКД)',
   ]
 
   const rows = inventoryData.value.map(item => [
-    item.name,
     item.sku || '',
-    item.warehouse_name || t('stock.all_warehouses'),
+    item.name,
+    item.warehouse_name || '',
     item.quantity,
-    item.unit_cost,
-    item.total_value
+    item.unit_cost ? (item.unit_cost / 100).toFixed(2) : '0.00',
+    item.total_value ? (item.total_value / 100).toFixed(2) : '0.00',
   ])
 
-  let csvContent = "data:text/csv;charset=utf-8,"
-    + headers.join(",") + "\n"
-    + rows.map(e => e.join(",")).join("\n")
-
-  const encodedUri = encodeURI(csvContent)
-  const link = document.createElement("a")
-  link.setAttribute("href", encodedUri)
-  link.setAttribute("download", "inventory_report.csv")
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  const csv = BOM + [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `zalihi-${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
 }
+// CLAUDE-CHECKPOINT
 
 function toggleSelect(itemId) {
     if (selectedItems.value.includes(itemId)) {

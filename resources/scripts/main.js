@@ -50,6 +50,9 @@ window.Facturino.addMessages(posMessages)
 import wacAuditMessages from '@/scripts/admin/i18n/wac-audit.js'
 window.Facturino.addMessages(wacAuditMessages)
 
+import demandForecastMessages from '@/scripts/admin/i18n/demand-forecast.js'
+window.Facturino.addMessages(demandForecastMessages)
+
 // Auto-connect fiscal printer on app boot (if previously granted)
 import { fiscalAutoConnectPlugin } from '@/scripts/admin/plugins/fiscal-auto-connect.js'
 window.Facturino.booting(fiscalAutoConnectPlugin)

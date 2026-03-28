@@ -125,6 +125,7 @@ const ProjectCreate = () => import('@/scripts/admin/views/projects/Create.vue')
 const ProjectView = () => import('@/scripts/admin/views/projects/View.vue')
 
 // Stock Module (Phase 2)
+const StockOverview = () => import('@/scripts/admin/views/stock/StockOverview.vue')
 const StockInventory = () => import('@/scripts/admin/views/stock/Inventory.vue')
 const StockItemCard = () => import('@/scripts/admin/views/stock/ItemCard.vue')
 const StockWarehouseInventory = () => import('@/scripts/admin/views/stock/WarehouseInventory.vue')
@@ -469,6 +470,12 @@ export default [
       // Note: These routes are only functional when FACTURINO_STOCK_V1_ENABLED=true
       {
         path: 'stock',
+        name: 'stock.overview',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: StockOverview,
+      },
+      {
+        path: 'stock/inventory',
         name: 'stock.index',
         meta: { ability: abilities.VIEW_ITEM },
         component: StockInventory,
