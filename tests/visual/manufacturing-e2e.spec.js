@@ -403,6 +403,7 @@ test.describe('Manufacturing Module — Full Production E2E', () => {
       for (let attempt = 0; attempt < 12; attempt++) {
         await page.waitForTimeout(10000) // 10s between polls
         const verify = await api(page, 'GET', `/manufacturing/orders/${fullLifecycleOrderId}`)
+        if (verify.status === 502 || verify.status === 503 || verify.status === 524) continue // deploy/timeout
         expect(verify.status).toBe(200)
         order = verify.body?.data
         if (order?.status === 'completed') break

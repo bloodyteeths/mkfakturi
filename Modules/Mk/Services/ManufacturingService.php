@@ -276,9 +276,7 @@ class ManufacturingService
         // Enforce period lock on order date
         $this->periodLockService->enforceUnlocked($order->company_id, $order->order_date);
 
-        return DB::transaction(function () use ($order, $actualQty, $coOutputs) {
-            $companyId = $order->company_id;
-
+        $order = DB::transaction(function () use ($order, $actualQty, $coOutputs) {
             // Update order
             $order->update([
                 'actual_quantity' => $actualQty,
@@ -300,9 +298,6 @@ class ManufacturingService
             // Calculate variances against BOM normative
             $order->calculateVariances();
 
-            // Post to GL if IFRS is enabled
-            $this->postToGl($order);
-
             return $order->fresh([
                 'materials',
                 'laborEntries',
@@ -310,6 +305,11 @@ class ManufacturingService
                 'coProductionOutputs',
             ]);
         });
+
+        // Post to GL outside transaction to avoid cache table lock waits
+        $this->postToGl($order);
+
+        return $order;
     }
 
     /**
@@ -348,10 +348,10 @@ class ManufacturingService
                 'status' => ProductionOrder::STATUS_CANCELLED,
                 'notes' => trim($order->notes."\n[Cancelled] ".$reason),
             ]);
-
-            // Reverse GL entries if posted
-            $this->reverseGlEntries($order);
         });
+
+        // Reverse GL entries outside transaction to avoid cache table lock waits
+        $this->reverseGlEntries($order);
     }
 
     // ====================================================================
