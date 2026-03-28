@@ -375,7 +375,14 @@
         "upcoming_deadlines": "Yaklaşan Son Tarihler",
         "no_upcoming_deadlines": "Yaklaşan son tarih yok",
         "view_all_deadlines": "Tüm son tarihleri görüntüle",
-        "deadlines_summary": "{overdue} gecikmiş, {week} bu hafta"
+        "deadlines_summary": "{overdue} gecikmiş, {week} bu hafta",
+        "pending_documents": "Bekleyen Belgeler",
+        "no_pending_documents": "Bekleyen belge yok",
+        "view_all_documents": "Tüm belgeleri görüntüle",
+        "create_receipt_desc": "Alınan malları kaydet",
+        "payroll_desc": "Aylık bordro hesapla",
+        "ujp_forms_desc": "Vergi beyannameleri",
+        "travel_order_desc": "Seyahat emri oluştur"
     },
     "tax_types": {
         "name": "İsim",
@@ -581,7 +588,13 @@
         "supplier_ledger_report": "Tedarikçi Hesap Kartı",
         "prepared_by": "Hazırlayan",
         "approved_by": "Onaylayan",
-        "journal_entry": "Yevmiye Kaydı"
+        "journal_entry": "Yevmiye Kaydı",
+        "vat_number": "KDV Numarası",
+        "vat_number_help": "KDV mükellefleri için vergi numarası",
+        "tax_id_help": "7 haneli şirket kayıt numarası",
+        "bank_account": "Banka Hesabı",
+        "bank_name": "Banka Adı",
+        "has_due_amount": "Ödenmemiş bakiye ile"
     },
     "items": {
         "duplicate_warning_message": "Benzer isimde bir ürün zaten mevcut. Lütfen aşağıdaki mevcut kayıtları inceleyin.",
@@ -4474,7 +4487,27 @@
             "found_during_audit": "Пројдеama ревveзve",
             "opening_balance": "Açılış Bakiyesi",
             "other": "Дру"
-        }
+        },
+        "dashboard": {
+            "title": "Stok Özeti",
+            "total_value": "Toplam Değer",
+            "items_tracked": "Takip Edilen Ürünler",
+            "total_quantity": "Toplam Miktar",
+            "low_stock_alerts": "Düşük Stok Uyarıları",
+            "critical": "kritik",
+            "warning": "uyarı",
+            "critical_items": "Kritik Ürünler",
+            "item": "Ürün",
+            "current": "Mevcut",
+            "minimum": "Minimum",
+            "recent_movements": "Son Hareketler",
+            "new_receipt": "+ Giriş",
+            "new_issue": "+ Çıkış"
+        },
+        "new_receipt": "Yeni Stok Girişi",
+        "receipt": "Giriş",
+        "issue": "Çıkış",
+        "transfer": "Transfer"
     },
     "warehouses": {
         "title": "Depolar",

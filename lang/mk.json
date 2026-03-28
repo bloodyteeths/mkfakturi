@@ -413,7 +413,14 @@
         "upcoming_deadlines": "Претстојни рокови",
         "no_upcoming_deadlines": "Нема претстојни рокови",
         "view_all_deadlines": "Прикажи ги сите рокови",
-        "deadlines_summary": "{overdue} задоцнети, {week} оваа недела"
+        "deadlines_summary": "{overdue} задоцнети, {week} оваа недела",
+        "pending_documents": "Документи на чекање",
+        "no_pending_documents": "Нема документи на чекање",
+        "view_all_documents": "Прегледај ги сите документи",
+        "create_receipt_desc": "Евидентирај примена стока",
+        "payroll_desc": "Месечна пресметка на плати",
+        "ujp_forms_desc": "Даночни пријави",
+        "travel_order_desc": "Креирај патен налог"
     },
     "partner_dashboard": {
         "recent_commissions_title": "Најнови Провизии",
@@ -744,7 +751,13 @@
         "supplier_ledger_report": "Картица на добавувач",
         "prepared_by": "Составил",
         "approved_by": "Одобрил",
-        "journal_entry": "Книжење"
+        "journal_entry": "Книжење",
+        "vat_number": "ЕДБ за ДДВ",
+        "vat_number_help": "Даночен број за ДДВ обврзници",
+        "tax_id_help": "7-цифрен матичен број (ЕМБС)",
+        "bank_account": "Трансакциска сметка",
+        "bank_name": "Банка",
+        "has_due_amount": "Со неплатен долг"
     },
     "suppliers": {
         "title": "Добавувачи",

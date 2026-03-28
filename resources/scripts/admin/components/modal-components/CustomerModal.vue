@@ -122,8 +122,37 @@
                   v-model="customerStore.currentCustomer.tax_id"
                   type="text"
                   class="mt-1 md:mt-0"
+                  placeholder="1234567"
                 />
               </BaseInputGroup>
+
+              <BaseInputGroup :label="$t('customers.vat_number')">
+                <BaseInput
+                  v-model="customerStore.currentCustomer.vat_number"
+                  type="text"
+                  class="mt-1 md:mt-0"
+                  placeholder="MK4030006XXXXXX"
+                />
+              </BaseInputGroup>
+
+              <BaseInputGrid>
+                <BaseInputGroup :label="$t('customers.bank_account')">
+                  <BaseInput
+                    v-model="customerStore.currentCustomer.bank_account"
+                    type="text"
+                    class="mt-1 md:mt-0"
+                    placeholder="300000001234567"
+                  />
+                </BaseInputGroup>
+
+                <BaseInputGroup :label="$t('customers.bank_name')">
+                  <BaseInput
+                    v-model="customerStore.currentCustomer.bank_name"
+                    type="text"
+                    class="mt-1 md:mt-0"
+                  />
+                </BaseInputGroup>
+              </BaseInputGrid>
 
             </BaseInputGrid>
           </BaseTab>

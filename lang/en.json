@@ -964,7 +964,13 @@
         "supplier_ledger_report": "Supplier Ledger Card",
         "prepared_by": "Prepared by",
         "approved_by": "Approved by",
-        "journal_entry": "Journal Entry"
+        "journal_entry": "Journal Entry",
+        "vat_number": "VAT Number (EDB za DDV)",
+        "vat_number_help": "VAT registration number for DDV-registered entities",
+        "tax_id_help": "7-digit company registration number (EMBS)",
+        "bank_account": "Bank Account",
+        "bank_name": "Bank Name",
+        "has_due_amount": "With Outstanding Balance"
     },
     "dashboard": {
         "cards": {
@@ -1037,7 +1043,14 @@
         "upcoming_deadlines": "Upcoming Deadlines",
         "no_upcoming_deadlines": "No upcoming deadlines",
         "view_all_deadlines": "View all deadlines",
-        "deadlines_summary": "{overdue} overdue, {week} due this week"
+        "deadlines_summary": "{overdue} overdue, {week} due this week",
+        "pending_documents": "Pending Documents",
+        "no_pending_documents": "No pending documents",
+        "view_all_documents": "View all documents",
+        "create_receipt_desc": "Record goods received",
+        "payroll_desc": "Run monthly payroll",
+        "ujp_forms_desc": "Tax declarations",
+        "travel_order_desc": "Create travel order"
     },
     "dateRange": {
         "custom": "Custom",

@@ -187,6 +187,51 @@
                 :content-loading="isFetchingInitialData"
                 type="text"
                 name="tax_id"
+                placeholder="1234567"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('customers.tax_id_help') }}
+              </p>
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('customers.vat_number')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseInput
+                v-model="customerStore.currentCustomer.vat_number"
+                :content-loading="isFetchingInitialData"
+                type="text"
+                name="vat_number"
+                placeholder="MK4030006XXXXXX"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('customers.vat_number_help') }}
+              </p>
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('customers.bank_account')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseInput
+                v-model="customerStore.currentCustomer.bank_account"
+                :content-loading="isFetchingInitialData"
+                type="text"
+                name="bank_account"
+                placeholder="300000001234567"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('customers.bank_name')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseInput
+                v-model="customerStore.currentCustomer.bank_name"
+                :content-loading="isFetchingInitialData"
+                type="text"
+                name="bank_name"
               />
             </BaseInputGroup>
 

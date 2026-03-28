@@ -52,6 +52,34 @@
       />
     </BaseDescriptionList>
 
+    <!-- Tax & Banking -->
+    <BaseDescriptionList class="mt-5">
+      <BaseDescriptionListItem
+        v-if="selectedViewCustomer.tax_id"
+        :content-loading="contentLoading"
+        :label="$t('customers.tax_id')"
+        :value="selectedViewCustomer?.tax_id"
+      />
+      <BaseDescriptionListItem
+        v-if="selectedViewCustomer.vat_number"
+        :content-loading="contentLoading"
+        :label="$t('customers.vat_number')"
+        :value="selectedViewCustomer?.vat_number"
+      />
+      <BaseDescriptionListItem
+        v-if="selectedViewCustomer.bank_account"
+        :content-loading="contentLoading"
+        :label="$t('customers.bank_account')"
+        :value="selectedViewCustomer?.bank_account"
+      />
+      <BaseDescriptionListItem
+        v-if="selectedViewCustomer.bank_name"
+        :content-loading="contentLoading"
+        :label="$t('customers.bank_name')"
+        :value="selectedViewCustomer?.bank_name"
+      />
+    </BaseDescriptionList>
+
     <!-- Address -->
     <BaseHeading
       v-if="selectedViewCustomer.billing || selectedViewCustomer.shipping"

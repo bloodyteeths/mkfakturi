@@ -63,6 +63,21 @@ class CustomerRequest extends FormRequest
                 'nullable',
             ],
             'tax_id' => $taxIdRules,
+            'vat_number' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+            'bank_account' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+            'bank_name' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'enable_portal' => [
                 'boolean',
             ],
@@ -160,6 +175,9 @@ class CustomerRequest extends FormRequest
                 'viber_phone',
                 'prefix',
                 'tax_id',
+                'vat_number',
+                'bank_account',
+                'bank_name',
                 'company_name',
                 'contact_name',
                 'website',

@@ -456,7 +456,14 @@
         "upcoming_deadlines": "Afatet e ardhshme",
         "no_upcoming_deadlines": "Nuk ka afate të ardhshme",
         "view_all_deadlines": "Shiko të gjitha afatet",
-        "deadlines_summary": "{overdue} të vonuara, {week} këtë javë"
+        "deadlines_summary": "{overdue} të vonuara, {week} këtë javë",
+        "pending_documents": "Dokumente në pritje",
+        "no_pending_documents": "Nuk ka dokumente në pritje",
+        "view_all_documents": "Shiko të gjitha dokumentet",
+        "create_receipt_desc": "Regjistro mallrat e marra",
+        "payroll_desc": "Llogarit pagat mujore",
+        "ujp_forms_desc": "Deklaratat tatimore",
+        "travel_order_desc": "Krijo urdhër udhëtimi"
     },
     "partner_dashboard": {
         "recent_commissions_title": "Komisionet e Fundit",
@@ -787,7 +794,13 @@
         "supplier_ledger_report": "Kartela e furnitorit",
         "prepared_by": "Përpiloi",
         "approved_by": "Miratoi",
-        "journal_entry": "Regjistrim"
+        "journal_entry": "Regjistrim",
+        "vat_number": "Numri i TVSH-së",
+        "vat_number_help": "Numri i regjistrimit për TVSH",
+        "tax_id_help": "Numri i regjistrimit të kompanisë (7 shifra)",
+        "bank_account": "Llogaria bankare",
+        "bank_name": "Banka",
+        "has_due_amount": "Me borxh të papaguar"
     },
     "suppliers": {
         "title": "Furnitorët",
@@ -1140,7 +1153,27 @@
             "found_during_audit": "Прajoјditaо прdhe ревdheзdheја",
             "opening_balance": "Fillestare menjëqindјба",
             "other": "Друго"
-        }
+        },
+        "dashboard": {
+            "title": "Pasqyra e stokut",
+            "total_value": "Vlera totale",
+            "items_tracked": "Artikuj të gjurmuar",
+            "total_quantity": "Sasia totale",
+            "low_stock_alerts": "Alarm stoku i ulët",
+            "critical": "kritike",
+            "warning": "paralajmërim",
+            "critical_items": "Artikuj kritikë",
+            "item": "Artikull",
+            "current": "Aktuale",
+            "minimum": "Minimumi",
+            "recent_movements": "Lëvizjet e fundit",
+            "new_receipt": "+ Pranim",
+            "new_issue": "+ Lëshim"
+        },
+        "new_receipt": "Pranim i ri",
+        "receipt": "Pranim",
+        "issue": "Lëshim",
+        "transfer": "Transferim"
     },
     "warehouses": {
         "title": "Magazina",

@@ -78,12 +78,22 @@
                 <div><span class="field-label">Телефон:</span> <span class="field-value">{{ $addr->phone }}</span></div>
             @endif
             <div><span class="field-label">Место на издавање:</span> <span class="field-value">{{ optional($addr)->city ?? 'Скопје' }}</span></div>
+            @php
+                $bankAccount = $invoice->company->bank_account_number ?? data_get($invoice->company, 'settings.bank_account_number');
+                $bankName = $invoice->company->bank_name ?? data_get($invoice->company, 'settings.bank_name');
+            @endphp
+            @if($bankAccount)
+                <div><span class="field-label">Трансакциска сметка:</span> <span class="field-value">{{ $bankAccount }}</span></div>
+            @endif
+            @if($bankName)
+                <div><span class="field-label">Банка:</span> <span class="field-value">{{ $bankName }}</span></div>
+            @endif
         </div>
 
         {{-- Buyer Block --}}
         <div class="info-col">
             <div class="section-title">ПРИМАТЕЛ НА ФАКТУРА</div>
-            <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->customer->name ?? '' }}</span></div>
+            <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->customer->company_name ?: ($invoice->customer->name ?? '') }}</span></div>
             @php
                 $custAddr = $invoice->customer ? $invoice->customer->billingAddress : null;
             @endphp
@@ -108,6 +118,12 @@
             @if($invoice->customer && $invoice->customer->phone)
                 <div><span class="field-label">Телефон:</span> <span class="field-value">{{ $invoice->customer->phone }}</span></div>
             @endif
+            @if(isset($invoice->customer->bank_account) && $invoice->customer->bank_account)
+                <div><span class="field-label">Трансакциска сметка:</span> <span class="field-value">{{ $invoice->customer->bank_account }}</span></div>
+            @endif
+            @if(isset($invoice->customer->bank_name) && $invoice->customer->bank_name)
+                <div><span class="field-label">Банка:</span> <span class="field-value">{{ $invoice->customer->bank_name }}</span></div>
+            @endif
         </div>
     </div>
     <div style="clear: both;"></div>
@@ -122,7 +138,7 @@
         </tr>
         <tr>
             <td style="padding:3px; border:1px solid #333;"><strong>Ден на извршен промет:</strong></td>
-            <td style="padding:3px; border:1px solid #333;">{{ $invoice->formattedInvoiceDate }}</td>
+            <td style="padding:3px; border:1px solid #333;">{{ $invoice->service_date ?? $invoice->formattedInvoiceDate }}</td>
             <td style="padding:3px; border:1px solid #333;"><strong>Рок на плаќање:</strong></td>
             <td style="padding:3px; border:1px solid #333;">{{ $invoice->formattedDueDate }}</td>
         </tr>
@@ -321,9 +337,16 @@
     {{-- Payment Details --}}
     <div style="margin-top: 6px; padding: 4px; border: 1px solid #ccc; font-size: 9px;">
         <div style="font-weight: bold; margin-bottom: 2px;">Детали за плаќање:</div>
-        <div><strong>Валута:</strong> МКД (Македонски денар)</div>
-        @if(optional($invoice->company->address)->zip)
-            <div><strong>Трансакциска сметка:</strong> {{ $invoice->company->address->zip }}</div>
+        <div><strong>Валута:</strong> {{ optional($invoice->customer->currency)->code ?? 'МКД' }} ({{ optional($invoice->customer->currency)->name ?? 'Македонски денар' }})</div>
+        @php
+            $payBankAccount = $bankAccount ?? ($invoice->company->bank_account_number ?? data_get($invoice->company, 'settings.bank_account_number'));
+            $payBankName = $bankName ?? ($invoice->company->bank_name ?? data_get($invoice->company, 'settings.bank_name'));
+        @endphp
+        @if($payBankAccount)
+            <div><strong>Трансакциска сметка:</strong> {{ $payBankAccount }}</div>
+        @endif
+        @if($payBankName)
+            <div><strong>Банка:</strong> {{ $payBankName }}</div>
         @endif
         <div><strong>Начин на плаќање:</strong> Банкарски трансфер</div>
     </div>
@@ -358,6 +381,27 @@
 
     {{-- CASYS QR Payment --}}
     @include('app.pdf.invoice.partials.casys-qr')
+
+    {{-- Signature / Stamp Placeholder --}}
+    <table style="width: 100%; margin-top: 30px; border: none; font-family: 'DejaVu Sans'; font-size: 9px;">
+        <tr>
+            <td style="width: 35%; text-align: center; border: none; vertical-align: bottom; padding-bottom: 0;">
+                <div style="border-top: 1px solid #333; width: 80%; margin: 0 auto; padding-top: 3px;">
+                    Фактурирал:
+                </div>
+            </td>
+            <td style="width: 30%; text-align: center; border: none; vertical-align: bottom; padding-bottom: 0;">
+                <div style="width: 60px; height: 60px; border: 1px solid #999; border-radius: 50%; margin: 0 auto; line-height: 60px; color: #999; font-size: 8px;">
+                    М.П.
+                </div>
+            </td>
+            <td style="width: 35%; text-align: center; border: none; vertical-align: bottom; padding-bottom: 0;">
+                <div style="border-top: 1px solid #333; width: 80%; margin: 0 auto; padding-top: 3px;">
+                    Примил:
+                </div>
+            </td>
+        </tr>
+    </table>
 
     {{-- Footer / Legal Text --}}
     <div class="footer" style="margin-top: 6px; border-top: 1px solid #ccc; padding-top: 3px;">

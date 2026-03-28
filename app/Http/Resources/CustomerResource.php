@@ -36,6 +36,9 @@ class CustomerResource extends JsonResource
             'base_due_amount' => $this->base_due_amount,
             'prefix' => $this->prefix,
             'tax_id' => $this->tax_id,
+            'vat_number' => $this->vat_number,
+            'bank_account' => $this->bank_account,
+            'bank_name' => $this->bank_name,
             'billing' => $this->whenLoaded('billingAddress', function () {
                 return AddressResource::make($this->billingAddress);
             }),

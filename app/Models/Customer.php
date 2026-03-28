@@ -402,6 +402,20 @@ class Customer extends Authenticatable implements HasMedia
             $query->wherePhone($filters->get('phone'));
         }
 
+        if ($filters->get('tax_id')) {
+            $query->where('tax_id', 'LIKE', '%'.$filters->get('tax_id').'%');
+        }
+
+        if ($filters->get('vat_number')) {
+            $query->where('vat_number', 'LIKE', '%'.$filters->get('vat_number').'%');
+        }
+
+        if ($filters->get('has_due_amount')) {
+            $query->whereHas('invoices', function ($q) {
+                $q->where('due_amount', '>', 0);
+            });
+        }
+
         if ($filters->get('orderByField') || $filters->get('orderBy')) {
             $field = $filters->get('orderByField') ? $filters->get('orderByField') : 'name';
             $orderBy = $filters->get('orderBy') ? $filters->get('orderBy') : 'asc';

@@ -16,5 +16,8 @@ export default function () {
     customFields: [],
     fields: [],
     enable_portal: false,
+    vat_number: null,
+    bank_account: null,
+    bank_name: null,
   }
 }

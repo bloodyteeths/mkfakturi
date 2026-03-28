@@ -75,6 +75,30 @@
           autocomplete="off"
         />
       </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('customers.tax_id')" class="text-left">
+        <BaseInput
+          v-model="filters.tax_id"
+          type="text"
+          name="tax_id"
+          autocomplete="off"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('customers.vat_number')" class="text-left">
+        <BaseInput
+          v-model="filters.vat_number"
+          type="text"
+          name="vat_number"
+          autocomplete="off"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('customers.has_due_amount')" class="text-left">
+        <BaseSwitch
+          v-model="filters.has_due_amount"
+        />
+      </BaseInputGroup>
     </BaseFilterWrapper>
 
     <BaseEmptyPlaceholder
@@ -175,6 +199,18 @@
           </span>
         </template>
 
+        <template #cell-tax_id="{ row }">
+          <span class="text-xs">
+            {{ row.data.tax_id || '-' }}
+          </span>
+        </template>
+
+        <template #cell-vat_number="{ row }">
+          <span class="text-xs">
+            {{ row.data.vat_number || '-' }}
+          </span>
+        </template>
+
         <template #cell-due_amount="{ row }">
           <BaseFormatMoney
             :amount="row.data.due_amount || 0"
@@ -228,6 +264,9 @@ let filters = reactive({
   display_name: '',
   contact_name: '',
   phone: '',
+  tax_id: '',
+  vat_number: '',
+  has_due_amount: false,
 })
 
 const showEmptyScreen = computed(
@@ -263,10 +302,12 @@ const customerColumns = computed(() => {
       tdClass: 'font-medium text-gray-900',
     },
     { key: 'phone', label: t('customers.phone') },
+    { key: 'tax_id', label: t('customers.tax_id') },
+    { key: 'vat_number', label: t('customers.vat_number') },
     { key: 'due_amount', label: t('customers.amount_due') },
     {
       key: 'created_at',
-      label: t('customers.added_on'), // Fixed: changed from t('items.added_on') to t('customers.added_on')
+      label: t('customers.added_on'),
     },
     {
       key: 'actions',
@@ -312,6 +353,9 @@ async function fetchData({ page, filter, sort }) {
     display_name: filters.display_name,
     contact_name: filters.contact_name,
     phone: filters.phone,
+    tax_id: filters.tax_id,
+    vat_number: filters.vat_number,
+    has_due_amount: filters.has_due_amount ? 1 : '',
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,
@@ -335,6 +379,9 @@ function clearFilter() {
   filters.display_name = ''
   filters.contact_name = ''
   filters.phone = ''
+  filters.tax_id = ''
+  filters.vat_number = ''
+  filters.has_due_amount = false
 }
 
 function toggleFilter() {
