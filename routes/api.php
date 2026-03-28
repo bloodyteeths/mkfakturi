@@ -1369,6 +1369,10 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/{id}/lock', [\Modules\Mk\Http\Controllers\BudgetController::class, 'lock']);
                 Route::get('/{id}/vs-actual', [\Modules\Mk\Http\Controllers\BudgetController::class, 'budgetVsActual']);
                 Route::delete('/{id}', [\Modules\Mk\Http\Controllers\BudgetController::class, 'destroy']);
+                Route::post('/{id}/clone', [\Modules\Mk\Http\Controllers\BudgetController::class, 'clone']);
+                Route::post('/{id}/archive', [\Modules\Mk\Http\Controllers\BudgetController::class, 'archive']);
+                Route::get('/{id}/export-csv', [\Modules\Mk\Http\Controllers\BudgetController::class, 'exportCsv']);
+                Route::get('/{id}/export-pdf', [\Modules\Mk\Http\Controllers\BudgetController::class, 'exportPdf']);
             });
 
             // ----------------------------------
