@@ -29,7 +29,7 @@ class ManufacturingReportService
             $query->where('order_date', '<=', $to);
         }
 
-        $orders = $query->with(['outputItem:id,name,unit_id', 'outputItem.unit:id,name', 'bom:id,name,code'])->get();
+        $orders = $query->with(['outputItem:id,name,unit_id', 'outputItem.unit:id,name', 'bom', 'bom.lines.item'])->get();
 
         // Group by output item for per-product breakdown
         $byProduct = $orders->groupBy('output_item_id')->map(function ($group) {
@@ -84,7 +84,7 @@ class ManufacturingReportService
 
         $orders = $query->with([
             'outputItem:id,name',
-            'bom:id,name,code',
+            'bom', 'bom.lines.item',
             'materials.item:id,name',
         ])->get();
 
@@ -210,7 +210,7 @@ class ManufacturingReportService
         $order->load([
             'outputItem:id,name,unit_id',
             'outputItem.unit:id,name',
-            'bom:id,name,code',
+            'bom', 'bom.lines.item',
             'currency:id,name,code,symbol',
             'outputWarehouse:id,name',
             'materials.item:id,name,unit_id',

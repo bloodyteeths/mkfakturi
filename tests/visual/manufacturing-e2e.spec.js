@@ -397,15 +397,18 @@ test.describe('Manufacturing Module — Full Production E2E', () => {
       actual_quantity: 48, // Slightly less than planned (50) — tests variance
     })
 
-    // 524 = Cloudflare timeout — server still processed it. Verify via GET.
+    // 524 = Cloudflare timeout — server still processing. Poll until completed.
     if (res.status === 524 || res.status === 502) {
-      // Wait for server to finish processing, then verify
-      await page.waitForTimeout(5000)
-      const verify = await api(page, 'GET', `/manufacturing/orders/${fullLifecycleOrderId}`)
-      expect(verify.status).toBe(200)
-      const order = verify.body?.data
-      expect(order.status).toBe('completed')
-      expect(order.actual_quantity).toBe('48.0000')
+      let order = null
+      for (let attempt = 0; attempt < 12; attempt++) {
+        await page.waitForTimeout(10000) // 10s between polls
+        const verify = await api(page, 'GET', `/manufacturing/orders/${fullLifecycleOrderId}`)
+        expect(verify.status).toBe(200)
+        order = verify.body?.data
+        if (order?.status === 'completed') break
+      }
+      expect(order?.status).toBe('completed')
+      expect(order?.actual_quantity).toBe('48.0000')
     } else {
       expect(res.status).toBe(200)
       const order = res.body?.data
@@ -526,7 +529,13 @@ test.describe('Manufacturing Module — Full Production E2E', () => {
   })
 
   test('7.2 — Variance report', async () => {
-    const res = await api(page, 'GET', '/manufacturing/reports/variance')
+    // Retry — may hit lock wait from prior completion transaction
+    let res
+    for (let i = 0; i < 3; i++) {
+      res = await api(page, 'GET', '/manufacturing/reports/variance')
+      if (res.status === 200) break
+      await page.waitForTimeout(5000)
+    }
     expect(res.status).toBe(200)
     expect(res.body?.success).toBe(true)
   })
