@@ -516,6 +516,18 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{id}/receipts', [FiscalDeviceController::class, 'receipts']);
             });
 
+            // Fiscal Monitor — Fraud Detection (Item #7)
+            // ----------------------------------
+
+            Route::prefix('fiscal-monitor')->group(function () {
+                Route::get('/dashboard', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'dashboard']);
+                Route::get('/events', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'events']);
+                Route::post('/events', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'logEvent']);
+                Route::get('/alerts', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'alerts']);
+                Route::patch('/alerts/{id}', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'updateAlert']);
+                Route::get('/audit-report', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'auditReport']);
+            });
+
             // Company Lookup (Central Registry)
             // ----------------------------------
 

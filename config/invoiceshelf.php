@@ -543,6 +543,18 @@ return [
             'feature_flag' => 'accounting_backbone',
         ],
         [
+            'title' => 'navigation.fiscal_monitor',
+            'group' => 2,
+            'submenu' => 'operations',
+            'link' => '/admin/fiscal-monitor',
+            'icon' => 'ShieldExclamationIcon',
+            'name' => 'Fiscal Monitor',
+            'owner_only' => true,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
+        [
             'title' => 'navigation.projects',
             'group' => 2,
             'submenu' => 'operations',

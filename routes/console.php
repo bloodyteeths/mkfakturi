@@ -237,6 +237,15 @@ if (InstallUtils::isDbCreated()) {
         ->withoutOverlapping()
         ->name('portfolio-recalculate');
 
+    // Fiscal fraud detection — daily checks at 6:30 AM Skopje
+    // Checks: missing Z-reports, cash discrepancies, receipt gaps
+    Schedule::command('fiscal:fraud-check')
+        ->dailyAt('06:30')
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->name('fiscal-fraud-check');
+
     // Post monthly depreciation GL entries on 1st of each month at 00:30
     Schedule::command('depreciation:post-monthly')
         ->monthlyOn(1, '00:30')

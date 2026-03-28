@@ -1320,6 +1320,18 @@ export default [
         component: () => import('@/scripts/admin/views/collections/Index.vue'),
       },
 
+      // Fiscal Monitor — Cash Register Fraud Detection
+      {
+        path: 'fiscal-monitor',
+        name: 'fiscal-monitor.index',
+        component: () => import('@/scripts/admin/views/fiscal-monitor/Index.vue'),
+      },
+      {
+        path: 'fiscal-monitor/audit',
+        name: 'fiscal-monitor.audit',
+        component: () => import('@/scripts/admin/views/fiscal-monitor/AuditReport.vue'),
+      },
+
       // Manufacturing Module
       {
         path: 'manufacturing',

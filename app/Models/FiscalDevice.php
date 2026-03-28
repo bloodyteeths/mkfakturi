@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Mk\Models\FiscalDeviceEvent;
+use Modules\Mk\Models\FiscalFraudAlert;
 
 /**
  * Fiscal Device Model
@@ -54,6 +56,16 @@ class FiscalDevice extends Model
     public function receipts(): HasMany
     {
         return $this->hasMany(FiscalReceipt::class);
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(FiscalDeviceEvent::class);
+    }
+
+    public function fraudAlerts(): HasMany
+    {
+        return $this->hasMany(FiscalFraudAlert::class);
     }
 
     public function scopeActive($query)
