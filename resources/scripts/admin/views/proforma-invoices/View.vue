@@ -615,7 +615,7 @@ onBeforeUnmount(() => {
                 <div class="flex items-center justify-between gap-2">
                   <span class="text-sm font-medium text-gray-900 truncate">{{ log.to }}</span>
                   <span class="text-xs text-gray-500 whitespace-nowrap">
-                    {{ new Date(log.created_at).toLocaleString() }}
+                    {{ new Date(log.created_at).toLocaleDateString('mk-MK', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }}
                   </span>
                 </div>
                 <p class="text-xs text-gray-500 mt-0.5 truncate">{{ log.subject }}</p>

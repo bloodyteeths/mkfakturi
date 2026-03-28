@@ -1585,8 +1585,18 @@
         "created": "Проfaturëта е me sukses креdheраnë",
         "updated": "Проfaturëта е me sukses ажурdheраnë",
         "deleted": "Проfaturëта е me sukses dheзбрdheшаnë",
-        "sent_successfully": "Проfaturëта е me sukses dheспратеnë",
-        "empty_description": "Krijoте проfatura për juajdheте klientë"
+        "sent_successfully": "Profatura u dërgua me sukses",
+        "send_proforma_invoice": "Dërgo Profaturën",
+        "converting": "Duke konvertuar...",
+        "view_converted_invoice": "Shiko faturën e konvertuar",
+        "marked_as_sent": "Profatura u shënua si e dërguar",
+        "marked_as_viewed": "Profatura u shënua si e parë",
+        "marked_as_expired": "Profatura u shënua si e skaduar",
+        "marked_as_rejected": "Profatura u shënua si e refuzuar",
+        "converted_successfully": "Profatura u konvertua në faturë me sukses",
+        "no_matching_proforma_invoices": "Nuk u gjetën profatura",
+        "something_went_wrong": "Diçka shkoi keq gjatë dërgimit të profaturës",
+        "empty_description": "Krijoni profatura për klientët tuaj"
     },
     "invoices": {
         "title": "Faturat",

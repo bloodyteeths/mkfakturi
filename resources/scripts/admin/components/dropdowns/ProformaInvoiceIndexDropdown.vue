@@ -9,7 +9,7 @@
 
     <!-- Edit Proforma Invoice  -->
     <router-link
-      v-if="userStore.hasAbilities(abilities.EDIT_ESTIMATE) && row.allow_edit"
+      v-if="userStore.hasAbilities(abilities.EDIT_PROFORMA_INVOICE) && row.allow_edit"
       :to="`/admin/proforma-invoices/${row.id}/edit`"
     >
       <BaseDropdownItem>
@@ -34,7 +34,7 @@
     <router-link
       v-if="
         route.name !== 'proforma-invoices.view' &&
-        userStore.hasAbilities(abilities.VIEW_ESTIMATE)
+        userStore.hasAbilities(abilities.VIEW_PROFORMA_INVOICE)
       "
       :to="`/admin/proforma-invoices/${row.id}/view`"
     >
@@ -109,7 +109,7 @@
 
     <!--  Delete Proforma Invoice  -->
     <BaseDropdownItem
-      v-if="userStore.hasAbilities(abilities.DELETE_ESTIMATE)"
+      v-if="userStore.hasAbilities(abilities.DELETE_PROFORMA_INVOICE)"
       @click="removeProformaInvoice(row.id)"
     >
       <BaseIcon
@@ -168,14 +168,14 @@ function canConvertToInvoice(row) {
 function canMarkAsSent(row) {
   return (
     row.status === 'DRAFT' &&
-    userStore.hasAbilities(abilities.EDIT_ESTIMATE)
+    userStore.hasAbilities(abilities.EDIT_PROFORMA_INVOICE)
   )
 }
 
 function canMarkAsViewed(row) {
   return (
     (row.status === 'DRAFT' || row.status === 'SENT') &&
-    userStore.hasAbilities(abilities.EDIT_ESTIMATE)
+    userStore.hasAbilities(abilities.EDIT_PROFORMA_INVOICE)
   )
 }
 
@@ -184,7 +184,7 @@ function canMarkAsExpired(row) {
     row.status !== 'CONVERTED' &&
     row.status !== 'EXPIRED' &&
     row.status !== 'REJECTED' &&
-    userStore.hasAbilities(abilities.EDIT_ESTIMATE)
+    userStore.hasAbilities(abilities.EDIT_PROFORMA_INVOICE)
   )
 }
 
@@ -192,7 +192,7 @@ function canMarkAsRejected(row) {
   return (
     row.status !== 'CONVERTED' &&
     row.status !== 'REJECTED' &&
-    userStore.hasAbilities(abilities.EDIT_ESTIMATE)
+    userStore.hasAbilities(abilities.EDIT_PROFORMA_INVOICE)
   )
 }
 
@@ -264,9 +264,7 @@ async function onMarkAsSent(id) {
     })
     .then(async (response) => {
       if (response) {
-        // Call API to mark as sent - the store updates status via markAsViewed (since there's no markAsSent in store)
-        // We need to add this action or use send
-        await proformaInvoiceStore.markAsViewed(id)
+        await proformaInvoiceStore.markAsSent(id)
         props.table && props.table.refresh()
       }
     })

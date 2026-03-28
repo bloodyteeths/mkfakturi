@@ -1084,25 +1084,25 @@ export default [
       {
         path: 'proforma-invoices',
         name: 'proforma-invoices.index',
-        meta: { ability: abilities.VIEW_ESTIMATE },
+        meta: { ability: abilities.VIEW_PROFORMA_INVOICE },
         component: ProformaInvoiceIndex,
       },
       {
         path: 'proforma-invoices/create',
         name: 'proforma-invoices.create',
-        meta: { ability: abilities.CREATE_ESTIMATE },
+        meta: { ability: abilities.CREATE_PROFORMA_INVOICE },
         component: ProformaInvoiceCreate,
       },
       {
         path: 'proforma-invoices/:id/view',
         name: 'proforma-invoices.view',
-        meta: { ability: abilities.VIEW_ESTIMATE },
+        meta: { ability: abilities.VIEW_PROFORMA_INVOICE },
         component: ProformaInvoiceView,
       },
       {
         path: 'proforma-invoices/:id/edit',
         name: 'proforma-invoices.edit',
-        meta: { ability: abilities.EDIT_ESTIMATE },
+        meta: { ability: abilities.EDIT_PROFORMA_INVOICE },
         component: ProformaInvoiceCreate,
       },
 

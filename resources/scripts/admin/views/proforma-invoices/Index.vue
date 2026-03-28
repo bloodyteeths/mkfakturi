@@ -139,6 +139,8 @@
           <BaseTab :title="$t('general.all')" filter="" />
           <BaseTab :title="$t('general.draft')" filter="DRAFT" />
           <BaseTab :title="$t('general.sent')" filter="SENT" />
+          <BaseTab :title="$t('proforma_invoices.statuses.viewed')" filter="VIEWED" />
+          <BaseTab :title="$t('proforma_invoices.statuses.expired')" filter="EXPIRED" />
           <BaseTab :title="$t('proforma_invoices.converted')" filter="CONVERTED" />
         </BaseTabGroup>
 
@@ -164,6 +166,16 @@
               <BaseIcon name="ChevronDownIcon" />
             </span>
           </template>
+
+          <BaseDropdownItem @click="bulkMarkAsSent">
+            <BaseIcon name="PaperAirplaneIcon" class="mr-3 text-gray-600" />
+            {{ $t('proforma_invoices.mark_as_sent') }}
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="bulkMarkAsExpired">
+            <BaseIcon name="ClockIcon" class="mr-3 text-gray-600" />
+            {{ $t('proforma_invoices.mark_as_expired') }}
+          </BaseDropdownItem>
 
           <BaseDropdownItem @click="removeMultipleProformaInvoices">
             <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
@@ -360,12 +372,10 @@ onUnmounted(() => {
 })
 
 function hasAtleastOneAbility() {
-  return userStore.hasAbilities([
-    abilities.DELETE_PROFORMA_INVOICE,
-    abilities.EDIT_PROFORMA_INVOICE,
-    abilities.VIEW_PROFORMA_INVOICE,
-    abilities.SEND_PROFORMA_INVOICE,
-  ])
+  return userStore.hasAbilities(abilities.DELETE_PROFORMA_INVOICE) ||
+    userStore.hasAbilities(abilities.EDIT_PROFORMA_INVOICE) ||
+    userStore.hasAbilities(abilities.VIEW_PROFORMA_INVOICE) ||
+    userStore.hasAbilities(abilities.SEND_PROFORMA_INVOICE)
 }
 
 async function clearStatusSearch() {
@@ -420,6 +430,12 @@ function setStatusFilter(val) {
     case t('general.sent'):
       filters.status = 'SENT'
       break
+    case t('proforma_invoices.statuses.viewed'):
+      filters.status = 'VIEWED'
+      break
+    case t('proforma_invoices.statuses.expired'):
+      filters.status = 'EXPIRED'
+      break
     case t('proforma_invoices.converted'):
       filters.status = 'CONVERTED'
       break
@@ -448,6 +464,56 @@ function clearFilter() {
   filters.proforma_invoice_number = ''
 
   activeTab.value = t('general.all')
+}
+
+async function bulkMarkAsSent() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('proforma_invoices.confirm_mark_sent'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        for (const id of proformaInvoiceStore.selectedProformaInvoices) {
+          await proformaInvoiceStore.markAsSent(id)
+        }
+        refreshTable()
+        proformaInvoiceStore.$patch((state) => {
+          state.selectedProformaInvoices = []
+          state.selectAllField = false
+        })
+      }
+    })
+}
+
+async function bulkMarkAsExpired() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('proforma_invoices.confirm_mark_expired'),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        for (const id of proformaInvoiceStore.selectedProformaInvoices) {
+          await proformaInvoiceStore.markAsExpired(id)
+        }
+        refreshTable()
+        proformaInvoiceStore.$patch((state) => {
+          state.selectedProformaInvoices = []
+          state.selectAllField = false
+        })
+      }
+    })
 }
 
 async function removeMultipleProformaInvoices() {

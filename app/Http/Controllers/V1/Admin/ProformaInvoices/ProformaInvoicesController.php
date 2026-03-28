@@ -183,6 +183,21 @@ class ProformaInvoicesController extends Controller
     }
 
     /**
+     * Mark proforma invoice as sent.
+     */
+    public function markAsSent(ProformaInvoice $proformaInvoice): JsonResponse
+    {
+        $this->authorize('update', $proformaInvoice);
+
+        $proformaInvoice->markAsSent();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Proforma invoice marked as sent',
+        ]);
+    }
+
+    /**
      * Mark proforma invoice as viewed.
      */
     public function markAsViewed(ProformaInvoice $proformaInvoice): JsonResponse

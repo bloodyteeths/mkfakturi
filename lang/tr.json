@@ -4020,8 +4020,18 @@
         "created": "Proforma Faturaта başarıyla oluşturuldu",
         "updated": "Proforma Faturaта başarıyla güncellendi",
         "deleted": "Proforma Faturaта başarıyla silindi",
-        "sent_successfully": "Proforma Faturaта başarıyla gönderildi",
-        "empty_description": "Oluşturте proforma faturalar için вашveте müşteriler"
+        "sent_successfully": "Proforma fatura başarıyla gönderildi",
+        "send_proforma_invoice": "Proforma Faturayı Gönder",
+        "converting": "Dönüştürülüyor...",
+        "view_converted_invoice": "Dönüştürülen faturayı görüntüle",
+        "marked_as_sent": "Proforma fatura gönderildi olarak işaretlendi",
+        "marked_as_viewed": "Proforma fatura görüntülendi olarak işaretlendi",
+        "marked_as_expired": "Proforma fatura süresi doldu olarak işaretlendi",
+        "marked_as_rejected": "Proforma fatura reddedildi olarak işaretlendi",
+        "converted_successfully": "Proforma fatura başarıyla faturaya dönüştürüldü",
+        "no_matching_proforma_invoices": "Eşleşen proforma fatura bulunamadı",
+        "something_went_wrong": "Proforma fatura gönderilirken bir hata oluştu",
+        "empty_description": "Müşterileriniz için proforma faturalar oluşturun"
     },
     "bills": {
         "duplicate_warning_message": "Benzer bilgilere sahip bir fatura zaten mevcut. Lütfen aşağıdaki mevcut kayıtları inceleyin.",

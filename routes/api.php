@@ -808,6 +808,8 @@ Route::prefix('/v1')->group(function () {
             Route::get('/proforma-invoices/{proformaInvoice}/send/preview', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'sendPreview']);
             Route::post('/proforma-invoices/{proformaInvoice}/send', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'send']);
 
+            Route::post('/proforma-invoices/{proformaInvoice}/mark-as-sent', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'markAsSent']);
+
             Route::post('/proforma-invoices/{proformaInvoice}/mark-as-viewed', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'markAsViewed']);
 
             Route::post('/proforma-invoices/{proformaInvoice}/mark-as-expired', [\App\Http\Controllers\V1\Admin\ProformaInvoices\ProformaInvoicesController::class, 'markAsExpired']);

@@ -4558,7 +4558,10 @@
         "updated": "Updated",
         "updated_message": "Proforma Invoice updated successfully",
         "view_proforma": "View Proforma",
-        "viewed": "Viewed"
+        "view_converted_invoice": "View converted invoice",
+        "viewed": "Viewed",
+        "no_matching_proforma_invoices": "No matching proforma invoices found",
+        "marked_as_sent": "Proforma invoice marked as sent"
     },
     "projects": {
         "active": "Active",

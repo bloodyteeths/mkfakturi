@@ -290,6 +290,30 @@ export const useProformaInvoiceStore = (useWindow = false) => {
         })
       },
 
+      markAsSent(id) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/proforma-invoices/${id}/mark-as-sent`)
+            .then((response) => {
+              let pos = this.proformaInvoices.findIndex(
+                (proforma) => proforma.id === id
+              )
+              if (this.proformaInvoices[pos]) {
+                this.proformaInvoices[pos].status = 'SENT'
+              }
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('proforma_invoices.marked_as_sent_message'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
       markAsViewed(id) {
         return new Promise((resolve, reject) => {
           axios
