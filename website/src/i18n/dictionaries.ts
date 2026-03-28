@@ -49,7 +49,7 @@ export type Dictionary = {
     popularBadge: string
     recommendedBadge: string
     includesPrevious: string
-    companyPlans: { name: string; price: string; period: string; bullets: string[]; popular: boolean }[]
+    companyPlans: { name: string; price: string; priceYearly?: string; period: string; periodYearly?: string; bullets: string[]; popular: boolean }[]
     partnerPlans: { name: string; price: string; priceYearly?: string; period: string; periodYearly?: string; bullets: string[]; popular: boolean }[]
     partnerSubtitle: string
     billingToggleMonthly?: string
@@ -270,10 +270,10 @@ const mk: Dictionary = {
     includesPrevious: 'Вклучува сè од {plan}',
     companyPlans: [
       { name: 'Free', price: '0 ден', period: '/засекогаш', bullets: ['3 фактури/месец', '1 корисник', 'PDF извоз', '10 AI прашања/месец', 'POS: 30 продажби/месец'], popular: false },
-      { name: 'Starter', price: '740 ден', period: '/месец', bullets: ['30 фактури/месец', '1 корисник', 'Е‑Фактура (5/месец)', '25 AI прашања/месец', 'POS: 60 продажби/месец'], popular: false },
-      { name: 'Standard', price: '2,400 ден', period: '/месец', bullets: ['60 фактури/месец', '3 корисници', 'Е‑Фактура + QES (неограничено)', '75 AI прашања/месец', 'POS: 500 продажби/месец'], popular: true },
-      { name: 'Business', price: '3,630 ден', period: '/месец', bullets: ['150 фактури/месец', '5 корисници', 'Банкарски увоз (CSV/MT940/PDF)', '200 AI прашања/месец', 'POS: 3,000 продажби/месец'], popular: false },
-      { name: 'Max', price: '9,170 ден', period: '/месец', bullets: ['Неограничено фактури', 'Неограничено корисници', '500 AI прашања/месец', 'Сите AI функции', 'POS: неограничено продажби'], popular: false }
+      { name: 'Starter', price: '740 ден', priceYearly: '7,400 ден', period: '/месец', periodYearly: '/годишно', bullets: ['30 фактури/месец', '1 корисник', 'Е‑Фактура (5/месец)', '25 AI прашања/месец', 'POS: 60 продажби/месец'], popular: false },
+      { name: 'Standard', price: '2,400 ден', priceYearly: '24,000 ден', period: '/месец', periodYearly: '/годишно', bullets: ['60 фактури/месец', '3 корисници', 'Е‑Фактура + QES (неограничено)', '75 AI прашања/месец', 'POS: 500 продажби/месец'], popular: true },
+      { name: 'Business', price: '3,630 ден', priceYearly: '36,300 ден', period: '/месец', periodYearly: '/годишно', bullets: ['150 фактури/месец', '5 корисници', 'Банкарски увоз (CSV/MT940/PDF)', '200 AI прашања/месец', 'POS: 3,000 продажби/месец'], popular: false },
+      { name: 'Max', price: '9,170 ден', priceYearly: '91,700 ден', period: '/месец', periodYearly: '/годишно', bullets: ['Неограничено фактури', 'Неограничено корисници', '500 AI прашања/месец', 'Сите AI функции', 'POS: неограничено продажби'], popular: false }
     ],
     partnerPlans: [
       { name: 'Start', price: '1,784 ден', priceYearly: '17,840 ден', period: '/месец', periodYearly: '/годишно', bullets: ['15 компании', '50 AI кредити/месец', '3 банкарски сметки', '10 вработени', '5 е-Фактури/месец'], popular: false },
@@ -513,10 +513,10 @@ const sq: Dictionary = {
     includesPrevious: 'Përfshin gjithçka në {plan}',
     companyPlans: [
       { name: 'Free', price: '0 den', period: '/përgjithmonë', bullets: ['3 fatura/muaj', '1 përdorues', 'Eksport PDF', '10 pyetje AI/muaj', 'POS: 30 shitje/muaj'], popular: false },
-      { name: 'Starter', price: '740 den', period: '/muaj', bullets: ['30 fatura/muaj', '1 përdorues', 'e‑Faturë (5/muaj)', '25 pyetje AI/muaj', 'POS: 60 shitje/muaj'], popular: false },
-      { name: 'Standard', price: '2,400 den', period: '/muaj', bullets: ['60 fatura/muaj', '3 përdorues', 'e‑Faturë + QES (pa limit)', '75 pyetje AI/muaj', 'POS: 500 shitje/muaj'], popular: true },
-      { name: 'Business', price: '3,630 den', period: '/muaj', bullets: ['150 fatura/muaj', '5 përdorues', 'Import bankar (CSV/MT940/PDF)', '200 pyetje AI/muaj', 'POS: 3,000 shitje/muaj'], popular: false },
-      { name: 'Max', price: '9,170 den', period: '/muaj', bullets: ['Fatura pa limit', 'Përdorues pa limit', '500 pyetje AI/muaj', 'Të gjitha funksionet AI', 'POS: shitje pa limit'], popular: false }
+      { name: 'Starter', price: '740 den', priceYearly: '7,400 den', period: '/muaj', periodYearly: '/vjetore', bullets: ['30 fatura/muaj', '1 përdorues', 'e‑Faturë (5/muaj)', '25 pyetje AI/muaj', 'POS: 60 shitje/muaj'], popular: false },
+      { name: 'Standard', price: '2,400 den', priceYearly: '24,000 den', period: '/muaj', periodYearly: '/vjetore', bullets: ['60 fatura/muaj', '3 përdorues', 'e‑Faturë + QES (pa limit)', '75 pyetje AI/muaj', 'POS: 500 shitje/muaj'], popular: true },
+      { name: 'Business', price: '3,630 den', priceYearly: '36,300 den', period: '/muaj', periodYearly: '/vjetore', bullets: ['150 fatura/muaj', '5 përdorues', 'Import bankar (CSV/MT940/PDF)', '200 pyetje AI/muaj', 'POS: 3,000 shitje/muaj'], popular: false },
+      { name: 'Max', price: '9,170 den', priceYearly: '91,700 den', period: '/muaj', periodYearly: '/vjetore', bullets: ['Fatura pa limit', 'Përdorues pa limit', '500 pyetje AI/muaj', 'Të gjitha funksionet AI', 'POS: shitje pa limit'], popular: false }
     ],
     partnerPlans: [
       { name: 'Start', price: '1,784 den', priceYearly: '17,840 den', period: '/muaj', periodYearly: '/vjetore', bullets: ['15 kompani', '50 kredite AI/muaj', '3 llogari bankare', '10 punonjës', '5 e-Fatura/muaj'], popular: false },
@@ -756,10 +756,10 @@ const tr: Dictionary = {
     includesPrevious: '{plan} paketindeki her şey dahil',
     companyPlans: [
       { name: 'Free', price: '0 den', period: '/süresiz', bullets: ['3 fatura/ay', '1 kullanıcı', 'PDF dışa aktarma', '10 AI soru/ay', 'POS: 30 satış/ay'], popular: false },
-      { name: 'Starter', price: '740 den', period: '/ay', bullets: ['30 fatura/ay', '1 kullanıcı', 'e‑Fatura (5/ay)', '25 AI soru/ay', 'POS: 60 satış/ay'], popular: false },
-      { name: 'Standard', price: '2,400 den', period: '/ay', bullets: ['60 fatura/ay', '3 kullanıcı', 'e‑Fatura + QES (sınırsız)', '75 AI soru/ay', 'POS: 500 satış/ay'], popular: true },
-      { name: 'Business', price: '3,630 den', period: '/ay', bullets: ['150 fatura/ay', '5 kullanıcı', 'Banka içe aktarma (CSV/MT940/PDF)', '200 AI soru/ay', 'POS: 3,000 satış/ay'], popular: false },
-      { name: 'Max', price: '9,170 den', period: '/ay', bullets: ['Sınırsız fatura', 'Sınırsız kullanıcı', '500 AI soru/ay', 'Tüm AI özellikleri', 'POS: sınırsız satış'], popular: false }
+      { name: 'Starter', price: '740 den', priceYearly: '7,400 den', period: '/ay', periodYearly: '/yıllık', bullets: ['30 fatura/ay', '1 kullanıcı', 'e‑Fatura (5/ay)', '25 AI soru/ay', 'POS: 60 satış/ay'], popular: false },
+      { name: 'Standard', price: '2,400 den', priceYearly: '24,000 den', period: '/ay', periodYearly: '/yıllık', bullets: ['60 fatura/ay', '3 kullanıcı', 'e‑Fatura + QES (sınırsız)', '75 AI soru/ay', 'POS: 500 satış/ay'], popular: true },
+      { name: 'Business', price: '3,630 den', priceYearly: '36,300 den', period: '/ay', periodYearly: '/yıllık', bullets: ['150 fatura/ay', '5 kullanıcı', 'Banka içe aktarma (CSV/MT940/PDF)', '200 AI soru/ay', 'POS: 3,000 satış/ay'], popular: false },
+      { name: 'Max', price: '9,170 den', priceYearly: '91,700 den', period: '/ay', periodYearly: '/yıllık', bullets: ['Sınırsız fatura', 'Sınırsız kullanıcı', '500 AI soru/ay', 'Tüm AI özellikleri', 'POS: sınırsız satış'], popular: false }
     ],
     partnerPlans: [
       { name: 'Start', price: '1,784 den', priceYearly: '17,840 den', period: '/ay', periodYearly: '/yıllık', bullets: ['15 şirket', '50 AI kredisi/ay', '3 banka hesabı', '10 çalışan', '5 e-Fatura/ay'], popular: false },
@@ -999,10 +999,10 @@ const en: Dictionary = {
     includesPrevious: 'Includes everything in {plan}',
     companyPlans: [
       { name: 'Free', price: '0 MKD', period: '/forever', bullets: ['3 invoices/month', '1 user', 'PDF export', '10 AI queries/month', 'POS: 30 sales/month'], popular: false },
-      { name: 'Starter', price: '740 MKD', period: '/month', bullets: ['30 invoices/month', '1 user', 'e-Invoice (5/month)', '25 AI queries/month', 'POS: 60 sales/month'], popular: false },
-      { name: 'Standard', price: '2,400 MKD', period: '/month', bullets: ['60 invoices/month', '3 users', 'Unlimited e-Invoice + QES', '75 AI queries/month', 'POS: 500 sales/month'], popular: true },
-      { name: 'Business', price: '3,630 MKD', period: '/month', bullets: ['150 invoices/month', '5 users', 'Bank import (CSV/MT940/PDF)', '200 AI queries/month', 'POS: 3,000 sales/month'], popular: false },
-      { name: 'Max', price: '9,170 MKD', period: '/month', bullets: ['Unlimited invoices', 'Unlimited users', '500 AI queries/month', 'All AI features', 'POS: unlimited sales'], popular: false }
+      { name: 'Starter', price: '740 MKD', priceYearly: '7,400 MKD', period: '/month', periodYearly: '/year', bullets: ['30 invoices/month', '1 user', 'e-Invoice (5/month)', '25 AI queries/month', 'POS: 60 sales/month'], popular: false },
+      { name: 'Standard', price: '2,400 MKD', priceYearly: '24,000 MKD', period: '/month', periodYearly: '/year', bullets: ['60 invoices/month', '3 users', 'Unlimited e-Invoice + QES', '75 AI queries/month', 'POS: 500 sales/month'], popular: true },
+      { name: 'Business', price: '3,630 MKD', priceYearly: '36,300 MKD', period: '/month', periodYearly: '/year', bullets: ['150 invoices/month', '5 users', 'Bank import (CSV/MT940/PDF)', '200 AI queries/month', 'POS: 3,000 sales/month'], popular: false },
+      { name: 'Max', price: '9,170 MKD', priceYearly: '91,700 MKD', period: '/month', periodYearly: '/year', bullets: ['Unlimited invoices', 'Unlimited users', '500 AI queries/month', 'All AI features', 'POS: unlimited sales'], popular: false }
     ],
     partnerPlans: [
       { name: 'Start', price: '1,784 MKD', priceYearly: '17,840 MKD', period: '/month', periodYearly: '/year', bullets: ['15 companies', '50 AI credits/month', '3 bank accounts', '10 employees', '5 e-Invoices/month'], popular: false },
