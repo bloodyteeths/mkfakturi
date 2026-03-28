@@ -17,6 +17,7 @@ class Budget extends Model
 
     protected $fillable = [
         'company_id',
+        'number',
         'name',
         'period_type',
         'start_date',

@@ -43,6 +43,11 @@ class BudgetLine extends Model
         return $this->belongsTo(CostCenter::class);
     }
 
+    public function ifrsAccount(): BelongsTo
+    {
+        return $this->belongsTo(\IFRS\Models\Account::class, 'ifrs_account_id');
+    }
+
     // ---- Accessors ----
 
     /**

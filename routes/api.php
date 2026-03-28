@@ -1400,6 +1400,8 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/trends', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'trends']);
                 Route::get('/summary', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'summary']);
                 Route::post('/refresh', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'refresh']);
+                Route::get('/comparative', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'comparative']);
+                Route::get('/export-pdf', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'exportPdf']);
             });
 
             // F11: Custom Report Builder — Partner-only (IFRS ledger data not relevant for company users)
@@ -2291,6 +2293,7 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::get('/ratios', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'ratios']);
             Route::get('/trends', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'trends']);
             Route::get('/summary', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'summary']);
+            Route::get('/comparative', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'comparative']);
         });
 
         // F11: Custom Reports (Partner — full CRUD)

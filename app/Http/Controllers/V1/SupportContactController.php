@@ -138,7 +138,7 @@ class SupportContactController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $sortBy = in_array($request->get('sort_by'), ['created_at', 'subject', 'name', 'category', 'priority', 'status', 'assigned_to']) ? $request->get('sort_by') : 'created_at';
+        $sortBy = in_array($request->get('sort_by'), ['id', 'created_at', 'subject', 'name', 'category', 'priority', 'status', 'assigned_to']) ? $request->get('sort_by') : 'created_at';
         $sortOrder = $request->get('sort_order') === 'asc' ? 'asc' : 'desc';
 
         $query = SupportContact::query()
@@ -291,6 +291,226 @@ class SupportContactController extends Controller
         return response()->json([
             'success' => true,
             'data' => $stats,
+        ]);
+    }
+
+    /**
+     * Bulk update status of multiple support contacts.
+     */
+    public function bulkUpdateStatus(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->isOwner()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:support_contacts,id',
+            'status' => ['required', Rule::in(['new', 'in_progress', 'resolved'])],
+        ]);
+
+        $updateData = ['status' => $request->status];
+        if ($request->status === 'resolved') {
+            $updateData['resolved_at'] = now();
+        }
+
+        $count = SupportContact::whereIn('id', $request->ids)->update($updateData);
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$count} contacts updated.",
+            'count' => $count,
+        ]);
+    }
+
+    /**
+     * Export support contacts as CSV.
+     */
+    public function export(Request $request)
+    {
+        $user = $request->user();
+        if (! $user->isOwner()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $query = SupportContact::query()
+            ->with(['user', 'company', 'assignedTo'])
+            ->orderBy('created_at', 'desc');
+
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        if ($request->has('category')) {
+            $query->where('category', $request->category);
+        }
+
+        $contacts = $query->get();
+
+        $csv = "Ref #,Subject,Name,Email,Company,Category,Priority,Status,Assigned To,Created,Resolved\n";
+        foreach ($contacts as $c) {
+            $csv .= implode(',', [
+                $c->reference_number,
+                '"'.str_replace('"', '""', $c->subject).'"',
+                '"'.str_replace('"', '""', $c->name).'"',
+                $c->email,
+                '"'.str_replace('"', '""', $c->company_name ?? ($c->company->name ?? '')).'"',
+                $c->category,
+                $c->priority,
+                $c->status,
+                '"'.str_replace('"', '""', $c->assignedTo->name ?? '').'"',
+                $c->created_at?->format('Y-m-d H:i'),
+                $c->resolved_at?->format('Y-m-d H:i') ?? '',
+            ])."\n";
+        }
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="support-contacts-'.date('Y-m-d').'.csv"',
+        ]);
+    }
+
+    /**
+     * Delete a support contact.
+     */
+    public function destroy(Request $request, SupportContact $supportContact): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->isOwner()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $supportContact->replies()->delete();
+        $supportContact->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contact deleted.',
+        ]);
+    }
+
+    /**
+     * Assign a support contact to an admin/support user.
+     */
+    public function assign(Request $request, SupportContact $supportContact): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->isOwner()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'assigned_to' => 'nullable|integer|exists:users,id',
+        ]);
+
+        $supportContact->update([
+            'assigned_to' => $request->assigned_to,
+        ]);
+
+        if ($request->assigned_to && $supportContact->status === 'new') {
+            $supportContact->update(['status' => 'in_progress']);
+        }
+
+        $supportContact->load('assignedTo');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contact assigned.',
+            'data' => $supportContact,
+        ]);
+    }
+
+    /**
+     * List replies for a support contact.
+     */
+    public function listReplies(Request $request, SupportContact $supportContact): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->isOwner()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $replies = $supportContact->replies()
+            ->with('user:id,name,email')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $replies,
+        ]);
+    }
+
+    /**
+     * Add a threaded reply to a support contact.
+     */
+    public function addReply(Request $request, SupportContact $supportContact): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->isOwner()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'message' => 'required|string|min:5|max:5000',
+            'is_internal' => 'boolean',
+        ]);
+
+        $reply = $supportContact->replies()->create([
+            'user_id' => $user->id,
+            'message' => $request->message,
+            'is_internal' => $request->boolean('is_internal', false),
+        ]);
+
+        // Also update legacy admin_reply for backward compat + email
+        $supportContact->update([
+            'admin_reply' => $request->message,
+            'admin_replied_at' => now(),
+            'admin_user_id' => $user->id,
+            'status' => $supportContact->status === 'new' ? 'in_progress' : $supportContact->status,
+        ]);
+
+        // Send reply email (only if not internal note)
+        if (! $request->boolean('is_internal', false)) {
+            try {
+                Mail::to($supportContact->email)
+                    ->send(new \App\Mail\SupportContactReply($supportContact));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send support reply email: '.$e->getMessage());
+            }
+        }
+
+        $reply->load('user:id,name,email');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reply added.',
+            'data' => $reply,
+        ]);
+    }
+
+    /**
+     * Bulk delete support contacts.
+     */
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->isOwner()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:support_contacts,id',
+        ]);
+
+        SupportContactReply::whereIn('support_contact_id', $request->ids)->delete();
+        $count = SupportContact::whereIn('id', $request->ids)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$count} contacts deleted.",
+            'count' => $count,
         ]);
     }
 
