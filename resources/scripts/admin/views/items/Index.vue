@@ -394,7 +394,8 @@ onUnmounted(() => {
 function clearFilter() {
   filters.name = ''
   filters.unit_id = ''
-  filters.price = ''
+  filters.price_from = ''
+  filters.price_to = ''
   filters.category_id = ''
   filters.track_quantity = ''
   filters.low_stock = false
@@ -430,7 +431,8 @@ async function fetchData({ page, filter, sort }) {
   let data = {
     search: filters.name,
     unit_id: filters.unit_id !== null ? filters.unit_id : '',
-    price: Math.round(filters.price * 100),
+    price_from: filters.price_from ? Math.round(filters.price_from * 100) : '',
+    price_to: filters.price_to ? Math.round(filters.price_to * 100) : '',
     category_id: filters.category_id !== null ? filters.category_id : '',
     track_quantity: filters.track_quantity !== null ? filters.track_quantity : '',
     low_stock: filters.low_stock ? 1 : '',

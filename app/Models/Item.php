@@ -152,9 +152,14 @@ class Item extends Model implements HasMedia
 
     // CLAUDE-CHECKPOINT: WS1 - Added inventoryAccount(), cogsAccount(), purchaseAccount() relationships
 
-    public function scopeWherePrice($query, $price)
+    public function scopeWherePriceFrom($query, $price)
     {
-        return $query->where('items.price', $price);
+        return $query->where('items.price', '>=', $price);
+    }
+
+    public function scopeWherePriceTo($query, $price)
+    {
+        return $query->where('items.price', '<=', $price);
     }
 
     public function scopeWhereUnit($query, $unit_id)
@@ -192,8 +197,12 @@ class Item extends Model implements HasMedia
             $query->whereSearch($filters->get('search'));
         }
 
-        if ($filters->get('price')) {
-            $query->wherePrice($filters->get('price'));
+        if ($filters->get('price_from')) {
+            $query->wherePriceFrom($filters->get('price_from'));
+        }
+
+        if ($filters->get('price_to')) {
+            $query->wherePriceTo($filters->get('price_to'));
         }
 
         if ($filters->get('unit_id')) {
