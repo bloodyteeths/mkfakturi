@@ -2348,7 +2348,10 @@
                 "no_data": "Nuk ka të dhëna",
                 "no_data_description": "Nuk u gjetën llogari për periudhën e zgjedhur",
                 "select_and_load": "Zgjidhni periudhën dhe ngarkoni raportin",
-                "select_and_load_description": "Zgjidhni datën e fillimit dhe përfundimit dhe klikoni butonin e përditësimit."
+                "select_and_load_description": "Zgjidhni datën e fillimit dhe përfundimit dhe klikoni butonin e përditësimit.",
+                "click_to_expand": "Klikoni një llogari për të parë regjistrimet",
+                "loading_entries": "Duke ngarkuar regjistrimet...",
+                "no_entries_for_account": "Nuk ka regjistrime për këtë llogari"
             },
             "balance_sheet": "Бdheланс në menjëqindјба",
             "income_statement": "Бdheланс në sukses",

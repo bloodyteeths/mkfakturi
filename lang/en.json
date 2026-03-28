@@ -4904,7 +4904,10 @@
                 "not_balanced": "Trial Balance is not balanced",
                 "title": "Trial Balance",
                 "select_and_load": "Select a period and load the report",
-                "select_and_load_description": "Choose the start and end date and click the update button."
+                "select_and_load_description": "Choose the start and end date and click the update button.",
+                "click_to_expand": "Click an account to see its journal entries",
+                "loading_entries": "Loading entries...",
+                "no_entries_for_account": "No entries for this account"
             },
             "unbalanced": "Trial Balance is not balanced"
         },

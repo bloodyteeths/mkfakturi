@@ -81,6 +81,12 @@
       </div>
     </div>
 
+    <!-- Hint: click to expand -->
+    <p v-if="selectedCompanyId && trialBalanceData && trialBalanceData.accounts && trialBalanceData.accounts.length > 0" class="text-xs text-gray-400 mb-2 flex items-center">
+      <BaseIcon name="InformationCircleIcon" class="h-4 w-4 mr-1" />
+      {{ $t('reports.accounting.trial_balance.click_to_expand') }}
+    </p>
+
     <!-- Loading state -->
     <div v-if="isLoading" class="bg-white rounded-lg shadow overflow-hidden">
       <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 animate-pulse">
@@ -158,32 +164,101 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white">
-            <tr v-for="(account, index) in trialBalanceData.accounts" :key="index" class="hover:bg-gray-50">
-              <td class="whitespace-nowrap px-3 py-3 text-sm font-mono font-medium text-gray-600">
-                {{ account.code || '-' }}
-              </td>
-              <td class="px-3 py-3 text-sm text-gray-900">
-                {{ account.name || '-' }}
-              </td>
-              <td class="whitespace-nowrap px-3 py-3 text-sm text-right text-gray-900">
-                {{ account.opening_debit > 0 ? formatMoney(account.opening_debit) : '' }}
-              </td>
-              <td class="whitespace-nowrap px-3 py-3 text-sm text-right text-gray-900 border-r border-gray-100">
-                {{ account.opening_credit > 0 ? formatMoney(account.opening_credit) : '' }}
-              </td>
-              <td class="whitespace-nowrap px-3 py-3 text-sm text-right text-gray-900">
-                {{ account.period_debit > 0 ? formatMoney(account.period_debit) : '' }}
-              </td>
-              <td class="whitespace-nowrap px-3 py-3 text-sm text-right text-gray-900 border-r border-gray-100">
-                {{ account.period_credit > 0 ? formatMoney(account.period_credit) : '' }}
-              </td>
-              <td class="whitespace-nowrap px-3 py-3 text-sm text-right font-medium text-gray-900">
-                {{ account.closing_debit > 0 ? formatMoney(account.closing_debit) : '' }}
-              </td>
-              <td class="whitespace-nowrap px-3 py-3 text-sm text-right font-medium text-gray-900">
-                {{ account.closing_credit > 0 ? formatMoney(account.closing_credit) : '' }}
-              </td>
-            </tr>
+            <template v-for="(account, index) in trialBalanceData.accounts" :key="index">
+              <tr class="hover:bg-gray-50 cursor-pointer" @click="toggleExpand(account)">
+                <td class="whitespace-nowrap px-3 py-3 text-sm font-mono font-medium text-gray-600">
+                  <div class="flex items-center">
+                    <BaseIcon
+                      :name="expandedRows[account.code] ? 'ChevronDownIcon' : 'ChevronRightIcon'"
+                      class="h-4 w-4 text-gray-400 mr-1.5 flex-shrink-0 transition-transform"
+                    />
+                    {{ account.code || '-' }}
+                  </div>
+                </td>
+                <td class="px-3 py-3 text-sm text-gray-900">
+                  {{ account.name || '-' }}
+                </td>
+                <td class="whitespace-nowrap px-3 py-3 text-sm text-right text-gray-900">
+                  {{ account.opening_debit > 0 ? formatMoney(account.opening_debit) : '' }}
+                </td>
+                <td class="whitespace-nowrap px-3 py-3 text-sm text-right text-gray-900 border-r border-gray-100">
+                  {{ account.opening_credit > 0 ? formatMoney(account.opening_credit) : '' }}
+                </td>
+                <td class="whitespace-nowrap px-3 py-3 text-sm text-right text-gray-900">
+                  {{ account.period_debit > 0 ? formatMoney(account.period_debit) : '' }}
+                </td>
+                <td class="whitespace-nowrap px-3 py-3 text-sm text-right text-gray-900 border-r border-gray-100">
+                  {{ account.period_credit > 0 ? formatMoney(account.period_credit) : '' }}
+                </td>
+                <td class="whitespace-nowrap px-3 py-3 text-sm text-right font-medium text-gray-900">
+                  {{ account.closing_debit > 0 ? formatMoney(account.closing_debit) : '' }}
+                </td>
+                <td class="whitespace-nowrap px-3 py-3 text-sm text-right font-medium text-gray-900">
+                  {{ account.closing_credit > 0 ? formatMoney(account.closing_credit) : '' }}
+                </td>
+              </tr>
+              <!-- Expanded GL entries for this account -->
+              <tr v-if="expandedRows[account.code]" class="bg-blue-50">
+                <td colspan="8" class="px-6 py-3">
+                  <!-- Loading state -->
+                  <div v-if="loadingEntries[account.code]" class="flex items-center justify-center py-4">
+                    <svg class="animate-spin h-5 w-5 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <span class="text-sm text-blue-600">{{ $t('reports.accounting.trial_balance.loading_entries') }}</span>
+                  </div>
+                  <!-- No entries -->
+                  <div v-else-if="glEntries[account.code] && glEntries[account.code].entries.length === 0" class="text-center py-4">
+                    <p class="text-sm text-gray-500">{{ $t('reports.accounting.trial_balance.no_entries_for_account') }}</p>
+                  </div>
+                  <!-- Entries table -->
+                  <table v-else-if="glEntries[account.code]" class="min-w-full text-xs">
+                    <thead>
+                      <tr class="text-gray-500">
+                        <th class="py-1.5 text-left font-medium">{{ $t('general.date') }}</th>
+                        <th class="py-1.5 text-left font-medium">{{ $t('reports.accounting.general_ledger.document') }}</th>
+                        <th class="py-1.5 text-left font-medium">{{ $t('general.description') }}</th>
+                        <th class="py-1.5 text-right font-medium">{{ $t('reports.accounting.general_ledger.debit') }}</th>
+                        <th class="py-1.5 text-right font-medium">{{ $t('reports.accounting.general_ledger.credit') }}</th>
+                        <th class="py-1.5 text-right font-medium">{{ $t('reports.accounting.general_ledger.balance') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Opening balance row -->
+                      <tr class="border-t border-blue-100 italic text-gray-500">
+                        <td class="py-1" colspan="3">{{ $t('reports.accounting.general_ledger.opening_balance') }}</td>
+                        <td class="py-1 text-right">{{ glEntries[account.code].opening_balance > 0 ? formatMoney(glEntries[account.code].opening_balance) : '' }}</td>
+                        <td class="py-1 text-right">{{ glEntries[account.code].opening_balance < 0 ? formatMoney(Math.abs(glEntries[account.code].opening_balance)) : '' }}</td>
+                        <td class="py-1 text-right" :class="glEntries[account.code].opening_balance < 0 ? 'text-red-600' : 'text-green-600'">
+                          {{ formatMoney(Math.abs(glEntries[account.code].opening_balance)) }}
+                        </td>
+                      </tr>
+                      <!-- Journal entries -->
+                      <tr v-for="(entry, ei) in glEntries[account.code].entries" :key="ei" class="border-t border-blue-100">
+                        <td class="py-1 text-gray-700">{{ formatDate(entry.date) }}</td>
+                        <td class="py-1 text-primary-600 font-medium">{{ entry.reference || '-' }}</td>
+                        <td class="py-1 text-gray-600 max-w-xs truncate">{{ entry.description || '-' }}</td>
+                        <td class="py-1 text-right text-gray-900">{{ entry.debit > 0 ? formatMoney(entry.debit) : '' }}</td>
+                        <td class="py-1 text-right text-gray-900">{{ entry.credit > 0 ? formatMoney(entry.credit) : '' }}</td>
+                        <td class="py-1 text-right font-medium" :class="entry.running_balance < 0 ? 'text-red-600' : 'text-green-600'">
+                          {{ formatMoney(Math.abs(entry.running_balance)) }}
+                        </td>
+                      </tr>
+                      <!-- Closing balance row -->
+                      <tr class="border-t-2 border-blue-200 font-semibold text-gray-900">
+                        <td class="py-1.5" colspan="3">{{ $t('reports.accounting.general_ledger.closing_balance') }}</td>
+                        <td class="py-1.5 text-right"></td>
+                        <td class="py-1.5 text-right"></td>
+                        <td class="py-1.5 text-right" :class="glEntries[account.code].closing_balance < 0 ? 'text-red-600' : 'text-green-600'">
+                          {{ formatMoney(Math.abs(glEntries[account.code].closing_balance)) }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </template>
           </tbody>
           <tfoot class="bg-gray-100">
             <tr class="font-semibold border-t-2 border-gray-300">
@@ -282,7 +357,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -303,6 +378,11 @@ const showPdfPreview = ref(false)
 const previewPdfUrl = ref(null)
 const pdfBlob = ref(null)
 const hasSearched = ref(false)
+
+// Expandable GL entries state
+const expandedRows = reactive({})
+const glEntries = ref({})
+const loadingEntries = reactive({})
 
 let abortController = null
 
@@ -375,6 +455,50 @@ watch(selectedCompanyId, () => { debouncedReset() })
 function onCompanyChange() {
   trialBalanceData.value = null
   hasSearched.value = false
+  clearExpandedState()
+}
+
+function clearExpandedState() {
+  Object.keys(expandedRows).forEach(k => delete expandedRows[k])
+  Object.keys(loadingEntries).forEach(k => delete loadingEntries[k])
+  glEntries.value = {}
+}
+
+async function toggleExpand(account) {
+  const code = account.code
+  if (!code) return
+
+  if (expandedRows[code]) {
+    delete expandedRows[code]
+    return
+  }
+
+  expandedRows[code] = true
+
+  // Skip fetch if already cached
+  if (glEntries.value[code]) return
+
+  loadingEntries[code] = true
+  try {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/general-ledger`, {
+      params: {
+        account_code: code,
+        from_date: filters.value.from_date,
+        to_date: filters.value.to_date,
+      },
+    })
+
+    const data = response.data?.data
+    glEntries.value[code] = {
+      entries: data?.entries || [],
+      opening_balance: data?.opening_balance || 0,
+      closing_balance: data?.closing_balance || 0,
+    }
+  } catch {
+    glEntries.value[code] = { entries: [], opening_balance: 0, closing_balance: 0 }
+  } finally {
+    delete loadingEntries[code]
+  }
 }
 
 async function loadTrialBalance() {
@@ -386,6 +510,7 @@ async function loadTrialBalance() {
   isLoading.value = true
   hasSearched.value = true
   trialBalanceData.value = null
+  clearExpandedState()
 
   try {
     const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/accounting/trial-balance`, {

@@ -1667,7 +1667,10 @@
                 "no_data": "Veri bulunamadi",
                 "no_data_description": "Secilen donem icin hesap bulunamadi",
                 "select_and_load": "Donem secin ve raporu yukleyin",
-                "select_and_load_description": "Baslangic ve bitis tarihini secin ve guncelle butonuna tiklayin."
+                "select_and_load_description": "Baslangic ve bitis tarihini secin ve guncelle butonuna tiklayin.",
+                "click_to_expand": "Kayitlari gormek icin hesaba tiklayin",
+                "loading_entries": "Kayitlar yukleniyor...",
+                "no_entries_for_account": "Bu hesap icin kayit yok"
             },
             "balance_sheet": "Bilanço ileсoба",
             "income_statement": "Bilanço успех",
