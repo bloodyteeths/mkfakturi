@@ -36,6 +36,14 @@ class BudgetService
     ];
 
     /**
+     * Get account type labels map.
+     */
+    public function getAccountTypeLabels(): array
+    {
+        return $this->accountTypeLabels;
+    }
+
+    /**
      * List budgets for a company with optional filters.
      *
      * @return array
@@ -43,8 +51,9 @@ class BudgetService
     public function list(int $companyId, array $filters = []): array
     {
         $query = Budget::forCompany($companyId)
-            ->with(['costCenter:id,name,code,color', 'createdBy:id,name', 'approvedBy:id,name'])
-            ->withCount('lines');
+            ->with(['costCenter:id,name,code,color', 'createdBy', 'approvedBy'])
+            ->withCount('lines')
+            ->withSum('lines', 'amount');
 
         if (! empty($filters['status'])) {
             $query->byStatus($filters['status']);
@@ -64,7 +73,11 @@ class BudgetService
             $query->where('scenario', $filters['scenario']);
         }
 
-        $budgets = $query->orderBy('created_at', 'desc')->get();
+        if (! empty($filters['search'])) {
+            $query->where('name', 'like', '%' . $filters['search'] . '%');
+        }
+
+        $budgets = $query->orderBy('created_at', 'desc')->limit(200)->get();
 
         return $budgets->map(fn (Budget $b) => $this->formatBudget($b))->toArray();
     }
@@ -75,8 +88,18 @@ class BudgetService
     public function create(int $companyId, array $data): Budget
     {
         return DB::transaction(function () use ($companyId, $data) {
+            // Auto-generate sequential budget number: BUD-YYYY-NNN
+            $year = date('Y', strtotime($data['start_date']));
+            $lastNumber = Budget::where('company_id', $companyId)
+                ->where('number', 'like', "BUD-{$year}-%")
+                ->orderByDesc('number')
+                ->value('number');
+            $seq = $lastNumber ? (int) substr($lastNumber, -3) + 1 : 1;
+            $number = sprintf('BUD-%s-%03d', $year, $seq);
+
             $budget = Budget::create([
                 'company_id' => $companyId,
+                'number' => $number,
                 'name' => $data['name'],
                 'period_type' => $data['period_type'] ?? 'monthly',
                 'start_date' => $data['start_date'],
@@ -195,6 +218,55 @@ class BudgetService
 
         Log::info('Budget locked', [
             'budget_id' => $budget->id,
+        ]);
+
+        return $budget->fresh();
+    }
+
+    /**
+     * Clone a budget with all its lines.
+     */
+    public function clone(Budget $budget): Budget
+    {
+        return DB::transaction(function () use ($budget) {
+            $budget->loadMissing('lines');
+
+            $newBudget = $budget->replicate(['id', 'approved_by', 'approved_at', 'created_at', 'updated_at']);
+            $newBudget->name = $budget->name . ' (копија)';
+            $newBudget->status = 'draft';
+            $newBudget->created_by = auth()->id();
+            $newBudget->save();
+
+            foreach ($budget->lines as $line) {
+                $newLine = $line->replicate(['id', 'budget_id', 'created_at', 'updated_at']);
+                $newLine->budget_id = $newBudget->id;
+                $newLine->save();
+            }
+
+            Log::info('Budget cloned', [
+                'source_budget_id' => $budget->id,
+                'new_budget_id' => $newBudget->id,
+                'company_id' => $budget->company_id,
+            ]);
+
+            return $newBudget->load('lines');
+        });
+    }
+
+    /**
+     * Archive an approved or locked budget.
+     */
+    public function archive(Budget $budget): Budget
+    {
+        if (! in_array($budget->status, ['approved', 'locked'])) {
+            throw new \InvalidArgumentException('Only approved or locked budgets can be archived.');
+        }
+
+        $budget->update(['status' => 'archived']);
+
+        Log::info('Budget archived', [
+            'budget_id' => $budget->id,
+            'company_id' => $budget->company_id,
         ]);
 
         return $budget->fresh();
@@ -796,6 +868,7 @@ class BudgetService
         return [
             'id' => $budget->id,
             'company_id' => $budget->company_id,
+            'number' => $budget->number,
             'name' => $budget->name,
             'period_type' => $budget->period_type,
             'start_date' => $budget->start_date?->toDateString(),
@@ -821,6 +894,7 @@ class BudgetService
             ] : null,
             'approved_at' => $budget->approved_at?->toIso8601String(),
             'lines_count' => $budget->lines_count ?? $budget->lines()->count(),
+            'total_amount' => (float) ($budget->lines_sum_amount ?? $budget->lines()->sum('amount')),
             'created_at' => $budget->created_at?->toIso8601String(),
             'updated_at' => $budget->updated_at?->toIso8601String(),
         ];

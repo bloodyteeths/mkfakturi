@@ -131,7 +131,15 @@ class DetectFileTypeJob implements ShouldQueue
 
         // Read first chunk of file for analysis
         $chunkSize = min($fileSize, 8192); // Read up to 8KB
-        $fileContent = Storage::get($filePath, 0, $chunkSize);
+        if ($fileSize <= $chunkSize) {
+            $fileContent = Storage::get($filePath);
+        } else {
+            // Read only first chunk for large files to avoid OOM
+            $fullPath = Storage::path($filePath);
+            $handle = fopen($fullPath, 'r');
+            $fileContent = fread($handle, $chunkSize);
+            fclose($handle);
+        }
 
         $fileInfo = [
             'name' => $fileName,
@@ -478,4 +486,5 @@ class DetectFileTypeJob implements ShouldQueue
     {
         $this->handleJobFailure($exception);
     }
+    // CLAUDE-CHECKPOINT
 }

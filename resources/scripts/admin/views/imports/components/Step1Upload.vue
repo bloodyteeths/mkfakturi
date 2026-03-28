@@ -13,6 +13,23 @@
     <!-- File Upload Area -->
     <div class="max-w-4xl mx-auto">
       <div v-if="!importStore.uploadedFile" class="space-y-6">
+        <!-- Source System Selector -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <label class="block text-sm font-medium text-gray-900 mb-2">
+            {{ $t('imports.source_system') }}
+          </label>
+          <BaseSelectInput
+            :value="importStore.sourceSystem"
+            @input="handleSourceSystemChange"
+            :options="sourceSystemOptions"
+            size="sm"
+            class="max-w-xs"
+          />
+          <p class="text-xs text-gray-500 mt-1.5">
+            {{ $t('imports.source_system_hint') }}
+          </p>
+        </div>
+
         <!-- Drag & Drop Upload Area -->
         <div
           class="upload-area"
@@ -246,6 +263,18 @@ const acceptedFileTypes = computed(() => {
   return importStore.supportedFormats.map(format => `.${format}`).join(',')
 })
 
+const sourceSystemOptions = computed(() => {
+  return [
+    { label: t('imports.source_auto_detect'), value: 'auto' },
+    { label: 'Onivo', value: 'onivo' },
+    { label: 'Megasoft', value: 'megasoft' },
+    { label: 'Effect Plus', value: 'effect_plus' },
+    { label: 'Eurofaktura', value: 'eurofaktura' },
+    { label: 'Manager.io', value: 'manager_io' },
+    { label: t('imports.source_generic_csv'), value: 'generic' },
+  ]
+})
+
 const typeOptions = computed(() => {
   return [
     { id: 'auto', value: null, label: t('imports.use_detected_type') },
@@ -258,6 +287,10 @@ const typeOptions = computed(() => {
 })
 
 // Methods
+const handleSourceSystemChange = (value) => {
+  importStore.sourceSystem = value || 'auto'
+}
+
 const handleTypeOverrideChange = (option) => {
   const value = option?.value ?? null
   importStore.manualTypeOverride = value

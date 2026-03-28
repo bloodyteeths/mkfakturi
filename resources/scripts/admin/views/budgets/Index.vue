@@ -2,8 +2,16 @@
   <BasePage>
     <BasePageHeader :title="t('title')">
       <template #actions>
-        <div class="flex items-center space-x-3">
-          <!-- Filters -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Search -->
+          <input
+            v-model="searchQuery"
+            type="text"
+            :placeholder="t('search')"
+            class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 w-48"
+          />
+
+          <!-- Status Filter -->
           <select
             v-model="filterStatus"
             class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
@@ -15,6 +23,7 @@
             <option value="archived">{{ t('archived') }}</option>
           </select>
 
+          <!-- Year Filter -->
           <select
             v-model="filterYear"
             class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
@@ -22,6 +31,25 @@
             <option value="">{{ t('period') }}: {{ t('all') }}</option>
             <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
           </select>
+
+          <!-- Scenario Filter -->
+          <select
+            v-model="filterScenario"
+            class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+          >
+            <option value="">{{ t('scenario') }}: {{ t('all') }}</option>
+            <option value="expected">{{ t('scenario_expected') }}</option>
+            <option value="optimistic">{{ t('scenario_optimistic') }}</option>
+            <option value="pessimistic">{{ t('scenario_pessimistic') }}</option>
+          </select>
+
+          <!-- Export CSV -->
+          <button
+            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            @click="exportCsv"
+          >
+            {{ t('export_csv') }}
+          </button>
 
           <BaseButton variant="primary" @click="$router.push({ name: 'budgets.create' })">
             <template #left="slotProps">
@@ -70,20 +98,29 @@
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('period') }}</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('scenario') }}</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('status') }}</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('total_amount') }}</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('cost_center') }}</th>
             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('general.actions') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
           <tr
-            v-for="budget in budgets"
+            v-for="budget in paginatedBudgets"
             :key="budget.id"
             class="hover:bg-gray-50 cursor-pointer"
             @click="$router.push({ name: 'budgets.view', params: { id: budget.id } })"
           >
             <td class="px-4 py-3">
-              <div class="text-sm font-medium text-gray-900">{{ budget.name }}</div>
-              <div class="text-xs text-gray-500">{{ budget.lines_count }} {{ t('lines').toLowerCase() }}</div>
+              <div class="text-sm font-medium text-gray-900">
+                <span v-if="budget.number" class="text-gray-500 font-normal">{{ budget.number }} &middot; </span>{{ budget.name }}
+              </div>
+              <div class="text-xs text-gray-500">
+                {{ budget.lines_count }} {{ t('lines').toLowerCase() }}
+                <template v-if="budget.created_by_user">
+                  <span class="mx-1">&middot;</span>
+                  <span class="text-gray-400">{{ t('created_by_label') }}: {{ budget.created_by_user.name }}</span>
+                </template>
+              </div>
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
               {{ formatDate(budget.start_date) }} - {{ formatDate(budget.end_date) }}
@@ -104,6 +141,9 @@
               >
                 {{ statusLabel(budget.status) }}
               </span>
+            </td>
+            <td class="whitespace-nowrap px-4 py-3 text-sm text-right font-medium text-gray-900">
+              {{ formatNumber(budget.total_amount || 0) }}
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
               <span v-if="budget.cost_center" class="flex items-center">
@@ -127,7 +167,7 @@
               <button
                 v-if="budget.status === 'draft'"
                 class="text-primary-600 hover:text-primary-800 mr-2"
-                @click.stop="$router.push({ name: 'budgets.view', params: { id: budget.id } })"
+                @click.stop="$router.push({ name: 'budgets.edit', params: { id: budget.id } })"
                 :title="t('edit')"
               >
                 <BaseIcon name="PencilSquareIcon" class="h-4 w-4" />
@@ -143,6 +183,29 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Pagination -->
+      <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-4 py-3">
+        <div class="text-sm text-gray-600">
+          {{ t('page_of').replace('{page}', currentPage).replace('{total}', totalPages) }}
+        </div>
+        <div class="flex space-x-2">
+          <button
+            :disabled="currentPage <= 1"
+            class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="currentPage--"
+          >
+            &laquo;
+          </button>
+          <button
+            :disabled="currentPage >= totalPages"
+            class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="currentPage++"
+          >
+            &raquo;
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Empty State -->
@@ -190,7 +253,11 @@ const budgets = ref([])
 const isLoading = ref(false)
 const filterStatus = ref('')
 const filterYear = ref('')
+const filterScenario = ref('')
+const searchQuery = ref('')
 const deletingBudget = ref(null)
+const currentPage = ref(1)
+const perPage = 15
 
 // Computed
 const currentYear = new Date().getFullYear()
@@ -214,6 +281,29 @@ const currentYearCount = computed(() => {
   }).length
 })
 
+const filteredBudgets = computed(() => {
+  if (!searchQuery.value) return budgets.value
+  const q = searchQuery.value.toLowerCase()
+  return budgets.value.filter(b => {
+    return (b.name && b.name.toLowerCase().includes(q))
+      || (b.number && b.number.toLowerCase().includes(q))
+  })
+})
+
+const totalPages = computed(() => {
+  return Math.max(1, Math.ceil(filteredBudgets.value.length / perPage))
+})
+
+const paginatedBudgets = computed(() => {
+  const start = (currentPage.value - 1) * perPage
+  return filteredBudgets.value.slice(start, start + perPage)
+})
+
+// Reset to page 1 when search changes
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
+
 // Lifecycle
 onMounted(() => {
   loadBudgets()
@@ -223,7 +313,8 @@ const debouncedLoad = debounce(() => {
   loadBudgets()
 }, 300)
 
-watch([filterStatus, filterYear], () => {
+watch([filterStatus, filterYear, filterScenario], () => {
+  currentPage.value = 1
   debouncedLoad()
 })
 
@@ -234,6 +325,7 @@ async function loadBudgets() {
     const params = {}
     if (filterStatus.value) params.status = filterStatus.value
     if (filterYear.value) params.year = filterYear.value
+    if (filterScenario.value) params.scenario = filterScenario.value
 
     const response = await window.axios.get('/budgets', { params })
     budgets.value = response.data?.data || []
@@ -251,6 +343,10 @@ function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
   return d.toLocaleDateString(fmtLocale, { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+function formatNumber(val) {
+  return Number(val || 0).toLocaleString(fmtLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 function statusLabel(status) {
@@ -292,6 +388,45 @@ function scenarioBadgeClass(scenario) {
     pessimistic: 'bg-red-100 text-red-800',
   }
   return classes[scenario] || 'bg-gray-100 text-gray-600'
+}
+
+function exportCsv() {
+  const rows = filteredBudgets.value
+  if (!rows.length) return
+
+  const headers = [
+    t('budget_number'),
+    t('name'),
+    t('period'),
+    t('scenario'),
+    t('status'),
+    t('total_amount'),
+    t('cost_center'),
+    t('created_by_label'),
+  ]
+
+  const csvRows = [headers.join(',')]
+  for (const b of rows) {
+    const row = [
+      b.number || '',
+      `"${(b.name || '').replace(/"/g, '""')}"`,
+      `${b.start_date || ''} - ${b.end_date || ''}`,
+      b.scenario || '',
+      b.status || '',
+      b.total_amount || 0,
+      b.cost_center ? `"${b.cost_center.name}"` : '',
+      b.created_by_user ? `"${b.created_by_user.name}"` : '',
+    ]
+    csvRows.push(row.join(','))
+  }
+
+  const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `budgets-${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 function confirmDelete(budget) {

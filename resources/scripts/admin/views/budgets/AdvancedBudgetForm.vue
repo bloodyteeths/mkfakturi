@@ -144,24 +144,63 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 bg-white">
-            <tr v-for="cat in accountCategories" :key="cat.type" class="hover:bg-gray-50">
-              <td class="sticky left-0 bg-white px-4 py-2 text-sm font-medium text-gray-900 z-10">
-                {{ cat.label }}
-              </td>
-              <td v-for="period in gridPeriods" :key="period.key" class="px-1 py-1">
-                <input
-                  type="number"
-                  step="0.01"
-                  :value="getGridValue(cat.type, period.key)"
-                  @change="setGridValue(cat.type, period.key, $event.target.value)"
-                  class="w-full rounded border-gray-200 text-sm text-right py-1 px-2 focus:border-primary-500 focus:ring-primary-500"
-                  placeholder="0.00"
-                />
-              </td>
-              <td class="px-3 py-2 text-sm text-right font-medium text-gray-900 bg-gray-50">
-                {{ formatNumber(getRowTotal(cat.type)) }}
-              </td>
-            </tr>
+            <template v-for="cat in accountCategories" :key="cat.type">
+              <!-- Type total row -->
+              <tr class="hover:bg-gray-50">
+                <td class="sticky left-0 bg-white px-4 py-2 text-sm font-medium text-gray-900 z-10">
+                  {{ cat.label }}
+                </td>
+                <td v-for="period in gridPeriods" :key="period.key" class="px-1 py-1">
+                  <input
+                    type="number"
+                    step="0.01"
+                    :value="getGridValue(cat.type, period.key)"
+                    @change="setGridValue(cat.type, period.key, $event.target.value)"
+                    class="w-full rounded border-gray-200 text-sm text-right py-1 px-2 focus:border-primary-500 focus:ring-primary-500"
+                    placeholder="0.00"
+                  />
+                </td>
+                <td class="px-3 py-2 text-sm text-right font-medium text-gray-900 bg-gray-50">
+                  {{ formatNumber(getRowTotal(cat.type)) }}
+                </td>
+              </tr>
+              <!-- Account-level sub-rows -->
+              <tr
+                v-for="acctRow in getAccountRowsForType(cat.type)"
+                :key="'acct-' + acctRow.account_id"
+                class="hover:bg-blue-50 bg-gray-50/50"
+              >
+                <td class="sticky left-0 bg-gray-50/50 px-4 py-1 text-xs text-gray-600 z-10 pl-8">
+                  <div class="flex items-center gap-1">
+                    <span class="font-mono text-gray-500">{{ acctRow.code }}</span>
+                    <span class="truncate">{{ acctRow.name }}</span>
+                    <button
+                      type="button"
+                      @click="removeAccountRow(cat.type, acctRow.account_id)"
+                      class="ml-1 text-gray-400 hover:text-red-500"
+                      :title="t('budgets.remove_account_line')"
+                    >
+                      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+                <td v-for="period in gridPeriods" :key="period.key" class="px-1 py-1">
+                  <input
+                    type="number"
+                    step="0.01"
+                    :value="getGridValue(acctRow.gridKey, period.key)"
+                    @change="setGridValue(acctRow.gridKey, period.key, $event.target.value)"
+                    class="w-full rounded border-gray-200 text-xs text-right py-1 px-2 focus:border-primary-500 focus:ring-primary-500"
+                    placeholder="0.00"
+                  />
+                </td>
+                <td class="px-3 py-1 text-xs text-right font-medium text-gray-600 bg-gray-50">
+                  {{ formatNumber(getRowTotal(acctRow.gridKey)) }}
+                </td>
+              </tr>
+            </template>
             <tr class="bg-primary-50 font-semibold">
               <td class="sticky left-0 bg-primary-50 px-4 py-3 text-sm text-primary-900 z-10">
                 {{ t('budgets.total_budgeted') }}
@@ -175,6 +214,51 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Add Account Line -->
+      <div class="px-6 py-3 border-t border-gray-100">
+        <div v-if="showAddAccountRow" class="flex items-end gap-3 mb-3">
+          <BaseInputGroup :label="t('budgets.account_type')" class="w-48">
+            <select
+              v-model="newAccountLine.account_type"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            >
+              <option v-for="cat in accountCategories" :key="cat.type" :value="cat.type">{{ cat.label }}</option>
+            </select>
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('budgets.select_account')" class="flex-1">
+            <BaseMultiselect
+              v-model="newAccountLine.account_id"
+              :options="filteredAccounts"
+              :searchable="true"
+              label="display_name"
+              value-prop="id"
+              :placeholder="t('budgets.select_account')"
+              track-by="display_name"
+              :can-clear="true"
+            />
+          </BaseInputGroup>
+          <div class="flex gap-2 pb-0.5">
+            <BaseButton variant="primary" size="sm" @click="addAccountLineRow" :disabled="!newAccountLine.account_id">
+              {{ $t('general.save') }}
+            </BaseButton>
+            <BaseButton variant="primary-outline" size="sm" @click="showAddAccountRow = false">
+              {{ $t('general.cancel') }}
+            </BaseButton>
+          </div>
+        </div>
+        <button
+          v-if="!showAddAccountRow && ifrsAccounts.length > 0"
+          type="button"
+          @click="showAddAccountRow = true"
+          class="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-800"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          {{ t('budgets.add_account_line') }}
+        </button>
       </div>
 
       <div class="px-6 py-4 border-t border-gray-200 flex justify-between">
@@ -219,12 +303,22 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="cat in accountCategories" :key="cat.type">
-              <td class="px-4 py-2 text-sm text-gray-900">{{ cat.label }}</td>
-              <td class="px-4 py-2 text-sm text-right font-medium" :class="getRowTotal(cat.type) > 0 ? 'text-gray-900' : 'text-gray-400'">
-                {{ formatNumber(getRowTotal(cat.type)) }}
-              </td>
-            </tr>
+            <template v-for="cat in accountCategories" :key="cat.type">
+              <tr>
+                <td class="px-4 py-2 text-sm text-gray-900">{{ cat.label }}</td>
+                <td class="px-4 py-2 text-sm text-right font-medium" :class="getRowTotal(cat.type) > 0 ? 'text-gray-900' : 'text-gray-400'">
+                  {{ formatNumber(getRowTotal(cat.type)) }}
+                </td>
+              </tr>
+              <tr v-for="acctRow in getAccountRowsForType(cat.type)" :key="'review-' + acctRow.account_id" class="bg-gray-50/50">
+                <td class="px-4 py-1 text-xs text-gray-600 pl-8">
+                  <span class="font-mono text-gray-500">{{ acctRow.code }}</span> {{ acctRow.name }}
+                </td>
+                <td class="px-4 py-1 text-xs text-right font-medium" :class="getRowTotal(acctRow.gridKey) > 0 ? 'text-gray-600' : 'text-gray-400'">
+                  {{ formatNumber(getRowTotal(acctRow.gridKey)) }}
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -254,7 +348,11 @@ import { useModalStore } from '@/scripts/stores/modal'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import CostCenterModal from '@/scripts/admin/components/modal-components/CostCenterModal.vue'
 
-const emit = defineEmits(['switchMode'])
+const props = defineProps({
+  initialData: { type: Object, default: null },
+  isEdit: { type: Boolean, default: false },
+})
+const emit = defineEmits(['switchMode', 'saved'])
 const router = useRouter()
 const { t } = useI18n()
 const modalStore = useModalStore()
@@ -275,6 +373,12 @@ const isPrefilling = ref(false)
 const costCenters = ref([])
 const prefillYear = ref(new Date().getFullYear() - 1)
 const prefillGrowth = ref(0)
+
+// Account-level detail state
+const ifrsAccounts = ref([])
+const accountRows = ref([]) // { account_type, account_id, code, name, gridKey }
+const showAddAccountRow = ref(false)
+const newAccountLine = ref({ account_type: 'OPERATING_REVENUE', account_id: null })
 
 const steps = [t('budgets.step_details'), t('budgets.step_lines'), t('budgets.step_review')]
 
@@ -360,7 +464,108 @@ const grandTotal = computed(() => {
   return total
 })
 
-onMounted(async () => { await loadCostCenters() })
+const filteredAccounts = computed(() => {
+  const existingIds = accountRows.value.map(r => r.account_id)
+  return ifrsAccounts.value
+    .filter(a => !existingIds.includes(a.id))
+    .map(a => ({ ...a, display_name: `${a.code} - ${a.name}` }))
+})
+
+function getAccountRowsForType(accountType) {
+  return accountRows.value.filter(r => r.account_type === accountType)
+}
+
+function addAccountLineRow() {
+  const accountId = newAccountLine.value.account_id
+  const accountType = newAccountLine.value.account_type
+  if (!accountId) return
+  const account = ifrsAccounts.value.find(a => a.id === accountId)
+  if (!account) return
+  // Check for duplicates
+  if (accountRows.value.some(r => r.account_id === accountId && r.account_type === accountType)) return
+  accountRows.value.push({
+    account_type: accountType,
+    account_id: accountId,
+    code: account.code,
+    name: account.name,
+    gridKey: `ACCT_${accountId}`,
+  })
+  newAccountLine.value = { account_type: accountType, account_id: null }
+  showAddAccountRow.value = false
+}
+
+function removeAccountRow(accountType, accountId) {
+  const idx = accountRows.value.findIndex(r => r.account_type === accountType && r.account_id === accountId)
+  if (idx === -1) return
+  const gridKey = accountRows.value[idx].gridKey
+  // Remove grid data for this account row
+  for (const key of Object.keys(gridData.value)) {
+    if (key.startsWith(gridKey + '|')) delete gridData.value[key]
+  }
+  accountRows.value.splice(idx, 1)
+}
+
+async function loadIfrsAccounts() {
+  try {
+    const response = await window.axios.get('/accounting/accounts')
+    ifrsAccounts.value = (response.data?.data || []).map(a => ({
+      id: a.id,
+      code: a.code,
+      name: a.name,
+      type: a.type,
+    }))
+  } catch { ifrsAccounts.value = [] }
+}
+
+onMounted(async () => {
+  await loadCostCenters()
+  loadIfrsAccounts()
+  if (props.initialData) {
+    form.value.name = props.initialData.name || ''
+    form.value.scenario = props.initialData.scenario || 'expected'
+    form.value.period_type = props.initialData.period_type || 'monthly'
+    form.value.cost_center_id = props.initialData.cost_center_id || null
+    form.value.start_date = props.initialData.start_date || form.value.start_date
+    form.value.end_date = props.initialData.end_date || form.value.end_date
+    // Pre-populate grid from initialData.lines
+    if (props.initialData.lines && props.initialData.lines.length > 0) {
+      gridData.value = {}
+      for (const line of props.initialData.lines) {
+        // Build period key from line dates
+        const startDate = new Date(line.period_start)
+        let periodKey
+        if (form.value.period_type === 'monthly') {
+          periodKey = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`
+        } else if (form.value.period_type === 'quarterly') {
+          const q = Math.floor(startDate.getMonth() / 3) + 1
+          periodKey = `${startDate.getFullYear()}-Q${q}`
+        } else {
+          periodKey = `${startDate.getFullYear()}`
+        }
+
+        // Account-level lines use a separate grid key
+        if (line.ifrs_account_id && line.ifrs_account) {
+          const gridKey = `ACCT_${line.ifrs_account_id}`
+          // Register the account row if not already present
+          if (!accountRows.value.some(r => r.account_id === line.ifrs_account_id && r.account_type === line.account_type)) {
+            accountRows.value.push({
+              account_type: line.account_type,
+              account_id: line.ifrs_account_id,
+              code: line.ifrs_account.code,
+              name: line.ifrs_account.name,
+              gridKey,
+            })
+          }
+          const key = `${gridKey}|${periodKey}`
+          gridData.value[key] = (gridData.value[key] || 0) + parseFloat(line.amount || 0)
+        } else {
+          const key = `${line.account_type}|${periodKey}`
+          gridData.value[key] = (gridData.value[key] || 0) + parseFloat(line.amount || 0)
+        }
+      }
+    }
+  }
+})
 
 async function loadCostCenters() {
   try {
@@ -405,6 +610,7 @@ function getRowTotal(accountType) {
 function getColumnTotal(periodKey) {
   let total = 0
   for (const cat of accountCategories) total += parseFloat(gridData.value[`${cat.type}|${periodKey}`]) || 0
+  for (const acctRow of accountRows.value) total += parseFloat(gridData.value[`${acctRow.gridKey}|${periodKey}`]) || 0
   return total
 }
 
@@ -459,10 +665,22 @@ function buildLines() {
   const lines = []
   for (const [key, amount] of Object.entries(gridData.value)) {
     if (!amount || parseFloat(amount) === 0) continue
-    const [accountType, periodKey] = key.split('|')
+    const [rowKey, periodKey] = key.split('|')
     const period = gridPeriods.value.find(p => p.key === periodKey)
     if (!period) continue
-    lines.push({ account_type: accountType, period_start: period.start, period_end: period.end, amount: parseFloat(amount) })
+
+    // Check if this is an account-level row (ACCT_<id>)
+    const acctRow = rowKey.startsWith('ACCT_')
+      ? accountRows.value.find(r => r.gridKey === rowKey)
+      : null
+
+    lines.push({
+      account_type: acctRow ? acctRow.account_type : rowKey,
+      ifrs_account_id: acctRow ? acctRow.account_id : null,
+      period_start: period.start,
+      period_end: period.end,
+      amount: parseFloat(amount),
+    })
   }
   return lines
 }
@@ -485,11 +703,20 @@ async function saveBudget(action) {
       cost_center_id: form.value.cost_center_id || null,
       lines,
     }
-    const response = await window.axios.post('/budgets', payload)
+    let response
+    if (props.isEdit && props.initialData?.id) {
+      response = await window.axios.put(`/budgets/${props.initialData.id}`, payload)
+    } else {
+      response = await window.axios.post('/budgets', payload)
+    }
     const budgetId = response.data?.data?.id
     if (action === 'approve' && budgetId) await window.axios.post(`/budgets/${budgetId}/approve`)
-    notificationStore.showNotification({ type: 'success', message: t('budgets.created_success') })
-    router.push({ name: 'budgets.index' })
+    notificationStore.showNotification({ type: 'success', message: props.isEdit ? t('budgets.updated_success') || t('budgets.created_success') : t('budgets.created_success') })
+    if (props.isEdit) {
+      emit('saved')
+    } else {
+      router.push({ name: 'budgets.index' })
+    }
   } catch (error) {
     notificationStore.showNotification({ type: 'error', message: error.response?.data?.error || t('budgets.error_creating') })
   } finally { isSaving.value = false }

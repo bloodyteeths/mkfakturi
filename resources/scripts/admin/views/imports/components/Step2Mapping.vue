@@ -389,11 +389,11 @@ const requiredFieldsCategories = computed(() => {
         name: 'customers',
         icon: 'UserIcon',
         fields: [
-          { key: 'name', required: true },
-          { key: 'email', required: true },
-          { key: 'phone', required: false },
-          { key: 'address', required: false },
-          { key: 'vat_number', required: false },
+          { key: 'customer_name', required: true },
+          { key: 'customer_email', required: true },
+          { key: 'customer_phone', required: false },
+          { key: 'customer_address', required: false },
+          { key: 'customer_tax_id', required: false },
         ]
       }
     ],
@@ -405,12 +405,10 @@ const requiredFieldsCategories = computed(() => {
           { key: 'invoice_number', required: true },
           { key: 'customer_name', required: true },
           { key: 'invoice_date', required: true },
-          { key: 'total', required: true },
+          { key: 'total_amount', required: true },
           { key: 'due_date', required: false },
           { key: 'subtotal', required: false },
-          { key: 'tax', required: false },
-          { key: 'status', required: false },
-          { key: 'currency', required: false },
+          { key: 'tax_amount', required: false },
           { key: 'notes', required: false },
         ]
       }
@@ -420,9 +418,9 @@ const requiredFieldsCategories = computed(() => {
         name: 'items',
         icon: 'CubeIcon',
         fields: [
-          { key: 'name', required: true },
-          { key: 'price', required: true },
-          { key: 'description', required: false },
+          { key: 'item_name', required: true },
+          { key: 'unit_price', required: true },
+          { key: 'item_description', required: false },
           { key: 'unit', required: false },
           { key: 'tax_rate', required: false },
         ]
@@ -434,9 +432,9 @@ const requiredFieldsCategories = computed(() => {
         icon: 'CashIcon',
         fields: [
           { key: 'payment_date', required: true },
-          { key: 'amount', required: true },
+          { key: 'payment_amount', required: true },
           { key: 'payment_method', required: false },
-          { key: 'reference', required: false },
+          { key: 'payment_reference', required: false },
           { key: 'customer_name', required: false },
           { key: 'invoice_number', required: false },
         ]
@@ -448,8 +446,7 @@ const requiredFieldsCategories = computed(() => {
         icon: 'ReceiptTaxIcon',
         fields: [
           { key: 'expense_date', required: true },
-          { key: 'amount', required: true },
-          { key: 'category', required: false },
+          { key: 'payment_amount', required: true },
           { key: 'customer_name', required: false },
           { key: 'notes', required: false },
         ]
@@ -472,11 +469,11 @@ const requiredFieldsMissing = computed(() => {
 
   // Define required fields for each import type (same as store validation)
   const requiredFieldsByType = {
-    customers: ['name', 'email'],
-    invoices: ['invoice_number', 'customer_name', 'invoice_date', 'total'],
-    items: ['name', 'price'],
-    payments: ['payment_date', 'amount'],
-    expenses: ['expense_date', 'amount'],
+    customers: ['customer_name', 'customer_email'],
+    invoices: ['invoice_number', 'customer_name', 'invoice_date', 'total_amount'],
+    items: ['item_name', 'unit_price'],
+    payments: ['payment_date', 'payment_amount'],
+    expenses: ['expense_date', 'payment_amount'],
   }
 
   // Get required fields for current import type

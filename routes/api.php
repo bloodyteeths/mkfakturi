@@ -1389,6 +1389,16 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/transactions/bulk-delete', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'bulkDeleteTransactions']);
                 Route::post('/transactions/{id}/unmatch', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'unmatchTransaction']);
                 Route::get('/transactions/export', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'exportTransactions']);
+                Route::post('/transactions/bulk-categorize', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'bulkCategorize']);
+
+                // Document generation & reports
+                Route::get('/ios', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'generateIos']);
+                Route::get('/statement-report', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'bankStatementReport']);
+                Route::get('/pp10', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'generatePp10']);
+                Route::get('/compensation', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'generateCompensation']);
+                Route::get('/pp40', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'generatePp40']);
+                Route::get('/sepa-export/{batch}', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'exportSepa']);
+                Route::get('/daily-cash-report', [\App\Http\Controllers\V1\Admin\Banking\BankingController::class, 'dailyCashReport']);
 
                 // CSV Import
                 Route::prefix('import')->group(function () {
@@ -1424,6 +1434,7 @@ Route::prefix('/v1')->group(function () {
                     Route::get('/expense-categories', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getExpenseCategories']);
                     Route::get('/unpaid-bills', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getUnpaidBills']);
                     Route::get('/payroll-runs', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getPayrollRuns']);
+                    Route::post('/generate-pp30', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'generatePp30']);
                 });
 
                 // Matching Rules (P0-09)

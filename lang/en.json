@@ -7204,7 +7204,13 @@
         },
         "mk_compliance_section": "Macedonian Compliance Designations",
         "legal_representative": "Legal Representative (Управител)",
-        "signing_authority": "Signing Authority (Овластено лице)"
+        "signing_authority": "Signing Authority (Овластено лице)",
+        "active": "Active",
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "never": "Never",
+        "ovlastuvanje": "Authorization Letter",
+        "export_users": "Export Users"
     },
     "validation": {
         "accepted": "Accepted",

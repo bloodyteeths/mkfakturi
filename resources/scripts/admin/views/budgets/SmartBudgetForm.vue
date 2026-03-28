@@ -203,6 +203,7 @@
           <div v-for="cat in revenueCategories" :key="cat.key" class="px-4 py-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2 flex-1 min-w-0">
+                <span v-if="accountCodePrefix(cat)" class="text-xs font-mono text-gray-400">{{ accountCodePrefix(cat) }}</span>
                 <span class="text-sm text-gray-700 truncate">{{ cat.label }}</span>
               </div>
               <div class="flex items-center gap-3 ml-4">
@@ -255,6 +256,7 @@
           <div v-for="cat in expenseCategories" :key="cat.key" class="px-4 py-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2 flex-1 min-w-0">
+                <span v-if="accountCodePrefix(cat)" class="text-xs font-mono text-gray-400">{{ accountCodePrefix(cat) }}</span>
                 <span class="text-sm text-gray-700 truncate">{{ cat.label }}</span>
               </div>
               <div class="flex items-center gap-3 ml-4">
@@ -480,6 +482,35 @@ async function loadAiInsights() {
   }
 }
 
+// MK chart-of-accounts code prefix mapping for smart budget categories
+const ACCOUNT_CODE_PREFIXES = {
+  // Revenue types
+  OPERATING_REVENUE: '70xx',
+  NON_OPERATING_REVENUE: '76xx',
+  // Expense types
+  OPERATING_EXPENSE: '40xx',
+  DIRECT_EXPENSE: '41xx',
+  OVERHEAD_EXPENSE: '42xx',
+  NON_OPERATING_EXPENSE: '46xx',
+  // Asset types
+  CURRENT_ASSET: '10xx',
+  NON_CURRENT_ASSET: '02xx',
+  // Liability types
+  CURRENT_LIABILITY: '22xx',
+  NON_CURRENT_LIABILITY: '20xx',
+  // Smart budget category keys
+  invoice_revenue: '70xx',
+  recurring_revenue: '75xx',
+  bill_expenses: '40xx',
+  recurring_expenses: '42xx',
+  salary_expenses: '44xx',
+  other_expenses: '46xx',
+}
+
+function accountCodePrefix(cat) {
+  return ACCOUNT_CODE_PREFIXES[cat.key] || ACCOUNT_CODE_PREFIXES[cat.account_type] || null
+}
+
 function applyAiGrowth() {
   if (aiInsights.value?.suggested_growth_pct != null) {
     growthPct.value = aiInsights.value.suggested_growth_pct
@@ -523,7 +554,7 @@ function buildBudgetLines() {
   const startYear = parseInt(form.start_date.split('-')[0])
 
   for (const cat of categories.value) {
-    if (!cat.adjusted_total || cat.adjusted_total <= 0) continue
+    if (cat.adjusted_total == null || cat.adjusted_total === 0) continue
 
     // Determine the monthly distribution
     const totalFromMonthly = Object.values(cat.monthly).reduce((s, v) => s + (v || 0), 0)
@@ -539,7 +570,7 @@ function buildBudgetLines() {
         } else {
           amount = Math.round(cat.adjusted_total / 12 * 100) / 100
         }
-        if (amount <= 0) continue
+        if (amount === 0) continue
 
         const periodStart = `${startYear}-${String(m).padStart(2, '0')}-01`
         const periodEnd = new Date(startYear, m, 0).toISOString().split('T')[0]
@@ -564,7 +595,7 @@ function buildBudgetLines() {
           amount = cat.adjusted_total / 4
         }
         amount = Math.round(amount * 100) / 100
-        if (amount <= 0) continue
+        if (amount === 0) continue
 
         const periodStart = `${startYear}-${String(q * 3 + 1).padStart(2, '0')}-01`
         const periodEnd = new Date(startYear, (q + 1) * 3, 0).toISOString().split('T')[0]

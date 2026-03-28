@@ -24,6 +24,7 @@ export const useImportStore = defineStore('import', {
       detectedImportType: null, // Auto-detected from CSV headers
       detectionConfidence: 0, // Confidence score for type detection
       manualTypeOverride: null, // Manual type selection to override auto-detection
+      sourceSystem: 'auto', // Source system: auto, onivo, megasoft, effect_plus, eurofaktura, manager_io, generic
 
       // Step 2 - Mapping
       detectedFields: [],
@@ -167,20 +168,20 @@ export const useImportStore = defineStore('import', {
         // Define patterns for each import type
         const typePatterns = {
           customers: {
-            requiredPatterns: ['name', 'email'],
-            optionalPatterns: ['phone', 'address', 'vat_number', 'customer_name', 'telephone', 'mobile', 'street', 'city', 'zip', 'postal_code', 'country', 'tax_id', 'website', 'currency', 'billing_address'],
+            requiredPatterns: ['name', 'email', 'партнер', 'име', 'назив', 'klijent', 'parner'],
+            optionalPatterns: ['phone', 'address', 'vat_number', 'customer_name', 'telephone', 'mobile', 'street', 'city', 'zip', 'postal_code', 'country', 'tax_id', 'website', 'currency', 'billing_address', 'телефон', 'адреса', 'едб', 'контакт', 'веб', 'град', 'telefon', 'adresa'],
           },
           invoices: {
-            requiredPatterns: ['invoice_number', 'invoice_date'],
-            optionalPatterns: ['due_date', 'total', 'subtotal', 'tax', 'amount', 'discount', 'notes', 'description', 'customer_name', 'status', 'currency', 'customer_id'],
+            requiredPatterns: ['invoice_number', 'invoice_date', 'фактура', 'број', 'датум', 'faktura'],
+            optionalPatterns: ['due_date', 'total', 'subtotal', 'tax', 'amount', 'discount', 'notes', 'description', 'customer_name', 'status', 'currency', 'customer_id', 'рок', 'вкупно', 'основица', 'ддв', 'попуст', 'купувач', 'забелешки', 'статус', 'ddv', 'vkupno'],
           },
           items: {
-            requiredPatterns: ['name', 'price'],
-            optionalPatterns: ['description', 'unit', 'sku', 'tax_rate', 'quantity', 'qty', 'category', 'tax_type', 'unit_price', 'product_name', 'item_name'],
+            requiredPatterns: ['name', 'price', 'производ', 'цена', 'artikal', 'naziv'],
+            optionalPatterns: ['description', 'unit', 'sku', 'tax_rate', 'quantity', 'qty', 'category', 'tax_type', 'unit_price', 'product_name', 'item_name', 'опис', 'единица', 'шифра', 'количина', 'мерна', 'opis', 'sifra', 'cena'],
           },
           payments: {
-            requiredPatterns: ['payment_date', 'amount'],
-            optionalPatterns: ['payment_method', 'invoice_number', 'paid_on', 'payment_type', 'currency', 'reference', 'notes', 'description'],
+            requiredPatterns: ['payment_date', 'amount', 'плаќање', 'износ', 'уплата', 'iznos'],
+            optionalPatterns: ['payment_method', 'invoice_number', 'paid_on', 'payment_type', 'currency', 'reference', 'notes', 'description', 'начин', 'референца', 'nacin'],
           },
         }
 
@@ -244,8 +245,10 @@ export const useImportStore = defineStore('import', {
               const lines = text.split('\n')
               const headerLine = lines[0]
 
-              // Parse CSV header
-              const headers = this.parseCSVLine(headerLine)
+              // Detect delimiter and parse CSV header
+              const delimiter = this.detectDelimiter(headerLine)
+              console.log('[importStore] Detected delimiter:', JSON.stringify(delimiter))
+              const headers = this.parseCSVLine(headerLine, delimiter)
 
               console.log('[importStore] Detected headers:', headers)
 
@@ -275,8 +278,35 @@ export const useImportStore = defineStore('import', {
         })
       },
 
+      // Detect CSV delimiter by counting occurrences in the first line
+      detectDelimiter(line) {
+        const candidates = [',', ';', '\t', '|']
+        let maxCount = 0
+        let detected = ','
+
+        for (const delim of candidates) {
+          // Count occurrences outside quoted fields
+          let count = 0
+          let insideQuotes = false
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i]
+            if (char === '"') {
+              insideQuotes = !insideQuotes
+            } else if (char === delim && !insideQuotes) {
+              count++
+            }
+          }
+          if (count > maxCount) {
+            maxCount = count
+            detected = delim
+          }
+        }
+
+        return detected
+      },
+
       // Parse CSV header line into array
-      parseCSVLine(line) {
+      parseCSVLine(line, delimiter = ',') {
         // Handle quoted fields
         const result = []
         let current = ''
@@ -293,7 +323,7 @@ export const useImportStore = defineStore('import', {
             } else {
               insideQuotes = !insideQuotes
             }
-          } else if (char === ',' && !insideQuotes) {
+          } else if (char === delimiter && !insideQuotes) {
             result.push(current.trim())
             current = ''
           } else {
@@ -346,6 +376,7 @@ export const useImportStore = defineStore('import', {
           const formData = new FormData()
           formData.append('file', file)
           formData.append('type', importType)
+          formData.append('source_system', this.sourceSystem || 'auto')
 
           const response = await axios.post('/admin/imports', formData, {
             headers: {
@@ -407,6 +438,7 @@ export const useImportStore = defineStore('import', {
         this.detectedImportType = null
         this.detectionConfidence = 0
         this.manualTypeOverride = null
+        this.sourceSystem = 'auto'
         this.resetState()
         this.updateCanProceed()
       },
@@ -472,11 +504,11 @@ export const useImportStore = defineStore('import', {
 
         // Define required fields for each import type
         const requiredFieldsByType = {
-          customers: ['name', 'email'],
-          invoices: ['invoice_number', 'customer_name', 'invoice_date', 'total'],
-          items: ['name', 'price'],
-          payments: ['payment_date', 'amount'],
-          expenses: ['expense_date', 'amount'],
+          customers: ['customer_name', 'customer_email'],
+          invoices: ['invoice_number', 'customer_name', 'invoice_date', 'total_amount'],
+          items: ['item_name', 'unit_price'],
+          payments: ['payment_date', 'payment_amount'],
+          expenses: ['expense_date', 'payment_amount'],
         }
 
         // Get required fields for current import type

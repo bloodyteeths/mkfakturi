@@ -12,6 +12,17 @@
 
           <BaseButton
             v-if="budget.status === 'draft'"
+            variant="primary-outline"
+            @click="$router.push({ name: 'budgets.edit', params: { id: budget.id } })"
+          >
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="PencilSquareIcon" />
+            </template>
+            {{ t('edit') }}
+          </BaseButton>
+
+          <BaseButton
+            v-if="budget.status === 'draft'"
             variant="primary"
             @click="confirmApprove"
           >
@@ -30,7 +41,37 @@
           </BaseButton>
 
           <BaseButton
-            v-if="budget.status !== 'locked'"
+            v-if="budget.status === 'approved' || budget.status === 'locked'"
+            variant="primary-outline"
+            @click="confirmArchive"
+          >
+            {{ t('archive') || 'Архивирај' }}
+          </BaseButton>
+
+          <BaseButton
+            variant="primary-outline"
+            @click="exportCsv"
+          >
+            CSV
+          </BaseButton>
+
+          <BaseButton
+            variant="primary-outline"
+            @click="exportPdf"
+          >
+            PDF
+          </BaseButton>
+
+          <BaseButton
+            v-if="comparison && (budget.status === 'approved' || budget.status === 'locked')"
+            variant="primary-outline"
+            @click="exportComparisonPdf"
+          >
+            {{ t('export_comparison_pdf') }}
+          </BaseButton>
+
+          <BaseButton
+            v-if="budget.status !== 'locked' && budget.status !== 'archived'"
             variant="danger"
             @click="confirmDelete"
           >
@@ -62,6 +103,10 @@
       <!-- Budget Info Card -->
       <div class="bg-white rounded-lg shadow p-6 mb-6">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div v-if="budget.number">
+            <p class="text-xs text-gray-500">{{ t('budget_number') }}</p>
+            <p class="text-sm font-medium text-gray-900">{{ budget.number }}</p>
+          </div>
           <div>
             <p class="text-xs text-gray-500">{{ t('period') }}</p>
             <p class="text-sm font-medium text-gray-900">
@@ -195,12 +240,12 @@
               <div class="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden relative">
                 <div
                   class="h-full rounded-full"
-                  :class="row.variance > 0 ? 'bg-red-500' : 'bg-green-500'"
+                  :class="barVarianceClass(row)"
                   :style="{ width: barWidth(row.actual, row) + '%' }"
                 ></div>
               </div>
             </div>
-            <div class="w-24 text-right text-xs font-medium" :class="row.variance > 0 ? 'text-red-600' : 'text-green-600'">
+            <div class="w-24 text-right text-xs font-medium" :class="barVarianceTextClass(row)">
               {{ row.variance_pct > 0 ? '+' : '' }}{{ row.variance_pct }}%
             </div>
           </div>
@@ -375,9 +420,27 @@ function getVarianceForLine(line) {
 
 function getVarianceClass(line) {
   const variance = getVarianceForLine(line)
-  if (variance > 0) return 'text-red-600'
-  if (variance < 0) return 'text-green-600'
-  return 'text-gray-500'
+  if (variance === 0) return 'text-gray-500'
+  const isRevenue = line.account_type.includes('REVENUE')
+  // For revenue: positive variance (earned more than budgeted) = green
+  // For expenses: positive variance (spent more than budgeted) = red
+  if (isRevenue) return variance > 0 ? 'text-green-600' : 'text-red-600'
+  return variance > 0 ? 'text-red-600' : 'text-green-600'
+}
+
+function barVarianceClass(row) {
+  const isRevenue = row.account_type?.includes('REVENUE')
+  const isPositive = row.variance > 0
+  // Revenue: positive variance = good (green), Expenses: positive variance = bad (red)
+  if (isRevenue) return isPositive ? 'bg-green-500' : 'bg-red-500'
+  return isPositive ? 'bg-red-500' : 'bg-green-500'
+}
+
+function barVarianceTextClass(row) {
+  const isRevenue = row.account_type?.includes('REVENUE')
+  const isPositive = row.variance > 0
+  if (isRevenue) return isPositive ? 'text-green-600' : 'text-red-600'
+  return isPositive ? 'text-red-600' : 'text-green-600'
 }
 
 function barWidth(value, row) {
@@ -463,6 +526,51 @@ function confirmLock() {
           notificationStore.showNotification({
             type: 'success',
             message: t('locked'),
+          })
+          await loadBudget()
+        } catch (error) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.error || t('error_loading'),
+          })
+        }
+      }
+    })
+}
+
+function exportCsv() {
+  const baseURL = window.axios.defaults.baseURL || '/api/v1'
+  window.open(`${baseURL}/budgets/${budget.value.id}/export-csv`, '_blank')
+}
+
+function exportPdf() {
+  const baseURL = window.axios.defaults.baseURL || '/api/v1'
+  window.open(`${baseURL}/budgets/${budget.value.id}/export-pdf`, '_blank')
+}
+
+function exportComparisonPdf() {
+  const baseURL = window.axios.defaults.baseURL || '/api/v1'
+  window.open(`${baseURL}/budgets/${budget.value.id}/export-comparison-pdf`, '_blank')
+}
+
+function confirmArchive() {
+  dialogStore
+    .openDialog({
+      title: t('archive') || 'Архивирај',
+      message: t('confirm_archive') || 'Are you sure you want to archive this budget?',
+      yesLabel: $t('general.ok'),
+      noLabel: $t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        try {
+          await window.axios.post(`/budgets/${budget.value.id}/archive`)
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('archived') || 'Budget archived',
           })
           await loadBudget()
         } catch (error) {

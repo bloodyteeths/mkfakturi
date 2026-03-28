@@ -3,12 +3,14 @@
 namespace Modules\Mk\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Modules\Mk\Models\Budget;
 use Modules\Mk\Services\AiBudgetService;
 use Modules\Mk\Services\BudgetService;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BudgetController extends Controller
 {
@@ -35,6 +37,7 @@ class BudgetController extends Controller
             'year' => $request->query('year'),
             'cost_center_id' => $request->query('cost_center_id'),
             'scenario' => $request->query('scenario'),
+            'search' => $request->query('search'),
         ];
 
         $data = $this->service->list($companyId, array_filter($filters));
@@ -57,7 +60,7 @@ class BudgetController extends Controller
         }
 
         $budget = Budget::forCompany($companyId)
-            ->with(['lines', 'costCenter:id,name,code,color', 'createdBy:id,name', 'approvedBy:id,name'])
+            ->with(['lines.ifrsAccount:id,code,name,type', 'costCenter:id,name,code,color', 'createdBy', 'approvedBy'])
             ->find($id);
 
         if (! $budget) {
@@ -69,6 +72,7 @@ class BudgetController extends Controller
             'data' => [
                 'id' => $budget->id,
                 'company_id' => $budget->company_id,
+                'number' => $budget->number,
                 'name' => $budget->name,
                 'period_type' => $budget->period_type,
                 'start_date' => $budget->start_date?->toDateString(),
@@ -97,6 +101,12 @@ class BudgetController extends Controller
                     'id' => $line->id,
                     'account_type' => $line->account_type,
                     'ifrs_account_id' => $line->ifrs_account_id,
+                    'ifrs_account' => $line->ifrsAccount ? [
+                        'id' => $line->ifrsAccount->id,
+                        'code' => $line->ifrsAccount->code,
+                        'name' => $line->ifrsAccount->name,
+                        'type' => $line->ifrsAccount->type,
+                    ] : null,
                     'cost_center_id' => $line->cost_center_id,
                     'period_start' => $line->period_start?->toDateString(),
                     'period_end' => $line->period_end?->toDateString(),
@@ -157,6 +167,8 @@ class BudgetController extends Controller
                 ],
                 'message' => 'Budget created successfully.',
             ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
@@ -419,6 +431,119 @@ class BudgetController extends Controller
         ]);
     }
     /**
+     * Clone a budget (deep copy with lines).
+     */
+    public function clone(Request $request, int $id): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        if (! $companyId) {
+            return response()->json(['error' => 'Company header required'], 400);
+        }
+
+        $budget = Budget::forCompany($companyId)->with('lines')->find($id);
+
+        if (! $budget) {
+            return response()->json(['error' => 'Budget not found'], 404);
+        }
+
+        $newBudget = $this->service->clone($budget);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $newBudget->id,
+                'name' => $newBudget->name,
+                'status' => $newBudget->status,
+            ],
+            'message' => 'Budget cloned successfully.',
+        ], 201);
+    }
+
+    /**
+     * Archive an approved or locked budget.
+     */
+    public function archive(Request $request, int $id): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        if (! $companyId) {
+            return response()->json(['error' => 'Company header required'], 400);
+        }
+
+        $budget = Budget::forCompany($companyId)->find($id);
+
+        if (! $budget) {
+            return response()->json(['error' => 'Budget not found'], 404);
+        }
+
+        try {
+            $budget = $this->service->archive($budget);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $budget->id,
+                    'status' => $budget->status,
+                ],
+                'message' => 'Budget archived successfully.',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Export budget as CSV download.
+     */
+    public function exportCsv(Request $request, int $id): StreamedResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        if (! $companyId) {
+            abort(400, 'Company header required');
+        }
+
+        $budget = Budget::forCompany($companyId)->with('lines')->find($id);
+
+        if (! $budget) {
+            abort(404, 'Budget not found');
+        }
+
+        $filename = 'budget-' . $budget->id . '-' . now()->format('Y-m-d') . '.csv';
+
+        return new StreamedResponse(function () use ($budget) {
+            $handle = fopen('php://output', 'w');
+
+            // Metadata rows
+            fputcsv($handle, ['Budget Name', $budget->name]);
+            fputcsv($handle, ['Period', $budget->start_date?->toDateString() . ' — ' . $budget->end_date?->toDateString()]);
+            fputcsv($handle, ['Status', $budget->status]);
+            fputcsv($handle, ['Scenario', $budget->scenario ?? 'expected']);
+            fputcsv($handle, []); // blank row
+
+            // Header row
+            fputcsv($handle, ['Account Type', 'Period Start', 'Period End', 'Budgeted Amount', 'Notes']);
+
+            // Data rows
+            foreach ($budget->lines as $line) {
+                fputcsv($handle, [
+                    $line->account_type,
+                    $line->period_start?->toDateString(),
+                    $line->period_end?->toDateString(),
+                    (float) $line->amount,
+                    $line->notes ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
      * AI-powered budget suggestions (deducts from AI usage quota).
      */
     public function aiSuggest(Request $request): JsonResponse
@@ -472,6 +597,150 @@ class BudgetController extends Controller
             'success' => true,
             'data' => $result,
         ]);
+    }
+
+    /**
+     * Export budget as PDF.
+     */
+    public function exportPdf(Request $request, int $id)
+    {
+        $companyId = (int) $request->header('company');
+
+        if (! $companyId) {
+            return response()->json(['error' => 'Company header required'], 400);
+        }
+
+        $budget = Budget::forCompany($companyId)
+            ->with(['lines', 'costCenter:id,name,code,color', 'createdBy', 'approvedBy', 'company.address'])
+            ->find($id);
+
+        if (! $budget) {
+            return response()->json(['error' => 'Budget not found'], 404);
+        }
+
+        $company = $budget->company;
+
+        // Generate sequential budget number
+        $budgetNumber = str_pad($budget->id, 5, '0', STR_PAD_LEFT);
+        $preparedDate = now()->format('d.m.Y');
+
+        // Macedonian number formatter
+        $formatNumber = function ($value) {
+            return number_format((float) ($value ?? 0), 2, ',', '.');
+        };
+
+        // Account type labels
+        $accountTypeLabels = $this->service->getAccountTypeLabels();
+
+        // Classify revenue vs expense types
+        $revenueTypes = ['OPERATING_REVENUE', 'NON_OPERATING_REVENUE'];
+        $expenseTypes = ['OPERATING_EXPENSE', 'NON_OPERATING_EXPENSE', 'DIRECT_EXPENSE', 'OVERHEAD_EXPENSE'];
+
+        $revenueLines = $budget->lines->filter(fn ($l) => in_array(strtoupper($l->account_type), $revenueTypes));
+        $expenseLines = $budget->lines->filter(fn ($l) => in_array(strtoupper($l->account_type), $expenseTypes));
+        $otherLines = $budget->lines->filter(fn ($l) =>
+            ! in_array(strtoupper($l->account_type), array_merge($revenueTypes, $expenseTypes))
+        );
+
+        $totalRevenue = $revenueLines->sum('amount');
+        $totalExpenses = $expenseLines->sum('amount');
+        $projectedProfitLoss = $totalRevenue - $totalExpenses;
+
+        $periodTypeLabels = [
+            'monthly' => 'Месечно',
+            'quarterly' => 'Квартално',
+            'yearly' => 'Годишно',
+        ];
+
+        $scenarioLabels = [
+            'expected' => 'Очекувано',
+            'optimistic' => 'Оптимистично',
+            'pessimistic' => 'Песимистично',
+        ];
+
+        $report_period = $budget->start_date?->format('d.m.Y') . ' - ' . $budget->end_date?->format('d.m.Y');
+
+        // Include comparison data for approved/locked budgets
+        $comparison = null;
+        if (in_array($budget->status, ['approved', 'locked'])) {
+            try {
+                $comparison = $this->service->getBudgetVsActual($budget);
+            } catch (\Exception $e) {
+                $comparison = null;
+            }
+        }
+
+        $pdf = Pdf::loadView('app.pdf.reports.budget', compact(
+            'budget',
+            'company',
+            'comparison',
+            'budgetNumber',
+            'preparedDate',
+            'formatNumber',
+            'accountTypeLabels',
+            'revenueLines',
+            'expenseLines',
+            'otherLines',
+            'totalRevenue',
+            'totalExpenses',
+            'projectedProfitLoss',
+            'periodTypeLabels',
+            'scenarioLabels',
+            'report_period'
+        ));
+
+        $pdf->setPaper('A4', 'portrait');
+        $filename = "budzet-{$budgetNumber}.pdf";
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Export budget vs actual comparison as PDF.
+     */
+    public function exportComparisonPdf(Request $request, int $id)
+    {
+        $companyId = (int) $request->header('company');
+
+        if (! $companyId) {
+            return response()->json(['error' => 'Company header required'], 400);
+        }
+
+        $budget = Budget::forCompany($companyId)
+            ->with(['lines', 'costCenter:id,name,code,color', 'createdBy', 'approvedBy', 'company.address'])
+            ->find($id);
+
+        if (! $budget) {
+            return response()->json(['error' => 'Budget not found'], 404);
+        }
+
+        $company = $budget->company;
+
+        // Get comparison data from BudgetService
+        $comparisonRows = $this->service->getBudgetVsActual($budget);
+        $summary = $this->service->getVarianceSummary($budget);
+
+        // Macedonian number formatter
+        $formatNumber = function ($value) {
+            return number_format((float) ($value ?? 0), 2, ',', '.');
+        };
+
+        $report_period = $budget->start_date?->format('d.m.Y') . ' - ' . $budget->end_date?->format('d.m.Y');
+
+        $pdf = Pdf::loadView('app.pdf.reports.budget-vs-actual', compact(
+            'budget',
+            'company',
+            'comparisonRows',
+            'summary',
+            'formatNumber',
+            'report_period'
+        ));
+
+        $pdf->setPaper('A4', 'portrait');
+        $budgetNumber = str_pad($budget->id, 5, '0', STR_PAD_LEFT);
+        $filename = "budzet-vs-realizacija-{$budgetNumber}.pdf";
+
+        return $pdf->download($filename);
     }
 }
 

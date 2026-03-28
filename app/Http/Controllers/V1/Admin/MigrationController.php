@@ -826,32 +826,18 @@ class MigrationController extends Controller
 
         $this->authorize('create', ImportJob::class);
 
-        $validTypes = [
-            'customers' => 'customer_import_template.csv',
-            'items' => 'items_import_template.csv',
-            'invoices' => 'invoice_import_template.csv',
-            'invoice_with_items' => 'invoice_with_items_template.csv',
-        ];
+        $validTypes = ['customers', 'items', 'invoices', 'invoice_with_items'];
 
-        if (! isset($validTypes[$type])) {
+        if (! in_array($type, $validTypes)) {
             return response()->json([
                 'message' => 'Invalid template type',
-                'valid_types' => array_keys($validTypes),
+                'valid_types' => $validTypes,
             ], 422);
         }
 
         try {
-            $filename = $validTypes[$type];
-            $templatePath = storage_path('app/templates/'.$filename);
-
-            if (! file_exists($templatePath)) {
-                Log::error('Template file not found', [
-                    'type' => $type,
-                    'path' => $templatePath,
-                ]);
-
-                return response()->json(['message' => 'Template file not found'], 404);
-            }
+            $csv = $this->generateTemplateCsv($type);
+            $filename = $type.'_import_template.csv';
 
             Log::info('Template downloaded', [
                 'type' => $type,
@@ -860,7 +846,7 @@ class MigrationController extends Controller
                 'company_id' => request()->header('company'),
             ]);
 
-            return response()->download($templatePath, $filename, [
+            return response($csv, 200, [
                 'Content-Type' => 'text/csv; charset=UTF-8',
                 'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             ]);
@@ -938,5 +924,62 @@ class MigrationController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Generate CSV template content on-the-fly with UTF-8 BOM and example rows.
+     */
+    protected function generateTemplateCsv(string $type): string
+    {
+        $templates = [
+            'customers' => [
+                'headers' => ['name', 'email', 'phone', 'vat_number', 'contact_name', 'address', 'city', 'zip', 'country', 'website'],
+                'rows' => [
+                    ['Петрол Македонија ДООЕЛ', 'info@petrol.mk', '+389 2 3100 200', 'MK4030004528764', 'Марко Петровски', 'бул. Партизански Одреди 17', 'Скопје', '1000', 'MK', 'https://petrol.mk'],
+                    ['Алкалоид АД Скопје', 'contact@alkaloid.com.mk', '+389 2 3104 000', 'MK4030996244413', 'Ана Стојановска', 'бул. Александар Македонски 12', 'Скопје', '1000', 'MK', 'https://alkaloid.com.mk'],
+                ],
+            ],
+            'items' => [
+                'headers' => ['name', 'description', 'price', 'unit', 'sku', 'quantity', 'tax_rate'],
+                'rows' => [
+                    ['Канцелариски стол', 'Ергономски стол со потпирач за раце', '12500.00', 'парче', 'FURN-001', '50', '18'],
+                    ['Веб дизајн услуга', 'Изработка на веб страница', '45000.00', 'услуга', 'SVC-010', '1', '18'],
+                ],
+            ],
+            'invoices' => [
+                'headers' => ['invoice_number', 'invoice_date', 'due_date', 'customer_name', 'subtotal', 'tax', 'total', 'status', 'notes'],
+                'rows' => [
+                    ['ФАК-2026-001', '2026-01-15', '2026-02-15', 'Петрол Македонија ДООЕЛ', '100000.00', '18000.00', '118000.00', 'sent', 'Месечна фактура за јануари'],
+                    ['ФАК-2026-002', '2026-01-20', '2026-02-20', 'Алкалоид АД Скопје', '45000.00', '8100.00', '53100.00', 'paid', 'Консултантски услуги'],
+                ],
+            ],
+            'invoice_with_items' => [
+                'headers' => ['row_type', 'invoice_number', 'invoice_date', 'due_date', 'customer_name', 'item_name', 'quantity', 'unit_price', 'tax_rate', 'subtotal', 'tax', 'total', 'status'],
+                'rows' => [
+                    ['invoice', 'ФАК-2026-001', '2026-01-15', '2026-02-15', 'Петрол Македонија ДООЕЛ', '', '', '', '', '145000.00', '26100.00', '171100.00', 'sent'],
+                    ['item', 'ФАК-2026-001', '', '', '', 'Канцелариски стол', '2', '12500.00', '18', '', '', '', ''],
+                    ['item', 'ФАК-2026-001', '', '', '', 'Веб дизајн услуга', '1', '45000.00', '18', '', '', '', ''],
+                    ['invoice', 'ФАК-2026-002', '2026-01-20', '2026-02-20', 'Алкалоид АД Скопје', '', '', '', '', '45000.00', '8100.00', '53100.00', 'paid'],
+                    ['item', 'ФАК-2026-002', '', '', '', 'Консултантски услуги', '1', '45000.00', '18', '', '', '', ''],
+                ],
+            ],
+        ];
+
+        $template = $templates[$type];
+
+        // UTF-8 BOM so Excel opens Cyrillic correctly
+        $output = "\xEF\xBB\xBF";
+
+        $handle = fopen('php://memory', 'r+');
+        fputcsv($handle, $template['headers']);
+        foreach ($template['rows'] as $row) {
+            fputcsv($handle, $row);
+        }
+        rewind($handle);
+        $output .= stream_get_contents($handle);
+        fclose($handle);
+
+        return $output;
+    }
+    // CLAUDE-CHECKPOINT
 }
 
