@@ -97,21 +97,27 @@ class TicketController extends Controller
         // Load relationships for response
         $ticket->load(['user', 'categories', 'labels']);
 
-        // Send notification to customer
-        $user->notify(new TicketCreatedNotification($ticket));
+        // Send notifications (non-blocking — ticket creation must succeed regardless)
+        try {
+            $user->notify(new TicketCreatedNotification($ticket));
 
-        // Send notification to admin emails (fallback to super admins if not configured)
-        $adminEmails = config('support.admin_notify_emails');
-        $emailList = $adminEmails
-            ? array_filter(array_map('trim', explode(',', $adminEmails)))
-            : \App\Models\User::where('role', 'super admin')->pluck('email')->toArray();
+            $adminEmails = config('support.admin_notify_emails');
+            $emailList = $adminEmails
+                ? array_filter(array_map('trim', explode(',', $adminEmails)))
+                : \App\Models\User::where('role', 'super admin')->pluck('email')->toArray();
 
-        if (! empty($emailList)) {
-            $ticket->load('company');
-            foreach ($emailList as $email) {
-                Notification::route('mail', $email)
-                    ->notify(new AdminTicketCreatedNotification($ticket));
+            if (! empty($emailList)) {
+                $ticket->load('company');
+                foreach ($emailList as $email) {
+                    Notification::route('mail', $email)
+                        ->notify(new AdminTicketCreatedNotification($ticket));
+                }
             }
+        } catch (\Throwable $e) {
+            \Log::error('Ticket notification failed', [
+                'ticket_id' => $ticket->id,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         // Notify Clawd AI assistant in real-time
@@ -120,7 +126,9 @@ class TicketController extends Controller
             'subject' => $ticket->title,
         ]);
 
-        return new TicketResource($ticket);
+        return (new TicketResource($ticket))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
