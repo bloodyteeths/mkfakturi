@@ -312,6 +312,29 @@ export function useFiscalPrinter() {
   }
 
   /**
+   * Print an X-report (mid-day, non-zeroing).
+   */
+  async function xReport() {
+    isProcessing.value = true
+    try {
+      const service = _getService()
+      const result = await service.dailyXReport()
+      _log('x-report', 'X-report printed')
+      notificationStore.showNotification({
+        type: 'success',
+        message: t('fiscal.x_report_printed') || 'X-Report printed',
+      })
+      return result
+    } catch (e) {
+      error.value = e.message
+      _log('error', e.message)
+      throw e
+    } finally {
+      isProcessing.value = false
+    }
+  }
+
+  /**
    * Open the cash drawer via fiscal device.
    */
   async function cashDrawerKick() {
@@ -391,6 +414,7 @@ export function useFiscalPrinter() {
     fiscalizeInvoice,
     getStatus,
     dailyReport,
+    xReport,
     cashDrawerKick,
   }
 }

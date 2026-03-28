@@ -20,11 +20,11 @@
 - [x] **A7. PLU quick codes** — Type numeric code + Enter to add item from catalog by SKU/PLU
 - [x] **A8. Quantity multiplier** — Type `3*` then scan → adds 3 units, visual badge indicator
 - [x] **A9. Cash drawer kick** — ISL CMD 0x46 via WebSerial, composable method
-- [ ] **A10. Receipt reprint from history** — F11 shortcut, lookup past receipts
-- [ ] **A11. Embedded weight barcode** — Parse prefix 27/28 EAN barcodes for weight-based items
-- [ ] **A12. X-Report** — Mid-day non-zeroing report via ISL CMD 0x45 param "2"
-- [ ] **A13. Blind cash counting** — Cashier enters count before seeing expected amount
-- [ ] **A14. Cash-in/Cash-out** — Petty cash transactions, logged with reason
+- [x] **A10. Receipt reprint from history** — F11 shortcut, ReceiptHistoryModal with search + reprint
+- [x] **A11. Embedded weight barcode** — Parse prefix 27/28 EAN-13 barcodes for weight-based items
+- [x] **A12. X-Report** — Mid-day non-zeroing report via ISL CMD 0x45 param "2", accessible from TopBar menu
+- [x] **A13. Blind cash counting** — 2-step shift close: count first, then see expected vs actual with difference
+- [x] **A14. Cash-in/Cash-out** — CashDrawerModal with type toggle, numpad, required reason, localStorage log
 
 ## Phase B: Receipt Printing & Z-Report (3-5 days)
 

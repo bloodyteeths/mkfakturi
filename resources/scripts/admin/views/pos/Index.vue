@@ -13,6 +13,9 @@
       @close-shift="showShiftClose = true"
       @open-return="showReturn = true"
       @warehouse-change="posStore.selectedWarehouse = $event"
+      @open-receipt-history="showReceiptHistory = true"
+      @open-cash-drawer="showCashDrawer = true"
+      @x-report="handleXReport"
       @exit="exitPos"
     />
 
@@ -177,6 +180,20 @@
       @close="showReturn = false"
     />
 
+    <!-- Cash In/Out Modal -->
+    <PosCashDrawerModal
+      :show="showCashDrawer"
+      @close="showCashDrawer = false"
+      @confirm="handleCashInOut"
+    />
+
+    <!-- Receipt History Modal -->
+    <PosReceiptHistoryModal
+      :show="showReceiptHistory"
+      @close="showReceiptHistory = false"
+      @reprint="handleReprintFromHistory"
+    />
+
     <!-- Parked Sales Modal -->
     <PosParkedModal
       v-if="showParked"
@@ -236,6 +253,8 @@ import PosReceiptModal from './components/ReceiptModal.vue'
 import PosShiftModal from './components/ShiftModal.vue'
 import PosParkedModal from './components/ParkedModal.vue'
 import PosReturnModal from './components/ReturnModal.vue'
+import PosReceiptHistoryModal from './components/ReceiptHistoryModal.vue'
+import PosCashDrawerModal from './components/CashDrawerModal.vue'
 import PosTableMap from './components/TableMap.vue'
 
 const { t } = useI18n()
@@ -249,6 +268,8 @@ const showShiftOpen = ref(false)
 const showShiftClose = ref(false)
 const showParked = ref(false)
 const showReturn = ref(false)
+const showReceiptHistory = ref(false)
+const showCashDrawer = ref(false)
 const showUpgrade = ref(false)
 const searchBarRef = ref(null)
 const splitAmounts = ref({ cash_amount: 0, card_amount: 0 })
@@ -268,8 +289,35 @@ function playBeep(freq = 800, duration = 100) {
   } catch (e) { /* silent fail */ }
 }
 
+// --- Weight barcode parser (prefix 27/28 EAN-13) ---
+function parseWeightBarcode(code) {
+  if (code.length !== 13) return null
+  const prefix = code.substring(0, 2)
+  if (prefix !== '27' && prefix !== '28') return null
+  const itemCode = code.substring(2, 7)
+  const weightRaw = parseInt(code.substring(7, 12), 10)
+  if (isNaN(weightRaw) || weightRaw <= 0) return null
+  const weightKg = weightRaw / 1000
+  return { itemCode, weightKg }
+}
+
 // --- Handlers ---
 async function handleBarcode(code) {
+  // Check for embedded weight barcode (prefix 27/28)
+  const weightData = parseWeightBarcode(code)
+  if (weightData) {
+    const pluResult = posStore.lookupPlu(weightData.itemCode)
+    if (pluResult.success) {
+      // Update last added item's quantity to the weight
+      const lastIdx = posStore.cart.length - 1
+      if (lastIdx >= 0) {
+        posStore.updateQuantity(lastIdx, weightData.weightKg)
+      }
+      playBeep(800, 100)
+      return
+    }
+  }
+
   // First try PLU lookup from loaded catalog
   const pluResult = posStore.lookupPlu(code)
   if (pluResult.success) {
@@ -355,6 +403,39 @@ async function handlePrintReceipt() {
   }
 }
 
+async function handleReprintFromHistory(receipt) {
+  if (!fiscal.isConnected.value) {
+    alert(t('pos.fiscal_not_connected') || 'No fiscal device connected')
+    return
+  }
+  try {
+    const deviceId = fiscalDeviceStore?.fiscalDevices?.find(d => d.is_active)?.id || null
+    if (deviceId && receipt.invoice_id) {
+      await fiscal.fiscalizeInvoice({ id: receipt.invoice_id, ...receipt.invoice }, deviceId)
+      showReceiptHistory.value = false
+    }
+  } catch (e) {
+    console.warn('Reprint from history failed:', e.message)
+  }
+}
+
+function handleCashInOut(entry) {
+  // Store in pos store's cash transactions for the current shift
+  const transactions = JSON.parse(localStorage.getItem('pos_cash_transactions') || '[]')
+  transactions.push(entry)
+  localStorage.setItem('pos_cash_transactions', JSON.stringify(transactions))
+  showCashDrawer.value = false
+}
+
+async function handleXReport() {
+  if (!fiscal.isConnected.value) return
+  try {
+    await fiscal.xReport()
+  } catch (e) {
+    console.warn('X-Report failed:', e.message)
+  }
+}
+
 function confirmClear() {
   if (confirm(t('pos.confirm_clear'))) {
     posStore.clearCart()
@@ -408,6 +489,11 @@ function handleKeydown(e) {
     e.preventDefault()
     confirmClear()
   }
+  // F11 = receipt history / reprint
+  if (e.key === 'F11') {
+    e.preventDefault()
+    showReceiptHistory.value = true
+  }
   // Escape = close modals
   if (e.key === 'Escape') {
     showPayment.value = false
@@ -415,6 +501,7 @@ function handleKeydown(e) {
     showShiftClose.value = false
     showParked.value = false
     showReturn.value = false
+    showReceiptHistory.value = false
     posStore.lastSale = null
   }
 }
