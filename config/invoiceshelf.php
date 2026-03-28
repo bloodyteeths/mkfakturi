@@ -309,6 +309,16 @@ return [
             'model' => '',
         ],
         [
+            'title' => 'online_payments.title',
+            'group' => '',
+            'name' => 'Online Payments',
+            'link' => '/admin/settings/online-payments',
+            'icon' => 'CreditCardIcon',
+            'owner_only' => true,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'Viber Notifications',
             'group' => '',
             'name' => 'Viber Notifications',

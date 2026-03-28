@@ -85,6 +85,8 @@ const FiscalDevicesSetting = () =>
   import('@/scripts/admin/views/settings/FiscalDevicesSetting.vue')
 const POSSetting = () =>
   import('@/scripts/admin/views/settings/POSSetting.vue')
+const OnlinePaymentsSetting = () =>
+  import('@/scripts/admin/views/settings/OnlinePaymentsSetting.vue')
 const ViberNotificationsSetting = () =>
   import('@/scripts/admin/views/settings/ViberNotificationsSetting.vue')
 const WooCommerceSetting = () =>
@@ -832,6 +834,12 @@ export default [
             name: 'settings.pos',
             meta: { isOwner: true },
             component: POSSetting,
+          },
+          {
+            path: 'online-payments',
+            name: 'settings.online-payments',
+            meta: { isOwner: true },
+            component: OnlinePaymentsSetting,
           },
           {
             path: 'viber-notifications',
