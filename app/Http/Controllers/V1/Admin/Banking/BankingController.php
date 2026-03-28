@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\Company;
-use App\Models\Invoice;
 use App\Models\Currency;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\Invoice;
 use App\Services\AiProvider\AiProviderInterface;
 use App\Services\AiProvider\ClaudeProvider;
 use App\Services\AiProvider\GeminiProvider;
@@ -738,7 +738,7 @@ class BankingController extends Controller
             $account = BankAccount::create([
                 'company_id' => $company->id,
                 'bank_name' => $validated['bank_name'],
-                'account_name' => $validated['bank_name'] . ' - ' . $validated['account_number'],
+                'account_name' => $validated['bank_name'].' - '.$validated['account_number'],
                 'account_number' => $validated['account_number'],
                 'iban' => $validated['iban'] ?? null,
                 'currency_id' => $currency->id,
@@ -793,7 +793,7 @@ class BankingController extends Controller
      * before the user manually selects a category.
      *
      * @param  Request  $request  Expects: description, amount, counterparty (optional: transaction_id)
-     * @return JsonResponse  { suggestion: { category_id, category_name, confidence } }
+     * @return JsonResponse { suggestion: { category_id, category_name, confidence } }
      */
     public function suggestCategory(Request $request): JsonResponse
     {
@@ -880,7 +880,7 @@ class BankingController extends Controller
      * @param  float  $amount  Transaction amount
      * @param  string  $counterparty  Counterparty name
      * @param  \Illuminate\Support\Collection  $categories  Available expense categories
-     * @return array|null  { category_id, category_name, confidence, method } or null
+     * @return array|null { category_id, category_name, confidence, method } or null
      */
     private function tryAiCategorySuggestion(
         string $description,
@@ -969,7 +969,7 @@ PROMPT;
      * @param  float  $amount  Transaction amount
      * @param  string  $counterparty  Counterparty name
      * @param  \Illuminate\Support\Collection  $categories  Available expense categories
-     * @return array|null  { category_id, category_name, confidence, method } or null
+     * @return array|null { category_id, category_name, confidence, method } or null
      */
     private function keywordCategorySuggestion(
         string $description,
@@ -977,7 +977,7 @@ PROMPT;
         string $counterparty,
         $categories
     ): ?array {
-        $text = mb_strtolower($description . ' ' . $counterparty);
+        $text = mb_strtolower($description.' '.$counterparty);
 
         // Keyword → category name patterns (supports both Macedonian and English terms)
         $keywordMap = [
@@ -1032,7 +1032,7 @@ PROMPT;
         });
 
         foreach ($keywordMap as $pattern => $possibleNames) {
-            if (preg_match('/(' . $pattern . ')/iu', $text)) {
+            if (preg_match('/('.$pattern.')/iu', $text)) {
                 // Try to find a matching category from the company's categories
                 foreach ($possibleNames as $name) {
                     $lowerName = mb_strtolower($name);
@@ -1070,8 +1070,6 @@ PROMPT;
 
     /**
      * Resolve the configured AI provider for category suggestions.
-     *
-     * @return AiProviderInterface
      */
     private function resolveAiProvider(): AiProviderInterface
     {
@@ -1294,12 +1292,12 @@ PROMPT;
 
         $transactions = $query->get();
 
-        $filename = 'transactions_' . $company->id . '_' . date('Y-m-d') . '.csv';
+        $filename = 'transactions_'.$company->id.'_'.date('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($transactions) {
             $handle = fopen('php://output', 'w');
             // BOM for Excel UTF-8
-            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
             fputcsv($handle, ['Date', 'Description', 'Counterparty', 'Amount', 'Type', 'Currency', 'Reference', 'Status']);
 
             foreach ($transactions as $tx) {
@@ -1355,6 +1353,385 @@ PROMPT;
     }
 
     /**
+     * Bulk categorize selected transactions.
+     */
+    public function bulkCategorize(Request $request): JsonResponse
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:bank_transactions,id',
+            'category' => 'required|string|max:50',
+        ]);
+
+        $company = $this->getCompany();
+
+        $updated = BankTransaction::forCompany($company->id)
+            ->whereIn('id', $request->ids)
+            ->update(['ai_category' => $request->category]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$updated} transactions categorized",
+            'updated' => $updated,
+        ]);
+    }
+
+    /**
+     * Generate IOS (open items statement) PDF for a customer.
+     */
+    public function generateIos(Request $request)
+    {
+        $request->validate([
+            'customer_id' => 'required|integer|exists:customers,id',
+            'from' => 'nullable|date',
+            'to' => 'nullable|date',
+        ]);
+
+        $company = $this->getCompany();
+        $customer = \App\Models\Customer::where('company_id', $company->id)
+            ->where('id', $request->customer_id)
+            ->firstOrFail();
+
+        $service = new \Modules\Mk\Services\IosPdfService;
+        $pdf = $service->generateForCustomer($company, $customer, $request->from, $request->to);
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="IOS-'.$customer->name.'.pdf"',
+        ]);
+    }
+
+    /**
+     * Generate bank statement PDF report.
+     */
+    public function bankStatementReport(Request $request)
+    {
+        $request->validate([
+            'account_id' => 'required|integer|exists:bank_accounts,id',
+            'from' => 'nullable|date',
+            'to' => 'nullable|date',
+        ]);
+
+        $company = $this->getCompany();
+        $account = BankAccount::where('company_id', $company->id)
+            ->where('id', $request->account_id)
+            ->firstOrFail();
+
+        $from = $request->from ? \Carbon\Carbon::parse($request->from) : \Carbon\Carbon::now()->startOfMonth();
+        $to = $request->to ? \Carbon\Carbon::parse($request->to) : \Carbon\Carbon::now();
+
+        $transactions = BankTransaction::forCompany($company->id)
+            ->where('bank_account_id', $account->id)
+            ->whereBetween('transaction_date', [$from, $to])
+            ->orderBy('transaction_date')
+            ->get();
+
+        $openingBalance = (float) ($account->opening_balance ?? 0);
+        $items = [];
+        $runningBalance = $openingBalance;
+
+        foreach ($transactions as $tx) {
+            $amount = (float) $tx->amount;
+            if ($tx->transaction_type === 'credit') {
+                $runningBalance += $amount;
+            } else {
+                $runningBalance -= $amount;
+            }
+            $items[] = [
+                'date' => \Carbon\Carbon::parse($tx->transaction_date)->format('d.m.Y'),
+                'description' => $tx->description ?? '',
+                'reference' => $tx->transaction_reference ?? '',
+                'debit' => $tx->transaction_type === 'debit' ? $amount : 0,
+                'credit' => $tx->transaction_type === 'credit' ? $amount : 0,
+                'balance' => $runningBalance,
+            ];
+        }
+
+        $pdf = \PDF::loadView('app.pdf.reports.bank-statement', [
+            'company' => $company,
+            'account' => $account,
+            'items' => $items,
+            'opening_balance' => $openingBalance,
+            'closing_balance' => $runningBalance,
+            'period_from' => $from->format('d.m.Y'),
+            'period_to' => $to->format('d.m.Y'),
+            'date' => now()->format('d.m.Y'),
+        ]);
+        $pdf->setPaper('a4', 'landscape');
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="bank-statement.pdf"',
+        ]);
+    }
+
+    /**
+     * Generate PP10 (collection order) PDF.
+     */
+    public function generatePp10(Request $request)
+    {
+        $request->validate([
+            'customer_id' => 'required|integer|exists:customers,id',
+            'invoice_ids' => 'required|array|min:1',
+            'invoice_ids.*' => 'integer|exists:invoices,id',
+        ]);
+
+        $company = $this->getCompany();
+        $customer = \App\Models\Customer::where('company_id', $company->id)
+            ->where('id', $request->customer_id)
+            ->firstOrFail();
+
+        $invoices = \App\Models\Invoice::where('company_id', $company->id)
+            ->whereIn('id', $request->invoice_ids)
+            ->get();
+
+        $bankAccount = BankAccount::where('company_id', $company->id)->first();
+        $service = new \Modules\Mk\Services\Pp30PdfService;
+
+        $slips = [];
+        foreach ($invoices as $inv) {
+            $slips[] = [
+                'creditor_name' => $company->name ?? '',
+                'creditor_iban' => $service->formatIban($bankAccount?->iban ?? ''),
+                'creditor_bank' => $bankAccount?->bank_name ?? '',
+                'debtor_name' => $customer->name ?? '',
+                'debtor_iban' => $service->formatIban($customer->iban ?? ''),
+                'debtor_bank' => '',
+                'amount' => (int) $inv->total,
+                'amount_formatted' => number_format($inv->total / 100, 2, ',', '.'),
+                'amount_words' => $service->amountToWords((int) $inv->total),
+                'currency_code' => 'MKD',
+                'description' => 'Наплата по фактура '.($inv->invoice_number ?? ''),
+                'date' => now()->format('d.m.Y'),
+                'bill_number' => $inv->invoice_number ?? '',
+            ];
+        }
+
+        $pdf = $service->generatePp10($slips);
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="PP10.pdf"',
+        ]);
+    }
+
+    /**
+     * Generate compensation (компензација) PDF.
+     */
+    public function generateCompensation(Request $request)
+    {
+        $request->validate([
+            'customer_id' => 'required|integer|exists:customers,id',
+            'receivable_invoice_ids' => 'nullable|array',
+            'payable_bill_ids' => 'nullable|array',
+        ]);
+
+        $company = $this->getCompany();
+        $customer = \App\Models\Customer::where('company_id', $company->id)
+            ->where('id', $request->customer_id)
+            ->firstOrFail();
+
+        $bankAccount = BankAccount::where('company_id', $company->id)->first();
+
+        $receivables = [];
+        $totalReceivables = 0;
+        if ($request->receivable_invoice_ids) {
+            $invoices = \App\Models\Invoice::where('company_id', $company->id)
+                ->whereIn('id', $request->receivable_invoice_ids)
+                ->get();
+            foreach ($invoices as $inv) {
+                $amount = (float) $inv->total / 100;
+                $receivables[] = [
+                    'document_number' => $inv->invoice_number,
+                    'date' => $inv->invoice_date ? \Carbon\Carbon::parse($inv->invoice_date)->format('d.m.Y') : '-',
+                    'due_date' => $inv->due_date ? \Carbon\Carbon::parse($inv->due_date)->format('d.m.Y') : '-',
+                    'amount' => $amount,
+                ];
+                $totalReceivables += $amount;
+            }
+        }
+
+        $payables = [];
+        $totalPayables = 0;
+        if ($request->payable_bill_ids) {
+            $bills = \App\Models\Bill::where('company_id', $company->id)
+                ->whereIn('id', $request->payable_bill_ids)
+                ->get();
+            foreach ($bills as $bill) {
+                $amount = (float) $bill->total / 100;
+                $payables[] = [
+                    'document_number' => $bill->bill_number,
+                    'date' => $bill->bill_date ? \Carbon\Carbon::parse($bill->bill_date)->format('d.m.Y') : '-',
+                    'due_date' => $bill->due_date ? \Carbon\Carbon::parse($bill->due_date)->format('d.m.Y') : '-',
+                    'amount' => $amount,
+                ];
+                $totalPayables += $amount;
+            }
+        }
+
+        $compensationAmount = min($totalReceivables, $totalPayables);
+
+        $pdf = \PDF::loadView('app.pdf.reports.kompenzacija', [
+            'party_a_name' => $company->name,
+            'party_a_vat' => $company->vat_number ?? '-',
+            'party_a_tax_id' => $company->edb ?? '-',
+            'party_a_address' => $company->address_street_1 ?? '',
+            'party_a_account' => $bankAccount?->iban ?? $bankAccount?->account_number ?? '-',
+            'party_b_name' => $customer->name,
+            'party_b_vat' => $customer->vat_number ?? '-',
+            'party_b_tax_id' => $customer->tax_id ?? '-',
+            'party_b_address' => trim(($customer->billing_address_street_1 ?? '').', '.($customer->billing_city ?? ''), ', '),
+            'party_b_account' => $customer->iban ?? '-',
+            'receivables' => $receivables,
+            'payables' => $payables,
+            'total_receivables' => $totalReceivables,
+            'total_payables' => $totalPayables,
+            'compensation_amount' => $compensationAmount,
+            'document_number' => 'KOMP-'.now()->format('Y-md'),
+            'date' => now()->format('d.m.Y'),
+        ]);
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="kompenzacija.pdf"',
+        ]);
+    }
+
+    /**
+     * Generate PP40 (promissory note / меница) PDF.
+     */
+    public function generatePp40(Request $request)
+    {
+        $request->validate([
+            'payee_name' => 'required|string',
+            'amount' => 'required|numeric|min:0.01',
+            'maturity_date' => 'required|date',
+        ]);
+
+        $company = $this->getCompany();
+        $bankAccount = BankAccount::where('company_id', $company->id)->first();
+        $pp30 = new \Modules\Mk\Services\Pp30PdfService;
+
+        $amountCents = (int) round($request->amount * 100);
+
+        $pdf = \PDF::loadView('app.pdf.reports.pp40', [
+            'issuer_name' => $company->name,
+            'issuer_vat' => $company->vat_number ?? '-',
+            'issuer_address' => $company->address_street_1 ?? '',
+            'issuer_account' => $bankAccount?->iban ?? '-',
+            'payee_name' => $request->payee_name,
+            'payee_vat' => $request->payee_vat ?? '-',
+            'payee_address' => $request->payee_address ?? '',
+            'payee_account' => $request->payee_account ?? '-',
+            'amount' => $amountCents,
+            'amount_words' => $pp30->amountToWords($amountCents),
+            'maturity_date' => \Carbon\Carbon::parse($request->maturity_date)->format('d.m.Y'),
+            'issue_date' => now()->format('d.m.Y'),
+            'issue_place' => $request->issue_place ?? 'Скопје',
+            'payment_place' => $request->payment_place ?? 'Скопје',
+            'note_number' => $request->note_number ?? 'МЕН-'.now()->format('Y-md'),
+            'currency' => 'МКД',
+        ]);
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="menica-pp40.pdf"',
+        ]);
+    }
+
+    /**
+     * Export SEPA pain.001 XML for a payment batch.
+     */
+    public function exportSepa(Request $request, int $batch)
+    {
+        $company = $this->getCompany();
+
+        $paymentBatch = \Modules\Mk\Models\PaymentBatch::where('company_id', $company->id)
+            ->where('id', $batch)
+            ->firstOrFail();
+
+        $builder = new \Modules\Mk\Services\SepaXmlBuilder;
+        $xml = $builder->build($paymentBatch);
+
+        $filename = 'SEPA-'.($paymentBatch->batch_number ?? $paymentBatch->id).'.xml';
+
+        return response($xml, 200, [
+            'Content-Type' => 'application/xml',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    /**
+     * Generate daily cash report PDF.
+     */
+    public function dailyCashReport(Request $request)
+    {
+        $request->validate([
+            'date' => 'nullable|date',
+        ]);
+
+        $company = $this->getCompany();
+        $date = $request->date ? \Carbon\Carbon::parse($request->date) : \Carbon\Carbon::today();
+
+        $payments = \App\Models\Payment::where('company_id', $company->id)
+            ->whereDate('payment_date', $date)
+            ->get();
+
+        $expenses = \App\Models\Expense::where('company_id', $company->id)
+            ->whereDate('expense_date', $date)
+            ->get();
+
+        $incomeItems = [];
+        $totalIncome = 0;
+        foreach ($payments as $pay) {
+            $amount = (float) $pay->amount;
+            $incomeItems[] = [
+                'time' => $pay->created_at ? $pay->created_at->format('H:i') : '-',
+                'document' => $pay->payment_number ?? '-',
+                'description' => $pay->notes ?? 'Уплата',
+                'customer' => $pay->customer?->name ?? '-',
+                'amount' => $amount,
+                'method' => 'Готовина',
+            ];
+            $totalIncome += $amount;
+        }
+
+        $expenseItems = [];
+        $totalExpense = 0;
+        foreach ($expenses as $exp) {
+            $amount = (float) $exp->amount / 100;
+            $expenseItems[] = [
+                'time' => $exp->created_at ? $exp->created_at->format('H:i') : '-',
+                'document' => '-',
+                'description' => $exp->notes ?? 'Расход',
+                'recipient' => $exp->category?->name ?? '-',
+                'amount' => $amount,
+                'method' => 'Готовина',
+            ];
+            $totalExpense += $amount;
+        }
+
+        $openingBalance = 0;
+        $closingBalance = $openingBalance + $totalIncome - $totalExpense;
+
+        $pdf = \PDF::loadView('app.pdf.reports.daily-cash-report', [
+            'company' => $company,
+            'date' => $date->format('d.m.Y'),
+            'opening_balance' => $openingBalance,
+            'total_income' => $totalIncome,
+            'total_expense' => $totalExpense,
+            'closing_balance' => $closingBalance,
+            'income_items' => $incomeItems,
+            'expense_items' => $expenseItems,
+        ]);
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="daily-cash-report-'.$date->format('Y-m-d').'.pdf"',
+        ]);
+    }
+
+    /**
      * Recalculate bank account balance from opening_balance + transactions.
      */
     private function recalculateAccountBalance(int $accountId): void
@@ -1376,4 +1753,3 @@ PROMPT;
         $account->update(['current_balance' => round($balance, 2)]);
     }
 }
-

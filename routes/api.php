@@ -780,6 +780,13 @@ Route::prefix('/v1')->group(function () {
             Route::get('suppliers/{supplier}/ledger', [CustomerLedgerController::class, 'forSupplier']);
             Route::get('suppliers/{supplier}/ledger/pdf', [CustomerLedgerController::class, 'supplierPdf']);
             Route::get('suppliers/match-by-tax-id', [CustomerMatchController::class, 'matchCustomer']);
+            Route::get('suppliers/aging', [\App\Http\Controllers\V1\Admin\AccountsPayable\SupplierReportsController::class, 'aging']);
+            Route::get('suppliers/aging/pdf', [\App\Http\Controllers\V1\Admin\AccountsPayable\SupplierReportsController::class, 'agingPdf']);
+            Route::post('suppliers/import', [\App\Http\Controllers\V1\Admin\AccountsPayable\SupplierReportsController::class, 'import']);
+            Route::get('suppliers/{supplier}/ios', [\App\Http\Controllers\V1\Admin\AccountsPayable\SupplierReportsController::class, 'ios']);
+            Route::get('suppliers/{supplier}/ios/pdf', [\App\Http\Controllers\V1\Admin\AccountsPayable\SupplierReportsController::class, 'iosPdf']);
+            Route::get('suppliers/{supplier}/statement', [\App\Http\Controllers\V1\Admin\AccountsPayable\SupplierReportsController::class, 'statement']);
+            Route::get('suppliers/{supplier}/pp30', [\App\Http\Controllers\V1\Admin\AccountsPayable\SupplierReportsController::class, 'pp30']);
             Route::apiResource('suppliers', \App\Http\Controllers\V1\Admin\AccountsPayable\SuppliersController::class);
 
             Route::get('/bills/inbound-alias', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'inboundAlias']);
@@ -1218,21 +1225,24 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'index']);
                 Route::get('/payable-bills', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'payableBills']);
                 Route::get('/overdue-summary', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'overdueSummary']);
+                Route::post('/bulk-approve', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'bulkApprove']);
+                Route::post('/bulk-export', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'bulkExport']);
+                Route::post('/bulk-cancel', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'bulkCancel']);
                 Route::post('/', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'store']);
                 Route::get('/{id}', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'show']);
+                Route::put('/{id}', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'update']);
                 Route::post('/{id}/approve', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'approve']);
                 Route::get('/{id}/export', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'export']);
                 Route::post('/{id}/confirm', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'confirm']);
                 Route::post('/{id}/cancel', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'cancel']);
+                Route::post('/{id}/duplicate', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'duplicate']);
                 Route::get('/{id}/pp30', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'pp30Pdf']);
+                Route::get('/{id}/pp50', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'pp50Pdf']);
             });
 
             // Расходен налог (Cash Disbursement Voucher)
             Route::get('/expenses/{expense}/rashoden-nalog', [\Modules\Mk\Http\Controllers\RashodenNalogController::class, 'forExpense']);
             Route::get('/bill-payments/{billPayment}/rashoden-nalog', [\Modules\Mk\Http\Controllers\RashodenNalogController::class, 'forBillPayment']);
-
-            // ПП50 (Budget Payment Order)
-            Route::get('/payment-orders/{id}/pp50', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'pp50Pdf']);
 
             // Cash Journal (Благајнички извештај)
             Route::get('/reports/cash-journal', [\Modules\Mk\Http\Controllers\CashJournalController::class, 'index']);
@@ -2168,13 +2178,19 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'index']);
             Route::get('/payable-bills', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'payableBills']);
             Route::get('/overdue-summary', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'overdueSummary']);
+            Route::post('/bulk-approve', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'bulkApprove']);
+            Route::post('/bulk-export', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'bulkExport']);
+            Route::post('/bulk-cancel', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'bulkCancel']);
             Route::post('/', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'store']);
             Route::get('/{id}', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'show']);
+            Route::put('/{id}', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'update']);
             Route::post('/{id}/approve', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'approve']);
             Route::get('/{id}/export', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'export']);
             Route::post('/{id}/confirm', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'confirm']);
             Route::post('/{id}/cancel', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'cancel']);
+            Route::post('/{id}/duplicate', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'duplicate']);
             Route::get('/{id}/pp30', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'pp30Pdf']);
+            Route::get('/{id}/pp50', [\App\Http\Controllers\V1\Partner\PartnerPaymentOrderController::class, 'pp50Pdf']);
         });
 
         // F3: Cost Centers (Partner)
