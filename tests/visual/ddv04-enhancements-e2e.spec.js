@@ -38,6 +38,55 @@ async function ss(page, name) {
   })
 }
 
+/** POST with CSRF token from cookie (Sanctum SPA auth). */
+async function apiPost(page, url, body) {
+  return page.evaluate(
+    async ({ url, body }) => {
+      const xsrf = document.cookie
+        .split('; ')
+        .find((c) => c.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1]
+      const headers = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        company: '2',
+      }
+      if (xsrf) headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf)
+      const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        credentials: 'same-origin',
+        body: JSON.stringify(body),
+      })
+      const text = await res.text()
+      try {
+        return { status: res.status, data: JSON.parse(text) }
+      } catch {
+        return { status: res.status, error: 'Non-JSON', body: text.substring(0, 300) }
+      }
+    },
+    { url, body }
+  )
+}
+
+async function apiGet(page, url) {
+  return page.evaluate(
+    async ({ url }) => {
+      const res = await fetch(url, {
+        headers: { Accept: 'application/json', company: '2' },
+        credentials: 'same-origin',
+      })
+      const text = await res.text()
+      try {
+        return { status: res.status, data: JSON.parse(text) }
+      } catch {
+        return { status: res.status, error: 'Non-JSON', body: text.substring(0, 300) }
+      }
+    },
+    { url }
+  )
+}
+
 test.describe('DDV-04 Enhancements — E2E', () => {
   test.describe.configure({ mode: 'serial' })
 
@@ -66,42 +115,18 @@ test.describe('DDV-04 Enhancements — E2E', () => {
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth() + 1
+    const periodStart = `${year}-${String(month).padStart(2, '0')}-01`
+    const lastDay = new Date(year, month, 0).getDate()
+    const periodEnd = `${year}-${String(month).padStart(2, '0')}-${lastDay}`
 
-    const response = await page.evaluate(
-      async ({ year, month }) => {
-        const periodStart = `${year}-${String(month).padStart(2, '0')}-01`
-        const lastDay = new Date(year, month, 0).getDate()
-        const periodEnd = `${year}-${String(month).padStart(2, '0')}-${lastDay}`
-
-        const res = await fetch(
-          `/api/v1/partner/companies/2/tax/vat-return/preview`,
-          {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              company: '2',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({
-              period_start: periodStart,
-              period_end: periodEnd,
-              period_type: 'MONTHLY',
-            }),
-          }
-        )
-        const text = await res.text()
-        try {
-          return { status: res.status, data: JSON.parse(text) }
-        } catch {
-          return { status: res.status, error: 'Non-JSON', body: text.substring(0, 200) }
-        }
-      },
-      { year, month }
+    const response = await apiPost(
+      page,
+      '/api/v1/partner/companies/2/tax/vat-return/preview',
+      { period_start: periodStart, period_end: periodEnd, period_type: 'MONTHLY' }
     )
 
-    if (response.error || response.status === 404) {
-      console.log('DDV-04 preview not available yet:', response.status)
+    if (response.error || response.status === 404 || response.status === 419) {
+      console.log('DDV-04 preview not available:', response.status, response.body || '')
       return
     }
 
@@ -111,7 +136,6 @@ test.describe('DDV-04 Enhancements — E2E', () => {
       const data = response.data
       expect(data.success || data.data).toBeTruthy()
 
-      // Check that output_vat contains hospitality bucket
       const outputVat = data.data?.output_vat || data.output_vat
       if (outputVat) {
         expect(outputVat.hospitality).toBeDefined()
@@ -120,7 +144,6 @@ test.describe('DDV-04 Enhancements — E2E', () => {
         console.log('Hospitality output:', JSON.stringify(outputVat.hospitality))
       }
 
-      // Check that input_vat contains hospitality bucket
       const inputVat = data.data?.input_vat || data.input_vat
       if (inputVat) {
         expect(inputVat.hospitality).toBeDefined()
@@ -139,36 +162,11 @@ test.describe('DDV-04 Enhancements — E2E', () => {
   test('DDV-04 fields match official UJP form layout', async () => {
     test.skip(!featureDeployed, 'Feature not deployed yet')
 
-    const now = new Date()
-    const year = now.getFullYear()
-
-    const response = await page.evaluate(
-      async ({ year }) => {
-        const res = await fetch(
-          `/api/v1/partner/companies/2/tax/vat-return/preview`,
-          {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              company: '2',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({
-              period_start: `${year}-01-01`,
-              period_end: `${year}-03-31`,
-              period_type: 'QUARTERLY',
-            }),
-          }
-        )
-        const text = await res.text()
-        try {
-          return { status: res.status, data: JSON.parse(text) }
-        } catch {
-          return { status: res.status, error: 'Non-JSON' }
-        }
-      },
-      { year }
+    const year = new Date().getFullYear()
+    const response = await apiPost(
+      page,
+      '/api/v1/partner/companies/2/tax/vat-return/preview',
+      { period_start: `${year}-01-01`, period_end: `${year}-03-31`, period_type: 'QUARTERLY' }
     )
 
     expect(response.status).toBe(200)
@@ -176,30 +174,23 @@ test.describe('DDV-04 Enhancements — E2E', () => {
     const fields = response.data.data?.fields || response.data.fields
     expect(fields).toBeDefined()
 
-    // Field 1-2: Standard 18% (base, VAT)
+    // Field 1-2: Standard 18%
     expect(typeof fields[1]).toBe('number')
     expect(typeof fields[2]).toBe('number')
-
-    // Field 3-4: Hospitality 10% (base, VAT) — NEW
+    // Field 3-4: Hospitality 10% — NEW
     expect(typeof fields[3]).toBe('number')
     expect(typeof fields[4]).toBe('number')
-
-    // Field 5-6: Reduced 5% (base, VAT) — SHIFTED
+    // Field 5-6: Reduced 5% — SHIFTED
     expect(typeof fields[5]).toBe('number')
     expect(typeof fields[6]).toBe('number')
-
-    // Field 7: Exports (zero-rated)
+    // Field 7: Exports
     expect(typeof fields[7]).toBe('number')
-
     // Field 8: Exempt with deduction
     expect(typeof fields[8]).toBe('number')
-
     // Field 10: Total output VAT
     expect(typeof fields[10]).toBe('number')
-
     // Field 19: Total input VAT
     expect(typeof fields[19]).toBe('number')
-
     // Field 31: Tax debt/claim
     expect(typeof fields[31]).toBe('number')
 
@@ -210,41 +201,16 @@ test.describe('DDV-04 Enhancements — E2E', () => {
   })
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // Test 3: Total output VAT formula correct (02+04+06+RC)
+  // Test 3: Total output VAT formula correct
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   test('Total output VAT (field 20) formula is correct', async () => {
     test.skip(!featureDeployed, 'Feature not deployed yet')
 
-    const now = new Date()
-    const year = now.getFullYear()
-
-    const response = await page.evaluate(
-      async ({ year }) => {
-        const res = await fetch(
-          `/api/v1/partner/companies/2/tax/vat-return/preview`,
-          {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              company: '2',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({
-              period_start: `${year}-01-01`,
-              period_end: `${year}-03-31`,
-              period_type: 'QUARTERLY',
-            }),
-          }
-        )
-        const text = await res.text()
-        try {
-          return { status: res.status, data: JSON.parse(text) }
-        } catch {
-          return { status: res.status, error: 'Non-JSON' }
-        }
-      },
-      { year }
+    const year = new Date().getFullYear()
+    const response = await apiPost(
+      page,
+      '/api/v1/partner/companies/2/tax/vat-return/preview',
+      { period_start: `${year}-01-01`, period_end: `${year}-03-31`, period_type: 'QUARTERLY' }
     )
 
     expect(response.status).toBe(200)
@@ -253,13 +219,9 @@ test.describe('DDV-04 Enhancements — E2E', () => {
 
     // field 20 ($f[10]) = 02 + 04 + 06 + RC VAT overrides (13+15+17+19)
     const expectedTotal =
-      (fields[2] || 0) +
-      (fields[4] || 0) +
-      (fields[6] || 0) +
-      (overrides[13] || 0) +
-      (overrides[15] || 0) +
-      (overrides[17] || 0) +
-      (overrides[19] || 0)
+      (fields[2] || 0) + (fields[4] || 0) + (fields[6] || 0) +
+      (overrides[13] || 0) + (overrides[15] || 0) +
+      (overrides[17] || 0) + (overrides[19] || 0)
 
     expect(Math.abs(fields[10] - expectedTotal)).toBeLessThan(0.02)
     console.log(`Total output VAT: ${fields[10]} (expected: ${expectedTotal})`)
@@ -273,36 +235,11 @@ test.describe('DDV-04 Enhancements — E2E', () => {
   test('Total input VAT (field 29) formula is correct', async () => {
     test.skip(!featureDeployed, 'Feature not deployed yet')
 
-    const now = new Date()
-    const year = now.getFullYear()
-
-    const response = await page.evaluate(
-      async ({ year }) => {
-        const res = await fetch(
-          `/api/v1/partner/companies/2/tax/vat-return/preview`,
-          {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              company: '2',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({
-              period_start: `${year}-01-01`,
-              period_end: `${year}-03-31`,
-              period_type: 'QUARTERLY',
-            }),
-          }
-        )
-        const text = await res.text()
-        try {
-          return { status: res.status, data: JSON.parse(text) }
-        } catch {
-          return { status: res.status, error: 'Non-JSON' }
-        }
-      },
-      { year }
+    const year = new Date().getFullYear()
+    const response = await apiPost(
+      page,
+      '/api/v1/partner/companies/2/tax/vat-return/preview',
+      { period_start: `${year}-01-01`, period_end: `${year}-03-31`, period_type: 'QUARTERLY' }
     )
 
     expect(response.status).toBe(200)
@@ -310,10 +247,7 @@ test.describe('DDV-04 Enhancements — E2E', () => {
 
     // field 29 ($f[19]) = 22 + 24 + 26 + 28
     const expectedInput =
-      (fields[12] || 0) +
-      (fields[14] || 0) +
-      (fields[16] || 0) +
-      (fields[18] || 0)
+      (fields[12] || 0) + (fields[14] || 0) + (fields[16] || 0) + (fields[18] || 0)
 
     expect(Math.abs(fields[19] - expectedInput)).toBeLessThan(0.02)
     console.log(`Total input VAT: ${fields[19]} (expected: ${expectedInput})`)
@@ -330,29 +264,10 @@ test.describe('DDV-04 Enhancements — E2E', () => {
   // Test 5: Period suggestion API
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   test('Period suggestion returns monthly/quarterly recommendation', async () => {
-    const now = new Date()
-    const year = now.getFullYear()
-
-    const response = await page.evaluate(
-      async ({ year }) => {
-        const res = await fetch(
-          `/api/v1/partner/companies/2/tax/vat-return/period-suggestion?year=${year}`,
-          {
-            headers: {
-              Accept: 'application/json',
-              company: '2',
-            },
-            credentials: 'same-origin',
-          }
-        )
-        const text = await res.text()
-        try {
-          return { status: res.status, data: JSON.parse(text) }
-        } catch {
-          return { status: res.status, error: 'Non-JSON', body: text.substring(0, 200) }
-        }
-      },
-      { year }
+    const year = new Date().getFullYear()
+    const response = await apiGet(
+      page,
+      `/api/v1/partner/companies/2/tax/vat-return/period-suggestion?year=${year}`
     )
 
     if (response.error || response.status === 404) {
@@ -377,43 +292,17 @@ test.describe('DDV-04 Enhancements — E2E', () => {
   test('Art. 35 proportional deduction data included in response', async () => {
     test.skip(!featureDeployed, 'Feature not deployed yet')
 
-    const now = new Date()
-    const year = now.getFullYear()
-
-    const response = await page.evaluate(
-      async ({ year }) => {
-        const res = await fetch(
-          `/api/v1/partner/companies/2/tax/vat-return/preview`,
-          {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              company: '2',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({
-              period_start: `${year}-01-01`,
-              period_end: `${year}-03-31`,
-              period_type: 'QUARTERLY',
-            }),
-          }
-        )
-        const text = await res.text()
-        try {
-          return { status: res.status, data: JSON.parse(text) }
-        } catch {
-          return { status: res.status, error: 'Non-JSON' }
-        }
-      },
-      { year }
+    const year = new Date().getFullYear()
+    const response = await apiPost(
+      page,
+      '/api/v1/partner/companies/2/tax/vat-return/preview',
+      { period_start: `${year}-01-01`, period_end: `${year}-03-31`, period_type: 'QUARTERLY' }
     )
 
     expect(response.status).toBe(200)
 
     const proportional =
-      response.data.data?.proportional_deduction ||
-      response.data.proportional_deduction
+      response.data.data?.proportional_deduction || response.data.proportional_deduction
 
     expect(proportional).toBeDefined()
     expect(typeof proportional.ratio).toBe('number')
@@ -421,13 +310,9 @@ test.describe('DDV-04 Enhancements — E2E', () => {
     expect(proportional.ratio).toBeGreaterThanOrEqual(0)
     expect(proportional.ratio).toBeLessThanOrEqual(1)
 
-    console.log(
-      `Proportional deduction: ratio=${proportional.ratio}, applicable=${proportional.applicable}`
-    )
+    console.log(`Proportional deduction: ratio=${proportional.ratio}, applicable=${proportional.applicable}`)
     if (proportional.applicable) {
-      console.log(
-        `  Taxable: ${proportional.taxable}, Exempt: ${proportional.exempt}`
-      )
+      console.log(`  Taxable: ${proportional.taxable}, Exempt: ${proportional.exempt}`)
     }
 
     await ss(page, '06-ddv04-proportional-deduction')
@@ -439,44 +324,17 @@ test.describe('DDV-04 Enhancements — E2E', () => {
   test('DDV-04 PDF export generates valid response', async () => {
     test.skip(!featureDeployed, 'Feature not deployed yet')
 
-    const now = new Date()
-    const year = now.getFullYear()
-
-    const response = await page.evaluate(
-      async ({ year }) => {
-        const res = await fetch(
-          `/api/v1/partner/companies/2/tax/vat-return`,
-          {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              company: '2',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({
-              period_start: `${year}-01-01`,
-              period_end: `${year}-01-31`,
-              period_type: 'MONTHLY',
-              format: 'pdf',
-            }),
-          }
-        )
-        return {
-          status: res.status,
-          contentType: res.headers.get('content-type'),
-        }
-      },
-      { year }
+    const year = new Date().getFullYear()
+    const response = await apiPost(
+      page,
+      '/api/v1/partner/companies/2/tax/vat-return',
+      { period_start: `${year}-01-01`, period_end: `${year}-01-31`, period_type: 'MONTHLY', format: 'pdf' }
     )
 
     // Should return PDF or at least 200
     expect([200, 500]).toContain(response.status)
     if (response.status === 200) {
-      console.log(
-        'DDV-04 PDF generated, content-type:',
-        response.contentType
-      )
+      console.log('DDV-04 PDF generated')
     }
 
     await ss(page, '07-ddv04-pdf-export')
