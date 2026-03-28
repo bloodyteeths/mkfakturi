@@ -2580,6 +2580,8 @@
         "import_items": "Import Items",
         "inventory_account": "Inventory Account",
         "inventory_account_hint": "Account for stock in warehouse (default: 630)",
+        "image_uploaded": "Product photo uploaded successfully",
+        "image_removed": "Product photo removed",
         "initial_quantity": "Initial Quantity",
         "initial_quantity_placeholder": "Enter quantity...",
         "initial_stock_hint": "Enter the opening stock balance for this item",

@@ -373,6 +373,7 @@ class POSSaleController extends Controller
                     'tax_percent' => $taxPercent,
                     'track_quantity' => (bool) $item->track_quantity,
                     'quantity' => (float) ($item->quantity ?? 0),
+                    'image_url' => $item->image_url,
                 ];
             });
 

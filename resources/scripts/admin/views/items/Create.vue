@@ -35,6 +35,31 @@
             />
           </BaseInputGroup>
 
+          <!-- Item Photo -->
+          <BaseInputGroup
+            :label="$t('items.photo', 'Product Photo')"
+            :content-loading="isFetchingInitialData"
+          >
+            <div class="flex items-center gap-4">
+              <div v-if="itemStore.currentItem.image_url && !isImageRemoved" class="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                <img :src="itemStore.currentItem.image_url" alt="Item photo" class="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+                  @click="removeImage"
+                >
+                  &times;
+                </button>
+              </div>
+              <BaseFileUploader
+                v-model="previewImage"
+                base64
+                @change="onImageChange"
+                @remove="onImageRemove"
+              />
+            </div>
+          </BaseInputGroup>
+
           <BaseInputGroup
             :label="$t('items.sku')"
             :content-loading="isFetchingInitialData"
@@ -546,6 +571,31 @@ const isFetchingInitialData = ref(false)
 const showDuplicateWarning = ref(false)
 const duplicateRecords = ref([])
 
+// Item photo
+const previewImage = ref([])
+const imageFileBlob = ref(null)
+const imageFileName = ref('')
+const isImageRemoved = ref(false)
+
+function onImageChange(file) {
+  imageFileBlob.value = file.data
+  imageFileName.value = file.name
+  isImageRemoved.value = false
+}
+
+function onImageRemove() {
+  imageFileBlob.value = null
+  imageFileName.value = ''
+}
+
+async function removeImage() {
+  if (isEdit.value && itemStore.currentItem.id) {
+    await itemStore.removeItemImage(itemStore.currentItem.id)
+  }
+  isImageRemoved.value = true
+  previewImage.value = []
+}
+
 // Stock module is always enabled (no feature flag)
 const stockEnabled = computed(() => true)
 
@@ -865,6 +915,12 @@ async function submitItem(allowDuplicate = false) {
       duplicateRecords.value = response.data.duplicates || []
       showDuplicateWarning.value = true
       return
+    }
+
+    // Upload photo if one was selected
+    const savedItemId = response?.data?.data?.id
+    if (savedItemId && imageFileBlob.value) {
+      await itemStore.uploadItemImage(savedItemId, imageFileBlob.value, imageFileName.value)
     }
 
     isSaving.value = false

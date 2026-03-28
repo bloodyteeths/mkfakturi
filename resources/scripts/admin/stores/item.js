@@ -46,6 +46,7 @@ export const useItemStore = (useWindow = false) => {
         inventory_account_id: null,
         cogs_account_id: null,
         purchase_account_id: null,
+        image_url: null,
       },
     }),
     getters: {
@@ -74,6 +75,7 @@ export const useItemStore = (useWindow = false) => {
           inventory_account_id: null,
           cogs_account_id: null,
           purchase_account_id: null,
+          image_url: null,
         }
       },
       // CLAUDE-CHECKPOINT: Added GL account fields to item store state
@@ -463,6 +465,56 @@ export const useItemStore = (useWindow = false) => {
                 })
               }
 
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      uploadItemImage(itemId, base64Data, fileName) {
+        const notificationStore = useNotificationStore()
+        const formData = new FormData()
+        formData.append('item_image', JSON.stringify({ data: base64Data, name: fileName }))
+
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/items/${itemId}/upload-image`, formData)
+            .then((response) => {
+              if (this.currentItem && this.currentItem.id === itemId) {
+                this.currentItem.image_url = response.data.image_url
+              }
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('items.image_uploaded'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      removeItemImage(itemId) {
+        const notificationStore = useNotificationStore()
+        const formData = new FormData()
+        formData.append('is_item_image_removed', '1')
+
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/items/${itemId}/upload-image`, formData)
+            .then((response) => {
+              if (this.currentItem && this.currentItem.id === itemId) {
+                this.currentItem.image_url = null
+              }
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('items.image_removed'),
+              })
               resolve(response)
             })
             .catch((err) => {

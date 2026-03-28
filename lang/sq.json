@@ -1247,6 +1247,8 @@
         "initial_stock_hint": "Vendosni bilancin fillestar të stokut për këtë artikull",
         "warehouse": "Magazinë",
         "select_warehouse": "Zgjidhni magazinën...",
+        "image_uploaded": "Fotografia e produktit u ngarkua me sukses",
+        "image_removed": "Fotografia e produktit u hoq",
         "initial_quantity": "Sasia fillestare",
         "initial_quantity_placeholder": "Vendosni sasinë...",
         "unit_cost": "Çmimi për njësi",

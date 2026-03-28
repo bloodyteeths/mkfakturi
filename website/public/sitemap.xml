@@ -2164,4 +2164,188 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- POS Landing Page -->
+  <url>
+    <loc>https://www.facturino.mk/mk/pos</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/pos" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/pos" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/pos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/pos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/pos" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/pos</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/pos" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/pos" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/pos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/pos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/pos" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/pos</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/pos" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/pos" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/pos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/pos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/pos" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/pos</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/pos" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/pos" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/pos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/pos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/pos" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Blog: POS Software Macedonia Comparison -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/pos-softver-makedonija</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/pos-softver-makedonija" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/pos-softver-makedonija</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/pos-softver-makedonija" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/pos-softver-makedonija</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/pos-softver-makedonija" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/pos-softver-makedonija</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/pos-softver-makedonija" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/pos-softver-makedonija" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog: Fiscal Printer Chrome WebSerial -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/fiskalen-pecatac-chrome</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/fiskalen-pecatac-chrome" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/fiskalen-pecatac-chrome</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/fiskalen-pecatac-chrome" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/fiskalen-pecatac-chrome</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/fiskalen-pecatac-chrome" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/fiskalen-pecatac-chrome</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/fiskalen-pecatac-chrome" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/fiskalen-pecatac-chrome" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog: Vector Alternative - Switch to Facturino POS -->
+  <url>
+    <loc>https://www.facturino.mk/mk/blog/vector-alternativa-pos</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/vector-alternativa-pos" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/blog/vector-alternativa-pos</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/vector-alternativa-pos" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/blog/vector-alternativa-pos</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/vector-alternativa-pos" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/blog/vector-alternativa-pos</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/blog/vector-alternativa-pos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/blog/vector-alternativa-pos" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>

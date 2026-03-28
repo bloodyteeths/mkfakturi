@@ -10,12 +10,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Item extends Model
+class Item extends Model implements HasMedia
 {
     use CacheableTrait;
     use HasAuditing;
     use HasFactory;
+    use InteractsWithMedia;
 
     protected static function boot()
     {
@@ -31,6 +34,7 @@ class Item extends Model
     protected $appends = [
         'formattedCreatedAt',
         'unit_name',
+        'image_url',
     ];
 
     /**
@@ -62,6 +66,16 @@ class Item extends Model
     public function getUnitNameAttribute(): ?string
     {
         return $this->unit ? $this->unit->name : null;
+    }
+
+    /**
+     * Get the item photo URL.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        $media = $this->getFirstMedia('photo');
+
+        return $media ? $media->getFullUrl() : null;
     }
 
     public function company(): BelongsTo

@@ -1219,6 +1219,8 @@
         "initial_stock_hint": "Внесете ја почетната состојба на залиха за овој артикл",
         "warehouse": "Магацин",
         "select_warehouse": "Изберете магацин...",
+        "image_uploaded": "Фотографијата на производот е прикачена",
+        "image_removed": "Фотографијата на производот е отстранета",
         "initial_quantity": "Почетна количина",
         "initial_quantity_placeholder": "Внесете количина...",
         "unit_cost": "Единечна цена",

@@ -326,6 +326,7 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/items/delete', [ItemsController::class, 'delete'])->middleware('throttle:strict');
             Route::get('/items/lookup-barcode', [ItemsController::class, 'lookupByBarcode']);
+            Route::post('/items/{item}/upload-image', [ItemsController::class, 'uploadImage']);
 
             Route::resource('items', ItemsController::class);
 

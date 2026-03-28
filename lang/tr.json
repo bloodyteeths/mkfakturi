@@ -642,6 +642,8 @@
         "initial_stock_hint": "Bu ürün için açılış stok bakiyesini girin",
         "warehouse": "Depo",
         "select_warehouse": "Depo seçin...",
+        "image_uploaded": "Ürün fotoğrafı başarıyla yüklendi",
+        "image_removed": "Ürün fotoğrafı kaldırıldı",
         "initial_quantity": "Başlangıç Miktarı",
         "initial_quantity_placeholder": "Miktar girin...",
         "unit_cost": "Birim Maliyet",

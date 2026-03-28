@@ -130,6 +130,35 @@ class ItemsController extends Controller
     }
 
     /**
+     * Upload or remove item photo.
+     */
+    public function uploadImage(Request $request, Item $item)
+    {
+        $this->authorize('update', $item);
+
+        if ($request->boolean('is_item_image_removed')) {
+            $item->clearMediaCollection('photo');
+        }
+
+        if ($request->has('item_image')) {
+            $data = json_decode($request->item_image);
+
+            if ($data) {
+                $item->clearMediaCollection('photo');
+
+                $item->addMediaFromBase64($data->data)
+                    ->usingFileName($data->name)
+                    ->toMediaCollection('photo');
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'image_url' => $item->fresh()->image_url,
+        ]);
+    }
+
+    /**
      * Lookup item by barcode (exact match).
      *
      * Used for barcode scanner scenarios where we need fast exact lookup.

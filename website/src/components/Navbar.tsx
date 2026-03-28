@@ -29,6 +29,11 @@ export default function Navbar({ t, locale }: { t: Dictionary; locale: Locale })
           <Link href={`/${locale}/e-faktura`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
             {t.nav.efaktura}
           </Link>
+          {t.nav.pos && (
+            <Link href={`/${locale}/pos`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
+              {t.nav.pos}
+            </Link>
+          )}
           {t.nav.integrations && (
             <Link href={`/${locale}/integrations`} className="px-2.5 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap">
               {t.nav.integrations}

@@ -43,6 +43,7 @@ class ItemResource extends JsonResource
             'retail_price' => $this->retail_price,
             'wholesale_price' => $this->wholesale_price,
             'markup_percent' => $this->markup_percent,
+            'image_url' => $this->image_url,
             'formatted_created_at' => $this->formattedCreatedAt,
             'unit' => $this->whenLoaded('unit', function () {
                 return UnitResource::make($this->unit);

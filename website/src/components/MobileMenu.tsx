@@ -68,6 +68,11 @@ export default function MobileMenu({ t, locale }: { t: Dictionary; locale: Local
                         <Link href={`/${locale}/e-faktura`} className={linkClass} onClick={() => setIsOpen(false)}>
                             {t.nav.efaktura}
                         </Link>
+                        {t.nav.pos && (
+                            <Link href={`/${locale}/pos`} className={linkClass} onClick={() => setIsOpen(false)}>
+                                {t.nav.pos}
+                            </Link>
+                        )}
                         {t.nav.integrations && (
                             <Link href={`/${locale}/integrations`} className={linkClass} onClick={() => setIsOpen(false)}>
                                 {t.nav.integrations}

@@ -29,6 +29,11 @@
         <!-- Subtle gradient overlay on hover -->
         <div class="absolute inset-0 bg-gradient-to-br from-primary-50/0 to-primary-50/0 group-hover:from-primary-50/50 group-hover:to-transparent dark:group-hover:from-primary-950/20 dark:group-hover:to-transparent transition-all duration-200 rounded-xl pointer-events-none"></div>
 
+        <!-- Item photo -->
+        <div v-if="item.image_url" class="relative w-full h-16 mb-2 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+          <img :src="item.image_url" :alt="item.name" class="w-full h-full object-cover" loading="lazy" />
+        </div>
+
         <!-- Item name -->
         <span class="relative text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 leading-tight tracking-tight">
           {{ item.name }}
