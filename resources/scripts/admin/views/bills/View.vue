@@ -25,6 +25,10 @@ const route = useRoute()
 const isMarkAsSent = ref(false)
 const isLoading = ref(false)
 const isDownloadingPp30 = ref(false)
+const journalEntries = ref([])
+const journalTransactionId = ref(null)
+const isLoadingJournal = ref(false)
+const journalError = ref(null)
 
 const bill = computed(() => billsStore.selectedBill)
 const pageTitle = computed(() => bill.value?.bill_number || t('bills.view_bill'))
@@ -88,6 +92,26 @@ async function onSendBill() {
 async function loadPayments() {
   if (!bill.value) return
   await billsStore.fetchBillPayments(bill.value.id)
+}
+
+async function loadJournalEntry() {
+  if (!bill.value || !bill.value.posted_to_ifrs) return
+  if (journalEntries.value.length > 0) return // already loaded
+  isLoadingJournal.value = true
+  journalError.value = null
+  try {
+    const response = await window.axios.get(`/bills/${bill.value.id}/journal-entry`)
+    if (response.data.success) {
+      journalEntries.value = response.data.entries || []
+      journalTransactionId.value = response.data.transaction_id
+    } else {
+      journalError.value = response.data.message || t('bills.journal_load_error', 'Failed to load journal entry')
+    }
+  } catch (error) {
+    journalError.value = error.response?.data?.message || t('bills.journal_load_error', 'Failed to load journal entry')
+  } finally {
+    isLoadingJournal.value = false
+  }
 }
 
 async function deletePayment(paymentId) {
@@ -286,6 +310,42 @@ onMounted(() => {
                   </BaseDescriptionListItem>
                   <BaseDescriptionListItem :label="$t('bills.supplier')">
                     {{ bill.supplier?.name || '-' }}
+                  </BaseDescriptionListItem>
+                  <BaseDescriptionListItem
+                    v-if="bill.supplier?.vat_number"
+                    :label="$t('bills.supplier_vat_number', 'ЕДБ за ДДВ')"
+                  >
+                    {{ bill.supplier.vat_number }}
+                  </BaseDescriptionListItem>
+                  <BaseDescriptionListItem
+                    v-if="bill.supplier?.tax_id"
+                    :label="$t('bills.supplier_tax_id', 'Даночен број')"
+                  >
+                    {{ bill.supplier.tax_id }}
+                  </BaseDescriptionListItem>
+                  <BaseDescriptionListItem
+                    v-if="bill.supplier?.company_registration_number"
+                    :label="$t('bills.supplier_embs', 'ЕМБС')"
+                  >
+                    {{ bill.supplier.company_registration_number }}
+                  </BaseDescriptionListItem>
+                  <BaseDescriptionListItem
+                    v-if="bill.supply_date"
+                    :label="$t('bills.supply_date', 'Ден на промет')"
+                  >
+                    {{ bill.supply_date }}
+                  </BaseDescriptionListItem>
+                  <BaseDescriptionListItem
+                    v-if="bill.place_of_issue"
+                    :label="$t('bills.place_of_issue', 'Место на издавање')"
+                  >
+                    {{ bill.place_of_issue }}
+                  </BaseDescriptionListItem>
+                  <BaseDescriptionListItem
+                    v-if="bill.payment_terms_days"
+                    :label="$t('bills.payment_terms_days', 'Рок на плаќање')"
+                  >
+                    {{ bill.payment_terms_days }} {{ $t('bills.days', 'дена') }}
                   </BaseDescriptionListItem>
                   <BaseDescriptionListItem :label="$t('bills.status')">
                     <span
@@ -569,6 +629,101 @@ onMounted(() => {
                 >
                   {{ $t('bills.view_all_payments') }} →
                 </router-link>
+              </div>
+            </div>
+          </BaseCard>
+        </BaseTab>
+
+        <!-- Journal Entry Tab (Книжење) -->
+        <BaseTab
+          v-if="bill.posted_to_ifrs"
+          tab-panel-container="py-4 mt-px"
+          :title="$t('bills.journal_entry', 'Книжење')"
+          @click="loadJournalEntry"
+        >
+          <BaseCard>
+            <div class="p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">
+                  {{ $t('bills.journal_entry', 'Книжење') }}
+                </h3>
+                <span
+                  v-if="journalTransactionId"
+                  class="text-xs text-gray-500"
+                >
+                  {{ $t('bills.transaction_id', 'Transaction ID') }}: #{{ journalTransactionId }}
+                </span>
+              </div>
+
+              <!-- Loading State -->
+              <div v-if="isLoadingJournal" class="flex justify-center py-8">
+                <LoadingIcon class="h-8 w-8 animate-spin text-primary-400" />
+              </div>
+
+              <!-- Error State -->
+              <div v-else-if="journalError" class="text-center py-8">
+                <p class="text-red-500">{{ journalError }}</p>
+              </div>
+
+              <!-- Journal Entries Table -->
+              <div v-else-if="journalEntries.length > 0" class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ $t('bills.account_code', 'Конто') }}
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ $t('bills.account_name', 'Назив на конто') }}
+                      </th>
+                      <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ $t('bills.debit', 'Должи') }}
+                      </th>
+                      <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ $t('bills.credit', 'Побарува') }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-for="(entry, index) in journalEntries" :key="index">
+                      <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+                        {{ entry.account_code }}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-gray-900">
+                        {{ entry.account_name }}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                        {{ entry.debit > 0 ? Number(entry.debit).toLocaleString('mk-MK', { minimumFractionDigits: 2 }) : '' }}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                        {{ entry.credit > 0 ? Number(entry.credit).toLocaleString('mk-MK', { minimumFractionDigits: 2 }) : '' }}
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot class="bg-gray-50">
+                    <tr>
+                      <td colspan="2" class="px-6 py-3 text-sm font-semibold text-gray-900">
+                        {{ $t('bills.total', 'Вкупно') }}
+                      </td>
+                      <td class="px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
+                        {{ journalEntries.reduce((sum, e) => sum + (e.debit || 0), 0).toLocaleString('mk-MK', { minimumFractionDigits: 2 }) }}
+                      </td>
+                      <td class="px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
+                        {{ journalEntries.reduce((sum, e) => sum + (e.credit || 0), 0).toLocaleString('mk-MK', { minimumFractionDigits: 2 }) }}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <!-- Fallback: Posted but no entries loaded yet -->
+              <div v-else class="text-center py-8">
+                <p class="text-gray-500">
+                  {{ $t('bills.posted_to_ifrs_label', 'Posted to IFRS') }}
+                </p>
+                <p v-if="bill.ifrs_transaction_id" class="text-xs text-gray-400 mt-1">
+                  {{ $t('bills.transaction_id', 'Transaction ID') }}: #{{ bill.ifrs_transaction_id }}
+                </p>
               </div>
             </div>
           </BaseCard>

@@ -31,9 +31,27 @@
             />
           </BaseInputGroup>
 
+          <BaseInputGroup :label="$t('bills.supply_date')">
+            <BaseDatePicker
+              v-model="bill.supply_date"
+            />
+          </BaseInputGroup>
+
           <BaseInputGroup :label="$t('bills.due_date')">
             <BaseDatePicker
               v-model="bill.due_date"
+            />
+          </BaseInputGroup>
+
+          <BaseInputGroup :label="$t('bills.payment_terms')">
+            <BaseMultiselect
+              v-model="bill.payment_terms_days"
+              :options="paymentTermsOptions"
+              label="label"
+              value-prop="value"
+              track-by="value"
+              :placeholder="$t('bills.payment_terms')"
+              :can-deselect="true"
             />
           </BaseInputGroup>
 
@@ -73,6 +91,13 @@
             <BaseProjectSelectInput
               v-model="bill.project_id"
               :show-action="false"
+            />
+          </BaseInputGroup>
+
+          <BaseInputGroup :label="$t('bills.place_of_issue')">
+            <BaseInput
+              v-model="bill.place_of_issue"
+              :placeholder="$t('bills.place_of_issue_placeholder')"
             />
           </BaseInputGroup>
 
@@ -165,6 +190,9 @@
                   min="0"
                   step="any"
                 />
+                <span v-if="line.unit_name" class="text-xs text-gray-500 mt-1">
+                  {{ line.unit_name }}
+                </span>
               </BaseInputGroup>
 
               <BaseInputGroup :label="$t('bills.item_price')">
@@ -310,7 +338,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed, onMounted } from 'vue'
+import { reactive, ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBillsStore } from '@/scripts/admin/stores/bills'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
@@ -386,7 +414,9 @@ const bill = reactive({
   id: null,
   bill_number: '',
   bill_date: today,
+  supply_date: null,
   due_date: '',
+  payment_terms_days: null,
   supplier_id: null,
   currency_id: null,
   exchange_rate: 1,
@@ -395,6 +425,39 @@ const bill = reactive({
   scanned_receipt_path: null,
   project_id: null,
   is_reverse_charge: false,
+  place_of_issue: '',
+})
+
+const paymentTermsOptions = [
+  { label: '15 дена', value: 15 },
+  { label: '30 дена', value: 30 },
+  { label: '45 дена', value: 45 },
+  { label: '60 дена', value: 60 },
+  { label: '90 дена', value: 90 },
+]
+
+// When bill_date changes, default supply_date if not set
+watch(() => bill.bill_date, (newDate) => {
+  if (newDate && !bill.supply_date) {
+    bill.supply_date = newDate
+  }
+})
+
+// When payment_terms_days changes, auto-calculate due_date
+watch(() => bill.payment_terms_days, (days) => {
+  if (days && bill.bill_date) {
+    const parts = bill.bill_date.split('-')
+    const base = new Date(
+      parseInt(parts[0], 10),
+      parseInt(parts[1], 10) - 1,
+      parseInt(parts[2], 10)
+    )
+    base.setDate(base.getDate() + days)
+    const y = base.getFullYear()
+    const m = String(base.getMonth() + 1).padStart(2, '0')
+    const d = String(base.getDate()).padStart(2, '0')
+    bill.due_date = `${y}-${m}-${d}`
+  }
 })
 
 const items = reactive([
@@ -412,6 +475,7 @@ function createEmptyItem() {
     warehouse_id: null,
     track_quantity: false,
     selectedItem: null,
+    unit_name: '',
   }
 }
 
@@ -441,6 +505,7 @@ function selectItem(index, item) {
   // BaseMoney v-model works in display format (dollars/denars), so divide by 100.
   items[index].price = item.price / 100
   items[index].track_quantity = item.track_quantity || false
+  items[index].unit_name = item.unit?.name || item.unit_name || ''
   items[index].selectedItem = item
 
   // Auto-fill taxes from item (extract tax_type_id for multiselect)
@@ -457,6 +522,7 @@ function clearItem(index) {
   items[index].description = ''
   items[index].price = 0
   items[index].track_quantity = false
+  items[index].unit_name = ''
   items[index].selectedItem = null
   items[index].taxes = []
 }
@@ -482,6 +548,10 @@ function hydrateForm(data) {
   bill.notes = data.notes || ''
   bill.scanned_receipt_path = data.scanned_receipt_path || null
   bill.project_id = data.project_id || null
+  bill.supply_date = data.supply_date || null
+  bill.place_of_issue = data.place_of_issue || ''
+  bill.payment_terms_days = data.payment_terms_days || null
+  bill.is_reverse_charge = data.is_reverse_charge || false
 
   if (data.items && data.items.length) {
     items.splice(0, items.length, ...data.items.map((i) => {
@@ -498,6 +568,7 @@ function hydrateForm(data) {
         taxes: taxIds,
         warehouse_id: i.warehouse_id || null,
         track_quantity: i.track_quantity || false,
+        unit_name: i.unit?.name || i.unit_name || '',
         selectedItem: i.item_id ? { id: i.item_id, name: i.name } : null,
       }
     }))
@@ -617,6 +688,9 @@ function buildPayload() {
     project_id: bill.project_id,
     scanned_receipt_path: bill.scanned_receipt_path || null,
     is_reverse_charge: bill.is_reverse_charge || false,
+    supply_date: bill.supply_date || null,
+    place_of_issue: bill.place_of_issue || '',
+    payment_terms_days: bill.payment_terms_days || null,
     // All amounts in cents
     discount_val: calculatedDiscountVal.value,
     sub_total: calculatedSubTotal.value,

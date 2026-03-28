@@ -331,5 +331,85 @@ class BillsController extends Controller
             'email' => $alias->alias.'@'.$domain,
         ]);
     }
+
+    /**
+     * Get IFRS journal entry lines for a bill.
+     */
+    public function journalEntry(Bill $bill): JsonResponse
+    {
+        $this->authorize('view', $bill);
+
+        if (! $bill->posted_to_ifrs || ! $bill->ifrs_transaction_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bill has not been posted to IFRS.',
+                'entries' => [],
+            ]);
+        }
+
+        try {
+            $entries = \Illuminate\Support\Facades\DB::table('ifrs_line_items as li')
+                ->join('ifrs_accounts as a', 'li.account_id', '=', 'a.id')
+                ->where('li.transaction_id', $bill->ifrs_transaction_id)
+                ->select([
+                    'a.code as account_code',
+                    'a.name as account_name',
+                    'li.amount',
+                    'li.credited',
+                    'li.narration',
+                ])
+                ->orderBy('li.credited')
+                ->orderBy('li.id')
+                ->get();
+
+            $formatted = $entries->map(function ($entry) {
+                return [
+                    'account_code' => $entry->account_code,
+                    'account_name' => $entry->account_name,
+                    'debit' => ! $entry->credited ? round($entry->amount, 2) : 0,
+                    'credit' => $entry->credited ? round($entry->amount, 2) : 0,
+                    'narration' => $entry->narration,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'transaction_id' => $bill->ifrs_transaction_id,
+                'entries' => $formatted,
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to fetch journal entry for bill', [
+                'bill_id' => $bill->id,
+                'ifrs_transaction_id' => $bill->ifrs_transaction_id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch journal entry.',
+                'entries' => [],
+            ]);
+        }
+    }
+
+    /**
+     * Generate and download Примка (Goods Receipt Note) PDF for a bill.
+     */
+    public function priemnica(Request $request, Bill $bill): mixed
+    {
+        $this->authorize('view', $bill);
+
+        $bill->load(['supplier', 'items', 'company.address', 'currency', 'creator']);
+
+        $pdf = \PDF::loadView('app.pdf.reports.priemnica-bill', [
+            'bill' => $bill,
+            'company' => $bill->company,
+            'supplier' => $bill->supplier,
+            'items' => $bill->items,
+            'currency' => $bill->currency,
+        ]);
+
+        return $pdf->download("priemnica-{$bill->bill_number}.pdf");
+    }
 }
 // CLAUDE-CHECKPOINT

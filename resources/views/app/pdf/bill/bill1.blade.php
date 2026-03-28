@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Сметка - {{ $bill->bill_number }}</title>
+    <title>Влезна фактура - {{ $bill->bill_number }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
     <style type="text/css">
@@ -348,6 +348,9 @@
         <hr class="header-bottom-divider" style="border: 0.620315px solid #E8E8E8;" />
     </div>
 
+    <div style="text-align: center; margin-top: 60px; margin-bottom: 10px;">
+        <h2 style="font-size: 16px; letter-spacing: 0.1em; margin: 0;">ВЛЕЗНА ФАКТУРА</h2>
+    </div>
 
     <div class="content-wrapper">
         <div style="padding-top: 30px">
@@ -376,11 +379,17 @@
                     </tr>
                     <tr>
                         <td class="attribute-label">Ден на промет</td>
-                        <td class="attribute-value"> &nbsp;{{ $bill->formattedBillDate }}</td>
+                        <td class="attribute-value"> &nbsp;{{ $bill->formattedSupplyDate ?? $bill->formattedBillDate }}</td>
                     </tr>
+                    @if($bill->place_of_issue)
+                    <tr>
+                        <td class="attribute-label">Место на издавање</td>
+                        <td class="attribute-value"> &nbsp;{{ $bill->place_of_issue }}</td>
+                    </tr>
+                    @endif
                     <tr>
                         <td class="attribute-label">Рок на плаќање</td>
-                        <td class="attribute-value"> &nbsp;{{ $bill->formattedDueDate }}</td>
+                        <td class="attribute-value"> &nbsp;{{ $bill->formattedDueDate }}@if($bill->payment_terms_days) ({{ $bill->payment_terms_days }} дена)@endif</td>
                     </tr>
                 </table>
             </div>
@@ -394,8 +403,11 @@
                 <div class="billing-address">
                     {!! $billing_address !!}
                 </div>
+                @if(isset($bill->supplier->vat_number) && $bill->supplier->vat_number)
+                    <div style="margin-top: 5px; font-size: 11px; padding-left: 30px;"><strong>ЕДБ за ДДВ:</strong> {{ $bill->supplier->vat_number }}</div>
+                @endif
                 @if(isset($bill->supplier->tax_id) && $bill->supplier->tax_id)
-                    <div style="margin-top: 5px; font-size: 11px; padding-left: 30px;"><strong>Даночен број:</strong> {{ $bill->supplier->tax_id }}</div>
+                    <div style="margin-top: 3px; font-size: 11px; padding-left: 30px;"><strong>Даночен број:</strong> {{ $bill->supplier->tax_id }}</div>
                 @endif
             @endif
         </div>
@@ -411,6 +423,61 @@
         <div style="position: relative; clear: both;">
             @include('app.pdf.invoice.partials.table')
         </div>
+
+        {{-- VAT Summary (Рекапитулација на ДДВ) --}}
+        @if(isset($taxes) && count($taxes) > 0)
+        <div style="padding: 0 30px; margin-top: 15px;">
+            <table style="width: 60%; border-collapse: collapse; font-size: 11px;">
+                <tr style="background-color: #f5f5f5;">
+                    <th style="padding: 5px; text-align: left; border: 1px solid #ddd;">Стапка на ДДВ</th>
+                    <th style="padding: 5px; text-align: right; border: 1px solid #ddd;">Основица</th>
+                    <th style="padding: 5px; text-align: right; border: 1px solid #ddd;">ДДВ</th>
+                    <th style="padding: 5px; text-align: right; border: 1px solid #ddd;">Вкупно</th>
+                </tr>
+                @php
+                    $vatSummary = [];
+                    if (isset($bill) && $bill->items) {
+                        foreach ($bill->items as $item) {
+                            if ($item->taxes && count($item->taxes) > 0) {
+                                foreach ($item->taxes as $tax) {
+                                    $rate = $tax->percent ?? 0;
+                                    $taxAmt = $tax->amount ?? 0;
+                                    $base = $rate > 0 ? round($taxAmt / ($rate / 100)) : ($item->total - $taxAmt);
+                                    if (!isset($vatSummary[$rate])) {
+                                        $vatSummary[$rate] = ['base' => 0, 'tax' => 0];
+                                    }
+                                    $vatSummary[$rate]['base'] += $base;
+                                    $vatSummary[$rate]['tax'] += $taxAmt;
+                                }
+                            } else {
+                                if (!isset($vatSummary[0])) {
+                                    $vatSummary[0] = ['base' => 0, 'tax' => 0];
+                                }
+                                $vatSummary[0]['base'] += $item->total ?? 0;
+                            }
+                        }
+                    }
+                    $currencySymbol = $bill->currency->symbol ?? 'ден.';
+                    krsort($vatSummary);
+                @endphp
+                @foreach($vatSummary as $rate => $data)
+                <tr>
+                    <td style="padding: 4px 5px; border: 1px solid #ddd;">{{ $rate }}%</td>
+                    <td style="padding: 4px 5px; text-align: right; border: 1px solid #ddd;">{{ number_format($data['base'] / 100, 2) }} {{ $currencySymbol }}</td>
+                    <td style="padding: 4px 5px; text-align: right; border: 1px solid #ddd;">{{ number_format($data['tax'] / 100, 2) }} {{ $currencySymbol }}</td>
+                    <td style="padding: 4px 5px; text-align: right; border: 1px solid #ddd;">{{ number_format(($data['base'] + $data['tax']) / 100, 2) }} {{ $currencySymbol }}</td>
+                </tr>
+                @endforeach
+            </table>
+        </div>
+        @endif
+
+        {{-- Authorized person --}}
+        @if(isset($bill->creator) && $bill->creator)
+        <div style="padding: 0 30px; margin-top: 10px; font-size: 11px; color: #595959;">
+            <strong>Одговорно лице:</strong> {{ $bill->creator->name }}
+        </div>
+        @endif
 
         <div class="notes">
             @if ($notes)

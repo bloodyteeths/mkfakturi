@@ -58,12 +58,14 @@ class Bill extends Model implements HasMedia
         'deleted_at',
         'bill_date',
         'due_date',
+        'supply_date',
     ];
 
     protected $appends = [
         'formattedCreatedAt',
         'formattedBillDate',
         'formattedDueDate',
+        'formattedSupplyDate',
         'dueAmount',
         'allowEdit',
     ];
@@ -89,6 +91,7 @@ class Bill extends Model implements HasMedia
             'due_amount' => 'integer',
             'posted_to_ifrs' => 'boolean',
             'is_duplicate' => 'boolean',
+            'supply_date' => 'date',
         ];
     }
 
@@ -126,6 +129,19 @@ class Bill extends Model implements HasMedia
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->due_date)->translatedFormat($dateFormat);
+    }
+
+    /**
+     * Get formatted supply date
+     */
+    public function getFormattedSupplyDateAttribute()
+    {
+        if (! $this->supply_date) {
+            return null;
+        }
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
+
+        return Carbon::parse($this->supply_date)->translatedFormat($dateFormat);
     }
 
     /**

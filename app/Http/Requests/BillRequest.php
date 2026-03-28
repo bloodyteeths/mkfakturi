@@ -40,6 +40,9 @@ class BillRequest extends FormRequest
             'project_id' => ['nullable', 'integer', 'exists:projects,id'],
             'allow_duplicate' => ['nullable', 'boolean'],
             'is_reverse_charge' => ['nullable', 'boolean'],
+            'supply_date' => ['nullable', 'date'],
+            'place_of_issue' => ['nullable', 'string', 'max:255'],
+            'payment_terms_days' => ['nullable', 'integer', 'in:15,30,45,60,90'],
         ];
 
         if ($this->isMethod('PUT') && $this->route('bill')) {
@@ -130,9 +133,14 @@ class BillRequest extends FormRequest
                 'base_due_amount' => $this->total * $exchangeRate,
                 'project_id' => $this->project_id,
                 'is_reverse_charge' => (bool) $this->input('is_reverse_charge', false),
+                'supply_date' => $this->supply_date,
+                'place_of_issue' => $this->place_of_issue,
+                'payment_terms_days' => $this->payment_terms_days,
             ])
             ->toArray();
     }
+
+    // CLAUDE-CHECKPOINT
 
     public function allowsDuplicate(): bool
     {

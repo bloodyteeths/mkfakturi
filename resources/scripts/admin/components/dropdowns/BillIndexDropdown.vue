@@ -89,6 +89,15 @@
       {{ $t('payment_orders.print_pp30', 'Print PP30') }}
     </BaseDropdownItem>
 
+    <!-- Download Примка (Goods Receipt Note) -->
+    <BaseDropdownItem @click="downloadPriemnica(row)">
+      <BaseIcon
+        name="DocumentArrowDownIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('bills.download_priemnica') }}
+    </BaseDropdownItem>
+
     <!--  Delete Bill  -->
     <BaseDropdownItem
       v-if="userStore.hasAbilities(abilities.DELETE_BILL)"
@@ -270,6 +279,27 @@ async function downloadPp30(bill) {
       message = error.response.data.message
     }
     notificationStore.showNotification({ type: 'error', message })
+  }
+}
+
+async function downloadPriemnica(bill) {
+  try {
+    const response = await window.axios.get(`/bills/${bill.id}/priemnica`, {
+      responseType: 'blob',
+    })
+    const url = window.URL.createObjectURL(response.data)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `priemnica-${bill.bill_number || bill.id}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || 'Failed to generate Примка',
+    })
   }
 }
 
