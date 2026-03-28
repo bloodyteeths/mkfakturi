@@ -139,7 +139,7 @@ class TradeDocumentsController extends Controller
         }
 
         $query = Nivelacija::whereCompany($company)
-            ->with(['sourceBill:id,bill_number', 'warehouse:id,name', 'creator'])
+            ->with(['sourceBill' => fn ($q) => $q->without(['supplier', 'currency', 'company']), 'warehouse:id,name', 'creator'])
             ->orderBy('document_date', 'desc');
 
         if ($status = $request->query('status')) {
@@ -239,26 +239,36 @@ class TradeDocumentsController extends Controller
             return response()->json(['error' => 'Некои артикли не се пронајдени во оваа компанија.'], 422);
         }
 
-        $nivelacija = Nivelacija::create([
-            'company_id' => $company,
-            'document_date' => $validated['document_date'],
-            'type' => $validated['type'],
-            'status' => Nivelacija::STATUS_DRAFT,
-            'reason' => $validated['reason'],
-            'source_bill_id' => $validated['source_bill_id'] ?? null,
-            'warehouse_id' => $validated['warehouse_id'] ?? null,
-            'total_difference' => $totalDifference,
-            'created_by' => auth()->id(),
-        ]);
+        try {
+            $nivelacija = Nivelacija::create([
+                'company_id' => $company,
+                'document_date' => $validated['document_date'],
+                'type' => $validated['type'],
+                'status' => Nivelacija::STATUS_DRAFT,
+                'reason' => $validated['reason'],
+                'source_bill_id' => $validated['source_bill_id'] ?? null,
+                'warehouse_id' => $validated['warehouse_id'] ?? null,
+                'total_difference' => $totalDifference,
+                'created_by' => auth()->id(),
+            ]);
 
-        foreach ($nivelacijaItems as $itemData) {
-            $nivelacija->items()->create($itemData);
+            foreach ($nivelacijaItems as $itemData) {
+                $nivelacija->items()->create($itemData);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $nivelacija->load('items.item'),
+            ], 201);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Nivelacija create error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to create nivelacija: ' . $e->getMessage(),
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'data' => $nivelacija->load('items.item'),
-        ], 201);
     }
 
     /**
@@ -272,7 +282,7 @@ class TradeDocumentsController extends Controller
         }
 
         $nivelacija = Nivelacija::whereCompany($company)
-            ->with(['items.item.unit', 'sourceBill:id,bill_number', 'warehouse:id,name', 'approver', 'creator'])
+            ->with(['items.item.unit', 'sourceBill' => fn ($q) => $q->without(['supplier', 'currency', 'company']), 'warehouse:id,name', 'approver', 'creator'])
             ->where('id', $id)
             ->first();
 
@@ -427,7 +437,7 @@ class TradeDocumentsController extends Controller
         $companyModel->load('address');
 
         $nivelacija = Nivelacija::whereCompany($company)
-            ->with(['items.item.unit', 'sourceBill:id,bill_number', 'warehouse:id,name', 'approver'])
+            ->with(['items.item.unit', 'sourceBill' => fn ($q) => $q->without(['supplier', 'currency', 'company']), 'warehouse:id,name', 'approver'])
             ->where('id', $id)
             ->first();
 
