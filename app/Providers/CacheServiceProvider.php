@@ -128,6 +128,15 @@ class CacheServiceProvider extends ServiceProvider
                     $redis->del($keys);
                 }
             }
+            // For Database cache store
+            elseif (Cache::getStore() instanceof \Illuminate\Cache\DatabaseStore) {
+                $prefix = config('cache.prefix', '');
+                $fullPattern = $prefix ? "{$prefix}{$pattern}" : $pattern;
+                $likePattern = str_replace('*', '%', $fullPattern);
+                \Illuminate\Support\Facades\DB::table(config('cache.stores.database.table', 'cache'))
+                    ->where('key', 'like', $likePattern)
+                    ->delete();
+            }
             // For Array cache store (testing) - just do nothing as cache is cleared automatically
             elseif (Cache::getStore() instanceof \Illuminate\Cache\ArrayStore) {
                 // ArrayStore doesn't need explicit flushing in tests as it's already isolated per test
@@ -147,6 +156,15 @@ class CacheServiceProvider extends ServiceProvider
                 if (! empty($keys)) {
                     $redis->del($keys);
                 }
+            }
+            // For Database cache store
+            elseif (Cache::getStore() instanceof \Illuminate\Cache\DatabaseStore) {
+                $prefix = config('cache.prefix', '');
+                $fullPattern = $prefix ? "{$prefix}{$pattern}" : $pattern;
+                $likePattern = str_replace('*', '%', $fullPattern);
+                \Illuminate\Support\Facades\DB::table(config('cache.stores.database.table', 'cache'))
+                    ->where('key', 'like', $likePattern)
+                    ->delete();
             }
             // For Array cache store (testing) - just do nothing as cache is cleared automatically
             elseif (Cache::getStore() instanceof \Illuminate\Cache\ArrayStore) {
