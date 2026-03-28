@@ -6,6 +6,7 @@
       :usage="posStore.posUsage"
       :fiscal-connected="fiscal.isConnected.value"
       :return-enabled="posStore.posSettings.return_enabled"
+      :restaurant-mode="posStore.posSettings.restaurant_mode"
       @open-shift="showShiftOpen = true"
       @close-shift="showShiftClose = true"
       @open-return="showReturn = true"

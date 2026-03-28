@@ -850,47 +850,53 @@ export default async function PosPage({
         </div>
       </section>
 
-      {/* ── POS Screenshot + Lifestyle Gallery ── */}
+      {/* ── Real POS UI Screenshot ── */}
       <section className="py-10 md:py-16 bg-white">
         <div className="container mx-auto max-w-6xl px-4">
-          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-indigo-500/10 border border-gray-100">
+          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-indigo-500/10 border border-gray-200">
             <Image
-              src="/images/pos/pos-cart-screenshot.png"
-              alt="Facturino POS checkout screen with product photos and cart"
-              width={1200}
-              height={750}
+              src="/images/pos/pos-ui-real.png"
+              alt="Facturino POS interface — real screenshot with product photos and cart"
+              width={1440}
+              height={900}
               className="w-full h-auto"
               priority
             />
           </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-            <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-              <Image src="/images/pos/bakery-scanning.png" alt="Bakery owner scanning barcode" width={400} height={250} className="w-full h-auto" />
-            </div>
-            <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-              <Image src="/images/pos/cafe-tablet-pos.png" alt="Cafe bartender using tablet POS" width={400} height={250} className="w-full h-auto" />
-            </div>
-            <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-              <Image src="/images/pos/bazaar-vendor.png" alt="Market vendor with fiscal printer" width={400} height={250} className="w-full h-auto" />
-            </div>
-            <div className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-              <Image src="/images/pos/fiscal-printer-closeup.png" alt="Fiscal receipt printer closeup" width={400} height={250} className="w-full h-auto" />
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* ── Feature Sections ── */}
-      {t.features.map((section, idx) => {
+      {/* ── Feature Sections with images ── */}
+      {(() => {
+        const featureImages = [
+          { src: '/images/pos/pos-ui-tablet.png', alt: 'Facturino POS on tablet device' },
+          { src: '/images/pos/bakery-scanning.png', alt: 'Bakery owner scanning barcode with POS' },
+          { src: '/images/pos/bazaar-vendor.png', alt: 'Market vendor using POS with fiscal printer' },
+          { src: '/images/pos/fiscal-printer-closeup.png', alt: 'Fiscal receipt printer connected via USB' },
+          { src: '/images/pos/multi-location.png', alt: 'Multi-location POS analytics dashboard' },
+        ]
+        return t.features.map((section, idx) => {
         const isEven = idx % 2 === 0
+        const img = featureImages[idx]
         return (
           <section
             key={idx}
             className={`py-8 md:py-20 ${isEven ? 'bg-gray-50' : 'bg-white'}`}
           >
             <div className="container mx-auto max-w-6xl px-4">
-              <div className="mb-6 md:mb-10 text-center md:text-left">
+              <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 md:gap-12 items-center`}>
+                {/* Image */}
+                {img && (
+                  <div className="w-full md:w-1/2 flex-shrink-0">
+                    <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-100">
+                      <Image src={img.src} alt={img.alt} width={700} height={440} className="w-full h-auto" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Text + features */}
+                <div className={img ? 'w-full md:w-1/2' : 'w-full'}>
+              <div className="mb-6 md:mb-10">
                 <span className="mb-1 block text-2xl md:text-4xl">{section.icon}</span>
                 {section.badge && (
                   <span className="mb-2 inline-block rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
@@ -905,7 +911,7 @@ export default async function PosPage({
                 </p>
               </div>
 
-              <div className="grid gap-3 md:gap-6 grid-cols-2 lg:grid-cols-4">
+              <div className={`grid gap-3 md:gap-6 ${img ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 lg:grid-cols-4'}`}>
                 {section.items.map((feat, fi) => (
                   <div
                     key={fi}
@@ -920,25 +926,13 @@ export default async function PosPage({
                   </div>
                 ))}
               </div>
+                </div>
+              </div>
             </div>
           </section>
         )
-      })}
-
-      {/* ── Multi-Location Visual ── */}
-      <section className="py-8 md:py-12 bg-gray-50">
-        <div className="container mx-auto max-w-5xl px-4">
-          <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-100">
-            <Image
-              src="/images/pos/multi-location.png"
-              alt="Business owner viewing multi-location POS analytics dashboard"
-              width={1200}
-              height={675}
-              className="w-full h-auto"
-            />
-          </div>
-        </div>
-      </section>
+      })
+      })()}
 
       {/* ── Comparison Table ── */}
       <section className="py-10 md:py-20 bg-white">

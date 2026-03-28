@@ -2,9 +2,66 @@
   <div class="h-14 bg-gradient-to-r from-gray-900 via-gray-900 to-gray-800 text-white flex items-center justify-between px-5 shrink-0 shadow-lg">
     <!-- Left: Company + Fiscal + Shift -->
     <div class="flex items-center gap-3">
-      <span class="font-black text-sm tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-        Facturino POS
-      </span>
+      <!-- POS Menu Dropdown -->
+      <div class="relative">
+        <button
+          class="font-black text-sm tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent flex items-center gap-1"
+          @click="showMenu = !showMenu"
+        >
+          Facturino POS
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div
+          v-if="showMenu"
+          class="absolute top-full left-0 mt-2 w-52 bg-gray-800 rounded-xl shadow-2xl ring-1 ring-gray-700 py-1 z-50"
+          @click="showMenu = false"
+        >
+          <button
+            class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-200 hover:bg-gray-700 flex items-center gap-3 transition-colors"
+            @click="$router.push('/admin/pos')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17" />
+            </svg>
+            {{ t('pos.title') || 'Point of Sale' }}
+          </button>
+          <button
+            v-if="restaurantMode"
+            class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-200 hover:bg-gray-700 flex items-center gap-3 transition-colors"
+            @click="$router.push('/admin/pos/kitchen')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Kitchen Display
+          </button>
+          <button
+            v-if="returnEnabled"
+            class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-200 hover:bg-gray-700 flex items-center gap-3 transition-colors"
+            @click="$emit('open-return')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+            {{ t('pos.return_sale') || 'Returns' }}
+          </button>
+          <div class="border-t border-gray-700 my-1"></div>
+          <button
+            class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-200 hover:bg-gray-700 flex items-center gap-3 transition-colors"
+            @click="$router.push('/admin/settings/pos')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {{ t('pos_settings.title') || 'POS Settings' }}
+          </button>
+        </div>
+      </div>
 
       <!-- Fiscal status pill -->
       <div
@@ -43,16 +100,8 @@
     <!-- Center: Clock -->
     <div class="text-lg font-mono font-light tracking-widest text-gray-300">{{ clock }}</div>
 
-    <!-- Right: Returns + Usage + Exit -->
+    <!-- Right: Usage + Exit -->
     <div class="flex items-center gap-3">
-      <!-- Returns button -->
-      <button
-        v-if="returnEnabled"
-        class="flex items-center gap-1.5 text-xs font-medium bg-amber-600/80 hover:bg-amber-500 px-4 py-2.5 rounded-lg transition-all"
-        @click="$emit('open-return')"
-      >
-        {{ t('pos.return_sale') || 'Return' }}
-      </button>
       <span v-if="usage?.limit" class="text-[11px] font-medium text-gray-500 tabular-nums">
         {{ usage.used }}/{{ usage.limit }}
       </span>
@@ -67,6 +116,9 @@
       </button>
     </div>
   </div>
+
+  <!-- Click-away overlay for dropdown -->
+  <div v-if="showMenu" class="fixed inset-0 z-40" @click="showMenu = false"></div>
 </template>
 
 <script setup>
@@ -80,10 +132,12 @@ const props = defineProps({
   usage: { type: Object, default: () => ({}) },
   fiscalConnected: { type: Boolean, default: false },
   returnEnabled: { type: Boolean, default: false },
+  restaurantMode: { type: Boolean, default: false },
 })
 
 defineEmits(['open-shift', 'close-shift', 'exit', 'open-return'])
 
+const showMenu = ref(false)
 const clock = ref('')
 let clockInterval = null
 
