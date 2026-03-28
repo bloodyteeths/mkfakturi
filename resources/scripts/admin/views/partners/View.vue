@@ -58,6 +58,12 @@
         <div class="text-2xl font-semibold text-green-600">
           {{ partner.effective_commission_rate ? (partner.effective_commission_rate * 100).toFixed(0) : 0 }}%
         </div>
+        <div
+          class="text-xs mt-1"
+          :class="partner.is_partner_plus ? 'text-purple-600' : 'text-gray-400'"
+        >
+          {{ partner.is_partner_plus ? $t('partners.plus_rate') : $t('partners.standard_rate') }}
+        </div>
       </div>
     </div>
 
@@ -218,6 +224,62 @@
 
         <BaseTab :title="$t('partners.tabs.commissions')">
           <div class="bg-white rounded-lg shadow">
+            <!-- Commission Management Actions -->
+            <div class="p-4 border-b border-gray-200 flex items-center space-x-3">
+              <BaseButton size="sm" @click="showAdjustForm = !showAdjustForm">
+                {{ $t('partners.adjust_commission') }}
+              </BaseButton>
+              <BaseButton size="sm" variant="primary-outline" @click="showPayoutForm = !showPayoutForm">
+                {{ $t('partners.create_payout') }}
+              </BaseButton>
+            </div>
+
+            <!-- Adjust Commission Form -->
+            <div v-if="showAdjustForm" class="p-4 bg-gray-50 border-b border-gray-200">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <BaseInputGroup :label="$t('partners.adjustment_amount')">
+                  <BaseInput v-model="adjustForm.amount" type="number" step="0.01" />
+                </BaseInputGroup>
+                <BaseInputGroup :label="$t('partners.adjustment_description')">
+                  <BaseInput v-model="adjustForm.description" type="text" />
+                </BaseInputGroup>
+                <div class="flex items-end">
+                  <BaseButton size="sm" @click="submitAdjustment" :disabled="!adjustForm.amount || !adjustForm.description">
+                    {{ $t('general.save') }}
+                  </BaseButton>
+                </div>
+              </div>
+            </div>
+
+            <!-- Create Payout Form -->
+            <div v-if="showPayoutForm" class="p-4 bg-gray-50 border-b border-gray-200">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                <BaseInputGroup :label="$t('partners.payout_amount')">
+                  <BaseInput v-model="payoutForm.amount" type="number" step="0.01" min="0.01" />
+                </BaseInputGroup>
+                <BaseInputGroup :label="$t('partners.payment_method')">
+                  <BaseSelect v-model="payoutForm.payment_method">
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="stripe">Stripe</option>
+                    <option value="wise">Wise</option>
+                    <option value="manual">Manual</option>
+                  </BaseSelect>
+                </BaseInputGroup>
+                <BaseInputGroup :label="$t('partners.payment_reference')">
+                  <BaseInput v-model="payoutForm.payment_reference" type="text" />
+                </BaseInputGroup>
+                <div class="flex items-end">
+                  <BaseButton size="sm" @click="submitPayout" :disabled="!payoutForm.amount || !payoutForm.payment_method">
+                    {{ $t('general.save') }}
+                  </BaseButton>
+                </div>
+              </div>
+              <BaseInputGroup :label="$t('partners.payout_notes')" class="mt-4">
+                <BaseInput v-model="payoutForm.notes" type="text" />
+              </BaseInputGroup>
+            </div>
+
             <div v-if="partner.monthly_commissions && partner.monthly_commissions.length > 0" class="p-6">
               <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $t('partners.monthly_commissions') }}</h3>
               <div class="overflow-x-auto">
@@ -296,6 +358,88 @@
             </div>
           </div>
         </BaseTab>
+
+        <BaseTab :title="$t('partners.tabs.kyc_documents')" @click="loadKycDocuments">
+          <div class="bg-white rounded-lg shadow">
+            <div v-if="kycDocuments.length > 0" class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      {{ $t('general.type') }}
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      {{ $t('general.filename') || 'Filename' }}
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      {{ $t('general.status') }}
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      {{ $t('general.date') || 'Uploaded' }}
+                    </th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                      {{ $t('general.actions') }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="doc in kycDocuments" :key="doc.id">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ formatDocumentType(doc.document_type) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {{ doc.original_filename }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span
+                        class="px-2 py-1 text-xs font-medium rounded"
+                        :class="{
+                          'bg-gray-100 text-gray-800': doc.status === 'pending',
+                          'bg-green-100 text-green-800': doc.status === 'approved',
+                          'bg-red-100 text-red-800': doc.status === 'rejected'
+                        }"
+                      >
+                        {{ doc.status }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {{ doc.created_at }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm space-x-2">
+                      <BaseButton
+                        v-if="doc.file_url"
+                        size="sm"
+                        variant="primary-outline"
+                        @click="window.open(doc.file_url, '_blank')"
+                      >
+                        {{ $t('partners.view_document') }}
+                      </BaseButton>
+                      <BaseButton
+                        v-if="doc.status !== 'approved'"
+                        size="sm"
+                        variant="success"
+                        @click="updateDocumentStatus(doc.id, 'approved')"
+                      >
+                        {{ $t('partners.approve_document') }}
+                      </BaseButton>
+                      <BaseButton
+                        v-if="doc.status !== 'rejected'"
+                        size="sm"
+                        variant="danger-outline"
+                        @click="updateDocumentStatus(doc.id, 'rejected')"
+                      >
+                        {{ $t('partners.reject_document') }}
+                      </BaseButton>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class="p-8 text-center text-gray-500">
+              {{ $t('partners.no_kyc_documents') }}
+            </div>
+          </div>
+        </BaseTab>
       </BaseTabGroup>
     </div>
   </BasePage>
@@ -330,6 +474,13 @@ const globalStore = useGlobalStore()
 
 const partner = ref(null)
 const showAssignModal = ref(false)
+const showAdjustForm = ref(false)
+const showPayoutForm = ref(false)
+const kycDocuments = ref([])
+const kycLoaded = ref(false)
+
+const adjustForm = ref({ amount: null, description: '' })
+const payoutForm = ref({ amount: null, payment_method: 'bank_transfer', payment_reference: '', notes: '' })
 
 // Add null-safe currency with fallback
 const currency = computed(() => {
@@ -398,6 +549,56 @@ async function unassignCompany(companyId) {
       message: error.response?.data?.message || t('partners.unassign_failed'),
     })
   }
+}
+
+async function submitAdjustment() {
+  try {
+    await axios.post(`/partners/${partner.value.id}/commissions/adjust`, adjustForm.value)
+    notificationStore.showNotification({ type: 'success', message: t('partners.commission_adjusted') })
+    showAdjustForm.value = false
+    adjustForm.value = { amount: null, description: '' }
+    fetchPartner()
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed' })
+  }
+}
+
+async function submitPayout() {
+  try {
+    await axios.post(`/partners/${partner.value.id}/payouts/create`, payoutForm.value)
+    notificationStore.showNotification({ type: 'success', message: t('partners.payout_created') })
+    showPayoutForm.value = false
+    payoutForm.value = { amount: null, payment_method: 'bank_transfer', payment_reference: '', notes: '' }
+    fetchPartner()
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed' })
+  }
+}
+
+async function loadKycDocuments() {
+  if (kycLoaded.value) return
+  try {
+    const response = await axios.get(`/partners/${route.params.id}/kyc-documents`)
+    kycDocuments.value = response.data.documents || []
+    kycLoaded.value = true
+  } catch (error) {
+    console.error('Failed to load KYC documents:', error)
+  }
+}
+
+async function updateDocumentStatus(docId, status) {
+  try {
+    await axios.put(`/partners/${partner.value.id}/kyc-documents/${docId}`, { status })
+    notificationStore.showNotification({ type: 'success', message: t('partners.document_status_updated') })
+    kycLoaded.value = false
+    loadKycDocuments()
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed' })
+  }
+}
+
+function formatDocumentType(type) {
+  return (type || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
 onMounted(() => {

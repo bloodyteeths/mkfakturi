@@ -437,6 +437,8 @@ Route::prefix('/v1')->group(function () {
 
             Route::get('/projects/list', [\App\Http\Controllers\V1\Admin\Project\ProjectsController::class, 'list']);
 
+            Route::get('/projects/branches/comparison', [\App\Http\Controllers\V1\Admin\Project\ProjectsController::class, 'branchComparison']);
+
             Route::get('/projects/{project}/summary', [\App\Http\Controllers\V1\Admin\Project\ProjectsController::class, 'summary']);
 
             Route::get('/projects/{project}/documents', [\App\Http\Controllers\V1\Admin\Project\ProjectsController::class, 'documents']);

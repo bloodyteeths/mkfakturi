@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\V1\Admin\Partner;
 
 use App\Http\Controllers\Controller;
+use App\Models\AffiliateEvent;
 use App\Models\Partner;
+use App\Models\Payout;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Silber\Bouncer\BouncerFacade;
 
@@ -531,6 +534,215 @@ class PartnerManagementController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Bulk action on multiple partners
+     */
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => 'required|in:activate,deactivate,approve_kyc',
+            'partner_ids' => 'required|array|min:1',
+            'partner_ids.*' => 'exists:partners,id',
+        ]);
+
+        $partners = Partner::whereIn('id', $request->partner_ids);
+
+        switch ($request->action) {
+            case 'activate':
+                $partners->update(['is_active' => true]);
+                break;
+            case 'deactivate':
+                $partners->update(['is_active' => false]);
+                DB::table('partner_company_links')
+                    ->whereIn('partner_id', $request->partner_ids)
+                    ->update(['is_active' => false]);
+                break;
+            case 'approve_kyc':
+                $partners->update(['kyc_status' => 'approved']);
+                break;
+        }
+
+        return response()->json([
+            'message' => "Bulk {$request->action} completed for " . count($request->partner_ids) . ' partners',
+            'affected' => count($request->partner_ids),
+        ]);
+    }
+
+    /**
+     * Export partners as CSV
+     */
+    public function export(Request $request)
+    {
+        $query = Partner::query();
+
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('company_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($request->status === 'inactive') {
+            $query->where('is_active', false);
+        }
+
+        if ($request->kyc_status) {
+            $query->where('kyc_status', $request->kyc_status);
+        }
+
+        $partners = $query->withCount('companies')->get();
+
+        $csv = "Name,Email,Phone,Company Name,Tax ID,Registration Number,Bank Account,Bank Name,Commission Rate,Status,KYC Status,Companies,Total Earnings,Created At\n";
+
+        foreach ($partners as $partner) {
+            $csv .= implode(',', [
+                '"' . str_replace('"', '""', $partner->name) . '"',
+                '"' . $partner->email . '"',
+                '"' . ($partner->phone ?? '') . '"',
+                '"' . str_replace('"', '""', $partner->company_name ?? '') . '"',
+                '"' . ($partner->tax_id ?? '') . '"',
+                '"' . ($partner->registration_number ?? '') . '"',
+                '"' . ($partner->bank_account ?? '') . '"',
+                '"' . str_replace('"', '""', $partner->bank_name ?? '') . '"',
+                $partner->commission_rate ?? 20,
+                $partner->is_active ? 'Active' : 'Inactive',
+                $partner->kyc_status ?? 'pending',
+                $partner->companies_count,
+                $partner->getLifetimeEarnings(),
+                $partner->created_at?->format('Y-m-d'),
+            ]) . "\n";
+        }
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="partners-' . now()->format('Y-m-d') . '.csv"',
+        ]);
+    }
+
+    /**
+     * Get KYC documents for a partner
+     */
+    public function kycDocuments($partnerId)
+    {
+        $partner = Partner::findOrFail($partnerId);
+        $documents = $partner->kycDocuments()->latest()->get();
+
+        return response()->json([
+            'documents' => $documents->map(function ($doc) {
+                $fileUrl = null;
+                if ($doc->file_path) {
+                    try {
+                        $fileUrl = Storage::temporaryUrl($doc->file_path, now()->addMinutes(30));
+                    } catch (\Exception $e) {
+                        $fileUrl = null;
+                    }
+                }
+
+                return [
+                    'id' => $doc->id,
+                    'document_type' => $doc->document_type,
+                    'original_filename' => $doc->original_filename,
+                    'status' => $doc->status,
+                    'file_url' => $fileUrl,
+                    'metadata' => $doc->metadata,
+                    'created_at' => $doc->created_at->format('Y-m-d H:i'),
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Update KYC document status
+     */
+    public function updateKycDocument(Request $request, $partnerId, $documentId)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,approved,rejected',
+        ]);
+
+        $partner = Partner::findOrFail($partnerId);
+        $document = $partner->kycDocuments()->findOrFail($documentId);
+        $document->update(['status' => $request->status]);
+
+        return response()->json(['message' => 'Document status updated', 'document' => $document]);
+    }
+
+    /**
+     * Adjust commission for a partner (manual +/-)
+     */
+    public function adjustCommission(Request $request, $partnerId)
+    {
+        $partner = Partner::findOrFail($partnerId);
+
+        $request->validate([
+            'amount' => 'required|numeric',
+            'description' => 'required|string|max:500',
+        ]);
+
+        $event = AffiliateEvent::create([
+            'affiliate_partner_id' => $partner->id,
+            'event_type' => 'adjustment',
+            'amount' => $request->amount,
+            'month_ref' => now()->format('Y-m'),
+            'metadata' => [
+                'description' => $request->description,
+                'adjusted_by' => auth()->id(),
+            ],
+        ]);
+
+        return response()->json(['message' => 'Commission adjusted', 'event' => $event]);
+    }
+
+    /**
+     * Create manual payout for a partner
+     */
+    public function createManualPayout(Request $request, $partnerId)
+    {
+        $partner = Partner::findOrFail($partnerId);
+
+        $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|in:bank_transfer,paypal,stripe,wise,manual',
+            'payment_reference' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $payout = Payout::create([
+            'partner_id' => $partner->id,
+            'amount' => $request->amount,
+            'currency' => 'EUR',
+            'status' => 'completed',
+            'payout_date' => now(),
+            'payment_method' => $request->payment_method,
+            'payment_reference' => $request->payment_reference,
+            'notes' => $request->notes,
+            'processed_at' => now(),
+            'processed_by' => auth()->id(),
+        ]);
+
+        // Mark unpaid events as paid up to the payout amount
+        $remaining = $request->amount;
+        $unpaidEvents = $partner->affiliateEvents()
+            ->whereNull('paid_at')
+            ->where('is_clawed_back', false)
+            ->oldest()
+            ->get();
+
+        foreach ($unpaidEvents as $event) {
+            if ($remaining <= 0) {
+                break;
+            }
+            $event->markAsPaid($payout);
+            $remaining -= $event->amount;
+        }
+
+        return response()->json(['message' => 'Payout created', 'payout' => $payout]);
     }
 
     /**

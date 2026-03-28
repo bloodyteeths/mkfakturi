@@ -9,6 +9,20 @@
 
       <template #actions>
         <div class="flex items-center justify-end space-x-5">
+          <BaseButton variant="primary-outline" @click="exportCsv">
+            <template #left="slotProps">
+              <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('partners.export_csv') }}
+          </BaseButton>
+
+          <BaseButton variant="primary-outline" @click="showReassignmentModal = true">
+            <template #left="slotProps">
+              <BaseIcon name="ArrowsRightLeftIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('partners.reassign') }}
+          </BaseButton>
+
           <BaseButton variant="primary-outline" @click="toggleFilter">
             {{ $t('general.filter') }}
             <template #right="slotProps">
@@ -102,6 +116,30 @@
       </template>
     </BaseEmptyPlaceholder>
 
+    <!-- Bulk Actions Bar -->
+    <div
+      v-if="selectedPartners.length > 0"
+      class="flex items-center justify-between p-4 mt-6 bg-primary-50 border border-primary-200 rounded-lg"
+    >
+      <span class="text-sm font-medium text-primary-700">
+        {{ $t('partners.selected_count', { count: selectedPartners.length }) }}
+      </span>
+      <div class="flex items-center space-x-3">
+        <BaseButton size="sm" variant="success" @click="bulkAction('activate')">
+          {{ $t('partners.bulk_activate') }}
+        </BaseButton>
+        <BaseButton size="sm" variant="danger" @click="bulkAction('deactivate')">
+          {{ $t('partners.bulk_deactivate') }}
+        </BaseButton>
+        <BaseButton size="sm" @click="bulkAction('approve_kyc')">
+          {{ $t('partners.bulk_approve_kyc') }}
+        </BaseButton>
+        <BaseButton size="sm" variant="primary-outline" @click="selectedPartners = []">
+          {{ $t('partners.clear_selection') }}
+        </BaseButton>
+      </div>
+    </div>
+
     <!-- Partners Table -->
     <div v-show="!showEmptyScreen" class="relative mt-6 table-container">
       <BaseTable
@@ -110,6 +148,24 @@
         :columns="partnerColumns"
         class="mt-3"
       >
+        <template #header-checkbox>
+          <input
+            type="checkbox"
+            :checked="isAllSelected"
+            @change="toggleSelectAll"
+            class="rounded border-gray-300 text-primary-600"
+          />
+        </template>
+
+        <template #cell-checkbox="{ row }">
+          <input
+            type="checkbox"
+            :checked="selectedPartners.includes(row.data.id)"
+            @change="toggleSelect(row.data.id)"
+            class="rounded border-gray-300 text-primary-600"
+          />
+        </template>
+
         <template #cell-name="{ row }">
           <router-link :to="{ path: `partners/${row.data.id}/view` }">
             <BaseText
@@ -198,6 +254,13 @@
         </template>
       </BaseTable>
     </div>
+
+    <!-- Reassignment Modal -->
+    <ReassignmentModal
+      v-if="showReassignmentModal"
+      @close="showReassignmentModal = false"
+      @reassigned="onReassigned"
+    />
   </BasePage>
 </template>
 
@@ -207,6 +270,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import AstronautIcon from '@/scripts/components/icons/empty/AstronautIcon.vue'
+import ReassignmentModal from './components/ReassignmentModal.vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
@@ -218,6 +282,9 @@ const globalStore = useGlobalStore()
 const tableComponent = ref(null)
 const showFilters = ref(false)
 const stats = ref(null)
+const selectedPartners = ref([])
+const showReassignmentModal = ref(false)
+const visiblePartnerIds = ref([])
 
 const filters = reactive({
   search: '',
@@ -225,7 +292,18 @@ const filters = reactive({
   kyc_status: '',
 })
 
+const isAllSelected = computed(() => {
+  return visiblePartnerIds.value.length > 0 && visiblePartnerIds.value.every(id => selectedPartners.value.includes(id))
+})
+
 const partnerColumns = ref([
+  {
+    key: 'checkbox',
+    label: '',
+    thClass: 'w-10',
+    tdClass: 'w-10',
+    sortable: false,
+  },
   {
     key: 'name',
     label: t('partners.name'),
@@ -299,8 +377,7 @@ async function fetchData({ page, filter, sort }) {
   })
 
   totalPartners.value = response.data.total
-  console.log('[Partners Index] totalPartners.value set to:', totalPartners.value)
-  console.log('[Partners Index] showEmptyScreen computed:', showEmptyScreen.value)
+  visiblePartnerIds.value = (response.data.data || []).map(p => p.id)
 
   return {
     data: response.data.data,
@@ -353,6 +430,78 @@ async function deactivatePartner(id) {
       message: t('partners.deactivate_failed'),
     })
   }
+}
+
+function toggleSelectAll() {
+  if (isAllSelected.value) {
+    selectedPartners.value = []
+  } else {
+    selectedPartners.value = [...visiblePartnerIds.value]
+  }
+}
+
+function toggleSelect(id) {
+  const index = selectedPartners.value.indexOf(id)
+  if (index === -1) {
+    selectedPartners.value.push(id)
+  } else {
+    selectedPartners.value.splice(index, 1)
+  }
+}
+
+async function bulkAction(action) {
+  if (!confirm(t('partners.confirm_bulk_action'))) return
+
+  try {
+    await axios.post('/partners/bulk-action', {
+      action,
+      partner_ids: selectedPartners.value,
+    })
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('partners.bulk_action_success'),
+    })
+    selectedPartners.value = []
+    refreshTable()
+    fetchStats()
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || 'Bulk action failed',
+    })
+  }
+}
+
+async function exportCsv() {
+  try {
+    const response = await axios.get('/partners/export', {
+      params: {
+        search: filters.search,
+        status: filters.status,
+        kyc_status: filters.kyc_status,
+      },
+      responseType: 'blob',
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `partners-${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: 'Export failed',
+    })
+  }
+}
+
+function onReassigned() {
+  showReassignmentModal.value = false
+  refreshTable()
+  fetchStats()
 }
 
 onMounted(() => {
