@@ -72,11 +72,14 @@ class PaymentOrderController extends Controller
         $companyId = $this->authorizeCompanyAccess($request);
 
         $query = PaymentBatch::forCompany($companyId)
-            ->with(['createdBy:id,name', 'approvedBy:id,name'])
-            ->orderByDesc('batch_date');
+            ->with(['createdBy:id,name', 'approvedBy:id,name']);
 
         if ($request->filled('status')) {
             $query->byStatus($request->input('status'));
+        }
+
+        if ($request->filled('format')) {
+            $query->where('format', $request->input('format'));
         }
 
         if ($request->filled('search')) {
@@ -90,6 +93,11 @@ class PaymentOrderController extends Controller
         if ($request->filled('to_date')) {
             $query->where('batch_date', '<=', $request->input('to_date'));
         }
+
+        $sortBy = in_array($request->input('sort_by'), ['batch_number', 'batch_date', 'total_amount', 'status', 'format'])
+            ? $request->input('sort_by') : 'batch_date';
+        $sortOrder = $request->input('sort_order') === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortBy, $sortOrder);
 
         $limit = $request->input('limit', 15);
         $batches = $limit === 'all'
@@ -144,15 +152,23 @@ class PaymentOrderController extends Controller
         $request->validate([
             'batch_date' => 'required|date',
             'format' => 'required|in:pp30,pp50,sepa_sct,csv',
+            'urgency' => 'nullable|in:redovno,itno',
             'bank_account_id' => 'nullable|integer',
             'notes' => 'nullable|string|max:2000',
             'bill_ids' => 'required|array|min:1',
             'bill_ids.*' => 'integer|exists:bills,id',
+            'payment_code' => 'nullable|string|max:3',
+            'tax_number' => 'nullable|string|max:13',
+            'revenue_code' => 'nullable|string|max:10',
+            'program_code' => 'nullable|string|max:10',
+            'municipality_code' => 'nullable|string|max:10',
+            'approval_reference' => 'nullable|string|max:50',
         ]);
 
         $companyId = $this->authorizeCompanyAccess($request);
 
-        $data = $request->only(['batch_date', 'format', 'bank_account_id', 'notes', 'bill_ids']);
+        $data = $request->only(['batch_date', 'format', 'urgency', 'bank_account_id', 'notes', 'bill_ids',
+            'payment_code', 'tax_number', 'revenue_code', 'program_code', 'municipality_code', 'approval_reference']);
         $data['created_by'] = Auth::id();
 
         try {
@@ -308,6 +324,105 @@ class PaymentOrderController extends Controller
     }
 
     /**
+     * Update a draft payment batch.
+     */
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'batch_date' => 'nullable|date',
+            'format' => 'nullable|in:pp30,pp50,sepa_sct,csv',
+            'urgency' => 'nullable|in:redovno,itno',
+            'bank_account_id' => 'nullable|integer',
+            'notes' => 'nullable|string|max:2000',
+            'bill_ids' => 'nullable|array|min:1',
+            'bill_ids.*' => 'integer|exists:bills,id',
+        ]);
+
+        $companyId = $this->authorizeCompanyAccess($request);
+
+        $batch = PaymentBatch::forCompany($companyId)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        try {
+            $batch = $this->service->updateBatch($batch, $request->only([
+                'batch_date', 'format', 'urgency', 'bank_account_id', 'notes', 'bill_ids',
+            ]));
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['success' => true, 'data' => $batch]);
+    }
+
+    /**
+     * Bulk approve payment batches.
+     */
+    public function bulkApprove(Request $request): JsonResponse
+    {
+        $request->validate(['batch_ids' => 'required|array|min:1', 'batch_ids.*' => 'integer']);
+        $companyId = $this->authorizeCompanyAccess($request);
+
+        $results = $this->service->bulkApprove($companyId, $request->input('batch_ids'), Auth::id());
+
+        return response()->json(['success' => true, 'data' => $results]);
+    }
+
+    /**
+     * Bulk export payment batches.
+     */
+    public function bulkExport(Request $request)
+    {
+        $request->validate(['batch_ids' => 'required|array|min:1', 'batch_ids.*' => 'integer']);
+        $companyId = $this->authorizeCompanyAccess($request);
+
+        try {
+            $result = $this->service->bulkExport($companyId, $request->input('batch_ids'));
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return response()->streamDownload(function () use ($result) {
+            echo $result['content'];
+        }, $result['filename'], [
+            'Content-Type' => $result['mime'],
+        ]);
+    }
+
+    /**
+     * Bulk cancel payment batches.
+     */
+    public function bulkCancel(Request $request): JsonResponse
+    {
+        $request->validate(['batch_ids' => 'required|array|min:1', 'batch_ids.*' => 'integer']);
+        $companyId = $this->authorizeCompanyAccess($request);
+
+        $results = $this->service->bulkCancel($companyId, $request->input('batch_ids'));
+
+        return response()->json(['success' => true, 'data' => $results]);
+    }
+
+    /**
+     * Duplicate a payment batch.
+     */
+    public function duplicate(Request $request, int $id): JsonResponse
+    {
+        $companyId = $this->authorizeCompanyAccess($request);
+
+        $batch = PaymentBatch::forCompany($companyId)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        try {
+            $result = $this->service->duplicateBatch($batch, Auth::id());
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['success' => true, 'data' => $result['batch']], 201);
+    }
+
+    /**
      * Generate PP30 payment slip PDF for a batch.
      */
     public function pp30Pdf(Request $request, int $id)
@@ -324,10 +439,28 @@ class PaymentOrderController extends Controller
 
             return $pdf->download("PP30_{$batch->batch_number}.pdf");
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 422);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Generate PP50 payment slip PDF for a batch.
+     */
+    public function pp50Pdf(Request $request, int $id)
+    {
+        $companyId = $this->authorizeCompanyAccess($request);
+
+        $batch = PaymentBatch::forCompany($companyId)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        try {
+            $pp30Service = app(Pp30PdfService::class);
+            $pdf = $pp30Service->generatePp50ForBatch($batch);
+
+            return $pdf->download("PP50_{$batch->batch_number}.pdf");
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
     }
 }

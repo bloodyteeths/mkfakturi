@@ -84,8 +84,8 @@ class Pp30FileBuilder
             ];
 
             if ($isPublicRevenue) {
-                $row[] = $item->purpose_code ?? '';
-                $row[] = '';
+                $row[] = $item->revenue_code ?? $item->purpose_code ?? '';
+                $row[] = $item->municipality_code ?? '';
             }
 
             fputcsv($output, $row);

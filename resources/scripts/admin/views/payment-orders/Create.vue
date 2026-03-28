@@ -11,7 +11,7 @@
     <!-- Settings Panel -->
     <div class="mb-6 rounded-lg bg-white p-6 shadow">
       <h3 class="mb-4 text-lg font-medium text-gray-900">{{ t('order_settings', 'Order Settings') }}</h3>
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-6">
         <BaseInputGroup :label="t('execution_date')" required>
           <BaseDatePicker v-model="form.batch_date" :calendar-button="true" calendar-button-icon="CalendarDaysIcon" />
         </BaseInputGroup>
@@ -25,6 +25,33 @@
             <option value="pp50">{{ t('pp50') }}</option>
             <option value="sepa_sct">{{ t('sepa') }}</option>
             <option value="csv">CSV</option>
+          </select>
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="t('urgency')">
+          <select
+            v-model="form.urgency"
+            class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+          >
+            <option value="redovno">{{ t('urgency_regular') }}</option>
+            <option value="itno">{{ t('urgency_urgent') }}</option>
+          </select>
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="t('payment_code')">
+          <select
+            v-model="form.payment_code"
+            class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+          >
+            <option value="">-</option>
+            <option value="110">110 - {{ t('payment_code_110') }}</option>
+            <option value="120">120 - {{ t('payment_code_120') }}</option>
+            <option value="130">130 - {{ t('payment_code_130') }}</option>
+            <option value="140">140 - {{ t('payment_code_140') }}</option>
+            <option value="220">220 - {{ t('payment_code_220') }}</option>
+            <option value="450">450 - {{ t('payment_code_450') }}</option>
+            <option value="460">460 - {{ t('payment_code_460') }}</option>
+            <option value="470">470 - {{ t('payment_code_470') }}</option>
           </select>
         </BaseInputGroup>
 
@@ -49,6 +76,53 @@
           />
         </BaseInputGroup>
       </div>
+
+      <!-- PP50 Public Revenue Fields -->
+      <div v-if="form.format === 'pp50'" class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+        <h4 class="mb-3 text-sm font-medium text-amber-800">{{ t('pp50_fields') }}</h4>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
+          <BaseInputGroup :label="t('tax_number')">
+            <input
+              v-model="form.tax_number"
+              type="text"
+              maxlength="13"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            />
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('revenue_code')">
+            <input
+              v-model="form.revenue_code"
+              type="text"
+              maxlength="10"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            />
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('program_code')">
+            <input
+              v-model="form.program_code"
+              type="text"
+              maxlength="10"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            />
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('municipality_code')">
+            <input
+              v-model="form.municipality_code"
+              type="text"
+              maxlength="10"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            />
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('approval_reference')">
+            <input
+              v-model="form.approval_reference"
+              type="text"
+              maxlength="50"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            />
+          </BaseInputGroup>
+        </div>
+      </div>
     </div>
 
     <!-- Quick Select Buttons -->
@@ -64,6 +138,12 @@
           <BaseIcon name="ClockIcon" :class="slotProps.class" />
         </template>
         {{ t('select_due_week', 'Select All Due This Week') }}
+      </BaseButton>
+      <BaseButton variant="primary-outline" size="sm" @click="selectDueThisMonth">
+        <template #left="slotProps">
+          <BaseIcon name="CalendarDaysIcon" :class="slotProps.class" />
+        </template>
+        {{ t('select_due_month') }}
       </BaseButton>
       <BaseButton v-if="selectedBillIds.length > 0" variant="primary-outline" size="sm" @click="clearSelection">
         {{ t('clear', 'Clear') }} ({{ selectedBillIds.length }})
@@ -111,6 +191,7 @@
                 </th>
                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('supplier', 'Supplier') }}</th>
                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('bill_number', 'Bill Number') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('description') }}</th>
                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('date') }}</th>
                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('due_date', 'Due Date') }}</th>
                 <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">{{ t('due_amount', 'Due Amount') }}</th>
@@ -143,6 +224,9 @@
                 </td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-primary-600">
                   {{ bill.bill_number }}
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-500 max-w-[200px] truncate" :title="bill.notes || bill.description || ''">
+                  {{ truncate(bill.notes || bill.description, 30) || t('no_description') }}
                 </td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
                   {{ formatDate(bill.bill_date) }}
@@ -248,8 +332,16 @@ const supplierFilter = ref('')
 const form = ref({
   batch_date: new Date().toISOString().slice(0, 10),
   format: 'pp30',
+  urgency: 'redovno',
+  payment_code: '',
   bank_account_id: null,
   notes: '',
+  // PP50 fields
+  tax_number: '',
+  revenue_code: '',
+  program_code: '',
+  municipality_code: '',
+  approval_reference: '',
 })
 
 const filteredBills = computed(() => {
@@ -331,8 +423,24 @@ function selectDueThisWeek() {
   selectedBillIds.value = [...new Set([...selectedBillIds.value, ...dueIds])]
 }
 
+function selectDueThisMonth() {
+  const now = new Date()
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  const dueIds = bills.value.filter((b) => {
+    if (!b.due_date) return false
+    const due = new Date(b.due_date)
+    return due <= endOfMonth
+  }).map((b) => b.id)
+  selectedBillIds.value = [...new Set([...selectedBillIds.value, ...dueIds])]
+}
+
 function clearSelection() {
   selectedBillIds.value = []
+}
+
+function truncate(str, len) {
+  if (!str) return ''
+  return str.length > len ? str.substring(0, len) + '...' : str
 }
 
 async function createBatch() {
@@ -357,9 +465,22 @@ async function createBatch() {
     const payload = {
       batch_date: form.value.batch_date,
       format: form.value.format,
+      urgency: form.value.urgency,
       bank_account_id: form.value.bank_account_id,
       notes: form.value.notes || null,
       bill_ids: selectedBillIds.value,
+    }
+
+    if (form.value.payment_code) {
+      payload.payment_code = form.value.payment_code
+    }
+
+    if (form.value.format === 'pp50') {
+      payload.tax_number = form.value.tax_number || null
+      payload.revenue_code = form.value.revenue_code || null
+      payload.program_code = form.value.program_code || null
+      payload.municipality_code = form.value.municipality_code || null
+      payload.approval_reference = form.value.approval_reference || null
     }
 
     const response = await window.axios.post('/payment-orders', payload)

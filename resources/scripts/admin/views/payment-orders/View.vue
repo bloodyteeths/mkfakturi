@@ -8,10 +8,22 @@
       </BaseBreadcrumb>
 
       <template #actions>
-        <div class="flex space-x-2">
+        <div class="flex flex-wrap gap-2">
+          <!-- Edit Button -->
+          <BaseButton
+            v-if="canEdit"
+            variant="primary-outline"
+            @click="toggleEditMode"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="PencilSquareIcon" :class="slotProps.class" />
+            </template>
+            {{ isEditing ? t('cancel') : t('edit_batch') }}
+          </BaseButton>
+
           <!-- Approve Button -->
           <BaseButton
-            v-if="canApprove"
+            v-if="canApprove && !isEditing"
             variant="primary-outline"
             :loading="isApproving"
             @click="approveBatch"
@@ -24,7 +36,7 @@
 
           <!-- Export CSV/XML Button -->
           <BaseButton
-            v-if="canExport"
+            v-if="canExport && !isEditing"
             variant="primary"
             :loading="isExporting"
             @click="exportBatch"
@@ -37,7 +49,7 @@
 
           <!-- Download PP30 PDF Button -->
           <BaseButton
-            v-if="canExportPp30"
+            v-if="canExportPp30 && !isEditing"
             variant="primary-outline"
             :loading="isDownloadingPp30"
             @click="downloadPp30Pdf"
@@ -48,9 +60,47 @@
             {{ t('pp30_pdf') }}
           </BaseButton>
 
+          <!-- Download PP50 PDF Button -->
+          <BaseButton
+            v-if="canExportPp50 && !isEditing"
+            variant="primary-outline"
+            :loading="isDownloadingPp50"
+            @click="downloadPp50Pdf"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="PrinterIcon" :class="slotProps.class" />
+            </template>
+            {{ t('download_pp50') }}
+          </BaseButton>
+
+          <!-- Print Button -->
+          <BaseButton
+            v-if="batch && !isEditing"
+            variant="primary-outline"
+            @click="printPage"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="PrinterIcon" :class="slotProps.class" />
+            </template>
+            {{ t('print') }}
+          </BaseButton>
+
+          <!-- Duplicate Button -->
+          <BaseButton
+            v-if="batch && !isEditing"
+            variant="primary-outline"
+            :loading="isDuplicating"
+            @click="duplicateBatch"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="DocumentDuplicateIcon" :class="slotProps.class" />
+            </template>
+            {{ t('duplicate_batch') }}
+          </BaseButton>
+
           <!-- Confirm Button -->
           <BaseButton
-            v-if="canConfirm"
+            v-if="canConfirm && !isEditing"
             variant="success"
             :loading="isConfirming"
             @click="confirmBatch"
@@ -63,7 +113,7 @@
 
           <!-- Cancel Button -->
           <BaseButton
-            v-if="canCancel"
+            v-if="canCancel && !isEditing"
             variant="danger-outline"
             :loading="isCancelling"
             @click="cancelBatch"
@@ -86,9 +136,49 @@
     </div>
 
     <template v-else-if="batch">
+      <!-- Edit Mode -->
+      <div v-if="isEditing" class="mb-6 rounded-lg border-2 border-primary-300 bg-white p-6 shadow">
+        <h3 class="mb-4 text-lg font-medium text-gray-900">{{ t('edit_batch') }}</h3>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5">
+          <BaseInputGroup :label="t('execution_date')">
+            <BaseDatePicker v-model="editForm.batch_date" :calendar-button="true" calendar-button-icon="CalendarDaysIcon" />
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('format')">
+            <select v-model="editForm.format" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500">
+              <option value="pp30">{{ t('pp30') }}</option>
+              <option value="pp50">{{ t('pp50') }}</option>
+              <option value="sepa_sct">{{ t('sepa') }}</option>
+              <option value="csv">CSV</option>
+            </select>
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('urgency')">
+            <select v-model="editForm.urgency" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500">
+              <option value="redovno">{{ t('urgency_regular') }}</option>
+              <option value="itno">{{ t('urgency_urgent') }}</option>
+            </select>
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('bank_account')">
+            <select v-model="editForm.bank_account_id" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500">
+              <option :value="null">{{ t('select') }}</option>
+              <option v-for="acc in bankAccounts" :key="acc.id" :value="acc.id">
+                {{ acc.account_name || acc.iban }}
+              </option>
+            </select>
+          </BaseInputGroup>
+          <BaseInputGroup :label="t('notes')">
+            <input v-model="editForm.notes" type="text" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+          </BaseInputGroup>
+        </div>
+        <div class="mt-4 flex justify-end">
+          <BaseButton variant="primary" :loading="isSaving" @click="saveBatch">
+            {{ t('save_changes') }}
+          </BaseButton>
+        </div>
+      </div>
+
       <!-- Batch Header Card -->
-      <div class="mb-6 rounded-lg bg-white p-6 shadow">
-        <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
+      <div v-if="!isEditing" class="mb-6 rounded-lg bg-white p-6 shadow">
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
           <div>
             <p class="text-xs font-medium uppercase text-gray-500">{{ t('batch_number') }}</p>
             <p class="text-sm font-bold text-gray-900">{{ batch.batch_number }}</p>
@@ -101,6 +191,15 @@
             <p class="text-xs font-medium uppercase text-gray-500">{{ t('format', 'Format') }}</p>
             <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
               {{ formatLabel(batch.format) }}
+            </span>
+          </div>
+          <div>
+            <p class="text-xs font-medium uppercase text-gray-500">{{ t('urgency') }}</p>
+            <span
+              class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+              :class="batch.urgency === 'itno' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'"
+            >
+              {{ batch.urgency === 'itno' ? t('urgency_urgent') : t('urgency_regular') }}
             </span>
           </div>
           <div>
@@ -136,6 +235,33 @@
                 {{ step.label }}
               </span>
               <div v-if="idx < statusPipeline.length - 1" class="mx-3 h-px w-8 bg-gray-300 sm:w-12"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PP50 Fields Display -->
+        <div v-if="batch.format === 'pp50' && hasPp50Data" class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3">
+          <h4 class="mb-2 text-xs font-medium uppercase text-amber-800">{{ t('pp50_fields') }}</h4>
+          <div class="grid grid-cols-2 gap-2 text-sm md:grid-cols-5">
+            <div v-if="pp50DataFromItems.tax_number">
+              <span class="text-xs text-gray-500">{{ t('tax_number') }}:</span>
+              <p class="font-medium">{{ pp50DataFromItems.tax_number }}</p>
+            </div>
+            <div v-if="pp50DataFromItems.revenue_code">
+              <span class="text-xs text-gray-500">{{ t('revenue_code') }}:</span>
+              <p class="font-medium">{{ pp50DataFromItems.revenue_code }}</p>
+            </div>
+            <div v-if="pp50DataFromItems.program_code">
+              <span class="text-xs text-gray-500">{{ t('program_code') }}:</span>
+              <p class="font-medium">{{ pp50DataFromItems.program_code }}</p>
+            </div>
+            <div v-if="pp50DataFromItems.municipality_code">
+              <span class="text-xs text-gray-500">{{ t('municipality_code') }}:</span>
+              <p class="font-medium">{{ pp50DataFromItems.municipality_code }}</p>
+            </div>
+            <div v-if="pp50DataFromItems.approval_reference">
+              <span class="text-xs text-gray-500">{{ t('approval_reference') }}:</span>
+              <p class="font-medium">{{ pp50DataFromItems.approval_reference }}</p>
             </div>
           </div>
         </div>
@@ -196,8 +322,10 @@
                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">IBAN</th>
                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('bill_number', 'Bill') }}</th>
                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('description', 'Description') }}</th>
+                <th v-if="hasPaymentCodes" class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500">{{ t('payment_code') }}</th>
                 <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">{{ t('amount') }}</th>
                 <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500">{{ t('status') }}</th>
+                <th v-if="isEditing" class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500"></th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -217,6 +345,9 @@
                 <td class="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">
                   {{ item.description || '-' }}
                 </td>
+                <td v-if="hasPaymentCodes" class="whitespace-nowrap px-4 py-3 text-center text-sm text-gray-500">
+                  {{ item.payment_code || '-' }}
+                </td>
                 <td class="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-gray-900">
                   {{ formatMoney(item.amount) }}
                 </td>
@@ -231,13 +362,19 @@
                     {{ t('reconciled', 'Reconciled') }}
                   </div>
                 </td>
+                <td v-if="isEditing" class="whitespace-nowrap px-4 py-3 text-center text-sm">
+                  <button class="text-red-500 hover:text-red-700" @click="removeItem(item.id)">
+                    {{ t('remove_item') }}
+                  </button>
+                </td>
               </tr>
             </tbody>
             <tfoot class="bg-gray-100 font-semibold">
               <tr>
-                <td colspan="5" class="px-4 py-3 text-sm">{{ t('total') }} ({{ batch.items?.length || 0 }})</td>
+                <td :colspan="hasPaymentCodes ? 6 : 5" class="px-4 py-3 text-sm">{{ t('total') }} ({{ batch.items?.length || 0 }})</td>
                 <td class="whitespace-nowrap px-4 py-3 text-right text-sm">{{ formatMoney(batch.total_amount) }}</td>
                 <td></td>
+                <td v-if="isEditing"></td>
               </tr>
             </tfoot>
           </table>
@@ -267,6 +404,7 @@ const observer = new MutationObserver(() => {
 onMounted(() => {
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] })
   loadBatch()
+  loadBankAccounts()
 })
 onBeforeUnmount(() => observer.disconnect())
 
@@ -280,21 +418,57 @@ const isLoading = ref(false)
 const isApproving = ref(false)
 const isExporting = ref(false)
 const isDownloadingPp30 = ref(false)
+const isDownloadingPp50 = ref(false)
 const isConfirming = ref(false)
 const isCancelling = ref(false)
+const isDuplicating = ref(false)
+const isSaving = ref(false)
+const isEditing = ref(false)
 const batch = ref(null)
-const pendingAction = ref(null) // 'confirm' | 'cancel' | null
+const bankAccounts = ref([])
+const pendingAction = ref(null)
+
+const editForm = ref({
+  batch_date: '',
+  format: '',
+  urgency: '',
+  bank_account_id: null,
+  notes: '',
+})
 
 const batchId = computed(() => route.params.id)
 
+const canEdit = computed(() => batch.value && ['draft', 'pending_approval'].includes(batch.value.status))
 const canApprove = computed(() => batch.value && ['draft', 'pending_approval'].includes(batch.value.status))
 const canExport = computed(() => batch.value && ['approved', 'exported'].includes(batch.value.status))
 const canConfirm = computed(() => batch.value && ['exported', 'sent_to_bank'].includes(batch.value.status))
 const canCancel = computed(() => batch.value && ['draft', 'pending_approval', 'approved'].includes(batch.value.status))
-const canExportPp30 = computed(() => batch.value && ['pp30', 'pp50'].includes(batch.value.format) && ['approved', 'exported', 'confirmed'].includes(batch.value.status))
+const canExportPp30 = computed(() => batch.value && batch.value.format === 'pp30' && ['approved', 'exported', 'confirmed'].includes(batch.value.status))
+const canExportPp50 = computed(() => batch.value && batch.value.format === 'pp50' && ['approved', 'exported', 'confirmed'].includes(batch.value.status))
+
+const hasPaymentCodes = computed(() => {
+  return batch.value?.items?.some(item => item.payment_code)
+})
+
+const hasPp50Data = computed(() => {
+  if (!batch.value?.items?.length) return false
+  const first = batch.value.items[0]
+  return first.tax_number || first.revenue_code || first.program_code || first.municipality_code || first.approval_reference
+})
+
+const pp50DataFromItems = computed(() => {
+  if (!batch.value?.items?.length) return {}
+  const first = batch.value.items[0]
+  return {
+    tax_number: first.tax_number,
+    revenue_code: first.revenue_code,
+    program_code: first.program_code,
+    municipality_code: first.municipality_code,
+    approval_reference: first.approval_reference,
+  }
+})
 
 const statusPipeline = computed(() => {
-  // Auto-approved batches show simplified 3-step pipeline
   if (batch.value && !['draft', 'pending_approval'].includes(batch.value.status)) {
     return [
       { key: 'approved', label: t('status_approved') },
@@ -311,6 +485,57 @@ const statusPipeline = computed(() => {
 })
 
 const statusOrder = ['draft', 'pending_approval', 'approved', 'exported', 'sent_to_bank', 'confirmed']
+
+function toggleEditMode() {
+  if (isEditing.value) {
+    isEditing.value = false
+    return
+  }
+  editForm.value = {
+    batch_date: batch.value.batch_date,
+    format: batch.value.format,
+    urgency: batch.value.urgency || 'redovno',
+    bank_account_id: batch.value.bank_account_id || null,
+    notes: batch.value.notes || '',
+  }
+  isEditing.value = true
+}
+
+async function loadBankAccounts() {
+  try {
+    const response = await window.axios.get('/banking/accounts')
+    bankAccounts.value = response.data?.data || response.data || []
+  } catch {
+    // silent
+  }
+}
+
+async function saveBatch() {
+  isSaving.value = true
+  try {
+    await window.axios.put(`/payment-orders/${batchId.value}`, editForm.value)
+    notificationStore.showNotification({ type: 'success', message: t('save_changes') + ' \u2713' })
+    isEditing.value = false
+    await loadBatch()
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('edit_not_allowed') })
+  } finally {
+    isSaving.value = false
+  }
+}
+
+function removeItem(itemId) {
+  // Remove item from current view and save updated bill_ids
+  const remainingBillIds = batch.value.items
+    .filter(i => i.id !== itemId && i.bill_id)
+    .map(i => i.bill_id)
+  if (remainingBillIds.length === 0) {
+    notificationStore.showNotification({ type: 'error', message: t('select_at_least_one') })
+    return
+  }
+  editForm.value.bill_ids = remainingBillIds
+  saveBatch()
+}
 
 async function loadBatch() {
   isLoading.value = true
@@ -348,7 +573,6 @@ async function exportBatch() {
       responseType: 'blob',
     })
 
-    // Check if response is actually an error (JSON wrapped in blob)
     const blob = response.data
     if (blob.type === 'application/json') {
       try {
@@ -361,7 +585,6 @@ async function exportBatch() {
       return
     }
 
-    // Extract filename from content-disposition header
     const contentDisposition = response.headers['content-disposition'] || ''
     const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
     const filename = filenameMatch ? filenameMatch[1].replace(/['"]/g, '') : `payment_order_${batch.value.batch_number}.csv`
@@ -379,7 +602,6 @@ async function exportBatch() {
     notificationStore.showNotification({ type: 'success', message: t('exported') || 'File exported' })
     await loadBatch()
   } catch (error) {
-    // When responseType is 'blob', error.response.data is a Blob — extract message
     let message = t('error_exporting') || 'Failed to export'
     if (error.response?.data instanceof Blob) {
       try {
@@ -396,15 +618,15 @@ async function exportBatch() {
   }
 }
 
-async function downloadPp30Pdf() {
-  isDownloadingPp30.value = true
+async function downloadPdf(endpoint, filename) {
+  const loadingRef = endpoint.includes('pp50') ? isDownloadingPp50 : isDownloadingPp30
+  loadingRef.value = true
   try {
-    const response = await window.axios.get(`/payment-orders/${batchId.value}/pp30`, {
+    const response = await window.axios.get(`/payment-orders/${batchId.value}/${endpoint}`, {
       responseType: 'blob',
     })
 
     const blob = response.data
-
     if (blob.type === 'application/json') {
       try {
         const text = await blob.text()
@@ -419,15 +641,15 @@ async function downloadPp30Pdf() {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `PP30_${batch.value.batch_number}.pdf`)
+    link.setAttribute('download', filename)
     document.body.appendChild(link)
     link.click()
     link.remove()
     window.URL.revokeObjectURL(url)
 
-    notificationStore.showNotification({ type: 'success', message: t('pp30_pdf') + ' ✓' })
+    notificationStore.showNotification({ type: 'success', message: filename + ' \u2713' })
   } catch (error) {
-    let message = t('error_exporting') || 'Failed to generate PP30'
+    let message = t('error_exporting') || 'Failed to generate PDF'
     if (error.response?.data instanceof Blob) {
       try {
         const text = await error.response.data.text()
@@ -439,7 +661,33 @@ async function downloadPp30Pdf() {
     }
     notificationStore.showNotification({ type: 'error', message })
   } finally {
-    isDownloadingPp30.value = false
+    loadingRef.value = false
+  }
+}
+
+function downloadPp30Pdf() {
+  downloadPdf('pp30', `PP30_${batch.value.batch_number}.pdf`)
+}
+
+function downloadPp50Pdf() {
+  downloadPdf('pp50', `PP50_${batch.value.batch_number}.pdf`)
+}
+
+function printPage() {
+  window.print()
+}
+
+async function duplicateBatch() {
+  isDuplicating.value = true
+  try {
+    const response = await window.axios.post(`/payment-orders/${batchId.value}/duplicate`)
+    const newBatch = response.data?.data
+    notificationStore.showNotification({ type: 'success', message: t('duplicate_success') })
+    router.push(`/admin/payment-orders/${newBatch.id}`)
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_creating') })
+  } finally {
+    isDuplicating.value = false
   }
 }
 

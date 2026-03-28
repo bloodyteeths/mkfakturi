@@ -38,11 +38,14 @@ class PartnerPaymentOrderController extends Controller
         }
 
         $query = PaymentBatch::forCompany($company)
-            ->with(['createdBy:id,name', 'approvedBy:id,name'])
-            ->orderByDesc('batch_date');
+            ->with(['createdBy:id,name', 'approvedBy:id,name']);
 
         if ($request->filled('status')) {
             $query->byStatus($request->input('status'));
+        }
+
+        if ($request->filled('format')) {
+            $query->where('format', $request->input('format'));
         }
 
         if ($request->filled('from_date')) {
@@ -52,6 +55,11 @@ class PartnerPaymentOrderController extends Controller
         if ($request->filled('to_date')) {
             $query->where('batch_date', '<=', $request->input('to_date'));
         }
+
+        $sortBy = in_array($request->input('sort_by'), ['batch_number', 'batch_date', 'total_amount', 'status', 'format'])
+            ? $request->input('sort_by') : 'batch_date';
+        $sortOrder = $request->input('sort_order') === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortBy, $sortOrder);
 
         $limit = $request->input('limit', 15);
         $batches = $limit === 'all'
@@ -117,13 +125,21 @@ class PartnerPaymentOrderController extends Controller
         $request->validate([
             'batch_date' => 'required|date',
             'format' => 'required|in:pp30,pp50,sepa_sct,csv',
+            'urgency' => 'nullable|in:redovno,itno',
             'bank_account_id' => 'nullable|integer',
             'notes' => 'nullable|string|max:2000',
             'bill_ids' => 'required|array|min:1',
             'bill_ids.*' => 'integer|exists:bills,id',
+            'payment_code' => 'nullable|string|max:3',
+            'tax_number' => 'nullable|string|max:13',
+            'revenue_code' => 'nullable|string|max:10',
+            'program_code' => 'nullable|string|max:10',
+            'municipality_code' => 'nullable|string|max:10',
+            'approval_reference' => 'nullable|string|max:50',
         ]);
 
-        $data = $request->only(['batch_date', 'format', 'bank_account_id', 'notes', 'bill_ids']);
+        $data = $request->only(['batch_date', 'format', 'urgency', 'bank_account_id', 'notes', 'bill_ids',
+            'payment_code', 'tax_number', 'revenue_code', 'program_code', 'municipality_code', 'approval_reference']);
         $data['created_by'] = $request->user()?->id;
 
         try {
@@ -294,6 +310,115 @@ class PartnerPaymentOrderController extends Controller
     }
 
     /**
+     * Update a draft payment batch.
+     */
+    public function update(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $request->validate([
+            'batch_date' => 'nullable|date',
+            'format' => 'nullable|in:pp30,pp50,sepa_sct,csv',
+            'urgency' => 'nullable|in:redovno,itno',
+            'bank_account_id' => 'nullable|integer',
+            'notes' => 'nullable|string|max:2000',
+            'bill_ids' => 'nullable|array|min:1',
+            'bill_ids.*' => 'integer|exists:bills,id',
+        ]);
+
+        $batch = PaymentBatch::forCompany($company)->where('id', $id)->firstOrFail();
+
+        try {
+            $batch = $this->service->updateBatch($batch, $request->only([
+                'batch_date', 'format', 'urgency', 'bank_account_id', 'notes', 'bill_ids',
+            ]));
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['success' => true, 'data' => $batch]);
+    }
+
+    /**
+     * Bulk approve payment batches.
+     */
+    public function bulkApprove(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $request->validate(['batch_ids' => 'required|array|min:1', 'batch_ids.*' => 'integer']);
+        $results = $this->service->bulkApprove($company, $request->input('batch_ids'), $request->user()?->id ?? 0);
+
+        return response()->json(['success' => true, 'data' => $results]);
+    }
+
+    /**
+     * Bulk export payment batches.
+     */
+    public function bulkExport(Request $request, int $company)
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $request->validate(['batch_ids' => 'required|array|min:1', 'batch_ids.*' => 'integer']);
+
+        try {
+            $result = $this->service->bulkExport($company, $request->input('batch_ids'));
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return response()->streamDownload(function () use ($result) {
+            echo $result['content'];
+        }, $result['filename'], ['Content-Type' => $result['mime']]);
+    }
+
+    /**
+     * Bulk cancel payment batches.
+     */
+    public function bulkCancel(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $request->validate(['batch_ids' => 'required|array|min:1', 'batch_ids.*' => 'integer']);
+        $results = $this->service->bulkCancel($company, $request->input('batch_ids'));
+
+        return response()->json(['success' => true, 'data' => $results]);
+    }
+
+    /**
+     * Duplicate a payment batch.
+     */
+    public function duplicate(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $batch = PaymentBatch::forCompany($company)->where('id', $id)->firstOrFail();
+
+        try {
+            $result = $this->service->duplicateBatch($batch, $request->user()?->id ?? 0);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['success' => true, 'data' => $result['batch']], 201);
+    }
+
+    /**
      * Generate PP30 payment slip PDF for a batch.
      */
     public function pp30Pdf(Request $request, int $company, int $id)
@@ -303,20 +428,35 @@ class PartnerPaymentOrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Access denied'], 403);
         }
 
-        $batch = PaymentBatch::forCompany($company)
-            ->where('id', $id)
-            ->firstOrFail();
+        $batch = PaymentBatch::forCompany($company)->where('id', $id)->firstOrFail();
 
         try {
             $pp30Service = app(Pp30PdfService::class);
             $pdf = $pp30Service->generateForBatch($batch);
-
             return $pdf->download("PP30_{$batch->batch_number}.pdf");
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 422);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Generate PP50 payment slip PDF for a batch.
+     */
+    public function pp50Pdf(Request $request, int $company, int $id)
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        $batch = PaymentBatch::forCompany($company)->where('id', $id)->firstOrFail();
+
+        try {
+            $pp30Service = app(Pp30PdfService::class);
+            $pdf = $pp30Service->generatePp50ForBatch($batch);
+            return $pdf->download("PP50_{$batch->batch_number}.pdf");
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
     }
 

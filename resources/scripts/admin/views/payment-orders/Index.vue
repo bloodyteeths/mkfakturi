@@ -78,6 +78,20 @@
         </select>
       </div>
       <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700">{{ t('format') }}:</label>
+        <select
+          v-model="filters.format"
+          class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+          @change="loadBatches"
+        >
+          <option value="">{{ t('all_formats') }}</option>
+          <option value="pp30">PP30</option>
+          <option value="pp50">PP50</option>
+          <option value="sepa_sct">SEPA</option>
+          <option value="csv">CSV</option>
+        </select>
+      </div>
+      <div class="flex items-center gap-2">
         <label class="text-sm font-medium text-gray-700">{{ t('search') }}:</label>
         <input
           v-model="filters.search"
@@ -93,6 +107,25 @@
         <span class="text-gray-400">&ndash;</span>
         <input v-model="filters.to_date" type="date" class="rounded-md border-gray-300 text-sm shadow-sm" @change="loadBatches" />
       </div>
+    </div>
+
+    <!-- Bulk Actions Bar -->
+    <div v-if="selectedBatchIds.length > 0" class="mb-4 flex items-center gap-3 rounded-lg border border-primary-200 bg-primary-50 p-3">
+      <span class="text-sm font-medium text-primary-800">
+        {{ selectedBatchIds.length }} {{ t('selected_count') }}
+      </span>
+      <BaseButton variant="primary-outline" size="sm" :loading="isBulkApproving" @click="bulkApprove">
+        {{ t('bulk_approve') }}
+      </BaseButton>
+      <BaseButton variant="primary" size="sm" :loading="isBulkExporting" @click="bulkExport">
+        {{ t('bulk_export') }}
+      </BaseButton>
+      <BaseButton variant="danger-outline" size="sm" :loading="isBulkCancelling" @click="bulkCancel">
+        {{ t('bulk_cancel') }}
+      </BaseButton>
+      <BaseButton variant="primary-outline" size="sm" @click="selectedBatchIds = []">
+        {{ t('clear') }}
+      </BaseButton>
     </div>
 
     <!-- Batches Table -->
@@ -113,12 +146,32 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('batch_number') }}</th>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('date') }}</th>
+                <th class="w-12 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    :checked="allSelected"
+                    @change="toggleSelectAll"
+                  />
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 cursor-pointer select-none" @click="toggleSort('batch_number')">
+                  {{ t('batch_number') }}
+                  <span v-if="sortBy === 'batch_number'" class="ml-1">{{ sortOrder === 'asc' ? '\u2191' : '\u2193' }}</span>
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 cursor-pointer select-none" @click="toggleSort('batch_date')">
+                  {{ t('date') }}
+                  <span v-if="sortBy === 'batch_date'" class="ml-1">{{ sortOrder === 'asc' ? '\u2191' : '\u2193' }}</span>
+                </th>
                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('format', 'Format') }}</th>
                 <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500">{{ t('items', 'Items') }}</th>
-                <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">{{ t('total') }}</th>
-                <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500">{{ t('status') }}</th>
+                <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 cursor-pointer select-none" @click="toggleSort('total_amount')">
+                  {{ t('total') }}
+                  <span v-if="sortBy === 'total_amount'" class="ml-1">{{ sortOrder === 'asc' ? '\u2191' : '\u2193' }}</span>
+                </th>
+                <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 cursor-pointer select-none" @click="toggleSort('status')">
+                  {{ t('status') }}
+                  <span v-if="sortBy === 'status'" class="ml-1">{{ sortOrder === 'asc' ? '\u2191' : '\u2193' }}</span>
+                </th>
                 <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">{{ t('actions') }}</th>
               </tr>
             </thead>
@@ -129,6 +182,14 @@
                 class="cursor-pointer hover:bg-gray-50"
                 @click="viewBatch(batch.id)"
               >
+                <td class="px-4 py-3" @click.stop>
+                  <input
+                    type="checkbox"
+                    class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    :checked="selectedBatchIds.includes(batch.id)"
+                    @change="toggleBatchSelect(batch.id)"
+                  />
+                </td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-primary-600">
                   {{ batch.batch_number }}
                 </td>
@@ -138,6 +199,9 @@
                 <td class="whitespace-nowrap px-4 py-3 text-sm">
                   <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
                     {{ formatLabel(batch.format) }}
+                  </span>
+                  <span v-if="batch.urgency === 'itno'" class="ml-1 inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                    {{ t('urgency_urgent') }}
                   </span>
                 </td>
                 <td class="whitespace-nowrap px-4 py-3 text-center text-sm text-gray-900">
@@ -219,11 +283,24 @@ function t(key) {
 const isLoading = ref(false)
 const batches = ref([])
 const overdueSummary = ref({})
+const selectedBatchIds = ref([])
+const isBulkApproving = ref(false)
+const isBulkExporting = ref(false)
+const isBulkCancelling = ref(false)
+const sortBy = ref('batch_date')
+const sortOrder = ref('desc')
+
 const filters = ref({
   status: '',
+  format: '',
   search: '',
   from_date: '',
   to_date: '',
+})
+
+const allSelected = computed(() => {
+  if (batches.value.length === 0) return false
+  return batches.value.every((b) => selectedBatchIds.value.includes(b.id))
 })
 
 let searchTimeout = null
@@ -237,11 +314,39 @@ onMounted(() => {
   loadOverdueSummary()
 })
 
+function toggleSort(column) {
+  if (sortBy.value === column) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = column
+    sortOrder.value = 'desc'
+  }
+  loadBatches()
+}
+
+function toggleBatchSelect(id) {
+  const idx = selectedBatchIds.value.indexOf(id)
+  if (idx > -1) {
+    selectedBatchIds.value.splice(idx, 1)
+  } else {
+    selectedBatchIds.value.push(id)
+  }
+}
+
+function toggleSelectAll() {
+  if (allSelected.value) {
+    selectedBatchIds.value = []
+  } else {
+    selectedBatchIds.value = batches.value.map((b) => b.id)
+  }
+}
+
 async function loadBatches() {
   isLoading.value = true
   try {
-    const params = {}
+    const params = { sort_by: sortBy.value, sort_order: sortOrder.value }
     if (filters.value.status) params.status = filters.value.status
+    if (filters.value.format) params.format = filters.value.format
     if (filters.value.search) params.search = filters.value.search
     if (filters.value.from_date) params.from_date = filters.value.from_date
     if (filters.value.to_date) params.to_date = filters.value.to_date
@@ -264,6 +369,79 @@ async function loadOverdueSummary() {
     overdueSummary.value = response.data?.data || {}
   } catch {
     // Silently fail for summary
+  }
+}
+
+async function bulkApprove() {
+  if (!confirm(t('confirm_bulk_approve').replace('{count}', selectedBatchIds.value.length))) return
+  isBulkApproving.value = true
+  try {
+    await window.axios.post('/payment-orders/bulk-approve', { batch_ids: selectedBatchIds.value })
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('bulk_approve_success').replace('{count}', selectedBatchIds.value.length),
+    })
+    selectedBatchIds.value = []
+    await loadBatches()
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_approving') })
+  } finally {
+    isBulkApproving.value = false
+  }
+}
+
+async function bulkExport() {
+  isBulkExporting.value = true
+  try {
+    const response = await window.axios.post('/payment-orders/bulk-export', { batch_ids: selectedBatchIds.value }, { responseType: 'blob' })
+    const blob = response.data
+    const contentDisposition = response.headers['content-disposition'] || ''
+    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+    const filename = filenameMatch ? filenameMatch[1].replace(/['"]/g, '') : 'payment_orders_export.zip'
+    const url = window.URL.createObjectURL(new Blob([blob]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('bulk_export_success').replace('{count}', selectedBatchIds.value.length),
+    })
+    selectedBatchIds.value = []
+    await loadBatches()
+  } catch (error) {
+    let message = t('error_exporting')
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        message = json.message || message
+      } catch { /* use default */ }
+    }
+    notificationStore.showNotification({ type: 'error', message })
+  } finally {
+    isBulkExporting.value = false
+  }
+}
+
+async function bulkCancel() {
+  if (!confirm(t('confirm_bulk_cancel').replace('{count}', selectedBatchIds.value.length))) return
+  isBulkCancelling.value = true
+  try {
+    await window.axios.post('/payment-orders/bulk-cancel', { batch_ids: selectedBatchIds.value })
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('bulk_cancel_success').replace('{count}', selectedBatchIds.value.length),
+    })
+    selectedBatchIds.value = []
+    await loadBatches()
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || t('error_cancelling') })
+  } finally {
+    isBulkCancelling.value = false
   }
 }
 

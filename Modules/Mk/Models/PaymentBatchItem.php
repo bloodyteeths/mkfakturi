@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $currency_code
  * @property string|null $purpose_code
  * @property string|null $payment_reference
+ * @property string|null $revenue_code
+ * @property string|null $municipality_code
  * @property string|null $description
  * @property string $status pending|exported|confirmed|failed
  * @property \Carbon\Carbon|null $reconciled_at
@@ -43,6 +45,8 @@ class PaymentBatchItem extends Model
         'currency_code',
         'purpose_code',
         'payment_reference',
+        'revenue_code',
+        'municipality_code',
         'description',
         'status',
         'reconciled_at',
