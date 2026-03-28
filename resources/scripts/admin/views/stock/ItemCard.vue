@@ -152,6 +152,10 @@
           <template #header>
             <div class="flex justify-between items-center">
               <h3 class="text-lg font-medium text-gray-900">{{ $t('stock.movements') }}</h3>
+              <BaseButton variant="primary-outline" size="sm" @click="exportToPdf" :loading="isExportingPdf">
+                <BaseIcon name="DocumentTextIcon" class="h-4 w-4 mr-1" />
+                PDF
+              </BaseButton>
               <BaseButton variant="primary-outline" size="sm" @click="exportToCsv">
                 <BaseIcon name="ArrowDownTrayIcon" class="h-4 w-4 mr-1" />
                 {{ $t('general.export') }}
@@ -279,6 +283,7 @@ const itemStore = useItemStore()
 const route = useRoute()
 
 const isLoadingItems = ref(false)
+const isExportingPdf = ref(false)
 
 const filters = reactive({
   item: null,
@@ -415,6 +420,33 @@ function clearFilters() {
   filters.from_date = null
   filters.to_date = null
   stockStore.resetItemCard()
+}
+
+async function exportToPdf() {
+  if (!filters.item) return
+  isExportingPdf.value = true
+  try {
+    const params = {}
+    if (filters.warehouse?.id) params.warehouse_id = filters.warehouse.id
+    if (filters.from_date) params.from_date = filters.from_date
+    if (filters.to_date) params.to_date = filters.to_date
+
+    const response = await window.axios.get(`/stock/item-card/${filters.item.id}/pdf`, {
+      params,
+      responseType: 'blob',
+    })
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `lagerska-kartica-${filters.item.name || filters.item.id}.pdf`
+    link.click()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Failed to export PDF:', error)
+  } finally {
+    isExportingPdf.value = false
+  }
 }
 
 function exportToCsv() {

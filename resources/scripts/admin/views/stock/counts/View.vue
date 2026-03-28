@@ -67,6 +67,21 @@
           >
             {{ $t('stock.approve_adjust', 'Одобри и корегирај') }}
           </button>
+          <button
+            @click="downloadPdf('sheet')"
+            class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            :disabled="isPdfLoading"
+          >
+            Пописна листа
+          </button>
+          <button
+            v-if="stockCount.status === 'completed' || stockCount.approved_at"
+            @click="downloadPdf('report')"
+            class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            :disabled="isPdfLoading"
+          >
+            Записник
+          </button>
           <router-link
             to="/admin/stock/counts"
             class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
@@ -193,6 +208,7 @@ const items = ref([])
 const isLoading = ref(false)
 const isSaving = ref(false)
 const isActing = ref(false)
+const isPdfLoading = ref(false)
 
 const barcodeInput = ref(null)
 const barcodeValue = ref('')
@@ -322,6 +338,28 @@ const fetchCount = async () => {
     notificationStore.showNotification({ type: 'error', message: 'Failed to load stock count.' })
   } finally {
     isLoading.value = false
+  }
+}
+
+const downloadPdf = async (type) => {
+  isPdfLoading.value = true
+  try {
+    const endpoint = type === 'report'
+      ? `/stock/counts/${route.params.id}/report-pdf`
+      : `/stock/counts/${route.params.id}/pdf`
+    const response = await window.axios.get(endpoint, { responseType: 'blob' })
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `popis-${type}-${stockCount.value?.id || ''}.pdf`
+    link.click()
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error('Failed to download PDF:', err)
+    notificationStore.showNotification({ type: 'error', message: 'Грешка при преземање на PDF.' })
+  } finally {
+    isPdfLoading.value = false
   }
 }
 

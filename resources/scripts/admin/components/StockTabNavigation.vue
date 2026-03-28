@@ -66,6 +66,13 @@
             {{ $t('trade.tab_kap', 'КАП') }}
           </router-link>
           <router-link
+            to="/admin/stock/trade/plt"
+            class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap"
+            :class="tabClass('/admin/stock/trade/plt')"
+          >
+            {{ $t('trade.tab_plt', 'ПЛТ') }}
+          </router-link>
+          <router-link
             to="/admin/stock/counts"
             class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap"
             :class="tabClass('/admin/stock/counts')"
@@ -165,6 +172,13 @@
         {{ $t('trade.tab_kap', 'КАП') }}
       </router-link>
       <router-link
+        to="/admin/stock/trade/plt"
+        class="py-3 px-2 border-b-2 font-medium text-xs whitespace-nowrap"
+        :class="tabClass('/admin/stock/trade/plt')"
+      >
+        {{ $t('trade.tab_plt', 'ПЛТ') }}
+      </router-link>
+      <router-link
         to="/admin/stock/counts"
         class="py-3 px-2 border-b-2 font-medium text-xs whitespace-nowrap"
         :class="tabClass('/admin/stock/counts')"
@@ -235,6 +249,20 @@
           @click="showFabMenu = false"
         >
           + Нивелација
+        </router-link>
+        <router-link
+          to="/admin/stock/documents/create?create=return"
+          class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
+          @click="showFabMenu = false"
+        >
+          + Повратница
+        </router-link>
+        <router-link
+          to="/admin/stock/documents/create?create=write_off"
+          class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
+          @click="showFabMenu = false"
+        >
+          + Расходување
         </router-link>
         <router-link
           to="/admin/stock/counts?create=true"

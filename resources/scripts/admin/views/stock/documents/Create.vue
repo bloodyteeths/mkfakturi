@@ -102,6 +102,19 @@
             />
           </BaseInputGroup>
 
+          <BaseInputGroup
+            v-if="form.document_type === 'return' || form.document_type === 'write_off'"
+            label="Причина"
+            required
+            class="md:col-span-2"
+          >
+            <BaseTextarea
+              v-model="form.reason"
+              rows="2"
+              :placeholder="form.document_type === 'return' ? 'Причина за враќање на стоката...' : 'Причина за расходување...'"
+            />
+          </BaseInputGroup>
+
           <BaseInputGroup label="Белешки" class="md:col-span-2">
             <BaseTextarea
               v-model="form.notes"
@@ -374,13 +387,30 @@ const documentTypes = [
     iconBg: 'bg-blue-100',
     iconColor: 'text-blue-600',
   },
+  {
+    value: 'return',
+    label: 'Повратница',
+    description: 'Враќање стока на добавувач',
+    icon: 'ArrowUturnLeftIcon',
+    iconBg: 'bg-cyan-100',
+    iconColor: 'text-cyan-600',
+  },
+  {
+    value: 'write_off',
+    label: 'Расходување',
+    description: 'Записник за расходување',
+    icon: 'TrashIcon',
+    iconBg: 'bg-amber-100',
+    iconColor: 'text-amber-600',
+  },
 ]
 
 const form = reactive({
-  document_type: 'receipt',
+  document_type: route.query.create || 'receipt',
   warehouse_id: null,
   destination_warehouse_id: null,
   document_date: new Date().toISOString().split('T')[0],
+  reason: '',
   notes: '',
   items: [],
 })
@@ -682,6 +712,7 @@ async function saveDocument() {
       warehouse_id: form.warehouse_id,
       destination_warehouse_id: form.document_type === 'transfer' ? form.destination_warehouse_id : null,
       document_date: form.document_date,
+      reason: form.reason || null,
       notes: form.notes || null,
       items: form.items.map(item => ({
         item_id: item.item_id,
