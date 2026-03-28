@@ -21,7 +21,7 @@ class BomController extends Controller
     /**
      * List BOMs for the current company.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $companyId = (int) $request->header('company');
 
@@ -40,7 +40,7 @@ class BomController extends Controller
     /**
      * Show a single BOM with lines.
      */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, int $id)
     {
         $companyId = (int) $request->header('company');
 
@@ -95,7 +95,7 @@ class BomController extends Controller
     /**
      * Update a BOM.
      */
-    public function update(UpdateBomRequest $request, int $id): JsonResponse
+    public function update(UpdateBomRequest $request, int $id)
     {
         $companyId = (int) $request->header('company');
 

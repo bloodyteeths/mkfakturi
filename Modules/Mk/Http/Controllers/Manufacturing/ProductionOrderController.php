@@ -24,7 +24,7 @@ class ProductionOrderController extends Controller
     /**
      * List production orders for the current company.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $companyId = (int) $request->header('company');
 
@@ -43,7 +43,7 @@ class ProductionOrderController extends Controller
     /**
      * Show a single production order with all details.
      */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, int $id)
     {
         $companyId = (int) $request->header('company');
 
@@ -103,7 +103,7 @@ class ProductionOrderController extends Controller
     /**
      * Update a draft production order.
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, int $id)
     {
         $companyId = (int) $request->header('company');
         $order = ProductionOrder::where('company_id', $companyId)->findOrFail($id);
@@ -135,7 +135,7 @@ class ProductionOrderController extends Controller
     /**
      * Start production — status → in_progress.
      */
-    public function start(Request $request, int $id): JsonResponse
+    public function start(Request $request, int $id)
     {
         $companyId = (int) $request->header('company');
         $order = ProductionOrder::where('company_id', $companyId)->findOrFail($id);
@@ -156,7 +156,7 @@ class ProductionOrderController extends Controller
     /**
      * Complete production — finalize costs and create stock movements.
      */
-    public function complete(CompleteProductionRequest $request, int $id): JsonResponse
+    public function complete(CompleteProductionRequest $request, int $id)
     {
         $companyId = (int) $request->header('company');
         $order = ProductionOrder::where('company_id', $companyId)->findOrFail($id);
@@ -181,7 +181,7 @@ class ProductionOrderController extends Controller
     /**
      * Cancel a production order.
      */
-    public function cancel(Request $request, int $id): JsonResponse
+    public function cancel(Request $request, int $id)
     {
         $companyId = (int) $request->header('company');
         $order = ProductionOrder::where('company_id', $companyId)->findOrFail($id);
