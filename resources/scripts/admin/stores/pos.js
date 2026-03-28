@@ -127,9 +127,10 @@ export const usePosStore = defineStore('pos', () => {
       categories.value = data.categories || []
       taxTypes.value = data.tax_types || []
       posUsage.value = data.pos_usage || posUsage.value
-      catalogLoaded.value = true
     } catch (e) {
       console.error('Failed to load POS catalog:', e)
+    } finally {
+      catalogLoaded.value = true
     }
   }
 

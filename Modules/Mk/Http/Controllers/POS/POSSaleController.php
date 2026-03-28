@@ -40,7 +40,7 @@ class POSSaleController extends Controller
                 'items.*.price' => 'nullable|integer',
                 'items.*.discount' => 'nullable|numeric|min:0|max:100',
                 'customer_id' => 'nullable|integer|exists:customers,id',
-                'payment_method' => 'required|string|in:cash,card,mixed',
+                'payment_method' => 'required|string|in:cash,card',
                 'cash_received' => 'nullable|integer|min:0',
                 'fiscal_device_id' => 'nullable|integer|exists:fiscal_devices,id',
                 'warehouse_id' => 'nullable|integer|exists:warehouses,id',
@@ -154,12 +154,17 @@ class POSSaleController extends Controller
 
         $total = $subTotal + $totalTax;
 
-        // --- Generate invoice number ---
+        // --- Generate invoice number with optional POS prefix ---
         $invoiceNumber = (new SerialNumberFormatter())
             ->setModel(new Invoice())
             ->setCompany($companyId)
             ->setCustomer($customerId)
             ->getNextNumber();
+
+        $posPrefix = CompanySetting::getSetting('pos_invoice_prefix', $companyId);
+        if ($posPrefix) {
+            $invoiceNumber = $posPrefix.$invoiceNumber;
+        }
 
         // --- Create invoice + items + payment atomically ---
         try {
@@ -187,7 +192,7 @@ class POSSaleController extends Controller
                     'discount_val' => 0,
                     'discount_type' => 'fixed',
                     'template_name' => 'invoice1',
-                    'notes' => $validated['notes'] ?? 'POS Sale',
+                    'notes' => $validated['notes'] ?? '[POS] Sale',
                     'currency_id' => $customerCurrency,
                     'exchange_rate' => 1,
                     'invoiceSend' => true,  // Status = SENT (triggers IFRS posting)
@@ -290,11 +295,11 @@ class POSSaleController extends Controller
                 ];
             });
 
-            // --- Increment POS transaction usage ---
-            $usageService->incrementUsage($company, 'pos_transactions_per_month');
-
             // --- Build fiscal data for WebSerial ---
             $fiscalData = $this->buildFiscalData($result['invoice']);
+
+            // --- Increment POS transaction usage (after successful transaction) ---
+            $usageService->incrementUsage($company, 'pos_transactions_per_month');
 
             // --- Calculate change ---
             $cashReceived = $validated['cash_received'] ?? $total;
@@ -451,8 +456,22 @@ class POSSaleController extends Controller
      */
     protected function getOrCreateWalkInCustomer(int $companyId): int
     {
+        $locale = CompanySetting::getSetting('language', $companyId) ?? 'mk';
+        $walkInName = match ($locale) {
+            'sq' => 'POS Blerës',
+            'tr' => 'POS Müşteri',
+            'en' => 'POS Customer',
+            default => 'POS Купувач',
+        };
+
+        // Search for any existing POS walk-in customer (any locale name)
         $posCustomer = Customer::where('company_id', $companyId)
-            ->where('name', 'POS Купувач')
+            ->where(function ($q) {
+                $q->where('name', 'POS Купувач')
+                    ->orWhere('name', 'POS Blerës')
+                    ->orWhere('name', 'POS Müşteri')
+                    ->orWhere('name', 'POS Customer');
+            })
             ->first();
 
         if ($posCustomer) {
@@ -462,7 +481,7 @@ class POSSaleController extends Controller
         $companyCurrency = CompanySetting::getSetting('currency', $companyId);
 
         $posCustomer = Customer::create([
-            'name' => 'POS Купувач',
+            'name' => $walkInName,
             'company_id' => $companyId,
             'currency_id' => $companyCurrency,
             'type' => 'customer',
@@ -496,7 +515,8 @@ class POSSaleController extends Controller
     /**
      * POST /api/v1/pos/return
      *
-     * Process a POS return/storno — creates credit note, reverses stock.
+     * Process a POS return/storno — creates credit note, reverses stock, processes refund.
+     * All operations are atomic: credit note + stock reversal + invoice status update.
      */
     public function returnSale(Request $request): JsonResponse
     {
@@ -516,7 +536,7 @@ class POSSaleController extends Controller
 
         $invoice = Invoice::where('id', $validated['invoice_id'])
             ->where('company_id', $companyId)
-            ->with('items')
+            ->with(['items.taxes.taxType', 'customer'])
             ->first();
 
         if (! $invoice) {
@@ -559,24 +579,179 @@ class POSSaleController extends Controller
         }
         $returnTotal = $returnSubTotal + $returnTax;
 
-        // Build fiscal storno data
-        $stornoData = $this->buildStornoFiscalData($invoice, $returnItems, $returnTotal, $returnTax);
+        $reason = $validated['reason'] ?? '[POS] Return';
 
-        return response()->json([
-            'storno' => true,
-            'original_invoice_id' => $invoice->id,
-            'original_invoice_number' => $invoice->invoice_number,
-            'return_total' => $returnTotal,
-            'return_tax' => $returnTax,
-            'return_items' => collect($returnItems)->map(fn ($ri) => [
-                'name' => $ri['item']->name,
-                'quantity' => $ri['quantity'],
-                'price' => $ri['item']->price,
-                'total' => (int) round($ri['item']->total * ($ri['quantity'] / $ri['item']->quantity)),
-            ]),
-            'fiscal_data' => $stornoData,
-            'reason' => $validated['reason'] ?? 'POS Return',
-        ]);
+        try {
+            $result = DB::transaction(function () use (
+                $request, $companyId, $invoice, $returnItems,
+                $returnSubTotal, $returnTax, $returnTotal, $reason
+            ) {
+                $companyCurrency = CompanySetting::getSetting('currency', $companyId);
+                $taxPerItem = CompanySetting::getSetting('tax_per_item', $companyId) ?? 'NO';
+
+                // --- 1. Create Credit Note ---
+                $creditNoteItems = [];
+                foreach ($returnItems as $ri) {
+                    $invoiceItem = $ri['item'];
+                    $ratio = $ri['quantity'] / $invoiceItem->quantity;
+
+                    $itemSubTotal = (int) round(($invoiceItem->total - $invoiceItem->tax) * $ratio);
+                    $itemTax = (int) round($invoiceItem->tax * $ratio);
+                    $itemTotal = $itemSubTotal + $itemTax;
+                    $itemDiscount = (int) round($invoiceItem->discount_val * $ratio);
+
+                    $itemTaxes = [];
+                    if ($invoiceItem->taxes) {
+                        foreach ($invoiceItem->taxes as $tax) {
+                            $taxAmount = (int) round($tax->amount * $ratio);
+                            $itemTaxes[] = [
+                                'tax_type_id' => $tax->tax_type_id,
+                                'name' => $tax->name ?? $tax->taxType?->name ?? '',
+                                'percent' => $tax->percent ?? $tax->taxType?->percent ?? 0,
+                                'amount' => $taxAmount,
+                                'compound_tax' => $tax->compound_tax ?? false,
+                            ];
+                        }
+                    }
+
+                    $creditNoteItems[] = [
+                        'item_id' => $invoiceItem->item_id,
+                        'name' => $invoiceItem->name,
+                        'description' => $reason,
+                        'quantity' => $ri['quantity'],
+                        'price' => $invoiceItem->price,
+                        'discount' => $invoiceItem->discount ?? 0,
+                        'discount_val' => $itemDiscount,
+                        'tax' => $itemTax,
+                        'total' => $itemTotal,
+                        'unit_name' => $invoiceItem->unit_name ?? '',
+                        'taxes' => $itemTaxes,
+                    ];
+                }
+
+                // Build credit note request
+                $cnRequest = new \Illuminate\Http\Request();
+                $cnRequest->headers->set('company', $companyId);
+                $cnRequest->setUserResolver(fn () => $request->user());
+
+                $cnData = [
+                    'credit_note_date' => now()->format('Y-m-d'),
+                    'customer_id' => $invoice->customer_id,
+                    'invoice_id' => $invoice->id,
+                    'sub_total' => $returnSubTotal,
+                    'total' => $returnTotal,
+                    'tax' => $returnTax,
+                    'discount' => 0,
+                    'discount_val' => 0,
+                    'discount_type' => 'fixed',
+                    'template_name' => 'credit_note1',
+                    'notes' => $reason,
+                    'currency_id' => $invoice->currency_id ?? $companyCurrency,
+                    'exchange_rate' => 1,
+                    'items' => $creditNoteItems,
+                    'creditNoteSend' => true,
+                ];
+
+                $cnRequest->replace($cnData);
+                $cnRequest->macro('getCreditNotePayload', function () use ($cnData, $companyId, $request, $taxPerItem) {
+                    return [
+                        'credit_note_date' => $cnData['credit_note_date'],
+                        'customer_id' => $cnData['customer_id'],
+                        'invoice_id' => $cnData['invoice_id'],
+                        'sub_total' => $cnData['sub_total'],
+                        'total' => $cnData['total'],
+                        'tax' => $cnData['tax'],
+                        'discount' => 0,
+                        'discount_val' => 0,
+                        'discount_type' => 'fixed',
+                        'template_name' => 'credit_note1',
+                        'notes' => $cnData['notes'],
+                        'creator_id' => $request->user()->id ?? null,
+                        'status' => \App\Models\CreditNote::STATUS_COMPLETED,
+                        'company_id' => $companyId,
+                        'tax_per_item' => $taxPerItem,
+                        'discount_per_item' => CompanySetting::getSetting('discount_per_item', $companyId) ?? 'NO',
+                        'exchange_rate' => 1,
+                        'base_total' => $cnData['total'],
+                        'base_discount_val' => 0,
+                        'base_sub_total' => $cnData['sub_total'],
+                        'base_tax' => $cnData['tax'],
+                        'currency_id' => $cnData['currency_id'],
+                    ];
+                });
+
+                $creditNote = \App\Models\CreditNote::createCreditNote($cnRequest);
+
+                // --- 2. Reverse stock for returned items ---
+                $stockService = app(\App\Services\StockService::class);
+                if (\App\Services\StockService::isEnabled()) {
+                    $defaultWarehouse = \App\Models\Warehouse::getOrCreateDefault($companyId);
+
+                    foreach ($returnItems as $ri) {
+                        $item = Item::find($ri['item']->item_id);
+                        if ($item && $item->track_quantity) {
+                            $wac = $item->wac_cost ?? $ri['item']->price ?? 0;
+                            $stockService->recordStockIn(
+                                $companyId,
+                                $ri['item']->warehouse_id ?? $defaultWarehouse->id,
+                                $ri['item']->item_id,
+                                (float) $ri['quantity'],
+                                $wac,
+                                \App\Models\StockMovement::SOURCE_RETURN,
+                                $creditNote->id,
+                                now()->format('Y-m-d'),
+                                "Stock IN from POS Return — CN #{$creditNote->credit_note_number}",
+                                [
+                                    'credit_note_id' => $creditNote->id,
+                                    'original_invoice_id' => $invoice->id,
+                                ],
+                                $request->user()->id ?? null
+                            );
+                        }
+                    }
+                }
+
+                // --- 3. Update original invoice paid status ---
+                $invoice->updateInvoiceStatus($returnTotal);
+
+                return [
+                    'credit_note' => $creditNote,
+                ];
+            });
+
+            // Build fiscal storno data
+            $stornoData = $this->buildStornoFiscalData($invoice, $returnItems, $returnTotal, $returnTax);
+
+            return response()->json([
+                'storno' => true,
+                'credit_note_id' => $result['credit_note']->id,
+                'credit_note_number' => $result['credit_note']->credit_note_number,
+                'original_invoice_id' => $invoice->id,
+                'original_invoice_number' => $invoice->invoice_number,
+                'return_total' => $returnTotal,
+                'return_tax' => $returnTax,
+                'return_items' => collect($returnItems)->map(fn ($ri) => [
+                    'name' => $ri['item']->name,
+                    'quantity' => $ri['quantity'],
+                    'price' => $ri['item']->price,
+                    'total' => (int) round($ri['item']->total * ($ri['quantity'] / $ri['item']->quantity)),
+                ]),
+                'fiscal_data' => $stornoData,
+                'reason' => $reason,
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('POS return failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'invoice_id' => $validated['invoice_id'],
+                'company_id' => $companyId,
+            ]);
+
+            return response()->json([
+                'error' => 'Return failed: '.$e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -659,10 +834,11 @@ class POSSaleController extends Controller
             return response()->json(['error' => 'No open shift found'], 404);
         }
 
-        // Calculate shift totals from invoices created during shift
+        // Calculate shift totals from POS invoices created during shift
+        // Uses '[POS]' prefix marker — more reliable than generic '%POS%' LIKE
         $shiftInvoices = Invoice::where('company_id', $companyId)
             ->where('creator_id', $userId)
-            ->where('notes', 'LIKE', '%POS%')
+            ->where('notes', 'LIKE', '[POS]%')
             ->where('created_at', '>=', $shift->opened_at)
             ->get();
 
@@ -724,7 +900,7 @@ class POSSaleController extends Controller
         // Live stats
         $salesSinceOpen = Invoice::where('company_id', $companyId)
             ->where('creator_id', $userId)
-            ->where('notes', 'LIKE', '%POS%')
+            ->where('notes', 'LIKE', '[POS]%')
             ->where('created_at', '>=', $shift->opened_at)
             ->selectRaw('SUM(total) as total_sales, COUNT(*) as count')
             ->first();
