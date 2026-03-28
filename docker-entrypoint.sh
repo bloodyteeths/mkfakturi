@@ -91,6 +91,7 @@ php artisan config:clear 2>/dev/null || echo "Warning: config:clear failed"
 echo "Clearing application cache..."
 php artisan cache:clear 2>/dev/null || echo "Warning: cache:clear failed"
 echo "Building optimization caches..."
+php artisan route:clear 2>/dev/null || true
 php artisan route:cache || echo "Warning: route:cache failed, falling back to uncached routes"
 php artisan view:cache || echo "Warning: view:cache failed"
 php artisan event:cache || echo "Warning: event:cache failed"
