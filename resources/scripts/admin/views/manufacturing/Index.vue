@@ -34,6 +34,15 @@
           </div>
         </div>
 
+        <router-link to="/admin/manufacturing/work-centers">
+          <BaseButton variant="primary-outline">
+            <template #left="slotProps">
+              <CogIcon :class="slotProps.class" />
+            </template>
+            {{ t('manufacturing.work_centers') }}
+          </BaseButton>
+        </router-link>
+
         <router-link to="/admin/manufacturing/orders/create">
           <BaseButton variant="primary">
             <template #left="slotProps">
@@ -200,7 +209,78 @@
         </div>
       </div>
 
-      <!-- ROW 3: Material Availability + Production Timeline -->
+      <!-- ROW 3: OEE Metrics (only if work centers exist) -->
+      <div v-if="data.oee && data.oee.work_centers && data.oee.work_centers.length > 0" class="mt-4 lg:mt-6">
+        <div class="rounded-lg bg-white p-5 shadow">
+          <div class="mb-4 flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-semibold text-gray-900">{{ t('manufacturing.dash_oee_title') }}</h3>
+              <p class="mt-0.5 text-xs text-gray-500">{{ t('manufacturing.dash_oee_subtitle') }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-gray-500">{{ t('manufacturing.dash_oee_overall') }}:</span>
+              <span
+                class="rounded-full px-3 py-1 text-sm font-bold"
+                :class="oeeColor(data.oee.overall)"
+              >{{ data.oee.overall }}%</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div
+              v-for="wc in data.oee.work_centers"
+              :key="wc.id"
+              class="rounded-lg border border-gray-100 p-4 transition hover:shadow-md cursor-pointer"
+              @click="$router.push(`/admin/manufacturing/work-centers/${wc.id}`)"
+            >
+              <div class="flex items-center justify-between">
+                <p class="truncate text-sm font-semibold text-gray-900">{{ wc.name }}</p>
+                <span
+                  class="rounded-full px-2 py-0.5 text-xs font-bold"
+                  :class="oeeColor(wc.oee)"
+                >{{ wc.oee }}%</span>
+              </div>
+              <p class="mt-0.5 text-xs text-gray-500">{{ wc.code }} · {{ wc.order_count }} {{ t('manufacturing.dash_orders_label') }}</p>
+
+              <!-- OEE Breakdown -->
+              <div class="mt-3 space-y-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-gray-500">{{ t('manufacturing.dash_oee_availability') }}</span>
+                  <span :class="wc.availability >= 80 ? 'text-green-600' : wc.availability >= 60 ? 'text-yellow-600' : 'text-red-600'" class="font-medium">{{ wc.availability }}%</span>
+                </div>
+                <div class="h-1.5 overflow-hidden rounded-full bg-gray-100">
+                  <div class="h-full rounded-full bg-blue-400 transition-all" :style="{ width: Math.min(wc.availability, 100) + '%' }"></div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-gray-500">{{ t('manufacturing.dash_oee_performance') }}</span>
+                  <span :class="wc.performance >= 80 ? 'text-green-600' : wc.performance >= 60 ? 'text-yellow-600' : 'text-red-600'" class="font-medium">{{ wc.performance }}%</span>
+                </div>
+                <div class="h-1.5 overflow-hidden rounded-full bg-gray-100">
+                  <div class="h-full rounded-full bg-emerald-400 transition-all" :style="{ width: Math.min(wc.performance, 100) + '%' }"></div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-gray-500">{{ t('manufacturing.dash_oee_quality') }}</span>
+                  <span :class="wc.quality >= 90 ? 'text-green-600' : wc.quality >= 75 ? 'text-yellow-600' : 'text-red-600'" class="font-medium">{{ wc.quality }}%</span>
+                </div>
+                <div class="h-1.5 overflow-hidden rounded-full bg-gray-100">
+                  <div class="h-full rounded-full bg-purple-400 transition-all" :style="{ width: Math.min(wc.quality, 100) + '%' }"></div>
+                </div>
+              </div>
+
+              <!-- Target comparison -->
+              <div v-if="wc.target_oee > 0" class="mt-2 flex items-center justify-between border-t border-gray-100 pt-2 text-xs">
+                <span class="text-gray-400">{{ t('manufacturing.dash_oee_target') }}: {{ wc.target_oee }}%</span>
+                <span v-if="wc.oee >= wc.target_oee" class="font-medium text-green-600">✓</span>
+                <span v-else class="font-medium text-red-500">{{ (wc.oee - wc.target_oee).toFixed(1) }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 4: Material Availability + Production Timeline -->
       <div class="mt-4 grid grid-cols-1 gap-4 lg:mt-6 lg:grid-cols-2 lg:gap-6">
 
         <!-- Material Availability (traffic lights) -->
@@ -657,6 +737,7 @@ const data = ref({
   top_products: [],
   chart: { labels: [], production_cost: [], wastage_cost: [], quantity: [], order_count: [] },
   material_availability: [],
+  oee: { overall: 0, work_centers: [] },
   timeline: [],
   period: { month: '', label: '' },
 })
@@ -764,6 +845,13 @@ function statusBadge(status) {
     completed: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
   }[status] || 'bg-gray-100 text-gray-800'
+}
+
+// ===== OEE helpers =====
+function oeeColor(value) {
+  if (value >= 85) return 'bg-green-100 text-green-800'
+  if (value >= 60) return 'bg-yellow-100 text-yellow-800'
+  return 'bg-red-100 text-red-800'
 }
 
 // ===== Gantt helpers =====

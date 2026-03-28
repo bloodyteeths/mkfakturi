@@ -181,6 +181,30 @@ class ProductionReportController extends Controller
             ];
         })->toArray();
 
+        // ---- OEE per work center (this month) ----
+        $workCenters = \Modules\Mk\Models\Manufacturing\WorkCenter::where('company_id', $companyId)
+            ->active()->orderBy('sort_order')->get();
+        $oeeData = $workCenters->map(function ($wc) use ($startOfMonth, $endOfMonth) {
+            $oee = $wc->calculateOee($startOfMonth, $endOfMonth);
+
+            return [
+                'id' => $wc->id,
+                'name' => $wc->name,
+                'code' => $wc->code,
+                'oee' => $oee['oee'],
+                'availability' => $oee['availability'],
+                'performance' => $oee['performance'],
+                'quality' => $oee['quality'],
+                'target_oee' => $wc->getTargetOee(),
+                'order_count' => $oee['order_count'],
+            ];
+        })->toArray();
+
+        $totalOeeOrders = array_sum(array_column($oeeData, 'order_count'));
+        $overallOee = $totalOeeOrders > 0
+            ? round(array_sum(array_map(fn ($wc) => $wc['oee'] * $wc['order_count'], $oeeData)) / $totalOeeOrders, 1)
+            : 0;
+
         // ---- Active orders timeline (for mini-Gantt) ----
         $timelineOrders = ProductionOrder::where('company_id', $companyId)
             ->whereIn('status', [ProductionOrder::STATUS_DRAFT, ProductionOrder::STATUS_IN_PROGRESS])
@@ -232,6 +256,10 @@ class ProductionReportController extends Controller
                     'order_count' => $chartOrderCount,
                 ],
                 'material_availability' => $materialAvailability,
+                'oee' => [
+                    'overall' => $overallOee,
+                    'work_centers' => $oeeData,
+                ],
                 'timeline' => $timelineOrders,
                 'period' => [
                     'month' => $now->format('Y-m'),

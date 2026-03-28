@@ -1388,6 +1388,26 @@ export default [
         component: () => import('@/scripts/admin/views/manufacturing/reports/WastageReport.vue'),
       },
 
+      // Work Centers
+      {
+        path: 'manufacturing/work-centers',
+        name: 'manufacturing.work-center.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/manufacturing/work-centers/Index.vue'),
+      },
+      {
+        path: 'manufacturing/work-centers/create',
+        name: 'manufacturing.work-center.create',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/manufacturing/work-centers/Create.vue'),
+      },
+      {
+        path: 'manufacturing/work-centers/:id',
+        name: 'manufacturing.work-center.view',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/manufacturing/work-centers/View.vue'),
+      },
+
       // F6: Purchase Orders
       {
         path: 'purchase-orders',

@@ -1007,6 +1007,15 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/boms/{bom}/pdf/normativ', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'normativPdf']);
                 Route::get('/items/{item}/pdf/lagerska-kartica', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'lagerskaKarticaPdf']);
 
+                // Work Centers / Работни центри
+                Route::get('/work-centers', [\Modules\Mk\Http\Controllers\Manufacturing\WorkCenterController::class, 'index']);
+                Route::post('/work-centers', [\Modules\Mk\Http\Controllers\Manufacturing\WorkCenterController::class, 'store']);
+                Route::get('/work-centers/oee-summary', [\Modules\Mk\Http\Controllers\Manufacturing\WorkCenterController::class, 'oeeSummary']);
+                Route::get('/work-centers/{workCenter}', [\Modules\Mk\Http\Controllers\Manufacturing\WorkCenterController::class, 'show']);
+                Route::put('/work-centers/{workCenter}', [\Modules\Mk\Http\Controllers\Manufacturing\WorkCenterController::class, 'update']);
+                Route::delete('/work-centers/{workCenter}', [\Modules\Mk\Http\Controllers\Manufacturing\WorkCenterController::class, 'destroy']);
+                Route::get('/work-centers/{workCenter}/oee', [\Modules\Mk\Http\Controllers\Manufacturing\WorkCenterController::class, 'oee']);
+
                 // AI-powered features
                 Route::post('/ai/suggest-materials', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionAiController::class, 'suggestMaterials']);
                 Route::get('/ai/boms/{bom}/predict-wastage', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionAiController::class, 'predictWastage']);

@@ -11,6 +11,7 @@ class ProductionOrderLabor extends Model
 
     protected $fillable = [
         'production_order_id',
+        'work_center_id',
         'description',
         'hours',
         'rate_per_hour',
@@ -34,6 +35,11 @@ class ProductionOrderLabor extends Model
     public function productionOrder(): BelongsTo
     {
         return $this->belongsTo(ProductionOrder::class);
+    }
+
+    public function workCenter(): BelongsTo
+    {
+        return $this->belongsTo(WorkCenter::class);
     }
 
     // ---- Business Methods ----

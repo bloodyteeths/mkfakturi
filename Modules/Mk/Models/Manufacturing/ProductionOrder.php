@@ -48,6 +48,7 @@ class ProductionOrder extends Model
         'planned_quantity',
         'actual_quantity',
         'output_warehouse_id',
+        'work_center_id',
         'total_material_cost',
         'total_labor_cost',
         'total_overhead_cost',
@@ -128,6 +129,11 @@ class ProductionOrder extends Model
     public function outputWarehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class, 'output_warehouse_id');
+    }
+
+    public function workCenter(): BelongsTo
+    {
+        return $this->belongsTo(WorkCenter::class);
     }
 
     public function materials(): HasMany
