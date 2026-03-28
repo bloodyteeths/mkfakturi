@@ -3,13 +3,13 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-lg font-semibold text-gray-900">
-        Stock Overview
+        {{ $t('stock.dashboard.title') || 'Stock Overview' }}
       </h3>
       <router-link
         to="/admin/stock"
         class="text-sm text-primary-500 hover:text-primary-600 font-medium"
       >
-        View All
+        {{ $t('general.view_all') || 'View All' }}
       </router-link>
     </div>
 
@@ -29,33 +29,29 @@
     <div v-else>
       <!-- Summary Numbers: 2x2 Grid -->
       <div class="grid grid-cols-2 gap-4 mb-4">
-        <!-- Total Stock Value -->
         <div class="bg-indigo-50 rounded-lg p-3 text-center">
-          <p class="text-xs text-gray-500 mb-1">Total Value</p>
+          <p class="text-xs text-gray-500 mb-1">{{ $t('stock.dashboard.total_value') || 'Total Value' }}</p>
           <p class="text-lg font-bold text-indigo-600">
             {{ formatCurrency(data.total_value) }}
           </p>
         </div>
 
-        <!-- Total Items Tracked -->
         <div class="bg-blue-50 rounded-lg p-3 text-center">
-          <p class="text-xs text-gray-500 mb-1">Items Tracked</p>
+          <p class="text-xs text-gray-500 mb-1">{{ $t('stock.dashboard.items_tracked') || 'Items Tracked' }}</p>
           <p class="text-lg font-bold text-blue-600">
             {{ data.total_items }}
           </p>
         </div>
 
-        <!-- Total Quantity -->
         <div class="bg-gray-50 rounded-lg p-3 text-center">
-          <p class="text-xs text-gray-500 mb-1">Total Quantity</p>
+          <p class="text-xs text-gray-500 mb-1">{{ $t('stock.dashboard.total_quantity') || 'Total Quantity' }}</p>
           <p class="text-lg font-bold text-gray-700">
             {{ data.total_quantity.toLocaleString('mk-MK') }}
           </p>
         </div>
 
-        <!-- Low Stock Alerts -->
         <div class="rounded-lg p-3 text-center" :class="lowStockBgClass">
-          <p class="text-xs text-gray-500 mb-1">Low Stock Alerts</p>
+          <p class="text-xs text-gray-500 mb-1">{{ $t('stock.dashboard.low_stock_alerts') || 'Low Stock Alerts' }}</p>
           <div class="flex items-center justify-center gap-1.5">
             <p class="text-lg font-bold" :class="lowStockTextClass">
               {{ data.low_stock_count }}
@@ -64,13 +60,13 @@
               v-if="criticalCount > 0"
               class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700"
             >
-              {{ criticalCount }} critical
+              {{ criticalCount }} {{ $t('stock.dashboard.critical') || 'critical' }}
             </span>
             <span
               v-else-if="data.low_stock_count > 0"
               class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-yellow-100 text-yellow-700"
             >
-              warning
+              {{ $t('stock.dashboard.warning') || 'warning' }}
             </span>
           </div>
         </div>
@@ -78,14 +74,14 @@
 
       <!-- Top 5 Critical Items -->
       <div v-if="data.low_stock_items && data.low_stock_items.length > 0" class="mb-4">
-        <h4 class="text-sm font-medium text-gray-700 mb-2">Critical Items</h4>
+        <h4 class="text-sm font-medium text-gray-700 mb-2">{{ $t('stock.dashboard.critical_items') || 'Critical Items' }}</h4>
         <div class="overflow-x-auto">
-          <table class="w-full text-xs">
+          <table class="w-full text-xs" role="table" :aria-label="$t('stock.dashboard.critical_items') || 'Critical Items'">
             <thead>
               <tr class="text-left text-gray-500 border-b">
-                <th class="pb-1.5 font-medium">Item</th>
-                <th class="pb-1.5 font-medium text-right">Current</th>
-                <th class="pb-1.5 font-medium text-right">Minimum</th>
+                <th class="pb-1.5 font-medium">{{ $t('stock.dashboard.item') || 'Item' }}</th>
+                <th class="pb-1.5 font-medium text-right">{{ $t('stock.dashboard.current') || 'Current' }}</th>
+                <th class="pb-1.5 font-medium text-right">{{ $t('stock.dashboard.minimum') || 'Minimum' }}</th>
               </tr>
             </thead>
             <tbody>
@@ -111,7 +107,7 @@
 
       <!-- Recent Movements -->
       <div v-if="data.recent_movements && data.recent_movements.length > 0">
-        <h4 class="text-sm font-medium text-gray-700 mb-2">Recent Movements</h4>
+        <h4 class="text-sm font-medium text-gray-700 mb-2">{{ $t('stock.dashboard.recent_movements') || 'Recent Movements' }}</h4>
         <div class="space-y-1.5">
           <div
             v-for="mov in data.recent_movements"
@@ -133,6 +129,22 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Quick Document Actions -->
+      <div class="flex gap-2 pt-3 mt-3 border-t border-gray-200">
+        <router-link
+          to="/admin/stock/documents/create?type=receipt"
+          class="flex-1 text-center text-xs font-medium text-emerald-600 hover:text-emerald-700 py-1.5 rounded border border-emerald-200 hover:bg-emerald-50 transition-colors"
+        >
+          {{ $t('stock.dashboard.new_receipt') || '+ Приемница' }}
+        </router-link>
+        <router-link
+          to="/admin/stock/documents/create?type=issue"
+          class="flex-1 text-center text-xs font-medium text-red-600 hover:text-red-700 py-1.5 rounded border border-red-200 hover:bg-red-50 transition-colors"
+        >
+          {{ $t('stock.dashboard.new_issue') || '+ Издатница' }}
+        </router-link>
       </div>
     </div>
   </div>

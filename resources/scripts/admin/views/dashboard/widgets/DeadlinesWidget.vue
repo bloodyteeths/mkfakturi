@@ -75,7 +75,7 @@
       >
         <div class="flex-1 min-w-0">
           <router-link
-            to="/admin/deadlines"
+            :to="getDeadlineRoute(deadline)"
             class="text-sm font-medium text-primary-500 hover:text-primary-600 truncate block"
           >
             {{ getLocalizedTitle(deadline) }}
@@ -188,6 +188,17 @@ function formatDueDate(deadline) {
   return `${days}d ${t('deadlines.upcoming').toLowerCase()}`
 }
 
+function getDeadlineRoute(deadline) {
+  const routes = {
+    'vat_return': '/admin/accounting/ujp-forms',
+    'mpin': '/admin/payroll',
+    'cit_advance': '/admin/accounting/ujp-forms',
+    'annual_fs': '/admin/reports',
+    'payroll': '/admin/payroll',
+  }
+  return routes[deadline.deadline_type] || '/admin/deadlines'
+}
+
 async function fetchDeadlines() {
   isLoading.value = true
   try {
@@ -213,12 +224,12 @@ async function markComplete(deadline) {
     deadlines.value = deadlines.value.filter((d) => d.id !== deadline.id)
     notificationStore.showNotification({
       type: 'success',
-      message: 'Deadline marked as complete.',
+      message: t('deadlines.marked_complete') || 'Deadline marked as complete.',
     })
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: 'Failed to complete deadline.',
+      message: t('deadlines.complete_failed') || 'Failed to complete deadline.',
     })
   } finally {
     completingId.value = null

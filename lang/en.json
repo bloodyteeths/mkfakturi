@@ -1671,6 +1671,7 @@
         "search": "Search",
         "select": "Select",
         "select_a_status": "Select a status",
+        "select_status": "Select status",
         "select_a_tax": "Select a tax",
         "select_all": "Select All",
         "select_city": "Select City",
@@ -4967,14 +4968,7 @@
         "generation_failed": "Invoice generation failed — limit may be reached",
         "pause_selected": "Pause Selected",
         "activate_selected": "Activate Selected",
-        "status_updated": "Status updated successfully",
-        "frequency.every_week": "Every Week",
-        "frequency.every_15_days": "Every 15 Days",
-        "frequency.every_month": "Every Month",
-        "frequency.every_quarter": "Every Quarter",
-        "frequency.every_6_months": "Every 6 Months",
-        "frequency.every_year": "Every Year",
-        "frequency.custom": "Custom (CRON)"
+        "status_updated": "Status updated successfully"
     },
     "reports": {
         "cash_flow": {

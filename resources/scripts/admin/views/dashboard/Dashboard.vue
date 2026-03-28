@@ -10,6 +10,7 @@ import RecentPaymentsWidget from './widgets/RecentPaymentsWidget.vue'
 import StockDashboardWidget from '@/scripts/admin/components/StockDashboardWidget.vue'
 import DeadlinesWidget from './widgets/DeadlinesWidget.vue'
 import FiscalDeviceWidget from './widgets/FiscalDeviceWidget.vue'
+import PendingDocumentsWidget from './widgets/PendingDocumentsWidget.vue'
 import OnboardingChecklistWidget from './widgets/OnboardingChecklistWidget.vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
@@ -86,8 +87,9 @@ onMounted(() => {
       <StockDashboardWidget v-if="stockEnabled" />
     </div>
 
-    <!-- Fiscal Device Status (only if company has configured devices) -->
+    <!-- Pending Documents & Fiscal Device Status -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4 lg:mb-6">
+      <PendingDocumentsWidget />
       <FiscalDeviceWidget />
     </div>
 

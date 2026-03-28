@@ -7,7 +7,7 @@
     </template>
 
     <!-- Grid of Quick Action Buttons -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       <!-- New Invoice -->
       <router-link
         v-if="userStore.hasAbilities(abilities.CREATE_INVOICE)"
@@ -123,6 +123,98 @@
             </p>
             <p class="text-xs text-gray-500 hidden sm:block">
               {{ $t('dashboard.view_reports_desc') || 'View business reports' }}
+            </p>
+          </div>
+        </div>
+      </router-link>
+
+      <!-- Stock Receipt -->
+      <router-link
+        v-if="userStore.hasAbilities(abilities.CREATE_ITEM)"
+        to="/admin/stock/documents/create?type=receipt"
+        class="group"
+      >
+        <div class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[60px]">
+          <div class="flex-shrink-0">
+            <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200">
+              <BaseIcon name="ArrowDownOnSquareIcon" class="h-6 w-6 text-emerald-600" />
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-900 group-hover:text-emerald-600">
+              {{ $t('stock.new_receipt') || 'New Stock Receipt' }}
+            </p>
+            <p class="text-xs text-gray-500 hidden sm:block">
+              {{ $t('dashboard.create_receipt_desc') || 'Record goods received' }}
+            </p>
+          </div>
+        </div>
+      </router-link>
+
+      <!-- Payroll -->
+      <router-link
+        v-if="userStore.hasAbilities(abilities.VIEW_FINANCIAL_REPORT)"
+        to="/admin/payroll"
+        class="group"
+      >
+        <div class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[60px]">
+          <div class="flex-shrink-0">
+            <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center group-hover:bg-amber-200">
+              <BaseIcon name="BanknotesIcon" class="h-6 w-6 text-amber-600" />
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-900 group-hover:text-amber-600">
+              {{ $t('payroll.payroll') || 'Payroll' }}
+            </p>
+            <p class="text-xs text-gray-500 hidden sm:block">
+              {{ $t('dashboard.payroll_desc') || 'Run monthly payroll' }}
+            </p>
+          </div>
+        </div>
+      </router-link>
+
+      <!-- UJP Forms -->
+      <router-link
+        v-if="userStore.hasAbilities(abilities.VIEW_FINANCIAL_REPORT)"
+        to="/admin/accounting/ujp-forms"
+        class="group"
+      >
+        <div class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[60px]">
+          <div class="flex-shrink-0">
+            <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center group-hover:bg-red-200">
+              <BaseIcon name="DocumentTextIcon" class="h-6 w-6 text-red-600" />
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-900 group-hover:text-red-600">
+              {{ $t('ujp.title') || 'UJP Forms' }}
+            </p>
+            <p class="text-xs text-gray-500 hidden sm:block">
+              {{ $t('dashboard.ujp_forms_desc') || 'Tax declarations' }}
+            </p>
+          </div>
+        </div>
+      </router-link>
+
+      <!-- Travel Order -->
+      <router-link
+        v-if="userStore.hasAbilities(abilities.CREATE_EXPENSE)"
+        to="/admin/travel-orders/create"
+        class="group"
+      >
+        <div class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[60px]">
+          <div class="flex-shrink-0">
+            <div class="h-10 w-10 rounded-full bg-cyan-100 flex items-center justify-center group-hover:bg-cyan-200">
+              <BaseIcon name="TruckIcon" class="h-6 w-6 text-cyan-600" />
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-900 group-hover:text-cyan-600">
+              {{ $t('travel.new_order') || 'Travel Order' }}
+            </p>
+            <p class="text-xs text-gray-500 hidden sm:block">
+              {{ $t('dashboard.travel_order_desc') || 'Create travel order' }}
             </p>
           </div>
         </div>
