@@ -90,9 +90,10 @@ class ManufacturingReportService
 
         $orderDetails = $orders->map(function ($order) {
             $bom = $order->bom;
-            $normativeCost = $bom ? $bom->calculateNormativeCost() : 0;
+            $normativeCostData = $bom ? $bom->calculateNormativeCost() : ['total_cost' => 0];
+            $normativeCostPerUnit = is_array($normativeCostData) ? ($normativeCostData['total_cost'] ?? 0) : (int) $normativeCostData;
             $normativeTotal = $order->actual_quantity > 0
-                ? (int) round($normativeCost * (float) $order->actual_quantity)
+                ? (int) round($normativeCostPerUnit * (float) $order->actual_quantity)
                 : 0;
 
             return [
@@ -104,7 +105,7 @@ class ManufacturingReportService
                 'planned_quantity' => $order->planned_quantity,
                 'actual_quantity' => $order->actual_quantity,
                 'quantity_variance' => (float) $order->actual_quantity - (float) $order->planned_quantity,
-                'normative_cost' => $normativeCost,
+                'normative_cost' => $normativeCostPerUnit,
                 'normative_total' => $normativeTotal,
                 'actual_total' => $order->total_production_cost,
                 'material_variance' => $order->material_variance,
