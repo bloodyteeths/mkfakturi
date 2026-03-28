@@ -777,6 +777,7 @@ export default [
           {
             path: 'roles-settings',
             name: 'roles.settings',
+            meta: { isOwner: true },
             component: RolesSettings,
           },
           // Exchange rate provider settings removed - using free Frankfurter API
@@ -802,6 +803,7 @@ export default [
           {
             path: 'payment-mode',
             name: 'payment.mode',
+            meta: { ability: abilities.VIEW_PAYMENT },
             component: PaymentMode,
           },
           {
@@ -821,13 +823,13 @@ export default [
           {
             path: 'file-disk',
             name: 'file-disk',
-            meta: { isOwner: true },
+            meta: { isOwner: true, requiresSuperAdmin: true },
             component: FileDisk,
           },
           {
             path: 'backup',
             name: 'backup',
-            meta: { isOwner: true },
+            meta: { isOwner: true, requiresSuperAdmin: true },
             component: Backup,
           },
           // Removed: Update App - external service offline
