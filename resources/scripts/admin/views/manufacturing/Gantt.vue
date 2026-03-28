@@ -88,23 +88,39 @@
 
       <!-- Body: rows -->
       <div class="flex" style="max-height: 70vh">
-        <!-- Left sidebar: order names -->
+        <!-- Left sidebar: order names grouped by work center -->
         <div class="w-64 flex-shrink-0 overflow-y-auto border-r border-gray-200" ref="sidebarRef">
-          <div
-            v-for="order in orders"
-            :key="order.id"
-            class="flex h-10 items-center border-b border-gray-100 px-4 transition hover:bg-gray-50 cursor-pointer"
-            @click="$router.push(`/admin/manufacturing/orders/${order.id}`)"
-          >
-            <span
-              class="mr-2 inline-block h-2 w-2 flex-shrink-0 rounded-full"
-              :class="statusDotClass(order.status)"
-            ></span>
-            <div class="min-w-0 flex-1">
-              <p class="truncate text-xs font-medium text-gray-900">{{ order.item_name }}</p>
+          <template v-for="group in groupedOrders" :key="group.key">
+            <!-- Work center group header -->
+            <div
+              class="flex h-8 items-center border-b border-gray-200 bg-gray-100 px-3 cursor-pointer select-none"
+              @click="toggleGroup(group.key)"
+            >
+              <svg class="mr-1.5 h-3 w-3 text-gray-500 transition-transform" :class="{ 'rotate-90': !collapsedGroups[group.key] }" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+              </svg>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-gray-600">{{ group.name }}</span>
+              <span class="ml-auto text-[10px] text-gray-400">{{ group.orders.length }}</span>
             </div>
-            <span class="ml-1 text-[10px] text-gray-400">{{ order.order_number }}</span>
-          </div>
+            <!-- Orders in group -->
+            <template v-if="!collapsedGroups[group.key]">
+              <div
+                v-for="order in group.orders"
+                :key="order.id"
+                class="flex h-10 items-center border-b border-gray-100 px-4 transition hover:bg-gray-50 cursor-pointer"
+                @click="$router.push(`/admin/manufacturing/orders/${order.id}`)"
+              >
+                <span
+                  class="mr-2 inline-block h-2 w-2 flex-shrink-0 rounded-full"
+                  :class="statusDotClass(order.status)"
+                ></span>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-xs font-medium text-gray-900">{{ order.item_name }}</p>
+                </div>
+                <span class="ml-1 text-[10px] text-gray-400">{{ order.order_number }}</span>
+              </div>
+            </template>
+          </template>
 
           <!-- Empty state -->
           <div v-if="orders.length === 0" class="px-4 py-8 text-center">
@@ -137,46 +153,53 @@
               :style="{ left: todayOffset + 'px' }"
             ></div>
 
-            <!-- Order bars -->
-            <div
-              v-for="order in orders"
-              :key="'bar-' + order.id"
-              class="relative h-10 border-b border-gray-50"
-            >
-              <!-- Dependency indicator -->
-              <div
-                v-if="order.depends_on && order.depends_on.length > 0"
-                class="absolute top-2 z-30 flex h-3 w-3 items-center justify-center"
-                :style="{ left: (barLeft(order) - 14) + 'px' }"
-                :title="t('manufacturing.blocked_by') + ': ' + order.depends_on.map(id => orders.find(o => o.id === id)?.order_number || id).join(', ')"
-              >
-                <svg class="h-3 w-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 005.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 01-2.828-2.828l3-3z"/>
-                </svg>
-              </div>
-
-              <div
-                class="absolute top-1.5 z-20 flex h-7 cursor-grab items-center rounded-md px-2 text-xs font-medium shadow-sm transition-shadow hover:shadow-md"
-                :class="barClass(order)"
-                :style="barStyle(order)"
-                @mousedown="startDrag($event, order)"
-                @touchstart.passive="startDrag($event, order)"
-                :title="`${order.order_number}: ${order.item_name} (${order.planned_quantity})`"
-              >
-                <span class="truncate">{{ order.item_name }}</span>
-                <span v-if="barDays(order) > 2" class="ml-1 opacity-70">{{ order.planned_quantity }}</span>
-
-                <!-- Resize handle (right edge) -->
+            <!-- Grouped order bars -->
+            <template v-for="group in groupedOrders" :key="'grp-' + group.key">
+              <!-- Group header row -->
+              <div class="relative h-8 border-b border-gray-200 bg-gray-100"></div>
+              <!-- Order bars -->
+              <template v-if="!collapsedGroups[group.key]">
                 <div
-                  class="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize"
-                  @mousedown.stop="startResize($event, order)"
-                  @touchstart.stop.passive="startResize($event, order)"
-                ></div>
-              </div>
-            </div>
+                  v-for="order in group.orders"
+                  :key="'bar-' + order.id"
+                  class="relative h-10 border-b border-gray-50"
+                >
+                  <!-- Dependency indicator -->
+                  <div
+                    v-if="order.depends_on && order.depends_on.length > 0"
+                    class="absolute top-2 z-30 flex h-3 w-3 items-center justify-center"
+                    :style="{ left: (barLeft(order) - 14) + 'px' }"
+                    :title="t('manufacturing.blocked_by') + ': ' + order.depends_on.map(id => flatOrders.find(o => o.id === id)?.order_number || id).join(', ')"
+                  >
+                    <svg class="h-3 w-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 005.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 01-2.828-2.828l3-3z"/>
+                    </svg>
+                  </div>
+
+                  <div
+                    class="absolute top-1.5 z-20 flex h-7 cursor-grab items-center rounded-md px-2 text-xs font-medium shadow-sm transition-shadow hover:shadow-md"
+                    :class="barClass(order)"
+                    :style="barStyle(order)"
+                    @mousedown="startDrag($event, order)"
+                    @touchstart.passive="startDrag($event, order)"
+                    :title="`${order.order_number}: ${order.item_name} (${order.planned_quantity})`"
+                  >
+                    <span class="truncate">{{ order.item_name }}</span>
+                    <span v-if="barDays(order) > 2" class="ml-1 opacity-70">{{ order.planned_quantity }}</span>
+
+                    <!-- Resize handle (right edge) -->
+                    <div
+                      class="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize"
+                      @mousedown.stop="startResize($event, order)"
+                      @touchstart.stop.passive="startResize($event, order)"
+                    ></div>
+                  </div>
+                </div>
+              </template>
+            </template>
 
             <!-- Dependency arrows (SVG overlay) -->
-            <svg v-if="dependencyLines.length > 0" class="absolute inset-0 z-10 pointer-events-none" :style="{ width: timelineWidth + 'px', height: (orders.length * 40) + 'px' }">
+            <svg v-if="dependencyLines.length > 0" class="absolute inset-0 z-10 pointer-events-none" :style="{ width: timelineWidth + 'px', height: totalRowHeight + 'px' }">
               <defs>
                 <marker id="dep-arrow" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
                   <path d="M0,0 L6,2 L0,4" fill="#f97316" />
@@ -219,7 +242,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // ===== State =====
 const loading = ref(true)
@@ -231,6 +254,7 @@ const autoScheduling = ref(false)
 const timelineHeaderRef = ref(null)
 const timelineBodyRef = ref(null)
 const sidebarRef = ref(null)
+const collapsedGroups = ref({})
 
 // Zoom levels
 const zoomLevels = [
@@ -273,21 +297,69 @@ const totalDays = computed(() => {
 
 const timelineWidth = computed(() => totalDays.value * dayWidth.value)
 
+// Group orders by work center
+const groupedOrders = computed(() => {
+  const groups = {}
+  const unassigned = { key: '__none', name: t('manufacturing.gantt_unassigned'), orders: [] }
+
+  for (const order of orders.value) {
+    if (order.work_center_id && order.work_center) {
+      const key = 'wc_' + order.work_center_id
+      if (!groups[key]) {
+        groups[key] = { key, name: order.work_center, orders: [] }
+      }
+      groups[key].orders.push(order)
+    } else {
+      unassigned.orders.push(order)
+    }
+  }
+
+  const result = Object.values(groups).sort((a, b) => a.name.localeCompare(b.name))
+  if (unassigned.orders.length > 0) {
+    result.push(unassigned)
+  }
+  return result
+})
+
+// Flat list of visible orders (respecting collapsed groups)
+const flatOrders = computed(() => {
+  const flat = []
+  for (const group of groupedOrders.value) {
+    if (!collapsedGroups.value[group.key]) {
+      flat.push(...group.orders)
+    }
+  }
+  return flat
+})
+
+// Total pixel height for SVG overlay
+const totalRowHeight = computed(() => {
+  let h = 0
+  for (const group of groupedOrders.value) {
+    h += 32 // group header
+    if (!collapsedGroups.value[group.key]) {
+      h += group.orders.length * 40
+    }
+  }
+  return h
+})
+
+function toggleGroup(key) {
+  collapsedGroups.value[key] = !collapsedGroups.value[key]
+}
+
 const visibleDays = computed(() => {
   const days = []
-  const shortDays = [
-    t('general.sun') || 'Sun',
-    t('general.mon') || 'Mon',
-    t('general.tue') || 'Tue',
-    t('general.wed') || 'Wed',
-    t('general.thu') || 'Thu',
-    t('general.fri') || 'Fri',
-    t('general.sat') || 'Sat',
-  ]
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ]
+  const mkDays = ['Нед', 'Пон', 'Вто', 'Сре', 'Чет', 'Пет', 'Саб']
+  const enDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const sqDays = ['Die', 'Hën', 'Mar', 'Mër', 'Enj', 'Pre', 'Sht']
+  const trDays = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt']
+  const dayMap = { mk: mkDays, en: enDays, sq: sqDays, tr: trDays }
+  const shortDays = dayMap[locale.value] || mkDays
+  const mkMonths = ['Јан', 'Фев', 'Мар', 'Апр', 'Мај', 'Јун', 'Јул', 'Авг', 'Сеп', 'Окт', 'Ное', 'Дек']
+  const enMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const monthMap = { mk: mkMonths, en: enMonths, sq: enMonths, tr: enMonths }
+  const months = monthMap[locale.value] || mkMonths
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -347,25 +419,34 @@ function barClass(order) {
 }
 
 // Dependency lines: connect right edge of dependency to left edge of dependent
+// Accounts for grouped rows (group headers = 32px, order rows = 40px)
 const dependencyLines = computed(() => {
   const lines = []
-  const orderIndex = {}
-  orders.value.forEach((o, i) => { orderIndex[o.id] = i })
+  // Build position map for visible orders
+  const posMap = {}
+  let y = 0
+  for (const group of groupedOrders.value) {
+    y += 32 // group header
+    if (collapsedGroups.value[group.key]) continue
+    for (const order of group.orders) {
+      posMap[order.id] = y + 20 // center of 40px row
+      y += 40
+    }
+  }
 
-  for (const order of orders.value) {
+  for (const order of flatOrders.value) {
     if (!order.depends_on || order.depends_on.length === 0) continue
-    const toIdx = orderIndex[order.id]
-    if (toIdx === undefined) continue
+    const toY = posMap[order.id]
+    if (toY === undefined) continue
     const toX = barLeft(order)
-    const toY = toIdx * 40 + 20
 
     for (const depId of order.depends_on) {
-      const fromIdx = orderIndex[depId]
-      if (fromIdx === undefined) continue
-      const dep = orders.value[fromIdx]
+      const fromY = posMap[depId]
+      if (fromY === undefined) continue
+      const dep = flatOrders.value.find(o => o.id === depId) || orders.value.find(o => o.id === depId)
+      if (!dep) continue
       const fromDuration = Math.max(1, daysBetween(dep.start, dep.end))
       const fromX = barLeft(dep) + fromDuration * dayWidth.value - 4
-      const fromY = fromIdx * 40 + 20
 
       lines.push({ x1: fromX, y1: fromY, x2: toX, y2: toY })
     }

@@ -237,6 +237,15 @@ if (InstallUtils::isDbCreated()) {
         ->withoutOverlapping()
         ->name('portfolio-recalculate');
 
+    // Manufacturing alerts — daily at 07:00 Skopje
+    // Overdue orders, low stock on BOM materials, QC pending disposition
+    Schedule::command('manufacturing:notify')
+        ->dailyAt('07:00')
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->name('manufacturing-notify');
+
     // Fiscal fraud detection — daily checks at 6:30 AM Skopje
     // Checks: missing Z-reports, cash discrepancies, receipt gaps
     Schedule::command('fiscal:fraud-check')

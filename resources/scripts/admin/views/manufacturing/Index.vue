@@ -43,6 +43,22 @@
           </BaseButton>
         </router-link>
 
+        <router-link to="/admin/manufacturing/tv" target="_blank">
+          <BaseButton variant="primary-outline">
+            <template #left="slotProps">
+              <TvIcon :class="slotProps.class" />
+            </template>
+            {{ t('manufacturing.tv_mode') }}
+          </BaseButton>
+        </router-link>
+
+        <BaseButton variant="primary-outline" @click="showImportModal = true">
+          <template #left="slotProps">
+            <ArrowUpTrayIcon :class="slotProps.class" />
+          </template>
+          {{ t('manufacturing.import_pantheon') }}
+        </BaseButton>
+
         <router-link to="/admin/manufacturing/work-centers">
           <BaseButton variant="primary-outline">
             <template #left="slotProps">
@@ -748,6 +764,77 @@
       </div>
 
     </template>
+
+    <!-- PANTHEON Import Modal -->
+    <teleport to="body">
+      <div v-if="showImportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="mx-4 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+          <h3 class="text-lg font-medium text-gray-900">{{ t('manufacturing.import_pantheon') }}</h3>
+          <p class="mt-1 text-sm text-gray-500">{{ t('manufacturing.import_desc') }}</p>
+
+          <div class="mt-4 space-y-4">
+            <div class="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center">
+              <input
+                ref="importFileInput"
+                type="file"
+                accept=".csv,.txt,.xml"
+                @change="onImportFileChange"
+                class="hidden"
+              />
+              <button
+                @click="$refs.importFileInput.click()"
+                class="text-sm font-medium text-primary-600 hover:text-primary-700"
+              >
+                {{ importFile ? importFile.name : t('manufacturing.import_choose_file') }}
+              </button>
+              <p class="mt-1 text-xs text-gray-400">CSV / XML (PANTHEON Sestavnice)</p>
+            </div>
+
+            <!-- Preview results -->
+            <div v-if="importPreview" class="rounded-lg bg-gray-50 p-4">
+              <p class="text-sm font-medium text-gray-900">
+                {{ t('manufacturing.import_preview_count', { boms: importPreview.total_boms, materials: importPreview.total_materials }) }}
+              </p>
+              <div class="mt-2 max-h-48 overflow-y-auto space-y-1">
+                <div v-for="bom in importPreview.boms" :key="bom.product_name" class="flex items-center justify-between text-xs">
+                  <span :class="bom.product_matched ? 'text-green-700' : 'text-orange-600'">
+                    {{ bom.product_matched ? '✓' : '●' }} {{ bom.product_name }}
+                  </span>
+                  <span class="text-gray-500">{{ bom.matched_count }}/{{ bom.materials.length }} {{ t('manufacturing.import_matched') }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Import result -->
+            <div v-if="importResult" class="rounded-lg bg-green-50 p-4">
+              <p class="text-sm font-medium text-green-800">{{ importResult }}</p>
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-end space-x-3">
+            <BaseButton variant="primary-outline" @click="closeImportModal">
+              {{ $t('general.cancel') }}
+            </BaseButton>
+            <BaseButton
+              v-if="importFile && !importPreview"
+              variant="primary-outline"
+              :loading="importLoading"
+              @click="previewImport"
+            >
+              {{ t('manufacturing.import_preview') }}
+            </BaseButton>
+            <BaseButton
+              v-if="importPreview"
+              variant="primary"
+              :loading="importLoading"
+              @click="executeImport"
+            >
+              {{ t('manufacturing.import_execute') }}
+            </BaseButton>
+          </div>
+        </div>
+      </div>
+    </teleport>
   </BasePage>
 </template>
 
@@ -791,6 +878,8 @@ import {
   ArrowTrendingUpIcon,
   InformationCircleIcon,
   CalendarDaysIcon,
+  TvIcon,
+  ArrowUpTrayIcon,
 } from '@heroicons/vue/24/outline'
 
 // Register Chart.js components
@@ -801,6 +890,64 @@ ChartJS.register(
 
 const { t } = useI18n()
 const companyStore = useCompanyStore()
+
+// ===== Import state =====
+const showImportModal = ref(false)
+const importFile = ref(null)
+const importPreview = ref(null)
+const importResult = ref(null)
+const importLoading = ref(false)
+
+function onImportFileChange(e) {
+  importFile.value = e.target.files[0] || null
+  importPreview.value = null
+  importResult.value = null
+}
+
+async function previewImport() {
+  if (!importFile.value) return
+  importLoading.value = true
+  try {
+    const form = new FormData()
+    form.append('file', importFile.value)
+    const res = await window.axios.post('/manufacturing/import/preview', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    importPreview.value = res.data?.data || null
+  } catch (err) {
+    window.$utils?.showNotification?.({ type: 'error', message: err.response?.data?.message || 'Preview failed' })
+  } finally {
+    importLoading.value = false
+  }
+}
+
+async function executeImport() {
+  if (!importFile.value) return
+  importLoading.value = true
+  try {
+    const form = new FormData()
+    form.append('file', importFile.value)
+    form.append('create_missing_items', '1')
+    const res = await window.axios.post('/manufacturing/import', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    importResult.value = res.data?.message || 'Import complete'
+    importPreview.value = null
+    // Refresh dashboard
+    fetchDashboard()
+  } catch (err) {
+    window.$utils?.showNotification?.({ type: 'error', message: err.response?.data?.message || 'Import failed' })
+  } finally {
+    importLoading.value = false
+  }
+}
+
+function closeImportModal() {
+  showImportModal.value = false
+  importFile.value = null
+  importPreview.value = null
+  importResult.value = null
+}
 
 // ===== Dashboard data =====
 const isLoading = ref(true)

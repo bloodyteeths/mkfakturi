@@ -133,9 +133,9 @@
             ></div>
           </div>
           <div class="mt-1.5 flex items-center justify-between text-xs text-gray-500">
-            <span>{{ order.actual_quantity || 0 }} / {{ order.planned_quantity }} {{ t('manufacturing.unit') }}</span>
+            <span>{{ fmtQty(order.actual_quantity || 0) }} / {{ fmtQty(order.planned_quantity) }} {{ t('manufacturing.unit') }}</span>
             <span v-if="order.is_overdue" class="text-red-600 font-medium">{{ t('manufacturing.gantt_overdue') }}</span>
-            <span v-else-if="order.expected_completion">{{ t('manufacturing.shop_floor_due') }} {{ order.expected_completion }}</span>
+            <span v-else-if="order.expected_completion">{{ t('manufacturing.shop_floor_due') }} {{ fmtDate(order.expected_completion) }}</span>
           </div>
         </div>
 
@@ -298,8 +298,21 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const notificationStore = useNotificationStore()
+
+const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
+
+function fmtDate(dateStr) {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  return d.toLocaleDateString(localeMap[locale.value] || 'mk-MK', { year: 'numeric', month: '2-digit', day: '2-digit' })
+}
+
+function fmtQty(val) {
+  const n = parseFloat(val) || 0
+  return n % 1 === 0 ? n.toFixed(0) : n.toFixed(2).replace(/\.?0+$/, '')
+}
 
 const loading = ref(true)
 const orders = ref([])

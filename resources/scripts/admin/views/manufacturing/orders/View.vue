@@ -34,6 +34,14 @@
         <BaseButton
           v-if="order"
           variant="primary-outline"
+          @click="duplicateOrder"
+          :loading="isDuplicating"
+        >
+          {{ t('manufacturing.duplicate_order') }}
+        </BaseButton>
+        <BaseButton
+          v-if="order"
+          variant="primary-outline"
           @click="downloadPdf('order')"
         >
           {{ t('manufacturing.print_order') }}
@@ -473,6 +481,7 @@ const showCompleteModal = ref(false)
 const completeQty = ref('')
 
 // QC state
+const isDuplicating = ref(false)
 const showQcModal = ref(false)
 const qcChecks = ref([])
 const qcForm = ref({
@@ -579,6 +588,25 @@ async function cancelOrder() {
     })
   } finally {
     isActing.value = false
+  }
+}
+
+async function duplicateOrder() {
+  isDuplicating.value = true
+  try {
+    const res = await window.axios.post(`/manufacturing/orders/${route.params.id}/duplicate`)
+    const newId = res.data?.data?.id
+    notificationStore.showNotification({ type: 'success', message: t('manufacturing.duplicated_success') })
+    if (newId) {
+      router.push(`/admin/manufacturing/orders/${newId}`)
+    }
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('manufacturing.error_loading'),
+    })
+  } finally {
+    isDuplicating.value = false
   }
 }
 

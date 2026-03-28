@@ -538,7 +538,55 @@ class ProductionOrderController extends Controller
         return false;
     }
 
-    // CLAUDE-CHECKPOINT: Added disposition, barcode scan, dependencies, auto-schedule
+    /**
+     * Duplicate a production order — creates a new draft from the same BOM.
+     */
+    public function duplicate(Request $request, int $id): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $order = ProductionOrder::where('company_id', $companyId)
+            ->with('bom')
+            ->findOrFail($id);
+
+        if (! $order->bom) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot duplicate: BOM not found.',
+            ], 422);
+        }
+
+        try {
+            $newOrder = $this->service->createProductionOrder(
+                $order->bom,
+                (float) $order->planned_quantity,
+                [
+                    'order_date' => now()->format('Y-m-d'),
+                    'expected_completion_date' => $order->expected_completion_date
+                        ? now()->addDays(
+                            $order->order_date && $order->expected_completion_date
+                                ? $order->order_date->diffInDays($order->expected_completion_date)
+                                : 7
+                        )->format('Y-m-d')
+                        : null,
+                    'output_warehouse_id' => $order->output_warehouse_id,
+                    'work_center_id' => $order->work_center_id,
+                    'notes' => $order->notes,
+                ]
+            );
+
+            return (new ProductionOrderResource($newOrder))
+                ->additional(['success' => true, 'message' => 'Order duplicated as draft'])
+                ->response()
+                ->setStatusCode(201);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    // CLAUDE-CHECKPOINT: Added duplicate, notifications
 
     // ====================================================================
     // Child Resource Endpoints

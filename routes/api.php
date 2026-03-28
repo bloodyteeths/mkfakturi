@@ -1049,6 +1049,10 @@ Route::prefix('/v1')->group(function () {
                 // QC disposition (rework/scrap)
                 Route::post('/orders/{order}/qc-checks/{check}/dispose', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'disposeQcCheck']);
 
+                // PANTHEON import
+                Route::post('/import/preview', [\Modules\Mk\Http\Controllers\Manufacturing\PantheonImportController::class, 'preview']);
+                Route::post('/import', [\Modules\Mk\Http\Controllers\Manufacturing\PantheonImportController::class, 'import']);
+
                 // Reports & PDFs
                 Route::get('/reports/qc-metrics', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'qcMetrics']);
                 Route::get('/reports/cost-analysis', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'costAnalysis']);
@@ -1504,6 +1508,18 @@ Route::prefix('/v1')->group(function () {
 
                 // Dashboard Summary
                 Route::get('/dashboard-summary', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'dashboardSummary']);
+
+                // WAC Audit & Correction
+                Route::prefix('wac-audit')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'index']);
+                    Route::post('/run', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'run']);
+                    Route::get('/{id}', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'show']);
+                    Route::post('/{id}/analyze', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'analyze']);
+                    Route::get('/{id}/proposal', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'proposal']);
+                    Route::post('/{id}/proposal/generate', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'generateProposal']);
+                    Route::post('/proposals/{proposal}/approve', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'approveProposal']);
+                    Route::post('/proposals/{proposal}/reject', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'rejectProposal']);
+                });
             });
         });
 

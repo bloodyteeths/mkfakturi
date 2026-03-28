@@ -129,6 +129,8 @@ const StockWarehouseInventory = () => import('@/scripts/admin/views/stock/Wareho
 const StockInventoryValuation = () => import('@/scripts/admin/views/stock/InventoryValuation.vue')
 const StockLowStock = () => import('@/scripts/admin/views/stock/LowStock.vue')
 const StockAdjustments = () => import('@/scripts/admin/views/stock/Adjustments.vue')
+const WacAudit = () => import('@/scripts/admin/views/stock/WacAudit.vue')
+const WacAuditDetail = () => import('@/scripts/admin/views/stock/WacAuditDetail.vue')
 
 // Warehouses
 const WarehousesIndex = () => import('@/scripts/admin/views/stock/warehouses/Index.vue')
@@ -482,6 +484,20 @@ export default [
         name: 'stock.adjustments',
         meta: { ability: abilities.VIEW_ITEM },
         component: StockAdjustments,
+      },
+
+      // WAC Audit
+      {
+        path: 'stock/wac-audit',
+        name: 'stock.wac-audit',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: WacAudit,
+      },
+      {
+        path: 'stock/wac-audit/:id',
+        name: 'stock.wac-audit.detail',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: WacAuditDetail,
       },
 
       // Warehouses
@@ -1452,6 +1468,14 @@ export default [
         name: 'manufacturing.gantt',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
         component: () => import('@/scripts/admin/views/manufacturing/Gantt.vue'),
+      },
+
+      // TV Dashboard (factory floor display)
+      {
+        path: 'manufacturing/tv',
+        name: 'manufacturing.tv',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/manufacturing/TvDashboard.vue'),
       },
 
       // Work Centers
