@@ -256,6 +256,50 @@ export default {
       capacity_hours: 'Капацитет (часови/ден)',
       hourly_rate: 'Стапка по час',
       overhead_rate: 'Општи трошоци по час',
+
+      // Smart Reorder
+      dash_reorder: 'Нарачај недостасувачки материјали',
+      dash_reorder_desc: 'Креира нацрт нарачки за набавка групирани по добавувач',
+      dash_reorder_success: 'Креирани {count} нарачки за набавка',
+      dash_reorder_no_supplier: 'Ниеден артикл нема поставен претпочитан добавувач',
+
+      // Shop Floor
+      shop_floor_title: 'Работилница',
+      shop_floor_progress: 'Прогрес',
+      shop_floor_due: 'Рок:',
+      shop_floor_record_output: 'Евидентирај излез',
+      shop_floor_empty: 'Нема работни налози за прикажување',
+
+      // Quality Control
+      qc_title: 'Контрола на квалитет',
+      qc_add_check: 'Додади проверка',
+      qc_check_date: 'Датум на проверка',
+      qc_result: 'Резултат',
+      qc_result_pass: 'Поминува',
+      qc_result_fail: 'Не поминува',
+      qc_result_conditional: 'Условно',
+      qc_qty_inspected: 'Проверено',
+      qc_passed: 'поминати',
+      qc_rejected: 'одбиени',
+      qc_checklist: 'Листа за проверка',
+      qc_add_criterion: 'Додади критериум',
+      qc_criterion_placeholder: 'пр. Визуелна инспекција, Димензии...',
+      qc_defects: 'Дефекти',
+      qc_add_defect: 'Додади дефект',
+      qc_defect_type: 'Тип на дефект',
+      qc_submit: 'Зачувај проверка',
+      qc_saved: 'Проверката е зачувана',
+      qc_no_checks: 'Нема евидентирани проверки на квалитет',
+
+      // Gantt
+      gantt_title: 'Распоред на производство',
+      gantt_today: 'Денес',
+      gantt_orders: 'Работни налози',
+      gantt_overdue: 'Задоцнет',
+      gantt_drag_hint: 'Повлечи ги лентите за промена на распоредот',
+      gantt_zoom_day: 'Ден',
+      gantt_zoom_week: 'Недела',
+      gantt_zoom_month: 'Месец',
     },
   },
   en: {
@@ -502,6 +546,50 @@ export default {
       capacity_hours: 'Capacity (hours/day)',
       hourly_rate: 'Hourly Rate',
       overhead_rate: 'Overhead Rate per Hour',
+
+      // Smart Reorder
+      dash_reorder: 'Reorder shortage materials',
+      dash_reorder_desc: 'Creates draft purchase orders grouped by supplier',
+      dash_reorder_success: '{count} purchase orders created',
+      dash_reorder_no_supplier: 'No items have a preferred supplier set',
+
+      // Shop Floor
+      shop_floor_title: 'Shop Floor',
+      shop_floor_progress: 'Progress',
+      shop_floor_due: 'Due:',
+      shop_floor_record_output: 'Record Output',
+      shop_floor_empty: 'No production orders to display',
+
+      // Quality Control
+      qc_title: 'Quality Control',
+      qc_add_check: 'Add Inspection',
+      qc_check_date: 'Check Date',
+      qc_result: 'Result',
+      qc_result_pass: 'Pass',
+      qc_result_fail: 'Fail',
+      qc_result_conditional: 'Conditional',
+      qc_qty_inspected: 'Inspected',
+      qc_passed: 'passed',
+      qc_rejected: 'rejected',
+      qc_checklist: 'Checklist',
+      qc_add_criterion: 'Add Criterion',
+      qc_criterion_placeholder: 'e.g. Visual inspection, Dimensions...',
+      qc_defects: 'Defects',
+      qc_add_defect: 'Add Defect',
+      qc_defect_type: 'Defect Type',
+      qc_submit: 'Save Inspection',
+      qc_saved: 'Inspection saved',
+      qc_no_checks: 'No quality checks recorded',
+
+      // Gantt
+      gantt_title: 'Production Schedule',
+      gantt_today: 'Today',
+      gantt_orders: 'Production Orders',
+      gantt_overdue: 'Overdue',
+      gantt_drag_hint: 'Drag bars to reschedule orders',
+      gantt_zoom_day: 'Day',
+      gantt_zoom_week: 'Week',
+      gantt_zoom_month: 'Month',
     },
   },
   sq: {
@@ -748,6 +836,50 @@ export default {
       capacity_hours: 'Kapaciteti (orë/ditë)',
       hourly_rate: 'Tarifa për orë',
       overhead_rate: 'Shpenzimet e përgjithshme për orë',
+
+      // Smart Reorder
+      dash_reorder: 'Porosit materialet që mungojnë',
+      dash_reorder_desc: 'Krijon porosi blerje draft të grupuara sipas furnitorit',
+      dash_reorder_success: '{count} porosi blerje u krijuan',
+      dash_reorder_no_supplier: 'Asnjë artikull nuk ka furnitor të preferuar',
+
+      // Shop Floor
+      shop_floor_title: 'Punëtoria',
+      shop_floor_progress: 'Progresi',
+      shop_floor_due: 'Afati:',
+      shop_floor_record_output: 'Regjistro daljen',
+      shop_floor_empty: 'Nuk ka urdhëra prodhimi për shfaqje',
+
+      // Quality Control
+      qc_title: 'Kontrolli i cilësisë',
+      qc_add_check: 'Shto inspektim',
+      qc_check_date: 'Data e kontrollit',
+      qc_result: 'Rezultati',
+      qc_result_pass: 'Kalon',
+      qc_result_fail: 'Nuk kalon',
+      qc_result_conditional: 'Me kusht',
+      qc_qty_inspected: 'Inspektuar',
+      qc_passed: 'kaluar',
+      qc_rejected: 'refuzuar',
+      qc_checklist: 'Lista e kontrollit',
+      qc_add_criterion: 'Shto kriter',
+      qc_criterion_placeholder: 'p.sh. Inspektim vizual, Dimensionet...',
+      qc_defects: 'Defektet',
+      qc_add_defect: 'Shto defekt',
+      qc_defect_type: 'Lloji i defektit',
+      qc_submit: 'Ruaj inspektimin',
+      qc_saved: 'Inspektimi u ruajt',
+      qc_no_checks: 'Nuk ka kontrolle cilësie të regjistruara',
+
+      // Gantt
+      gantt_title: 'Orari i prodhimit',
+      gantt_today: 'Sot',
+      gantt_orders: 'Urdhërat e prodhimit',
+      gantt_overdue: 'I vonuar',
+      gantt_drag_hint: 'Tërhiqni shiritat për të riplanifikuar urdhërat',
+      gantt_zoom_day: 'Ditë',
+      gantt_zoom_week: 'Javë',
+      gantt_zoom_month: 'Muaj',
     },
   },
   tr: {
@@ -994,6 +1126,50 @@ export default {
       capacity_hours: 'Kapasite (saat/gün)',
       hourly_rate: 'Saatlik Ücret',
       overhead_rate: 'Saat Başı Genel Gider',
+
+      // Smart Reorder
+      dash_reorder: 'Eksik malzemeleri sipariş et',
+      dash_reorder_desc: 'Tedarikçiye göre gruplandırılmış taslak satın alma siparişleri oluşturur',
+      dash_reorder_success: '{count} satın alma siparişi oluşturuldu',
+      dash_reorder_no_supplier: 'Hiçbir ürünün tercih edilen tedarikçisi yok',
+
+      // Shop Floor
+      shop_floor_title: 'Atölye',
+      shop_floor_progress: 'İlerleme',
+      shop_floor_due: 'Son tarih:',
+      shop_floor_record_output: 'Çıktı Kaydet',
+      shop_floor_empty: 'Gösterilecek üretim emri yok',
+
+      // Quality Control
+      qc_title: 'Kalite Kontrol',
+      qc_add_check: 'Denetim Ekle',
+      qc_check_date: 'Kontrol Tarihi',
+      qc_result: 'Sonuç',
+      qc_result_pass: 'Geçti',
+      qc_result_fail: 'Kaldı',
+      qc_result_conditional: 'Koşullu',
+      qc_qty_inspected: 'Denetlenen',
+      qc_passed: 'geçen',
+      qc_rejected: 'reddedilen',
+      qc_checklist: 'Kontrol Listesi',
+      qc_add_criterion: 'Kriter Ekle',
+      qc_criterion_placeholder: 'ör. Görsel inceleme, Boyutlar...',
+      qc_defects: 'Kusurlar',
+      qc_add_defect: 'Kusur Ekle',
+      qc_defect_type: 'Kusur Türü',
+      qc_submit: 'Denetimi Kaydet',
+      qc_saved: 'Denetim kaydedildi',
+      qc_no_checks: 'Kayıtlı kalite kontrolü yok',
+
+      // Gantt
+      gantt_title: 'Üretim Takvimi',
+      gantt_today: 'Bugün',
+      gantt_orders: 'Üretim Emirleri',
+      gantt_overdue: 'Gecikmiş',
+      gantt_drag_hint: 'Çubukları sürükleyerek emirleri yeniden planlayın',
+      gantt_zoom_day: 'Gün',
+      gantt_zoom_week: 'Hafta',
+      gantt_zoom_month: 'Ay',
     },
   },
 }

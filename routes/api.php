@@ -994,6 +994,18 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/orders/{order}/labor', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'addLabor']);
                 Route::post('/orders/{order}/overhead', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'addOverhead']);
 
+                // Quality control
+                Route::get('/orders/{order}/qc-checks', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'qcChecks']);
+                Route::post('/orders/{order}/qc-checks', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'addQcCheck']);
+
+                // Smart Reordering (MRP-lite)
+                Route::post('/smart-reorder', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'smartReorder']);
+                Route::get('/net-requirements', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'netRequirements']);
+
+                // Gantt scheduling
+                Route::get('/gantt', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'ganttData']);
+                Route::patch('/orders/{order}/reschedule', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'reschedule']);
+
                 // Reports & PDFs
                 Route::get('/reports/cost-analysis', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'costAnalysis']);
                 Route::get('/reports/variance', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'varianceReport']);

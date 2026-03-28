@@ -34,6 +34,15 @@
           </div>
         </div>
 
+        <router-link to="/admin/manufacturing/shop-floor">
+          <BaseButton variant="primary-outline">
+            <template #left="slotProps">
+              <PlayIcon :class="slotProps.class" />
+            </template>
+            {{ t('manufacturing.shop_floor_title') }}
+          </BaseButton>
+        </router-link>
+
         <router-link to="/admin/manufacturing/work-centers">
           <BaseButton variant="primary-outline">
             <template #left="slotProps">
@@ -333,7 +342,20 @@
               </div>
             </div>
           </div>
-          <div v-else class="px-5 py-8 text-center">
+          <!-- Reorder button for shortages -->
+          <div v-if="hasShortages" class="border-t border-gray-100 px-5 py-3">
+            <button
+              @click.stop="reorderShortages"
+              :disabled="reordering"
+              class="flex w-full items-center justify-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ArrowPathIcon v-if="reordering" class="mr-2 h-4 w-4 animate-spin" />
+              <BanknotesIcon v-else class="mr-2 h-4 w-4" />
+              {{ t('manufacturing.dash_reorder') }}
+            </button>
+            <p class="mt-1 text-center text-xs text-gray-500">{{ t('manufacturing.dash_reorder_desc') }}</p>
+          </div>
+          <div v-else-if="!data.material_availability || data.material_availability.length === 0" class="px-5 py-8 text-center">
             <ClipboardDocumentListIcon class="mx-auto h-8 w-8 text-gray-300" />
             <p class="mt-2 text-xs text-gray-500">{{ t('manufacturing.empty_boms') }}</p>
           </div>
@@ -343,8 +365,8 @@
         <div class="rounded-lg bg-white shadow">
           <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
             <h3 class="text-base font-semibold text-gray-900">{{ t('manufacturing.dash_timeline') }}</h3>
-            <router-link to="/admin/manufacturing/orders" class="text-sm font-medium text-primary-500 hover:text-primary-600">
-              {{ t('manufacturing.dash_view_all') }}
+            <router-link to="/admin/manufacturing/gantt" class="text-sm font-medium text-primary-500 hover:text-primary-600">
+              {{ t('manufacturing.gantt_title') }} &rarr;
             </router-link>
           </div>
           <div v-if="data.timeline && data.timeline.length > 0" class="p-5">
@@ -747,6 +769,63 @@ const data = ref({
   timeline: [],
   period: { month: '', label: '' },
 })
+
+// ===== Reorder state =====
+const reordering = ref(false)
+
+const hasShortages = computed(() => {
+  return (data.value.material_availability || []).some(
+    b => b.status === 'red' && b.shortages && b.shortages.length > 0
+  )
+})
+
+async function reorderShortages() {
+  if (reordering.value) return
+  reordering.value = true
+  try {
+    // Collect all shortage items across all BOMs
+    const items = []
+    for (const bom of data.value.material_availability || []) {
+      if (bom.shortages) {
+        for (const s of bom.shortages) {
+          if (s.deficit > 0 && s.item_id) {
+            // Avoid duplicates — accumulate by item_id
+            const existing = items.find(i => i.item_id === s.item_id)
+            if (existing) {
+              existing.quantity += s.deficit
+            } else {
+              items.push({ item_id: s.item_id, quantity: s.deficit })
+            }
+          }
+        }
+      }
+    }
+
+    if (items.length === 0) return
+
+    const res = await window.axios.post('/manufacturing/smart-reorder', { items })
+    const created = res.data?.data?.count || 0
+    if (created > 0) {
+      window.$utils?.showNotification?.({
+        type: 'success',
+        message: t('manufacturing.dash_reorder_success', { count: created }),
+      })
+    } else {
+      window.$utils?.showNotification?.({
+        type: 'warning',
+        message: t('manufacturing.dash_reorder_no_supplier'),
+      })
+    }
+  } catch (error) {
+    console.error('Smart reorder failed:', error)
+    window.$utils?.showNotification?.({
+      type: 'error',
+      message: t('manufacturing.error_loading'),
+    })
+  } finally {
+    reordering.value = false
+  }
+}
 
 // ===== AI state =====
 const aiInput = ref('')

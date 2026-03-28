@@ -59,6 +59,20 @@ class ItemsRequest extends FormRequest
                 'integer',
                 'min:0',
             ],
+            'preferred_supplier_id' => [
+                'nullable',
+                'integer',
+            ],
+            'reorder_quantity' => [
+                'nullable',
+                'integer',
+                'min:1',
+            ],
+            'lead_time_days' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
             'category' => [
                 'nullable',
                 'string',

@@ -296,6 +296,59 @@
             </p>
           </BaseInputGroup>
 
+          <!-- Preferred Supplier (for smart reorder) -->
+          <BaseInputGroup
+            v-if="stockEnabled && itemStore.currentItem.track_quantity"
+            :label="$t('items.preferred_supplier')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseMultiselect
+              v-model="itemStore.currentItem.preferred_supplier_id"
+              :content-loading="isFetchingInitialData"
+              label="name"
+              :options="supplierStore.suppliers"
+              value-prop="id"
+              :placeholder="$t('items.preferred_supplier_placeholder')"
+              searchable
+              track-by="name"
+            />
+            <p class="mt-1 text-xs text-gray-400">
+              {{ $t('items.preferred_supplier_hint') }}
+            </p>
+          </BaseInputGroup>
+
+          <!-- Reorder Quantity -->
+          <BaseInputGroup
+            v-if="stockEnabled && itemStore.currentItem.track_quantity"
+            :label="$t('items.reorder_quantity')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseInput
+              v-model="itemStore.currentItem.reorder_quantity"
+              :content-loading="isFetchingInitialData"
+              type="number"
+              step="1"
+              min="1"
+              :placeholder="$t('items.reorder_quantity_placeholder')"
+            />
+          </BaseInputGroup>
+
+          <!-- Lead Time (days) -->
+          <BaseInputGroup
+            v-if="stockEnabled && itemStore.currentItem.track_quantity"
+            :label="$t('items.lead_time_days')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseInput
+              v-model="itemStore.currentItem.lead_time_days"
+              :content-loading="isFetchingInitialData"
+              type="number"
+              step="1"
+              min="0"
+              :placeholder="$t('items.lead_time_days_placeholder')"
+            />
+          </BaseInputGroup>
+
           <!-- Allow Negative Stock (only shows when track_quantity is enabled) -->
           <BaseInputGroup
             v-if="stockEnabled && itemStore.currentItem.track_quantity"
@@ -464,6 +517,7 @@ import { useTaxTypeStore } from '@/scripts/admin/stores/tax-type'
 import { useModalStore } from '@/scripts/stores/modal'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 import { useWarehouseStore } from '@/scripts/admin/stores/warehouse'
+import { useSuppliersStore } from '@/scripts/admin/stores/suppliers'
 import ItemUnitModal from '@/scripts/admin/components/modal-components/ItemUnitModal.vue'
 import ItemCategoryModal from '@/scripts/admin/components/modal-components/ItemCategoryModal.vue'
 import DuplicateWarningModal from '@/scripts/admin/components/modal-components/DuplicateWarningModal.vue'
@@ -473,6 +527,7 @@ import abilities from '@/scripts/admin/stub/abilities'
 const itemStore = useItemStore()
 const globalStore = useGlobalStore()
 const warehouseStore = useWarehouseStore()
+const supplierStore = useSuppliersStore()
 
 // GL account mapping
 const accounts = ref([])
@@ -711,9 +766,10 @@ async function loadData() {
     loadPromises.push(taxTypeStore.fetchTaxTypes({ limit: 'all' }))
   }
 
-  // Load warehouses if stock module is enabled
+  // Load warehouses and suppliers if stock module is enabled
   if (stockEnabled.value) {
     loadPromises.push(warehouseStore.fetchWarehouses({ limit: 'all' }))
+    loadPromises.push(supplierStore.fetchSuppliers({ limit: 'all' }))
   }
 
   await Promise.all(loadPromises)

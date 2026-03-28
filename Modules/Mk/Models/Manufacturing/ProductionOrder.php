@@ -156,6 +156,11 @@ class ProductionOrder extends Model
         return $this->hasMany(CoProductionOutput::class);
     }
 
+    public function qcChecks(): HasMany
+    {
+        return $this->hasMany(QcCheck::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

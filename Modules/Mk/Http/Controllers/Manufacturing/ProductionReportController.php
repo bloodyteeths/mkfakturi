@@ -162,6 +162,7 @@ class ProductionReportController extends Controller
                 if ($currentQty < $neededQty) {
                     $status = 'red';
                     $shortages[] = [
+                        'item_id' => $line->item->id,
                         'item_name' => $line->item->name,
                         'needed' => $neededQty,
                         'available' => $currentQty,
@@ -173,6 +174,7 @@ class ProductionReportController extends Controller
                 elseif ($minQty > 0 && $currentQty <= $minQty && $status !== 'red') {
                     $status = 'yellow';
                     $shortages[] = [
+                        'item_id' => $line->item->id,
                         'item_name' => $line->item->name,
                         'needed' => $neededQty,
                         'available' => $currentQty,
@@ -282,6 +284,178 @@ class ProductionReportController extends Controller
                     'month' => $now->format('Y-m'),
                     'label' => $now->translatedFormat('F Y'),
                 ],
+            ],
+        ]);
+    }
+
+    /**
+     * Smart reorder — create a draft PO from material shortages.
+     *
+     * Accepts an array of items with quantities. Groups by preferred supplier
+     * and creates one draft PO per supplier.
+     */
+    public function smartReorder(Request $request): JsonResponse
+    {
+        $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.item_id' => 'required|integer',
+            'items.*.quantity' => 'required|numeric|min:0.01',
+            'items.*.supplier_id' => 'nullable|integer',
+            'warehouse_id' => 'nullable|integer',
+            'notes' => 'nullable|string',
+        ]);
+
+        $companyId = (int) $request->header('company');
+        $userId = $request->user()?->id;
+        $poService = app(\Modules\Mk\Services\PurchaseOrderService::class);
+
+        // Group items by supplier
+        $bySupplier = [];
+        foreach ($request->items as $entry) {
+            $item = Item::where('company_id', $companyId)->find($entry['item_id']);
+            if (! $item) {
+                continue;
+            }
+
+            $supplierId = $entry['supplier_id']
+                ?? $item->preferred_supplier_id
+                ?? null;
+
+            if (! $supplierId) {
+                continue; // Skip items with no supplier
+            }
+
+            $qty = $item->reorder_quantity && $item->reorder_quantity > $entry['quantity']
+                ? $item->reorder_quantity
+                : (float) $entry['quantity'];
+
+            $bySupplier[$supplierId][] = [
+                'item_id' => $item->id,
+                'name' => $item->name,
+                'quantity' => $qty,
+                'price' => $item->cost ?? 0, // WAC or last cost
+                'tax' => 0,
+            ];
+        }
+
+        if (empty($bySupplier)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No items with assigned suppliers. Set preferred suppliers on items first.',
+            ], 422);
+        }
+
+        $createdPos = [];
+        foreach ($bySupplier as $supplierId => $items) {
+            try {
+                $leadTime = max(...array_map(
+                    fn ($i) => Item::find($i['item_id'])?->lead_time_days ?? 7,
+                    $items
+                ));
+
+                $po = $poService->create($companyId, [
+                    'supplier_id' => $supplierId,
+                    'po_date' => now()->toDateString(),
+                    'expected_delivery_date' => now()->addDays($leadTime)->toDateString(),
+                    'warehouse_id' => $request->warehouse_id,
+                    'notes' => $request->notes ?? 'Auto-generated from manufacturing material shortage',
+                    'items' => $items,
+                ], $userId);
+
+                $createdPos[] = [
+                    'id' => $po->id,
+                    'po_number' => $po->po_number,
+                    'supplier' => $po->supplier?->name,
+                    'total' => $po->total,
+                    'item_count' => count($items),
+                ];
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Smart reorder failed for supplier', [
+                    'supplier_id' => $supplierId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'purchase_orders' => $createdPos,
+                'count' => count($createdPos),
+            ],
+            'message' => count($createdPos) . ' purchase order(s) created as draft.',
+        ]);
+    }
+
+    /**
+     * Net material requirements — calculate what's needed across all pending orders.
+     */
+    public function netRequirements(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $stockService = app(\App\Services\StockService::class);
+
+        // Get all pending (draft + in_progress) orders
+        $pendingOrders = ProductionOrder::where('company_id', $companyId)
+            ->whereIn('status', [ProductionOrder::STATUS_DRAFT, ProductionOrder::STATUS_IN_PROGRESS])
+            ->with(['bom.lines.item:id,name,minimum_quantity,preferred_supplier_id,reorder_quantity'])
+            ->get();
+
+        // Aggregate material needs across all orders
+        $materialNeeds = [];
+        foreach ($pendingOrders as $order) {
+            if (! $order->bom) {
+                continue;
+            }
+            $multiplier = (float) $order->planned_quantity / max(1, (float) $order->bom->output_quantity);
+
+            foreach ($order->bom->lines as $line) {
+                if (! $line->item) {
+                    continue;
+                }
+                $itemId = $line->item->id;
+                $needed = (float) $line->quantity * $multiplier;
+
+                if (! isset($materialNeeds[$itemId])) {
+                    $materialNeeds[$itemId] = [
+                        'item_id' => $itemId,
+                        'item_name' => $line->item->name,
+                        'total_needed' => 0,
+                        'order_count' => 0,
+                        'minimum_quantity' => $line->item->minimum_quantity,
+                        'preferred_supplier_id' => $line->item->preferred_supplier_id,
+                        'reorder_quantity' => $line->item->reorder_quantity,
+                    ];
+                }
+                $materialNeeds[$itemId]['total_needed'] += $needed;
+                $materialNeeds[$itemId]['order_count']++;
+            }
+        }
+
+        // Check stock and calculate net requirements
+        $results = [];
+        foreach ($materialNeeds as $itemId => $need) {
+            $stock = $stockService->getItemStock($companyId, $itemId);
+            $currentQty = $stock['current_quantity'] ?? 0;
+            $netRequired = max(0, $need['total_needed'] - $currentQty);
+            $belowMinimum = $need['minimum_quantity'] && $currentQty < $need['minimum_quantity'];
+
+            $results[] = array_merge($need, [
+                'current_stock' => $currentQty,
+                'net_required' => round($netRequired, 2),
+                'below_minimum' => $belowMinimum,
+                'status' => $netRequired > 0 ? 'shortage' : ($belowMinimum ? 'low' : 'ok'),
+            ]);
+        }
+
+        // Sort: shortages first, then low, then ok
+        usort($results, fn ($a, $b) => ['shortage' => 0, 'low' => 1, 'ok' => 2][$a['status']] <=> ['shortage' => 0, 'low' => 1, 'ok' => 2][$b['status']]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'requirements' => $results,
+                'pending_orders' => $pendingOrders->count(),
             ],
         ]);
     }

@@ -1388,6 +1388,22 @@ export default [
         component: () => import('@/scripts/admin/views/manufacturing/reports/WastageReport.vue'),
       },
 
+      // Shop Floor (mobile operator view)
+      {
+        path: 'manufacturing/shop-floor',
+        name: 'manufacturing.shop-floor',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/manufacturing/ShopFloor.vue'),
+      },
+
+      // Gantt Scheduler
+      {
+        path: 'manufacturing/gantt',
+        name: 'manufacturing.gantt',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/manufacturing/Gantt.vue'),
+      },
+
       // Work Centers
       {
         path: 'manufacturing/work-centers',

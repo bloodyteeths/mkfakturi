@@ -133,6 +133,97 @@ class ProductionOrderController extends Controller
     }
 
     /**
+     * Reschedule a draft or in-progress order (drag-drop from Gantt).
+     */
+    public function reschedule(Request $request, int $id)
+    {
+        $companyId = (int) $request->header('company');
+        $order = ProductionOrder::where('company_id', $companyId)->findOrFail($id);
+
+        if ($order->status === ProductionOrder::STATUS_COMPLETED || $order->status === ProductionOrder::STATUS_CANCELLED) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot reschedule completed or cancelled orders.',
+            ], 422);
+        }
+
+        $request->validate([
+            'order_date' => 'required|date',
+            'expected_completion_date' => 'required|date|after_or_equal:order_date',
+        ]);
+
+        $order->update([
+            'order_date' => $request->order_date,
+            'expected_completion_date' => $request->expected_completion_date,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $order->id,
+                'order_date' => $order->order_date->format('Y-m-d'),
+                'expected_completion_date' => $order->expected_completion_date->format('Y-m-d'),
+            ],
+        ]);
+    }
+
+    /**
+     * Return all schedulable orders for the Gantt view.
+     */
+    public function ganttData(Request $request)
+    {
+        $companyId = (int) $request->header('company');
+
+        $orders = ProductionOrder::where('company_id', $companyId)
+            ->whereIn('status', [
+                ProductionOrder::STATUS_DRAFT,
+                ProductionOrder::STATUS_IN_PROGRESS,
+                ProductionOrder::STATUS_COMPLETED,
+            ])
+            ->with(['outputItem:id,name', 'bom:id,name,code', 'workCenter:id,name'])
+            ->orderBy('order_date')
+            ->get()
+            ->map(fn ($o) => [
+                'id' => $o->id,
+                'order_number' => $o->order_number,
+                'item_name' => $o->outputItem?->name ?? '-',
+                'bom_name' => $o->bom?->name,
+                'bom_code' => $o->bom?->code,
+                'work_center' => $o->workCenter?->name,
+                'work_center_id' => $o->work_center_id,
+                'status' => $o->status,
+                'start' => $o->order_date?->format('Y-m-d'),
+                'end' => $o->expected_completion_date?->format('Y-m-d')
+                    ?? $o->order_date?->copy()->addDays(7)->format('Y-m-d'),
+                'planned_quantity' => (float) $o->planned_quantity,
+                'actual_quantity' => (float) $o->actual_quantity,
+                'total_production_cost' => $o->total_production_cost,
+                'is_overdue' => $o->expected_completion_date
+                    && $o->expected_completion_date->lt(now()),
+                'can_reschedule' => in_array($o->status, [
+                    ProductionOrder::STATUS_DRAFT,
+                    ProductionOrder::STATUS_IN_PROGRESS,
+                ]),
+            ]);
+
+        // Work centers for grouping
+        $workCenters = \Modules\Mk\Models\Manufacturing\WorkCenter::where('company_id', $companyId)
+            ->active()
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'code', 'capacity_hours_per_day']);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'orders' => $orders,
+                'work_centers' => $workCenters,
+            ],
+        ]);
+    }
+
+    // CLAUDE-CHECKPOINT: Added reschedule() and ganttData() for Gantt scheduling
+
+    /**
      * Start production — status → in_progress.
      */
     public function start(Request $request, int $id)
@@ -198,6 +289,74 @@ class ProductionOrderController extends Controller
             ], 422);
         }
     }
+
+    // ====================================================================
+    // Quality Control
+    // ====================================================================
+
+    /**
+     * List QC checks for a production order.
+     */
+    public function qcChecks(Request $request, int $orderId): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $order = ProductionOrder::where('company_id', $companyId)->findOrFail($orderId);
+
+        $checks = $order->qcChecks()
+            ->with('inspector:id,name')
+            ->orderByDesc('check_date')
+            ->get();
+
+        return response()->json(['success' => true, 'data' => $checks]);
+    }
+
+    /**
+     * Record a QC inspection check.
+     */
+    public function addQcCheck(Request $request, int $orderId): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $order = ProductionOrder::where('company_id', $companyId)->findOrFail($orderId);
+
+        if ($order->isCompleted() || $order->isCancelled()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot add QC check to completed or cancelled orders.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'check_date' => 'required|date',
+            'result' => 'required|in:pass,fail,conditional',
+            'quantity_inspected' => 'required|numeric|min:0',
+            'quantity_passed' => 'required|numeric|min:0',
+            'quantity_rejected' => 'required|numeric|min:0',
+            'notes' => 'nullable|string|max:2000',
+            'checklist' => 'nullable|array',
+            'checklist.*.criterion' => 'required_with:checklist|string',
+            'checklist.*.result' => 'required_with:checklist|in:pass,fail,na',
+            'checklist.*.notes' => 'nullable|string',
+            'defects' => 'nullable|array',
+            'defects.*.type' => 'required_with:defects|string',
+            'defects.*.quantity' => 'required_with:defects|numeric|min:0',
+            'defects.*.severity' => 'nullable|in:minor,major,critical',
+            'defects.*.notes' => 'nullable|string',
+        ]);
+
+        $validated['production_order_id'] = $order->id;
+        $validated['company_id'] = $companyId;
+        $validated['inspector_id'] = $request->user()?->id;
+
+        $check = \Modules\Mk\Models\Manufacturing\QcCheck::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'data' => $check->load('inspector:id,name'),
+            'message' => 'QC check recorded successfully.',
+        ], 201);
+    }
+
+    // CLAUDE-CHECKPOINT: Added qcChecks() and addQcCheck() for quality control gates
 
     // ====================================================================
     // Child Resource Endpoints

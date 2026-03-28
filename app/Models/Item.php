@@ -101,6 +101,14 @@ class Item extends Model
     }
 
     /**
+     * Get the preferred supplier for reordering.
+     */
+    public function preferredSupplier(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Supplier::class, 'preferred_supplier_id');
+    }
+
+    /**
      * Get the BOMs where this item is the output product.
      */
     public function boms(): \Illuminate\Database\Eloquent\Relations\HasMany
