@@ -26,6 +26,18 @@
             </div>
           </div>
 
+          <!-- Export CSV -->
+          <BaseButton
+            v-show="activeTab === 'users' && usersStore.totalUsers"
+            variant="primary-outline"
+            @click="usersStore.exportCsv()"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('general.export_csv') }}
+          </BaseButton>
+
           <BaseButton
             v-show="activeTab === 'users' && usersStore.totalUsers"
             variant="primary-outline"
@@ -135,7 +147,7 @@
           />
         </BaseInputGroup>
 
-        <BaseInputGroup class="flex-1 mt-2" :label="$t('users.role')">
+        <BaseInputGroup class="flex-1 mt-2 mr-4" :label="$t('users.role')">
           <BaseMultiselect
             v-model="filters.role"
             :options="roleOptions"
@@ -143,6 +155,17 @@
             value-prop="value"
             :can-deselect="true"
             :placeholder="$t('users.select_role')"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup class="flex-1 mt-2" :label="$t('users.status')">
+          <BaseMultiselect
+            v-model="filters.is_active"
+            :options="statusOptions"
+            label="label"
+            value-prop="value"
+            :can-deselect="true"
+            :placeholder="$t('general.all')"
           />
         </BaseInputGroup>
       </BaseFilterWrapper>
@@ -229,12 +252,20 @@
           </template>
 
           <template #cell-name="{ row }">
-            <router-link
-              :to="{ path: `users/${row.data.id}/edit` }"
-              class="font-medium text-primary-500"
-            >
-              {{ row.data.name }}
-            </router-link>
+            <div class="flex items-center">
+              <router-link
+                :to="{ path: `users/${row.data.id}/edit` }"
+                class="font-medium text-primary-500"
+              >
+                {{ row.data.name }}
+              </router-link>
+              <span
+                v-if="row.data.is_active === false"
+                class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700"
+              >
+                {{ $t('users.inactive') }}
+              </span>
+            </div>
           </template>
 
           <template #cell-phone="{ row }">
@@ -258,6 +289,10 @@
 
           <template #cell-company_names="{ row }">
             <span class="text-sm text-gray-600">{{ row.data.company_names || '-' }}</span>
+          </template>
+
+          <template #cell-last_login_at="{ row }">
+            <span class="text-sm text-gray-500">{{ row.data.formatted_last_login || $t('users.never') }}</span>
           </template>
 
           <template #cell-created_at="{ row }">
@@ -458,6 +493,7 @@ let filters = reactive({
   email: '',
   phone: '',
   role: null,
+  is_active: null,
 })
 
 let activityFilters = reactive({
@@ -478,6 +514,11 @@ const roleOptions = computed(() => [
   { value: 'user', label: t('users.roles.user') },
   { value: 'partner', label: t('users.roles.partner') },
   { value: 'accountant', label: t('users.roles.accountant') },
+])
+
+const statusOptions = computed(() => [
+  { value: '1', label: t('users.active') },
+  { value: '0', label: t('users.inactive') },
 ])
 
 const entityTypeOptions = computed(() => [
@@ -521,6 +562,10 @@ const userTableColumns = computed(() => {
       key: 'company_names',
       label: t('users.companies'),
       sortable: false,
+    },
+    {
+      key: 'last_login_at',
+      label: t('users.last_login'),
     },
     {
       key: 'created_at',
@@ -631,6 +676,10 @@ async function fetchData({ page, filter, sort }) {
     page,
   }
 
+  if (filters.is_active !== null && filters.is_active !== '') {
+    data.is_active = filters.is_active
+  }
+
   isFetchingInitialData.value = true
 
   let response = await usersStore.fetchUsers(data)
@@ -687,6 +736,7 @@ function clearFilter() {
   filters.email = ''
   filters.phone = null
   filters.role = null
+  filters.is_active = null
 }
 
 function toggleFilter() {

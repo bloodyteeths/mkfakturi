@@ -271,7 +271,9 @@ Route::prefix('/v1')->group(function () {
 
             Route::prefix('deadlines')->group(function () {
                 Route::get('/', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'index']);
+                Route::get('/summary', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'summary']);
                 Route::post('/', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'store']);
+                Route::patch('/{id}', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'update']);
                 Route::post('/{id}/complete', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'complete']);
                 Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\DeadlineController::class, 'destroy']);
             });
@@ -505,6 +507,7 @@ Route::prefix('/v1')->group(function () {
             // Fiscal Devices (P10-02)
             // ----------------------------------
 
+            Route::get('fiscal-receipts/export', [FiscalDeviceController::class, 'exportReceipts']);
             Route::get('fiscal-receipts', [FiscalDeviceController::class, 'allReceipts']);
 
             Route::prefix('fiscal-devices')->group(function () {
@@ -520,6 +523,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{id}/receipts', [FiscalDeviceController::class, 'receipts']);
                 Route::post('/{id}/record-receipt', [FiscalDeviceController::class, 'recordReceipt']);
                 Route::post('/{id}/record-z-report', [FiscalDeviceController::class, 'recordZReport']);
+                Route::post('/{device}/receipts/{receipt}/storno', [FiscalDeviceController::class, 'stornoReceipt']);
             });
 
             // Fiscal Monitor — Fraud Detection (Item #7)
@@ -1210,6 +1214,44 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/{id}/pp30', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'pp30Pdf']);
             });
 
+            // Расходен налог (Cash Disbursement Voucher)
+            Route::get('/expenses/{expense}/rashoden-nalog', [\Modules\Mk\Http\Controllers\RashodenNalogController::class, 'forExpense']);
+            Route::get('/bill-payments/{billPayment}/rashoden-nalog', [\Modules\Mk\Http\Controllers\RashodenNalogController::class, 'forBillPayment']);
+
+            // ПП50 (Budget Payment Order)
+            Route::get('/payment-orders/{id}/pp50', [\Modules\Mk\Http\Controllers\PaymentOrderController::class, 'pp50Pdf']);
+
+            // Cash Journal (Благајнички извештај)
+            Route::get('/reports/cash-journal', [\Modules\Mk\Http\Controllers\CashJournalController::class, 'index']);
+            Route::get('/reports/cash-journal/pdf', [\Modules\Mk\Http\Controllers\CashJournalController::class, 'pdf']);
+
+            // IOS (Open Items Statement)
+            Route::get('/reports/ios/customer/{customer}', [\Modules\Mk\Http\Controllers\OpenItemsStatementController::class, 'customer']);
+            Route::get('/reports/ios/customer/{customer}/pdf', [\Modules\Mk\Http\Controllers\OpenItemsStatementController::class, 'customerPdf']);
+            Route::get('/reports/ios/supplier/{supplier}', [\Modules\Mk\Http\Controllers\OpenItemsStatementController::class, 'supplier']);
+            Route::get('/reports/ios/supplier/{supplier}/pdf', [\Modules\Mk\Http\Controllers\OpenItemsStatementController::class, 'supplierPdf']);
+            Route::post('/reports/ios/send', [\Modules\Mk\Http\Controllers\OpenItemsStatementController::class, 'sendEmail']);
+
+            // Cessions (Цесии)
+            Route::prefix('cessions')->middleware('tier:standard')->group(function () {
+                Route::get('/', [\Modules\Mk\Http\Controllers\CessionController::class, 'index']);
+                Route::post('/', [\Modules\Mk\Http\Controllers\CessionController::class, 'store']);
+                Route::get('/{id}', [\Modules\Mk\Http\Controllers\CessionController::class, 'show']);
+                Route::post('/{id}/confirm', [\Modules\Mk\Http\Controllers\CessionController::class, 'confirm']);
+                Route::post('/{id}/cancel', [\Modules\Mk\Http\Controllers\CessionController::class, 'cancel']);
+                Route::get('/{id}/pdf', [\Modules\Mk\Http\Controllers\CessionController::class, 'pdf']);
+            });
+
+            // Assignations (Асигнации)
+            Route::prefix('assignations')->middleware('tier:standard')->group(function () {
+                Route::get('/', [\Modules\Mk\Http\Controllers\AssignationController::class, 'index']);
+                Route::post('/', [\Modules\Mk\Http\Controllers\AssignationController::class, 'store']);
+                Route::get('/{id}', [\Modules\Mk\Http\Controllers\AssignationController::class, 'show']);
+                Route::post('/{id}/confirm', [\Modules\Mk\Http\Controllers\AssignationController::class, 'confirm']);
+                Route::post('/{id}/cancel', [\Modules\Mk\Http\Controllers\AssignationController::class, 'cancel']);
+                Route::get('/{id}/pdf', [\Modules\Mk\Http\Controllers\AssignationController::class, 'pdf']);
+            });
+
             // F3: Cost Centers - Standard+ tier
             // ----------------------------------
             Route::prefix('cost-centers')->middleware('tier:standard')->group(function () {
@@ -1324,8 +1366,6 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/trends', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'trends']);
                 Route::get('/summary', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'summary']);
                 Route::post('/refresh', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'refresh']);
-                Route::get('/comparative', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'comparative']);
-                Route::get('/export-pdf', [\Modules\Mk\Http\Controllers\BiDashboardController::class, 'exportPdf']);
             });
 
             // F11: Custom Report Builder — Partner-only (IFRS ledger data not relevant for company users)
@@ -1526,6 +1566,8 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/{id}/complete', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'complete']);
                     Route::post('/{id}/approve', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'approve']);
                     Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'destroy']);
+                    Route::get('/{id}/pdf', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'pdf']);
+                    Route::get('/{id}/report-pdf', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'reportPdf']);
                 });
 
                 // Dashboard Summary
@@ -1806,22 +1848,64 @@ Route::middleware(['auth:sanctum'])->prefix('v1/partner/subscription')->group(fu
 Route::middleware(['auth:sanctum'])->prefix('billing')->group(function () {
     Route::get('/subscription', function (\Illuminate\Http\Request $request) {
         $user = $request->user();
-        $companyId = $user->companies()->first()?->id ?? $user->company_id ?? 1;
+        $companyId = $request->header('company') ?: ($user->companies()->first()?->id ?? $user->company_id);
 
-        return app(\Modules\Mk\Billing\Controllers\SubscriptionController::class)->index($companyId);
+        if (! $companyId) {
+            return response()->json(['data' => null]);
+        }
+
+        return app(\Modules\Mk\Billing\Controllers\SubscriptionController::class)->index((int) $companyId);
     });
 
     Route::get('/invoices', function (\Illuminate\Http\Request $request) {
         $user = $request->user();
-        $companyId = $user->companies()->first()?->id ?? $user->company_id ?? 1;
+        $companyId = $request->header('company') ?: ($user->companies()->first()?->id ?? $user->company_id);
 
-        // Return billing invoices (from Paddle subscription)
         $company = \App\Models\Company::find($companyId);
-        if (! $company || ! $company->subscription) {
+        if (! $company) {
             return response()->json(['data' => []]);
         }
 
-        return response()->json(['data' => []]);  // TODO: Implement Paddle invoice fetching
+        $subscription = \App\Models\CompanySubscription::where('company_id', $company->id)
+            ->latest()
+            ->first();
+
+        if (! $subscription || ! $subscription->provider_subscription_id) {
+            return response()->json(['data' => []]);
+        }
+
+        // Fetch Stripe invoices
+        try {
+            if ($subscription->provider === 'stripe' && $company->stripe_id) {
+                \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+                $stripeInvoices = \Stripe\Invoice::all([
+                    'customer' => $company->stripe_id,
+                    'limit' => 24,
+                ]);
+
+                $invoices = collect($stripeInvoices->data)->map(function ($inv) {
+                    return [
+                        'id' => $inv->id,
+                        'date' => $inv->created ? date('Y-m-d', $inv->created) : null,
+                        'description' => $inv->lines->data[0]->description ?? 'Subscription',
+                        'amount' => number_format($inv->amount_paid / 100, 2),
+                        'currency' => strtoupper($inv->currency),
+                        'status' => $inv->status === 'paid' ? 'paid' : ($inv->status === 'open' ? 'pending' : $inv->status),
+                        'pdf_url' => $inv->invoice_pdf,
+                        'invoice_number' => $inv->number,
+                    ];
+                });
+
+                return response()->json(['data' => $invoices]);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to fetch Stripe invoices', [
+                'company_id' => $company->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return response()->json(['data' => []]);
     });
 });
 
@@ -2006,6 +2090,10 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/kap/{bill}', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'kapData']);
         Route::get('/kap/{bill}/export', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'kapExport']);
 
+        // ПЛТ — Приемен лист во трговијата на мало (per-bill)
+        Route::get('/plt/{bill}', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'pltData']);
+        Route::get('/plt/{bill}/export', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'pltExport']);
+
         // Нивелација CRUD
         Route::prefix('nivelacii')->group(function () {
             Route::get('/', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiIndex']);
@@ -2141,7 +2229,6 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::get('/ratios', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'ratios']);
             Route::get('/trends', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'trends']);
             Route::get('/summary', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'summary']);
-            Route::get('/comparative', [\App\Http\Controllers\V1\Partner\PartnerBiDashboardController::class, 'comparative']);
         });
 
         // F11: Custom Reports (Partner — full CRUD)

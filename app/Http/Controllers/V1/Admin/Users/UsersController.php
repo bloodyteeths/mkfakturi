@@ -10,7 +10,7 @@ use App\Models\Company;
 use App\Models\User;
 use App\Services\UserCountService;
 use Illuminate\Http\Request;
-
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UsersController extends Controller
 {
@@ -153,4 +153,90 @@ class UsersController extends Controller
         ]);
     }
 
+    /**
+     * Toggle user active/inactive status.
+     */
+    public function toggleActive(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+
+        $user->update(['is_active' => ! $user->is_active]);
+
+        return new UserResource($user->fresh());
+    }
+
+    /**
+     * Export users list as CSV.
+     */
+    public function export(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', User::class);
+
+        $users = User::with('companies')
+            ->applyFilters($request->all())
+            ->where('id', '<>', $request->user()->id)
+            ->latest()
+            ->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="users-export-'.now()->format('Y-m-d').'.csv"',
+        ];
+
+        return response()->stream(function () use ($users) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, ['Name', 'Email', 'Phone', 'Role', 'Companies', 'Status', 'Last Login', 'Added On']);
+
+            foreach ($users as $user) {
+                $companyNames = $user->relationLoaded('companies')
+                    ? $user->companies->pluck('name')->implode(', ')
+                    : '';
+
+                fputcsv($handle, [
+                    $user->name,
+                    $user->email,
+                    $user->phone ?? '',
+                    $user->role ?? 'user',
+                    $companyNames,
+                    $user->is_active ? 'Active' : 'Inactive',
+                    $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i') : 'Never',
+                    $user->created_at->format('Y-m-d'),
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    /**
+     * Generate Овластување (authorization letter) PDF for a user.
+     */
+    public function ovlastuvanje(Request $request, User $user)
+    {
+        $this->authorize('view', $user);
+
+        $companyId = $request->header('company');
+        $company = Company::find($companyId);
+
+        if (! $company) {
+            return response()->json(['error' => 'company_not_found'], 404);
+        }
+
+        $owner = User::find($company->owner_id);
+
+        $data = [
+            'company' => $company,
+            'user' => $user,
+            'owner' => $owner,
+            'date' => now()->format('d.m.Y'),
+            'city' => $company->city ?? 'Скопје',
+        ];
+
+        $pdf = \PDF::loadView('app.pdf.reports.ovlastuvanje', $data);
+        $pdf->setPaper('a4');
+
+        return $pdf->stream('ovlastuvanje-'.$user->name.'.pdf');
+    }
 }

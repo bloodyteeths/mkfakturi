@@ -80,6 +80,8 @@ class LoginController extends Controller
         if ($this->attemptLogin($request)) {
             Log::info('Login successful', ['email' => $request->input('email')]);
 
+            $this->guard()->user()->recordLastLogin();
+
             return $this->sendLoginResponse($request);
         }
 
