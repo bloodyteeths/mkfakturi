@@ -4589,6 +4589,7 @@
         "field_invoice_number": "Број на фактура",
         "field_invoice_date": "Датум на фактура",
         "field_due_date": "Датум на доспевање",
+        "field_expense_date": "Датум на трошок",
         "field_subtotal": "Подзбир",
         "field_tax_amount": "Износ на данок",
         "field_total_amount": "Вкупен износ",

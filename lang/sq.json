@@ -4458,6 +4458,7 @@
         "field_invoice_number": "Numri në faturë",
         "field_invoice_date": "Data në faturë",
         "field_due_date": "Data në deriспевање",
+        "field_expense_date": "Data e shpenzimit",
         "field_subtotal": "Пngaзбdheр",
         "field_tax_amount": "Shuma në tatimi",
         "field_total_amount": "Total shuma",

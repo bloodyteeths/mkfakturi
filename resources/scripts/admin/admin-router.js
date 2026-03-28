@@ -1832,6 +1832,18 @@ export default [
         component: () => import('./views/reports/EquityChanges.vue'),
       },
       {
+        path: 'reports/cash-book',
+        name: 'reports.cash-book',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('./views/reports/CashBook.vue'),
+      },
+      {
+        path: 'reports/vat-books',
+        name: 'reports.vat-books',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('./views/reports/VatBooks.vue'),
+      },
+      {
         path: 'reports/trial-balance',
         name: 'reports.trial-balance',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
