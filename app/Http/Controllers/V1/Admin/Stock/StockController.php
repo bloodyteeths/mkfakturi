@@ -4,10 +4,12 @@ namespace App\Http\Controllers\V1\Admin\Stock;
 
 use App\Http\Controllers\Controller;
 use App\Models\Item;
+use App\Models\StockMovement;
 use App\Models\Warehouse;
 use App\Services\StockService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use PDF;
 
 /**
  * Stock Controller
@@ -493,12 +495,31 @@ class StockController extends Controller
 
         $topLowStock = array_slice($lowStockItems, 0, 5);
 
+        // Get last 5 recent movements for the dashboard widget
+        $recentMovements = StockMovement::where('company_id', $companyId)
+            ->with(['item:id,name', 'warehouse:id,name'])
+            ->orderBy('movement_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(fn ($m) => [
+                'id' => $m->id,
+                'date' => $m->movement_date->format('Y-m-d'),
+                'item_name' => $m->item?->name,
+                'warehouse_name' => $m->warehouse?->name,
+                'source_type' => $m->source_type,
+                'source_type_label' => $m->source_type_label,
+                'quantity' => $m->quantity,
+                'is_stock_in' => $m->isStockIn(),
+            ]);
+
         return response()->json([
             'total_value' => $totalValue,
             'total_items' => $items->count(),
             'total_quantity' => $totalQuantity,
             'low_stock_count' => count($lowStockItems),
             'low_stock_items' => $topLowStock,
+            'recent_movements' => $recentMovements,
         ]);
     }
 
@@ -594,4 +615,121 @@ class StockController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Generate PDF for an item's stock card (lagerska kartica).
+     *
+     * Reuses the itemCard logic to fetch movement history, then renders
+     * the lagerska-kartica blade template as a PDF.
+     *
+     * @param  int  $itemId  The item ID
+     */
+    public function itemCardPdf(Request $request, int $itemId)
+    {
+        $companyId = $request->header('company');
+        $warehouseId = $request->query('warehouse_id');
+        $fromDate = $request->query('from_date');
+        $toDate = $request->query('to_date');
+
+        $item = Item::where('company_id', $companyId)
+            ->where('id', $itemId)
+            ->with(['unit', 'currency'])
+            ->firstOrFail();
+
+        $company = \App\Models\Company::with('address')->find($companyId);
+        $currency = \App\Models\Currency::where('code', 'MKD')->first()
+            ?: \App\Models\Currency::first();
+
+        $warehouseName = null;
+        if ($warehouseId) {
+            $warehouse = Warehouse::find($warehouseId);
+            $warehouseName = $warehouse?->name;
+        }
+
+        // Fetch movements (all, no limit for PDF)
+        $movements = $this->stockService->getMovementHistory(
+            $companyId,
+            $itemId,
+            $warehouseId,
+            $fromDate,
+            $toDate,
+            10000
+        );
+
+        // Calculate running balances (same logic as itemCard)
+        $needsRecalc = ! $warehouseId && $movements->isNotEmpty();
+
+        // Sort chronologically for PDF (oldest first)
+        $sortedMovements = $movements->sortBy([
+            ['movement_date', 'asc'],
+            ['id', 'asc'],
+        ])->values();
+
+        $runningQty = 0;
+        $runningValue = 0;
+        $formattedMovements = [];
+
+        foreach ($sortedMovements as $movement) {
+            $currentWac = $runningQty > 0 ? (int) round($runningValue / $runningQty) : 0;
+
+            if ($movement->quantity > 0) {
+                $unitCost = $movement->unit_cost ?? 0;
+                $totalCost = (int) ($movement->quantity * $unitCost);
+                $runningValue += $totalCost;
+            } else {
+                $unitCost = $currentWac;
+                $totalCost = (int) (abs($movement->quantity) * $currentWac);
+                $runningValue = max(0, $runningValue - $totalCost);
+            }
+
+            $runningQty += $movement->quantity;
+
+            $formattedMovements[] = [
+                'date' => $movement->movement_date->format('d.m.Y'),
+                'document' => $movement->notes ?: ($movement->source_type_label ?? $movement->source_type),
+                'source_type' => $movement->source_type,
+                'quantity' => $movement->quantity,
+                'unit_cost' => $unitCost,
+                'total_cost' => $movement->quantity > 0 ? $totalCost : -$totalCost,
+                'balance_quantity' => $runningQty,
+                'balance_value' => $runningValue,
+            ];
+        }
+
+        // Opening balance: state before first movement
+        $openingBalance = [
+            'quantity' => 0,
+            'value' => 0,
+            'wac' => 0,
+        ];
+
+        view()->share([
+            'company' => $company,
+            'currency' => $currency,
+            'item_name' => $item->name,
+            'item_sku' => $item->sku,
+            'item_barcode' => $item->barcode,
+            'item_unit' => $item->unit?->name,
+            'min_stock' => $item->minimum_quantity,
+            'max_stock' => null,
+            'warehouse_name' => $warehouseName ?? 'Сите магацини',
+            'from_date' => $fromDate ?: 'почеток',
+            'to_date' => $toDate ?: date('d.m.Y'),
+            'opening_balance' => $openingBalance,
+            'movements' => $formattedMovements,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.lagerska-kartica')
+            ->setPaper('a4', 'landscape');
+
+        if ($request->has('preview')) {
+            return view('app.pdf.reports.lagerska-kartica');
+        }
+
+        $filename = "lagerska-kartica-{$item->sku}-" . date('Y-m-d') . '.pdf';
+
+        return $pdf->stream($filename);
+    }
 }
+
+// CLAUDE-CHECKPOINT

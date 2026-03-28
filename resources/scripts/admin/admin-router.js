@@ -133,6 +133,9 @@ const StockLowStock = () => import('@/scripts/admin/views/stock/LowStock.vue')
 const StockAdjustments = () => import('@/scripts/admin/views/stock/Adjustments.vue')
 const WacAudit = () => import('@/scripts/admin/views/stock/WacAudit.vue')
 const WacAuditDetail = () => import('@/scripts/admin/views/stock/WacAuditDetail.vue')
+const StockCountIndex = () => import('@/scripts/admin/views/stock/counts/Index.vue')
+const StockCountCreate = () => import('@/scripts/admin/views/stock/counts/Create.vue')
+const StockCountView = () => import('@/scripts/admin/views/stock/counts/View.vue')
 
 // Warehouses
 const WarehousesIndex = () => import('@/scripts/admin/views/stock/warehouses/Index.vue')
@@ -505,6 +508,26 @@ export default [
         name: 'stock.wac-audit.detail',
         meta: { ability: abilities.VIEW_ITEM },
         component: WacAuditDetail,
+      },
+
+      // Stock Counts (Stocktake / Попис)
+      {
+        path: 'stock/counts',
+        name: 'stock.counts',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: StockCountIndex,
+      },
+      {
+        path: 'stock/counts/create',
+        name: 'stock.counts.create',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: StockCountCreate,
+      },
+      {
+        path: 'stock/counts/:id',
+        name: 'stock.counts.view',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: StockCountView,
       },
 
       // Warehouses

@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Company;
+use App\Models\StockMovement;
 use App\Models\WacAuditRun;
 use App\Services\WacAuditService;
 use Illuminate\Console\Command;
@@ -9,7 +11,7 @@ use Illuminate\Console\Command;
 class VerifyWacChainCommand extends Command
 {
     protected $signature = 'stock:verify-wac
-                            {--company= : Company ID (required)}
+                            {--company= : Company ID or "all" for every company}
                             {--item= : Item ID (optional, all items if omitted)}
                             {--warehouse= : Warehouse ID (optional, all warehouses if omitted)}
                             {--fix-preview : Show proposed corrections without applying}
@@ -19,14 +21,62 @@ class VerifyWacChainCommand extends Command
 
     public function handle(WacAuditService $auditService): int
     {
-        $companyId = $this->option('company');
+        $companyOption = $this->option('company');
 
-        if (! $companyId) {
-            $this->error('--company is required.');
-
-            return self::FAILURE;
+        if (! $companyOption) {
+            // Default to 'all' when no company specified (for cron usage)
+            $companyOption = 'all';
         }
 
+        if ($companyOption === 'all') {
+            return $this->handleAllCompanies($auditService);
+        }
+
+        return $this->handleSingleCompany($auditService, (int) $companyOption);
+    }
+
+    protected function handleAllCompanies(WacAuditService $auditService): int
+    {
+        // Only verify companies that actually have stock movements
+        $companyIds = StockMovement::distinct()->pluck('company_id');
+
+        if ($companyIds->isEmpty()) {
+            $this->info('No companies with stock movements found.');
+
+            return self::SUCCESS;
+        }
+
+        $this->info("WAC Chain Verification for {$companyIds->count()} companies");
+        $this->info(str_repeat('=', 50));
+        $this->newLine();
+
+        $totalDiscrepancies = 0;
+        $failedCompanies = 0;
+
+        foreach ($companyIds as $companyId) {
+            try {
+                $auditRun = $auditService->verifyChain((int) $companyId);
+
+                $status = $auditRun->hasDiscrepancies()
+                    ? "WARN: {$auditRun->discrepancies_found} discrepancies"
+                    : 'OK';
+
+                $this->line("Company #{$companyId}: {$auditRun->total_movements_checked} movements checked — {$status}");
+                $totalDiscrepancies += $auditRun->discrepancies_found;
+            } catch (\Exception $e) {
+                $this->error("Company #{$companyId}: FAILED — {$e->getMessage()}");
+                $failedCompanies++;
+            }
+        }
+
+        $this->newLine();
+        $this->info("Summary: {$companyIds->count()} companies, {$totalDiscrepancies} total discrepancies, {$failedCompanies} failures.");
+
+        return $failedCompanies > 0 ? self::FAILURE : self::SUCCESS;
+    }
+
+    protected function handleSingleCompany(WacAuditService $auditService, int $companyId): int
+    {
         $itemId = $this->option('item') ? (int) $this->option('item') : null;
         $warehouseId = $this->option('warehouse') ? (int) $this->option('warehouse') : null;
 
@@ -44,7 +94,7 @@ class VerifyWacChainCommand extends Command
 
         try {
             $auditRun = $auditService->verifyChain(
-                (int) $companyId,
+                $companyId,
                 $itemId,
                 $warehouseId
             );
@@ -81,7 +131,7 @@ class VerifyWacChainCommand extends Command
 
             if ($this->option('freeze')) {
                 $this->newLine();
-                $frozen = $auditService->freezeMovements((int) $companyId);
+                $frozen = $auditService->freezeMovements($companyId);
                 $this->info("Frozen {$frozen} movement(s).");
             }
 
@@ -148,3 +198,4 @@ class VerifyWacChainCommand extends Command
         }
     }
 }
+// CLAUDE-CHECKPOINT

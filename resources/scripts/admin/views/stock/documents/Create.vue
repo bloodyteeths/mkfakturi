@@ -169,11 +169,26 @@
                   </template>
                   <template #option="{ option }">
                     <div class="flex justify-between items-center w-full">
-                      <span>{{ option.name }}</span>
-                      <span v-if="option.sku" class="text-gray-500 text-xs">({{ option.sku }})</span>
+                      <div>
+                        <span>{{ option.name }}</span>
+                        <span v-if="option.sku" class="text-gray-500 text-xs ml-1">({{ option.sku }})</span>
+                      </div>
                     </div>
                   </template>
                 </BaseMultiselect>
+                <!-- Available stock indicator for issue/transfer -->
+                <div
+                  v-if="form.document_type !== 'receipt' && item.item_id && item.available_stock !== null"
+                  class="mt-1 text-xs"
+                  :class="item.available_stock > 0 ? 'text-green-600' : 'text-red-500'"
+                >
+                  <span v-if="item.available_stock > 0">
+                    Достапно: {{ item.available_stock }} единици
+                  </span>
+                  <span v-else>
+                    Нема залиха во избраниот магацин
+                  </span>
+                </div>
               </div>
 
               <!-- Quantity -->
@@ -184,15 +199,25 @@
                   type="number"
                   step="1"
                   min="1"
+                  :max="form.document_type !== 'receipt' && item.available_stock ? item.available_stock : undefined"
                   class="text-right"
                   placeholder="0"
                 />
+                <!-- Over-stock warning for issue/transfer -->
+                <div
+                  v-if="form.document_type !== 'receipt' && item.quantity && item.available_stock !== null && parseFloat(item.quantity) > item.available_stock"
+                  class="mt-1 text-xs text-red-500"
+                >
+                  Количината ја надминува залихата!
+                </div>
               </div>
 
-              <!-- Unit Cost (receipt only) -->
-              <div v-if="form.document_type === 'receipt'" class="md:col-span-2">
+              <!-- Unit Cost -->
+              <div class="md:col-span-2">
                 <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Ед. цена</label>
+                <!-- Editable for receipt -->
                 <BaseInput
+                  v-if="form.document_type === 'receipt'"
                   v-model="item.unit_cost"
                   type="number"
                   step="0.01"
@@ -200,6 +225,14 @@
                   class="text-right"
                   placeholder="0.00"
                 />
+                <!-- Read-only WAC for issue/transfer -->
+                <div
+                  v-else
+                  class="h-10 flex items-center justify-end text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-md px-3"
+                >
+                  <span v-if="item.wac !== null">{{ (item.wac / 100).toFixed(2) }}</span>
+                  <span v-else class="text-gray-400">WAC</span>
+                </div>
               </div>
 
               <!-- Total -->
@@ -212,7 +245,7 @@
               </div>
 
               <!-- Notes -->
-              <div class="md:col-span-12 lg:col-span-5" :class="{ 'lg:col-span-3': form.document_type === 'receipt' }">
+              <div class="md:col-span-12 lg:col-span-5">
                 <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Белешка</label>
                 <BaseInput
                   v-model="item.notes"
@@ -366,6 +399,7 @@ function addItem() {
     unit_cost: null,
     notes: '',
     wac: null,
+    available_stock: null,
   })
 }
 
@@ -384,6 +418,7 @@ async function onItemSelected(index, itemId) {
   if (!itemId) {
     form.items[index].wac = null
     form.items[index].unit_cost = null
+    form.items[index].available_stock = null
     return
   }
 
@@ -398,13 +433,15 @@ async function onItemSelected(index, itemId) {
     }
   }
 
-  // Fetch WAC for issue/transfer types
-  if (form.document_type !== 'receipt' && form.warehouse_id) {
+  // Fetch stock info (WAC + available quantity) when a warehouse is selected
+  if (form.warehouse_id) {
     try {
       const data = await stockStore.getItemStock(itemId, form.warehouse_id)
       form.items[index].wac = data.unit_cost || 0
+      form.items[index].available_stock = data.quantity != null ? parseFloat(data.quantity) : null
     } catch {
       form.items[index].wac = null
+      form.items[index].available_stock = null
     }
   }
 }
@@ -457,7 +494,17 @@ async function loadDocument() {
       unit_cost: item.unit_cost ? (item.unit_cost / 100).toFixed(2) : null,
       notes: item.notes || '',
       wac: null,
+      available_stock: null,
     }))
+
+    // Fetch stock info for each loaded item
+    if (form.warehouse_id) {
+      form.items.forEach((item, idx) => {
+        if (item.item_id) {
+          onItemSelected(idx, item.item_id)
+        }
+      })
+    }
   } catch (error) {
     console.error('Failed to load document:', error)
     notificationStore.showNotification({
@@ -597,6 +644,32 @@ watch(() => form.document_type, (newType) => {
   if (newType !== 'transfer') {
     form.destination_warehouse_id = null
   }
+  // Re-fetch stock info for all items when document type changes
+  // (WAC display logic differs between receipt/issue/transfer)
+  if (form.warehouse_id) {
+    form.items.forEach((item, idx) => {
+      if (item.item_id) {
+        onItemSelected(idx, item.item_id)
+      }
+    })
+  }
+})
+
+// Re-fetch stock info for all items when source warehouse changes
+watch(() => form.warehouse_id, (newWarehouseId) => {
+  if (newWarehouseId) {
+    form.items.forEach((item, idx) => {
+      if (item.item_id) {
+        onItemSelected(idx, item.item_id)
+      }
+    })
+  } else {
+    // Clear stock info when no warehouse selected
+    form.items.forEach(item => {
+      item.wac = null
+      item.available_stock = null
+    })
+  }
 })
 
 onMounted(async () => {
@@ -605,4 +678,5 @@ onMounted(async () => {
     await loadDocument()
   }
 })
+// CLAUDE-CHECKPOINT
 </script>

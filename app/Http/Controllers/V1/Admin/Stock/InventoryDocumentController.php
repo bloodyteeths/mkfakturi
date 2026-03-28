@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use PDF;
 
 /**
  * Inventory Document Controller
@@ -359,6 +360,67 @@ class InventoryDocumentController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    /**
+     * Generate PDF for an inventory document.
+     */
+    public function pdf(Request $request, int $id)
+    {
+        $companyId = $request->header('company');
+
+        $doc = InventoryDocument::where('company_id', $companyId)
+            ->with(['items.item.unit', 'warehouse', 'destinationWarehouse', 'creator', 'approver', 'company.address'])
+            ->findOrFail($id);
+
+        $templateMap = [
+            'receipt' => 'priemnica',
+            'issue' => 'izdatnica',
+            'transfer' => 'trade-prenosnica',
+        ];
+        $template = $templateMap[$doc->document_type] ?? 'priemnica';
+
+        $currency = \App\Models\Currency::where('code', 'MKD')->first()
+            ?: \App\Models\Currency::first();
+
+        $documentData = [
+            'document_number' => $doc->document_number,
+            'document_date' => $doc->document_date?->format('d.m.Y'),
+            'warehouse_name' => $doc->warehouse?->name,
+            'destination_warehouse_name' => $doc->destinationWarehouse?->name,
+            'supplier_name' => null,
+            'notes' => $doc->notes,
+            'status' => $doc->status,
+            'created_by_name' => $doc->creator?->name,
+            'approved_by_name' => $doc->approver?->name,
+            'items' => $doc->items->map(function (InventoryDocumentItem $item) {
+                return [
+                    'item_name' => $item->item?->name,
+                    'sku' => $item->item?->sku,
+                    'unit' => $item->item?->unit?->name,
+                    'quantity' => $item->quantity,
+                    'unit_cost' => $item->unit_cost,
+                    'total_cost' => $item->total_cost,
+                    'notes' => $item->notes,
+                ];
+            })->toArray(),
+        ];
+
+        view()->share([
+            'document' => $documentData,
+            'company' => $doc->company,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView("app.pdf.reports.{$template}");
+
+        if ($request->has('preview')) {
+            return view("app.pdf.reports.{$template}");
+        }
+
+        $filename = "{$template}-{$doc->document_number}.pdf";
+
+        return $pdf->stream($filename);
     }
 
     /**

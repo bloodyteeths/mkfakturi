@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\StockMovement;
 use App\Models\WacAuditDiscrepancy;
 use App\Models\WacAuditRun;
@@ -9,6 +10,7 @@ use App\Models\WacCorrectionProposal;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class WacAuditService
 {
@@ -87,6 +89,11 @@ class WacAuditService
                 ],
                 'completed_at' => Carbon::now(),
             ]);
+
+            // Notify company owner if discrepancies were found
+            if ($totalDiscrepancies > 0) {
+                $this->notifyOwnerOfDiscrepancies($auditRun->fresh(), $companyId, $totalDiscrepancies, $totalChecked);
+            }
 
             return $auditRun->fresh();
         } catch (\Exception $e) {
@@ -207,6 +214,42 @@ class WacAuditService
             ->update(['frozen_at' => Carbon::now()]);
 
         return $frozenByAge;
+    }
+
+    /**
+     * Notify the company owner via email when discrepancies are found.
+     */
+    protected function notifyOwnerOfDiscrepancies(WacAuditRun $auditRun, int $companyId, int $discrepancyCount, int $movementsChecked): void
+    {
+        try {
+            $company = Company::with('owner')->find($companyId);
+            if (! $company || ! $company->owner?->email) {
+                return;
+            }
+
+            $auditUrl = config('app.url') . '/admin/stock/wac-audit/' . $auditRun->id;
+
+            $body = "WAC Audit completed for {$company->name}.\n\n"
+                . "Discrepancies found: {$discrepancyCount}\n"
+                . "Movements checked: {$movementsChecked}\n\n"
+                . "View details: {$auditUrl}\n\n"
+                . "— Facturino";
+
+            Mail::raw($body, function ($message) use ($company, $discrepancyCount) {
+                $message->to($company->owner->email)
+                    ->from(config('mail.admin_email', config('mail.from.address')), 'Facturino')
+                    ->subject("WAC Audit: {$discrepancyCount} discrepancies found");
+
+                // Use Postmark broadcast stream
+                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+            });
+        } catch (\Exception $e) {
+            Log::warning('Failed to send WAC audit notification email', [
+                'audit_run_id' => $auditRun->id,
+                'company_id' => $companyId,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -400,6 +443,28 @@ class WacAuditService
                 'applied_by' => $userId,
             ]);
 
+            // Re-verify the affected chains after correction
+            try {
+                $firstEntry = $proposal->correction_entries[0] ?? null;
+                $reVerifyRun = $this->verifyChain(
+                    $proposal->company_id,
+                    $firstEntry['item_id'] ?? null,
+                    $firstEntry['warehouse_id'] ?? null,
+                    $userId
+                );
+
+                Log::info('WAC post-correction re-verification', [
+                    'proposal_id' => $proposal->id,
+                    'reVerify_run_id' => $reVerifyRun->id,
+                    'remaining_discrepancies' => $reVerifyRun->discrepancies_found,
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('WAC post-correction re-verification failed', [
+                    'proposal_id' => $proposal->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             return $createdMovements;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -411,3 +476,4 @@ class WacAuditService
         }
     }
 }
+// CLAUDE-CHECKPOINT

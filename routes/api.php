@@ -1483,6 +1483,7 @@ Route::prefix('/v1')->group(function () {
                 // Stock Reports
                 Route::get('/inventory', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'inventory']);
                 Route::get('/item-card/{item}', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'itemCard']);
+                Route::get('/item-card/{item}/pdf', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'itemCardPdf']);
                 Route::get('/warehouse/{warehouse}/inventory', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'warehouseInventory']);
                 Route::get('/valuation-report', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'valuationReport']);
                 Route::get('/low-stock', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'lowStock']);
@@ -1509,6 +1510,18 @@ Route::prefix('/v1')->group(function () {
                 Route::delete('/documents/{id}', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'destroy']);
                 Route::post('/documents/{id}/approve', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'approve']);
                 Route::post('/documents/{id}/void', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'void']);
+                Route::get('/documents/{id}/pdf', [\App\Http\Controllers\V1\Admin\Stock\InventoryDocumentController::class, 'pdf']);
+
+                // Stock Counts (Пописи)
+                Route::prefix('counts')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'index']);
+                    Route::post('/', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'store']);
+                    Route::get('/{id}', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'show']);
+                    Route::put('/{id}', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'update']);
+                    Route::post('/{id}/complete', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'complete']);
+                    Route::post('/{id}/approve', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'approve']);
+                    Route::delete('/{id}', [\App\Http\Controllers\V1\Admin\Stock\StockCountController::class, 'destroy']);
+                });
 
                 // Dashboard Summary
                 Route::get('/dashboard-summary', [\App\Http\Controllers\V1\Admin\Stock\StockController::class, 'dashboardSummary']);

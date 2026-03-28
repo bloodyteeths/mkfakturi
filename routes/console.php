@@ -255,6 +255,27 @@ if (InstallUtils::isDbCreated()) {
         ->withoutOverlapping()
         ->name('fiscal-fraud-check');
 
+    // Low stock check — daily 08:00 Skopje (business hours start)
+    Schedule::command('stock:check-low-stock --notify')
+        ->dailyAt('08:00')
+        ->timezone('Europe/Skopje')
+        ->runInBackground()
+        ->withoutOverlapping()
+        ->name('stock-low-stock-check');
+
+    // WAC chain integrity check — weekly Monday 03:00 Skopje
+    Schedule::command('stock:verify-wac --company=all')
+        ->weeklyOn(1, '03:00')
+        ->timezone('Europe/Skopje')
+        ->withoutOverlapping()
+        ->appendOutputTo(storage_path('logs/wac-verify.log'));
+
+    // Freeze old movements — daily 02:00 Skopje
+    Schedule::command('stock:freeze-movements')
+        ->dailyAt('02:00')
+        ->timezone('Europe/Skopje')
+        ->withoutOverlapping();
+
     // Post monthly depreciation GL entries on 1st of each month at 00:30
     Schedule::command('depreciation:post-monthly')
         ->monthlyOn(1, '00:30')
