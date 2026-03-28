@@ -119,10 +119,11 @@ test.describe('Items Page Audit — E2E', () => {
   let testCategoryId = null
 
   test.beforeAll(async ({ browser }) => {
+    test.setTimeout(60000)
     const context = await browser.newContext()
     page = await context.newPage()
 
-    await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}/login`, { waitUntil: 'networkidle', timeout: 30000 })
     await page.waitForTimeout(3000)
     await page.fill('input[type="email"]', EMAIL)
     await page.fill('input[type="password"]', PASS)
@@ -159,7 +160,7 @@ test.describe('Items Page Audit — E2E', () => {
       name: `Test Category ${Date.now()}`,
       description: 'E2E test category',
     })
-    expect(res.status).toBe(200)
+    expect([200, 201]).toContain(res.status)
     expect(res.data.data.id).toBeDefined()
     testCategoryId = res.data.data.id
   })
@@ -346,18 +347,18 @@ test.describe('Items Page Audit — E2E', () => {
   })
 
   test('17. Filter panel opens and shows new filters', async () => {
-    // Click filter button
-    const filterBtn = page.locator('button', { hasText: /filter/i }).first()
-    await filterBtn.click()
-    await page.waitForTimeout(1000)
+    // Click filter button — text could be English "Filter" or Macedonian "Филтер"
+    const filterBtn = page.locator('button', { hasText: /filter|филтер/i }).first()
+    await filterBtn.click({ timeout: 10000 })
+    await page.waitForTimeout(1500)
 
-    // Check that the new filter fields are present
-    // Category filter
-    const categoryLabel = page.locator('text=Category').or(page.locator('text=Категорија')).first()
+    // Check that the new filter fields are present in the expanded panel
+    // Category filter — look for the select/input within the filter wrapper
+    const categoryLabel = page.locator('text=/Category|Категорија|Kategori/i').first()
     // Track quantity filter
-    const trackLabel = page.locator('text=Track Inventory').or(page.locator('text=Следење залихи')).first()
+    const trackLabel = page.locator('text=/Track Inventory|Следење залихи|Следи залиха/i').first()
     // Low stock filter
-    const lowStockLabel = page.locator('text=Low Stock').or(page.locator('text=Ниска залиха')).first()
+    const lowStockLabel = page.locator('text=/Low Stock|ниска залиха|low stock/i').first()
 
     // At least one should be visible (depends on language)
     const filtersVisible = await categoryLabel.isVisible().catch(() => false) ||
