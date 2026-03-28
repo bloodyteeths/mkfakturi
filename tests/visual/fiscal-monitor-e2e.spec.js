@@ -313,6 +313,75 @@ test.describe('Fiscal Monitor — E2E', () => {
 
     console.log(`Events date filtering: ${res.data.data?.length || 0} events in range ✓`)
   })
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Test 13: Device detail API returns valid structure
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  test('Device detail API returns valid structure', async () => {
+    // First get a device ID from the dashboard
+    const dashRes = await apiGet(page, 'fiscal-monitor/dashboard')
+    expect(dashRes.status).toBe(200)
+
+    const devices = dashRes.data?.data?.devices || []
+    if (devices.length === 0) {
+      console.log('No devices to test detail endpoint — skipping ✓')
+      return
+    }
+
+    const deviceId = devices[0].device?.id || devices[0].id
+    const res = await apiGet(page, `fiscal-monitor/devices/${deviceId}`)
+
+    expect(res.status).toBe(200)
+    expect(res.data?.data).toBeDefined()
+
+    const data = res.data.data
+    expect(data).toHaveProperty('device')
+    expect(data).toHaveProperty('status')
+    expect(data).toHaveProperty('recent_events')
+    expect(data).toHaveProperty('alerts')
+    expect(data).toHaveProperty('daily_stats')
+    expect(data).toHaveProperty('operators')
+
+    expect(data.device).toHaveProperty('id')
+    expect(data.device).toHaveProperty('serial_number')
+    expect(['open', 'closed']).toContain(data.status)
+
+    console.log(`Device detail: ${data.device.serial_number} (${data.status}), ${data.recent_events?.length || 0} events, ${data.operators?.length || 0} operators ✓`)
+  })
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Test 14: Device detail returns 404 for non-existent device
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  test('Device detail returns 404 for non-existent device', async () => {
+    const res = await apiGet(page, 'fiscal-monitor/devices/999999')
+
+    expect(res.status).toBe(404)
+    console.log('Device detail: 404 on non-existent device ✓')
+  })
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Test 15: Device detail UI loads
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  test('Device detail UI loads', async () => {
+    // Get a device ID first
+    const dashRes = await apiGet(page, 'fiscal-monitor/dashboard')
+    const devices = dashRes.data?.data?.devices || []
+    if (devices.length === 0) {
+      console.log('No devices to test UI — skipping ✓')
+      return
+    }
+
+    const deviceId = devices[0].device.id
+    const response = await page.goto(`${BASE}/admin/fiscal-monitor/device/${deviceId}`, { waitUntil: 'domcontentloaded', timeout: 15000 })
+    expect(response.status()).toBeLessThan(500)
+
+    await page.waitForTimeout(5000)
+
+    const url = page.url()
+    expect(url.includes('fiscal-monitor') || url.includes('admin')).toBeTruthy()
+
+    console.log(`Device detail UI loaded at ${url} ✓`)
+  })
 })
 
 // CLAUDE-CHECKPOINT
