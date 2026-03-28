@@ -256,27 +256,39 @@ class InvoicesController extends Controller
     {
         $this->authorize('view', $invoice);
 
-        // Check if invoice is already paid
         if ($invoice->status === Invoice::STATUS_PAID) {
             return response()->json([
                 'error' => 'Invoice is already paid',
             ], 400);
         }
 
-        // Check if advanced payments feature is enabled
-        if (! config('mk.features.advanced_payments', false)) {
+        $companyId = $invoice->company_id;
+
+        // Check if CASYS is enabled and invoice QR is active for this company
+        $casysEnabled = \App\Models\CompanySetting::getSetting('casys_enabled', $companyId) === 'YES';
+        $invoiceQr = \App\Models\CompanySetting::getSetting('casys_invoice_qr', $companyId) === 'YES';
+
+        if (! $casysEnabled || ! $invoiceQr) {
             return response()->json([
-                'error' => 'Advanced payments feature is not enabled',
+                'error' => 'Online payments not configured. Enable CASYS in Settings → Online Payments.',
             ], 403);
         }
 
         try {
-            $cpayDriver = app(\Modules\Mk\Services\CpayDriver::class);
-            $checkoutData = $cpayDriver->createCheckout($invoice);
+            $cpayService = app(\Modules\Mk\Services\CpayMerchantService::class);
+            $orderId = 'INV-' . $invoice->id . '-' . time();
+            $description = 'Invoice ' . $invoice->invoice_number;
+
+            $checkoutData = $cpayService->createCheckout(
+                $companyId,
+                $invoice->total,
+                $orderId,
+                $description
+            );
 
             return response()->json([
                 'checkout_url' => $checkoutData['checkout_url'],
-                'transaction_id' => $checkoutData['params']['order_id'] ?? null,
+                'transaction_id' => $orderId,
             ]);
         } catch (\Exception $e) {
             \Log::error('CPAY checkout creation failed', [

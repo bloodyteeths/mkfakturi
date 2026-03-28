@@ -9,6 +9,7 @@ import { useModalStore } from '@/scripts/stores/modal'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
+import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
 import SendInvoiceModal from '@/scripts/admin/components/modal-components/SendInvoiceModal.vue'
@@ -27,6 +28,7 @@ const invoiceStore = useInvoiceStore()
 const userStore = useUserStore()
 const dialogStore = useDialogStore()
 const globalStore = useGlobalStore()
+const companyStore = useCompanyStore()
 const notificationStore = useNotificationStore()
 
 const { t } = useI18n()
@@ -74,6 +76,11 @@ const getOrderName = computed(() => {
 
 const shareableLink = computed(() => {
   return `/invoices/pdf/${invoiceData.value.unique_hash}`
+})
+
+const casysInvoiceEnabled = computed(() => {
+  const s = companyStore.selectedCompany?.settings
+  return s?.casys_enabled === 'YES' && s?.casys_invoice_qr === 'YES'
 })
 
 const getCurrentInvoiceId = computed(() => {
@@ -314,7 +321,7 @@ onSearched = debounce(onSearched, 500)
             (invoiceData.status === 'SENT' || invoiceData.status === 'VIEWED') &&
             invoiceData.status !== 'PAID' &&
             userStore.hasAbilities(abilities.CREATE_PAYMENT) &&
-            globalStore.featureFlags?.['advanced_payments'] === true
+            casysInvoiceEnabled
           "
           variant="primary"
           class="mr-3"
