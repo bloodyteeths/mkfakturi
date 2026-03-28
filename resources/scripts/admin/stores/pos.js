@@ -21,14 +21,6 @@ export const usePosStore = defineStore('pos', () => {
     } catch (e) { /* ignore quota errors */ }
   }, { deep: true })
 
-  // Persist selected warehouse to localStorage
-  watch(selectedWarehouse, (wh) => {
-    try {
-      if (wh) localStorage.setItem('pos_selected_warehouse', String(wh))
-      else localStorage.removeItem('pos_selected_warehouse')
-    } catch (e) { /* ignore */ }
-  })
-
   const customer = ref(null)
   const paymentMethod = ref('cash')
   const cashReceived = ref(0)
@@ -48,6 +40,15 @@ export const usePosStore = defineStore('pos', () => {
   const selectedWarehouse = ref(
     (() => { try { const v = localStorage.getItem('pos_selected_warehouse'); return v ? Number(v) : null } catch { return null } })()
   )
+
+  // Persist selected warehouse to localStorage
+  watch(selectedWarehouse, (wh) => {
+    try {
+      if (wh) localStorage.setItem('pos_selected_warehouse', String(wh))
+      else localStorage.removeItem('pos_selected_warehouse')
+    } catch (e) { /* ignore */ }
+  })
+
   const posSettings = ref({
     numpad_enabled: true,
     sound_enabled: true,
