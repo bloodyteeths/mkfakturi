@@ -245,6 +245,30 @@
                     <td class="amount money-format">{{ number_format($payrollRunLine->meal_allowance / 100, 2, '.', ',') }}</td>
                 </tr>
                 @endif
+                @if(($payrollRunLine->seniority_bonus ?? 0) > 0)
+                <tr>
+                    <td>Минат труд ({{ $payrollRunLine->seniority_years ?? 0 }} год. × 0.5%)</td>
+                    <td class="amount money-format">{{ number_format($payrollRunLine->seniority_bonus / 100, 2, '.', ',') }}</td>
+                </tr>
+                @endif
+                @if(($payrollRunLine->overtime_amount ?? 0) > 0)
+                <tr>
+                    <td>Прекувремена работа ({{ $payrollRunLine->overtime_hours ?? 0 }}ч × {{ number_format(($payrollRunLine->overtime_multiplier ?? 1.35) * 100, 0) }}%)</td>
+                    <td class="amount money-format">{{ number_format($payrollRunLine->overtime_amount / 100, 2, '.', ',') }}</td>
+                </tr>
+                @endif
+                @if(($payrollRunLine->night_amount ?? 0) > 0)
+                <tr>
+                    <td>Ноќна работа ({{ $payrollRunLine->night_hours ?? 0 }}ч × 135%)</td>
+                    <td class="amount money-format">{{ number_format($payrollRunLine->night_amount / 100, 2, '.', ',') }}</td>
+                </tr>
+                @endif
+                @if(($payrollRunLine->leave_deduction_amount ?? 0) > 0)
+                <tr>
+                    <td style="color: #e74c3c;">Одбиток за отсуство ({{ $payrollRunLine->leave_days_taken ?? 0 }} дена)</td>
+                    <td class="amount money-format" style="color: #e74c3c;">-{{ number_format($payrollRunLine->leave_deduction_amount / 100, 2, '.', ',') }}</td>
+                </tr>
+                @endif
                 @if($payrollRunLine->other_additions && count($payrollRunLine->other_additions) > 0)
                     @foreach($payrollRunLine->other_additions as $addition)
                     <tr>

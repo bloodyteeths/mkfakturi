@@ -91,6 +91,16 @@ class PayrollCalculationService
                 );
                 $adjustedGross = $grossSalary - $leaveResult['leave_deduction_amount'];
 
+                // Calculate seniority bonus (минат труд) — 0.5% per year of service
+                $yearsOfService = 0;
+                if ($employee->employment_date) {
+                    $yearsOfService = (int) $employee->employment_date->diffInYears($run->period_end);
+                }
+                $seniorityResult = $this->overtimeService->calculateSeniorityBonus(
+                    $adjustedGross,
+                    $yearsOfService
+                );
+
                 // Calculate overtime premium (P7-04)
                 $overtimeHours = $employee->overtime_hours ?? 0;
                 $overtimeMultiplier = $employee->overtime_multiplier
@@ -102,13 +112,24 @@ class PayrollCalculationService
                     $run->working_days ?? 22
                 );
 
-                // Add overtime premium to gross before tax calculation
-                $grossWithOvertime = $adjustedGross + $overtimeResult['overtime_amount'];
+                // Calculate night work premium (ноќна работа)
+                $nightHours = $employee->night_hours ?? 0;
+                $nightResult = $this->overtimeService->calculateNightWork(
+                    $adjustedGross,
+                    $nightHours,
+                    $run->working_days ?? 22
+                );
 
-                // Calculate taxes on the adjusted gross (after leave deductions + overtime)
-                $calculation = $this->taxService->calculateFromGross($grossWithOvertime);
+                // Add all premiums to gross before tax calculation
+                $grossWithPremiums = $adjustedGross
+                    + $seniorityResult['seniority_bonus']
+                    + $overtimeResult['overtime_amount']
+                    + $nightResult['night_amount'];
 
-                // Create payroll run line (includes leave + overtime data)
+                // Calculate taxes on the adjusted gross (after all additions/deductions)
+                $calculation = $this->taxService->calculateFromGross($grossWithPremiums);
+
+                // Create payroll run line (includes all components)
                 $line = $run->lines()->create([
                     'employee_id' => $employee->id,
                     'gross_salary' => $calculation->grossSalary,
@@ -126,6 +147,10 @@ class PayrollCalculationService
                     'overtime_hours' => $overtimeResult['overtime_hours'],
                     'overtime_multiplier' => $overtimeResult['multiplier'],
                     'overtime_amount' => $overtimeResult['overtime_amount'],
+                    'seniority_years' => $seniorityResult['seniority_years'],
+                    'seniority_bonus' => $seniorityResult['seniority_bonus'],
+                    'night_hours' => $nightResult['night_hours'],
+                    'night_amount' => $nightResult['night_amount'],
                 ]);
 
                 // Accumulate totals

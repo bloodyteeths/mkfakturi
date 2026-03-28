@@ -12,11 +12,20 @@ use Illuminate\Support\Facades\Log;
  * Leave Calculation Service
  *
  * Calculates leave deductions for payroll runs and tracks leave balances.
- * Implements Macedonian labor law requirements:
- * - Annual leave: 100% pay (no deduction)
- * - Sick leave: 70% pay (30% deduction from gross)
- * - Maternity leave: 100% pay (no deduction)
- * - Unpaid leave: 0% pay (full deduction from gross)
+ * Implements Macedonian labor law (Закон за работни односи, Art. 112-113, 137, 146-149):
+ *
+ * - Annual leave: 100% pay (no deduction) — Art. 137
+ * - Sick leave: 70% pay (30% deduction, employer-funded first 30 days) — Art. 112
+ * - Sick leave (work injury): 100% pay from day 1 — Art. 113
+ * - Maternity leave: 100% pay — 270 days
+ * - Parental leave (father): 100% pay — 7 days
+ * - Marriage leave: 100% pay — 3 days (Art. 146)
+ * - Bereavement leave: 100% pay — 5 days (Art. 146)
+ * - Blood donation: 100% pay — 2 days (Art. 146)
+ * - Study/exam leave: 100% pay — 7 days (Art. 146)
+ * - Moving house: 100% pay — 2 days (Art. 146)
+ * - Natural disaster: 100% pay — 3 days (Art. 146)
+ * - Unpaid leave: 0% pay — up to 90 days (Art. 149)
  */
 class LeaveCalculationService
 {

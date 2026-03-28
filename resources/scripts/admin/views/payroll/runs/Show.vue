@@ -183,12 +183,19 @@
             />
           </template>
 
-          <template #cell-overtime_hours="{ row }">
-            {{ row.data.overtime_hours ? `${row.data.overtime_hours}h` : '-' }}
+          <template #cell-seniority_bonus="{ row }">
+            <template v-if="row.data.seniority_bonus">
+              <BaseFormatMoney
+                :amount="row.data.seniority_bonus"
+                :currency="companyStore.selectedCompanyCurrency"
+              />
+              <div class="text-xs text-gray-400">{{ row.data.seniority_years }}{{ $t('payroll.years_short') }}</div>
+            </template>
+            <span v-else>-</span>
           </template>
 
-          <template #cell-overtime_multiplier="{ row }">
-            {{ row.data.overtime_multiplier ? `${row.data.overtime_multiplier}x` : '-' }}
+          <template #cell-overtime_hours="{ row }">
+            {{ row.data.overtime_hours ? `${row.data.overtime_hours}h` : '-' }}
           </template>
 
           <template #cell-overtime_amount="{ row }">
@@ -197,6 +204,17 @@
               :amount="row.data.overtime_amount"
               :currency="companyStore.selectedCompanyCurrency"
             />
+            <span v-else>-</span>
+          </template>
+
+          <template #cell-night_amount="{ row }">
+            <template v-if="row.data.night_amount">
+              <BaseFormatMoney
+                :amount="row.data.night_amount"
+                :currency="companyStore.selectedCompanyCurrency"
+              />
+              <div class="text-xs text-gray-400">{{ row.data.night_hours }}h</div>
+            </template>
             <span v-else>-</span>
           </template>
 
@@ -320,16 +338,20 @@ const linesColumns = computed(() => {
       label: t('payroll.gross_salary'),
     },
     {
+      key: 'seniority_bonus',
+      label: t('payroll.seniority_bonus'),
+    },
+    {
       key: 'overtime_hours',
       label: t('payroll.overtime_hours'),
     },
     {
-      key: 'overtime_multiplier',
-      label: t('payroll.ot_rate'),
-    },
-    {
       key: 'overtime_amount',
       label: t('payroll.overtime_pay'),
+    },
+    {
+      key: 'night_amount',
+      label: t('payroll.night_work_pay'),
     },
     {
       key: 'employee_deductions',

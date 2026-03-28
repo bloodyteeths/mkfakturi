@@ -98,4 +98,91 @@ class OvertimeCalculationService
             default => config('mk.payroll.overtime_regular_multiplier', self::MULTIPLIER_REGULAR),
         };
     }
+
+    /**
+     * Calculate night work premium.
+     *
+     * Night work hours (22:00-06:00) receive a 35% premium per Art. 105
+     * of Закон за работни односи. This is separate from overtime —
+     * an employee can work night hours within their regular shift.
+     *
+     * @param int $grossSalaryCents Base gross salary in cents
+     * @param float $nightHours Number of night hours worked (22:00-06:00)
+     * @param int $workingDays Working days in the period
+     * @return array{night_amount: int, hourly_rate: int, night_hours: float}
+     */
+    public function calculateNightWork(
+        int $grossSalaryCents,
+        float $nightHours,
+        int $workingDays = self::DEFAULT_WORKING_DAYS
+    ): array {
+        if ($nightHours <= 0 || $grossSalaryCents <= 0) {
+            return [
+                'night_amount' => 0,
+                'hourly_rate' => 0,
+                'night_hours' => 0.0,
+            ];
+        }
+
+        $nightMultiplier = (float) config('mk.payroll.night_work_multiplier', self::MULTIPLIER_REGULAR);
+        $totalHours = $workingDays * self::HOURS_PER_DAY;
+        $hourlyRate = (int) round($grossSalaryCents / $totalHours);
+
+        // Night premium = hours * hourly_rate * (multiplier - 1)
+        $premiumFactor = $nightMultiplier - 1.0;
+        $nightAmount = (int) round($nightHours * $hourlyRate * $premiumFactor);
+
+        Log::debug('Night work calculated', [
+            'gross' => $grossSalaryCents,
+            'night_hours' => $nightHours,
+            'multiplier' => $nightMultiplier,
+            'hourly_rate' => $hourlyRate,
+            'premium' => $nightAmount,
+        ]);
+
+        return [
+            'night_amount' => $nightAmount,
+            'hourly_rate' => $hourlyRate,
+            'night_hours' => $nightHours,
+        ];
+    }
+
+    /**
+     * Calculate seniority bonus (минат труд).
+     *
+     * Per Македонски колективен договор, employees receive 0.5% of gross
+     * salary for each completed year of service. This is mandatory.
+     *
+     * @param int $grossSalaryCents Base gross salary in cents
+     * @param int $yearsOfService Completed years of service
+     * @return array{seniority_bonus: int, seniority_years: int, rate: float}
+     */
+    public function calculateSeniorityBonus(int $grossSalaryCents, int $yearsOfService): array
+    {
+        if ($yearsOfService <= 0 || $grossSalaryCents <= 0) {
+            return [
+                'seniority_bonus' => 0,
+                'seniority_years' => 0,
+                'rate' => 0.0,
+            ];
+        }
+
+        $ratePerYear = (float) config('mk.payroll.seniority_rate_per_year', 0.005);
+        $totalRate = $ratePerYear * $yearsOfService;
+        $seniorityBonus = (int) round($grossSalaryCents * $totalRate);
+
+        Log::debug('Seniority bonus calculated', [
+            'gross' => $grossSalaryCents,
+            'years' => $yearsOfService,
+            'rate_per_year' => $ratePerYear,
+            'total_rate' => $totalRate,
+            'bonus' => $seniorityBonus,
+        ]);
+
+        return [
+            'seniority_bonus' => $seniorityBonus,
+            'seniority_years' => $yearsOfService,
+            'rate' => $totalRate,
+        ];
+    }
 }

@@ -124,6 +124,42 @@
                 />
               </span>
             </div>
+            <div v-if="payslip.seniority_bonus" class="flex justify-between">
+              <span class="text-sm text-gray-600">{{ $t('payroll.seniority_bonus') }} ({{ payslip.seniority_years }} {{ $t('payroll.years_short') }} × 0.5%)</span>
+              <span class="text-sm font-medium text-gray-900">
+                <BaseFormatMoney
+                  :amount="payslip.seniority_bonus"
+                  :currency="companyStore.selectedCompanyCurrency"
+                />
+              </span>
+            </div>
+            <div v-if="payslip.overtime_amount" class="flex justify-between">
+              <span class="text-sm text-gray-600">{{ $t('payroll.overtime_pay') }} ({{ payslip.overtime_hours }}h)</span>
+              <span class="text-sm font-medium text-gray-900">
+                <BaseFormatMoney
+                  :amount="payslip.overtime_amount"
+                  :currency="companyStore.selectedCompanyCurrency"
+                />
+              </span>
+            </div>
+            <div v-if="payslip.night_amount" class="flex justify-between">
+              <span class="text-sm text-gray-600">{{ $t('payroll.night_work_pay') }} ({{ payslip.night_hours }}h)</span>
+              <span class="text-sm font-medium text-gray-900">
+                <BaseFormatMoney
+                  :amount="payslip.night_amount"
+                  :currency="companyStore.selectedCompanyCurrency"
+                />
+              </span>
+            </div>
+            <div v-if="payslip.leave_deduction_amount" class="flex justify-between">
+              <span class="text-sm text-red-500">{{ $t('payroll.leave_deduction') }} ({{ payslip.leave_days_taken }} {{ $t('payroll.business_days') }})</span>
+              <span class="text-sm font-medium text-red-500">
+                -<BaseFormatMoney
+                  :amount="payslip.leave_deduction_amount"
+                  :currency="companyStore.selectedCompanyCurrency"
+                />
+              </span>
+            </div>
           </div>
         </div>
 

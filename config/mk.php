@@ -486,6 +486,13 @@ return [
 
         // Personal deduction (лично ослободување) — Закон за данокот на личен доход
         'personal_deduction' => 1027000,            // MKD 10,270 in cents per month
+
+        // Seniority bonus (минат труд) — Колективен договор / Закон за работни односи
+        'seniority_rate_per_year' => 0.005,         // 0.5% of gross per year of service
+
+        // Night work premium (ноќна работа) — Art. 105 Закон за работни односи
+        // Hours between 22:00-06:00 get 35% premium (same as regular OT rate)
+        'night_work_multiplier' => 1.35,            // 135% of base hourly rate
     ],
 
     /*

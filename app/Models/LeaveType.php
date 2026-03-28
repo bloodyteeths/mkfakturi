@@ -35,14 +35,38 @@ class LeaveType extends Model
     /** @var string Leave type code for annual leave */
     public const CODE_ANNUAL = 'ANNUAL';
 
-    /** @var string Leave type code for sick leave */
+    /** @var string Leave type code for sick leave (70% employer-funded, first 30 days) */
     public const CODE_SICK = 'SICK';
+
+    /** @var string Leave type code for sick leave due to work injury (100% from day 1) */
+    public const CODE_SICK_WORK_INJURY = 'SICK_WORK_INJURY';
 
     /** @var string Leave type code for maternity leave */
     public const CODE_MATERNITY = 'MATERNITY';
 
+    /** @var string Leave type code for parental leave (father) */
+    public const CODE_PARENTAL = 'PARENTAL';
+
     /** @var string Leave type code for unpaid leave */
     public const CODE_UNPAID = 'UNPAID';
+
+    /** @var string Leave type code for marriage leave (Art. 146) */
+    public const CODE_MARRIAGE = 'MARRIAGE';
+
+    /** @var string Leave type code for bereavement leave (Art. 146) */
+    public const CODE_BEREAVEMENT = 'BEREAVEMENT';
+
+    /** @var string Leave type code for blood donation leave */
+    public const CODE_BLOOD_DONATION = 'BLOOD_DONATION';
+
+    /** @var string Leave type code for study/exam leave */
+    public const CODE_STUDY = 'STUDY';
+
+    /** @var string Leave type code for moving house */
+    public const CODE_MOVING = 'MOVING';
+
+    /** @var string Leave type code for natural disaster leave */
+    public const CODE_NATURAL_DISASTER = 'NATURAL_DISASTER';
 
     protected $guarded = [
         'id',
