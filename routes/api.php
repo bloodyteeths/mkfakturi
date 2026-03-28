@@ -1913,6 +1913,19 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/valuation', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryValuation']);
         Route::get('/item-card/{item}', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'itemCard']);
         Route::get('/movements', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'movements']);
+
+        // WAC Audit (partner-scoped)
+        Route::prefix('wac-audit')->group(function () {
+            Route::get('/', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'index']);
+            Route::post('/run', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'run']);
+            Route::get('/{id}', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'show']);
+            Route::post('/{id}/analyze', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'analyze']);
+            Route::get('/{id}/proposal', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'proposal']);
+            Route::post('/{id}/proposal/generate', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'generateProposal']);
+            Route::post('/proposals/{proposal}/approve', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'approveProposal']);
+            Route::post('/proposals/{proposal}/reject', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'rejectProposal']);
+            Route::post('/seed-test', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'seedTestDiscrepancy']);
+        });
     });
 
     // Partner Period Lock Management for Client Companies

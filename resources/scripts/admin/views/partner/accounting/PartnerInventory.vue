@@ -374,12 +374,186 @@
           <p class="mt-1 text-sm text-gray-500">{{ $t('stock.select_item_prompt_message', 'Choose filters and click Load to view stock movements.') }}</p>
         </div>
       </template>
+
+      <!-- WAC Audit Tab -->
+      <template v-if="activeTab === 'wacaudit'">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-medium">{{ $t('stock.wac_audit_title', 'Weighted Average Cost Audit') }}</h3>
+          <BaseButton variant="primary" :loading="isRunningAudit" @click="runWacAudit">
+            <template #left="slotProps">
+              <BaseIcon name="MagnifyingGlassIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('stock.run_audit', 'Run Audit') }}
+          </BaseButton>
+        </div>
+
+        <!-- Loading -->
+        <div v-if="isLoadingAudit" class="flex justify-center py-8">
+          <BaseContentPlaceholders>
+            <BaseContentPlaceholdersBox :rounded="true" class="w-full h-64" />
+          </BaseContentPlaceholders>
+        </div>
+
+        <!-- Audit Runs List -->
+        <div v-else-if="wacAuditRuns.length > 0" class="bg-white rounded-lg shadow overflow-hidden mb-6">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('general.date') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('general.status') }}</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.movements_checked', 'Checked') }}</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.discrepancies', 'Discrepancies') }}</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="run in wacAuditRuns" :key="run.id" class="hover:bg-gray-50 cursor-pointer" @click="loadAuditDetail(run.id)">
+                <td class="px-4 py-3 text-sm">#{{ run.id }}</td>
+                <td class="px-4 py-3 text-sm">{{ run.created_at }}</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" :class="auditStatusClass(run.status)">
+                    {{ run.status }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm text-right">{{ run.total_movements_checked }}</td>
+                <td class="px-4 py-3 text-sm text-right">
+                  <span :class="run.discrepancies_found > 0 ? 'text-red-600 font-semibold' : 'text-green-600'">
+                    {{ run.discrepancies_found }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <BaseIcon name="ChevronRightIcon" class="w-4 h-4 text-gray-400" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else class="bg-white rounded-lg shadow p-12 text-center">
+          <BaseIcon name="ShieldCheckIcon" class="mx-auto h-12 w-12 text-gray-400" />
+          <h3 class="mt-2 text-sm font-medium text-gray-900">{{ $t('stock.no_discrepancies', 'No discrepancies') }}</h3>
+          <p class="mt-1 text-sm text-gray-500">{{ $t('stock.run_audit', 'Run Audit') }}</p>
+        </div>
+
+        <!-- Audit Detail Panel -->
+        <div v-if="currentAuditDetail" class="bg-white rounded-lg shadow mt-6">
+          <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-sm font-semibold">{{ $t('stock.wac_audit', 'WAC Audit') }} #{{ currentAuditDetail.id }}</h3>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" :class="auditStatusClass(currentAuditDetail.status)">
+              {{ currentAuditDetail.status }}
+            </span>
+          </div>
+
+          <!-- Summary -->
+          <div class="grid grid-cols-3 gap-4 p-4 border-b border-gray-100">
+            <div>
+              <span class="text-xs text-gray-500">{{ $t('stock.movements_checked', 'Movements Checked') }}</span>
+              <div class="text-lg font-bold">{{ currentAuditDetail.total_movements_checked }}</div>
+            </div>
+            <div>
+              <span class="text-xs text-gray-500">{{ $t('stock.discrepancies', 'Discrepancies') }}</span>
+              <div class="text-lg font-bold" :class="currentAuditDetail.discrepancies_found > 0 ? 'text-red-600' : 'text-green-600'">
+                {{ currentAuditDetail.discrepancies_found }}
+              </div>
+            </div>
+            <div class="flex items-end space-x-2">
+              <BaseButton
+                v-if="currentAuditDetail.has_discrepancies && !currentAuditDetail.proposals?.length"
+                variant="primary"
+                size="sm"
+                :loading="isGeneratingProposal"
+                @click="generateProposal(currentAuditDetail.id)"
+              >
+                {{ $t('stock.generate_correction', 'Generate Correction') }}
+              </BaseButton>
+            </div>
+          </div>
+
+          <!-- Discrepancies Table -->
+          <div v-if="currentAuditDetail.discrepancies?.length" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('stock.chain_position', 'Position') }}</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('general.date') }}</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                  <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.stored_value', 'Stored') }}</th>
+                  <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.expected_value', 'Expected') }}</th>
+                  <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('stock.value_drift', 'Drift') }}</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('stock.root_cause', 'Root Cause') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="d in currentAuditDetail.discrepancies"
+                  :key="d.id"
+                  :class="d.is_root_cause ? 'bg-orange-50 border-l-4 border-orange-400' : 'bg-red-50'"
+                >
+                  <td class="px-3 py-2">#{{ d.chain_position }}</td>
+                  <td class="px-3 py-2">{{ d.movement?.movement_date }}</td>
+                  <td class="px-3 py-2">{{ d.movement?.source_type_label }}</td>
+                  <td class="px-3 py-2 text-right">{{ formatMoney(d.stored_balance_value) }}</td>
+                  <td class="px-3 py-2 text-right">{{ formatMoney(d.expected_balance_value) }}</td>
+                  <td class="px-3 py-2 text-right font-medium text-red-600">{{ formatMoney(d.value_drift) }}</td>
+                  <td class="px-3 py-2">
+                    <span v-if="d.is_root_cause" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                      {{ $t('stock.root_cause', 'Root Cause') }}
+                    </span>
+                    <span v-else-if="d.error_category === 'cascade'" class="text-xs text-gray-400">cascade</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- No discrepancies -->
+          <div v-else-if="!currentAuditDetail.has_discrepancies" class="p-6 text-center">
+            <BaseIcon name="CheckCircleIcon" class="w-8 h-8 text-green-500 mx-auto mb-2" />
+            <p class="text-green-700 font-medium">{{ $t('stock.no_discrepancies', 'No discrepancies — all chains are consistent') }}</p>
+          </div>
+
+          <!-- Correction Proposal -->
+          <div v-for="proposal in (currentAuditDetail.proposals || [])" :key="proposal.id" class="px-4 py-3 border-t border-gray-200">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-semibold">{{ $t('stock.correction_proposal', 'Correction Proposal') }}</span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                :class="proposal.status === 'applied' ? 'bg-green-100 text-green-800' : proposal.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'">
+                {{ proposal.status }}
+              </span>
+            </div>
+            <p class="text-sm text-gray-600 mb-2">{{ proposal.description }}</p>
+            <div class="grid grid-cols-2 gap-4 mb-3">
+              <div>
+                <span class="text-xs text-gray-500">{{ $t('stock.quantity_drift', 'Qty Adj') }}</span>
+                <div class="font-medium">{{ Number(proposal.net_quantity_adjustment).toFixed(4) }}</div>
+              </div>
+              <div>
+                <span class="text-xs text-gray-500">{{ $t('stock.value_drift', 'Value Adj') }}</span>
+                <div class="font-medium">{{ formatMoney(proposal.net_value_adjustment) }}</div>
+              </div>
+            </div>
+            <div v-if="proposal.is_usable" class="flex items-center space-x-3">
+              <BaseButton variant="primary" size="sm" :loading="isApprovingProposal" @click="approveProposal(proposal.id, currentAuditDetail.id)">
+                {{ $t('stock.approve_correction', 'Approve') }}
+              </BaseButton>
+              <BaseButton variant="danger-outline" size="sm" @click="rejectProposal(proposal.id, currentAuditDetail.id)">
+                {{ $t('stock.reject_correction', 'Reject') }}
+              </BaseButton>
+            </div>
+            <div v-else-if="proposal.status === 'applied'" class="text-sm text-green-600 font-medium">
+              {{ $t('stock.correction_applied', 'Correction applied') }} — {{ proposal.applied_at }}
+            </div>
+          </div>
+        </div>
+      </template>
     </template>
   </BasePage>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConsoleStore } from '@/scripts/admin/stores/console'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -417,6 +591,21 @@ const movementsLogData = ref([])
 const isLoadingLog = ref(false)
 const hasSearchedLog = ref(false)
 
+// WAC Audit tab
+const wacAuditRuns = ref([])
+const isLoadingAudit = ref(false)
+const currentAuditDetail = ref(null)
+const isLoadingAuditDetail = ref(false)
+const isRunningAudit = ref(false)
+const isGeneratingProposal = ref(false)
+const isApprovingProposal = ref(false)
+
+watch(activeTab, (tab) => {
+  if (tab === 'wacaudit' && selectedCompanyId.value && wacAuditRuns.value.length === 0) {
+    loadWacAuditRuns()
+  }
+})
+
 const companies = computed(() => consoleStore.managedCompanies || [])
 
 const selectedCompanyCurrency = computed(() => {
@@ -429,6 +618,7 @@ const tabs = computed(() => [
   { key: 'inventory', label: t('stock.inventory_list', 'Inventory List') },
   { key: 'itemcard', label: t('stock.item_card', 'Item Card') },
   { key: 'movements', label: t('stock.movements_log', 'Stock Movements Log') },
+  { key: 'wacaudit', label: t('stock.wac_audit', 'WAC Audit') },
 ])
 
 // Client-side filter + sort
@@ -483,6 +673,8 @@ function onCompanyChange() {
   hasSearched.value = false
   hasSearchedLog.value = false
   searchQuery.value = ''
+  wacAuditRuns.value = []
+  currentAuditDetail.value = null
   if (selectedCompanyId.value) {
     loadInventory()
   }
@@ -626,6 +818,100 @@ function exportLogCsv() {
     m.unit_cost ? (m.unit_cost / 100).toFixed(2) : '', m.balance_quantity,
   ])
   downloadCsv(headers, rows, 'movements_log')
+}
+
+// === WAC Audit ===
+async function loadWacAuditRuns() {
+  if (!selectedCompanyId.value) return
+  isLoadingAudit.value = true
+  try {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/stock-reports/wac-audit`)
+    wacAuditRuns.value = response.data.data || []
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to load WAC audits' })
+  } finally {
+    isLoadingAudit.value = false
+  }
+}
+
+async function runWacAudit() {
+  if (!selectedCompanyId.value) return
+  isRunningAudit.value = true
+  try {
+    const response = await window.axios.post(`/partner/companies/${selectedCompanyId.value}/stock-reports/wac-audit/run`, {})
+    const result = response.data
+    notificationStore.showNotification({
+      type: result.data?.has_discrepancies ? 'warning' : 'success',
+      message: result.message,
+    })
+    await loadWacAuditRuns()
+    if (result.data?.id) {
+      await loadAuditDetail(result.data.id)
+    }
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Audit failed' })
+  } finally {
+    isRunningAudit.value = false
+  }
+}
+
+async function loadAuditDetail(runId) {
+  if (!selectedCompanyId.value) return
+  isLoadingAuditDetail.value = true
+  try {
+    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/stock-reports/wac-audit/${runId}`)
+    currentAuditDetail.value = response.data.data
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to load audit detail' })
+  } finally {
+    isLoadingAuditDetail.value = false
+  }
+}
+
+async function generateProposal(runId) {
+  if (!selectedCompanyId.value) return
+  isGeneratingProposal.value = true
+  try {
+    await window.axios.post(`/partner/companies/${selectedCompanyId.value}/stock-reports/wac-audit/${runId}/proposal/generate`)
+    notificationStore.showNotification({ type: 'success', message: t('stock.correction_proposal', 'Correction proposal generated') })
+    await loadAuditDetail(runId)
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to generate proposal' })
+  } finally {
+    isGeneratingProposal.value = false
+  }
+}
+
+async function approveProposal(proposalId, runId) {
+  if (!confirm(t('stock.confirm_approve', 'Are you sure you want to approve this correction?'))) return
+  isApprovingProposal.value = true
+  try {
+    const response = await window.axios.post(`/partner/companies/${selectedCompanyId.value}/stock-reports/wac-audit/proposals/${proposalId}/approve`)
+    notificationStore.showNotification({ type: 'success', message: response.data.message })
+    await loadAuditDetail(runId)
+    await loadWacAuditRuns()
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to approve' })
+  } finally {
+    isApprovingProposal.value = false
+  }
+}
+
+async function rejectProposal(proposalId, runId) {
+  if (!confirm(t('stock.confirm_reject', 'Are you sure you want to reject this correction?'))) return
+  const notes = prompt(t('stock.reject_reason', 'Rejection reason (optional):'))
+  try {
+    await window.axios.post(`/partner/companies/${selectedCompanyId.value}/stock-reports/wac-audit/proposals/${proposalId}/reject`, { notes: notes || '' })
+    notificationStore.showNotification({ type: 'info', message: t('stock.correction_rejected', 'Correction rejected') })
+    await loadAuditDetail(runId)
+  } catch (error) {
+    notificationStore.showNotification({ type: 'error', message: error.response?.data?.message || 'Failed to reject' })
+  }
+}
+
+function auditStatusClass(status) {
+  const map = { completed: 'bg-green-100 text-green-800', running: 'bg-blue-100 text-blue-800', pending: 'bg-yellow-100 text-yellow-800', failed: 'bg-red-100 text-red-800' }
+  return map[status] || 'bg-gray-100 text-gray-800'
 }
 
 function downloadCsv(headers, rows, filename) {

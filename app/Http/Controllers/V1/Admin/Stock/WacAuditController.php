@@ -21,11 +21,20 @@ class WacAuditController extends Controller
     ) {}
 
     /**
+     * Resolve company ID from either the URL param (partner routes)
+     * or the request header (user routes).
+     */
+    protected function resolveCompanyId(Request $request): int
+    {
+        return (int) ($request->route('company') ?: $this->resolveCompanyId($request));
+    }
+
+    /**
      * List audit runs for the company.
      */
     public function index(Request $request): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->resolveCompanyId($request);
         $limit = (int) $request->query('limit', 15);
 
         $runs = WacAuditRun::where('company_id', $companyId)
@@ -49,7 +58,7 @@ class WacAuditController extends Controller
      */
     public function run(Request $request): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->resolveCompanyId($request);
         $itemId = $request->input('item_id');
         $warehouseId = $request->input('warehouse_id');
 
@@ -81,7 +90,7 @@ class WacAuditController extends Controller
      */
     public function show(Request $request, int $id): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->resolveCompanyId($request);
 
         $auditRun = WacAuditRun::where('company_id', $companyId)
             ->with([
@@ -134,7 +143,7 @@ class WacAuditController extends Controller
      */
     public function analyze(Request $request, int $id): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->resolveCompanyId($request);
 
         $auditRun = WacAuditRun::where('company_id', $companyId)->findOrFail($id);
 
@@ -165,7 +174,7 @@ class WacAuditController extends Controller
      */
     public function proposal(Request $request, int $id): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->resolveCompanyId($request);
 
         $auditRun = WacAuditRun::where('company_id', $companyId)->findOrFail($id);
 
@@ -187,7 +196,7 @@ class WacAuditController extends Controller
      */
     public function generateProposal(Request $request, int $id): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->resolveCompanyId($request);
 
         $auditRun = WacAuditRun::where('company_id', $companyId)->findOrFail($id);
 
@@ -217,7 +226,7 @@ class WacAuditController extends Controller
      */
     public function approveProposal(Request $request, int $proposalId): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->resolveCompanyId($request);
 
         $proposal = WacCorrectionProposal::where('company_id', $companyId)->findOrFail($proposalId);
 
@@ -252,7 +261,7 @@ class WacAuditController extends Controller
      */
     public function rejectProposal(Request $request, int $proposalId): JsonResponse
     {
-        $companyId = $request->header('company');
+        $companyId = $this->resolveCompanyId($request);
 
         $proposal = WacCorrectionProposal::where('company_id', $companyId)->findOrFail($proposalId);
 
@@ -284,7 +293,7 @@ class WacAuditController extends Controller
      */
     public function seedTestDiscrepancy(Request $request): JsonResponse
     {
-        $companyId = (int) $request->header('company');
+        $companyId = (int) $this->resolveCompanyId($request);
         $userId = auth()->id();
 
         // Get the first trackable item + warehouse for this company
