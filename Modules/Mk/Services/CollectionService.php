@@ -60,6 +60,14 @@ class CollectionService
             }
         }
 
+        if (! empty($filters['due_date_from'])) {
+            $query->where('due_date', '>=', $filters['due_date_from']);
+        }
+
+        if (! empty($filters['due_date_to'])) {
+            $query->where('due_date', '<=', $filters['due_date_to']);
+        }
+
         if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
@@ -546,6 +554,275 @@ class CollectionService
             'total_with_interest' => $dueAmount + $interest,
             'today' => $today->format('d.m.Y'),
             'reminder_count' => $reminderCount,
+        ];
+    }
+
+    /**
+     * Get open items grouped by customer for ИОС.
+     */
+    public function getOpenItemsByCustomer(int $companyId, array $filters = []): array
+    {
+        $query = Invoice::where('company_id', $companyId)
+            ->where('due_amount', '>', 0)
+            ->whereNotIn('status', [Invoice::STATUS_DRAFT])
+            ->whereIn('paid_status', [Invoice::STATUS_UNPAID, Invoice::STATUS_PARTIALLY_PAID])
+            ->with('customer:id,name,email,phone', 'currency:id,symbol');
+
+        if (empty($filters['include_current'])) {
+            $query->where('due_date', '<', Carbon::today()->format('Y-m-d'));
+        }
+
+        if (! empty($filters['customer_id'])) {
+            $query->where('customer_id', $filters['customer_id']);
+        }
+
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->whereHas('customer', function ($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $invoices = $query->orderBy('customer_id')->orderBy('due_date', 'asc')->get();
+        $today = Carbon::today();
+        $annualRate = $this->getInterestRate($companyId);
+
+        $grouped = $invoices->groupBy('customer_id');
+
+        $grandTotalDue = 0;
+        $grandTotalInterest = 0;
+        $invoiceCount = 0;
+
+        $customers = $grouped->map(function ($items, $customerId) use ($today, $annualRate, &$grandTotalDue, &$grandTotalInterest, &$invoiceCount) {
+            $customer = $items->first()->customer;
+            $subtotalDue = 0;
+            $subtotalInterest = 0;
+
+            $mappedItems = $items->map(function ($invoice) use ($today, $annualRate, &$subtotalDue, &$subtotalInterest, &$invoiceCount) {
+                $dueDate = Carbon::parse($invoice->due_date instanceof \DateTimeInterface ? $invoice->due_date : (string) $invoice->due_date);
+                $dueAmount = (int) $invoice->due_amount;
+                $daysOverdue = $dueDate->lt($today) ? $dueDate->diffInDays($today) : 0;
+                $interest = $daysOverdue > 0 ? (int) round($dueAmount * ($annualRate / 100 / 365) * $daysOverdue) : 0;
+
+                $subtotalDue += $dueAmount;
+                $subtotalInterest += $interest;
+                $invoiceCount++;
+
+                return [
+                    'id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'invoice_date' => $invoice->invoice_date instanceof \DateTimeInterface ? $invoice->invoice_date->format('Y-m-d') : (string) $invoice->invoice_date,
+                    'due_date' => $dueDate->format('Y-m-d'),
+                    'total' => (int) $invoice->total,
+                    'due_amount' => $dueAmount,
+                    'days_overdue' => $daysOverdue,
+                    'interest' => $interest,
+                ];
+            })->values()->toArray();
+
+            $grandTotalDue += $subtotalDue;
+            $grandTotalInterest += $subtotalInterest;
+
+            return [
+                'customer_id' => (int) $customerId,
+                'customer_name' => $customer?->name,
+                'customer_email' => $customer?->email,
+                'items' => $mappedItems,
+                'subtotal_due' => $subtotalDue,
+                'subtotal_interest' => $subtotalInterest,
+                'subtotal_total_with_interest' => $subtotalDue + $subtotalInterest,
+            ];
+        })->values()->toArray();
+
+        return [
+            'customers' => $customers,
+            'grand_total_due' => $grandTotalDue,
+            'grand_total_interest' => $grandTotalInterest,
+            'grand_total_with_interest' => $grandTotalDue + $grandTotalInterest,
+            'customer_count' => count($customers),
+            'invoice_count' => $invoiceCount,
+        ];
+    }
+
+    /**
+     * Get data for ИОС PDF for a specific customer.
+     */
+    public function getIosData(int $companyId, int $customerId): array
+    {
+        $customer = Customer::where('company_id', $companyId)->where('id', $customerId)->first();
+        if (! $customer) {
+            throw new \InvalidArgumentException('Customer not found.');
+        }
+
+        $invoices = Invoice::where('company_id', $companyId)
+            ->where('customer_id', $customerId)
+            ->where('due_amount', '>', 0)
+            ->whereNotIn('status', [Invoice::STATUS_DRAFT])
+            ->whereIn('paid_status', [Invoice::STATUS_UNPAID, Invoice::STATUS_PARTIALLY_PAID])
+            ->with('currency:id,symbol')
+            ->orderBy('due_date', 'asc')
+            ->get();
+
+        $company = \App\Models\Company::find($companyId);
+        $logoMedia = $company->getMedia('logo')->first();
+        $logo = $logoMedia ? $logoMedia->getFullUrl() : null;
+
+        $today = Carbon::today();
+        $annualRate = $this->getInterestRate($companyId);
+        $currencySymbol = $invoices->first()?->currency?->symbol ?? 'ден.';
+
+        $totalDue = 0;
+        $totalInterest = 0;
+
+        $items = $invoices->map(function ($invoice) use ($today, $annualRate, &$totalDue, &$totalInterest) {
+            $dueDate = Carbon::parse($invoice->due_date instanceof \DateTimeInterface ? $invoice->due_date : (string) $invoice->due_date);
+            $dueAmount = (int) $invoice->due_amount;
+            $daysOverdue = $dueDate->lt($today) ? $dueDate->diffInDays($today) : 0;
+            $interest = $daysOverdue > 0 ? (int) round($dueAmount * ($annualRate / 100 / 365) * $daysOverdue) : 0;
+
+            $totalDue += $dueAmount;
+            $totalInterest += $interest;
+
+            return (object) [
+                'invoice_number' => $invoice->invoice_number,
+                'invoice_date' => $invoice->invoice_date instanceof \DateTimeInterface ? $invoice->invoice_date->format('d.m.Y') : Carbon::parse((string) $invoice->invoice_date)->format('d.m.Y'),
+                'due_date' => $dueDate->format('d.m.Y'),
+                'total' => (int) $invoice->total,
+                'paid' => (int) $invoice->total - $dueAmount,
+                'due_amount' => $dueAmount,
+                'days_overdue' => $daysOverdue,
+                'interest' => $interest,
+            ];
+        });
+
+        return [
+            'company' => $company,
+            'customer' => $customer,
+            'logo' => $logo,
+            'currency_symbol' => $currencySymbol,
+            'items' => $items,
+            'total_due' => $totalDue,
+            'total_interest' => $totalInterest,
+            'total_with_interest' => $totalDue + $totalInterest,
+            'interest_rate' => $annualRate,
+            'today' => $today->format('d.m.Y'),
+        ];
+    }
+
+    /**
+     * Bulk send ИОС PDFs to customers.
+     */
+    public function sendIosBulk(int $companyId, array $customerIds = []): array
+    {
+        $query = Invoice::where('company_id', $companyId)
+            ->where('due_amount', '>', 0)
+            ->where('due_date', '<', Carbon::today()->format('Y-m-d'))
+            ->whereNotIn('status', [Invoice::STATUS_DRAFT])
+            ->whereIn('paid_status', [Invoice::STATUS_UNPAID, Invoice::STATUS_PARTIALLY_PAID]);
+
+        if (! empty($customerIds)) {
+            $query->whereIn('customer_id', $customerIds);
+        }
+
+        $targetCustomerIds = $query->distinct()->pluck('customer_id')->toArray();
+
+        $sent = 0;
+        $failed = 0;
+
+        foreach ($targetCustomerIds as $custId) {
+            try {
+                $iosData = $this->getIosData($companyId, $custId);
+                $customer = $iosData['customer'];
+
+                if (! $customer->email) {
+                    $failed++;
+                    continue;
+                }
+
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('app.pdf.reports.ios', $iosData);
+                $pdf->setPaper('A4', 'portrait');
+                $pdfContent = $pdf->output();
+
+                $company = $iosData['company'];
+
+                \Illuminate\Support\Facades\Mail::to($customer->email)
+                    ->send(new \App\Mail\IosMail($company, $customer, $pdfContent));
+
+                $sent++;
+            } catch (\Exception $e) {
+                $failed++;
+                \Log::warning("IOS bulk send failed for customer {$custId}: " . $e->getMessage());
+            }
+        }
+
+        return ['sent' => $sent, 'failed' => $failed];
+    }
+
+    /**
+     * Get data for Каматна нота PDF for a specific customer.
+     */
+    public function getInterestNoteData(int $companyId, int $customerId): array
+    {
+        $customer = Customer::where('company_id', $companyId)->where('id', $customerId)->first();
+        if (! $customer) {
+            throw new \InvalidArgumentException('Customer not found.');
+        }
+
+        $invoices = Invoice::where('company_id', $companyId)
+            ->where('customer_id', $customerId)
+            ->where('due_amount', '>', 0)
+            ->where('due_date', '<', Carbon::today()->format('Y-m-d'))
+            ->whereNotIn('status', [Invoice::STATUS_DRAFT])
+            ->whereIn('paid_status', [Invoice::STATUS_UNPAID, Invoice::STATUS_PARTIALLY_PAID])
+            ->with('currency:id,symbol')
+            ->orderBy('due_date', 'asc')
+            ->get();
+
+        if ($invoices->isEmpty()) {
+            throw new \InvalidArgumentException('No overdue invoices found for this customer.');
+        }
+
+        $company = \App\Models\Company::find($companyId);
+        $logoMedia = $company->getMedia('logo')->first();
+        $logo = $logoMedia ? $logoMedia->getFullUrl() : null;
+
+        $today = Carbon::today();
+        $annualRate = $this->getInterestRate($companyId);
+        $currencySymbol = $invoices->first()?->currency?->symbol ?? 'ден.';
+
+        $totalPrincipal = 0;
+        $totalInterest = 0;
+
+        $items = $invoices->map(function ($invoice) use ($today, $annualRate, &$totalPrincipal, &$totalInterest) {
+            $dueDate = Carbon::parse($invoice->due_date instanceof \DateTimeInterface ? $invoice->due_date : (string) $invoice->due_date);
+            $dueAmount = (int) $invoice->due_amount;
+            $daysOverdue = $dueDate->diffInDays($today);
+            $interest = (int) round($dueAmount * ($annualRate / 100 / 365) * $daysOverdue);
+
+            $totalPrincipal += $dueAmount;
+            $totalInterest += $interest;
+
+            return (object) [
+                'invoice_number' => $invoice->invoice_number,
+                'due_date' => $dueDate->format('d.m.Y'),
+                'due_amount' => $dueAmount,
+                'days_overdue' => $daysOverdue,
+                'interest_rate' => $annualRate,
+                'interest' => $interest,
+            ];
+        });
+
+        return [
+            'company' => $company,
+            'customer' => $customer,
+            'logo' => $logo,
+            'currency_symbol' => $currencySymbol,
+            'items' => $items,
+            'total_principal' => $totalPrincipal,
+            'total_interest' => $totalInterest,
+            'total_with_interest' => $totalPrincipal + $totalInterest,
+            'interest_rate' => $annualRate,
+            'today' => $today->format('d.m.Y'),
         ];
     }
 

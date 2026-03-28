@@ -19,6 +19,31 @@
       </template>
     </BasePageHeader>
 
+    <!-- Navigation Tabs -->
+    <div class="flex gap-1 mb-4 border-b border-gray-200">
+      <router-link
+        :to="{ name: 'bi-dashboard.index' }"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="$route.name === 'bi-dashboard.index' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+      >
+        {{ t('summary') }}
+      </router-link>
+      <router-link
+        :to="{ name: 'bi-dashboard.trends' }"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="$route.name === 'bi-dashboard.trends' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+      >
+        {{ t('trends') }}
+      </router-link>
+      <router-link
+        :to="{ name: 'bi-dashboard.ratios' }"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="$route.name === 'bi-dashboard.ratios' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+      >
+        {{ t('financial_ratios') }}
+      </router-link>
+    </div>
+
     <!-- Loading -->
     <div v-if="isLoading" class="text-center py-12">
       <p class="text-sm text-gray-500">{{ $t('general.loading') }}...</p>
@@ -189,10 +214,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import biMessages from '@/scripts/admin/i18n/bi-dashboard.js'
 
+const route = useRoute()
 const notificationStore = useNotificationStore()
 
 const locale = document.documentElement.lang || 'mk'
@@ -200,6 +227,13 @@ function t(key) {
   return biMessages[locale]?.bi_dashboard?.[key]
     || biMessages['en']?.bi_dashboard?.[key]
     || key
+}
+
+function toLocalDateString(d) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 const isLoading = ref(false)
@@ -237,18 +271,18 @@ function getPeriodDate() {
   switch (selectedPeriod.value) {
     case 'last_month': {
       const d = new Date(now.getFullYear(), now.getMonth() - 1 + 1, 0)
-      return d.toISOString().split('T')[0]
+      return toLocalDateString(d)
     }
     case 'last_quarter': {
       const qMonth = Math.floor((now.getMonth()) / 3) * 3
       const d = new Date(now.getFullYear(), qMonth, 0)
-      return d.toISOString().split('T')[0]
+      return toLocalDateString(d)
     }
     case 'this_year':
       return `${now.getFullYear()}-12-31`
     default: {
       const d = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-      return d.toISOString().split('T')[0]
+      return toLocalDateString(d)
     }
   }
 }

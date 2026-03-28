@@ -28,6 +28,8 @@ class CollectionController extends Controller
             'customer_id' => $request->query('customer_id'),
             'escalation_level' => $request->query('escalation_level'),
             'search' => $request->query('search'),
+            'due_date_from' => $request->query('due_date_from'),
+            'due_date_to' => $request->query('due_date_to'),
             'page' => $request->query('page', 1),
             'per_page' => $request->query('per_page', 50),
         ];
@@ -268,6 +270,106 @@ class CollectionController extends Controller
             $pdf->setPaper('A4', 'portrait');
 
             $filename = "opomena-{$data['invoice']->invoice_number}.pdf";
+
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+    /**
+     * List open items grouped by customer (ИОС data).
+     */
+    public function ios(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $filters = [
+            'customer_id' => $request->query('customer_id'),
+            'search' => $request->query('search'),
+            'include_current' => (bool) $request->query('include_current', false),
+        ];
+
+        $result = $this->service->getOpenItemsByCustomer($companyId, $filters);
+
+        return response()->json([
+            'success' => true,
+            'data' => $result,
+        ]);
+    }
+
+    /**
+     * Generate ИОС PDF for a specific customer.
+     */
+    public function iosPdf(Request $request, int $customerId)
+    {
+        $companyId = (int) $request->header('company');
+
+        try {
+            $data = $this->service->getIosData($companyId, $customerId);
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('app.pdf.reports.ios', $data);
+            $pdf->setPaper('A4', 'portrait');
+
+            $filename = "ios-{$data['customer']->name}-" . now()->format('Y-m-d') . '.pdf';
+
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Bulk send ИОС PDFs via email.
+     */
+    public function iosBulkSend(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $request->validate([
+            'customer_ids' => 'nullable|array',
+            'customer_ids.*' => 'integer',
+        ]);
+
+        try {
+            $result = $this->service->sendIosBulk(
+                $companyId,
+                $request->input('customer_ids', [])
+            );
+
+            return response()->json([
+                'success' => true,
+                'sent' => $result['sent'],
+                'failed' => $result['failed'],
+                'message' => "Sent: {$result['sent']}, Failed: {$result['failed']}",
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Generate Каматна нота PDF for a specific customer.
+     */
+    public function interestNotePdf(Request $request, int $customerId)
+    {
+        $companyId = (int) $request->header('company');
+
+        try {
+            $data = $this->service->getInterestNoteData($companyId, $customerId);
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('app.pdf.reports.kamatna-nota', $data);
+            $pdf->setPaper('A4', 'portrait');
+
+            $filename = "kamatna-nota-{$data['customer']->name}-" . now()->format('Y-m-d') . '.pdf';
 
             return $pdf->download($filename);
         } catch (\Exception $e) {

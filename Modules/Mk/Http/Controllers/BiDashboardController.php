@@ -127,11 +127,115 @@ class BiDashboardController extends Controller
                     'ratios' => $allData,
                     'health' => $healthIndicators,
                     'raw' => $raw,
+                    'last_calculated_at' => $this->service->getLastCachedAt($companyId),
                 ],
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Get comparative ratios: current period vs same period last year.
+     */
+    public function comparative(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        if (! $companyId) {
+            return response()->json(['error' => 'Company header required'], 400);
+        }
+
+        if (! $this->service->isInitialized($companyId)) {
+            return response()->json([
+                'success' => true,
+                'data' => null,
+                'message' => 'accounting_not_initialized',
+            ]);
+        }
+
+        $date = $request->query('date', Carbon::now()->endOfMonth()->toDateString());
+
+        try {
+            $data = $this->service->computeComparativeRatios($companyId, $date);
+
+            $currentRaw = $data['current']['raw'] ?? [];
+            unset($data['current']['raw']);
+            $priorRaw = $data['prior']['raw'] ?? [];
+            unset($data['prior']['raw']);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'current_date' => $date,
+                    'prior_date' => $data['prior_date'],
+                    'current' => [
+                        'ratios' => $data['current'],
+                        'health' => $this->buildHealthIndicators($data['current']),
+                        'raw' => $currentRaw,
+                    ],
+                    'prior' => [
+                        'ratios' => $data['prior'],
+                        'health' => $this->buildHealthIndicators($data['prior']),
+                        'raw' => $priorRaw,
+                    ],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Export BI dashboard as PDF.
+     */
+    public function exportPdf(Request $request): \Illuminate\Http\Response
+    {
+        $companyId = (int) $request->header('company');
+
+        if (! $companyId) {
+            abort(400, 'Company header required');
+        }
+
+        if (! $this->service->isInitialized($companyId)) {
+            abort(404, 'Accounting not initialized');
+        }
+
+        $date = $request->query('date', Carbon::now()->endOfMonth()->toDateString());
+        $type = $request->query('type', 'summary');
+
+        $company = \App\Models\Company::find($companyId);
+        $allData = $this->service->computeAllRatios($companyId, $date);
+        $raw = $allData['raw'] ?? [];
+        unset($allData['raw']);
+        $health = $this->buildHealthIndicators($allData);
+
+        // Comparative: prior year same period
+        $priorDate = Carbon::parse($date)->subYear()->endOfMonth()->toDateString();
+        $priorData = $this->service->computeAllRatios($companyId, $priorDate);
+        $priorRaw = $priorData['raw'] ?? [];
+        unset($priorData['raw']);
+
+        $viewData = [
+            'company' => $company,
+            'date' => $date,
+            'prior_date' => $priorDate,
+            'ratios' => $allData,
+            'health' => $health,
+            'raw' => $raw,
+            'prior_ratios' => $priorData,
+            'prior_raw' => $priorRaw,
+            'type' => $type,
+        ];
+
+        $view = 'app.pdf.reports.bi-dashboard';
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, $viewData);
+        $pdf->setPaper('a4', 'portrait');
+
+        $filename = "bi-dashboard-{$type}-" . Carbon::parse($date)->format('Y-m') . ".pdf";
+
+        return $pdf->download($filename);
     }
 
     /**

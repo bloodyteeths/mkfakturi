@@ -8,6 +8,31 @@
       </template>
     </BasePageHeader>
 
+    <!-- Navigation Tabs -->
+    <div class="flex gap-1 mb-4 border-b border-gray-200">
+      <router-link
+        :to="{ name: 'bi-dashboard.index' }"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="$route.name === 'bi-dashboard.index' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+      >
+        {{ t('summary') }}
+      </router-link>
+      <router-link
+        :to="{ name: 'bi-dashboard.trends' }"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="$route.name === 'bi-dashboard.trends' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+      >
+        {{ t('trends') }}
+      </router-link>
+      <router-link
+        :to="{ name: 'bi-dashboard.ratios' }"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="$route.name === 'bi-dashboard.ratios' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+      >
+        {{ t('financial_ratios') }}
+      </router-link>
+    </div>
+
     <!-- Ratio Selector -->
     <div class="mb-6">
       <BaseInputGroup :label="t('select_ratio')">
@@ -96,10 +121,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import biMessages from '@/scripts/admin/i18n/bi-dashboard.js'
 
+const route = useRoute()
 const notificationStore = useNotificationStore()
 
 const locale = document.documentElement.lang || 'mk'
@@ -172,10 +199,10 @@ function formatMonth(dateStr) {
   if (!dateStr) return ''
   const parts = dateStr.split('-')
   const monthNames = {
-    mk: ['Јан', 'Фев', 'Мар', 'Апр', 'Мај', 'Јун', 'Јул', 'Авг', 'Сеп', 'Окт', 'Ное', 'Дек'],
+    mk: ['\u0408\u0430\u043d', '\u0424\u0435\u0432', '\u041c\u0430\u0440', '\u0410\u043f\u0440', '\u041c\u0430\u0458', '\u0408\u0443\u043d', '\u0408\u0443\u043b', '\u0410\u0432\u0433', '\u0421\u0435\u043f', '\u041e\u043a\u0442', '\u041d\u043e\u0435', '\u0414\u0435\u043a'],
     en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    tr: ['Oca', 'Sub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Agu', 'Eyl', 'Eki', 'Kas', 'Ara'],
-    sq: ['Jan', 'Shk', 'Mar', 'Pri', 'Maj', 'Qer', 'Kor', 'Gus', 'Sht', 'Tet', 'Nen', 'Dhj'],
+    tr: ['Oca', '\u015eub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'A\u011fu', 'Eyl', 'Eki', 'Kas', 'Ara'],
+    sq: ['Jan', 'Shk', 'Mar', 'Pri', 'Maj', 'Qer', 'Kor', 'Gus', 'Sht', 'Tet', 'N\u00ebn', 'Dhj'],
   }
   const names = monthNames[locale] || monthNames['en']
   const monthIdx = parseInt(parts[1], 10) - 1

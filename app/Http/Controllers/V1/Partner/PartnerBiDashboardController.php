@@ -97,6 +97,52 @@ class PartnerBiDashboardController extends Controller
     }
 
     /**
+     * Get comparative ratios: current period vs same period last year.
+     */
+    public function comparative(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['success' => false, 'message' => 'Access denied'], 403);
+        }
+
+        if (! $this->service->isInitialized($company)) {
+            return response()->json(['success' => true, 'data' => null, 'message' => 'accounting_not_initialized']);
+        }
+
+        $date = $request->query('date', Carbon::now()->endOfMonth()->toDateString());
+
+        try {
+            $data = $this->service->computeComparativeRatios($company, $date);
+
+            $currentRaw = $data['current']['raw'] ?? [];
+            unset($data['current']['raw']);
+            $priorRaw = $data['prior']['raw'] ?? [];
+            unset($data['prior']['raw']);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'current_date' => $date,
+                    'prior_date' => $data['prior_date'],
+                    'current' => [
+                        'ratios' => $data['current'],
+                        'health' => $this->buildHealthIndicators($data['current']),
+                        'raw' => $currentRaw,
+                    ],
+                    'prior' => [
+                        'ratios' => $data['prior'],
+                        'health' => $this->buildHealthIndicators($data['prior']),
+                        'raw' => $priorRaw,
+                    ],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Get full summary with all ratios and health indicators.
      */
     public function summary(Request $request, int $company): JsonResponse

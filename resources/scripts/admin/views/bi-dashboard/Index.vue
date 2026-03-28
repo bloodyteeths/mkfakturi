@@ -2,14 +2,52 @@
   <BasePage>
     <BasePageHeader :title="t('title')">
       <template #actions>
-        <BaseButton variant="primary-outline" size="sm" @click="refreshData" :disabled="isLoading">
-          {{ t('refresh') }}
-        </BaseButton>
+        <div class="flex items-center gap-2">
+          <BaseButton variant="primary-outline" size="sm" @click="exportPdf">
+            PDF
+          </BaseButton>
+          <BaseButton variant="primary-outline" size="sm" @click="printPage">
+            {{ t('print') }}
+          </BaseButton>
+          <BaseButton variant="primary-outline" size="sm" @click="refreshData" :disabled="isLoading">
+            {{ t('refresh') }}
+          </BaseButton>
+        </div>
       </template>
     </BasePageHeader>
 
     <!-- Subtitle -->
     <p class="text-sm text-gray-500 -mt-4 mb-6">{{ t('subtitle') }}</p>
+
+    <!-- Data Freshness -->
+    <p v-if="lastCalculatedAt" class="text-xs text-gray-400 -mt-5 mb-6">
+      {{ t('last_calculated') }}: {{ formatFreshness(lastCalculatedAt) }}
+    </p>
+
+    <!-- Navigation Tabs -->
+    <div class="flex gap-1 mb-4 border-b border-gray-200">
+      <router-link
+        :to="{ name: 'bi-dashboard.index' }"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="$route.name === 'bi-dashboard.index' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+      >
+        {{ t('summary') }}
+      </router-link>
+      <router-link
+        :to="{ name: 'bi-dashboard.trends' }"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="$route.name === 'bi-dashboard.trends' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+      >
+        {{ t('trends') }}
+      </router-link>
+      <router-link
+        :to="{ name: 'bi-dashboard.ratios' }"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+        :class="$route.name === 'bi-dashboard.ratios' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+      >
+        {{ t('financial_ratios') }}
+      </router-link>
+    </div>
 
     <!-- Period Selector Pills -->
     <div class="flex flex-wrap gap-2 mb-6">
@@ -23,6 +61,13 @@
         @click="selectPeriod(opt.value)"
       >
         {{ opt.label }}
+      </button>
+      <button
+        class="px-4 py-2 text-sm font-medium rounded-full border transition-colors"
+        :class="showComparative ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-300'"
+        @click="toggleComparative"
+      >
+        {{ t('comparative') }}
       </button>
     </div>
 
@@ -82,13 +127,17 @@
         </div>
       </div>
 
-      <!-- 4 Key Metric Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <!-- 6 Key Metric Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <!-- Revenue -->
         <div class="bg-white rounded-lg shadow p-5">
           <p class="text-xs font-medium text-gray-500 uppercase mb-1">{{ t('revenue') }}</p>
           <p class="text-xl font-bold text-gray-900">{{ formatCurrency(revenueValue) }}</p>
           <p class="text-[11px] text-gray-400 mt-1.5 leading-snug">{{ t('revenue_desc') }}</p>
+          <div v-if="showComparative && comparativeData" class="mt-1">
+            <span class="text-xs text-gray-400">{{ t('prior_year') }}: </span>
+            <span class="text-xs font-medium text-gray-500">{{ formatCurrency(comparativeData.prior?.raw?.revenue || 0) }}</span>
+          </div>
         </div>
 
         <!-- Net Margin -->
@@ -98,6 +147,10 @@
             {{ formatPercent(netMarginValue) }}
           </p>
           <p class="text-[11px] text-gray-400 mt-1.5 leading-snug">{{ t('net_margin_desc') }}</p>
+          <div v-if="showComparative && comparativeData" class="mt-1">
+            <span class="text-xs text-gray-400">{{ t('prior_year') }}: </span>
+            <span class="text-xs font-medium text-gray-500">{{ formatPercent(comparativeData.prior?.ratios?.profitability?.net_margin || 0) }}</span>
+          </div>
         </div>
 
         <!-- Cash Position -->
@@ -105,6 +158,10 @@
           <p class="text-xs font-medium text-gray-500 uppercase mb-1">{{ t('cash_position') }}</p>
           <p class="text-xl font-bold text-gray-900">{{ formatCurrency(cashValue) }}</p>
           <p class="text-[11px] text-gray-400 mt-1.5 leading-snug">{{ t('cash_position_desc') }}</p>
+          <div v-if="showComparative && comparativeData" class="mt-1">
+            <span class="text-xs text-gray-400">{{ t('prior_year') }}: </span>
+            <span class="text-xs font-medium text-gray-500">{{ formatCurrency(comparativeData.prior?.raw?.cash || 0) }}</span>
+          </div>
         </div>
 
         <!-- Receivable Days -->
@@ -114,6 +171,36 @@
             {{ Math.round(receivableDaysValue) }} <span class="text-sm font-normal text-gray-500">{{ t('days_label') }}</span>
           </p>
           <p class="text-[11px] text-gray-400 mt-1.5 leading-snug">{{ t('receivable_days_desc') }}</p>
+          <div v-if="showComparative && comparativeData" class="mt-1">
+            <span class="text-xs text-gray-400">{{ t('prior_year') }}: </span>
+            <span class="text-xs font-medium text-gray-500">{{ Math.round(comparativeData.prior?.ratios?.activity?.receivable_days || 0) }} {{ t('days_label') }}</span>
+          </div>
+        </div>
+
+        <!-- EBITDA -->
+        <div class="bg-white rounded-lg shadow p-5">
+          <p class="text-xs font-medium text-gray-500 uppercase mb-1">{{ t('ebitda') }}</p>
+          <p class="text-xl font-bold" :class="ebitdaValue >= 0 ? 'text-green-600' : 'text-red-600'">
+            {{ formatCurrency(ebitdaValue) }}
+          </p>
+          <p class="text-[11px] text-gray-400 mt-1.5 leading-snug">{{ t('ebitda_desc') }}</p>
+          <div v-if="showComparative && comparativeData" class="mt-1">
+            <span class="text-xs text-gray-400">{{ t('prior_year') }}: </span>
+            <span class="text-xs font-medium text-gray-500">{{ formatCurrency(comparativeData.prior?.raw?.ebitda || 0) }}</span>
+          </div>
+        </div>
+
+        <!-- Working Capital -->
+        <div class="bg-white rounded-lg shadow p-5">
+          <p class="text-xs font-medium text-gray-500 uppercase mb-1">{{ t('working_capital') }}</p>
+          <p class="text-xl font-bold" :class="workingCapitalValue >= 0 ? 'text-green-600' : 'text-red-600'">
+            {{ formatCurrency(workingCapitalValue) }}
+          </p>
+          <p class="text-[11px] text-gray-400 mt-1.5 leading-snug">{{ t('working_capital_desc') }}</p>
+          <div v-if="showComparative && comparativeData" class="mt-1">
+            <span class="text-xs text-gray-400">{{ t('prior_year') }}: </span>
+            <span class="text-xs font-medium text-gray-500">{{ formatCurrency(comparativeData.prior?.raw?.working_capital || 0) }}</span>
+          </div>
         </div>
       </div>
 
@@ -253,10 +340,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import biMessages from '@/scripts/admin/i18n/bi-dashboard.js'
 
+const route = useRoute()
 const notificationStore = useNotificationStore()
 
 const locale = document.documentElement.lang || 'mk'
@@ -266,11 +355,21 @@ function t(key) {
     || key
 }
 
+function toLocalDateString(d) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 const isLoading = ref(false)
 const summaryData = ref(null)
 const notInitialized = ref(false)
 const selectedPeriod = ref('this_month')
 const showDetails = ref(false)
+const lastCalculatedAt = ref(null)
+const showComparative = ref(false)
+const comparativeData = ref(null)
 
 // Trend
 const trendLoading = ref(false)
@@ -300,19 +399,19 @@ function getPeriodDate() {
   switch (selectedPeriod.value) {
     case 'last_month': {
       const d = new Date(now.getFullYear(), now.getMonth(), 0)
-      return d.toISOString().split('T')[0]
+      return toLocalDateString(d)
     }
     case 'last_quarter': {
       const currentQ = Math.floor(now.getMonth() / 3)
       const prevQEnd = currentQ * 3
       const d = new Date(now.getFullYear(), prevQEnd, 0)
-      return d.toISOString().split('T')[0]
+      return toLocalDateString(d)
     }
     case 'this_year':
       return `${now.getFullYear()}-12-31`
     default: {
       const d = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-      return d.toISOString().split('T')[0]
+      return toLocalDateString(d)
     }
   }
 }
@@ -332,6 +431,8 @@ const revenueValue = computed(() => {
 const netMarginValue = computed(() => summaryData.value?.ratios?.profitability?.net_margin || 0)
 const cashValue = computed(() => summaryData.value?.raw?.cash || 0)
 const receivableDaysValue = computed(() => summaryData.value?.ratios?.activity?.receivable_days || 0)
+const ebitdaValue = computed(() => summaryData.value?.raw?.ebitda || 0)
+const workingCapitalValue = computed(() => summaryData.value?.raw?.working_capital || 0)
 
 // Filter trend data to only months with actual non-zero values
 const trendDataPoints = computed(() => {
@@ -343,11 +444,11 @@ const displayTrendData = computed(() => trendDataPoints.value)
 
 // Formatting
 function formatCurrency(val) {
-  if (val === 0 || val === null || val === undefined) return '0'
+  if (val === 0 || val === null || val === undefined) return '0 \u0434\u0435\u043d'
   return Number(val).toLocaleString(locale === 'mk' ? 'mk-MK' : locale === 'sq' ? 'sq-AL' : locale === 'tr' ? 'tr-TR' : 'en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  })
+  }) + ' \u0434\u0435\u043d'
 }
 
 function formatPercent(val) {
@@ -366,14 +467,25 @@ function formatMonth(dateStr) {
   if (!dateStr) return ''
   const parts = dateStr.split('-')
   const monthNames = {
-    mk: ['Јан', 'Фев', 'Мар', 'Апр', 'Мај', 'Јун', 'Јул', 'Авг', 'Сеп', 'Окт', 'Ное', 'Дек'],
+    mk: ['\u0408\u0430\u043d', '\u0424\u0435\u0432', '\u041c\u0430\u0440', '\u0410\u043f\u0440', '\u041c\u0430\u0458', '\u0408\u0443\u043d', '\u0408\u0443\u043b', '\u0410\u0432\u0433', '\u0421\u0435\u043f', '\u041e\u043a\u0442', '\u041d\u043e\u0435', '\u0414\u0435\u043a'],
     en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    tr: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
-    sq: ['Jan', 'Shk', 'Mar', 'Pri', 'Maj', 'Qer', 'Kor', 'Gus', 'Sht', 'Tet', 'Nën', 'Dhj'],
+    tr: ['Oca', '\u015eub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'A\u011fu', 'Eyl', 'Eki', 'Kas', 'Ara'],
+    sq: ['Jan', 'Shk', 'Mar', 'Pri', 'Maj', 'Qer', 'Kor', 'Gus', 'Sht', 'Tet', 'N\u00ebn', 'Dhj'],
   }
   const names = monthNames[locale] || monthNames['en']
   const monthIdx = parseInt(parts[1], 10) - 1
   return names[monthIdx] || parts[1]
+}
+
+function formatFreshness(isoDate) {
+  if (!isoDate) return ''
+  const diff = Date.now() - new Date(isoDate).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 60) return mins + ' ' + t('minutes_ago')
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return hours + ' ' + t('hours_ago')
+  const days = Math.floor(hours / 24)
+  return days + ' ' + t('days_ago')
 }
 
 // Status colors
@@ -417,6 +529,26 @@ function selectPeriod(val) {
   loadSummary()
 }
 
+async function toggleComparative() {
+  showComparative.value = !showComparative.value
+  if (showComparative.value && !comparativeData.value) {
+    await loadComparative()
+  }
+}
+
+async function loadComparative() {
+  try {
+    const { data } = await axios.get('/bi-dashboard/comparative', {
+      params: { date: getPeriodDate() },
+    })
+    if (data.data) {
+      comparativeData.value = data.data
+    }
+  } catch (e) {
+    notificationStore.showNotification({ type: 'error', message: t('error_loading_comparative') })
+  }
+}
+
 async function loadSummary() {
   isLoading.value = true
   notInitialized.value = false
@@ -429,6 +561,7 @@ async function loadSummary() {
       summaryData.value = null
     } else {
       summaryData.value = data.data || null
+      lastCalculatedAt.value = data.data?.last_calculated_at || null
     }
   } catch (e) {
     notificationStore.showNotification({ type: 'error', message: t('error_loading_summary') })
@@ -465,6 +598,7 @@ async function refreshData() {
       summaryData.value = null
     } else {
       summaryData.value = data.data || null
+      lastCalculatedAt.value = data.data?.last_calculated_at || null
     }
   } catch (e) {
     notificationStore.showNotification({ type: 'error', message: t('error_refreshing') })
@@ -473,10 +607,41 @@ async function refreshData() {
   }
 }
 
+function printPage() {
+  window.print()
+}
+
+async function exportPdf() {
+  try {
+    const response = await axios.get('/bi-dashboard/export-pdf', {
+      params: { date: getPeriodDate(), type: 'summary' },
+      responseType: 'blob',
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `bi-dashboard-${getPeriodDate()}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (e) {
+    notificationStore.showNotification({ type: 'error', message: t('error_exporting_pdf') })
+  }
+}
+
 onMounted(() => {
   loadSummary()
   loadTrend()
 })
 </script>
+
+<style>
+@media print {
+  nav, .sidebar, header, .no-print { display: none !important; }
+  .shadow { box-shadow: none !important; }
+  body { margin: 0; }
+}
+</style>
 
 // CLAUDE-CHECKPOINT

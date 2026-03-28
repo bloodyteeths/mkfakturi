@@ -46,6 +46,8 @@ class FinancialRatioService
         $activity = $this->getActivityRatios($companyId, $date);
         $altmanZ = $this->getAltmanZScore($companyId, $date);
         $rawAmounts = $this->getRawAmounts($companyId, $date);
+        $ebitda = $this->getEbitda($companyId, $date);
+        $workingCapital = $this->getWorkingCapital($companyId, $date);
 
         return [
             'date' => $date,
@@ -54,7 +56,31 @@ class FinancialRatioService
             'solvency' => $solvency,
             'activity' => $activity,
             'altman_z' => $altmanZ,
-            'raw' => $rawAmounts,
+            'raw' => [
+                'revenue' => $rawAmounts['revenue'],
+                'cash' => $rawAmounts['cash'],
+                'ebitda' => $ebitda['ebitda'],
+                'ebitda_margin' => $ebitda['ebitda_margin'],
+                'working_capital' => $workingCapital['working_capital'],
+            ],
+        ];
+    }
+
+    /**
+     * Compute ratios for current period and prior year for comparison.
+     */
+    public function computeComparativeRatios(int $companyId, string $currentDate): array
+    {
+        $current = $this->computeAllRatios($companyId, $currentDate);
+
+        // Prior period: same period last year
+        $priorDate = Carbon::parse($currentDate)->subYear()->endOfMonth()->toDateString();
+        $prior = $this->computeAllRatios($companyId, $priorDate);
+
+        return [
+            'current' => $current,
+            'prior' => $prior,
+            'prior_date' => $priorDate,
         ];
     }
 
@@ -69,6 +95,63 @@ class FinancialRatioService
         return [
             'revenue' => round($revenue, 2),
             'cash' => round($cash, 2),
+        ];
+    }
+
+    /**
+     * Get EBITDA (Earnings Before Interest, Taxes, Depreciation & Amortization).
+     *
+     * Note: We use EBIT as the proxy for EBITDA because IFRS account types
+     * do not reliably separate depreciation/amortization from other operating
+     * expenses. For MK SMEs this is an acceptable approximation.
+     *
+     * @return array{ebitda: float, ebitda_margin: float}
+     */
+    public function getEbitda(int $companyId, string $date): array
+    {
+        $revenue = $this->sumByAccountTypes($companyId, $date, ['OPERATING_REVENUE'], true);
+        $operatingExpense = $this->sumByAccountTypes($companyId, $date, ['OPERATING_EXPENSE']);
+
+        // EBITDA ≈ EBIT (D&A not separately identifiable from IFRS account types)
+        $ebitda = $revenue - $operatingExpense;
+
+        $ebitdaMargin = $revenue != 0
+            ? round($ebitda / $revenue, 4)
+            : 0;
+
+        return [
+            'ebitda' => round($ebitda, 2),
+            'ebitda_margin' => $ebitdaMargin,
+        ];
+    }
+
+    /**
+     * Get Working Capital metrics.
+     *
+     * Working Capital = Current Assets - Current Liabilities
+     * Working Capital Ratio = Current Assets / Current Liabilities (same as current_ratio)
+     *
+     * @return array{working_capital: float, working_capital_ratio: float}
+     */
+    public function getWorkingCapital(int $companyId, string $date): array
+    {
+        $currentAssets = $this->sumByAccountTypes($companyId, $date, [
+            'BANK', 'RECEIVABLE', 'INVENTORY', 'CURRENT_ASSET',
+        ]);
+
+        $currentLiabilities = $this->sumByAccountTypes($companyId, $date, [
+            'PAYABLE', 'CURRENT_LIABILITY',
+        ]);
+
+        $workingCapital = $currentAssets - abs($currentLiabilities);
+
+        $workingCapitalRatio = $currentLiabilities != 0
+            ? round($currentAssets / abs($currentLiabilities), 4)
+            : 0;
+
+        return [
+            'working_capital' => round($workingCapital, 2),
+            'working_capital_ratio' => $workingCapitalRatio,
         ];
     }
 
@@ -182,7 +265,11 @@ class FinancialRatioService
 
         $ebit = $revenue - $operatingExpense;
 
-        // Interest expense is a subset of non-operating expense, approximate with full non-op expense
+        // Interest expense approximation: MK SMEs rarely have a dedicated interest
+        // expense account type in IFRS. We use the full NON_OPERATING_EXPENSE as a
+        // proxy, which may include foreign exchange losses, fines, etc. This overstates
+        // interest expense and therefore understates the interest coverage ratio —
+        // a conservative approximation acceptable for SME financial health monitoring.
         $interestExpense = $this->sumByAccountTypes($companyId, $date, [
             'NON_OPERATING_EXPENSE',
         ]);
@@ -203,6 +290,9 @@ class FinancialRatioService
 
     /**
      * Get activity ratios: receivable_days, payable_days, inventory_turnover.
+     *
+     * Uses proper average balances (beginning + ending / 2) and actual days
+     * in the period rather than a hardcoded 365.
      */
     public function getActivityRatios(int $companyId, string $date): array
     {
@@ -214,12 +304,18 @@ class FinancialRatioService
             'OPERATING_EXPENSE',
         ]);
 
-        $avgReceivables = $this->sumByAccountTypes($companyId, $date, ['RECEIVABLE']);
-        $avgPayables = $this->sumByAccountTypes($companyId, $date, ['PAYABLE'], true);
-        $avgInventory = $this->sumByAccountTypes($companyId, $date, ['INVENTORY']);
+        // Use average balances: (beginning of year + end of period) / 2
+        $avgReceivables = $this->getAverageBalance($companyId, $date, ['RECEIVABLE']);
+        $avgPayables = $this->getAverageBalance($companyId, $date, ['PAYABLE'], true);
+        $avgInventory = $this->getAverageBalance($companyId, $date, ['INVENTORY']);
 
-        $dailyRevenue = $revenue / 365;
-        $dailyCogs = $cogs / 365;
+        // Use actual days in the period (Jan 1 to $date) instead of hardcoded 365
+        $startOfYear = Carbon::parse($date)->startOfYear();
+        $endDate = Carbon::parse($date);
+        $daysInPeriod = $startOfYear->diffInDays($endDate) + 1;
+
+        $dailyRevenue = $daysInPeriod > 0 ? $revenue / $daysInPeriod : 0;
+        $dailyCogs = $daysInPeriod > 0 ? $cogs / $daysInPeriod : 0;
 
         $receivableDays = $dailyRevenue != 0
             ? round($avgReceivables / $dailyRevenue, 4)
@@ -238,6 +334,32 @@ class FinancialRatioService
             'payable_days' => $payableDays,
             'inventory_turnover' => $inventoryTurnover,
         ];
+    }
+
+    /**
+     * Compute the average balance for given account types over the fiscal period.
+     *
+     * Average = (balance at start of fiscal year + balance at end of period) / 2
+     * The fiscal year for MK companies starts on Jan 1.
+     *
+     * @param  array  $accountTypes  IFRS account type codes
+     * @param  bool  $creditPositive  Whether credit balances are positive (for liabilities/revenue)
+     */
+    protected function getAverageBalance(
+        int $companyId,
+        string $date,
+        array $accountTypes,
+        bool $creditPositive = false
+    ): float {
+        $startOfYear = Carbon::parse($date)->startOfYear()->subDay()->toDateString();
+
+        // Balance at end of previous year (= beginning of current fiscal year)
+        $beginningBalance = $this->sumByAccountTypes($companyId, $startOfYear, $accountTypes, $creditPositive);
+
+        // Balance at end of current period
+        $endingBalance = $this->sumByAccountTypes($companyId, $date, $accountTypes, $creditPositive);
+
+        return ($beginningBalance + $endingBalance) / 2;
     }
 
     /**
@@ -404,6 +526,18 @@ class FinancialRatioService
             'period_date' => $periodDate,
             'ratio_count' => count($flatRatios),
         ]);
+    }
+
+    /**
+     * Get the last time ratios were cached for a company.
+     */
+    public function getLastCachedAt(int $companyId): ?string
+    {
+        $latest = FinancialRatioCache::forCompany($companyId)
+            ->orderByDesc('calculated_at')
+            ->value('calculated_at');
+
+        return $latest ? Carbon::parse($latest)->toIso8601String() : null;
     }
 
     /**
