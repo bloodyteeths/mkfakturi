@@ -2648,7 +2648,25 @@
         "view_item": "View Item",
         "view_stock": "View Stock",
         "view_stock_hint": "View stock levels, movements and adjust inventory for this item",
-        "warehouse": "Warehouse"
+        "warehouse": "Warehouse",
+        "retail_price": "Retail Price",
+        "retail_price_hint": "Price for end consumers (incl. markup)",
+        "wholesale_price": "Wholesale Price",
+        "wholesale_price_hint": "Discounted price for bulk/wholesale buyers",
+        "markup_percent": "Markup %",
+        "markup_percent_placeholder": "e.g. 25.00",
+        "markup_percent_hint": "Profit margin percentage over cost price",
+        "pricing_section": "Pricing",
+        "pricing_section_hint": "Set retail, wholesale prices and markup for trade documents.",
+        "category_placeholder": "All categories",
+        "show_low_stock": "Show only low stock items",
+        "bulk_assign_category": "Assign Category",
+        "bulk_enable_stock": "Enable Stock Tracking",
+        "bulk_disable_stock": "Disable Stock Tracking",
+        "bulk_enable_stock_confirm": "Enable stock tracking for {count} selected items?",
+        "bulk_disable_stock_confirm": "Disable stock tracking for {count} selected items?",
+        "bulk_updated_message": "{count} items updated successfully",
+        "has_stock_movements": "Cannot delete item with stock movements"
     },
     "landing": {
         "cta_footer": {
@@ -6810,7 +6828,27 @@
         "warehouse_name": "Warehouse Name",
         "warehouse_updated": "Warehouse Updated",
         "warehouses": "Warehouses",
-        "warning": "Warning (50-74%)"
+        "warning": "Warning (50-74%)",
+        "dashboard": {
+            "title": "Stock Overview",
+            "total_value": "Total Value",
+            "items_tracked": "Items Tracked",
+            "total_quantity": "Total Quantity",
+            "low_stock_alerts": "Low Stock Alerts",
+            "critical": "critical",
+            "warning": "warning",
+            "critical_items": "Critical Items",
+            "item": "Item",
+            "current": "Current",
+            "minimum": "Minimum",
+            "recent_movements": "Recent Movements",
+            "new_receipt": "+ Receipt",
+            "new_issue": "+ Issue"
+        },
+        "new_receipt": "New Stock Receipt",
+        "receipt": "Receipt",
+        "issue": "Issue",
+        "transfer": "Transfer"
     },
     "subscriptions": {
         "cancel_anytime": "Cancel anytime. No hidden fees.",

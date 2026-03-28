@@ -1112,7 +1112,27 @@
             "found_during_audit": "Пронајдено при ревизија",
             "opening_balance": "Почетна состојба",
             "other": "Друго"
-        }
+        },
+        "dashboard": {
+            "title": "Преглед на залиха",
+            "total_value": "Вкупна вредност",
+            "items_tracked": "Следени артикли",
+            "total_quantity": "Вкупна количина",
+            "low_stock_alerts": "Ниска залиха",
+            "critical": "критично",
+            "warning": "предупредување",
+            "critical_items": "Критични артикли",
+            "item": "Артикл",
+            "current": "Моментално",
+            "minimum": "Минимум",
+            "recent_movements": "Последни движења",
+            "new_receipt": "+ Приемница",
+            "new_issue": "+ Издатница"
+        },
+        "new_receipt": "Нова приемница",
+        "receipt": "Приемница",
+        "issue": "Издатница",
+        "transfer": "Преносница"
     },
     "warehouses": {
         "title": "Магацини",
@@ -1280,7 +1300,25 @@
         "items": "Ставки",
         "select_tax": "Изберете данок",
         "empty_description": "Креирајте ставки за брзо додавање на фактури",
-        "search_item": "Пребарај ставка"
+        "search_item": "Пребарај ставка",
+        "retail_price": "Малопродажна цена",
+        "retail_price_hint": "Цена за крајни потрошувачи (вкл. маржа)",
+        "wholesale_price": "Велепродажна цена",
+        "wholesale_price_hint": "Намалена цена за големопродажба",
+        "markup_percent": "Маржа %",
+        "markup_percent_placeholder": "пр. 25.00",
+        "markup_percent_hint": "Процент на профитна маржа над набавна цена",
+        "pricing_section": "Цени",
+        "pricing_section_hint": "Поставете малопродажни, велепродажни цени и маржа за трговски документи.",
+        "category_placeholder": "Сите категории",
+        "show_low_stock": "Прикажи само артикли со ниска залиха",
+        "bulk_assign_category": "Додели категорија",
+        "bulk_enable_stock": "Вклучи следење залихи",
+        "bulk_disable_stock": "Исклучи следење залихи",
+        "bulk_enable_stock_confirm": "Вклучи следење залихи за {count} избрани артикли?",
+        "bulk_disable_stock_confirm": "Исклучи следење залихи за {count} избрани артикли?",
+        "bulk_updated_message": "{count} артикли се ажурирани успешно",
+        "has_stock_movements": "Не може да се избрише артикл со движења на залиха"
     },
     "estimates": {
         "title": "Понуди",

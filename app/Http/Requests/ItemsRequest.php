@@ -73,11 +73,6 @@ class ItemsRequest extends FormRequest
                 'integer',
                 'min:0',
             ],
-            'category' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
             'category_id' => [
                 'nullable',
                 'integer',

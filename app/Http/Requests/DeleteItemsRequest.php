@@ -32,6 +32,7 @@ class DeleteItemsRequest extends FormRequest
                 new RelationNotExist(Item::class, 'invoiceItems'),
                 new RelationNotExist(Item::class, 'estimateItems'),
                 new RelationNotExist(Item::class, 'taxes'),
+                new RelationNotExist(Item::class, 'stockMovements'),
             ],
         ];
     }

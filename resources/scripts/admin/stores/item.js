@@ -41,12 +41,14 @@ export const useItemStore = (useWindow = false) => {
         track_quantity: false,
         allow_negative_stock: false,
         minimum_quantity: null,
-        category: '',
         category_id: null,
         inventory_account_id: null,
         cogs_account_id: null,
         purchase_account_id: null,
         image_url: null,
+        retail_price: 0,
+        wholesale_price: 0,
+        markup_percent: null,
       },
     }),
     getters: {
@@ -76,6 +78,9 @@ export const useItemStore = (useWindow = false) => {
           cogs_account_id: null,
           purchase_account_id: null,
           image_url: null,
+          retail_price: 0,
+          wholesale_price: 0,
+          markup_percent: null,
         }
       },
       // CLAUDE-CHECKPOINT: Added GL account fields to item store state
@@ -188,6 +193,32 @@ export const useItemStore = (useWindow = false) => {
                 message: global.tc('items.deleted_message', 1),
               })
 
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
+      bulkUpdate(action, params = {}) {
+        const notificationStore = useNotificationStore()
+
+        return new Promise((resolve, reject) => {
+          axios
+            .post('/items/bulk-update', {
+              ids: this.selectedItems,
+              action,
+              ...params,
+            })
+            .then((response) => {
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('items.bulk_updated_message', {
+                  count: response.data.updated_count,
+                }),
+              })
               resolve(response)
             })
             .catch((err) => {

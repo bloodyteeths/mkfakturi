@@ -130,6 +130,47 @@ class ItemsController extends Controller
     }
 
     /**
+     * Bulk update items (category assignment, stock tracking toggle).
+     */
+    public function bulkUpdate(Request $request)
+    {
+        $this->authorize('create', Item::class);
+
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'required|integer|exists:items,id',
+            'action' => 'required|string|in:assign_category,toggle_track_quantity',
+            'category_id' => 'nullable|integer|exists:item_categories,id',
+            'track_quantity' => 'nullable|boolean',
+        ]);
+
+        $items = Item::whereCompany()->whereIn('id', $request->ids)->get();
+
+        if ($items->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No items found'], 404);
+        }
+
+        switch ($request->action) {
+            case 'assign_category':
+                $items->each(function ($item) use ($request) {
+                    $item->update(['category_id' => $request->category_id]);
+                });
+                break;
+
+            case 'toggle_track_quantity':
+                $items->each(function ($item) use ($request) {
+                    $item->update(['track_quantity' => (bool) $request->track_quantity]);
+                });
+                break;
+        }
+
+        return response()->json([
+            'success' => true,
+            'updated_count' => $items->count(),
+        ]);
+    }
+
+    /**
      * Upload or remove item photo.
      */
     public function uploadImage(Request $request, Item $item)

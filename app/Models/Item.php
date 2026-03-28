@@ -172,6 +172,18 @@ class Item extends Model implements HasMedia
         $query->orWhere('id', $item_id);
     }
 
+    public function scopeWhereCategory($query, $categoryId)
+    {
+        return $query->where('items.category_id', $categoryId);
+    }
+
+    public function scopeWhereLowStock($query)
+    {
+        return $query->where('items.track_quantity', true)
+            ->whereNotNull('items.minimum_quantity')
+            ->whereColumn('items.quantity', '<=', 'items.minimum_quantity');
+    }
+
     public function scopeApplyFilters($query, array $filters)
     {
         $filters = collect($filters);
@@ -188,6 +200,10 @@ class Item extends Model implements HasMedia
             $query->whereUnit($filters->get('unit_id'));
         }
 
+        if ($filters->get('category_id')) {
+            $query->whereCategory($filters->get('category_id'));
+        }
+
         if ($filters->get('item_id')) {
             $query->whereItem($filters->get('item_id'));
         }
@@ -199,8 +215,13 @@ class Item extends Model implements HasMedia
         }
 
         // Filter by track_quantity (for stock-enabled items only)
-        if ($filters->has('track_quantity')) {
+        if ($filters->has('track_quantity') && $filters->get('track_quantity') !== '' && $filters->get('track_quantity') !== null) {
             $query->where('track_quantity', (bool) $filters->get('track_quantity'));
+        }
+
+        // Filter to show only low stock items
+        if ($filters->get('low_stock')) {
+            $query->whereLowStock();
         }
     }
 

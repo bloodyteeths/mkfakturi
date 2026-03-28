@@ -135,6 +135,62 @@
             </p>
           </BaseInputGroup>
 
+          <!-- Pricing Section -->
+          <div class="col-span-1 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {{ $t('items.pricing_section', 'Pricing') }}
+            </h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              {{ $t('items.pricing_section_hint', 'Set retail, wholesale prices and markup for trade documents.') }}
+            </p>
+          </div>
+
+          <BaseInputGroup
+            :label="$t('items.retail_price', 'Retail Price')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseMoney
+              v-model="retailPrice"
+              :content-loading="isFetchingInitialData"
+              :currency="selectedCurrency"
+            />
+            <p class="mt-1 text-xs text-gray-400">
+              {{ $t('items.retail_price_hint', 'Price for end consumers (incl. markup)') }}
+            </p>
+          </BaseInputGroup>
+
+          <BaseInputGroup
+            :label="$t('items.wholesale_price', 'Wholesale Price')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseMoney
+              v-model="wholesalePrice"
+              :content-loading="isFetchingInitialData"
+              :currency="selectedCurrency"
+            />
+            <p class="mt-1 text-xs text-gray-400">
+              {{ $t('items.wholesale_price_hint', 'Discounted price for bulk/wholesale buyers') }}
+            </p>
+          </BaseInputGroup>
+
+          <BaseInputGroup
+            :label="$t('items.markup_percent', 'Markup %')"
+            :content-loading="isFetchingInitialData"
+          >
+            <BaseInput
+              v-model="itemStore.currentItem.markup_percent"
+              :content-loading="isFetchingInitialData"
+              type="number"
+              step="0.01"
+              min="0"
+              max="999.99"
+              :placeholder="$t('items.markup_percent_placeholder', 'e.g. 25.00')"
+            />
+            <p class="mt-1 text-xs text-gray-400">
+              {{ $t('items.markup_percent_hint', 'Profit margin percentage over cost price') }}
+            </p>
+          </BaseInputGroup>
+
           <BaseInputGroup
             :content-loading="isFetchingInitialData"
             :label="$t('items.unit')"
@@ -670,6 +726,28 @@ const costPrice = computed({
   },
 })
 
+const retailPrice = computed({
+  get: () => {
+    const val = itemStore.currentItem.retail_price ?? 0
+    return val / 100
+  },
+  set: (value) => {
+    const safeValue = value ?? 0
+    itemStore.currentItem.retail_price = Math.round(safeValue * 100)
+  },
+})
+
+const wholesalePrice = computed({
+  get: () => {
+    const val = itemStore.currentItem.wholesale_price ?? 0
+    return val / 100
+  },
+  set: (value) => {
+    const safeValue = value ?? 0
+    itemStore.currentItem.wholesale_price = Math.round(safeValue * 100)
+  },
+})
+
 const taxes = computed({
   get: () =>
     itemStore?.currentItem?.taxes?.map((tax) => {
@@ -749,14 +827,14 @@ const rules = computed(() => {
       sku: {
         maxLength: helpers.withMessage(
           t('validation.sku_maxlength'),
-          maxLength(255)
+          maxLength(100)
         ),
       },
 
       barcode: {
         maxLength: helpers.withMessage(
           t('validation.barcode_maxlength'),
-          maxLength(255)
+          maxLength(100)
         ),
       },
 

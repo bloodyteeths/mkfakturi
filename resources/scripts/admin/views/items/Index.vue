@@ -69,8 +69,50 @@
         />
       </BaseInputGroup>
 
-      <BaseInputGroup class="text-left" :label="$t('items.price')">
-        <BaseMoney v-model="filters.price" />
+      <BaseInputGroup class="text-left" :label="$t('items.price_from', 'Price From')">
+        <BaseMoney v-model="filters.price_from" />
+      </BaseInputGroup>
+
+      <BaseInputGroup class="text-left" :label="$t('items.price_to', 'Price To')">
+        <BaseMoney v-model="filters.price_to" />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('items.category')" class="text-left">
+        <BaseMultiselect
+          v-model="filters.category_id"
+          :placeholder="$t('items.category_placeholder', 'All categories')"
+          value-prop="id"
+          track-by="name"
+          label="name"
+          searchable
+          :can-deselect="true"
+          class="w-full"
+          :options="itemStore.itemCategories"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('items.track_quantity')" class="text-left">
+        <BaseMultiselect
+          v-model="filters.track_quantity"
+          :placeholder="$t('general.all', 'All')"
+          :can-deselect="true"
+          class="w-full"
+          :options="[
+            { id: '1', name: $t('items.track_quantity_enabled') },
+            { id: '0', name: $t('items.track_quantity_disabled') },
+          ]"
+          value-prop="id"
+          label="name"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('stock.low_stock', 'Low Stock')" class="text-left">
+        <div class="flex items-center h-10">
+          <BaseCheckbox
+            v-model="filters.low_stock"
+            :label="$t('items.show_low_stock', 'Show only low stock items')"
+          />
+        </div>
       </BaseInputGroup>
     </BaseFilterWrapper>
 
@@ -122,6 +164,22 @@
               <BaseIcon name="ChevronDownIcon" />
             </span>
           </template>
+
+          <BaseDropdownItem @click="showBulkCategoryModal = true">
+            <BaseIcon name="TagIcon" class="mr-3 text-gray-600" />
+            {{ $t('items.bulk_assign_category', 'Assign Category') }}
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="bulkEnableStockTracking">
+            <BaseIcon name="ArchiveBoxIcon" class="mr-3 text-gray-600" />
+            {{ $t('items.bulk_enable_stock', 'Enable Stock Tracking') }}
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="bulkDisableStockTracking">
+            <BaseIcon name="ArchiveBoxXMarkIcon" class="mr-3 text-gray-600" />
+            {{ $t('items.bulk_disable_stock', 'Disable Stock Tracking') }}
+          </BaseDropdownItem>
+
           <BaseDropdownItem @click="removeMultipleItems">
             <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
             {{ $t('general.delete') }}
@@ -207,6 +265,34 @@
         </template>
       </BaseTable>
     </div>
+    <!-- Bulk Category Assignment Modal -->
+    <BaseModal :show="showBulkCategoryModal" @close="showBulkCategoryModal = false">
+      <template #header>
+        {{ $t('items.bulk_assign_category', 'Assign Category') }}
+      </template>
+      <div class="p-6">
+        <BaseInputGroup :label="$t('items.category')">
+          <BaseMultiselect
+            v-model="bulkCategoryId"
+            label="name"
+            :options="itemStore.itemCategories"
+            value-prop="id"
+            :placeholder="$t('items.category_placeholder', 'Select category')"
+            searchable
+            :can-deselect="true"
+            track-by="name"
+          />
+        </BaseInputGroup>
+        <div class="flex justify-end mt-4 space-x-3">
+          <BaseButton variant="primary-outline" @click="showBulkCategoryModal = false">
+            {{ $t('general.cancel') }}
+          </BaseButton>
+          <BaseButton @click="bulkAssignCategory">
+            {{ $t('general.save') }}
+          </BaseButton>
+        </div>
+      </div>
+    </BaseModal>
   </BasePage>
 </template>
 
@@ -237,7 +323,11 @@ let isFetchingInitialData = ref(true)
 const filters = reactive({
   name: '',
   unit_id: '',
-  price: '',
+  price_from: '',
+  price_to: '',
+  category_id: '',
+  track_quantity: '',
+  low_stock: false,
 })
 
 const table = ref(null)
@@ -293,6 +383,7 @@ debouncedWatch(
 )
 
 itemStore.fetchItemUnits({ limit: 'all' })
+itemStore.fetchItemCategories({ limit: 'all' })
 
 onUnmounted(() => {
   if (itemStore.selectAllField) {
@@ -304,6 +395,9 @@ function clearFilter() {
   filters.name = ''
   filters.unit_id = ''
   filters.price = ''
+  filters.category_id = ''
+  filters.track_quantity = ''
+  filters.low_stock = false
 }
 
 function hasAbilities() {
@@ -337,6 +431,9 @@ async function fetchData({ page, filter, sort }) {
     search: filters.name,
     unit_id: filters.unit_id !== null ? filters.unit_id : '',
     price: Math.round(filters.price * 100),
+    category_id: filters.category_id !== null ? filters.category_id : '',
+    track_quantity: filters.track_quantity !== null ? filters.track_quantity : '',
+    low_stock: filters.low_stock ? 1 : '',
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,
@@ -357,6 +454,60 @@ async function fetchData({ page, filter, sort }) {
       limit: 10,
     },
   }
+}
+
+const showBulkCategoryModal = ref(false)
+const bulkCategoryId = ref(null)
+
+async function bulkAssignCategory() {
+  try {
+    await itemStore.bulkUpdate('assign_category', {
+      category_id: bulkCategoryId.value,
+    })
+    showBulkCategoryModal.value = false
+    bulkCategoryId.value = null
+    refreshTable()
+  } catch {
+    // error handled by store
+  }
+}
+
+async function bulkEnableStockTracking() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('items.bulk_enable_stock_confirm', 'Enable stock tracking for {count} selected items?', { count: itemStore.selectedItems.length }),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        await itemStore.bulkUpdate('toggle_track_quantity', { track_quantity: true })
+        refreshTable()
+      }
+    })
+}
+
+async function bulkDisableStockTracking() {
+  dialogStore
+    .openDialog({
+      title: t('general.are_you_sure'),
+      message: t('items.bulk_disable_stock_confirm', 'Disable stock tracking for {count} selected items?', { count: itemStore.selectedItems.length }),
+      yesLabel: t('general.ok'),
+      noLabel: t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        await itemStore.bulkUpdate('toggle_track_quantity', { track_quantity: false })
+        refreshTable()
+      }
+    })
 }
 
 function removeMultipleItems() {
