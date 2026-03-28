@@ -1980,4 +1980,188 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Tools Index -->
+  <url>
+    <loc>https://www.facturino.mk/mk/alati</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/alati</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/alati</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/alati</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- DDV Kalkulator -->
+  <url>
+    <loc>https://www.facturino.mk/mk/alati/ddv-kalkulator</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/ddv-kalkulator" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/alati/ddv-kalkulator</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/ddv-kalkulator" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/alati/ddv-kalkulator</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/ddv-kalkulator" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/alati/ddv-kalkulator</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/ddv-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/ddv-kalkulator" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Plata Kalkulator -->
+  <url>
+    <loc>https://www.facturino.mk/mk/alati/plata-kalkulator</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/plata-kalkulator" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/alati/plata-kalkulator</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/plata-kalkulator" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/alati/plata-kalkulator</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/plata-kalkulator" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/alati/plata-kalkulator</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/plata-kalkulator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/plata-kalkulator" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- E-Faktura Proverka -->
+  <url>
+    <loc>https://www.facturino.mk/mk/alati/efaktura-proverka</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/efaktura-proverka" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/sq/alati/efaktura-proverka</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/efaktura-proverka" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/tr/alati/efaktura-proverka</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/efaktura-proverka" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.facturino.mk/en/alati/efaktura-proverka</loc>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://www.facturino.mk/mk/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="sq" href="https://www.facturino.mk/sq/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.facturino.mk/tr/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.facturino.mk/en/alati/efaktura-proverka" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.facturino.mk/mk/alati/efaktura-proverka" />
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
 </urlset>

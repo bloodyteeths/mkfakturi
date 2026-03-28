@@ -87,6 +87,11 @@ export default function MobileMenu({ t, locale }: { t: Dictionary; locale: Local
                                 {t.nav.blog}
                             </Link>
                         )}
+                        {t.nav.tools && (
+                            <Link href={`/${locale}/alati`} className={linkClass} onClick={() => setIsOpen(false)}>
+                                {t.nav.tools}
+                            </Link>
+                        )}
                     </nav>
                     <div className="border-t border-gray-100 px-3 py-2.5 space-y-1.5">
                         <Link

@@ -22,6 +22,7 @@ const footerCopy = {
     contact: 'Контакт',
     followUs: 'Следете не',
     showcase: 'Преглед',
+    tools: 'Алатки',
   },
   sq: {
     companyInfo: 'Facturino by Facturino DOOEL, Shkup, Maqedonia e Veriut',
@@ -40,6 +41,7 @@ const footerCopy = {
     contact: 'Kontakti',
     followUs: 'Na ndiqni',
     showcase: 'Permbledhje',
+    tools: 'Mjete',
   },
   tr: {
     companyInfo: 'Facturino by Facturino DOOEL, Üsküp, Kuzey Makedonya',
@@ -58,6 +60,7 @@ const footerCopy = {
     contact: 'İletişim',
     followUs: 'Bizi Takip Edin',
     showcase: 'Onizleme',
+    tools: 'Araçlar',
   },
   en: {
     companyInfo: 'Facturino by Facturino DOOEL, Skopje, North Macedonia',
@@ -76,6 +79,7 @@ const footerCopy = {
     contact: 'Contact',
     followUs: 'Follow Us',
     showcase: 'Preview',
+    tools: 'Tools',
   },
 } as const
 
@@ -144,6 +148,14 @@ export default function Footer({ t, locale }: { t: Dictionary; locale: Locale })
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {f.integrations}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/alati`}
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {f.tools}
                 </Link>
               </li>
             </ul>
