@@ -30,7 +30,7 @@
     <!-- Main Content -->
     <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
       <!-- Left: Products -->
-      <div class="flex-1 lg:w-3/5 flex flex-col overflow-hidden border-r border-gray-200 dark:border-gray-700">
+      <div class="flex-1 lg:w-3/5 flex flex-col overflow-hidden border-r border-gray-100 dark:border-gray-800">
         <!-- Search Bar -->
         <PosSearchBar
           ref="searchBarRef"
@@ -39,10 +39,12 @@
         />
 
         <!-- Category Tabs -->
-        <div class="flex gap-2 px-4 py-2 overflow-x-auto border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shrink-0">
+        <div class="flex gap-2 px-4 py-2.5 overflow-x-auto border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 shrink-0 scrollbar-hide">
           <button
-            class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors"
-            :class="!posStore.selectedCategory ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'"
+            class="px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-200"
+            :class="!posStore.selectedCategory
+              ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
             @click="posStore.selectedCategory = null"
           >
             {{ t('pos.all_categories') }}
@@ -50,8 +52,10 @@
           <button
             v-for="cat in posStore.categories"
             :key="cat.id"
-            class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors"
-            :class="posStore.selectedCategory === cat.id ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'"
+            class="px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-200"
+            :class="posStore.selectedCategory === cat.id
+              ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
             @click="posStore.selectedCategory = cat.id"
           >
             {{ cat.name }}

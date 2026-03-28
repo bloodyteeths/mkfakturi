@@ -1,104 +1,106 @@
 <template>
-  <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="$emit('close')">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden ring-1 ring-gray-200 dark:ring-gray-800">
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('pos.pay') || 'Payment' }}</h3>
-        <button class="text-gray-400 hover:text-gray-600" @click="$emit('close')">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Body -->
-      <div class="p-6 space-y-5">
-        <!-- Total -->
-        <div class="text-center">
-          <div class="text-sm text-gray-500">{{ t('pos.total') || 'Total' }}</div>
-          <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ formatPrice(total) }}</div>
+      <div class="px-6 py-5 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border-b border-gray-100 dark:border-gray-800">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
+            {{ t('pos.payment_method') || 'Payment' }}
+          </h3>
+          <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-colors" @click="$emit('close')">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-
-        <!-- Payment Method -->
-        <div>
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-            {{ t('pos.payment_method') || 'Payment Method' }}
-          </label>
-          <div class="grid grid-cols-2 gap-3">
-            <button
-              class="py-3 rounded-lg font-medium text-sm border-2 transition-all flex items-center justify-center gap-2"
-              :class="paymentMethod === 'cash'
-                ? 'border-green-500 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300'"
-              @click="$emit('update:payment-method', 'cash')"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              {{ t('pos.cash') || 'Cash' }}
-            </button>
-            <button
-              class="py-3 rounded-lg font-medium text-sm border-2 transition-all flex items-center justify-center gap-2"
-              :class="paymentMethod === 'card'
-                ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300'"
-              @click="$emit('update:payment-method', 'card')"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-              </svg>
-              {{ t('pos.card') || 'Card' }}
-            </button>
+        <!-- Total display -->
+        <div class="mt-3 text-center">
+          <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">{{ t('pos.total') || 'Total' }}</span>
+          <div class="text-4xl font-black text-gray-900 dark:text-white tabular-nums mt-1">
+            {{ formatPrice(total) }}
           </div>
         </div>
+      </div>
 
-        <!-- Cash Received (only for cash) -->
-        <div v-if="paymentMethod === 'cash'">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+      <div class="p-6 space-y-5">
+        <!-- Payment type toggle -->
+        <div class="flex gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
+          <button
+            class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-200"
+            :class="localMethod === 'cash'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'"
+            @click="localMethod = 'cash'; $emit('update:payment-method', 'cash')"
+          >
+            {{ t('pos.cash') || 'Cash' }}
+          </button>
+          <button
+            class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-200"
+            :class="localMethod === 'card'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'"
+            @click="localMethod = 'card'; $emit('update:payment-method', 'card')"
+          >
+            {{ t('pos.card') || 'Card' }}
+          </button>
+        </div>
+
+        <!-- Cash received input (only for cash) -->
+        <div v-if="localMethod === 'cash'" class="space-y-3">
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">
             {{ t('pos.cash_received') || 'Cash Received' }}
           </label>
           <input
-            ref="cashInput"
-            :value="cashReceivedDisplay"
+            v-model.number="localCash"
             type="number"
-            step="1"
             min="0"
-            class="w-full px-4 py-3 text-xl font-bold text-center bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-            @input="handleCashInput"
+            step="100"
+            class="w-full px-4 py-3.5 text-2xl font-bold text-center bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none tabular-nums transition-colors"
+            @input="$emit('update:cash-received', localCash)"
           />
 
-          <!-- Quick amounts -->
-          <div class="grid grid-cols-4 gap-2 mt-3">
+          <!-- Quick amount buttons -->
+          <div class="grid grid-cols-4 gap-2">
             <button
               v-for="amount in quickAmounts"
               :key="amount"
-              class="py-2 text-sm font-medium bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              @click="$emit('update:cash-received', amount)"
+              class="py-2.5 text-sm font-bold bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-primary-50 hover:border-primary-300 dark:hover:bg-primary-900/20 dark:hover:border-primary-700 active:scale-95 transition-all"
+              @click="localCash = amount; $emit('update:cash-received', amount)"
             >
-              {{ formatPrice(amount) }}
+              {{ (amount / 100).toLocaleString('mk-MK') }}
             </button>
           </div>
 
-          <!-- Change -->
-          <div v-if="change > 0" class="mt-3 p-3 bg-green-50 dark:bg-green-900/30 rounded-lg text-center">
-            <div class="text-sm text-green-600 dark:text-green-400">{{ t('pos.change') || 'Change' }}</div>
-            <div class="text-2xl font-bold text-green-700 dark:text-green-300">{{ formatPrice(change) }}</div>
+          <!-- Change display -->
+          <div
+            v-if="localChange > 0"
+            class="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl ring-1 ring-emerald-200 dark:ring-emerald-800"
+          >
+            <span class="text-sm font-bold text-emerald-700 dark:text-emerald-300">{{ t('pos.change') || 'Change' }}</span>
+            <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
+              {{ formatPrice(localChange) }}
+            </span>
           </div>
         </div>
       </div>
 
-      <!-- Footer -->
-      <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+      <!-- Confirm button -->
+      <div class="px-6 pb-6">
         <button
-          :disabled="isProcessing || (paymentMethod === 'cash' && cashReceived < total)"
-          class="w-full py-3 rounded-lg text-white font-bold text-base transition-all"
-          :class="!isProcessing && (paymentMethod !== 'cash' || cashReceived >= total)
-            ? 'bg-green-600 hover:bg-green-700 active:bg-green-800'
-            : 'bg-gray-300 cursor-not-allowed'"
+          :disabled="isProcessing || (localMethod === 'cash' && localCash < total)"
+          class="w-full py-4 rounded-2xl text-white font-bold text-lg transition-all duration-200 flex items-center justify-center gap-2"
+          :class="!isProcessing && (localMethod !== 'cash' || localCash >= total)
+            ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 shadow-lg shadow-green-500/25 hover:shadow-xl hover:-translate-y-0.5'
+            : 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed text-gray-400'"
           @click="$emit('confirm')"
         >
-          <span v-if="isProcessing">{{ t('pos.processing') || 'Processing...' }}</span>
-          <span v-else>{{ t('pos.pay') || 'Confirm Payment' }} — {{ formatPrice(total) }}</span>
+          <template v-if="isProcessing">
+            <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            {{ t('pos.processing') || 'Processing...' }}
+          </template>
+          <template v-else>
+            {{ t('pos.confirm_payment') || 'Confirm Payment' }}
+          </template>
         </button>
       </div>
     </div>
@@ -106,7 +108,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, nextTick } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -121,47 +123,27 @@ const props = defineProps({
 
 defineEmits(['update:payment-method', 'update:cash-received', 'confirm', 'close'])
 
-const cashInput = ref(null)
+const localMethod = ref(props.paymentMethod)
+const localCash = ref(props.cashReceived || props.total)
 
-const cashReceivedDisplay = computed(() =>
-  props.cashReceived > 0 ? Math.round(props.cashReceived / 100) : ''
-)
+const localChange = computed(() => Math.max(0, localCash.value - props.total))
 
-function handleCashInput(e) {
-  const mkd = parseInt(e.target.value) || 0
-  // Convert MKD to cents
-  const cents = mkd * 100
-  // Use a proper event instead of directly emitting
-  const emit = defineEmits ? null : null
-}
-
-// Quick amount buttons — round up to nearest common denomination
+// Quick amount buttons — round up to nearest common denominations
 const quickAmounts = computed(() => {
-  const totalMkd = Math.ceil(props.total / 100)
-  const amounts = []
-  // Exact amount
-  amounts.push(props.total)
-  // Round to 50
-  const r50 = Math.ceil(totalMkd / 50) * 50 * 100
-  if (r50 > props.total) amounts.push(r50)
-  // Round to 100
-  const r100 = Math.ceil(totalMkd / 100) * 100 * 100
-  if (r100 > props.total && r100 !== r50) amounts.push(r100)
-  // Round to 500
-  const r500 = Math.ceil(totalMkd / 500) * 500 * 100
-  if (r500 > props.total && r500 !== r100) amounts.push(r500)
-  return amounts.slice(0, 4)
+  const total = props.total
+  const amounts = new Set()
+  amounts.add(total)
+  for (const round of [5000, 10000, 50000, 100000]) {
+    const rounded = Math.ceil(total / round) * round
+    if (rounded >= total && rounded <= total * 3) amounts.add(rounded)
+  }
+  return [...amounts].sort((a, b) => a - b).slice(0, 4)
 })
 
 function formatPrice(cents) {
   if (!cents) return '0 МКД'
   return (cents / 100).toLocaleString('mk-MK', { minimumFractionDigits: 0 }) + ' МКД'
 }
-
-onMounted(async () => {
-  await nextTick()
-  cashInput.value?.focus()
-})
 </script>
 
 <!-- CLAUDE-CHECKPOINT -->

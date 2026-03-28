@@ -1,31 +1,39 @@
 <template>
-  <div class="h-12 bg-gray-900 text-white flex items-center justify-between px-4 shrink-0">
-    <!-- Left: Company + Shift -->
+  <div class="h-14 bg-gradient-to-r from-gray-900 via-gray-900 to-gray-800 text-white flex items-center justify-between px-5 shrink-0 shadow-lg">
+    <!-- Left: Company + Fiscal + Shift -->
     <div class="flex items-center gap-3">
-      <span class="font-bold text-sm">Facturino POS</span>
-      <!-- Fiscal status indicator -->
+      <span class="font-black text-sm tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+        Facturino POS
+      </span>
+
+      <!-- Fiscal status pill -->
       <div
-        class="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
-        :class="fiscalConnected ? 'bg-green-700 text-green-200' : 'bg-gray-700 text-gray-400'"
-        :title="fiscalConnected ? 'Fiscal printer connected' : 'No fiscal printer'"
+        class="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full backdrop-blur-sm transition-colors"
+        :class="fiscalConnected
+          ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/30'
+          : 'bg-gray-700/50 text-gray-500 ring-1 ring-gray-600/30'"
       >
-        <span class="w-1.5 h-1.5 rounded-full" :class="fiscalConnected ? 'bg-green-300' : 'bg-gray-500'"></span>
-        {{ fiscalConnected ? '🖨️' : '🖨️' }}
+        <span class="w-1.5 h-1.5 rounded-full" :class="fiscalConnected ? 'bg-emerald-400 animate-pulse' : 'bg-gray-600'"></span>
+        {{ fiscalConnected ? 'Fiscal' : 'No Fiscal' }}
       </div>
-      <div v-if="shift" class="flex items-center gap-1.5 text-xs bg-green-600 px-2 py-0.5 rounded-full">
-        <span class="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse"></span>
+
+      <!-- Shift indicator -->
+      <div v-if="shift" class="flex items-center gap-1.5 text-[11px] font-medium bg-blue-500/20 text-blue-300 ring-1 ring-blue-500/30 px-2.5 py-1 rounded-full">
+        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>
         {{ formatDuration }}
       </div>
+
+      <!-- Shift buttons -->
       <button
         v-if="!shift"
-        class="text-xs bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded transition-colors"
+        class="text-[11px] font-medium bg-blue-600/80 hover:bg-blue-500 px-3 py-1.5 rounded-lg transition-all hover:shadow-md hover:shadow-blue-500/20"
         @click="$emit('open-shift')"
       >
         {{ t('pos.open_shift') || 'Open Shift' }}
       </button>
       <button
         v-else
-        class="text-xs bg-gray-700 hover:bg-gray-600 px-2.5 py-1 rounded transition-colors"
+        class="text-[11px] font-medium bg-gray-700/80 hover:bg-gray-600 px-3 py-1.5 rounded-lg transition-colors"
         @click="$emit('close-shift')"
       >
         {{ t('pos.close_shift') || 'Close Shift' }}
@@ -33,15 +41,15 @@
     </div>
 
     <!-- Center: Clock -->
-    <div class="text-sm font-mono">{{ clock }}</div>
+    <div class="text-lg font-mono font-light tracking-widest text-gray-300">{{ clock }}</div>
 
     <!-- Right: Usage + Exit -->
     <div class="flex items-center gap-3">
-      <span v-if="usage?.limit" class="text-xs text-gray-400">
+      <span v-if="usage?.limit" class="text-[11px] font-medium text-gray-500 tabular-nums">
         {{ usage.used }}/{{ usage.limit }}
       </span>
       <button
-        class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded flex items-center gap-1.5 transition-colors"
+        class="flex items-center gap-1.5 text-[11px] font-medium bg-gray-800 hover:bg-gray-700 px-3.5 py-1.5 rounded-lg ring-1 ring-gray-700 hover:ring-gray-600 transition-all"
         @click="$emit('exit')"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
