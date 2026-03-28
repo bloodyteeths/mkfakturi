@@ -117,7 +117,7 @@ test.beforeAll(async ({ browser }) => {
       console.log('⚠ No completed bills found for company 2')
     }
   } else {
-    console.log(`⚠ Bills API returned ${billResult.status}: ${JSON.stringify(billResult.data).substring(0, 300)}`)
+    console.log(`⚠ Bills API returned ${billResult.status}: ${JSON.stringify(billResult.data || billResult.body || billResult.error).substring(0, 300)}`)
   }
 
   // Find a real item_id for nivelacija tests
