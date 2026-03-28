@@ -134,6 +134,18 @@
     </BaseInputGroup>
 
     <BaseInputGroup
+      :label="$t('recurring_invoices.contract_reference')"
+      :content-loading="isLoading"
+      class="lg:mt-0"
+    >
+      <BaseInput
+        v-model="recurringInvoiceStore.newRecurringInvoice.contract_reference"
+        :content-loading="isLoading"
+        type="text"
+      />
+    </BaseInputGroup>
+
+    <BaseInputGroup
       :label="$t('recurring_invoices.frequency.select_frequency')"
       required
       :content-loading="isLoading"
@@ -305,4 +317,5 @@ async function getNextInvoiceDate() {
 
   isLoadingNextDate.value = false
 }
+// CLAUDE-CHECKPOINT
 </script>

@@ -393,6 +393,10 @@ Route::prefix('/v1')->group(function () {
 
             Route::post('/recurring-invoices/delete', [RecurringInvoiceController::class, 'delete']);
 
+            Route::post('recurring-invoices/{recurring_invoice}/clone', [RecurringInvoiceController::class, 'clone']);
+            Route::post('recurring-invoices/{recurring_invoice}/toggle-status', [RecurringInvoiceController::class, 'toggleStatus']);
+            Route::post('recurring-invoices/{recurring_invoice}/generate-now', [RecurringInvoiceController::class, 'generateNow']);
+
             Route::apiResource('recurring-invoices', RecurringInvoiceController::class);
 
             // Estimates (available to all, usage limits apply on free tier)

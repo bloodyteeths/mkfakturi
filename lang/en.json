@@ -4878,6 +4878,7 @@
         "generation_failed": "Invoice generation failed — limit may be reached",
         "pause_selected": "Pause Selected",
         "activate_selected": "Activate Selected",
+        "status_updated": "Status updated successfully",
         "frequency.every_week": "Every Week",
         "frequency.every_15_days": "Every 15 Days",
         "frequency.every_month": "Every Month",

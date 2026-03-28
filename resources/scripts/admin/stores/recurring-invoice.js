@@ -37,16 +37,12 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       },
 
       frequencies: [
-        { label: global.t('recurring_invoices.frequency.every_minute'), value: '* * * * *' },
-        { label: global.t('recurring_invoices.frequency.every_30_minute'), value: '*/30 * * * *' },
-        { label: global.t('recurring_invoices.frequency.every_hour'), value: '0 * * * *' },
-        { label: global.t('recurring_invoices.frequency.every_2_hour'), value: '0 */2 * * *' },
-        { label: global.t('recurring_invoices.frequency.every_day_at_midnight'), value: '0 0 * * *' },
         { label: global.t('recurring_invoices.frequency.every_week'), value: '0 0 * * 0' },
-        { label: global.t('recurring_invoices.frequency.every_15_days_at_midnight'), value: '0 5 */15 * *' },
-        { label: global.t('recurring_invoices.frequency.on_the_first_day_of_every_month_at_midnight'), value: '0 0 1 * *' },
-        { label: global.t('recurring_invoices.frequency.every_6_month'), value: '0 0 1 */6 *' },
-        { label: global.t('recurring_invoices.frequency.every_year_on_the_first_day_of_january_at_midnight'), value: '0 0 1 1 *' },
+        { label: global.t('recurring_invoices.frequency.every_15_days'), value: '0 0 */15 * *' },
+        { label: global.t('recurring_invoices.frequency.every_month'), value: '0 0 1 * *' },
+        { label: global.t('recurring_invoices.frequency.every_quarter'), value: '0 0 1 */3 *' },
+        { label: global.t('recurring_invoices.frequency.every_6_months'), value: '0 0 1 */6 *' },
+        { label: global.t('recurring_invoices.frequency.every_year'), value: '0 0 1 1 *' },
         { label: global.t('recurring_invoices.frequency.custom'), value: 'CUSTOM' },
       ],
     }),
@@ -289,6 +285,21 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
         })
       },
 
+      async cloneRecurringInvoice(id) {
+        const response = await axios.post(`/recurring-invoices/${id}/clone`)
+        return response.data
+      },
+
+      async toggleRecurringInvoiceStatus(id) {
+        const response = await axios.post(`/recurring-invoices/${id}/toggle-status`)
+        return response.data
+      },
+
+      async generateRecurringInvoiceNow(id) {
+        const response = await axios.post(`/recurring-invoices/${id}/generate-now`)
+        return response.data
+      },
+
       resetSelectedCustomer() {
         this.newRecurringInvoice.customer = null
         this.newRecurringInvoice.customer_id = ''
@@ -471,3 +482,4 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
     },
   })()
 }
+// CLAUDE-CHECKPOINT

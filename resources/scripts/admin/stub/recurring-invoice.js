@@ -31,6 +31,7 @@ export default function () {
     exchange_rate: null,
     tax_per_item: null,
     discount_per_item: null,
+    contract_reference: '',
     template_name: null,
     items: [
       {
@@ -48,3 +49,4 @@ export default function () {
     selectedInvoice: null,
   }
 }
+// CLAUDE-CHECKPOINT

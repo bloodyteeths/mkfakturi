@@ -2034,6 +2034,7 @@
         "generation_failed": "Gjenerimi dështoi — limiti mund të jetë arritur",
         "pause_selected": "Pauzë të zgjedhurat",
         "activate_selected": "Aktivizo të zgjedhurat",
+        "status_updated": "Statusi u përditësua me sukses",
         "frequency.every_week": "Çdo javë",
         "frequency.every_15_days": "Çdo 15 ditë",
         "frequency.every_month": "Çdo muaj",

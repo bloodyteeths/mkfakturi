@@ -84,6 +84,11 @@ class RecurringInvoiceRequest extends FormRequest
             'items.*' => [
                 'required',
             ],
+            'contract_reference' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
         ];
 
         $customer = Customer::find($this->customer_id);
@@ -118,7 +123,9 @@ class RecurringInvoiceRequest extends FormRequest
                 'due_amount' => $this->total,
                 'exchange_rate' => $exchange_rate,
                 'currency_id' => $currency,
+                'contract_reference' => $this->contract_reference,
             ])
             ->toArray();
     }
 }
+// CLAUDE-CHECKPOINT

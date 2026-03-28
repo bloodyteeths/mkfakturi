@@ -41,6 +41,53 @@
       </BaseDropdownItem>
     </router-link>
 
+    <!-- Clone Recurring Invoice -->
+    <BaseDropdownItem
+      v-if="userStore.hasAbilities(abilities.CREATE_RECURRING_INVOICE)"
+      @click="cloneRecurringInvoice(row.id)"
+    >
+      <BaseIcon
+        name="DocumentDuplicateIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('recurring_invoices.clone') }}
+    </BaseDropdownItem>
+
+    <!-- Pause/Resume Toggle -->
+    <BaseDropdownItem
+      v-if="row.status === 'ACTIVE' && userStore.hasAbilities(abilities.EDIT_RECURRING_INVOICE)"
+      @click="toggleStatus(row.id)"
+    >
+      <BaseIcon
+        name="PauseIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('recurring_invoices.pause') }}
+    </BaseDropdownItem>
+
+    <BaseDropdownItem
+      v-if="row.status === 'ON_HOLD' && userStore.hasAbilities(abilities.EDIT_RECURRING_INVOICE)"
+      @click="toggleStatus(row.id)"
+    >
+      <BaseIcon
+        name="PlayIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('recurring_invoices.activate') }}
+    </BaseDropdownItem>
+
+    <!-- Generate Now -->
+    <BaseDropdownItem
+      v-if="userStore.hasAbilities(abilities.EDIT_RECURRING_INVOICE)"
+      @click="generateNow(row.id)"
+    >
+      <BaseIcon
+        name="BoltIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('recurring_invoices.generate_now') }}
+    </BaseDropdownItem>
+
     <!-- Delete Recurring Invoice  -->
     <BaseDropdownItem
       v-if="userStore.hasAbilities(abilities.DELETE_RECURRING_INVOICE)"
@@ -66,6 +113,7 @@ import { useUserStore } from '@/scripts/admin/stores/user'
 import { inject } from 'vue'
 import { useRecurringInvoiceStore } from '@/scripts/admin/stores/recurring-invoice'
 import abilities from '@/scripts/admin/stub/abilities'
+import { handleError } from '@/scripts/helpers/error-handling'
 
 const props = defineProps({
   row: {
@@ -91,6 +139,48 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const utils = inject('utils')
+
+async function cloneRecurringInvoice(id) {
+  try {
+    const res = await recurringInvoiceStore.cloneRecurringInvoice(id)
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('recurring_invoices.cloned_message'),
+    })
+    props.table && props.table.refresh()
+  } catch (err) {
+    handleError(err)
+  }
+}
+
+async function toggleStatus(id) {
+  try {
+    await recurringInvoiceStore.toggleRecurringInvoiceStatus(id)
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('recurring_invoices.status_updated'),
+    })
+    props.table && props.table.refresh()
+  } catch (err) {
+    handleError(err)
+  }
+}
+
+async function generateNow(id) {
+  try {
+    const res = await recurringInvoiceStore.generateRecurringInvoiceNow(id)
+    const invoiceId = res.data?.invoice_id
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('recurring_invoices.generated_message'),
+    })
+    if (invoiceId) {
+      router.push(`/admin/invoices/${invoiceId}/view`)
+    }
+  } catch (err) {
+    handleError(err)
+  }
+}
 
 async function removeMultipleRecurringInvoices(id = null) {
   dialogStore
@@ -128,4 +218,5 @@ async function removeMultipleRecurringInvoices(id = null) {
       }
     })
 }
+// CLAUDE-CHECKPOINT
 </script>

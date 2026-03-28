@@ -139,6 +139,7 @@
           <BaseTab :title="$t('recurring_invoices.all')" filter="ALL" />
           <BaseTab :title="$t('recurring_invoices.active')" filter="ACTIVE" />
           <BaseTab :title="$t('recurring_invoices.on_hold')" filter="ON_HOLD" />
+          <BaseTab :title="$t('recurring_invoices.completed')" filter="COMPLETED" />
         </BaseTabGroup>
 
         <BaseDropdown
@@ -160,6 +161,16 @@
               <BaseIcon name="ChevronDownIcon" class="h-5" />
             </span>
           </template>
+
+          <BaseDropdownItem @click="bulkPauseSelected()">
+            <BaseIcon name="PauseIcon" class="mr-3 text-gray-600" />
+            {{ $t('recurring_invoices.pause_selected') }}
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="bulkActivateSelected()">
+            <BaseIcon name="PlayIcon" class="mr-3 text-gray-600" />
+            {{ $t('recurring_invoices.activate_selected') }}
+          </BaseDropdownItem>
 
           <BaseDropdownItem @click="removeMultipleRecurringInvoices()">
             <BaseIcon name="TrashIcon" class="mr-3 text-gray-600" />
@@ -203,6 +214,11 @@
           {{ row.data.formatted_starts_at }}
         </template>
 
+        <!-- Next Invoice -->
+        <template #cell-next_invoice_at="{ row }">
+          {{ row.data.formatted_next_invoice_at || '-' }}
+        </template>
+
         <!-- Customer  -->
         <template #cell-customer="{ row }">
           <router-link :to="{ path: `recurring-invoices/${row.data.id}/view` }">
@@ -237,6 +253,11 @@
           >
             <BaseRecurringInvoiceStatusLabel :status="row.data.status" />
           </BaseRecurringInvoiceStatusBadge>
+        </template>
+
+        <!-- Contract Ref -->
+        <template #cell-contract_reference="{ row }">
+          {{ row.data.contract_reference || '-' }}
         </template>
 
         <!-- Amount  -->
@@ -285,7 +306,8 @@ const showFilters = ref(false)
 const statusList = ref([
   {label: t('recurring_invoices.active'), value: 'ACTIVE'},
   {label: t('recurring_invoices.on_hold'), value: 'ON_HOLD'},
-  {label: t('recurring_invoices.all'), value: 'ALL'}
+  {label: t('recurring_invoices.completed'), value: 'COMPLETED'},
+  {label: t('recurring_invoices.all'), value: 'ALL'},
 ])
 const isRequestOngoing = ref(true)
 const activeTab = ref('recurring-invoices.all')
@@ -322,9 +344,19 @@ const invoiceColumns = computed(() => {
       thClass: 'extra',
       tdClass: 'font-medium',
     },
+    {
+      key: 'next_invoice_at',
+      label: t('recurring_invoices.next_invoice_date'),
+      thClass: 'extra',
+      tdClass: 'font-medium',
+    },
     { key: 'customer', label: t('invoices.customer') },
     { key: 'frequency', label: t('recurring_invoices.frequency.title') },
     { key: 'status', label: t('invoices.status') },
+    {
+      key: 'contract_reference',
+      label: t('recurring_invoices.contract_reference'),
+    },
     { key: 'total', label: t('invoices.total') },
     {
       key: 'actions',
@@ -416,6 +448,9 @@ function setStatusFilter(val) {
     case t('recurring_invoices.on_hold'):
       filters.status = 'ON_HOLD'
       break
+    case t('recurring_invoices.completed'):
+      filters.status = 'COMPLETED'
+      break
     case t('recurring_invoices.all'):
       filters.status = 'ALL'
       break
@@ -477,6 +512,44 @@ async function removeMultipleRecurringInvoices(id = null) {
     })
 }
 
+async function bulkPauseSelected() {
+  const ids = recurringInvoiceStore.selectedRecurringInvoices
+  if (!ids.length) return
+
+  for (const id of ids) {
+    await recurringInvoiceStore.toggleRecurringInvoiceStatus(id)
+  }
+
+  refreshTable()
+  recurringInvoiceStore.$patch((state) => {
+    state.selectedRecurringInvoices = []
+    state.selectAllField = false
+  })
+  notificationStore.showNotification({
+    type: 'success',
+    message: t('recurring_invoices.status_updated'),
+  })
+}
+
+async function bulkActivateSelected() {
+  const ids = recurringInvoiceStore.selectedRecurringInvoices
+  if (!ids.length) return
+
+  for (const id of ids) {
+    await recurringInvoiceStore.toggleRecurringInvoiceStatus(id)
+  }
+
+  refreshTable()
+  recurringInvoiceStore.$patch((state) => {
+    state.selectedRecurringInvoices = []
+    state.selectAllField = false
+  })
+  notificationStore.showNotification({
+    type: 'success',
+    message: t('recurring_invoices.status_updated'),
+  })
+}
+
 function toggleFilter() {
   if (showFilters.value) {
     clearFilter()
@@ -498,9 +571,13 @@ function setActiveTab(val) {
     case 'ON_HOLD':
       activeTab.value = t('recurring_invoices.on_hold')
       break
+    case 'COMPLETED':
+      activeTab.value = t('recurring_invoices.completed')
+      break
     case 'ALL':
       activeTab.value = t('recurring_invoices.all')
       break
   }
 }
+// CLAUDE-CHECKPOINT
 </script>

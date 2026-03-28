@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Admin\RecurringInvoice;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RecurringInvoiceRequest;
 use App\Http\Resources\RecurringInvoiceResource;
+use App\Models\Company;
 use App\Models\RecurringInvoice;
 use Illuminate\Http\Request;
 
@@ -170,4 +171,95 @@ class RecurringInvoiceController extends Controller
             'success' => true,
         ]);
     }
+
+    /**
+     * Clone a recurring invoice with all items, taxes, and custom fields.
+     */
+    public function clone(Request $request, RecurringInvoice $recurringInvoice)
+    {
+        $this->authorize('create', RecurringInvoice::class);
+
+        $clone = $recurringInvoice->cloneRecurringInvoice();
+
+        $clone->load([
+            'customer.currency',
+            'company',
+            'currency',
+            'items.taxes',
+            'taxes',
+            'invoices.customer.currency',
+            'fields',
+            'creator',
+        ]);
+
+        return new RecurringInvoiceResource($clone);
+    }
+
+    /**
+     * Toggle recurring invoice status between ACTIVE and ON_HOLD.
+     */
+    public function toggleStatus(Request $request, RecurringInvoice $recurringInvoice)
+    {
+        $this->authorize('update', $recurringInvoice);
+
+        // If activating, check tier limits
+        if ($recurringInvoice->status === RecurringInvoice::ON_HOLD) {
+            $company = Company::find($request->header('company'));
+
+            if ($company) {
+                $tier = $company->subscription_tier ?? 'free';
+                $maxActive = config("subscriptions.tiers.{$tier}.limits.recurring_invoices_active");
+
+                if ($maxActive !== null) {
+                    $currentActive = RecurringInvoice::where('company_id', $company->id)
+                        ->where('status', RecurringInvoice::ACTIVE)
+                        ->count();
+
+                    if ($currentActive >= $maxActive) {
+                        return response()->json([
+                            'error' => 'limit_exceeded',
+                            'message' => "Active recurring invoice limit reached ({$maxActive}).",
+                        ], 403);
+                    }
+                }
+            }
+        }
+
+        $recurringInvoice->toggleStatus();
+
+        $recurringInvoice->load([
+            'customer.currency',
+            'company',
+            'currency',
+            'items.taxes',
+            'taxes',
+            'invoices.customer.currency',
+            'fields',
+            'creator',
+        ]);
+
+        return new RecurringInvoiceResource($recurringInvoice);
+    }
+
+    /**
+     * Generate an invoice immediately from this recurring invoice.
+     */
+    public function generateNow(Request $request, RecurringInvoice $recurringInvoice)
+    {
+        $this->authorize('update', $recurringInvoice);
+
+        $invoice = $recurringInvoice->generateNow();
+
+        if (! $invoice) {
+            return response()->json([
+                'error' => 'Limit reached or invoice generation failed.',
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'invoice_id' => $invoice->id,
+        ]);
+    }
 }
+// CLAUDE-CHECKPOINT

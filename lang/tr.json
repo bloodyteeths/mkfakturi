@@ -1285,6 +1285,7 @@
         "generation_failed": "Fatura oluşturma başarısız — limit aşılmış olabilir",
         "pause_selected": "Seçilenleri Duraklat",
         "activate_selected": "Seçilenleri Etkinleştir",
+        "status_updated": "Durum başarıyla güncellendi",
         "frequency.every_week": "Her Hafta",
         "frequency.every_15_days": "Her 15 Günde",
         "frequency.every_month": "Her Ay",

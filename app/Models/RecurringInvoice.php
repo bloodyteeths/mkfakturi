@@ -436,4 +436,96 @@ class RecurringInvoice extends Model
 
         return true;
     }
+
+    /**
+     * Clone this recurring invoice with all items, taxes, and custom fields.
+     * Status is set to ON_HOLD, next_invoice_at is recalculated.
+     */
+    public function cloneRecurringInvoice(): self
+    {
+        $this->load(['items.taxes', 'taxes', 'fields']);
+
+        $clone = $this->replicate([
+            'id',
+            'created_at',
+            'updated_at',
+        ]);
+
+        $clone->status = self::ON_HOLD;
+        $clone->next_invoice_at = self::getNextInvoiceDate($this->frequency, $this->starts_at);
+        $clone->save();
+
+        // Clone items with their taxes
+        if ($this->items->isNotEmpty()) {
+            self::createItems($clone, $this->items->toArray());
+        }
+
+        // Clone invoice-level taxes
+        if ($this->taxes->isNotEmpty()) {
+            self::createTaxes($clone, $this->taxes->toArray());
+        }
+
+        // Clone custom fields
+        if ($this->fields->isNotEmpty()) {
+            $customFields = [];
+            foreach ($this->fields as $field) {
+                $customFields[] = [
+                    'id' => $field->custom_field_id,
+                    'value' => $field->defaultAnswer,
+                ];
+            }
+            $clone->addCustomFields($customFields);
+        }
+
+        return $clone;
+    }
+
+    /**
+     * Toggle status between ACTIVE and ON_HOLD.
+     */
+    public function toggleStatus(): self
+    {
+        if ($this->status === self::ACTIVE) {
+            $this->status = self::ON_HOLD;
+        } elseif ($this->status === self::ON_HOLD) {
+            $this->status = self::ACTIVE;
+        }
+
+        $this->save();
+
+        return $this;
+    }
+
+    /**
+     * Generate an invoice immediately, regardless of schedule.
+     * Respects limit checks (COUNT / DATE).
+     *
+     * @return Invoice|null
+     */
+    public function generateNow(): ?Invoice
+    {
+        // Respect COUNT limit
+        if ($this->limit_by === 'COUNT') {
+            $invoiceCount = Invoice::where('recurring_invoice_id', $this->id)->count();
+            if ($invoiceCount >= $this->limit_count) {
+                return null;
+            }
+        }
+
+        // Respect DATE limit
+        if ($this->limit_by === 'DATE') {
+            $today = Carbon::today()->format('Y-m-d');
+            if ($this->limit_date < $today) {
+                return null;
+            }
+        }
+
+        $this->createInvoice();
+
+        // Return the most recently created invoice for this recurring invoice
+        return Invoice::where('recurring_invoice_id', $this->id)
+            ->latest()
+            ->first();
+    }
 }
+// CLAUDE-CHECKPOINT

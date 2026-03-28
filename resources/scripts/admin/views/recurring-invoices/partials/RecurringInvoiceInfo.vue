@@ -54,6 +54,13 @@
         "
         :content-loading="isLoading"
       />
+
+      <BaseDescriptionListItem
+        v-if="recurringInvoiceStore.newRecurringInvoice?.contract_reference"
+        :label="$t('recurring_invoices.contract_reference')"
+        :value="recurringInvoiceStore.newRecurringInvoice?.contract_reference"
+        :content-loading="isLoading"
+      />
     </BaseDescriptionList>
 
     <BaseHeading class="mt-8">
@@ -91,4 +98,5 @@ watch(
 async function loadRecurringInvoice() {
   await recurringInvoiceStore.fetchRecurringInvoice(route.params.id)
 }
+// CLAUDE-CHECKPOINT
 </script>
