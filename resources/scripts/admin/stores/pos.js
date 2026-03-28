@@ -19,6 +19,19 @@ export const usePosStore = defineStore('pos', () => {
   const searchQuery = ref('')
   const selectedCategory = ref(null)
   const catalogLoaded = ref(false)
+  const posSettings = ref({
+    numpad_enabled: true,
+    sound_enabled: true,
+    restaurant_mode: false,
+    table_count: 20,
+    kitchen_printing: false,
+    split_payment: false,
+    return_enabled: false,
+    casys_qr: false,
+    barcode_camera: false,
+    auto_print: false,
+    show_vat: true,
+  })
 
   // --- Getters ---
   const cartItemCount = computed(() =>
@@ -127,6 +140,7 @@ export const usePosStore = defineStore('pos', () => {
       categories.value = data.categories || []
       taxTypes.value = data.tax_types || []
       posUsage.value = data.pos_usage || posUsage.value
+      if (data.pos_settings) posSettings.value = data.pos_settings
     } catch (e) {
       console.error('Failed to load POS catalog:', e)
     } finally {
@@ -147,7 +161,7 @@ export const usePosStore = defineStore('pos', () => {
     }
   }
 
-  async function completeSale(fiscalDeviceId = null) {
+  async function completeSale(fiscalDeviceId = null, splitAmountsData = null) {
     if (cart.value.length === 0 || isProcessing.value) return null
     isProcessing.value = true
 
@@ -163,6 +177,12 @@ export const usePosStore = defineStore('pos', () => {
         payment_method: paymentMethod.value,
         cash_received: paymentMethod.value === 'cash' ? cashReceived.value : cartTotal.value,
         fiscal_device_id: fiscalDeviceId,
+      }
+
+      // Add split payment amounts
+      if (paymentMethod.value === 'mixed' && splitAmountsData) {
+        saleData.cash_amount = splitAmountsData.cash_amount
+        saleData.card_amount = splitAmountsData.card_amount
       }
 
       const { data } = await axios.post('/pos/sale', saleData)
@@ -242,6 +262,68 @@ export const usePosStore = defineStore('pos', () => {
     }
   }
 
+  // --- Restaurant Table Management ---
+  const tableOrders = ref({})
+  const activeTable = ref(null)
+
+  function selectTable(tableNumber) {
+    // Save current cart to previous table if any
+    if (activeTable.value && cart.value.length > 0) {
+      saveTableOrder(activeTable.value)
+    }
+
+    activeTable.value = tableNumber
+
+    // Load table's existing order into cart
+    const order = tableOrders.value[tableNumber]
+    if (order && order.items.length > 0) {
+      cart.value = [...order.items]
+      customer.value = order.customer || null
+    } else {
+      cart.value = []
+      customer.value = null
+    }
+    cashReceived.value = 0
+    paymentMethod.value = 'cash'
+  }
+
+  function saveTableOrder(tableNumber) {
+    if (cart.value.length === 0) {
+      delete tableOrders.value[tableNumber]
+    } else {
+      tableOrders.value[tableNumber] = {
+        items: [...cart.value],
+        customer: customer.value,
+        total: cartTotal.value,
+        updatedAt: new Date().toISOString(),
+      }
+    }
+    persistTableOrders()
+  }
+
+  function clearTable(tableNumber) {
+    delete tableOrders.value[tableNumber]
+    if (activeTable.value === tableNumber) {
+      activeTable.value = null
+      cart.value = []
+      customer.value = null
+    }
+    persistTableOrders()
+  }
+
+  function persistTableOrders() {
+    localStorage.setItem('pos_table_orders', JSON.stringify(tableOrders.value))
+  }
+
+  function loadTableOrders() {
+    try {
+      const saved = localStorage.getItem('pos_table_orders')
+      if (saved) tableOrders.value = JSON.parse(saved)
+    } catch (e) {
+      tableOrders.value = {}
+    }
+  }
+
   // --- Park/Resume Sales ---
   function parkSale() {
     if (cart.value.length === 0) return
@@ -283,7 +365,7 @@ export const usePosStore = defineStore('pos', () => {
     cart, customer, paymentMethod, cashReceived, isProcessing,
     catalog, categories, taxTypes, lastSale, posUsage,
     currentShift, parkedSales, searchQuery, selectedCategory,
-    catalogLoaded,
+    catalogLoaded, posSettings,
     // Getters
     cartItemCount, cartSubTotal, cartTax, cartDiscount, cartTotal,
     changeAmount, filteredCatalog, isLimitApproaching, isLimitReached,
@@ -292,6 +374,9 @@ export const usePosStore = defineStore('pos', () => {
     loadCatalog, lookupBarcode, completeSale, processReturn,
     openShift, closeShift, fetchCurrentShift,
     parkSale, resumeSale, loadParkedSales,
+    // Restaurant
+    tableOrders, activeTable,
+    selectTable, saveTableOrder, clearTable, loadTableOrders,
   }
 })
 

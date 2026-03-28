@@ -350,6 +350,11 @@ export default [
         name: 'pos',
         component: () => import('@/scripts/admin/views/pos/Index.vue'),
       },
+      {
+        path: 'kitchen',
+        name: 'pos-kitchen',
+        component: () => import('@/scripts/admin/views/pos/KitchenDisplay.vue'),
+      },
     ],
   },
   {

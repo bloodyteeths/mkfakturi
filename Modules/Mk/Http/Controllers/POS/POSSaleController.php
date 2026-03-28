@@ -40,8 +40,10 @@ class POSSaleController extends Controller
                 'items.*.price' => 'nullable|integer',
                 'items.*.discount' => 'nullable|numeric|min:0|max:100',
                 'customer_id' => 'nullable|integer|exists:customers,id',
-                'payment_method' => 'required|string|in:cash,card',
+                'payment_method' => 'required|string|in:cash,card,mixed',
                 'cash_received' => 'nullable|integer|min:0',
+                'cash_amount' => 'nullable|integer|min:0',
+                'card_amount' => 'nullable|integer|min:0',
                 'fiscal_device_id' => 'nullable|integer|exists:fiscal_devices,id',
                 'warehouse_id' => 'nullable|integer|exists:warehouses,id',
                 'notes' => 'nullable|string|max:500',
@@ -243,55 +245,34 @@ class POSSaleController extends Controller
                 // Create invoice (fires InvoiceObserver + StockInvoiceItemObserver)
                 $invoice = Invoice::createInvoice($invoiceRequest);
 
-                // --- Create payment ---
-                $paymentMethodId = $this->resolvePaymentMethodId($companyId, $validated['payment_method']);
+                // --- Create payment(s) ---
+                $payments = [];
 
-                $paymentNumber = (new SerialNumberFormatter())
-                    ->setModel(new Payment())
-                    ->setCompany($companyId)
-                    ->setCustomer($customerId)
-                    ->getNextNumber();
+                if ($validated['payment_method'] === 'mixed') {
+                    // Split payment: cash + card
+                    $cashAmount = $validated['cash_amount'] ?? 0;
+                    $cardAmount = $validated['card_amount'] ?? ($total - $cashAmount);
 
-                $paymentRequest = new \Illuminate\Http\Request();
-                $paymentRequest->headers->set('company', $companyId);
-                $paymentRequest->setUserResolver(fn () => $request->user());
-
-                $paymentData = [
-                    'payment_date' => now()->format('Y-m-d'),
-                    'customer_id' => $customerId,
-                    'amount' => $total,
-                    'payment_number' => $paymentNumber,
-                    'invoice_id' => $invoice->id,
-                    'payment_method_id' => $paymentMethodId,
-                    'notes' => 'POS Payment',
-                    'currency_id' => $customerCurrency,
-                    'exchange_rate' => 1,
-                ];
-
-                $paymentRequest->replace($paymentData);
-                $paymentRequest->macro('getPaymentPayload', function () use ($paymentData, $companyId, $request, $customerCurrency) {
-                    return [
-                        'payment_date' => $paymentData['payment_date'],
-                        'customer_id' => $paymentData['customer_id'],
-                        'amount' => $paymentData['amount'],
-                        'payment_number' => $paymentData['payment_number'],
-                        'invoice_id' => $paymentData['invoice_id'],
-                        'payment_method_id' => $paymentData['payment_method_id'],
-                        'notes' => $paymentData['notes'],
-                        'creator_id' => $request->user()->id ?? null,
-                        'company_id' => $companyId,
-                        'exchange_rate' => 1,
-                        'base_amount' => $paymentData['amount'],
-                        'currency_id' => $customerCurrency,
-                        'project_id' => null,
-                    ];
-                });
-
-                $payment = Payment::createPayment($paymentRequest);
+                    foreach (['cash' => $cashAmount, 'card' => $cardAmount] as $method => $amount) {
+                        if ($amount <= 0) {
+                            continue;
+                        }
+                        $payments[] = $this->createPosPayment(
+                            $request, $companyId, $customerId, $customerCurrency,
+                            $invoice->id, $amount, $method
+                        );
+                    }
+                } else {
+                    $payments[] = $this->createPosPayment(
+                        $request, $companyId, $customerId, $customerCurrency,
+                        $invoice->id, $total, $validated['payment_method']
+                    );
+                }
 
                 return [
                     'invoice' => $invoice,
-                    'payment' => $payment,
+                    'payment' => $payments[0],
+                    'payments' => $payments,
                 ];
             });
 
@@ -394,11 +375,27 @@ class POSSaleController extends Controller
         $usageService = app(UsageLimitService::class);
         $posUsage = $usageService->getUsage($company, 'pos_transactions_per_month');
 
+        // POS feature settings
+        $posSettings = [
+            'numpad_enabled' => CompanySetting::getSetting('pos_numpad_enabled', $companyId) !== 'NO',
+            'sound_enabled' => CompanySetting::getSetting('pos_sound_enabled', $companyId) !== 'NO',
+            'restaurant_mode' => CompanySetting::getSetting('pos_restaurant_mode', $companyId) === 'YES',
+            'table_count' => (int) (CompanySetting::getSetting('pos_table_count', $companyId) ?: 20),
+            'kitchen_printing' => CompanySetting::getSetting('pos_kitchen_printing', $companyId) === 'YES',
+            'split_payment' => CompanySetting::getSetting('pos_split_payment', $companyId) === 'YES',
+            'return_enabled' => CompanySetting::getSetting('pos_return_enabled', $companyId) === 'YES',
+            'casys_qr' => CompanySetting::getSetting('pos_casys_qr', $companyId) === 'YES',
+            'barcode_camera' => CompanySetting::getSetting('pos_barcode_camera', $companyId) === 'YES',
+            'auto_print' => CompanySetting::getSetting('pos_auto_print', $companyId) === 'YES',
+            'show_vat' => CompanySetting::getSetting('pos_show_vat', $companyId) !== 'NO',
+        ];
+
         return response()->json([
             'items' => $items,
             'categories' => $categories,
             'tax_types' => $taxTypes,
             'pos_usage' => $posUsage,
+            'pos_settings' => $posSettings,
         ]);
     }
 
@@ -448,6 +445,45 @@ class POSSaleController extends Controller
                 'tax_percent' => $taxPercent,
                 'track_quantity' => (bool) $item->track_quantity,
                 'quantity' => (float) ($item->quantity ?? 0),
+            ],
+        ]);
+    }
+
+    /**
+     * GET /api/v1/pos/invoice-lookup?number=XXX
+     *
+     * Find an invoice by number for POS returns.
+     */
+    public function invoiceLookup(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+        $number = $request->input('number');
+
+        if (! $number) {
+            return response()->json(['error' => 'Invoice number required'], 422);
+        }
+
+        $invoice = Invoice::where('company_id', $companyId)
+            ->where('invoice_number', 'LIKE', '%' . $number . '%')
+            ->with(['items:id,invoice_id,item_id,name,price,quantity'])
+            ->first();
+
+        if (! $invoice) {
+            return response()->json(['error' => 'Invoice not found'], 404);
+        }
+
+        return response()->json([
+            'invoice' => [
+                'id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'total' => $invoice->total,
+                'invoice_date' => $invoice->invoice_date,
+                'items' => $invoice->items->map(fn ($i) => [
+                    'item_id' => $i->item_id,
+                    'name' => $i->name,
+                    'price' => $i->price,
+                    'quantity' => (int) $i->quantity,
+                ]),
             ],
         ]);
     }
@@ -514,6 +550,64 @@ class POSSaleController extends Controller
     }
 
     /**
+     * Create a single POS payment record.
+     */
+    protected function createPosPayment(
+        Request $request,
+        int $companyId,
+        int $customerId,
+        int $customerCurrency,
+        int $invoiceId,
+        int $amount,
+        string $method
+    ): Payment {
+        $paymentMethodId = $this->resolvePaymentMethodId($companyId, $method);
+
+        $paymentNumber = (new SerialNumberFormatter())
+            ->setModel(new Payment())
+            ->setCompany($companyId)
+            ->setCustomer($customerId)
+            ->getNextNumber();
+
+        $paymentRequest = new \Illuminate\Http\Request();
+        $paymentRequest->headers->set('company', $companyId);
+        $paymentRequest->setUserResolver(fn () => $request->user());
+
+        $paymentData = [
+            'payment_date' => now()->format('Y-m-d'),
+            'customer_id' => $customerId,
+            'amount' => $amount,
+            'payment_number' => $paymentNumber,
+            'invoice_id' => $invoiceId,
+            'payment_method_id' => $paymentMethodId,
+            'notes' => 'POS Payment (' . ucfirst($method) . ')',
+            'currency_id' => $customerCurrency,
+            'exchange_rate' => 1,
+        ];
+
+        $paymentRequest->replace($paymentData);
+        $paymentRequest->macro('getPaymentPayload', function () use ($paymentData, $companyId, $request, $customerCurrency) {
+            return [
+                'payment_date' => $paymentData['payment_date'],
+                'customer_id' => $paymentData['customer_id'],
+                'amount' => $paymentData['amount'],
+                'payment_number' => $paymentData['payment_number'],
+                'invoice_id' => $paymentData['invoice_id'],
+                'payment_method_id' => $paymentData['payment_method_id'],
+                'notes' => $paymentData['notes'],
+                'creator_id' => $request->user()->id ?? null,
+                'company_id' => $companyId,
+                'exchange_rate' => 1,
+                'base_amount' => $paymentData['amount'],
+                'currency_id' => $customerCurrency,
+                'project_id' => null,
+            ];
+        });
+
+        return Payment::createPayment($paymentRequest);
+    }
+
+    /**
      * POST /api/v1/pos/return
      *
      * Process a POS return/storno — creates credit note, reverses stock, processes refund.
@@ -527,7 +621,7 @@ class POSSaleController extends Controller
             $validated = $request->validate([
                 'invoice_id' => 'required|integer|exists:invoices,id',
                 'items' => 'nullable|array',
-                'items.*.invoice_item_id' => 'required|integer',
+                'items.*.item_id' => 'required|integer',
                 'items.*.quantity' => 'required|numeric|gt:0',
                 'reason' => 'nullable|string|max:500',
             ]);

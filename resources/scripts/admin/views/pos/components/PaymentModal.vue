@@ -30,7 +30,7 @@
             :class="localMethod === 'cash'
               ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
               : 'text-gray-500 hover:text-gray-700'"
-            @click="localMethod = 'cash'; $emit('update:payment-method', 'cash')"
+            @click="setMethod('cash')"
           >
             {{ t('pos.cash') || 'Cash' }}
           </button>
@@ -39,9 +39,19 @@
             :class="localMethod === 'card'
               ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
               : 'text-gray-500 hover:text-gray-700'"
-            @click="localMethod = 'card'; $emit('update:payment-method', 'card')"
+            @click="setMethod('card')"
           >
             {{ t('pos.card') || 'Card' }}
+          </button>
+          <button
+            v-if="splitEnabled"
+            class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-200"
+            :class="localMethod === 'mixed'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'"
+            @click="setMethod('mixed')"
+          >
+            {{ t('pos_settings.split_payment') || 'Split' }}
           </button>
         </div>
 
@@ -50,14 +60,14 @@
           <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">
             {{ t('pos.cash_received') || 'Cash Received' }}
           </label>
-          <input
-            v-model.number="displayCash"
-            type="number"
-            min="0"
-            step="1"
-            class="w-full px-4 py-3.5 text-2xl font-bold text-center bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none tabular-nums transition-colors"
-            @input="$emit('update:cash-received', localCash)"
-          />
+
+          <!-- Amount display -->
+          <div
+            class="w-full px-4 py-3.5 text-2xl font-bold text-center bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl tabular-nums cursor-text"
+            @click="numpadActive = true"
+          >
+            {{ cashDisplay }} МКД
+          </div>
 
           <!-- Quick amount buttons -->
           <div class="grid grid-cols-4 gap-2">
@@ -65,11 +75,18 @@
               v-for="amount in quickAmounts"
               :key="amount"
               class="py-2.5 text-sm font-bold bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-primary-50 hover:border-primary-300 dark:hover:bg-primary-900/20 dark:hover:border-primary-700 active:scale-95 transition-all"
-              @click="localCash = amount; $emit('update:cash-received', amount)"
+              @click="setCashFromAmount(amount)"
             >
               {{ (amount / 100).toLocaleString('mk-MK') }}
             </button>
           </div>
+
+          <!-- Numpad -->
+          <NumPad
+            @input="onNumpadInput"
+            @backspace="onNumpadBackspace"
+            @clear="onNumpadClear"
+          />
 
           <!-- Change display -->
           <div
@@ -82,14 +99,64 @@
             </span>
           </div>
         </div>
+
+        <!-- Split payment inputs (only for mixed) -->
+        <div v-if="localMethod === 'mixed'" class="space-y-3">
+          <div>
+            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+              {{ t('pos.cash') || 'Cash' }}
+            </label>
+            <div
+              class="w-full px-4 py-3 text-xl font-bold text-center bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl tabular-nums cursor-text mt-1"
+              :class="splitFocus === 'cash' ? 'ring-2 ring-primary-500 border-primary-500' : ''"
+              @click="splitFocus = 'cash'"
+            >
+              {{ splitCashDisplay }} МКД
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+              {{ t('pos.card') || 'Card' }}
+            </label>
+            <div
+              class="w-full px-4 py-3 text-xl font-bold text-center bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl tabular-nums cursor-text mt-1"
+              :class="splitFocus === 'card' ? 'ring-2 ring-primary-500 border-primary-500' : ''"
+              @click="splitFocus = 'card'"
+            >
+              {{ splitCardDisplay }} МКД
+            </div>
+          </div>
+
+          <NumPad
+            @input="onSplitNumpadInput"
+            @backspace="onSplitNumpadBackspace"
+            @clear="onSplitNumpadClear"
+          />
+
+          <!-- Remaining display -->
+          <div
+            v-if="splitRemaining !== 0"
+            class="flex items-center justify-between p-3 rounded-xl ring-1"
+            :class="splitRemaining > 0
+              ? 'bg-amber-50 dark:bg-amber-900/20 ring-amber-200 dark:ring-amber-800'
+              : 'bg-emerald-50 dark:bg-emerald-900/20 ring-emerald-200 dark:ring-emerald-800'"
+          >
+            <span class="text-sm font-bold" :class="splitRemaining > 0 ? 'text-amber-700 dark:text-amber-300' : 'text-emerald-700 dark:text-emerald-300'">
+              {{ splitRemaining > 0 ? 'Remaining' : 'Overpaid' }}
+            </span>
+            <span class="text-lg font-black tabular-nums" :class="splitRemaining > 0 ? 'text-amber-600' : 'text-emerald-600'">
+              {{ formatPrice(Math.abs(splitRemaining)) }}
+            </span>
+          </div>
+        </div>
       </div>
 
       <!-- Confirm button -->
       <div class="px-6 pb-6">
         <button
-          :disabled="isProcessing || (localMethod === 'cash' && localCash < total)"
+          :disabled="isProcessing || !canConfirm"
           class="w-full py-4 rounded-2xl text-white font-bold text-lg transition-all duration-200 flex items-center justify-center gap-2"
-          :class="!isProcessing && (localMethod !== 'cash' || localCash >= total)
+          :class="!isProcessing && canConfirm
             ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 shadow-lg shadow-green-500/25 hover:shadow-xl hover:-translate-y-0.5'
             : 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed text-gray-400'"
           @click="$emit('confirm')"
@@ -110,6 +177,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import NumPad from './NumPad.vue'
 
 const { t } = useI18n()
 
@@ -119,20 +187,130 @@ const props = defineProps({
   cashReceived: { type: Number, default: 0 },
   change: { type: Number, default: 0 },
   isProcessing: { type: Boolean, default: false },
+  splitEnabled: { type: Boolean, default: false },
 })
 
-defineEmits(['update:payment-method', 'update:cash-received', 'confirm', 'close'])
+const emit = defineEmits(['update:payment-method', 'update:cash-received', 'update:split-amounts', 'confirm', 'close'])
 
 const localMethod = ref(props.paymentMethod)
 const localCash = ref(props.cashReceived || props.total)
+const numpadActive = ref(true)
 
-// Display value in MKD (not cents) for the input field
-const displayCash = computed({
-  get: () => Math.round(localCash.value / 100),
-  set: (val) => { localCash.value = Math.round((val || 0) * 100) },
+// String buffer for numpad entry (in MKD, not cents)
+const numpadBuffer = ref(String(Math.round(localCash.value / 100)))
+
+// Display value from numpad buffer
+const cashDisplay = computed(() => {
+  const val = parseInt(numpadBuffer.value) || 0
+  return val.toLocaleString('mk-MK')
 })
 
+function syncCashFromBuffer() {
+  const mkd = parseInt(numpadBuffer.value) || 0
+  localCash.value = mkd * 100
+  emit('update:cash-received', localCash.value)
+}
+
+function onNumpadInput(digit) {
+  if (numpadBuffer.value === '0') {
+    numpadBuffer.value = digit
+  } else {
+    numpadBuffer.value += digit
+  }
+  syncCashFromBuffer()
+}
+
+function onNumpadBackspace() {
+  if (numpadBuffer.value.length <= 1) {
+    numpadBuffer.value = '0'
+  } else {
+    numpadBuffer.value = numpadBuffer.value.slice(0, -1)
+  }
+  syncCashFromBuffer()
+}
+
+function onNumpadClear() {
+  numpadBuffer.value = '0'
+  syncCashFromBuffer()
+}
+
+function setCashFromAmount(amount) {
+  localCash.value = amount
+  numpadBuffer.value = String(Math.round(amount / 100))
+  emit('update:cash-received', amount)
+}
+
+function setMethod(method) {
+  localMethod.value = method
+  emit('update:payment-method', method)
+  if (method === 'mixed') {
+    // Default: half cash, half card
+    const halfMkd = Math.round(props.total / 200) // half in MKD
+    splitCashBuffer.value = String(halfMkd)
+    splitCardBuffer.value = String(Math.round(props.total / 100) - halfMkd)
+    splitFocus.value = 'cash'
+    emitSplitAmounts()
+  }
+}
+
 const localChange = computed(() => Math.max(0, localCash.value - props.total))
+
+// --- Split payment ---
+const splitFocus = ref('cash')
+const splitCashBuffer = ref('0')
+const splitCardBuffer = ref('0')
+
+const splitCashDisplay = computed(() => (parseInt(splitCashBuffer.value) || 0).toLocaleString('mk-MK'))
+const splitCardDisplay = computed(() => (parseInt(splitCardBuffer.value) || 0).toLocaleString('mk-MK'))
+
+const splitRemaining = computed(() => {
+  const cashCents = (parseInt(splitCashBuffer.value) || 0) * 100
+  const cardCents = (parseInt(splitCardBuffer.value) || 0) * 100
+  return props.total - cashCents - cardCents
+})
+
+function emitSplitAmounts() {
+  emit('update:split-amounts', {
+    cash_amount: (parseInt(splitCashBuffer.value) || 0) * 100,
+    card_amount: (parseInt(splitCardBuffer.value) || 0) * 100,
+  })
+}
+
+function onSplitNumpadInput(digit) {
+  const buf = splitFocus.value === 'cash' ? 'splitCashBuffer' : 'splitCardBuffer'
+  if (splitFocus.value === 'cash') {
+    splitCashBuffer.value = splitCashBuffer.value === '0' ? digit : splitCashBuffer.value + digit
+  } else {
+    splitCardBuffer.value = splitCardBuffer.value === '0' ? digit : splitCardBuffer.value + digit
+  }
+  emitSplitAmounts()
+}
+
+function onSplitNumpadBackspace() {
+  if (splitFocus.value === 'cash') {
+    splitCashBuffer.value = splitCashBuffer.value.length <= 1 ? '0' : splitCashBuffer.value.slice(0, -1)
+  } else {
+    splitCardBuffer.value = splitCardBuffer.value.length <= 1 ? '0' : splitCardBuffer.value.slice(0, -1)
+  }
+  emitSplitAmounts()
+}
+
+function onSplitNumpadClear() {
+  if (splitFocus.value === 'cash') {
+    splitCashBuffer.value = '0'
+  } else {
+    splitCardBuffer.value = '0'
+  }
+  emitSplitAmounts()
+}
+
+// --- Confirm validation ---
+const canConfirm = computed(() => {
+  if (localMethod.value === 'cash') return localCash.value >= props.total
+  if (localMethod.value === 'card') return true
+  if (localMethod.value === 'mixed') return splitRemaining.value <= 0
+  return false
+})
 
 // Quick amount buttons — round up to nearest common denominations
 const quickAmounts = computed(() => {

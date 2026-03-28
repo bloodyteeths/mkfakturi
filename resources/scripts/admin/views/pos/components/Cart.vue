@@ -62,14 +62,14 @@
           <!-- Qty controls -->
           <div class="flex items-center gap-0.5 shrink-0 bg-gray-50 dark:bg-gray-800 rounded-lg p-0.5">
             <button
-              class="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 hover:shadow-sm active:scale-90 transition-all font-bold text-lg"
+              class="w-11 h-11 flex items-center justify-center rounded-md text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 hover:shadow-sm active:scale-90 transition-all font-bold text-xl"
               @click="$emit('update-qty', { index, qty: item.quantity - 1 })"
             >
               -
             </button>
-            <span class="w-8 text-center text-sm font-bold text-gray-800 dark:text-gray-200">{{ item.quantity }}</span>
+            <span class="w-10 text-center text-sm font-bold text-gray-800 dark:text-gray-200">{{ item.quantity }}</span>
             <button
-              class="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 hover:shadow-sm active:scale-90 transition-all font-bold text-lg"
+              class="w-11 h-11 flex items-center justify-center rounded-md text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 hover:shadow-sm active:scale-90 transition-all font-bold text-xl"
               @click="$emit('update-qty', { index, qty: item.quantity + 1 })"
             >
               +
@@ -81,12 +81,12 @@
             {{ formatPrice(item.price * item.quantity) }}
           </div>
 
-          <!-- Remove (appears on hover) -->
+          <!-- Remove -->
           <button
-            class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all shrink-0"
+            class="w-9 h-9 flex items-center justify-center opacity-60 hover:opacity-100 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all shrink-0"
             @click="$emit('remove', index)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>

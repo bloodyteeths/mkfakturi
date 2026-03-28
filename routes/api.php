@@ -542,6 +542,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/return', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'returnSale']);
                 Route::get('/catalog', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'catalog']);
                 Route::get('/barcode/{code}', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'barcodeLookup']);
+                Route::get('/invoice-lookup', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'invoiceLookup']);
                 Route::post('/shift/open', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'openShift']);
                 Route::post('/shift/close', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'closeShift']);
                 Route::get('/shift/current', [\Modules\Mk\Http\Controllers\POS\POSSaleController::class, 'currentShift']);
