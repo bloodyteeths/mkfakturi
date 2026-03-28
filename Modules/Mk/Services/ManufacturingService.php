@@ -42,6 +42,13 @@ class ManufacturingService
      */
     public function createBom(int $companyId, array $data, array $lines = []): Bom
     {
+        // Prevent circular reference: output item must not appear in BOM lines
+        $outputItemId = (int) ($data['output_item_id'] ?? 0);
+        $lineItemIds = array_map(fn ($l) => (int) ($l['item_id'] ?? 0), $lines);
+        if ($outputItemId && in_array($outputItemId, $lineItemIds, true)) {
+            throw new \RuntimeException('A BOM cannot use its output item as an input material.');
+        }
+
         return DB::transaction(function () use ($companyId, $data, $lines) {
             $bom = Bom::create(array_merge($data, [
                 'company_id' => $companyId,
@@ -63,6 +70,15 @@ class ManufacturingService
      */
     public function updateBom(Bom $bom, array $data, ?array $lines = null): Bom
     {
+        // Prevent circular reference on update
+        $outputItemId = (int) ($data['output_item_id'] ?? $bom->output_item_id);
+        if ($lines !== null) {
+            $lineItemIds = array_map(fn ($l) => (int) ($l['item_id'] ?? 0), $lines);
+            if ($outputItemId && in_array($outputItemId, $lineItemIds, true)) {
+                throw new \RuntimeException('A BOM cannot use its output item as an input material.');
+            }
+        }
+
         return DB::transaction(function () use ($bom, $data, $lines) {
             $bom->update($data);
 
@@ -184,9 +200,16 @@ class ManufacturingService
             throw new \RuntimeException('Can only record consumption for in-progress orders.');
         }
 
+        // Enforce period lock on consumption date
+        $this->periodLockService->enforceUnlocked($order->company_id, $order->order_date);
+
         $material = $order->materials()->findOrFail($materialId);
         $companyId = $order->company_id;
-        $warehouse = $warehouseId ?? $material->warehouse_id;
+        $warehouse = $warehouseId ?? $material->warehouse_id ?? $order->output_warehouse_id;
+
+        if (! $warehouse) {
+            throw new \RuntimeException('No warehouse specified for material consumption. Set warehouse on the material line, the production order, or pass it explicitly.');
+        }
 
         // Get current WAC at consumption time
         $stock = $this->stockService->getItemStock($companyId, $material->item_id, $warehouse);
@@ -284,6 +307,12 @@ class ManufacturingService
         $this->periodLockService->enforceUnlocked($order->company_id, $order->order_date);
 
         $order = DB::transaction(function () use ($order, $actualQty, $coOutputs) {
+            $order = ProductionOrder::lockForUpdate()->findOrFail($order->id);
+
+            if (! $order->canComplete()) {
+                throw new \RuntimeException('Order cannot be completed from status: '.$order->status);
+            }
+
             // Update order
             $order->update([
                 'actual_quantity' => $actualQty,
@@ -566,6 +595,28 @@ class ManufacturingService
                     'disposition' => 'scrap',
                     'scrap_quantity' => $rejectedQty,
                 ]);
+
+                // Write off scrapped quantity from stock
+                if ($rejectedQty > 0 && $order->output_warehouse_id) {
+                    $stock = $this->stockService->getItemStock(
+                        $order->company_id,
+                        $order->output_item_id,
+                        $order->output_warehouse_id
+                    );
+                    $wac = $stock['weighted_average_cost'] ?? 0;
+
+                    $this->stockService->recordStockOut(
+                        companyId: $order->company_id,
+                        warehouseId: $order->output_warehouse_id,
+                        itemId: $order->output_item_id,
+                        quantity: $rejectedQty,
+                        sourceType: StockMovement::SOURCE_PRODUCTION_WASTAGE,
+                        sourceId: $check->id,
+                        movementDate: now()->format('Y-m-d'),
+                        notes: "QC scrap write-off: {$order->order_number} (QC #{$check->id})",
+                        createdBy: auth()->id(),
+                    );
+                }
             }
 
             return $check->fresh(['reworkOrder']);
@@ -628,4 +679,4 @@ class ManufacturingService
     }
 }
 
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT: scrap stock out, period lock on consumption, warehouse fallback, BOM circular ref prevention

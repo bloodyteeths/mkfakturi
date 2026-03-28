@@ -3,6 +3,8 @@
 namespace Modules\Mk\Http\Requests\Manufacturing;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
+use Modules\Mk\Models\Manufacturing\ProductionOrder;
 
 class CompleteProductionRequest extends FormRequest
 {
@@ -24,6 +26,34 @@ class CompleteProductionRequest extends FormRequest
             'co_outputs.*.allocation_percent' => 'nullable|numeric|min:0|max:100',
         ];
     }
+
+    /**
+     * Validate actual_quantity is within reasonable range of planned_quantity.
+     * Variance > 200% (3x planned) is rejected to catch data entry errors.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $actualQty = (float) $this->input('actual_quantity');
+            $orderId = (int) $this->route('id');
+            $companyId = (int) $this->header('company');
+
+            $order = ProductionOrder::where('company_id', $companyId)->find($orderId);
+            if (! $order || (float) $order->planned_quantity <= 0) {
+                return;
+            }
+
+            $plannedQty = (float) $order->planned_quantity;
+            $variance = abs($actualQty - $plannedQty) / $plannedQty * 100;
+
+            if ($variance > 200) {
+                $validator->errors()->add(
+                    'actual_quantity',
+                    "Actual quantity ({$actualQty}) deviates more than 200% from planned quantity ({$plannedQty}). Please verify the value."
+                );
+            }
+        });
+    }
 }
 
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT: actual_quantity reasonableness validation (>200% variance rejected)

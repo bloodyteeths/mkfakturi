@@ -372,6 +372,9 @@ export default {
 
       // Gantt grouping
       gantt_unassigned: 'Нераспределени',
+      invalid_date_range: 'Невалиден опсег на датуми — крајниот датум мора да биде по почетниот',
+      pdf_failed: 'Генерирањето PDF не успеа',
+      connection_lost: 'Врската е прекината',
     },
   },
   en: {
@@ -726,6 +729,9 @@ export default {
       import_preview_count: '{boms} BOMs, {materials} materials',
       import_matched: 'matched',
       gantt_unassigned: 'Unassigned',
+      invalid_date_range: 'Invalid date range — end date must be after start date',
+      pdf_failed: 'PDF generation failed',
+      connection_lost: 'Connection lost',
     },
   },
   sq: {
@@ -1071,6 +1077,9 @@ export default {
       import_preview_count: '{boms} norma, {materials} materiale',
       import_matched: 'përputhur',
       gantt_unassigned: 'Pa caktuar',
+      invalid_date_range: 'Diapazoni i datave i pavlefshëm — data e mbarimit duhet të jetë pas datës së fillimit',
+      pdf_failed: 'Gjenerimi i PDF dështoi',
+      connection_lost: 'Lidhja u ndërpre',
     },
   },
   tr: {
@@ -1416,6 +1425,10 @@ export default {
       import_preview_count: '{boms} BOM, {materials} malzeme',
       import_matched: 'eşleşti',
       gantt_unassigned: 'Atanmamış',
+      invalid_date_range: 'Geçersiz tarih aralığı — bitiş tarihi başlangıç tarihinden sonra olmalı',
+      pdf_failed: 'PDF oluşturma başarısız',
+      connection_lost: 'Bağlantı kesildi',
     },
   },
 }
+// CLAUDE-CHECKPOINT

@@ -129,6 +129,13 @@ class CostAllocationService
     public function allocateByFixedRatio($outputs, int $totalCost): array
     {
         $totalPercent = $outputs->sum(fn ($o) => (float) $o->allocation_percent);
+
+        if (abs($totalPercent - 100.0) > 0.1) {
+            throw new \RuntimeException(
+                "Co-production allocation percentages must sum to 100%. Current total: {$totalPercent}%."
+            );
+        }
+
         $result = [];
         $allocated = 0;
 
@@ -190,4 +197,4 @@ class CostAllocationService
     }
 }
 
-// CLAUDE-CHECKPOINT
+// CLAUDE-CHECKPOINT: fixed_ratio allocation_percent sum-to-100 validation

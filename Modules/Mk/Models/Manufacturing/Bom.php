@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Bom extends Model
 {
@@ -71,10 +72,16 @@ class Bom extends Model
         static::creating(function (Bom $bom) {
             if (empty($bom->code)) {
                 $year = date('Y');
-                $sequence = static::where('company_id', $bom->company_id)
-                    ->withTrashed()
-                    ->whereYear('created_at', $year)
-                    ->count() + 1;
+                $sequence = (int) DB::transaction(function () use ($bom, $year) {
+                    $max = static::where('company_id', $bom->company_id)
+                        ->withTrashed()
+                        ->whereYear('created_at', $year)
+                        ->lockForUpdate()
+                        ->selectRaw('MAX(CAST(SUBSTRING(code, -4) AS UNSIGNED)) as max_seq')
+                        ->value('max_seq');
+
+                    return ($max ?? 0) + 1;
+                });
                 $bom->code = sprintf('BOM-%d-%04d', $year, $sequence);
             }
         });

@@ -309,10 +309,17 @@ class ProductionReportController extends Controller
         $userId = $request->user()?->id;
         $poService = app(\Modules\Mk\Services\PurchaseOrderService::class);
 
+        // Batch load all requested items to avoid N+1
+        $requestedItemIds = collect($request->items)->pluck('item_id')->unique()->toArray();
+        $itemsById = Item::where('company_id', $companyId)
+            ->whereIn('id', $requestedItemIds)
+            ->get()
+            ->keyBy('id');
+
         // Group items by supplier
         $bySupplier = [];
         foreach ($request->items as $entry) {
-            $item = Item::where('company_id', $companyId)->find($entry['item_id']);
+            $item = $itemsById->get($entry['item_id']);
             if (! $item) {
                 continue;
             }
@@ -353,7 +360,7 @@ class ProductionReportController extends Controller
         foreach ($bySupplier as $supplierId => $items) {
             try {
                 $leadTime = max(...array_map(
-                    fn ($i) => Item::find($i['item_id'])?->lead_time_days ?? 7,
+                    fn ($i) => $itemsById->get($i['item_id'])?->lead_time_days ?? 7,
                     $items
                 ));
 
@@ -362,7 +369,7 @@ class ProductionReportController extends Controller
                     'po_date' => now()->toDateString(),
                     'expected_delivery_date' => now()->addDays($leadTime)->toDateString(),
                     'warehouse_id' => $request->warehouse_id,
-                    'notes' => $request->notes ?? 'Auto-generated from manufacturing material shortage',
+                    'notes' => strip_tags($request->notes ?? 'Auto-generated from manufacturing material shortage'),
                     'items' => $items,
                 ], $userId);
 

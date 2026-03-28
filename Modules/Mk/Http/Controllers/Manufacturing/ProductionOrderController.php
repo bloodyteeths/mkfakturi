@@ -367,6 +367,19 @@ class ProductionOrderController extends Controller
 
         $check = $order->qcChecks()->findOrFail($checkId);
 
+        // Authorization: only the original inspector or company owner can dispose
+        $user = $request->user();
+        $isInspector = $user && $check->inspector_id === $user->id;
+        $isOwner = $user && $order->company && $order->company->owner_id === $user->id;
+        $isSuperAdmin = $user && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin();
+
+        if (! $isInspector && ! $isOwner && ! $isSuperAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only the inspector or company owner can dispose QC checks.',
+            ], 403);
+        }
+
         $request->validate([
             'disposition' => 'required|in:rework,scrap',
         ]);
@@ -505,11 +518,14 @@ class ProductionOrderController extends Controller
     }
 
     /**
-     * Check if adding dependencies would create a cycle.
+     * Check if adding dependencies would create a cycle (bidirectional BFS).
+     *
+     * Forward check: BFS from each newDep's existing deps — if we reach $orderId, it's a cycle.
+     * Reverse check: BFS from $orderId's dependents — if we reach any newDep, it's a cycle.
      */
     private function wouldCreateCycle(int $orderId, array $newDeps, int $companyId): bool
     {
-        // BFS from each newDep — if we reach $orderId, it's a cycle
+        // Forward: walk existing deps of each newDep to see if $orderId is reachable
         $visited = [];
         $queue = $newDeps;
 
@@ -531,6 +547,34 @@ class ProductionOrderController extends Controller
             foreach ($deps as $dep) {
                 if (! isset($visited[$dep])) {
                     $queue[] = $dep;
+                }
+            }
+        }
+
+        // Reverse: walk dependents of $orderId to see if any newDep is reachable
+        $newDepSet = array_flip($newDeps);
+        $visited = [];
+        $queue = [$orderId];
+
+        while (! empty($queue)) {
+            $current = array_shift($queue);
+            if (isset($visited[$current])) {
+                continue;
+            }
+            $visited[$current] = true;
+
+            // Find orders that depend ON $current (reverse edges)
+            $dependents = \Illuminate\Support\Facades\DB::table('production_order_dependencies')
+                ->where('depends_on_order_id', $current)
+                ->pluck('order_id')
+                ->toArray();
+
+            foreach ($dependents as $dependent) {
+                if (isset($newDepSet[$dependent])) {
+                    return true;
+                }
+                if (! isset($visited[$dependent])) {
+                    $queue[] = $dependent;
                 }
             }
         }

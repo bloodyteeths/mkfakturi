@@ -8,6 +8,7 @@
       </div>
       <div class="flex items-center gap-4">
         <span class="text-lg text-gray-400">{{ currentTime }}</span>
+        <span v-if="fetchErrorCount >= 3" class="text-sm text-red-400 font-medium">{{ t('manufacturing.connection_lost') }}</span>
         <span class="inline-flex h-3 w-3 rounded-full animate-pulse" :class="isLive ? 'bg-green-500' : 'bg-red-500'"></span>
       </div>
     </div>
@@ -112,6 +113,7 @@ const orders = ref([])
 const qcData = ref(null)
 const isLive = ref(true)
 const currentTime = ref('')
+const fetchErrorCount = ref(0)
 
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
 
@@ -187,9 +189,16 @@ async function fetchData() {
     }))
     qcData.value = qcRes.data?.data || null
     isLive.value = true
+    fetchErrorCount.value = 0
   } catch (error) {
     console.error('TV fetch failed:', error)
+    fetchErrorCount.value++
     isLive.value = false
+    // Stop retrying after 3 consecutive failures
+    if (fetchErrorCount.value >= 3 && refreshInterval) {
+      clearInterval(refreshInterval)
+      refreshInterval = null
+    }
   } finally {
     loading.value = false
   }
@@ -218,4 +227,5 @@ onBeforeUnmount(() => {
   if (refreshInterval) clearInterval(refreshInterval)
   if (clockInterval) clearInterval(clockInterval)
 })
+// CLAUDE-CHECKPOINT
 </script>

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class ProductionOrder extends Model
 {
@@ -88,6 +89,13 @@ class ProductionOrder extends Model
         ];
     }
 
+    private static array $validTransitions = [
+        self::STATUS_DRAFT => [self::STATUS_IN_PROGRESS, self::STATUS_CANCELLED],
+        self::STATUS_IN_PROGRESS => [self::STATUS_COMPLETED, self::STATUS_CANCELLED],
+        self::STATUS_COMPLETED => [],
+        self::STATUS_CANCELLED => [],
+    ];
+
     protected static function boot(): void
     {
         parent::boot();
@@ -95,11 +103,29 @@ class ProductionOrder extends Model
         static::creating(function (ProductionOrder $order) {
             if (empty($order->order_number)) {
                 $year = date('Y');
-                $sequence = static::where('company_id', $order->company_id)
-                    ->withTrashed()
-                    ->whereYear('created_at', $year)
-                    ->count() + 1;
+                $sequence = (int) DB::transaction(function () use ($order, $year) {
+                    $max = static::where('company_id', $order->company_id)
+                        ->withTrashed()
+                        ->whereYear('created_at', $year)
+                        ->lockForUpdate()
+                        ->selectRaw('MAX(CAST(SUBSTRING(order_number, -4) AS UNSIGNED)) as max_seq')
+                        ->value('max_seq');
+
+                    return ($max ?? 0) + 1;
+                });
                 $order->order_number = sprintf('РН-%d-%04d', $year, $sequence);
+            }
+        });
+
+        static::updating(function (ProductionOrder $order) {
+            if ($order->isDirty('status')) {
+                $from = $order->getOriginal('status');
+                $to = $order->status;
+                $allowed = self::$validTransitions[$from] ?? [];
+
+                if (! in_array($to, $allowed)) {
+                    throw new \RuntimeException("Invalid status transition: {$from} → {$to}");
+                }
             }
         });
     }

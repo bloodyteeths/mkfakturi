@@ -83,22 +83,29 @@ class ManufacturingNotifyCommand extends Command
             ->pluck('id');
 
         if ($activeOrderIds->isNotEmpty()) {
-            $lowStockItems = DB::table('production_order_materials as m')
+            // Get distinct material item IDs with minimum_quantity set
+            $materialItems = DB::table('production_order_materials as m')
                 ->join('items as i', 'i.id', '=', 'm.item_id')
                 ->whereIn('m.production_order_id', $activeOrderIds)
                 ->whereNotNull('i.minimum_quantity')
                 ->where('i.minimum_quantity', '>', 0)
-                ->whereRaw('COALESCE(i.quantity, 0) <= i.minimum_quantity')
-                ->select('i.id', 'i.name', 'i.quantity as current_qty', 'i.minimum_quantity')
+                ->select('i.id', 'i.name', 'i.minimum_quantity')
                 ->distinct()
                 ->get();
 
-            foreach ($lowStockItems as $item) {
-                $alerts[] = [
-                    'type' => 'low_stock',
-                    'severity' => ($item->current_qty ?? 0) <= 0 ? 'critical' : 'warning',
-                    'message' => "{$item->name} — залиха: " . round($item->current_qty ?? 0) . " (мин: {$item->minimum_quantity})",
-                ];
+            // Check actual stock via stock_movements (not stale items.quantity)
+            $stockService = app(\App\Services\StockService::class);
+            foreach ($materialItems as $item) {
+                $stock = $stockService->getItemStock($companyId, $item->id);
+                $currentQty = $stock['current_quantity'] ?? $stock['quantity'] ?? 0;
+
+                if ($currentQty <= $item->minimum_quantity) {
+                    $alerts[] = [
+                        'type' => 'low_stock',
+                        'severity' => $currentQty <= 0 ? 'critical' : 'warning',
+                        'message' => "{$item->name} — залиха: " . round($currentQty) . " (мин: {$item->minimum_quantity})",
+                    ];
+                }
             }
         }
 
@@ -165,3 +172,5 @@ class ManufacturingNotifyCommand extends Command
         }
     }
 }
+
+// CLAUDE-CHECKPOINT

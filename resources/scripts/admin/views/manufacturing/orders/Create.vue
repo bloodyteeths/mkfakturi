@@ -119,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -275,4 +275,9 @@ onMounted(async () => {
     // Options will stay empty
   }
 })
+
+onBeforeUnmount(() => {
+  if (stockCheckTimer) clearTimeout(stockCheckTimer)
+})
+// CLAUDE-CHECKPOINT
 </script>

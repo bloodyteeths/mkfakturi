@@ -1463,4 +1463,5 @@ onBeforeUnmount(() => {
     chartInstance = null
   }
 })
+// CLAUDE-CHECKPOINT
 </script>

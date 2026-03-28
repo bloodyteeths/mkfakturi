@@ -280,11 +280,17 @@ class PantheonImportController extends Controller
 
     /**
      * Parse PANTHEON XML export.
+     * Uses LIBXML_NONET to prevent XXE external entity attacks.
      */
     private function parseXml(string $path): array
     {
         $boms = [];
-        $xml = simplexml_load_file($path);
+        $content = file_get_contents($path);
+        if ($content === false) {
+            throw new \RuntimeException('Cannot read XML file');
+        }
+
+        $xml = simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOENT | LIBXML_NONET);
         if (! $xml) {
             throw new \RuntimeException('Invalid XML file');
         }
@@ -322,3 +328,5 @@ class PantheonImportController extends Controller
         return $boms;
     }
 }
+
+// CLAUDE-CHECKPOINT

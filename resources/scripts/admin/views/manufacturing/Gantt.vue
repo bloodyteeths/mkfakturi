@@ -241,8 +241,10 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useNotificationStore } from '@/scripts/stores/notification'
 
 const { t, locale } = useI18n()
+const notificationStore = useNotificationStore()
 
 // ===== State =====
 const loading = ref(true)
@@ -470,6 +472,38 @@ let dragStartX = 0
 let dragOrigStart = ''
 let dragOrigEnd = ''
 
+// Store bound handler references so we can remove them reliably
+let boundOnDrag = null
+let boundEndDrag = null
+let boundOnResize = null
+let boundEndResize = null
+
+function removeDragListeners() {
+  if (boundOnDrag) {
+    document.removeEventListener('mousemove', boundOnDrag)
+    document.removeEventListener('touchmove', boundOnDrag)
+  }
+  if (boundEndDrag) {
+    document.removeEventListener('mouseup', boundEndDrag)
+    document.removeEventListener('touchend', boundEndDrag)
+  }
+  boundOnDrag = null
+  boundEndDrag = null
+}
+
+function removeResizeListeners() {
+  if (boundOnResize) {
+    document.removeEventListener('mousemove', boundOnResize)
+    document.removeEventListener('touchmove', boundOnResize)
+  }
+  if (boundEndResize) {
+    document.removeEventListener('mouseup', boundEndResize)
+    document.removeEventListener('touchend', boundEndResize)
+  }
+  boundOnResize = null
+  boundEndResize = null
+}
+
 function startDrag(e, order) {
   if (!order.can_reschedule) return
   e.preventDefault()
@@ -479,10 +513,15 @@ function startDrag(e, order) {
   dragOrigStart = order.start
   dragOrigEnd = order.end
 
-  document.addEventListener('mousemove', onDrag)
-  document.addEventListener('mouseup', endDrag)
-  document.addEventListener('touchmove', onDrag, { passive: false })
-  document.addEventListener('touchend', endDrag)
+  // Remove any stale listeners before adding new ones
+  removeDragListeners()
+
+  boundOnDrag = onDrag
+  boundEndDrag = endDrag
+  document.addEventListener('mousemove', boundOnDrag)
+  document.addEventListener('mouseup', boundEndDrag)
+  document.addEventListener('touchmove', boundOnDrag, { passive: false })
+  document.addEventListener('touchend', boundEndDrag)
 }
 
 function onDrag(e) {
@@ -504,10 +543,7 @@ function endDrag() {
   if (!dragging) return
   const order = dragging
 
-  document.removeEventListener('mousemove', onDrag)
-  document.removeEventListener('mouseup', endDrag)
-  document.removeEventListener('touchmove', onDrag)
-  document.removeEventListener('touchend', endDrag)
+  removeDragListeners()
 
   // Only save if dates changed
   if (order.start !== dragOrigStart || order.end !== dragOrigEnd) {
@@ -524,10 +560,15 @@ function startResize(e, order) {
   dragStartX = clientX
   dragOrigEnd = order.end
 
-  document.addEventListener('mousemove', onResize)
-  document.addEventListener('mouseup', endResize)
-  document.addEventListener('touchmove', onResize, { passive: false })
-  document.addEventListener('touchend', endResize)
+  // Remove any stale listeners before adding new ones
+  removeResizeListeners()
+
+  boundOnResize = onResize
+  boundEndResize = endResize
+  document.addEventListener('mousemove', boundOnResize)
+  document.addEventListener('mouseup', boundEndResize)
+  document.addEventListener('touchmove', boundOnResize, { passive: false })
+  document.addEventListener('touchend', boundEndResize)
 }
 
 function onResize(e) {
@@ -548,10 +589,7 @@ function endResize() {
   if (!resizing) return
   const order = resizing
 
-  document.removeEventListener('mousemove', onResize)
-  document.removeEventListener('mouseup', endResize)
-  document.removeEventListener('touchmove', onResize)
-  document.removeEventListener('touchend', endResize)
+  removeResizeListeners()
 
   if (order.end !== dragOrigEnd) {
     saveReschedule(order)
@@ -568,6 +606,17 @@ function addDays(dateStr, days) {
 }
 
 async function saveReschedule(order) {
+  // Validate: end date must be >= start date
+  if (new Date(order.end) < new Date(order.start)) {
+    order.start = dragOrigStart
+    order.end = dragOrigEnd
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('manufacturing.invalid_date_range'),
+    })
+    return
+  }
+
   try {
     await window.axios.patch(`/manufacturing/orders/${order.id}/reschedule`, {
       order_date: order.start,
@@ -645,13 +694,8 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('mousemove', onDrag)
-  document.removeEventListener('mouseup', endDrag)
-  document.removeEventListener('mousemove', onResize)
-  document.removeEventListener('mouseup', endResize)
-  document.removeEventListener('touchmove', onDrag)
-  document.removeEventListener('touchend', endDrag)
-  document.removeEventListener('touchmove', onResize)
-  document.removeEventListener('touchend', endResize)
+  removeDragListeners()
+  removeResizeListeners()
 })
+// CLAUDE-CHECKPOINT
 </script>

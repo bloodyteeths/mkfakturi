@@ -57,6 +57,9 @@ class AutoScheduleService
             ];
         }
 
+        // Validate no circular dependencies before scheduling
+        $this->validateNoCycles($draftOrders);
+
         // Sort orders by dependency topology (orders with no deps first)
         $sorted = $this->topologicalSort($draftOrders);
 
@@ -278,6 +281,53 @@ class AutoScheduleService
         }
 
         return $bestId;
+    }
+
+    /**
+     * Detect circular dependencies using DFS.
+     *
+     * @throws \RuntimeException if a cycle is found
+     */
+    private function validateNoCycles($orders): void
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('production_order_dependencies')) {
+            return;
+        }
+
+        $orderMap = $orders->keyBy('id');
+        $visiting = [];
+        $visited = [];
+
+        foreach ($orders as $order) {
+            if (isset($visited[$order->id])) {
+                continue;
+            }
+            $this->cycleVisit($order, $orderMap, $visiting, $visited);
+        }
+    }
+
+    private function cycleVisit($order, $orderMap, &$visiting, &$visited): void
+    {
+        if (isset($visited[$order->id])) {
+            return;
+        }
+
+        if (isset($visiting[$order->id])) {
+            throw new \RuntimeException(
+                "Circular dependency detected involving order: {$order->order_number}"
+            );
+        }
+
+        $visiting[$order->id] = true;
+
+        foreach ($order->dependsOn as $dep) {
+            if (isset($orderMap[$dep->id])) {
+                $this->cycleVisit($orderMap[$dep->id], $orderMap, $visiting, $visited);
+            }
+        }
+
+        unset($visiting[$order->id]);
+        $visited[$order->id] = true;
     }
 
     /**
