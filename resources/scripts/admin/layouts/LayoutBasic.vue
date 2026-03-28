@@ -27,10 +27,8 @@
     <PwaInstallPrompt />
   </div>
 
-  <!-- Show minimal loader only briefly - don't block entire app -->
-  <div v-else class="h-full flex items-center justify-center">
-    <div class="text-primary-500">Loading...</div>
-  </div>
+  <!-- Show branded loader during bootstrap -->
+  <BaseGlobalLoader v-else />
 </template>
 
 <script setup>
@@ -51,6 +49,7 @@ import LimitExceededModal from '@/scripts/admin/components/LimitExceededModal.vu
 import PwaInstallPrompt from '@/scripts/admin/components/mobile/PwaInstallPrompt.vue'
 import OfflineBanner from '@/scripts/admin/components/mobile/OfflineBanner.vue'
 import PullToRefresh from '@/scripts/admin/components/mobile/PullToRefresh.vue'
+import BaseGlobalLoader from '@/scripts/components/base/BaseGlobalLoader.vue'
 
 const globalStore = useGlobalStore()
 const route = useRoute()
