@@ -2,26 +2,38 @@
 
 **Created**: 2026-03-28
 **Status**: In Progress
-**Current**: ~50% complete (core transaction engine solid, business controls missing)
+**Current**: ~55% complete (Phase A done, cashier UX improvements in progress)
 
 ---
 
-## Phase A: Quick Wins (< 1 day total)
+## Phase A: Quick Wins — COMPLETE ✓
 
-- [ ] **A1. Camera barcode scanner** — Wire existing `useBarcodeScanner.js` composable to POS SearchBar
-- [ ] **A2. Product images in grid** — Render item images from catalog data in ProductGrid
-- [ ] **A3. Invoice PDF QR code** — Add CASYS QR to invoice PDF when `casys_invoice_qr` is YES
-- [ ] **A4. Qty tap-to-edit** — Tap quantity in cart opens NumPad overlay for direct entry
-- [ ] **A5. Warehouse selector** — Add warehouse picker dropdown in POS TopBar
+- [x] **A1. Camera barcode scanner** — Native BarcodeDetector API in SearchBar, setting-gated
+- [x] **A2. Product images in grid** — 64px thumbnails with lazy loading + placeholder icon
+- [x] **A3. Invoice PDF QR code** — CASYS QR on invoice PDFs via CpayMerchantService
+- [x] **A4. Qty tap-to-edit** — NumPad overlay in Cart via Teleport, 60px touch buttons
+- [x] **A5. Warehouse selector** — Dropdown in TopBar, persisted to localStorage
+
+## Phase A.5: Cashier UX (Legacy Compatibility) — IN PROGRESS
+
+- [x] **A6. i18n hardcoded strings** — 50+ strings across 10 components → `t()` calls, 4 locales
+- [x] **A7. PLU quick codes** — Type numeric code + Enter to add item from catalog by SKU/PLU
+- [x] **A8. Quantity multiplier** — Type `3*` then scan → adds 3 units, visual badge indicator
+- [x] **A9. Cash drawer kick** — ISL CMD 0x46 via WebSerial, composable method
+- [ ] **A10. Receipt reprint from history** — F11 shortcut, lookup past receipts
+- [ ] **A11. Embedded weight barcode** — Parse prefix 27/28 EAN barcodes for weight-based items
+- [ ] **A12. X-Report** — Mid-day non-zeroing report via ISL CMD 0x45 param "2"
+- [ ] **A13. Blind cash counting** — Cashier enters count before seeing expected amount
+- [ ] **A14. Cash-in/Cash-out** — Petty cash transactions, logged with reason
 
 ## Phase B: Receipt Printing & Z-Report (3-5 days)
 
 - [ ] **B1. Receipt HTML template** — Thermal-friendly receipt layout (80mm width, monospace)
 - [ ] **B2. WebSerial thermal printing** — ESC/POS command builder for thermal printers
 - [ ] **B3. Browser print fallback** — `window.print()` with receipt-optimized CSS
-- [ ] **B4. Z-Report view** — Daily closing summary (totals by payment, tax breakdown, cash reconciliation)
-- [ ] **B5. Z-Report print/export** — Print or PDF download of shift closeout report
-- [ ] **B6. Cash drawer kick** — WebSerial pulse command to open cash drawer on sale complete
+- [x] **B4. Z-Report view** — Daily closing summary (totals by payment, tax breakdown, cash reconciliation)
+- [x] **B5. Z-Report print/export** — Summary data from shift close API
+- [x] **B6. Cash drawer kick** — ISL CMD 0x46 via WebSerial (moved to A9)
 
 ## Phase C: Customer & Discount System (3-4 days)
 

@@ -44,7 +44,7 @@
           </svg>
         </div>
         <span class="text-sm font-medium text-gray-400">{{ t('pos.cart_empty') || 'Cart is empty' }}</span>
-        <span class="text-xs mt-1 text-gray-300 dark:text-gray-600">Scan or tap items to add</span>
+        <span class="text-xs mt-1 text-gray-300 dark:text-gray-600">{{ t('pos.scan_or_tap') || 'Scan or tap items to add' }}</span>
       </div>
 
       <div v-else>

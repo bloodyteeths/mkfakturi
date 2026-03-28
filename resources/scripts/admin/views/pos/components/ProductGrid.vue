@@ -15,7 +15,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
       </div>
-      <span class="text-sm font-medium">No items found</span>
+      <span class="text-sm font-medium">{{ t('pos.no_items_found') || 'No items found' }}</span>
     </div>
 
     <!-- Grid -->
@@ -55,7 +55,7 @@
               ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'
               : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'"
           >
-            {{ item.quantity > 0 ? item.quantity : 'Out' }}
+            {{ item.quantity > 0 ? item.quantity : t('pos.out_of_stock_badge') || 'Out' }}
           </span>
         </div>
 
@@ -69,6 +69,10 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 defineProps({
   items: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },

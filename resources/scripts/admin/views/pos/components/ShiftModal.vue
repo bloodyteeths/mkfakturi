@@ -52,13 +52,13 @@
           class="flex-1 py-2.5 text-sm font-medium border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
           @click="$emit('close')"
         >
-          Cancel
+          {{ t('pos.cancel') || 'Cancel' }}
         </button>
         <button
           class="flex-1 py-2.5 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700"
           @click="handleConfirm"
         >
-          {{ mode === 'open' ? 'Open' : 'Close' }}
+          {{ mode === 'open' ? t('pos.open') || 'Open' : t('pos.close') || 'Close' }}
         </button>
       </div>
     </div>

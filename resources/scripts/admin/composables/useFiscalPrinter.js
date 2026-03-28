@@ -312,6 +312,20 @@ export function useFiscalPrinter() {
   }
 
   /**
+   * Open the cash drawer via fiscal device.
+   */
+  async function cashDrawerKick() {
+    if (!isConnected.value) return
+    try {
+      const service = _getService()
+      await service.cashDrawerKick()
+      _log('drawer', 'Cash drawer opened')
+    } catch (e) {
+      _log('error', `Drawer open failed: ${e.message}`)
+    }
+  }
+
+  /**
    * Disconnect from the fiscal printer.
    */
   async function disconnect() {
@@ -377,6 +391,7 @@ export function useFiscalPrinter() {
     fiscalizeInvoice,
     getStatus,
     dailyReport,
+    cashDrawerKick,
   }
 }
 

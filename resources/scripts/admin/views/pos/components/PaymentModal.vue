@@ -142,7 +142,7 @@
               : 'bg-emerald-50 dark:bg-emerald-900/20 ring-emerald-200 dark:ring-emerald-800'"
           >
             <span class="text-sm font-bold" :class="splitRemaining > 0 ? 'text-amber-700 dark:text-amber-300' : 'text-emerald-700 dark:text-emerald-300'">
-              {{ splitRemaining > 0 ? 'Remaining' : 'Overpaid' }}
+              {{ splitRemaining > 0 ? t('pos.remaining') || 'Remaining' : t('pos.overpaid') || 'Overpaid' }}
             </span>
             <span class="text-lg font-black tabular-nums" :class="splitRemaining > 0 ? 'text-amber-600' : 'text-emerald-600'">
               {{ formatPrice(Math.abs(splitRemaining)) }}
@@ -359,7 +359,7 @@ async function generateCasysQr() {
     // Start polling for payment status
     startCasysPolling(data.order_id)
   } catch (e) {
-    alert(e.response?.data?.error || 'Failed to generate CASYS QR')
+    alert(t('pos.sale_failed') + ': ' + (e.response?.data?.error || 'Failed to generate CASYS QR'))
   } finally {
     casysLoading.value = false
   }

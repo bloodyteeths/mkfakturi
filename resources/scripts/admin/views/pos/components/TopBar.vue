@@ -37,7 +37,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            Kitchen Display
+            {{ t('pos.kitchen_display') || 'Kitchen Display' }}
           </button>
           <button
             v-if="returnEnabled"
@@ -71,7 +71,7 @@
           : 'bg-gray-700/50 text-gray-500 ring-1 ring-gray-600/30'"
       >
         <span class="w-1.5 h-1.5 rounded-full" :class="fiscalConnected ? 'bg-emerald-400 animate-pulse' : 'bg-gray-600'"></span>
-        {{ fiscalConnected ? 'Fiscal' : 'No Fiscal' }}
+        {{ fiscalConnected ? t('pos.fiscal_connected') || 'Fiscal' : t('pos.fiscal_not_connected') || 'No Fiscal' }}
       </div>
 
       <!-- Warehouse selector (only if > 1 warehouse) -->

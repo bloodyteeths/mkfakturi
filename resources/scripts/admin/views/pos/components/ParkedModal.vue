@@ -14,7 +14,7 @@
 
       <div class="max-h-80 overflow-y-auto">
         <div v-if="sales.length === 0" class="p-8 text-center text-gray-400 text-sm">
-          No parked sales
+          {{ t('pos.no_parked_sales') || 'No parked sales' }}
         </div>
         <div
           v-for="sale in sales"

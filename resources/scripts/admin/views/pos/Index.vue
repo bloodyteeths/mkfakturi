@@ -68,7 +68,9 @@
           ref="searchBarRef"
           v-model="posStore.searchQuery"
           :barcode-camera-enabled="posStore.posSettings.barcode_camera"
+          :qty-multiplier="posStore.qtyMultiplier"
           @barcode="handleBarcode"
+          @set-multiplier="posStore.qtyMultiplier = $event"
         />
 
         <!-- Category Tabs -->
@@ -268,6 +270,14 @@ function playBeep(freq = 800, duration = 100) {
 
 // --- Handlers ---
 async function handleBarcode(code) {
+  // First try PLU lookup from loaded catalog
+  const pluResult = posStore.lookupPlu(code)
+  if (pluResult.success) {
+    playBeep(800, 100)
+    return
+  }
+
+  // Then try server barcode lookup
   const result = await posStore.lookupBarcode(code)
   if (result.success) {
     playBeep(800, 100)

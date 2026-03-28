@@ -40,7 +40,7 @@
         <div v-if="sale?.stock_warnings?.length" class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl text-left ring-1 ring-amber-200 dark:ring-amber-800/50">
           <div class="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1.5">{{ t('pos.stock_low') || 'Low Stock' }}</div>
           <div v-for="w in sale.stock_warnings" :key="w.item_id" class="text-xs text-amber-700 dark:text-amber-300 py-0.5">
-            {{ w.name }}: <span class="font-bold">{{ w.remaining_qty }}</span> remaining
+            {{ w.name }}: <span class="font-bold">{{ w.remaining_qty }}</span> {{ t('pos.remaining_stock') || 'remaining' }}
           </div>
         </div>
       </div>

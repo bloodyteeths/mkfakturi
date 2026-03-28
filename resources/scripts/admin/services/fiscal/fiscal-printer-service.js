@@ -216,6 +216,16 @@ export class FiscalPrinterService {
   }
 
   /**
+   * Open cash drawer via CASH_IN_OUT command (CMD 0x46).
+   * Sends a 0-amount cash-in to trigger the drawer mechanism.
+   */
+  async cashDrawerKick() {
+    this._ensureConnected()
+    // CMD 0x46 with "0" amount triggers drawer open
+    await this._sendCommand(CMD.CASH_IN_OUT, '0', false)
+  }
+
+  /**
    * Abort/cancel a currently open fiscal receipt.
    * Uses Daisy-specific CMD 0x82, falls back to standard 0x3C.
    */

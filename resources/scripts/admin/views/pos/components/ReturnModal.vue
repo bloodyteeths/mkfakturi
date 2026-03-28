@@ -51,7 +51,7 @@
               <div class="text-xs text-gray-500">{{ formatPrice(selectedInvoice.total) }}</div>
             </div>
             <button class="text-xs text-primary-600 font-medium" @click="selectedInvoice = null; returnItems = []">
-              Change
+              {{ t('pos.change_invoice') || 'Change' }}
             </button>
           </div>
 
@@ -100,7 +100,7 @@
 
           <!-- Return total -->
           <div v-if="returnTotal > 0" class="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl ring-1 ring-red-200 dark:ring-red-800">
-            <span class="text-sm font-bold text-red-700 dark:text-red-300">Refund</span>
+            <span class="text-sm font-bold text-red-700 dark:text-red-300">{{ t('pos.refund') || 'Refund' }}</span>
             <span class="text-xl font-black text-red-600 dark:text-red-400 tabular-nums">
               {{ formatPrice(returnTotal) }}
             </span>
@@ -131,7 +131,7 @@
       <!-- Success result -->
       <div v-if="returnResult" class="px-6 pb-6">
         <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl ring-1 ring-emerald-200 dark:ring-emerald-800 text-center">
-          <div class="text-emerald-700 dark:text-emerald-300 font-bold">Credit note created</div>
+          <div class="text-emerald-700 dark:text-emerald-300 font-bold">{{ t('pos.credit_note_created') || 'Credit note created' }}</div>
           <div class="text-sm text-emerald-600 dark:text-emerald-400 mt-1">{{ returnResult.credit_note_number }}</div>
           <div class="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-1">
             {{ formatPrice(returnResult.refund_total) }}
@@ -175,7 +175,7 @@ async function searchInvoice() {
     })
 
     if (!data.invoice) {
-      searchError.value = 'Invoice not found'
+      searchError.value = t('pos.invoice_not_found') || 'Invoice not found'
       return
     }
 
@@ -189,7 +189,7 @@ async function searchInvoice() {
       selected: true,
     }))
   } catch (e) {
-    searchError.value = e.response?.data?.error || 'Invoice not found'
+    searchError.value = e.response?.data?.error || t('pos.invoice_not_found') || 'Invoice not found'
   }
 }
 
@@ -214,7 +214,7 @@ async function processReturn() {
     returnResult.value = data
     selectedInvoice.value = null
   } catch (e) {
-    alert(e.response?.data?.error || e.message || 'Return failed')
+    alert(t('pos.sale_failed') + ': ' + (e.response?.data?.error || e.message || 'Return failed'))
   } finally {
     isProcessing.value = false
   }

@@ -2,14 +2,14 @@
   <div class="h-screen bg-gray-900 text-white flex flex-col overflow-hidden">
     <!-- Header -->
     <div class="h-14 bg-black flex items-center justify-between px-6 shrink-0">
-      <span class="font-black text-lg tracking-tight">Kitchen Display</span>
+      <span class="font-black text-lg tracking-tight">{{ t('pos.kitchen_display') || 'Kitchen Display' }}</span>
       <div class="flex items-center gap-4">
         <span class="text-lg font-mono text-gray-400">{{ clock }}</span>
         <button
           class="text-xs font-medium bg-gray-800 hover:bg-gray-700 px-4 py-2.5 rounded-lg ring-1 ring-gray-700 transition-all"
           @click="$router.push('/admin/pos')"
         >
-          Back to POS
+          {{ t('pos.back_to_pos') || 'Back to POS' }}
         </button>
       </div>
     </div>
@@ -19,8 +19,8 @@
       <div v-if="orders.length === 0" class="flex items-center justify-center h-full">
         <div class="text-center">
           <div class="text-6xl mb-4">&#x1F373;</div>
-          <div class="text-xl font-bold text-gray-500">No pending orders</div>
-          <div class="text-sm text-gray-600 mt-1">Orders from tables will appear here</div>
+          <div class="text-xl font-bold text-gray-500">{{ t('pos.no_pending_orders') || 'No pending orders' }}</div>
+          <div class="text-sm text-gray-600 mt-1">{{ t('pos.orders_appear_here') || 'Orders from tables will appear here' }}</div>
         </div>
       </div>
 
@@ -56,7 +56,7 @@
             class="mt-3 w-full py-3 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition-all"
             @click="markReady(order.tableNumber)"
           >
-            READY
+            {{ t('pos.ready') || 'READY' }}
           </button>
         </div>
       </div>
@@ -66,6 +66,9 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const clock = ref('')
 const tableOrders = ref({})

@@ -42,6 +42,7 @@ export const usePosStore = defineStore('pos', () => {
   const parkedSales = ref([])
   const searchQuery = ref('')
   const selectedCategory = ref(null)
+  const qtyMultiplier = ref(1)
   const catalogLoaded = ref(false)
   const warehouses = ref([])
   const selectedWarehouse = ref(
@@ -118,16 +119,17 @@ export const usePosStore = defineStore('pos', () => {
   })
 
   // --- Actions ---
-  function addItem(item) {
+  function addItem(item, qty = null) {
+    const addQty = qty || qtyMultiplier.value || 1
     const existing = cart.value.find(i => i.item_id === item.id)
     if (existing) {
-      existing.quantity++
+      existing.quantity += addQty
     } else {
       cart.value.push({
         item_id: item.id,
         name: item.name,
         price: item.retail_price || item.price || 0,
-        quantity: 1,
+        quantity: addQty,
         tax_percent: item.tax_percent || 0,
         discount: 0,
         unit_name: item.unit_name || '',
@@ -136,6 +138,7 @@ export const usePosStore = defineStore('pos', () => {
         barcode: item.barcode,
       })
     }
+    qtyMultiplier.value = 1 // Reset after use
   }
 
   function removeItem(index) {
@@ -183,6 +186,22 @@ export const usePosStore = defineStore('pos', () => {
     } finally {
       catalogLoaded.value = true
     }
+  }
+
+  function lookupPlu(code) {
+    // Search catalog by SKU, PLU code, or item ID matching the typed number
+    const numCode = code.replace(/^0+/, '') // Remove leading zeros for matching
+    const item = catalog.value.find(i =>
+      i.sku === code ||
+      i.sku === numCode ||
+      (i.plu_code && i.plu_code === code) ||
+      String(i.id) === numCode
+    )
+    if (item) {
+      addItem(item)
+      return { success: true, item }
+    }
+    return { success: false }
   }
 
   async function lookupBarcode(code) {
@@ -416,13 +435,13 @@ export const usePosStore = defineStore('pos', () => {
     cart, customer, paymentMethod, cashReceived, isProcessing,
     catalog, categories, taxTypes, lastSale, posUsage,
     currentShift, parkedSales, searchQuery, selectedCategory,
-    catalogLoaded, posSettings, warehouses, selectedWarehouse,
+    catalogLoaded, posSettings, warehouses, selectedWarehouse, qtyMultiplier,
     // Getters
     cartItemCount, cartSubTotal, cartTax, cartDiscount, cartTotal,
     changeAmount, filteredCatalog, isLimitApproaching, isLimitReached,
     // Actions
     addItem, removeItem, updateQuantity, updateDiscount, clearCart,
-    loadCatalog, lookupBarcode, completeSale, processReturn,
+    loadCatalog, lookupPlu, lookupBarcode, completeSale, processReturn,
     openShift, closeShift, fetchCurrentShift,
     parkSale, resumeSale, loadParkedSales,
     // Restaurant

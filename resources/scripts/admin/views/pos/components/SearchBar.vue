@@ -35,6 +35,14 @@
         </svg>
       </button>
 
+      <!-- Quantity multiplier badge -->
+      <div
+        v-if="qtyMultiplier > 1"
+        class="absolute right-14 top-1/2 -translate-y-1/2 text-[11px] font-black text-white bg-primary-500 px-2 py-0.5 rounded-full animate-pulse"
+      >
+        {{ qtyMultiplier }}&times;
+      </div>
+
       <!-- Keyboard shortcut hint -->
       <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-gray-300 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
         F1
@@ -71,9 +79,10 @@ const { t } = useI18n()
 const props = defineProps({
   modelValue: { type: String, default: '' },
   barcodeCameraEnabled: { type: Boolean, default: false },
+  qtyMultiplier: { type: Number, default: 1 },
 })
 
-const emit = defineEmits(['update:modelValue', 'barcode'])
+const emit = defineEmits(['update:modelValue', 'barcode', 'set-multiplier'])
 
 const inputRef = ref(null)
 const videoRef = ref(null)
@@ -83,11 +92,30 @@ let detectionInterval = null
 
 function handleEnter() {
   const val = inputRef.value?.value?.trim()
-  if (val) {
-    emit('barcode', val)
+  if (!val) return
+
+  // Check for quantity multiplier pattern: "3*" or "3x"
+  const multiMatch = val.match(/^(\d+)[*xX\u00d7]$/)
+  if (multiMatch) {
+    emit('set-multiplier', parseInt(multiMatch[1], 10))
     emit('update:modelValue', '')
     if (inputRef.value) inputRef.value.value = ''
+    return
   }
+
+  // Check for multiplier+barcode pattern: "3*12345678"
+  const multiBarcodeMatch = val.match(/^(\d+)[*xX\u00d7](.+)$/)
+  if (multiBarcodeMatch) {
+    emit('set-multiplier', parseInt(multiBarcodeMatch[1], 10))
+    emit('barcode', multiBarcodeMatch[2])
+    emit('update:modelValue', '')
+    if (inputRef.value) inputRef.value.value = ''
+    return
+  }
+
+  emit('barcode', val)
+  emit('update:modelValue', '')
+  if (inputRef.value) inputRef.value.value = ''
 }
 
 async function startCamera() {
