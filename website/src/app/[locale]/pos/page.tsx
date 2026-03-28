@@ -828,7 +828,7 @@ export default async function PosPage({
           { src: '/images/pos/pos-ui-tablet.png', alt: 'Facturino POS on tablet device' },
           { src: '/images/pos/bakery-scanning.png', alt: 'Bakery owner scanning barcode with POS' },
           { src: '/images/pos/bazaar-vendor.png', alt: 'Market vendor using POS with fiscal printer' },
-          { src: '/images/pos/fiscal-printer-closeup.png', alt: 'Fiscal receipt printer connected via USB' },
+          { src: '/images/pos/kafana-waitress-pos.png', alt: 'Macedonian kafana waitress taking payment on phone with Facturino POS' },
           { src: '/images/pos/multi-location.png', alt: 'Multi-location POS analytics dashboard' },
         ]
         return t.features.map((section, idx) => {
