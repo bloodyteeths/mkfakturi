@@ -17,13 +17,13 @@
       <!-- Action Buttons -->
       <div class="space-y-3">
         <button
-          @click="$router.push('/dashboard')"
+          @click="$router.push('/admin/dashboard')"
           class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
         >
           Go to Dashboard
         </button>
         <button
-          @click="$router.push('/billing')"
+          @click="$router.push('/admin/billing')"
           class="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
         >
           View Subscription Details

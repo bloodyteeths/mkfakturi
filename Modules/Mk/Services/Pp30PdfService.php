@@ -2,8 +2,8 @@
 
 namespace Modules\Mk\Services;
 
-use App\Models\Bill;
 use App\Models\BankAccount;
+use App\Models\Bill;
 use App\Models\Company;
 use Modules\Mk\Models\PaymentBatch;
 use PDF;
@@ -17,6 +17,13 @@ use PDF;
  */
 class Pp30PdfService
 {
+    protected AmountToWordsService $amountToWordsService;
+
+    public function __construct(?AmountToWordsService $amountToWordsService = null)
+    {
+        $this->amountToWordsService = $amountToWordsService ?? new AmountToWordsService;
+    }
+
     /**
      * Macedonian bank code mapping (IBAN positions 5-7).
      */
@@ -157,114 +164,12 @@ class Pp30PdfService
     /**
      * Convert amount in cents to Macedonian words.
      *
+     * Delegates to shared AmountToWordsService.
      * e.g. 1500000 → "петнаесет илјади денари и 00 дени"
      */
     public function amountToWords(int $amountCents): string
     {
-        $denars = intdiv(abs($amountCents), 100);
-        $deni = abs($amountCents) % 100;
-
-        if ($denars === 0) {
-            return "нула денари и {$deni} дени";
-        }
-
-        $words = $this->numberToWords($denars);
-
-        $denarWord = $this->denarSuffix($denars);
-
-        return "{$words} {$denarWord} и {$deni} дени";
-    }
-
-    /**
-     * Convert integer to Macedonian words.
-     */
-    protected function numberToWords(int $number): string
-    {
-        if ($number === 0) {
-            return 'нула';
-        }
-
-        $units = [
-            '', 'еден', 'два', 'три', 'четири',
-            'пет', 'шест', 'седум', 'осум', 'девет',
-        ];
-
-        $teens = [
-            'десет', 'единаесет', 'дванаесет', 'тринаесет', 'четиринаесет',
-            'петнаесет', 'шеснаесет', 'седумнаесет', 'осумнаесет', 'деветнаесет',
-        ];
-
-        $tens = [
-            '', '', 'дваесет', 'триесет', 'четириесет',
-            'педесет', 'шеесет', 'седумдесет', 'осумдесет', 'деведесет',
-        ];
-
-        $hundreds = [
-            '', 'сто', 'двесте', 'триста', 'четиристотини',
-            'петстотини', 'шестотини', 'седумстотини', 'осумстотини', 'деветстотини',
-        ];
-
-        $parts = [];
-
-        // Millions
-        if ($number >= 1000000) {
-            $millions = intdiv($number, 1000000);
-            if ($millions === 1) {
-                $parts[] = 'еден милион';
-            } else {
-                $parts[] = $this->numberToWords($millions).' милиони';
-            }
-            $number %= 1000000;
-        }
-
-        // Thousands
-        if ($number >= 1000) {
-            $thousands = intdiv($number, 1000);
-            if ($thousands === 1) {
-                $parts[] = 'илјада';
-            } elseif ($thousands < 10) {
-                $parts[] = $units[$thousands].' илјади';
-            } else {
-                $parts[] = $this->numberToWords($thousands).' илјади';
-            }
-            $number %= 1000;
-        }
-
-        // Hundreds
-        if ($number >= 100) {
-            $h = intdiv($number, 100);
-            $parts[] = $hundreds[$h];
-            $number %= 100;
-        }
-
-        // Tens and units
-        if ($number >= 10 && $number <= 19) {
-            $parts[] = $teens[$number - 10];
-        } elseif ($number >= 20) {
-            $t = intdiv($number, 10);
-            $u = $number % 10;
-            if ($u > 0) {
-                $parts[] = $tens[$t].' и '.$units[$u];
-            } else {
-                $parts[] = $tens[$t];
-            }
-        } elseif ($number > 0) {
-            $parts[] = $units[$number];
-        }
-
-        return implode(' ', $parts);
-    }
-
-    /**
-     * Get the correct denar word form based on number.
-     */
-    protected function denarSuffix(int $number): string
-    {
-        if ($number === 1) {
-            return 'денар';
-        }
-
-        return 'денари';
+        return $this->amountToWordsService->convert($amountCents, 'MKD');
     }
 
     /**
@@ -296,6 +201,52 @@ class Pp30PdfService
         $bankCode = substr($iban, 4, 3);
 
         return self::BANK_CODES[$bankCode] ?? '';
+    }
+
+    /**
+     * Generate PP30 from a bank transaction (pre-fill from transaction data).
+     */
+    public function generateFromTransaction(\App\Models\BankTransaction $transaction, Company $company, ?BankAccount $bankAccount = null)
+    {
+        if (! $bankAccount) {
+            $bankAccount = $this->getDefaultBankAccount($company);
+        }
+
+        $slip = $this->buildSlip(
+            $company->name ?? '',
+            $bankAccount?->iban ?? $bankAccount?->account_number ?? '',
+            $bankAccount?->bank_name ?? '',
+            $transaction->creditor_name ?? $transaction->debtor_name ?? '',
+            $transaction->creditor_iban ?? $transaction->debtor_iban ?? '',
+            '',
+            (int) round(abs((float) $transaction->amount) * 100),
+            $transaction->currency ?? 'MKD',
+            '',
+            $transaction->transaction_reference ?? '',
+            $transaction->description ?? 'Плаќање',
+            $transaction->transaction_date
+                ? \Carbon\Carbon::parse($transaction->transaction_date)->format('d.m.Y')
+                : now()->format('d.m.Y'),
+            ''
+        );
+
+        view()->share(['slips' => [$slip]]);
+
+        return PDF::loadView('app.pdf.reports.pp30');
+    }
+
+    /**
+     * Generate PP10 collection order PDF.
+     */
+    public function generatePp10(array $slips)
+    {
+        if (empty($slips)) {
+            throw new \Exception('No slips provided for PP10.');
+        }
+
+        view()->share(['slips' => $slips]);
+
+        return PDF::loadView('app.pdf.reports.pp10');
     }
 
     /**

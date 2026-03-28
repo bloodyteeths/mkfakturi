@@ -15,7 +15,7 @@ use Modules\Mk\Models\Manufacturing\ProductionOrder;
  *
  * Schedule: daily at 07:00 Skopje time
  */
-class ManufacturingNotifyCommand extends Command
+class ManufacturingNotify extends Command
 {
     protected $signature = 'manufacturing:notify';
     protected $description = 'Send manufacturing alerts (overdue orders, low stock, QC failures)';

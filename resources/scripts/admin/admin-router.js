@@ -57,14 +57,10 @@ const ExpenseCategory = () =>
 const FileDisk = () =>
   import('@/scripts/admin/views/settings/FileDiskSetting.vue')
 const Backup = () => import('@/scripts/admin/views/settings/BackupSetting.vue')
-const UpdateApp = () =>
-  import('@/scripts/admin/views/settings/UpdateAppSetting.vue')
 const RolesSettings = () =>
   import('@/scripts/admin/views/settings/RolesSettings.vue')
 const PDFGenerationSettings = () =>
   import('@/scripts/admin/views/settings/PDFGenerationSetting.vue')
-const AiInsightsSetting = () =>
-  import('@/scripts/admin/views/settings/AiInsightsSetting.vue')
 const FeatureFlagsSettings = () =>
   import('@/scripts/admin/views/settings/FeatureFlagsSettings.vue')
 const PartnerSettings = () =>
@@ -101,6 +97,7 @@ const ItemCreate = () => import('@/scripts/admin/views/items/Create.vue')
 // Expenses
 const ExpensesIndex = () => import('@/scripts/admin/views/expenses/Index.vue')
 const ExpenseCreate = () => import('@/scripts/admin/views/expenses/Create.vue')
+const ExpenseView = () => import('@/scripts/admin/views/expenses/View.vue')
 
 // Users
 const UserIndex = () => import('@/scripts/admin/views/users/Index.vue')
@@ -152,6 +149,7 @@ const NivelacijaIndex = () => import('@/scripts/admin/views/stock/trade/Nivelaci
 const NivelacijaCreate = () => import('@/scripts/admin/views/stock/trade/NivelacijaCreate.vue')
 const NivelacijaView = () => import('@/scripts/admin/views/stock/trade/NivelacijaView.vue')
 const KapView = () => import('@/scripts/admin/views/stock/trade/KapView.vue')
+const PltView = () => import('@/scripts/admin/views/stock/trade/PltView.vue')
 
 // Client Documents (P8-01) + AI Document Hub
 const ClientDocuments = () => import('@/scripts/admin/views/documents/ClientDocuments.vue')
@@ -259,7 +257,7 @@ const MatchingRules = () => import('@/scripts/admin/views/banking/MatchingRules.
 
 // Billing & Subscription
 const PricingPage = () => import('@/js/pages/pricing/Companies.vue')
-const BillingIndex = () => import('@/js/pages/billing/Index.vue')
+const BillingIndex = () => import('@/scripts/admin/views/billing/Index.vue')
 const BillingSuccess = () => import('@/js/pages/billing/Success.vue')
 
 // Support Contact
@@ -628,6 +626,12 @@ export default [
         meta: { requiresAuth: true, ability: abilities.VIEW_ITEM },
         component: KapView,
       },
+      {
+        path: 'stock/trade/plt',
+        name: 'stock.trade.plt',
+        meta: { requiresAuth: true, ability: abilities.VIEW_ITEM },
+        component: PltView,
+      },
 
       // Client Documents (P8-01) + AI Document Hub
       {
@@ -968,6 +972,12 @@ export default [
         name: 'expenses.create',
         meta: { ability: abilities.CREATE_EXPENSE },
         component: ExpenseCreate,
+      },
+      {
+        path: 'expenses/:id/view',
+        name: 'expenses.view',
+        meta: { ability: abilities.VIEW_EXPENSE },
+        component: ExpenseView,
       },
       {
         path: 'expenses/:id/edit',
@@ -1379,6 +1389,12 @@ export default [
         component: () => import('@/scripts/admin/views/compensations/Create.vue'),
       },
       {
+        path: 'compensations/:id/edit',
+        name: 'compensations.edit',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/compensations/Create.vue'),
+      },
+      {
         path: 'compensations/:id',
         name: 'compensations.view',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
@@ -1403,6 +1419,59 @@ export default [
         name: 'payment-orders.view',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
         component: () => import('@/scripts/admin/views/payment-orders/View.vue'),
+      },
+
+      // Cash Journal
+      {
+        path: 'reports/cash-journal',
+        name: 'reports.cash-journal',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/reports/CashJournal.vue'),
+      },
+      // Open Items Statement (IOS)
+      {
+        path: 'reports/ios',
+        name: 'reports.ios',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/reports/OpenItemsStatement.vue'),
+      },
+      // Cessions
+      {
+        path: 'cessions',
+        name: 'cessions.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/cessions/Index.vue'),
+      },
+      {
+        path: 'cessions/create',
+        name: 'cessions.create',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/cessions/Create.vue'),
+      },
+      {
+        path: 'cessions/:id/view',
+        name: 'cessions.view',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/cessions/View.vue'),
+      },
+      // Assignations
+      {
+        path: 'assignations',
+        name: 'assignations.index',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/assignations/Index.vue'),
+      },
+      {
+        path: 'assignations/create',
+        name: 'assignations.create',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/assignations/Create.vue'),
+      },
+      {
+        path: 'assignations/:id/view',
+        name: 'assignations.view',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/assignations/View.vue'),
       },
 
       // F3: Cost Centers
@@ -1991,3 +2060,4 @@ export default [
 // CLAUDE-CHECKPOINT: Added GeneralLedger, JournalEntries, TrialBalance, BalanceSheet, IncomeStatement, ProfitLoss report routes
 // CLAUDE-CHECKPOINT: Removed certificates route - no UI component available
 // LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT: Added cash-journal, IOS, cessions, assignations Vue router entries

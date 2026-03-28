@@ -655,7 +655,7 @@ return [
             'link' => '/admin/billing',
             'icon' => 'CreditCardIcon',
             'name' => 'Billing',
-            'owner_only' => false,
+            'owner_only' => true,
             'ability' => '',
             'model' => '',
         ],

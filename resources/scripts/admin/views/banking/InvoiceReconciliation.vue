@@ -189,6 +189,12 @@
                   </template>
                   {{ $t('banking.link_to_payroll', 'Link to Payroll') }}
                 </BaseButton>
+                <BaseButton variant="primary-outline" size="sm" @click="generatePp30(tx)">
+                  <template #left="slotProps">
+                    <BaseIcon name="DocumentArrowDownIcon" :class="slotProps.class" />
+                  </template>
+                  {{ $t('banking.generate_pp30', 'ПП30') }}
+                </BaseButton>
                 <BaseButton variant="primary-outline" size="sm" @click="markReviewed(tx)">
                   {{ $t('banking.mark_reviewed', 'Mark Reviewed') }}
                 </BaseButton>
@@ -769,6 +775,24 @@ const confirmLinkPayroll = async () => {
   } catch (error) {
     console.error('Link payroll failed:', error)
     notificationStore.showNotification({ type: 'error', message: t('banking.action_failed', 'Action failed') })
+  }
+}
+
+const generatePp30 = async (transaction) => {
+  try {
+    const response = await axios.post('/banking/reconciliation/generate-pp30', {
+      transaction_id: transaction.id,
+    }, { responseType: 'blob' })
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+    const url = window.URL.createObjectURL(blob)
+    window.open(url, '_blank')
+    setTimeout(() => window.URL.revokeObjectURL(url), 10000)
+  } catch (error) {
+    console.error('PP30 generation failed:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('banking.pp30_failed', 'Failed to generate PP30'),
+    })
   }
 }
 

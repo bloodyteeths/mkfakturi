@@ -624,6 +624,32 @@ class ReconciliationController extends Controller
     }
 
     /**
+     * Generate PP30 payment slip from a bank transaction.
+     */
+    public function generatePp30(Request $request)
+    {
+        $request->validate([
+            'transaction_id' => 'required|integer|exists:bank_transactions,id',
+        ]);
+
+        $company = $this->getCompany();
+
+        $transaction = BankTransaction::forCompany($company->id)
+            ->where('id', $request->transaction_id)
+            ->firstOrFail();
+
+        $service = new \Modules\Mk\Services\Pp30PdfService();
+        $pdf = $service->generateFromTransaction($transaction, $company);
+
+        $filename = 'PP30-' . ($transaction->transaction_reference ?? $transaction->id) . '.pdf';
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "inline; filename=\"{$filename}\"",
+        ]);
+    }
+
+    /**
      * Create payment and update invoice status
      */
     protected function createPaymentAndUpdateInvoice(BankTransaction $transaction, Invoice $invoice, array $match): void

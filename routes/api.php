@@ -537,6 +537,7 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/events', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'logEvent']);
                 Route::get('/alerts', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'alerts']);
                 Route::patch('/alerts/{id}', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'updateAlert']);
+                Route::get('/audit-report-pdf', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'exportAuditReport']);
                 Route::get('/audit-report', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'auditReport']);
                 Route::get('/devices/{id}', [\Modules\Mk\Http\Controllers\FiscalFraudController::class, 'deviceDetail']);
             });
@@ -879,6 +880,10 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/contacts/{supportContact}/status', [\App\Http\Controllers\V1\SupportContactController::class, 'updateStatus']);
                     Route::post('/contacts/{supportContact}/reply', [\App\Http\Controllers\V1\SupportContactController::class, 'reply']);
                     Route::get('/contacts/{supportContact}/attachments/{index}', [\App\Http\Controllers\V1\SupportContactController::class, 'downloadAttachment']);
+                    Route::post('/contacts/{supportContact}/assign', [\App\Http\Controllers\V1\SupportContactController::class, 'assign']);
+                    Route::get('/contacts/{supportContact}/replies', [\App\Http\Controllers\V1\SupportContactController::class, 'listReplies']);
+                    Route::post('/contacts/{supportContact}/replies', [\App\Http\Controllers\V1\SupportContactController::class, 'addReply']);
+                    Route::delete('/contacts/{supportContact}', [\App\Http\Controllers\V1\SupportContactController::class, 'destroy']);
 
                     Route::get('/tickets', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'listAllTickets']);
                     Route::get('/statistics', [\App\Http\Controllers\V1\Admin\Support\AdminTicketController::class, 'getStatistics']);
@@ -2414,3 +2419,4 @@ Route::middleware(['throttle:60,1', 'clawd.token'])
     });
 
 // CLAUDE-CHECKPOINT: Public signup endpoints with referral tracking
+// CLAUDE-CHECKPOINT: Added rashoden-nalog, PP50, cash-journal, IOS, cessions, assignations routes

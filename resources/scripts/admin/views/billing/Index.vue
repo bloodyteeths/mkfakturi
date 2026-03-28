@@ -47,11 +47,11 @@
             <div>
               <p class="text-sm text-gray-500">{{ $t('billing.plan') }}</p>
               <div class="flex items-center mt-1">
-                <BaseBadge :variant="getPlanVariant(subscription.plan_name)" class="mr-2">
-                  {{ subscription.plan_name }}
+                <BaseBadge :variant="getPlanVariant(subscription.tier)" class="mr-2">
+                  {{ formatTierName(subscription.tier) }}
                 </BaseBadge>
                 <span class="text-2xl font-bold text-gray-900">
-                  €{{ subscription.price }}
+                  {{ formatSubscriptionPrice(subscription) }}
                 </span>
                 <span class="text-gray-500 ml-1">{{ $t('billing.per_month') }}</span>
               </div>
@@ -87,7 +87,8 @@
 
             <BaseButton
               variant="white"
-              @click="openUpdatePaymentMethod"
+              @click="openStripePortal"
+              :disabled="isProcessing"
             >
               <template #left>
                 <CreditCardIcon class="h-5 w-5" />
@@ -96,7 +97,7 @@
             </BaseButton>
 
             <BaseButton
-              v-if="subscription.status === 'active'"
+              v-if="subscription.status === 'active' || subscription.status === 'trial'"
               variant="danger-outline"
               @click="showCancelModal = true"
             >
@@ -107,7 +108,7 @@
             </BaseButton>
 
             <BaseButton
-              v-if="subscription.status === 'canceled' && subscription.ends_at"
+              v-if="subscription.status === 'canceled'"
               variant="primary"
               @click="resumeSubscription"
               :disabled="isProcessing"
@@ -151,6 +152,9 @@
                     {{ $t('billing.date') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {{ $t('billing.invoice_number') }}
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {{ $t('billing.description') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -169,11 +173,14 @@
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {{ formatDate(invoice.date) }}
                   </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {{ invoice.invoice_number || '-' }}
+                  </td>
                   <td class="px-6 py-4 text-sm text-gray-900">
                     {{ invoice.description }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    €{{ invoice.amount }}
+                    {{ invoice.currency === 'MKD' ? `${invoice.amount} ден` : `€${invoice.amount}` }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <BaseBadge :variant="getInvoiceStatusVariant(invoice.status)">
@@ -250,7 +257,6 @@ import axios from 'axios'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
-// Import base components
 import BasePage from '@/scripts/components/base/BasePage.vue'
 import BasePageHeader from '@/scripts/components/base/BasePageHeader.vue'
 import BaseCard from '@/scripts/components/base/BaseCard.vue'
@@ -259,6 +265,14 @@ import BaseBadge from '@/scripts/components/base/BaseBadge.vue'
 import BaseAlert from '@/scripts/components/base/BaseAlert.vue'
 import BaseSpinner from '@/scripts/components/base/BaseSpinner.vue'
 import BaseDialog from '@/scripts/components/base/BaseDialog.vue'
+
+const TIER_PRICES = {
+  free: { eur: 0, mkd: 0 },
+  starter: { eur: 12, mkd: 740 },
+  standard: { eur: 39, mkd: 2400 },
+  business: { eur: 59, mkd: 3630 },
+  max: { eur: 149, mkd: 9170 },
+}
 
 const router = useRouter()
 const { t } = useI18n()
@@ -271,15 +285,25 @@ const subscription = ref(null)
 const invoices = ref([])
 const showCancelModal = ref(false)
 
-// Paddle configuration
-const paddleClientToken = import.meta.env.VITE_PADDLE_CLIENT_TOKEN
-const paddleSandbox = import.meta.env.VITE_PADDLE_SANDBOX === 'true'
+const companyId = computed(() => companyStore.selectedCompany?.id)
 
 // Fetch subscription data
 const fetchSubscription = async () => {
   try {
     const response = await axios.get('/api/billing/subscription')
-    subscription.value = response.data.data
+    // Backend returns { tiers, current_plan, stripe_customer_id }
+    const data = response.data
+    if (data.current_plan && data.current_plan.status !== 'none') {
+      subscription.value = {
+        tier: data.current_plan.tier,
+        status: data.current_plan.status,
+        next_billing_date: data.current_plan.ends_at,
+        trial_ends_at: data.current_plan.trial_ends_at,
+        stripe_customer_id: data.stripe_customer_id,
+      }
+    } else {
+      subscription.value = null
+    }
   } catch (err) {
     if (err.response?.status !== 404) {
       error.value = t('billing.error_load_subscription')
@@ -300,25 +324,55 @@ const fetchInvoices = async () => {
   }
 }
 
-// Format date
+// Format date — MK locale (dd.MM.yyyy)
 const formatDate = (date) => {
-  if (!date) return 'N/A'
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  if (!date) return '-'
+  const d = new Date(date)
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const year = d.getFullYear()
+  return `${day}.${month}.${year}`
+}
+
+// Format tier display name
+const formatTierName = (tier) => {
+  const names = {
+    free: 'Free',
+    starter: 'Starter',
+    standard: 'Standard',
+    business: 'Business',
+    max: 'Max',
+  }
+  return names[tier] || tier
+}
+
+// Format subscription price with currency
+const formatSubscriptionPrice = (sub) => {
+  const tierPrices = TIER_PRICES[sub.tier]
+  if (!tierPrices) return '€0'
+  // Show both EUR and MKD
+  return `€${tierPrices.eur} (${tierPrices.mkd.toLocaleString()} ден)`
 }
 
 // Format status
 const formatStatus = (status) => {
-  return status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
+  const labels = {
+    active: 'Активен',
+    trial: 'Пробен период',
+    trialing: 'Пробен период',
+    past_due: 'Доцнење',
+    canceled: 'Откажан',
+    paused: 'Паузиран',
+    none: 'Неактивен',
+  }
+  return labels[status] || status.charAt(0).toUpperCase() + status.slice(1)
 }
 
-// Get status badge variant
+// Badge variants
 const getStatusVariant = (status) => {
   const variants = {
     active: 'success',
+    trial: 'info',
     trialing: 'info',
     past_due: 'warning',
     canceled: 'danger',
@@ -327,17 +381,17 @@ const getStatusVariant = (status) => {
   return variants[status] || 'secondary'
 }
 
-// Get plan badge variant
-const getPlanVariant = (plan) => {
+const getPlanVariant = (tier) => {
   const variants = {
+    free: 'secondary',
     starter: 'secondary',
-    professional: 'primary',
+    standard: 'primary',
     business: 'success',
+    max: 'warning',
   }
-  return variants[plan?.toLowerCase()] || 'secondary'
+  return variants[tier?.toLowerCase()] || 'secondary'
 }
 
-// Get invoice status variant
 const getInvoiceStatusVariant = (status) => {
   const variants = {
     paid: 'success',
@@ -347,71 +401,48 @@ const getInvoiceStatusVariant = (status) => {
   return variants[status?.toLowerCase()] || 'secondary'
 }
 
-// Check if can upgrade
+// Can upgrade check — aligned with backend tiers
 const canUpgrade = computed(() => {
   if (!subscription.value) return false
-  const plan = subscription.value.plan_name?.toLowerCase()
-  return plan === 'starter' || plan === 'professional'
+  const tier = subscription.value.tier
+  return tier === 'free' || tier === 'starter' || tier === 'standard' || tier === 'business'
 })
 
-// Initialize Paddle
-const initializePaddle = async () => {
-  if (!window.Paddle) {
-    const script = document.createElement('script')
-    script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js'
-    script.async = true
+// Open Stripe Customer Portal for payment method updates
+const openStripePortal = async () => {
+  isProcessing.value = true
+  error.value = null
 
-    await new Promise((resolve, reject) => {
-      script.onload = resolve
-      script.onerror = reject
-      document.head.appendChild(script)
-    })
-  }
-
-  if (window.Paddle) {
-    window.Paddle.Environment.set(paddleSandbox ? 'sandbox' : 'production')
-    window.Paddle.Initialize({
-      token: paddleClientToken,
-    })
-  }
-}
-
-// Open update payment method
-const openUpdatePaymentMethod = async () => {
   try {
-    await initializePaddle()
-
-    if (!window.Paddle) {
-      throw new Error('Paddle not initialized')
+    if (!companyId.value) {
+      throw new Error('No company selected')
     }
-
-    // Open Paddle update payment method overlay
-    window.Paddle.PaymentMethod.update({
-      subscriptionId: subscription.value.paddle_subscription_id,
-    })
+    const response = await axios.get(`/api/v1/companies/${companyId.value}/subscription/manage`)
+    if (response.data.portal_url) {
+      window.location.href = response.data.portal_url
+    }
   } catch (err) {
-    console.error('Failed to open payment method update:', err)
+    console.error('Failed to open Stripe portal:', err)
     error.value = t('billing.error_payment_method')
+  } finally {
+    isProcessing.value = false
   }
 }
 
-// Cancel subscription
+// Cancel subscription — uses company-scoped route
 const cancelSubscription = async () => {
   isProcessing.value = true
   error.value = null
 
   try {
-    const companyId = companyStore.selectedCompany?.id
-    if (!companyId) {
+    if (!companyId.value) {
       throw new Error('No company selected')
     }
-    await axios.post(`/companies/${companyId}/subscription/cancel`)
+    await axios.post(`/api/v1/companies/${companyId.value}/subscription/cancel`)
     showCancelModal.value = false
 
-    // Refresh subscription data
     await fetchSubscription()
 
-    // Show success message
     notificationStore.showNotification({
       type: 'success',
       message: t('billing.success_canceled'),
@@ -424,18 +455,19 @@ const cancelSubscription = async () => {
   }
 }
 
-// Resume subscription
+// Resume subscription — uses company-scoped route
 const resumeSubscription = async () => {
   isProcessing.value = true
   error.value = null
 
   try {
-    await axios.post('/api/billing/subscription/resume')
+    if (!companyId.value) {
+      throw new Error('No company selected')
+    }
+    await axios.post(`/api/v1/companies/${companyId.value}/subscription/resume`)
 
-    // Refresh subscription data
     await fetchSubscription()
 
-    // Show success message
     notificationStore.showNotification({
       type: 'success',
       message: t('billing.success_resumed'),

@@ -10,6 +10,16 @@
       </span>
       <div class="flex items-center space-x-2">
         <BaseButton
+          variant="primary-outline"
+          size="sm"
+          @click="showBulkCategorizeModal = true"
+        >
+          <template #left="slotProps">
+            <BaseIcon name="TagIcon" :class="slotProps.class" />
+          </template>
+          {{ $t('banking.bulk_categorize', 'Bulk Categorize') }}
+        </BaseButton>
+        <BaseButton
           variant="danger"
           size="sm"
           @click="bulkDelete"
@@ -241,6 +251,48 @@
       </template>
     </BaseModal>
 
+    <!-- Bulk Categorize Modal -->
+    <BaseModal
+      :show="showBulkCategorizeModal"
+      @close="showBulkCategorizeModal = false"
+      @update:show="showBulkCategorizeModal = $event"
+    >
+      <template #header>
+        <h3 class="text-lg font-semibold text-gray-900">
+          {{ $t('banking.bulk_categorize', 'Bulk Categorize') }}
+        </h3>
+      </template>
+      <div class="p-6">
+        <p class="text-sm text-gray-600 mb-4">
+          {{ selectedIds.length }} {{ $t('banking.transactions', 'transactions') }}
+        </p>
+        <select
+          v-model="bulkCategory"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+        >
+          <option :value="null" disabled>{{ $t('banking.select_category', 'Select category...') }}</option>
+          <option value="salary">{{ $t('banking.category_salary', 'Плата') }}</option>
+          <option value="tax_payment">{{ $t('banking.category_tax', 'Даночно плаќање') }}</option>
+          <option value="bank_fee">{{ $t('banking.category_bank_fee', 'Банкарска провизија') }}</option>
+          <option value="supplier_payment">{{ $t('banking.category_supplier', 'Плаќање кон добавувач') }}</option>
+          <option value="internal_transfer">{{ $t('banking.category_transfer', 'Интерен трансфер') }}</option>
+          <option value="utility">{{ $t('banking.category_utility', 'Ко��унални') }}</option>
+          <option value="rent">{{ $t('banking.category_rent', 'Кирија') }}</option>
+          <option value="other">{{ $t('banking.category_other', 'Друго') }}</option>
+        </select>
+      </div>
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <BaseButton variant="secondary" @click="showBulkCategorizeModal = false">
+            {{ $t('general.cancel') }}
+          </BaseButton>
+          <BaseButton variant="primary" :disabled="!bulkCategory" @click="confirmBulkCategorize">
+            {{ $t('banking.apply_category', 'Apply Category') }}
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
+
     <!-- Delete Confirm Modal -->
     <BaseModal
       :show="showDeleteConfirm"
@@ -307,6 +359,8 @@ const deleteConfirmMessage = ref('')
 const pendingDeleteAction = ref(null)
 const isDeleting = ref(false)
 const isBulkDeleting = ref(false)
+const showBulkCategorizeModal = ref(false)
+const bulkCategory = ref(null)
 
 // Re-fetch when filters change (account_id, dates)
 watch(() => props.filters, () => {
@@ -467,6 +521,29 @@ const unmatchTransaction = async (transaction) => {
     notificationStore.showNotification({
       type: 'error',
       message: error.response?.data?.message || 'Failed to unmatch transaction'
+    })
+  }
+}
+
+const confirmBulkCategorize = async () => {
+  if (!bulkCategory.value || selectedIds.value.length === 0) return
+  try {
+    await axios.post('/banking/transactions/bulk-categorize', {
+      ids: selectedIds.value,
+      category: bulkCategory.value,
+    })
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('banking.bulk_categorize_success', 'Transactions categorized successfully'),
+    })
+    showBulkCategorizeModal.value = false
+    bulkCategory.value = null
+    selectedIds.value = []
+    refresh()
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || 'Failed to categorize',
     })
   }
 }

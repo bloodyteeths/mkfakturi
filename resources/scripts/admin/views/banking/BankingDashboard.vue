@@ -67,6 +67,18 @@
               <BaseIcon name="ArrowDownTrayIcon" class="mr-3 h-5 w-5 text-gray-500" />
               {{ $t('banking.export', 'Export CSV') }}
             </BaseDropdownItem>
+            <BaseDropdownItem @click="downloadBankStatement">
+              <BaseIcon name="DocumentTextIcon" class="mr-3 h-5 w-5 text-gray-500" />
+              {{ $t('banking.bank_statement', 'Извод од банка') }}
+            </BaseDropdownItem>
+            <BaseDropdownItem @click="downloadIos">
+              <BaseIcon name="DocumentDuplicateIcon" class="mr-3 h-5 w-5 text-gray-500" />
+              {{ $t('banking.ios_report', 'ИОС извештај') }}
+            </BaseDropdownItem>
+            <BaseDropdownItem @click="downloadDailyCashReport">
+              <BaseIcon name="BanknotesIcon" class="mr-3 h-5 w-5 text-gray-500" />
+              {{ $t('banking.daily_cash_report', 'Дневен извештај за каса') }}
+            </BaseDropdownItem>
           </BaseDropdown>
         </div>
       </template>
@@ -244,6 +256,43 @@
             calendar-button-icon="calendar"
           />
         </BaseInputGroup>
+
+        <BaseInputGroup :label="$t('banking.min_amount', 'Мин. износ')" class="text-left">
+          <BaseInput
+            v-model="filters.min_amount"
+            type="number"
+            step="0.01"
+            placeholder="0.00"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="$t('banking.max_amount', 'Макс. износ')" class="text-left">
+          <BaseInput
+            v-model="filters.max_amount"
+            type="number"
+            step="0.01"
+            placeholder="0.00"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="$t('banking.type')" class="text-left">
+          <BaseMultiselect
+            v-model="filters.transaction_type"
+            :options="transactionTypeOptions"
+            :searchable="false"
+            :show-labels="false"
+            :placeholder="$t('banking.all_types', 'Сите типови')"
+            label="label"
+            value-prop="value"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="$t('banking.counterparty', 'Контрапартија')" class="text-left">
+          <BaseInput
+            v-model="filters.counterparty"
+            :placeholder="$t('banking.search_counterparty', 'Пребарај...')"
+          />
+        </BaseInputGroup>
       </BaseFilterWrapper>
 
       <!-- Transactions List Component -->
@@ -371,8 +420,18 @@ const showFilters = ref(false)
 const filters = ref({
   account_id: null,
   from_date: null,
-  to_date: null
+  to_date: null,
+  min_amount: null,
+  max_amount: null,
+  transaction_type: null,
+  counterparty: null,
 })
+
+const transactionTypeOptions = computed(() => [
+  { label: t('banking.all_types', 'Сите типови'), value: null },
+  { label: t('banking.credit', 'Приход'), value: 'credit' },
+  { label: t('banking.debit', 'Расход'), value: 'debit' },
+])
 
 // Computed
 const showEmptyScreen = computed(() => {
@@ -564,8 +623,50 @@ const clearFilters = () => {
   filters.value = {
     account_id: null,
     from_date: null,
-    to_date: null
+    to_date: null,
+    min_amount: null,
+    max_amount: null,
+    transaction_type: null,
+    counterparty: null,
   }
+}
+
+const downloadPdfReport = async (url, filename) => {
+  try {
+    const params = {}
+    if (filters.value.account_id) params.account_id = filters.value.account_id
+    if (filters.value.from_date) params.from = filters.value.from_date
+    if (filters.value.to_date) params.to = filters.value.to_date
+    const response = await axios.get(url, { params, responseType: 'blob' })
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+    const link = document.createElement('a')
+    link.href = window.URL.createObjectURL(blob)
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(link.href)
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || 'Failed to generate report',
+    })
+  }
+}
+
+const downloadBankStatement = () => {
+  const date = new Date().toISOString().split('T')[0]
+  downloadPdfReport('/banking/statement-report', 'bank-statement-' + date + '.pdf')
+}
+
+const downloadIos = () => {
+  const date = new Date().toISOString().split('T')[0]
+  downloadPdfReport('/banking/ios', 'ios-' + date + '.pdf')
+}
+
+const downloadDailyCashReport = () => {
+  const date = new Date().toISOString().split('T')[0]
+  downloadPdfReport('/banking/daily-cash-report', 'daily-cash-' + date + '.pdf')
 }
 
 const formatMoney = (amount, currency) => {
