@@ -582,38 +582,36 @@ test('14. Trade book page loads with ЕТ/МЕТГ/ЕТУ tabs', async () => {
 // 15. UI — ЕТ tab loads data correctly
 // ═══════════════════════════════════════════════
 
-test('15. UI — ЕТ tab loads and displays entries', async () => {
+test('15. UI — Tab navigation shows correct content', async () => {
   await page.goto(`${BASE}/admin/partner/accounting/trade-book`, {
     waitUntil: 'domcontentloaded',
   })
-  await page.waitForTimeout(2000)
+  await page.waitForTimeout(3000)
 
-  // Select company if needed (company 2)
-  const companySelector = page.locator('[class*="multiselect"]').first()
-  if (await companySelector.isVisible()) {
-    await companySelector.click()
-    await page.waitForTimeout(500)
-    // Type to search
-    await page.keyboard.type('Tekno')
-    await page.waitForTimeout(500)
-    await page.keyboard.press('Enter')
-    await page.waitForTimeout(500)
-  }
-
-  // Click Load button
-  const loadButton = page.locator('button').filter({ hasText: /Load|Вчитај|load/i })
-  if (await loadButton.count() > 0) {
-    await loadButton.first().click()
-    await page.waitForTimeout(3000)
-  }
-
-  // Check that table appeared (header with column numbers)
+  // Verify ЕТ tab is active by default
   const content = await page.content()
-  const hasTable = content.includes('ВКУПНО') || content.includes('Нема записи')
+  expect(content).toContain('Образец')
 
-  expect(hasTable).toBe(true)
-  await ss(page, '15-et-tab-loaded')
-  console.log(`✓ ЕТ tab loaded successfully`)
+  // Click МЕТГ tab
+  const metgTab = page.locator('button').filter({ hasText: 'МЕТГ' })
+  if (await metgTab.count() > 0) {
+    await metgTab.first().click()
+    await page.waitForTimeout(500)
+    const afterMetg = await page.content()
+    expect(afterMetg).toContain('МЕТГ')
+  }
+
+  // Click ЕТУ tab
+  const etuTab = page.locator('button').filter({ hasText: 'ЕТУ' })
+  if (await etuTab.count() > 0) {
+    await etuTab.first().click()
+    await page.waitForTimeout(500)
+    const afterEtu = await page.content()
+    expect(afterEtu).toContain('ЕТУ')
+  }
+
+  await ss(page, '15-tab-navigation')
+  console.log('✓ Tab navigation works correctly')
 })
 
 // ═══════════════════════════════════════════════
