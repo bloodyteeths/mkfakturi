@@ -91,9 +91,11 @@ const isSaving = ref(false)
 
 const accountCodeOptions = computed(() => [
   { code: '100', label: '100 - ' + t('settings.payment_modes.account_bank') },
-  { code: '102', label: '102 - ' + t('settings.payment_modes.account_cash') },
-  { code: '103', label: '103 - ' + t('settings.payment_modes.account_foreign') },
-  { code: '105', label: '105 - ' + t('settings.payment_modes.account_other') },
+  { code: '101', label: '101 - ' + t('settings.payment_modes.account_cash_domestic') },
+  { code: '102', label: '102 - ' + t('settings.payment_modes.account_designated_deposits') },
+  { code: '104', label: '104 - ' + t('settings.payment_modes.account_denar_cash') },
+  { code: '105', label: '105 - ' + t('settings.payment_modes.account_foreign') },
+  { code: '109', label: '109 - ' + t('settings.payment_modes.account_other') },
 ])
 
 const rules = computed(() => {
@@ -152,4 +154,5 @@ function closePaymentModeModal() {
     }
   })
 }
+// CLAUDE-CHECKPOINT
 </script>

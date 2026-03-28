@@ -27,7 +27,7 @@ class CompensationController extends Controller
         $companyId = (int) $request->header('company');
 
         $query = Compensation::forCompany($companyId)
-            ->with(['customer:id,name', 'supplier:id,name', 'createdBy:id,name'])
+            ->with(['customer:id,name', 'supplier:id,name', 'createdBy'])
             ->orderBy('compensation_date', 'desc');
 
         // Apply filters
@@ -87,7 +87,7 @@ class CompensationController extends Controller
         $companyId = (int) $request->header('company');
 
         $compensation = Compensation::forCompany($companyId)
-            ->with(['customer', 'supplier', 'items', 'createdBy:id,name', 'confirmedBy:id,name'])
+            ->with(['customer', 'supplier', 'items', 'createdBy', 'confirmedBy'])
             ->where('id', $id)
             ->first();
 
@@ -133,6 +133,48 @@ class CompensationController extends Controller
                 'message' => 'Compensation created successfully',
             ], 201);
         } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Update a draft compensation.
+     */
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+
+        $compensation = Compensation::forCompany($companyId)
+            ->where('id', $id)
+            ->first();
+
+        if (!$compensation) {
+            return response()->json(['success' => false, 'message' => 'Compensation not found'], 404);
+        }
+
+        $request->validate([
+            'compensation_date' => 'nullable|date',
+            'type' => 'nullable|in:bilateral,unilateral',
+            'notes' => 'nullable|string|max:2000',
+            'items' => 'nullable|array|min:1',
+            'items.*.side' => 'required_with:items|in:receivable,payable',
+            'items.*.document_type' => 'required_with:items|in:invoice,bill,credit_note',
+            'items.*.document_id' => 'required_with:items|integer',
+            'items.*.amount_offset' => 'required_with:items|integer|min:1',
+        ]);
+
+        try {
+            $compensation = $this->service->update($compensation, $request->all());
+
+            return response()->json([
+                'success' => true,
+                'data' => $compensation,
+                'message' => 'Compensation updated successfully',
+            ]);
+        } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),

@@ -20,9 +20,15 @@ class PaymentMethod extends Model
     public const TYPE_MODULE = 'MODULE';
 
     // Standard GL account codes (Правилник 174/2011)
-    public const GL_CASH = '102';          // Парични средства во благајна
-    public const GL_BANK = '100';          // Парични средства на трансакциски сметки
-    public const GL_OTHER_CASH = '105';    // Парични средства во благајна во странска валута
+    public const GL_BANK = '100';              // 100 - Трансакциска сметка
+    public const GL_CASH_DOMESTIC = '101';     // 101 - Благајна - домашна валута
+    public const GL_DESIGNATED_DEPOSITS = '102'; // 102 - Наменски депозити
+    public const GL_DENAR_CASH = '104';        // 104 - Денарска благајна
+    public const GL_FOREIGN_CASH = '105';      // 105 - Девизна благајна
+    public const GL_OTHER_CASH = '109';        // 109 - Останати парични средства
+
+    // Legacy aliases for backward compatibility
+    public const GL_CASH = '101'; // CLAUDE-CHECKPOINT
 
     protected function casts(): array
     {

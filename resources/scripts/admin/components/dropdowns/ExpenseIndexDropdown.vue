@@ -7,6 +7,20 @@
       <BaseIcon v-else name="EllipsisHorizontalIcon" class="h-5 text-gray-500" />
     </template>
 
+    <!-- view expense -->
+    <router-link
+      v-if="userStore.hasAbilities(abilities.VIEW_EXPENSE)"
+      :to="`/admin/expenses/${row.id}/view`"
+    >
+      <BaseDropdownItem>
+        <BaseIcon
+          name="EyeIcon"
+          class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+        />
+        {{ $t('expenses.view_expense') }}
+      </BaseDropdownItem>
+    </router-link>
+
     <!-- edit expense  -->
     <router-link
       v-if="userStore.hasAbilities(abilities.EDIT_EXPENSE)"
@@ -20,6 +34,30 @@
         {{ $t('general.edit') }}
       </BaseDropdownItem>
     </router-link>
+
+    <!-- clone expense -->
+    <BaseDropdownItem
+      v-if="userStore.hasAbilities(abilities.CREATE_EXPENSE)"
+      @click="cloneExpense(row.id)"
+    >
+      <BaseIcon
+        name="DocumentDuplicateIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('general.clone') }}
+    </BaseDropdownItem>
+
+    <!-- approve expense -->
+    <BaseDropdownItem
+      v-if="userStore.hasAbilities(abilities.EDIT_EXPENSE) && row.status === 'draft'"
+      @click="approveExpense(row.id)"
+    >
+      <BaseIcon
+        name="CheckCircleIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('general.approve') }}
+    </BaseDropdownItem>
 
     <!-- delete expense  -->
     <BaseDropdownItem
@@ -69,6 +107,22 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const $utils = inject('utils')
+
+function cloneExpense(id) {
+  expenseStore.cloneExpense(id).then((res) => {
+    if (res) {
+      router.push(`/admin/expenses/${res.data.data.id}/edit`)
+    }
+  })
+}
+
+function approveExpense(id) {
+  expenseStore.approveExpense(id).then((res) => {
+    if (res) {
+      props.loadData && props.loadData()
+    }
+  })
+}
 
 function removeExpense(id) {
   dialogStore

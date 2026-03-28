@@ -18,6 +18,29 @@
       </BaseDropdownItem>
     </router-link>
 
+    <!-- Print PP30 -->
+    <BaseDropdownItem
+      v-if="row.bill_id"
+      @click="printPP30(row)"
+    >
+      <BaseIcon
+        name="PrinterIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ bp('print_pp30') }}
+    </BaseDropdownItem>
+
+    <!-- Расходен налог -->
+    <BaseDropdownItem
+      @click="printRashodenNalog(row)"
+    >
+      <BaseIcon
+        name="DocumentTextIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ bp('rashoden_nalog') || 'Расходен налог' }}
+    </BaseDropdownItem>
+
     <!-- Delete Payment -->
     <BaseDropdownItem @click="removeBillPayment(row)">
       <BaseIcon
@@ -59,6 +82,14 @@ function bp(key) {
     || key
 }
 
+function printPP30(payment) {
+  window.open(`/api/v1/admin/bills/${payment.bill_id}/pp30`, '_blank')
+}
+
+function printRashodenNalog(payment) {
+  window.open(`/api/v1/admin/bill-payments/${payment.id}/rashoden-nalog`, '_blank')
+}
+
 function removeBillPayment(payment) {
   dialogStore
     .openDialog({
@@ -91,4 +122,5 @@ function removeBillPayment(payment) {
       }
     })
 }
+// CLAUDE-CHECKPOINT
 </script>

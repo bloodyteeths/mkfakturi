@@ -174,6 +174,78 @@ class CompensationService
     }
 
     /**
+     * Update a draft compensation.
+     */
+    public function update(Compensation $compensation, array $data): Compensation
+    {
+        if ($compensation->status !== 'draft') {
+            throw new \InvalidArgumentException('Only draft compensations can be updated.');
+        }
+
+        return DB::transaction(function () use ($compensation, $data) {
+            // Update header fields
+            $headerFields = [];
+            if (isset($data['compensation_date'])) $headerFields['compensation_date'] = $data['compensation_date'];
+            if (isset($data['type'])) $headerFields['type'] = $data['type'];
+            if (array_key_exists('notes', $data)) $headerFields['notes'] = $data['notes'];
+
+            // If items are provided, recalculate totals
+            if (!empty($data['items'])) {
+                // Delete old items
+                CompensationItem::where('compensation_id', $compensation->id)->delete();
+
+                $receivablesTotal = 0;
+                $payablesTotal = 0;
+
+                foreach ($data['items'] as $item) {
+                    if ($item['side'] === 'receivable') {
+                        $receivablesTotal += (int) $item['amount_offset'];
+                    } else {
+                        $payablesTotal += (int) $item['amount_offset'];
+                    }
+                }
+
+                $offsetAmount = min($receivablesTotal, $payablesTotal);
+
+                $headerFields['total_amount'] = $offsetAmount;
+                $headerFields['receivables_total'] = $receivablesTotal;
+                $headerFields['payables_total'] = $payablesTotal;
+                $headerFields['receivables_remaining'] = $receivablesTotal - $offsetAmount;
+                $headerFields['payables_remaining'] = $payablesTotal - $offsetAmount;
+
+                // Create new items
+                foreach ($data['items'] as $item) {
+                    $docInfo = $this->resolveDocumentInfo(
+                        $item['document_type'],
+                        $item['document_id']
+                    );
+
+                    $amountOffset = (int) $item['amount_offset'];
+                    $remainingAfter = max(0, ($docInfo['due_amount'] ?? 0) - $amountOffset);
+
+                    CompensationItem::create([
+                        'compensation_id' => $compensation->id,
+                        'side' => $item['side'],
+                        'document_type' => $item['document_type'],
+                        'document_id' => $item['document_id'],
+                        'document_number' => $docInfo['document_number'],
+                        'document_date' => $docInfo['document_date'],
+                        'document_total' => $docInfo['total'],
+                        'amount_offset' => $amountOffset,
+                        'remaining_after' => $remainingAfter,
+                    ]);
+                }
+            }
+
+            if (!empty($headerFields)) {
+                $compensation->update($headerFields);
+            }
+
+            return $compensation->fresh(['items', 'customer', 'supplier']);
+        });
+    }
+
+    /**
      * Confirm a compensation: mark as confirmed and apply offsets to invoices/bills.
      */
     public function confirm(Compensation $compensation, ?int $userId = null): Compensation

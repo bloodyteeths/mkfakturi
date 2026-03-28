@@ -17,7 +17,9 @@ use Illuminate\Support\Facades\Schema;
  *
  * Recurrence rules supported:
  * - monthly_DD  (e.g. monthly_25 → 25th of next month)
+ * - monthly_DD_suffix (e.g. monthly_25_payment → 25th of next month)
  * - annual_MM_DD (e.g. annual_03_15 → March 15th next year)
+ * - annual_MM_DD_suffix (e.g. annual_01_31_firmarina → Jan 31st next year)
  */
 class GenerateRecurringDeadlines extends Command
 {
@@ -76,7 +78,7 @@ class GenerateRecurringDeadlines extends Command
 
                 // Check if a deadline for this period already exists (idempotent)
                 $exists = Deadline::where('company_id', $template->company_id)
-                    ->where('deadline_type', $template->deadline_type)
+                    ->where('recurrence_rule', $template->recurrence_rule)
                     ->where('due_date', $nextDueDate->toDateString())
                     ->exists();
 
@@ -131,7 +133,9 @@ class GenerateRecurringDeadlines extends Command
         $today = Carbon::today();
 
         if (str_starts_with($rule, 'monthly_')) {
-            $day = (int) str_replace('monthly_', '', $rule);
+            // Extract day from rules like monthly_25, monthly_25_payment, monthly_25_books
+            preg_match('/^monthly_(\d+)/', $rule, $matches);
+            $day = (int) ($matches[1] ?? 1);
 
             // Generate for next month
             $nextMonth = $today->copy()->addMonthNoOverflow();
@@ -145,7 +149,7 @@ class GenerateRecurringDeadlines extends Command
         }
 
         if (str_starts_with($rule, 'annual_')) {
-            // Format: annual_MM_DD
+            // Format: annual_MM_DD or annual_MM_DD_suffix
             $parts = explode('_', $rule);
 
             if (count($parts) < 3) {
@@ -168,3 +172,4 @@ class GenerateRecurringDeadlines extends Command
         return null;
     }
 }
+// CLAUDE-CHECKPOINT

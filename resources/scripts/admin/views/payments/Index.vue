@@ -67,6 +67,12 @@
             </template>
           </BaseButton>
 
+          <ExportButton
+            v-show="billPaymentTotalCount > 0"
+            type="bill-payments"
+            :filters="bpFilters"
+          />
+
           <router-link to="/admin/payment-orders/create">
             <BaseButton variant="primary">
               <template #left="slotProps">
@@ -138,6 +144,44 @@
             :delay="500"
             searchable
             :options="searchPayment"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="bp('from_date')">
+          <BaseDatePicker
+            v-model="filters.from_date"
+            :calendar-button="true"
+            calendar-button-icon="calendar"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="bp('to_date')">
+          <BaseDatePicker
+            v-model="filters.to_date"
+            :calendar-button="true"
+            calendar-button-icon="calendar"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="bp('status')">
+          <BaseMultiselect
+            v-model="filters.gateway_status"
+            :options="statusOptions"
+            label="label"
+            value-prop="value"
+            :can-deselect="true"
+            :placeholder="bp('all')"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="bp('gateway')">
+          <BaseMultiselect
+            v-model="filters.gateway"
+            :options="gatewayOptions"
+            label="label"
+            value-prop="value"
+            :can-deselect="true"
+            :placeholder="bp('all')"
           />
         </BaseInputGroup>
       </BaseFilterWrapper>
@@ -260,6 +304,19 @@
             />
           </template>
 
+          <template #cell-currency="{ row }">
+            {{ row.data.customer?.currency?.code || 'MKD' }}
+          </template>
+
+          <template #cell-reconciled="{ row }">
+            <BaseIcon
+              v-if="row.data.transaction_id"
+              name="CheckCircleIcon"
+              class="w-5 h-5 text-green-500"
+              :title="bp('reconciled')"
+            />
+          </template>
+
           <template v-if="hasAtleastOneAbility()" #cell-actions="{ row }">
             <PaymentDropdown :row="row.data" :table="tableComponent" />
           </template>
@@ -299,6 +356,22 @@
               <BaseIcon name="HashtagIcon" :class="slotProps.class" />
             </template>
           </BaseInput>
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="bp('from_date')">
+          <BaseDatePicker
+            v-model="bpFilters.from_date"
+            :calendar-button="true"
+            calendar-button-icon="calendar"
+          />
+        </BaseInputGroup>
+
+        <BaseInputGroup :label="bp('to_date')">
+          <BaseDatePicker
+            v-model="bpFilters.to_date"
+            :calendar-button="true"
+            calendar-button-icon="calendar"
+          />
         </BaseInputGroup>
       </BaseFilterWrapper>
 
@@ -477,7 +550,25 @@ const filters = reactive({
   payment_mode: '',
   payment_number: '',
   project_id: route.query.project_id || '',
+  from_date: '',
+  to_date: '',
+  gateway_status: '',
+  gateway: '',
 })
+
+const statusOptions = [
+  { value: 'COMPLETED', label: bp('status_completed') },
+  { value: 'PENDING', label: bp('status_pending') },
+  { value: 'REFUNDED', label: bp('status_refunded') },
+  { value: 'FAILED', label: bp('status_failed') },
+]
+
+const gatewayOptions = [
+  { value: 'manual', label: bp('gateway_manual') },
+  { value: 'bank_transfer', label: bp('gateway_bank_transfer') },
+  { value: 'cpay', label: bp('gateway_cpay') },
+  { value: 'paddle', label: bp('gateway_paddle') },
+]
 
 const paymentStore = usePaymentStore()
 const companyStore = useCompanyStore()
@@ -508,6 +599,8 @@ const paymentColumns = computed(() => {
     { key: 'payment_mode', label: t('payments.payment_mode') },
     { key: 'invoice_number', label: t('payments.invoice') },
     { key: 'amount', label: t('payments.amount') },
+    { key: 'currency', label: bp('currency'), sortable: false },
+    { key: 'reconciled', label: '', sortable: false, thClass: 'w-8' },
     {
       key: 'actions',
       label: '',
@@ -568,6 +661,10 @@ async function fetchData({ page, filter, sort }) {
       filters.payment_mode !== null ? filters.payment_mode : '',
     payment_number: filters.payment_number,
     project_id: filters.project_id,
+    from_date: filters.from_date || '',
+    to_date: filters.to_date || '',
+    gateway_status: filters.gateway_status || '',
+    gateway: filters.gateway || '',
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,
@@ -603,6 +700,10 @@ function clearFilter() {
   filters.payment_mode = ''
   filters.payment_number = ''
   filters.project_id = ''
+  filters.from_date = ''
+  filters.to_date = ''
+  filters.gateway_status = ''
+  filters.gateway = ''
 }
 
 function toggleFilter() {
@@ -652,6 +753,8 @@ const bpFilters = reactive({
   supplier_id: '',
   payment_method_id: '',
   search: '',
+  from_date: '',
+  to_date: '',
 })
 
 const billPaymentColumns = computed(() => {
@@ -695,6 +798,8 @@ async function fetchBillPaymentData({ page, filter, sort }) {
     supplier_id: bpFilters.supplier_id || '',
     payment_method_id: bpFilters.payment_method_id || '',
     search: bpFilters.search || '',
+    from_date: bpFilters.from_date || '',
+    to_date: bpFilters.to_date || '',
   }
 
   const response = await window.axios.get('/bill-payments', { params })
@@ -772,6 +877,8 @@ function clearBillPaymentFilter() {
   bpFilters.supplier_id = ''
   bpFilters.payment_method_id = ''
   bpFilters.search = ''
+  bpFilters.from_date = ''
+  bpFilters.to_date = ''
 }
 
 function toggleBillPaymentFilter() {
@@ -804,4 +911,5 @@ function formatBillPaymentAmount(payment) {
 function switchTab(tab) {
   activeTab.value = tab
 }
+// CLAUDE-CHECKPOINT
 </script>

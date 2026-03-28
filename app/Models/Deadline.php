@@ -160,8 +160,10 @@ class Deadline extends Model
      */
     public function scopeUpcoming($query)
     {
-        return $query->where('status', self::STATUS_UPCOMING)
-            ->orWhere('status', self::STATUS_DUE_TODAY);
+        return $query->where(function ($q) {
+            $q->where('status', self::STATUS_UPCOMING)
+                ->orWhere('status', self::STATUS_DUE_TODAY);
+        });
     }
 
     /**
@@ -348,3 +350,4 @@ class Deadline extends Model
         return $labels[$this->deadline_type] ?? $this->deadline_type;
     }
 }
+// CLAUDE-CHECKPOINT

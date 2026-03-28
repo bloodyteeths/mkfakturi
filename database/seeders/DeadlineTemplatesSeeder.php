@@ -18,9 +18,13 @@ use Illuminate\Support\Facades\Schema;
  *
  * Standard MK accounting deadlines:
  * - VAT Return (ДДВ пријава): 25th of each month
+ * - VAT Payment (Уплата на ДДВ): 25th of each month
+ * - VAT Books (Книга за влезен/излезен ДДВ): 25th of each month
  * - MPIN Filing (МПИН пријава): 10th of each month
  * - CIT Advance (Аконтација на данок на добивка): 15th of each month
- * - Annual Financial Statement (Годишна сметка): March 15th
+ * - Annual Financial Statement (Годишна сметка): March 31st
+ * - Property Tax (Данок на имот): January 31st
+ * - Communal Tax / Firmarina: January 31st
  */
 class DeadlineTemplatesSeeder extends Seeder
 {
@@ -102,10 +106,13 @@ class DeadlineTemplatesSeeder extends Seeder
      * - MPIN filing: 10th of each month
      * - MPIN + CIT payment: 15th of each month
      * - VAT return filing: 25th of each month
-     * - VAT payment: 30th of each month
+     * - VAT payment: 25th of each month
+     * - VAT books: 25th of each month
      * - CIT annual return (electronic): March 15th
      * - Annual financial statements (Central Registry): March 31st
      * - Personal income tax confirmation: May 31st
+     * - Property tax: January 31st
+     * - Communal tax (firmarina): January 31st
      *
      * @return array<array<string, mixed>>
      */
@@ -134,6 +141,20 @@ class DeadlineTemplatesSeeder extends Seeder
                 'recurrence_rule' => 'monthly_25',
             ],
             [
+                'title' => 'VAT Payment',
+                'title_mk' => 'Уплата на ДДВ',
+                'description' => 'Monthly VAT payment based on DDV-04 return. Due on the 25th of the month following the tax period, same day as the VAT return filing.',
+                'deadline_type' => Deadline::TYPE_VAT,
+                'recurrence_rule' => 'monthly_25_payment',
+            ],
+            [
+                'title' => 'VAT Input/Output Books',
+                'title_mk' => 'Книга за влезен/излезен ДДВ',
+                'description' => 'Monthly VAT input and output ledger (Книга за влезен ДДВ и Книга за излезен ДДВ). Must be submitted alongside the DDV-04 return by the 25th.',
+                'deadline_type' => Deadline::TYPE_VAT,
+                'recurrence_rule' => 'monthly_25_books',
+            ],
+            [
                 'title' => 'CIT Annual Return',
                 'title_mk' => 'Годишен данок на добивка (ДБ)',
                 'description' => 'Annual Corporate Income Tax return (electronic filing). Due March 15th. Final CIT payment due within 30 days.',
@@ -154,20 +175,36 @@ class DeadlineTemplatesSeeder extends Seeder
                 'deadline_type' => Deadline::TYPE_ANNUAL_FS,
                 'recurrence_rule' => 'annual_05_31',
             ],
+            [
+                'title' => 'Property Tax',
+                'title_mk' => 'Данок на имот',
+                'description' => 'Annual property tax (Данок на имот) declaration to the municipality. Due January 31st each year.',
+                'deadline_type' => Deadline::TYPE_CUSTOM,
+                'recurrence_rule' => 'annual_01_31',
+            ],
+            [
+                'title' => 'Communal Tax (Firmarina)',
+                'title_mk' => 'Комунална такса (Фирмарина)',
+                'description' => 'Annual communal tax payment to the municipality. Due January 31st each year.',
+                'deadline_type' => Deadline::TYPE_CUSTOM,
+                'recurrence_rule' => 'annual_01_31_firmarina',
+            ],
         ];
     }
 
     /**
      * Calculate the next due date based on a recurrence rule.
      *
-     * @param  string  $rule  The recurrence rule (e.g. monthly_25, annual_03_15)
+     * @param  string  $rule  The recurrence rule (e.g. monthly_25, monthly_25_payment, annual_03_15)
      */
     protected function calculateNextDueDate(string $rule): Carbon
     {
         $today = Carbon::today();
 
         if (str_starts_with($rule, 'monthly_')) {
-            $day = (int) str_replace('monthly_', '', $rule);
+            // Extract day from rules like monthly_25, monthly_25_payment, monthly_25_books
+            preg_match('/^monthly_(\d+)/', $rule, $matches);
+            $day = (int) ($matches[1] ?? 1);
             $candidate = Carbon::create($today->year, $today->month, min($day, $today->daysInMonth));
 
             // If the date has passed this month, move to next month
@@ -181,7 +218,7 @@ class DeadlineTemplatesSeeder extends Seeder
         }
 
         if (str_starts_with($rule, 'annual_')) {
-            // Format: annual_MM_DD
+            // Format: annual_MM_DD or annual_MM_DD_suffix
             $parts = explode('_', $rule);
             $month = (int) $parts[1];
             $day = (int) $parts[2];
@@ -200,3 +237,4 @@ class DeadlineTemplatesSeeder extends Seeder
         return $today->addDays(30);
     }
 }
+// CLAUDE-CHECKPOINT

@@ -195,7 +195,12 @@
 
     <div class="divider"></div>
 
-    {{-- Main Title --}}
+    {{-- Serial Number + Main Title --}}
+    @if($payment->sequence_number)
+        <div style="text-align: right; font-size: 10px; color: #333; margin-bottom: 5px;">
+            <strong>@lang('pdf_serial_number')</strong> {{ $payment->sequence_number }}
+        </div>
+    @endif
     <div class="main-title">@lang('pdf_payment_receipt_label')</div>
 
     {{-- Customer and Payment Details --}}
@@ -237,6 +242,12 @@
                 <span class="detail-label">@lang('pdf_invoice_label')</span>
                 <span class="detail-value">{{ $payment->invoice && $payment->invoice->invoice_number ? $payment->invoice->invoice_number : '-' }}</span>
             </div>
+            @if($payment->paymentMethod && $payment->paymentMethod->account_code)
+            <div class="detail-row">
+                <span class="detail-label">@lang('pdf_payment_konto')</span>
+                <span class="detail-value">{{ $payment->paymentMethod->account_code }}</span>
+            </div>
+            @endif
         </div>
     </div>
     <div class="clearfix"></div>
@@ -251,6 +262,20 @@
         </table>
     </div>
 
+    {{-- Amount in Words --}}
+    @if (!empty($amount_words))
+        <div style="margin-top: 10px; font-size: 11px;">
+            <strong>@lang('pdf_amount_in_words')</strong> {{ $amount_words }}
+        </div>
+    @endif
+
+    {{-- Payment Basis --}}
+    @if (!empty($payment_basis))
+        <div style="margin-top: 8px; font-size: 11px;">
+            <strong>@lang('pdf_payment_basis')</strong> {{ $payment_basis }}
+        </div>
+    @endif
+
     {{-- Notes --}}
     @if ($notes)
         <div class="notes-box">
@@ -259,25 +284,26 @@
         </div>
     @endif
 
-    {{-- Stamp & Signature --}}
-    @if(isset($stamp) && $stamp || isset($signature) && $signature)
-    <table style="width:100%; margin-top:10px; border:none;">
+    {{-- Stamp, Signature & Cashier --}}
+    <table style="width:100%; margin-top:20px; border:none;">
         <tr>
-            <td style="width:50%; text-align:center; border:none;">
+            <td style="width:33%; text-align:center; border:none; vertical-align:bottom;">
                 @if(isset($stamp) && $stamp)
                     <img src="{{ \App\Space\ImageUtils::toBase64Src($stamp) }}" style="height:80px;" alt="Печат">
-                    <div style="font-size:8px; color:#666;">Печат / Stamp</div>
                 @endif
+                <div style="border-top:1px solid #999; margin-top:40px; padding-top:5px; font-size:9px; color:#666;">Печат / Stamp</div>
             </td>
-            <td style="width:50%; text-align:center; border:none;">
+            <td style="width:33%; text-align:center; border:none; vertical-align:bottom;">
+                <div style="border-top:1px solid #999; margin-top:40px; padding-top:5px; font-size:9px; color:#666;">@lang('pdf_cashier')</div>
+            </td>
+            <td style="width:33%; text-align:center; border:none; vertical-align:bottom;">
                 @if(isset($signature) && $signature)
                     <img src="{{ \App\Space\ImageUtils::toBase64Src($signature) }}" style="height:80px;" alt="Потпис">
-                    <div style="font-size:8px; color:#666;">Овластен потпис / Signature</div>
                 @endif
+                <div style="border-top:1px solid #999; margin-top:40px; padding-top:5px; font-size:9px; color:#666;">@lang('pdf_director_authorized')</div>
             </td>
         </tr>
     </table>
-    @endif
 
     {{-- Footer --}}
     <div class="footer">

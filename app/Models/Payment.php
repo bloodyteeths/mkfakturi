@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Modules\Mk\Services\AmountToWordsService;
 use Vinkla\Hashids\Facades\Hashids;
 
 class Payment extends Model implements HasMedia
@@ -74,7 +75,7 @@ class Payment extends Model implements HasMedia
      */
     protected $with = [
         'customer:id,name,email,phone,vat_number,tax_id',
-        'paymentMethod:id,name',
+        'paymentMethod:id,name,account_code',
         'currency:id,name,code,symbol',
         'company:id,name,vat_id,tax_id',
     ];
@@ -466,6 +467,23 @@ class Payment extends Model implements HasMedia
         $stamp = $company->stamp ?: ($company->stamp_path ?: null);
         $signature = $company->signature ?: ($company->signature_path ?: null);
 
+        // Amount in words (Macedonian)
+        $amountWords = '';
+        try {
+            $currencyCode = $this->currency->code ?? 'MKD';
+            $amountWords = app(AmountToWordsService::class)->convert((int) $this->amount, $currencyCode);
+        } catch (\Throwable $e) {
+            // Graceful fallback — leave empty
+        }
+
+        // Payment basis: notes or invoice reference
+        $paymentBasis = '';
+        if ($this->notes) {
+            $paymentBasis = strip_tags($this->notes);
+        } elseif ($this->invoice && $this->invoice->invoice_number) {
+            $paymentBasis = __('pdf_invoice_label') . ' ' . $this->invoice->invoice_number;
+        }
+
         view()->share([
             'payment' => $this,
             'company_address' => $this->getCompanyAddress(),
@@ -474,6 +492,8 @@ class Payment extends Model implements HasMedia
             'logo' => $logo ?? null,
             'stamp' => $stamp,
             'signature' => $signature,
+            'amount_words' => $amountWords,
+            'payment_basis' => $paymentBasis,
         ]);
 
         if (request()->has('preview')) {

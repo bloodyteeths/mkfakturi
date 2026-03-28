@@ -65,6 +65,37 @@ class DeadlineController extends Controller
     }
 
     /**
+     * KPI summary counts for company deadlines.
+     *
+     * @return JsonResponse
+     */
+    public function summary(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        if (! $companyId) {
+            return response()->json(['error' => 'No company found for user'], 404);
+        }
+
+        $today = now()->startOfDay();
+        $endOfWeek = now()->endOfWeek();
+        $endOfMonth = now()->endOfMonth();
+
+        return response()->json([
+            'overdue_count' => Deadline::forCompany($companyId)
+                ->where('status', Deadline::STATUS_OVERDUE)->count(),
+            'due_this_week' => Deadline::forCompany($companyId)->notCompleted()
+                ->whereBetween('due_date', [$today, $endOfWeek])->count(),
+            'due_this_month' => Deadline::forCompany($companyId)->notCompleted()
+                ->whereBetween('due_date', [$today, $endOfMonth])->count(),
+            'completed_this_month' => Deadline::forCompany($companyId)
+                ->where('status', Deadline::STATUS_COMPLETED)
+                ->whereMonth('completed_at', now()->month)
+                ->whereYear('completed_at', now()->year)->count(),
+        ]);
+    }
+
+    /**
      * Mark a company deadline as completed.
      *
      * @return JsonResponse
@@ -104,6 +135,7 @@ class DeadlineController extends Controller
             'message' => 'Deadline marked as completed.',
         ]);
     }
+
     /**
      * Create a custom deadline for the company.
      *
@@ -157,6 +189,46 @@ class DeadlineController extends Controller
     }
 
     /**
+     * Update a custom (non-recurring) deadline.
+     *
+     * @return JsonResponse
+     */
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        if (! $companyId) {
+            return response()->json(['error' => 'No company found for user'], 404);
+        }
+
+        $deadline = Deadline::forCompany($companyId)->find($id);
+
+        if (! $deadline) {
+            return response()->json(['error' => 'Deadline not found'], 404);
+        }
+
+        if ($deadline->is_recurring) {
+            return response()->json(['error' => 'System recurring deadlines cannot be edited'], 422);
+        }
+
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'title_mk' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'due_date' => 'sometimes|required|date|after_or_equal:today',
+            'deadline_type' => ['sometimes', Rule::in(['vat_return', 'mpin', 'cit_advance', 'annual_fs', 'custom'])],
+            'reminder_days_before' => 'nullable|array',
+            'reminder_days_before.*' => 'integer|min:1|max:30',
+        ]);
+
+        $deadline->update($validated);
+        $deadline->load(['completedBy:id,name,email']);
+        $deadline->append(['days_remaining', 'type_label', 'type_label_en']);
+
+        return response()->json(['data' => $deadline]);
+    }
+
+    /**
      * Delete a custom (non-recurring) deadline.
      *
      * @return JsonResponse
@@ -191,3 +263,4 @@ class DeadlineController extends Controller
         return response()->json(['message' => 'Deadline deleted successfully']);
     }
 }
+// CLAUDE-CHECKPOINT
