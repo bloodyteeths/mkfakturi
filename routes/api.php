@@ -1519,6 +1519,7 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/{id}/proposal/generate', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'generateProposal']);
                     Route::post('/proposals/{proposal}/approve', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'approveProposal']);
                     Route::post('/proposals/{proposal}/reject', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'rejectProposal']);
+                    Route::post('/seed-test', [\App\Http\Controllers\V1\Admin\Stock\WacAuditController::class, 'seedTestDiscrepancy']);
                 });
             });
         });

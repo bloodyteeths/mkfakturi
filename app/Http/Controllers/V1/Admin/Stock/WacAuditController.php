@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\V1\Admin\Stock;
 
 use App\Http\Controllers\Controller;
+use App\Models\StockMovement;
 use App\Models\WacAuditRun;
 use App\Models\WacCorrectionProposal;
 use App\Services\WacAiAnalyzerService;
 use App\Services\WacAuditService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WacAuditController extends Controller
 {
@@ -272,6 +275,114 @@ class WacAuditController extends Controller
             'message' => 'Correction proposal rejected.',
             'data' => $this->formatProposal($proposal->fresh()),
         ]);
+    }
+
+    /**
+     * Seed test discrepancy data for E2E testing.
+     * Creates stock movements with a deliberate WAC chain error.
+     * Super-admin only.
+     */
+    public function seedTestDiscrepancy(Request $request): JsonResponse
+    {
+        $companyId = (int) $request->header('company');
+        $userId = auth()->id();
+
+        // Get the first trackable item + warehouse for this company
+        $existing = StockMovement::where('company_id', $companyId)
+            ->select('item_id', 'warehouse_id')
+            ->groupBy('item_id', 'warehouse_id')
+            ->first();
+
+        if (! $existing) {
+            return response()->json(['error' => 'No stock movements exist to seed from.'], 422);
+        }
+
+        $itemId = $existing->item_id;
+        $warehouseId = $existing->warehouse_id;
+
+        // Create 3 new test movements with correct chain, then corrupt #2
+        $now = Carbon::now();
+        $baseDate = $now->copy()->subDays(3);
+
+        // Movement 1: Stock IN 10 @ 100 MKD (10000 cents) → balance: 10 qty, 1000000 value
+        $m1 = StockMovement::create([
+            'company_id' => $companyId,
+            'warehouse_id' => $warehouseId,
+            'item_id' => $itemId,
+            'source_type' => StockMovement::SOURCE_ADJUSTMENT,
+            'quantity' => 10,
+            'unit_cost' => 10000, // 100 MKD in cents
+            'total_cost' => 100000,
+            'movement_date' => $baseDate,
+            'notes' => 'WAC test seed: initial stock IN',
+            'balance_quantity' => 10,
+            'balance_value' => 100000, // Correct: 10 × 10000
+            'created_by' => $userId,
+        ]);
+
+        // Movement 2: Stock IN 5 @ 120 MKD (12000 cents) → balance: 15 qty, 160000 value
+        // WAC = 160000/15 = 10667
+        $m2 = StockMovement::create([
+            'company_id' => $companyId,
+            'warehouse_id' => $warehouseId,
+            'item_id' => $itemId,
+            'source_type' => StockMovement::SOURCE_ADJUSTMENT,
+            'quantity' => 5,
+            'unit_cost' => 12000, // 120 MKD in cents
+            'total_cost' => 60000,
+            'movement_date' => $baseDate->copy()->addDay(),
+            'notes' => 'WAC test seed: second stock IN (WILL BE CORRUPTED)',
+            'balance_quantity' => 15,
+            'balance_value' => 160000, // Correct: 100000 + 60000
+            'created_by' => $userId,
+        ]);
+
+        // Movement 3: Stock OUT -3 @ WAC → balance: 12 qty, expected ~128000 value
+        // WAC at this point = 160000/15 = 10667, OUT cost = 3 × 10667 = 32001
+        $wac = (int) round(160000 / 15);
+        $outCost = 3 * $wac;
+        $m3 = StockMovement::create([
+            'company_id' => $companyId,
+            'warehouse_id' => $warehouseId,
+            'item_id' => $itemId,
+            'source_type' => StockMovement::SOURCE_ADJUSTMENT,
+            'quantity' => -3,
+            'unit_cost' => $wac,
+            'total_cost' => $outCost,
+            'movement_date' => $baseDate->copy()->addDays(2),
+            'notes' => 'WAC test seed: stock OUT (cascade from corruption)',
+            'balance_quantity' => 12,
+            'balance_value' => 160000 - $outCost, // Correct based on correct chain
+            'created_by' => $userId,
+        ]);
+
+        // Now CORRUPT movement #2's balance_value via raw DB (bypass boot guard)
+        // Change 160000 → 200000 (wrong by 40000 cents = 400 MKD)
+        DB::table('stock_movements')
+            ->where('id', $m2->id)
+            ->update(['balance_value' => 200000, 'frozen_at' => null]);
+
+        // Also corrupt movement #3's balance to cascade from the wrong #2
+        // With corrupted #2: WAC = 200000/15 = 13333, OUT = 3 × 13333 = 39999
+        $corruptedWac = (int) round(200000 / 15);
+        $corruptedOutCost = 3 * $corruptedWac;
+        DB::table('stock_movements')
+            ->where('id', $m3->id)
+            ->update(['balance_value' => 200000 - $corruptedOutCost, 'frozen_at' => null]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Seeded 3 test movements with WAC chain error on movement #2.',
+            'data' => [
+                'item_id' => $itemId,
+                'warehouse_id' => $warehouseId,
+                'movements' => [$m1->id, $m2->id, $m3->id],
+                'corrupted_movement' => $m2->id,
+                'correct_balance_value' => 160000,
+                'corrupted_balance_value' => 200000,
+                'drift' => 40000,
+            ],
+        ], 201);
     }
 
     protected function formatRun(WacAuditRun $run): array

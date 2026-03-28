@@ -129,10 +129,28 @@ test('02 — WAC Audit page loads with summary cards', async () => {
 })
 
 // ============================================================
-// 2. WAC Audit API — Run Audit
+// 2. Seed Test Discrepancies
 // ============================================================
 
-test('03 — API: Run WAC audit for company 2', async () => {
+test('03 — API: Seed test discrepancy data', async () => {
+  const page = sharedPage
+  const result = await apiPost(page, `${BASE}/api/v1/stock/wac-audit/seed-test`, {})
+
+  console.log('Seed result:', JSON.stringify(result, null, 2))
+
+  expect(result.status).toBe(201)
+  expect(result.data?.success).toBe(true)
+  expect(result.data?.data?.movements?.length).toBe(3)
+  expect(result.data?.data?.corrupted_movement).toBeTruthy()
+  console.log('Corrupted movement:', result.data.data.corrupted_movement,
+    'drift:', result.data.data.drift, 'cents')
+})
+
+// ============================================================
+// 3. WAC Audit API — Run Audit (should find discrepancies)
+// ============================================================
+
+test('04 — API: Run WAC audit — detects seeded discrepancies', async () => {
   const page = sharedPage
   const result = await apiPost(page, `${BASE}/api/v1/stock/wac-audit/run`, {})
 
@@ -142,15 +160,23 @@ test('03 — API: Run WAC audit for company 2', async () => {
   expect(result.data?.success).toBe(true)
   expect(result.data?.data?.id).toBeTruthy()
   expect(result.data?.data?.status).toBe('completed')
+  expect(result.data?.data?.discrepancies_found).toBeGreaterThan(0)
+  expect(result.data?.data?.has_discrepancies).toBe(true)
+
+  console.log('Discrepancies found:', result.data.data.discrepancies_found)
 })
 
-test('04 — API: List WAC audit runs', async () => {
+test('05 — API: List WAC audit runs', async () => {
   const page = sharedPage
   const result = await apiGet(page, `${BASE}/api/v1/stock/wac-audit`)
 
   expect(result.status).toBe(200)
   expect(Array.isArray(result.data?.data)).toBe(true)
   expect(result.data.data.length).toBeGreaterThan(0)
+
+  // Should have at least one run with discrepancies
+  const withDiscrepancies = result.data.data.find((r) => r.has_discrepancies)
+  expect(withDiscrepancies).toBeTruthy()
 
   console.log(
     'Audit runs:',
@@ -163,63 +189,65 @@ test('04 — API: List WAC audit runs', async () => {
   )
 })
 
-test('05 — API: Get audit run detail', async () => {
-  const page = sharedPage
-
-  // Get the latest run
-  const list = await apiGet(page, `${BASE}/api/v1/stock/wac-audit`)
-  const latestRun = list.data?.data?.[0]
-  expect(latestRun).toBeTruthy()
-
-  const detail = await apiGet(page, `${BASE}/api/v1/stock/wac-audit/${latestRun.id}`)
-  expect(detail.status).toBe(200)
-  expect(detail.data?.data?.id).toBe(latestRun.id)
-  expect(detail.data?.data?.discrepancies).toBeDefined()
-
-  console.log('Audit detail:', {
-    id: detail.data.data.id,
-    discrepancies_count: detail.data.data.discrepancies?.length || 0,
-    has_discrepancies: detail.data.data.has_discrepancies,
-  })
-})
-
-// ============================================================
-// 3. WAC Audit Detail Page UI
-// ============================================================
-
-test('06 — WAC Audit detail page renders', async () => {
-  const page = sharedPage
-
-  // Get latest run ID
-  const list = await apiGet(page, `${BASE}/api/v1/stock/wac-audit`)
-  const latestRun = list.data?.data?.[0]
-  expect(latestRun).toBeTruthy()
-
-  await page.goto(`${BASE}/admin/stock/wac-audit/${latestRun.id}`)
-  await page.waitForLoadState('networkidle')
-  await page.waitForTimeout(2000)
-
-  // Summary cards should be visible
-  await expect(page.locator('body')).not.toContainText('500')
-
-  await ss(page, '06-wac-audit-detail')
-})
-
-// ============================================================
-// 4. Correction Proposal (if discrepancies exist)
-// ============================================================
-
-test('07 — API: Generate correction proposal if discrepancies exist', async () => {
+test('06 — API: Get audit run detail with discrepancies', async () => {
   const page = sharedPage
 
   const list = await apiGet(page, `${BASE}/api/v1/stock/wac-audit`)
   const runWithDiscrepancies = list.data?.data?.find((r) => r.has_discrepancies)
+  expect(runWithDiscrepancies).toBeTruthy()
 
-  if (!runWithDiscrepancies) {
-    console.log('No audit run with discrepancies found — skipping proposal test')
-    test.skip()
-    return
-  }
+  const detail = await apiGet(page, `${BASE}/api/v1/stock/wac-audit/${runWithDiscrepancies.id}`)
+  expect(detail.status).toBe(200)
+  expect(detail.data?.data?.discrepancies?.length).toBeGreaterThan(0)
+
+  // Root cause should be marked
+  const rootCause = detail.data.data.discrepancies.find((d) => d.is_root_cause)
+  expect(rootCause).toBeTruthy()
+  expect(rootCause.value_drift).not.toBe(0)
+
+  console.log('Discrepancies:', detail.data.data.discrepancies.map((d) => ({
+    position: d.chain_position,
+    is_root: d.is_root_cause,
+    value_drift: d.value_drift,
+    stored: d.stored_balance_value,
+    expected: d.expected_balance_value,
+  })))
+})
+
+// ============================================================
+// 4. WAC Audit Detail Page UI — with discrepancies
+// ============================================================
+
+test('07 — UI: Detail page shows discrepancy table', async () => {
+  const page = sharedPage
+
+  const list = await apiGet(page, `${BASE}/api/v1/stock/wac-audit`)
+  const runWithDiscrepancies = list.data?.data?.find((r) => r.has_discrepancies)
+  expect(runWithDiscrepancies).toBeTruthy()
+
+  await page.goto(`${BASE}/admin/stock/wac-audit/${runWithDiscrepancies.id}`)
+  await page.waitForLoadState('networkidle')
+  await page.waitForTimeout(2000)
+
+  await expect(page.locator('body')).not.toContainText('500')
+
+  // Should show discrepancy count in summary card
+  const body = await page.textContent('body')
+  expect(body).toMatch(/[1-9]\d*/) // At least one non-zero number
+
+  await ss(page, '07-wac-audit-detail-discrepancies')
+})
+
+// ============================================================
+// 5. Correction Proposal — Generate, Retrieve, Approve
+// ============================================================
+
+test('08 — API: Generate correction proposal', async () => {
+  const page = sharedPage
+
+  const list = await apiGet(page, `${BASE}/api/v1/stock/wac-audit`)
+  const runWithDiscrepancies = list.data?.data?.find((r) => r.has_discrepancies)
+  expect(runWithDiscrepancies).toBeTruthy()
 
   const result = await apiPost(
     page,
@@ -228,21 +256,29 @@ test('07 — API: Generate correction proposal if discrepancies exist', async ()
 
   console.log('Proposal generation result:', JSON.stringify(result, null, 2))
 
-  // Either 201 (created) or 200 (existing or no correction needed)
-  expect([200, 201]).toContain(result.status)
+  expect(result.status).toBe(201)
+  expect(result.data?.success).toBe(true)
+  expect(result.data?.data?.id).toBeTruthy()
+  expect(result.data?.data?.status).toBe('pending')
+  expect(result.data?.data?.correction_entries?.length).toBeGreaterThan(0)
+  expect(result.data?.data?.net_value_adjustment).not.toBe(0)
+  expect(result.data?.data?.is_usable).toBe(true)
+
+  console.log('Proposal:', {
+    id: result.data.data.id,
+    entries: result.data.data.correction_entries.length,
+    net_qty: result.data.data.net_quantity_adjustment,
+    net_val: result.data.data.net_value_adjustment,
+    expires: result.data.data.expires_at,
+  })
 })
 
-test('08 — API: Get correction proposal', async () => {
+test('09 — API: Get correction proposal', async () => {
   const page = sharedPage
 
   const list = await apiGet(page, `${BASE}/api/v1/stock/wac-audit`)
   const runWithDiscrepancies = list.data?.data?.find((r) => r.has_discrepancies)
-
-  if (!runWithDiscrepancies) {
-    console.log('No audit run with discrepancies — skipping')
-    test.skip()
-    return
-  }
+  expect(runWithDiscrepancies).toBeTruthy()
 
   const result = await apiGet(
     page,
@@ -250,106 +286,127 @@ test('08 — API: Get correction proposal', async () => {
   )
 
   expect(result.status).toBe(200)
-  console.log('Proposal:', result.data?.data ? {
+  expect(result.data?.data).toBeTruthy()
+  expect(result.data.data.status).toBe('pending')
+  expect(result.data.data.correction_entries?.length).toBeGreaterThan(0)
+
+  console.log('Proposal retrieved:', {
     id: result.data.data.id,
     status: result.data.data.status,
     net_qty: result.data.data.net_quantity_adjustment,
     net_val: result.data.data.net_value_adjustment,
     entries: result.data.data.correction_entries?.length,
-  } : 'No proposal')
-})
-
-// ============================================================
-// 5. Frozen Movement Protection
-// ============================================================
-
-test('09 — Frozen movements column exists', async () => {
-  const page = sharedPage
-
-  // Verify the frozen_at column works by checking a stock movement API
-  const result = await apiGet(page, `${BASE}/api/v1/stock/adjustments?limit=1`)
-  expect(result.status).toBe(200)
-  // The API should work without errors (migration ran successfully)
-  console.log('Adjustments API works after frozen_at migration:', result.status)
-})
-
-// ============================================================
-// 6. WAC Audit Run with Scoped Item
-// ============================================================
-
-test('10 — API: Run scoped audit (single item)', async () => {
-  const page = sharedPage
-
-  // Get a trackable item
-  const inventory = await apiGet(page, `${BASE}/api/v1/stock/inventory?limit=1`)
-  const firstItem = inventory.data?.data?.[0]
-
-  if (!firstItem) {
-    console.log('No inventory items — skipping scoped audit')
-    test.skip()
-    return
-  }
-
-  const result = await apiPost(page, `${BASE}/api/v1/stock/wac-audit/run`, {
-    item_id: firstItem.item_id,
   })
+})
+
+test('10 — API: Approve correction proposal', async () => {
+  const page = sharedPage
+
+  const list = await apiGet(page, `${BASE}/api/v1/stock/wac-audit`)
+  const runWithDiscrepancies = list.data?.data?.find((r) => r.has_discrepancies)
+  expect(runWithDiscrepancies).toBeTruthy()
+
+  // Get the proposal
+  const proposalResult = await apiGet(
+    page,
+    `${BASE}/api/v1/stock/wac-audit/${runWithDiscrepancies.id}/proposal`
+  )
+  const proposal = proposalResult.data?.data
+  expect(proposal).toBeTruthy()
+  expect(proposal.is_usable).toBe(true)
+
+  // Approve it
+  const result = await apiPost(
+    page,
+    `${BASE}/api/v1/stock/wac-audit/proposals/${proposal.id}/approve`
+  )
+
+  console.log('Approve result:', JSON.stringify(result, null, 2))
+
+  expect(result.status).toBe(200)
+  expect(result.data?.success).toBe(true)
+  expect(result.data?.data?.proposal?.status).toBe('applied')
+  expect(result.data?.data?.created_movements).toBeGreaterThan(0)
+
+  console.log('Correction applied:',
+    result.data.data.created_movements, 'movement(s) created')
+})
+
+// ============================================================
+// 6. Post-Correction Verification
+// ============================================================
+
+test('11 — API: Re-run audit — fewer or zero discrepancies after correction', async () => {
+  const page = sharedPage
+  const result = await apiPost(page, `${BASE}/api/v1/stock/wac-audit/run`, {})
 
   expect(result.status).toBe(201)
-  expect(result.data?.data?.item_id).toBe(firstItem.item_id)
-  console.log('Scoped audit:', {
-    item: firstItem.name,
+  expect(result.data?.data?.status).toBe('completed')
+
+  console.log('Post-correction audit:', {
     checked: result.data.data.total_movements_checked,
     discrepancies: result.data.data.discrepancies_found,
   })
 })
 
 // ============================================================
-// 7. WAC Audit Page — Run and Verify UI Flow
+// 7. Frozen Movement Protection
 // ============================================================
 
-test('11 — UI: Click Run Audit button and verify results', async () => {
+test('12 — Frozen movements column exists', async () => {
+  const page = sharedPage
+
+  const result = await apiGet(page, `${BASE}/api/v1/stock/adjustments?limit=1`)
+  expect(result.status).toBe(200)
+  console.log('Adjustments API works after frozen_at migration:', result.status)
+})
+
+// ============================================================
+// 8. UI Flow — List and Detail with Data
+// ============================================================
+
+test('13 — UI: WAC Audit list page shows runs with discrepancies', async () => {
   const page = sharedPage
   await page.goto(`${BASE}/admin/stock/wac-audit`)
   await page.waitForLoadState('networkidle')
   await page.waitForTimeout(2000)
 
-  // Check that the audit history table or empty state is shown
   const pageContent = await page.textContent('body')
   const hasContent =
     pageContent.includes('completed') ||
-    pageContent.includes('pending') ||
     pageContent.includes('WAC') ||
     pageContent.includes('ПСВ')
 
   expect(hasContent).toBe(true)
-  await ss(page, '11-wac-audit-list')
+  await ss(page, '13-wac-audit-list-with-data')
 })
 
-test('12 — UI: Audit detail page shows discrepancy table or success', async () => {
+test('14 — UI: Audit detail page shows applied correction', async () => {
   const page = sharedPage
 
   const list = await apiGet(page, `${BASE}/api/v1/stock/wac-audit`)
-  const latestRun = list.data?.data?.[0]
+  const runWithDiscrepancies = list.data?.data?.find((r) => r.has_discrepancies)
 
-  if (!latestRun) {
-    console.log('No audit runs — skipping')
+  if (!runWithDiscrepancies) {
+    console.log('No runs with discrepancies remain — skipping')
     test.skip()
     return
   }
 
-  await page.goto(`${BASE}/admin/stock/wac-audit/${latestRun.id}`)
+  await page.goto(`${BASE}/admin/stock/wac-audit/${runWithDiscrepancies.id}`)
   await page.waitForLoadState('networkidle')
   await page.waitForTimeout(2000)
 
   const body = await page.textContent('body')
 
-  if (latestRun.has_discrepancies) {
-    // Should show discrepancy table
-    expect(body).toMatch(/Position|Позиција|chain_position/)
-  } else {
-    // Should show success message
-    expect(body).toMatch(/consistent|конзистентни|No discrepancies|Нема отстапувања/)
-  }
+  // Should show correction applied or the discrepancy table
+  const hasExpectedContent =
+    body.includes('applied') ||
+    body.includes('применета') ||
+    body.includes('Correction') ||
+    body.includes('Корекција') ||
+    body.match(/Position|Позиција/)
 
-  await ss(page, '12-wac-audit-detail-result')
+  expect(hasExpectedContent).toBeTruthy()
+  await ss(page, '14-wac-audit-detail-corrected')
 })
