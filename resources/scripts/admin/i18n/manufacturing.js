@@ -238,6 +238,7 @@ export default {
       dash_cost_trend: 'Тренд на производствени трошоци',
       dash_material_avail: 'Достапност на материјали',
       dash_stock_low: 'Ниска залиха',
+      dash_below_min: 'под минимум',
       dash_timeline: 'Распоред на производство',
       dash_no_scheduled: 'Нема закажани работни налози',
 
@@ -483,6 +484,7 @@ export default {
       dash_cost_trend: 'Production Cost Trend',
       dash_material_avail: 'Material Availability',
       dash_stock_low: 'Low Stock',
+      dash_below_min: 'below minimum',
       dash_timeline: 'Production Schedule',
       dash_no_scheduled: 'No scheduled production orders',
 
@@ -728,6 +730,7 @@ export default {
       dash_cost_trend: 'Trendi i kostove të prodhimit',
       dash_material_avail: 'Disponueshmëria e materialeve',
       dash_stock_low: 'Stok i ulët',
+      dash_below_min: 'nën minimum',
       dash_timeline: 'Orari i prodhimit',
       dash_no_scheduled: 'Nuk ka urdhëra prodhimi të planifikuara',
 
@@ -973,6 +976,7 @@ export default {
       dash_cost_trend: 'Üretim Maliyet Trendi',
       dash_material_avail: 'Malzeme Durumu',
       dash_stock_low: 'Düşük Stok',
+      dash_below_min: 'minimumun altında',
       dash_timeline: 'Üretim Takvimi',
       dash_no_scheduled: 'Planlanmış üretim emri yok',
 

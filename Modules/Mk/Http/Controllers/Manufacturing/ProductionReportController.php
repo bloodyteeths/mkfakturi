@@ -141,7 +141,7 @@ class ProductionReportController extends Controller
         $stockService = app(\App\Services\StockService::class);
         $activeBoms = Bom::where('company_id', $companyId)
             ->where('is_active', true)
-            ->with(['outputItem:id,name', 'lines.item:id,name'])
+            ->with(['outputItem:id,name', 'lines.item:id,name,minimum_quantity,track_quantity,quantity'])
             ->limit(10)
             ->get();
 
@@ -156,7 +156,9 @@ class ProductionReportController extends Controller
                 $stock = $stockService->getItemStock($companyId, $line->item->id);
                 $currentQty = $stock['current_quantity'] ?? 0;
                 $neededQty = (float) $line->quantity;
+                $minQty = $line->item->minimum_quantity ?? 0;
 
+                // Red: not enough stock for one production run
                 if ($currentQty < $neededQty) {
                     $status = 'red';
                     $shortages[] = [
@@ -164,8 +166,23 @@ class ProductionReportController extends Controller
                         'needed' => $neededQty,
                         'available' => $currentQty,
                         'deficit' => round($neededQty - $currentQty, 2),
+                        'below_minimum' => $minQty > 0 && $currentQty <= $minQty,
                     ];
-                } elseif ($currentQty < $neededQty * 1.5 && $status !== 'red') {
+                }
+                // Yellow: enough for production but below item's minimum_quantity threshold
+                elseif ($minQty > 0 && $currentQty <= $minQty && $status !== 'red') {
+                    $status = 'yellow';
+                    $shortages[] = [
+                        'item_name' => $line->item->name,
+                        'needed' => $neededQty,
+                        'available' => $currentQty,
+                        'deficit' => 0,
+                        'below_minimum' => true,
+                        'minimum_quantity' => $minQty,
+                    ];
+                }
+                // Yellow: enough but tight buffer (< 1.5× needed)
+                elseif ($currentQty < $neededQty * 1.5 && $status !== 'red') {
                     $status = 'yellow';
                 }
             }

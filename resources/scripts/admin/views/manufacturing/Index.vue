@@ -312,6 +312,12 @@
               <div class="ml-3 flex-1 min-w-0">
                 <p class="truncate text-sm font-medium text-gray-900">{{ bom.output_item || bom.bom_name }}</p>
                 <p class="text-xs text-gray-500">{{ bom.bom_code }} · {{ bom.material_count }} {{ t('manufacturing.lines').toLowerCase() }}</p>
+                <!-- Show shortage details inline -->
+                <div v-if="bom.shortages && bom.shortages.length > 0" class="mt-1 space-y-0.5">
+                  <p v-for="(s, si) in bom.shortages.slice(0, 2)" :key="si" class="text-xs" :class="s.below_minimum ? 'text-amber-600' : 'text-red-600'">
+                    {{ s.item_name }}: {{ s.deficit > 0 ? `−${s.deficit}` : '' }}{{ s.below_minimum ? ` ⚠ ${t('manufacturing.dash_below_min')}` : '' }}
+                  </p>
+                </div>
               </div>
               <div class="ml-3 flex-shrink-0">
                 <span
@@ -446,11 +452,11 @@
               <div v-if="parsedOrder" class="mt-3 rounded-lg border border-green-200 bg-green-50 p-3">
                 <p class="text-xs font-medium text-green-800">{{ t('manufacturing.dash_ai_parsed') }}:</p>
                 <p class="mt-1 text-sm text-green-900">
-                  {{ parsedOrder.product_name }} — {{ parsedOrder.quantity }} {{ parsedOrder.unit || '' }}
+                  {{ parsedBomName || t('manufacturing.select_bom') }} — {{ parsedOrder.quantity }} {{ t('manufacturing.unit') }}
                   <span v-if="parsedOrder.deadline" class="text-green-700">({{ parsedOrder.deadline }})</span>
                 </p>
                 <router-link
-                  :to="`/admin/manufacturing/orders/create?bom=${parsedOrder.bom_id || ''}&qty=${parsedOrder.quantity || ''}`"
+                  :to="parsedOrderLink"
                   class="mt-2 inline-flex items-center rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700"
                 >
                   <PlusCircleIcon class="mr-1 h-3.5 w-3.5" />
@@ -795,6 +801,27 @@ const availableDocuments = computed(() => [
   { key: 'izdatnica', label: t('manufacturing.print_izdatnica') },
   { key: 'trebovnica', label: t('manufacturing.print_trebovnica') },
 ])
+
+// ===== AI parsed order helpers =====
+const parsedBomName = computed(() => {
+  if (!parsedOrder.value?.bom_id) return ''
+  const recent = data.value.recent_orders || []
+  // Try to find BOM name from recent orders or material availability
+  const bom = (data.value.material_availability || []).find(b => b.bom_id === parsedOrder.value.bom_id)
+  return bom?.bom_name || bom?.output_item || `BOM #${parsedOrder.value.bom_id}`
+})
+
+const parsedOrderLink = computed(() => {
+  const p = parsedOrder.value
+  if (!p) return '/admin/manufacturing/orders/create'
+  const params = new URLSearchParams()
+  if (p.bom_id) params.set('bom', p.bom_id)
+  if (p.quantity) params.set('qty', p.quantity)
+  if (p.deadline) params.set('deadline', p.deadline)
+  if (p.notes) params.set('notes', p.notes)
+  const qs = params.toString()
+  return '/admin/manufacturing/orders/create' + (qs ? '?' + qs : '')
+})
 
 // ===== AI insight helpers =====
 function insightBorderClass(type) {

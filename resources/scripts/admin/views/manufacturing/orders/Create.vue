@@ -120,11 +120,12 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
 const router = useRouter()
+const route = useRoute()
 const notificationStore = useNotificationStore()
 const { t } = useI18n()
 
@@ -247,6 +248,29 @@ onMounted(async () => {
       ...b,
     }))
     warehouseOptions.value = whRes.data?.data || whRes.data || []
+
+    // Auto-fill from query params (AI parse-intent or dashboard link)
+    const qBom = route.query.bom
+    const qQty = route.query.qty
+    const qDeadline = route.query.deadline
+    const qNotes = route.query.notes
+
+    if (qBom) {
+      const bomId = parseInt(qBom)
+      if (allBoms.value.some((b) => b.id === bomId)) {
+        form.bom_id = bomId
+        onBomChange()
+      }
+    }
+    if (qQty && parseFloat(qQty) > 0) {
+      form.planned_quantity = String(qQty)
+    }
+    if (qDeadline) {
+      form.expected_completion_date = qDeadline
+    }
+    if (qNotes) {
+      form.notes = qNotes
+    }
   } catch {
     // Options will stay empty
   }

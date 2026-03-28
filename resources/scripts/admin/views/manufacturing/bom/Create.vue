@@ -26,7 +26,17 @@
               value-prop="id"
               :placeholder="t('manufacturing.select_item')"
               :searchable="true"
-            />
+            >
+              <template #action>
+                <BaseSelectAction
+                  v-if="userStore.hasAbilities(abilities.CREATE_ITEM)"
+                  @click="openNewItemModal(-1)"
+                >
+                  <BaseIcon name="PlusCircleIcon" class="mr-2 -ml-2 h-4 text-center text-primary-400" />
+                  {{ $t('general.add_new_item') }}
+                </BaseSelectAction>
+              </template>
+            </BaseMultiselect>
           </BaseInputGroup>
 
           <BaseInputGroup :label="t('manufacturing.output_quantity')" required>
@@ -123,7 +133,25 @@
                 value-prop="id"
                 :placeholder="t('manufacturing.select_item')"
                 :searchable="true"
-              />
+              >
+                <template #option="{ option }">
+                  <div class="flex w-full items-center justify-between">
+                    <span>{{ option.name }}</span>
+                    <span v-if="option.quantity !== undefined" class="ml-2 rounded px-1.5 py-0.5 text-xs"
+                      :class="option.quantity <= 0 ? 'bg-red-100 text-red-700' : option.minimum_quantity && option.quantity <= option.minimum_quantity ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'"
+                    >{{ option.quantity || 0 }}</span>
+                  </div>
+                </template>
+                <template #action>
+                  <BaseSelectAction
+                    v-if="userStore.hasAbilities(abilities.CREATE_ITEM)"
+                    @click="openNewItemModal(index)"
+                  >
+                    <BaseIcon name="PlusCircleIcon" class="mr-2 -ml-2 h-4 text-center text-primary-400" />
+                    {{ $t('general.add_new_item') }}
+                  </BaseSelectAction>
+                </template>
+              </BaseMultiselect>
             </div>
             <div class="col-span-2">
               <label class="mb-1 block text-xs font-medium text-gray-600">{{ t('manufacturing.quantity') }}</label>
@@ -193,9 +221,14 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import { useModalStore } from '@/scripts/stores/modal'
+import { useUserStore } from '@/scripts/admin/stores/user'
+import abilities from '@/scripts/admin/stub/abilities'
 
 const router = useRouter()
 const notificationStore = useNotificationStore()
+const modalStore = useModalStore()
+const userStore = useUserStore()
 const { t } = useI18n()
 
 const itemOptions = ref([])
@@ -253,6 +286,31 @@ const liveCost = computed(() => {
 function formatMoney(cents) {
   if (!cents) return '0.00 ден.'
   return (cents / 100).toLocaleString('mk-MK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ден.'
+}
+
+// Index of the line being edited (-1 = output item)
+let pendingItemLineIndex = -1
+
+function openNewItemModal(lineIndex) {
+  pendingItemLineIndex = lineIndex
+  modalStore.openModal({
+    title: t('items.add_item'),
+    componentName: 'ItemModal',
+    refreshData: (newItem) => {
+      if (newItem?.id) {
+        // Add to options
+        itemOptions.value.push(newItem)
+        if (newItem.cost) itemPrices.value[newItem.id] = newItem.cost
+
+        // Auto-select in the right field
+        if (pendingItemLineIndex === -1) {
+          form.output_item_id = newItem.id
+        } else if (form.lines[pendingItemLineIndex]) {
+          form.lines[pendingItemLineIndex].item_id = newItem.id
+        }
+      }
+    },
+  })
 }
 
 function addLine() {
