@@ -2,7 +2,7 @@
 <html lang="mk">
 
 <head>
-    <title>Евиденција во трговијата на мало (Образец ЕТ)</title>
+    <title>Материјална евиденција во трговија на големо (Образец МЕТГ)</title>
     <style type="text/css">
         body {
             font-family: "DejaVu Sans";
@@ -20,12 +20,6 @@
             margin-bottom: 5px;
         }
 
-        .company-info {
-            font-size: 9px;
-            color: #333;
-            margin-bottom: 2px;
-        }
-
         .company-name {
             font-weight: bold;
             font-size: 11px;
@@ -38,26 +32,28 @@
 
         .heading-text {
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             color: #1a1a1a;
             text-align: center;
             margin: 8px 0 2px 0;
         }
 
-        .period-info {
-            font-size: 10px;
-            color: #555;
-            text-align: center;
-            margin: 2px 0 10px 0;
+        .product-info {
+            font-size: 9px;
+            color: #333;
+            margin: 4px 0;
+            border: 1px solid #ccc;
+            padding: 6px 10px;
+            background: #fafafa;
         }
 
-        .et-table {
+        .metg-table {
             width: 100%;
             border: 1px solid #888;
             margin-top: 5px;
         }
 
-        .et-table th {
+        .metg-table th {
             background: #2d2040;
             color: #ffffff;
             padding: 5px 4px;
@@ -68,7 +64,7 @@
             border-right: 1px solid #444;
         }
 
-        .et-table th:last-child {
+        .metg-table th:last-child {
             border-right: none;
         }
 
@@ -113,39 +109,9 @@
             text-align: center;
         }
 
-        .cell-right {
-            text-align: right;
-        }
-
         .cell-number {
             text-align: right;
             font-family: "DejaVu Sans";
-        }
-
-        .credit-note-row {
-            background: #fff5f5 !important;
-        }
-
-        .credit-note-badge {
-            background: #fed7d7;
-            color: #c53030;
-            padding: 1px 3px;
-            border-radius: 2px;
-            font-size: 6px;
-            font-weight: bold;
-        }
-
-        .negative {
-            color: #c53030;
-        }
-
-        .bill-row td {
-            color: #555;
-        }
-
-        .expense-row td {
-            color: #666;
-            font-style: italic;
         }
 
         .total-row {
@@ -205,12 +171,12 @@
     {{-- Company Header --}}
     <table class="report-header">
         <tr>
-            <td style="width: 70%;">
+            <td style="width: 50%;">
                 <p class="company-detail" style="font-size: 8px; color: #888;">Трговец:</p>
                 <p class="company-name">{{ $company->name ?? '' }}</p>
                 <p class="company-detail">
                     @if($company->address)
-                        {{ $company->address->address_street_1 ?? '' }}
+                        Адреса: {{ $company->address->address_street_1 ?? '' }}
                     @endif
                 </p>
                 <p class="company-detail">
@@ -220,19 +186,29 @@
                     @if($company->vat_number) ЕДБ: {{ $company->vat_number }} @endif
                 </p>
             </td>
-            <td style="width: 30%; text-align: right; vertical-align: top;">
-                <p class="company-detail" style="font-weight: bold;">Образец "ЕТ"</p>
+            <td style="width: 50%; text-align: right; vertical-align: top;">
+                <p class="company-detail" style="font-weight: bold;">Образец "МЕТГ"</p>
                 <p class="company-detail">Правилник Сл. весник 51/04; 89/04</p>
+                <p class="company-detail" style="margin-top: 4px;">
+                    Година: <strong>{{ $year ?? date('Y') }}</strong>
+                </p>
             </td>
         </tr>
     </table>
 
-    <p class="heading-text">ЕВИДЕНЦИЈА ВО ТРГОВИЈАТА НА МАЛО</p>
-    <p class="period-info">за период: {{ $from_date }} — {{ $to_date }}</p>
+    <p class="heading-text">МАТЕРИЈАЛНА ЕВИДЕНЦИЈА ВО ТРГОВИЈАТА НА ГОЛЕМО</p>
 
-    <table class="et-table">
+    {{-- Product info --}}
+    <div class="product-info">
+        <strong>Назив на производот:</strong> {{ $product_name ?? 'Сите артикли' }}
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <strong>Магацин:</strong> {{ $warehouse_name ?? '-' }}
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <strong>Единица мера:</strong> {{ $unit_name ?? 'ком.' }}
+    </div>
+
+    <table class="metg-table">
         <thead>
-            {{-- Group header row --}}
             <tr>
                 <th rowspan="2" style="width: 4%;">
                     Ред.<br>бр.
@@ -242,117 +218,89 @@
                     Датум на<br>книжење<br>(ден и месец)
                     <span class="col-header-sub">2</span>
                 </th>
-                <th class="group-header" colspan="2" style="width: 28%;">
+                <th class="group-header" colspan="3" style="width: 38%;">
                     Книговодствен документ
                 </th>
-                <th rowspan="2" style="width: 15%;">
-                    Набавна вредност<br>на стоките<br><span style="font-size: 6px; font-weight: normal; color: #aaa;">(кол. 6+7 од ПЛТ)</span>
-                    <span class="col-header-sub">5</span>
-                </th>
-                <th rowspan="2" style="width: 15%;">
-                    Продажна вредност<br>на стоките<br><span style="font-size: 6px; font-weight: normal; color: #aaa;">(кол. 10 од ПЛТ)</span>
+                <th rowspan="2" style="width: 10%;">
+                    Влез
                     <span class="col-header-sub">6</span>
                 </th>
-                <th rowspan="2" style="width: 15%;">
-                    Дневен<br>промет
+                <th rowspan="2" style="width: 10%;">
+                    Излез
                     <span class="col-header-sub">7</span>
+                </th>
+                <th rowspan="2" style="width: 10%;">
+                    Состојба
+                    <span class="col-header-sub">8</span>
                 </th>
             </tr>
             <tr>
-                <th style="width: 20%;">
-                    Назив и број
+                <th style="width: 8%;">
+                    Број
                     <span class="col-header-sub">3</span>
                 </th>
                 <th style="width: 8%;">
                     Датум
                     <span class="col-header-sub">4</span>
                 </th>
+                <th style="width: 22%;">
+                    Назив (добавувач/купувач)
+                    <span class="col-header-sub">5</span>
+                </th>
             </tr>
         </thead>
         <tbody>
             @php
-                $totalNabavna = 0;
-                $totalProdazhna = 0;
-                $totalPromet = 0;
+                $totalVlez = 0;
+                $totalIzlez = 0;
             @endphp
 
             @foreach($entries as $entry)
             @php
-                $nabavna = $entry['nabavna'] ?? 0;
-                $prodazhna = $entry['prodazhna'] ?? 0;
-                $promet = $entry['promet'] ?? null;
-                $isCreditNote = ($entry['doc_type'] ?? '') === 'credit_note';
-                $isBill = ($entry['doc_type'] ?? '') === 'bill';
-                $isExpense = ($entry['doc_type'] ?? '') === 'expense';
-
-                $totalNabavna += $nabavna;
-                $totalProdazhna += $prodazhna;
-                if ($promet !== null) $totalPromet += $promet;
-
-                $rowClass = $isCreditNote ? 'entry-row credit-note-row' : ($isBill ? 'entry-row bill-row' : ($isExpense ? 'entry-row expense-row' : 'entry-row'));
+                $vlez = $entry['vlez'] ?? 0;
+                $izlez = $entry['izlez'] ?? 0;
+                $totalVlez += $vlez;
+                $totalIzlez += $izlez;
             @endphp
-            <tr class="{{ $rowClass }}">
+            <tr class="entry-row">
                 <td class="cell-center">{{ $entry['seq'] ?? '' }}</td>
                 <td class="cell-center">{{ $entry['date'] ?? '' }}</td>
-                <td>
-                    {{ $entry['doc_name'] ?? '' }} {{ $entry['doc_number'] ?? '' }}
-                    @if($isCreditNote)<span class="credit-note-badge">КН</span>@endif
+                <td class="cell-center">{{ $entry['doc_number'] ?? '' }}</td>
+                <td class="cell-center">{{ $entry['doc_date'] ?? '' }}</td>
+                <td>{{ $entry['doc_name'] ?? '' }}
                     @if($entry['party'] ?? '')
                         <br><span style="font-size: 6.5px; color: #888;">{{ $entry['party'] }}</span>
                     @endif
                 </td>
-                <td class="cell-center">{{ $entry['doc_date'] ?? '' }}</td>
-                <td class="cell-number {{ $nabavna < 0 ? 'negative' : '' }}">
-                    @if($nabavna != 0)
-                        {!! format_money_pdf($nabavna, $currency) !!}
-                    @endif
-                </td>
-                <td class="cell-number {{ $prodazhna < 0 ? 'negative' : '' }}">
-                    @if($prodazhna != 0)
-                        {!! format_money_pdf($prodazhna, $currency) !!}
-                    @endif
+                <td class="cell-number">
+                    @if($vlez > 0) {{ number_format($vlez, $vlez == floor($vlez) ? 0 : 2) }} @endif
                 </td>
                 <td class="cell-number">
-                    @if($promet !== null && $promet != 0)
-                        {!! format_money_pdf($promet, $currency) !!}
-                    @endif
+                    @if($izlez > 0) {{ number_format($izlez, $izlez == floor($izlez) ? 0 : 2) }} @endif
+                </td>
+                <td class="cell-number" style="font-weight: bold;">
+                    {{ number_format($entry['sostojba'] ?? 0, ($entry['sostojba'] ?? 0) == floor($entry['sostojba'] ?? 0) ? 0 : 2) }}
                 </td>
             </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr class="carry-row">
-                <td colspan="4" style="text-align: right; font-style: italic;">
-                    Пренос →
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalNabavna, $currency) !!}
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalProdazhna, $currency) !!}
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalPromet, $currency) !!}
-                </td>
+                <td colspan="5" style="text-align: right; font-style: italic;">Пренос →</td>
+                <td class="cell-number">{{ number_format($totalVlez, $totalVlez == floor($totalVlez) ? 0 : 2) }}</td>
+                <td class="cell-number">{{ number_format($totalIzlez, $totalIzlez == floor($totalIzlez) ? 0 : 2) }}</td>
+                <td class="cell-number" style="font-weight: bold;">{{ number_format($totalVlez - $totalIzlez, ($totalVlez - $totalIzlez) == floor($totalVlez - $totalIzlez) ? 0 : 2) }}</td>
             </tr>
             <tr class="total-row">
-                <td colspan="4" style="text-align: left;">
-                    ВКУПНО ({{ count($entries) }} записи)
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalNabavna, $currency) !!}
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalProdazhna, $currency) !!}
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalPromet, $currency) !!}
-                </td>
+                <td colspan="5" style="text-align: left;">ВКУПНО</td>
+                <td class="cell-number">{{ number_format($totalVlez, $totalVlez == floor($totalVlez) ? 0 : 2) }}</td>
+                <td class="cell-number">{{ number_format($totalIzlez, $totalIzlez == floor($totalIzlez) ? 0 : 2) }}</td>
+                <td class="cell-number">{{ number_format($totalVlez - $totalIzlez, ($totalVlez - $totalIzlez) == floor($totalVlez - $totalIzlez) ? 0 : 2) }}</td>
             </tr>
         </tfoot>
     </table>
 
-    <p class="form-ref">Образец "ЕТ" — Евиденција во трговијата на мало / Правилник за евиденција Сл. весник 51/04; 89/04</p>
+    <p class="form-ref">Образец "МЕТГ" — Материјална евиденција во трговијата на големо / Правилник за евиденција Сл. весник 51/04; 89/04</p>
 
     <table class="signature-section">
         <tr>

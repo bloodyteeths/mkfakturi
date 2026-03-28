@@ -170,6 +170,24 @@
               </span>
             </div>
             <div class="flex justify-between pt-2 border-t border-gray-200">
+              <span class="text-sm text-green-600 font-medium">{{ $t('payroll.personal_deduction') }}</span>
+              <span class="text-sm font-medium text-green-600">
+                -<BaseFormatMoney
+                  :amount="payslip.personal_deduction || 1027000"
+                  :currency="companyStore.selectedCompanyCurrency"
+                />
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-400 italic">{{ $t('payroll.taxable_base') }}</span>
+              <span class="text-sm text-gray-400 italic">
+                <BaseFormatMoney
+                  :amount="taxableBase"
+                  :currency="companyStore.selectedCompanyCurrency"
+                />
+              </span>
+            </div>
+            <div class="flex justify-between">
               <span class="text-sm text-gray-600">{{ $t('payroll.income_tax') }} (10%)</span>
               <span class="text-sm font-medium text-red-600">
                 -<BaseFormatMoney
@@ -226,7 +244,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
@@ -254,6 +272,16 @@ const payslip = ref({
   income_tax_amount: 0,
   transport_allowance: 0,
   meal_allowance: 0,
+})
+
+const taxableBase = computed(() => {
+  const gross = payslip.value.gross_salary || 0
+  const contributions = (payslip.value.pension_contribution_employee || 0)
+    + (payslip.value.health_contribution_employee || 0)
+    + (payslip.value.unemployment_contribution || 0)
+    + (payslip.value.additional_contribution || 0)
+  const deduction = payslip.value.personal_deduction || 1027000
+  return Math.max(0, gross - contributions - deduction)
 })
 
 onMounted(async () => {

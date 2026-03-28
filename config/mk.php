@@ -483,6 +483,9 @@ return [
         'min_contribution_base' => 3157700,      // MKD 31,577 in cents
         'max_contribution_base' => 101046400,    // MKD 1,010,464 in cents
         'national_avg_salary' => 6315400,        // MKD 63,154 in cents
+
+        // Personal deduction (лично ослободување) — Закон за данокот на личен доход
+        'personal_deduction' => 1027000,            // MKD 10,270 in cents per month
     ],
 
     /*

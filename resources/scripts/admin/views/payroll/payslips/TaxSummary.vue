@@ -234,6 +234,17 @@
                   />
                 </td>
               </tr>
+              <tr class="bg-green-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-700">
+                  {{ $t('payroll.personal_deduction') }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 text-right">
+                  10,270 MKD/mo
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-green-700 text-right italic">
+                  {{ $t('payroll.taxable_base') }}
+                </td>
+              </tr>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {{ $t('payroll.income_tax') }}

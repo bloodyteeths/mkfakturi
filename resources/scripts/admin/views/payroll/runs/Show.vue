@@ -428,94 +428,58 @@ async function calculateRun() {
   }
 }
 
-async function approveRun() {
-  dialogStore
-    .openDialog({
-      title: t('payroll.approve_run'),
-      message: t('payroll.approve_run_confirm'),
-      yesLabel: t('general.yes'),
-      noLabel: t('general.cancel'),
-      variant: 'primary',
-      hideNoButton: false,
+/**
+ * Generic confirm-then-act helper for payroll run state transitions.
+ * Reduces repetitive dialog + API + notification boilerplate.
+ */
+async function confirmAndExecute({ title, message, apiAction, successMsg, variant = 'primary' }) {
+  const confirmed = await dialogStore.openDialog({
+    title,
+    message,
+    yesLabel: t('general.yes'),
+    noLabel: t('general.cancel'),
+    variant,
+    hideNoButton: false,
+  })
+  if (!confirmed) return
+  try {
+    await apiAction()
+    notificationStore.showNotification({ type: 'success', message: successMsg })
+    await loadRun()
+  } catch (error) {
+    console.error(`Error: ${title}`, error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('general.something_went_wrong'),
     })
-    .then(async (res) => {
-      if (res) {
-        try {
-          await axios.post(`payroll-runs/${run.value.id}/approve`)
-          notificationStore.showNotification({
-            type: 'success',
-            message: t('payroll.run_approved'),
-          })
-          await loadRun()
-        } catch (error) {
-          console.error('Error approving run:', error)
-          notificationStore.showNotification({
-            type: 'error',
-            message: error.response?.data?.message || t('general.something_went_wrong'),
-          })
-        }
-      }
-    })
+  }
 }
 
-async function postRun() {
-  dialogStore
-    .openDialog({
-      title: t('payroll.post_to_gl'),
-      message: t('payroll.post_to_gl_confirm'),
-      yesLabel: t('general.yes'),
-      noLabel: t('general.cancel'),
-      variant: 'primary',
-      hideNoButton: false,
-    })
-    .then(async (res) => {
-      if (res) {
-        try {
-          await axios.post(`payroll-runs/${run.value.id}/post`)
-          notificationStore.showNotification({
-            type: 'success',
-            message: t('payroll.run_posted'),
-          })
-          await loadRun()
-        } catch (error) {
-          console.error('Error posting run:', error)
-          notificationStore.showNotification({
-            type: 'error',
-            message: error.response?.data?.message || t('general.something_went_wrong'),
-          })
-        }
-      }
-    })
+function approveRun() {
+  confirmAndExecute({
+    title: t('payroll.approve_run'),
+    message: t('payroll.approve_run_confirm'),
+    apiAction: () => axios.post(`payroll-runs/${run.value.id}/approve`),
+    successMsg: t('payroll.run_approved'),
+  })
 }
 
-async function markAsPaid() {
-  dialogStore
-    .openDialog({
-      title: t('payroll.mark_as_paid'),
-      message: t('payroll.mark_as_paid_confirm'),
-      yesLabel: t('general.yes'),
-      noLabel: t('general.cancel'),
-      variant: 'primary',
-      hideNoButton: false,
-    })
-    .then(async (res) => {
-      if (res) {
-        try {
-          await axios.post(`payroll-runs/${run.value.id}/mark-paid`)
-          notificationStore.showNotification({
-            type: 'success',
-            message: t('payroll.run_marked_as_paid'),
-          })
-          await loadRun()
-        } catch (error) {
-          console.error('Error marking run as paid:', error)
-          notificationStore.showNotification({
-            type: 'error',
-            message: error.response?.data?.message || t('general.something_went_wrong'),
-          })
-        }
-      }
-    })
+function postRun() {
+  confirmAndExecute({
+    title: t('payroll.post_to_gl'),
+    message: t('payroll.post_to_gl_confirm'),
+    apiAction: () => axios.post(`payroll-runs/${run.value.id}/post`),
+    successMsg: t('payroll.run_posted'),
+  })
+}
+
+function markAsPaid() {
+  confirmAndExecute({
+    title: t('payroll.mark_as_paid'),
+    message: t('payroll.mark_as_paid_confirm'),
+    apiAction: () => axios.post(`payroll-runs/${run.value.id}/mark-paid`),
+    successMsg: t('payroll.run_marked_as_paid'),
+  })
 }
 
 async function generateBankFile() {
@@ -636,34 +600,27 @@ async function downloadAllPayslips() {
   }
 }
 
-function deleteRun() {
-  dialogStore
-    .openDialog({
-      title: t('general.are_you_sure'),
-      message: t('payroll.confirm_delete_run'),
-      yesLabel: t('general.ok'),
-      noLabel: t('general.cancel'),
-      variant: 'danger',
-      hideNoButton: false,
+async function deleteRun() {
+  const confirmed = await dialogStore.openDialog({
+    title: t('general.are_you_sure'),
+    message: t('payroll.confirm_delete_run'),
+    yesLabel: t('general.ok'),
+    noLabel: t('general.cancel'),
+    variant: 'danger',
+    hideNoButton: false,
+  })
+  if (!confirmed) return
+  try {
+    await axios.delete(`payroll-runs/${run.value.id}`)
+    notificationStore.showNotification({ type: 'success', message: t('payroll.run_deleted') })
+    router.push('/admin/payroll/runs')
+  } catch (error) {
+    console.error('Error deleting run:', error)
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || t('general.something_went_wrong'),
     })
-    .then(async (res) => {
-      if (res) {
-        try {
-          await axios.delete(`payroll-runs/${run.value.id}`)
-          notificationStore.showNotification({
-            type: 'success',
-            message: t('payroll.run_deleted'),
-          })
-          router.push('/admin/payroll/runs')
-        } catch (error) {
-          console.error('Error deleting run:', error)
-          notificationStore.showNotification({
-            type: 'error',
-            message: error.response?.data?.message || t('general.something_went_wrong'),
-          })
-        }
-      }
-    })
+  }
 }
 </script>
 

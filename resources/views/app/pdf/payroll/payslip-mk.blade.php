@@ -279,6 +279,22 @@
                 <tr class="section-header">
                     <td colspan="2">ДАНОЦИ</td>
                 </tr>
+                @php
+                    $personalDeduction = $payrollRunLine->personal_deduction ?? config('mk.payroll.personal_deduction', 1027000);
+                    $totalContributions = $payrollRunLine->pension_contribution_employee
+                        + $payrollRunLine->health_contribution_employee
+                        + $payrollRunLine->unemployment_contribution
+                        + $payrollRunLine->additional_contribution;
+                    $taxableBase = max(0, $payrollRunLine->gross_salary - $totalContributions - $personalDeduction);
+                @endphp
+                <tr>
+                    <td style="color: #27ae60;">Лично ослободување (Чл. 10 ЗДЛД)</td>
+                    <td class="amount money-format" style="color: #27ae60;">-{{ number_format($personalDeduction / 100, 2, '.', ',') }}</td>
+                </tr>
+                <tr>
+                    <td style="font-style: italic; color: #666;">Даночна основица (бруто − придонеси − ослободување)</td>
+                    <td class="amount money-format" style="font-style: italic; color: #666;">{{ number_format($taxableBase / 100, 2, '.', ',') }}</td>
+                </tr>
                 <tr>
                     <td>Данок на доход - 10%</td>
                     <td class="amount money-format">-{{ number_format($payrollRunLine->income_tax_amount / 100, 2, '.', ',') }}</td>

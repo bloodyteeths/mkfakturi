@@ -14,6 +14,7 @@ class PayrollCalculationResult
      * @param int $grossSalary Gross salary in cents
      * @param int $netSalary Net salary (take-home pay) in cents
      * @param int $taxableBase Taxable base for income tax in cents
+     * @param int $personalDeduction Personal deduction (лично ослободување) in cents
      * @param int $pensionEmployee Employee pension contribution (9%) in cents
      * @param int $pensionEmployer Employer pension contribution (9%) in cents
      * @param int $healthEmployee Employee health contribution (3.75%) in cents
@@ -28,6 +29,7 @@ class PayrollCalculationResult
         public int $grossSalary,
         public int $netSalary,
         public int $taxableBase,
+        public int $personalDeduction,
         public int $pensionEmployee,
         public int $pensionEmployer,
         public int $healthEmployee,
@@ -49,6 +51,7 @@ class PayrollCalculationResult
             grossSalary: $data['grossSalary'] ?? 0,
             netSalary: $data['netSalary'] ?? 0,
             taxableBase: $data['taxableBase'] ?? 0,
+            personalDeduction: $data['personalDeduction'] ?? 0,
             pensionEmployee: $data['pensionEmployee'] ?? 0,
             pensionEmployer: $data['pensionEmployer'] ?? 0,
             healthEmployee: $data['healthEmployee'] ?? 0,
@@ -70,6 +73,7 @@ class PayrollCalculationResult
             'grossSalary' => $this->grossSalary,
             'netSalary' => $this->netSalary,
             'taxableBase' => $this->taxableBase,
+            'personalDeduction' => $this->personalDeduction,
             'pensionEmployee' => $this->pensionEmployee,
             'pensionEmployer' => $this->pensionEmployer,
             'healthEmployee' => $this->healthEmployee,

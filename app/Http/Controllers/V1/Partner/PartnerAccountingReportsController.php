@@ -1321,6 +1321,405 @@ class PartnerAccountingReportsController extends Controller
 
         return $pdf->download("trgovska_kniga_{$fromDate}_{$toDate}.pdf");
     }
+    /**
+     * ПЛТ — Приемен лист во трговијата на мало (Образец ПЛТ)
+     * Generates receiving sheet PDF for a specific bill (влезна фактура).
+     * 11 columns per Правилник Сл. весник 51/04; 89/04
+     */
+    public function pltExport(Request $request, int $company, int $billId): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner || !$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'Access denied');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+        $companyModel->load('address');
+
+        $bill = \App\Models\Bill::where('company_id', $company)
+            ->where('id', $billId)
+            ->with(['supplier', 'items.item.unit', 'items.taxes.taxType'])
+            ->first();
+
+        if (!$bill) {
+            abort(404, 'Bill not found');
+        }
+
+        $currency = \App\Models\Currency::find(
+            CompanySetting::getSetting('currency', $company)
+        );
+
+        // Build PLT items from bill items
+        $items = [];
+        foreach ($bill->items as $billItem) {
+            $qty = $billItem->quantity ?? 1;
+            $unitPrice = $billItem->price ?? 0; // cents, excl. VAT
+            $nabavnaIznos = (int) ($unitPrice * $qty);
+            $discount = $billItem->discount_val ?? 0;
+            $nabavnaIznos -= $discount;
+
+            // Get VAT info from item taxes
+            $vatRate = 0;
+            $vatAmount = 0;
+            foreach ($billItem->taxes as $tax) {
+                $vatRate = $tax->taxType->percent ?? 0;
+                $vatAmount += (int) ($tax->amount ?? 0);
+            }
+
+            // Продажна = набавна + ДДВ + маржа (approximate: use total)
+            $prodazhnaIznos = $nabavnaIznos + $vatAmount;
+            $unitPriceProdazhna = $qty > 0 ? (int) round($prodazhnaIznos / $qty) : 0;
+
+            // ДДВ во продажна вредност (пресметковна стапка)
+            $prodazhnaVat = $vatAmount;
+
+            $items[] = [
+                'name' => $billItem->item?->name ?? $billItem->name ?? '',
+                'unit' => $billItem->item?->unit?->name ?? 'ком.',
+                'quantity' => $qty,
+                'unit_price' => $unitPrice,
+                'nabavna_iznos' => $nabavnaIznos,
+                'vat_amount' => $vatAmount,
+                'vat_rate' => $vatRate,
+                'unit_price_prodazhna' => $unitPriceProdazhna,
+                'prodazhna_iznos' => $prodazhnaIznos,
+                'prodazhna_vat' => $prodazhnaVat,
+            ];
+        }
+
+        $billDate = $bill->bill_date instanceof \DateTimeInterface
+            ? $bill->bill_date->format('Y-m-d')
+            : ($bill->bill_date ?? '');
+
+        view()->share([
+            'company' => $companyModel,
+            'bill' => $bill,
+            'bill_date' => substr((string) $billDate, 0, 10),
+            'supplier_name' => $bill->supplier?->name ?? '',
+            'supplier_address' => $bill->supplier?->address_street_1 ?? '',
+            'items' => $items,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.trade-plt');
+        $pdf->setPaper('a4', 'landscape');
+
+        return $pdf->download("plt_{$bill->bill_number}_{$billDate}.pdf");
+    }
+
+    /**
+     * МЕТГ — Материјална евиденција во трговија на големо (Образец МЕТГ)
+     * Generates wholesale material evidence: per-product quantity tracking.
+     * 8 columns per Правилник Сл. весник 51/04; 89/04
+     */
+    public function metgData(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner || !$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $itemId = $request->input('item_id'); // optional: filter by specific item
+
+        if (!$fromDate || !$toDate) {
+            return response()->json(['error' => 'Потребни се и почетен и краен датум.'], 422);
+        }
+
+        $entries = collect();
+
+        // Inflow (Влез): bill items — purchases
+        $billItemsQuery = \App\Models\BillItem::whereHas('bill', function ($q) use ($company, $fromDate, $toDate) {
+            $q->where('company_id', $company)
+                ->whereNotIn('status', ['DRAFT'])
+                ->where('bill_date', '>=', $fromDate)
+                ->where('bill_date', '<=', $toDate);
+        })->with(['bill.supplier', 'item.unit']);
+
+        if ($itemId) {
+            $billItemsQuery->where('item_id', $itemId);
+        }
+
+        foreach ($billItemsQuery->get() as $bi) {
+            $billDate = $bi->bill->bill_date instanceof \DateTimeInterface
+                ? $bi->bill->bill_date->format('Y-m-d')
+                : ($bi->bill->bill_date ?? '');
+
+            $entries->push([
+                'date' => substr((string) $billDate, 0, 10),
+                'doc_number' => $bi->bill->bill_number ?? '',
+                'doc_date' => substr((string) $billDate, 0, 10),
+                'doc_name' => 'Приемница',
+                'party' => $bi->bill->supplier?->name ?? '',
+                'item_id' => $bi->item_id,
+                'item_name' => $bi->item?->name ?? $bi->name ?? '',
+                'unit' => $bi->item?->unit?->name ?? 'ком.',
+                'vlez' => (float) ($bi->quantity ?? 0),
+                'izlez' => 0,
+            ]);
+        }
+
+        // Outflow (Излез): invoice items — sales
+        $invoiceItemsQuery = \App\Models\InvoiceItem::whereHas('invoice', function ($q) use ($company, $fromDate, $toDate) {
+            $q->where('company_id', $company)
+                ->whereNotIn('status', ['DRAFT'])
+                ->where('invoice_date', '>=', $fromDate)
+                ->where('invoice_date', '<=', $toDate);
+        })->with(['invoice.customer', 'item.unit']);
+
+        if ($itemId) {
+            $invoiceItemsQuery->where('item_id', $itemId);
+        }
+
+        foreach ($invoiceItemsQuery->get() as $ii) {
+            $invDate = $ii->invoice->invoice_date instanceof \DateTimeInterface
+                ? $ii->invoice->invoice_date->format('Y-m-d')
+                : ($ii->invoice->invoice_date ?? '');
+
+            $entries->push([
+                'date' => substr((string) $invDate, 0, 10),
+                'doc_number' => $ii->invoice->invoice_number ?? '',
+                'doc_date' => substr((string) $invDate, 0, 10),
+                'doc_name' => 'Испратница',
+                'party' => $ii->invoice->customer?->name ?? '',
+                'item_id' => $ii->item_id,
+                'item_name' => $ii->item?->name ?? $ii->name ?? '',
+                'unit' => $ii->item?->unit?->name ?? 'ком.',
+                'vlez' => 0,
+                'izlez' => (float) ($ii->quantity ?? 0),
+            ]);
+        }
+
+        // Sort chronologically, compute running balance per item
+        $sorted = $entries->sortBy('date')->values();
+
+        // Group by item for running balance
+        $balanceByItem = [];
+        $result = [];
+
+        foreach ($sorted as $i => $entry) {
+            $iid = $entry['item_id'] ?? 0;
+            if (!isset($balanceByItem[$iid])) {
+                $balanceByItem[$iid] = 0;
+            }
+            $balanceByItem[$iid] += $entry['vlez'] - $entry['izlez'];
+
+            $result[] = [
+                'seq' => $i + 1,
+                'date' => $entry['date'],
+                'doc_number' => $entry['doc_number'],
+                'doc_date' => $entry['doc_date'],
+                'doc_name' => $entry['doc_name'],
+                'party' => $entry['party'],
+                'item_name' => $entry['item_name'],
+                'unit' => $entry['unit'],
+                'vlez' => $entry['vlez'],
+                'izlez' => $entry['izlez'],
+                'sostojba' => $balanceByItem[$iid],
+            ];
+        }
+
+        $totalVlez = $sorted->sum('vlez');
+        $totalIzlez = $sorted->sum('izlez');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'entries' => $result,
+                'summary' => [
+                    'total_vlez' => $totalVlez,
+                    'total_izlez' => $totalIzlez,
+                    'balance' => $totalVlez - $totalIzlez,
+                    'count' => count($result),
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * МЕТГ PDF Export
+     */
+    public function metgExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner || !$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'Access denied');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+        $companyModel->load('address');
+
+        $fromDate = $request->query('from_date', now()->startOfYear()->toDateString());
+        $toDate = $request->query('to_date', now()->toDateString());
+
+        // Reuse JSON data
+        $jsonRequest = new Request(['from_date' => $fromDate, 'to_date' => $toDate, 'item_id' => $request->query('item_id')]);
+        $jsonRequest->setUserResolver(function () use ($request) { return $request->user(); });
+        $jsonResponse = $this->metgData($jsonRequest, $company);
+        $data = json_decode($jsonResponse->getContent(), true)['data'] ?? [];
+
+        $currency = \App\Models\Currency::find(
+            CompanySetting::getSetting('currency', $company)
+        );
+
+        // Get item info if filtered
+        $productName = 'Сите артикли';
+        $unitName = 'ком.';
+        $warehouseName = '-';
+        if ($request->query('item_id')) {
+            $item = \App\Models\Item::with('unit')->find($request->query('item_id'));
+            if ($item) {
+                $productName = $item->name;
+                $unitName = $item->unit?->name ?? 'ком.';
+            }
+        }
+
+        view()->share([
+            'company' => $companyModel,
+            'entries' => $data['entries'] ?? [],
+            'year' => substr($fromDate, 0, 4),
+            'product_name' => $productName,
+            'warehouse_name' => $warehouseName,
+            'unit_name' => $unitName,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.trade-metg');
+        $pdf->setPaper('a4', 'landscape');
+
+        return $pdf->download("metg_{$fromDate}_{$toDate}.pdf");
+    }
+
+    /**
+     * ЕТУ — Евиденција за вршење на трговски услуги (Образец ЕТУ)
+     * For service-based businesses. Tracks invoiced services with VAT and collection status.
+     * 9 columns per Правилник Сл. весник 51/04; 89/04
+     */
+    public function etuData(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner || !$this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        if (!$fromDate || !$toDate) {
+            return response()->json(['error' => 'Потребни се и почетен и краен датум.'], 422);
+        }
+
+        $entries = collect();
+
+        // Service invoices (services are invoices where items don't have unit "qty" typically)
+        $invoices = \App\Models\Invoice::where('company_id', $company)
+            ->whereNotIn('status', ['DRAFT'])
+            ->with(['customer', 'payments'])
+            ->where('invoice_date', '>=', $fromDate)
+            ->where('invoice_date', '<=', $toDate)
+            ->orderBy('invoice_date')
+            ->get();
+
+        foreach ($invoices as $inv) {
+            $total = (int) ($inv->total ?? 0);
+            $subTotal = (int) ($inv->sub_total ?? 0);
+            $taxAmount = $total - $subTotal;
+            $collected = (int) $inv->payments->sum('amount');
+
+            $invDate = $inv->invoice_date instanceof \DateTimeInterface
+                ? $inv->invoice_date->format('Y-m-d')
+                : ($inv->invoice_date ?? '');
+
+            $entries->push([
+                'date' => substr((string) $invDate, 0, 10),
+                'doc_number' => $inv->invoice_number ?? '',
+                'doc_date' => substr((string) $invDate, 0, 10),
+                'doc_name' => 'Фактура',
+                'party' => $inv->customer?->name ?? '',
+                'service_name' => 'Трговски услуги',
+                'amount_with_vat' => $total,
+                'vat_amount' => $taxAmount,
+                'collected' => $collected,
+            ]);
+        }
+
+        // Sort and assign sequence
+        $sorted = $entries->sortBy('date')->values();
+        $result = [];
+        $totalWithVat = 0;
+        $totalVat = 0;
+        $totalCollected = 0;
+
+        foreach ($sorted as $i => $entry) {
+            $totalWithVat += $entry['amount_with_vat'];
+            $totalVat += $entry['vat_amount'];
+            $totalCollected += $entry['collected'];
+
+            $result[] = array_merge($entry->toArray(), ['seq' => $i + 1]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'entries' => $result,
+                'summary' => [
+                    'total_with_vat' => $totalWithVat,
+                    'total_vat' => $totalVat,
+                    'total_collected' => $totalCollected,
+                    'count' => count($result),
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * ЕТУ PDF Export
+     */
+    public function etuExport(Request $request, int $company): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (!$partner || !$this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'Access denied');
+        }
+
+        $companyModel = Company::find($company);
+        if (!$companyModel) {
+            abort(404, 'Company not found');
+        }
+        $companyModel->load('address');
+
+        $fromDate = $request->query('from_date', now()->startOfMonth()->toDateString());
+        $toDate = $request->query('to_date', now()->toDateString());
+
+        $jsonRequest = new Request(['from_date' => $fromDate, 'to_date' => $toDate]);
+        $jsonRequest->setUserResolver(function () use ($request) { return $request->user(); });
+        $jsonResponse = $this->etuData($jsonRequest, $company);
+        $data = json_decode($jsonResponse->getContent(), true)['data'] ?? [];
+
+        $currency = \App\Models\Currency::find(
+            CompanySetting::getSetting('currency', $company)
+        );
+
+        view()->share([
+            'company' => $companyModel,
+            'entries' => $data['entries'] ?? [],
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.trade-etu');
+        $pdf->setPaper('a4', 'landscape');
+
+        return $pdf->download("etu_{$fromDate}_{$toDate}.pdf");
+    }
 }
 // CLAUDE-CHECKPOINT
 

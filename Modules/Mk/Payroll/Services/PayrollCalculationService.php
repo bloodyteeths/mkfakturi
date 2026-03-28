@@ -120,6 +120,7 @@ class PayrollCalculationService
                     'unemployment_contribution' => $calculation->unemployment,
                     'additional_contribution' => $calculation->additionalContribution,
                     'income_tax_amount' => $calculation->incomeTax,
+                    'personal_deduction' => $calculation->personalDeduction,
                     'leave_days_taken' => $leaveResult['leave_days_taken'],
                     'leave_deduction_amount' => $leaveResult['leave_deduction_amount'],
                     'overtime_hours' => $overtimeResult['overtime_hours'],
@@ -195,6 +196,7 @@ class PayrollCalculationService
                 'unemployment_contribution' => $calculation->unemployment,
                 'additional_contribution' => $calculation->additionalContribution,
                 'income_tax_amount' => $calculation->incomeTax,
+                'personal_deduction' => $calculation->personalDeduction,
             ]);
 
             Log::info('Payroll line recalculated', [

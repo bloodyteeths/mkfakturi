@@ -2,7 +2,7 @@
 <html lang="mk">
 
 <head>
-    <title>Евиденција во трговијата на мало (Образец ЕТ)</title>
+    <title>Евиденција за трговски услуги (Образец ЕТУ)</title>
     <style type="text/css">
         body {
             font-family: "DejaVu Sans";
@@ -20,12 +20,6 @@
             margin-bottom: 5px;
         }
 
-        .company-info {
-            font-size: 9px;
-            color: #333;
-            margin-bottom: 2px;
-        }
-
         .company-name {
             font-weight: bold;
             font-size: 11px;
@@ -38,7 +32,7 @@
 
         .heading-text {
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             color: #1a1a1a;
             text-align: center;
             margin: 8px 0 2px 0;
@@ -51,24 +45,24 @@
             margin: 2px 0 10px 0;
         }
 
-        .et-table {
+        .etu-table {
             width: 100%;
             border: 1px solid #888;
             margin-top: 5px;
         }
 
-        .et-table th {
+        .etu-table th {
             background: #2d2040;
             color: #ffffff;
             padding: 5px 4px;
-            font-size: 7.5px;
+            font-size: 7px;
             font-weight: bold;
             text-align: center;
             border-bottom: 2px solid #555;
             border-right: 1px solid #444;
         }
 
-        .et-table th:last-child {
+        .etu-table th:last-child {
             border-right: none;
         }
 
@@ -113,39 +107,9 @@
             text-align: center;
         }
 
-        .cell-right {
-            text-align: right;
-        }
-
         .cell-number {
             text-align: right;
             font-family: "DejaVu Sans";
-        }
-
-        .credit-note-row {
-            background: #fff5f5 !important;
-        }
-
-        .credit-note-badge {
-            background: #fed7d7;
-            color: #c53030;
-            padding: 1px 3px;
-            border-radius: 2px;
-            font-size: 6px;
-            font-weight: bold;
-        }
-
-        .negative {
-            color: #c53030;
-        }
-
-        .bill-row td {
-            color: #555;
-        }
-
-        .expense-row td {
-            color: #666;
-            font-style: italic;
         }
 
         .total-row {
@@ -210,7 +174,7 @@
                 <p class="company-name">{{ $company->name ?? '' }}</p>
                 <p class="company-detail">
                     @if($company->address)
-                        {{ $company->address->address_street_1 ?? '' }}
+                        Адреса: {{ $company->address->address_street_1 ?? '' }}
                     @endif
                 </p>
                 <p class="company-detail">
@@ -221,138 +185,112 @@
                 </p>
             </td>
             <td style="width: 30%; text-align: right; vertical-align: top;">
-                <p class="company-detail" style="font-weight: bold;">Образец "ЕТ"</p>
+                <p class="company-detail" style="font-weight: bold;">Образец "ЕТУ"</p>
                 <p class="company-detail">Правилник Сл. весник 51/04; 89/04</p>
             </td>
         </tr>
     </table>
 
-    <p class="heading-text">ЕВИДЕНЦИЈА ВО ТРГОВИЈАТА НА МАЛО</p>
+    <p class="heading-text">ЕВИДЕНЦИЈА ЗА ВРШЕЊЕ НА ТРГОВСКИ УСЛУГИ</p>
     <p class="period-info">за период: {{ $from_date }} — {{ $to_date }}</p>
 
-    <table class="et-table">
+    <table class="etu-table">
         <thead>
-            {{-- Group header row --}}
             <tr>
                 <th rowspan="2" style="width: 4%;">
                     Ред.<br>бр.
                     <span class="col-header-sub">1</span>
                 </th>
-                <th rowspan="2" style="width: 8%;">
+                <th rowspan="2" style="width: 7%;">
                     Датум на<br>книжење<br>(ден и месец)
                     <span class="col-header-sub">2</span>
                 </th>
-                <th class="group-header" colspan="2" style="width: 28%;">
+                <th class="group-header" colspan="3" style="width: 36%;">
                     Книговодствен документ
                 </th>
-                <th rowspan="2" style="width: 15%;">
-                    Набавна вредност<br>на стоките<br><span style="font-size: 6px; font-weight: normal; color: #aaa;">(кол. 6+7 од ПЛТ)</span>
-                    <span class="col-header-sub">5</span>
-                </th>
-                <th rowspan="2" style="width: 15%;">
-                    Продажна вредност<br>на стоките<br><span style="font-size: 6px; font-weight: normal; color: #aaa;">(кол. 10 од ПЛТ)</span>
+                <th rowspan="2" style="width: 14%;">
+                    Назив на извршени<br>трговски услуги
                     <span class="col-header-sub">6</span>
                 </th>
-                <th rowspan="2" style="width: 15%;">
-                    Дневен<br>промет
+                <th rowspan="2" style="width: 10%;">
+                    Износ на вредноста<br>на услугите<br>со ДДВ
                     <span class="col-header-sub">7</span>
+                </th>
+                <th rowspan="2" style="width: 8%;">
+                    Износ<br>ДДВ
+                    <span class="col-header-sub">8</span>
+                </th>
+                <th rowspan="2" style="width: 10%;">
+                    Износ на<br>наплатени<br>услуги
+                    <span class="col-header-sub">9</span>
                 </th>
             </tr>
             <tr>
-                <th style="width: 20%;">
-                    Назив и број
+                <th style="width: 7%;">
+                    Број
                     <span class="col-header-sub">3</span>
                 </th>
-                <th style="width: 8%;">
+                <th style="width: 7%;">
                     Датум
                     <span class="col-header-sub">4</span>
+                </th>
+                <th style="width: 22%;">
+                    Назив (клиент, место,<br>опис на услугата)
+                    <span class="col-header-sub">5</span>
                 </th>
             </tr>
         </thead>
         <tbody>
             @php
-                $totalNabavna = 0;
-                $totalProdazhna = 0;
-                $totalPromet = 0;
+                $totalWithVat = 0;
+                $totalVat = 0;
+                $totalCollected = 0;
             @endphp
 
             @foreach($entries as $entry)
             @php
-                $nabavna = $entry['nabavna'] ?? 0;
-                $prodazhna = $entry['prodazhna'] ?? 0;
-                $promet = $entry['promet'] ?? null;
-                $isCreditNote = ($entry['doc_type'] ?? '') === 'credit_note';
-                $isBill = ($entry['doc_type'] ?? '') === 'bill';
-                $isExpense = ($entry['doc_type'] ?? '') === 'expense';
-
-                $totalNabavna += $nabavna;
-                $totalProdazhna += $prodazhna;
-                if ($promet !== null) $totalPromet += $promet;
-
-                $rowClass = $isCreditNote ? 'entry-row credit-note-row' : ($isBill ? 'entry-row bill-row' : ($isExpense ? 'entry-row expense-row' : 'entry-row'));
+                $withVat = $entry['amount_with_vat'] ?? 0;
+                $vat = $entry['vat_amount'] ?? 0;
+                $collected = $entry['collected'] ?? 0;
+                $totalWithVat += $withVat;
+                $totalVat += $vat;
+                $totalCollected += $collected;
             @endphp
-            <tr class="{{ $rowClass }}">
+            <tr class="entry-row">
                 <td class="cell-center">{{ $entry['seq'] ?? '' }}</td>
                 <td class="cell-center">{{ $entry['date'] ?? '' }}</td>
+                <td class="cell-center">{{ $entry['doc_number'] ?? '' }}</td>
+                <td class="cell-center">{{ $entry['doc_date'] ?? '' }}</td>
                 <td>
-                    {{ $entry['doc_name'] ?? '' }} {{ $entry['doc_number'] ?? '' }}
-                    @if($isCreditNote)<span class="credit-note-badge">КН</span>@endif
+                    {{ $entry['doc_name'] ?? '' }}
                     @if($entry['party'] ?? '')
                         <br><span style="font-size: 6.5px; color: #888;">{{ $entry['party'] }}</span>
                     @endif
                 </td>
-                <td class="cell-center">{{ $entry['doc_date'] ?? '' }}</td>
-                <td class="cell-number {{ $nabavna < 0 ? 'negative' : '' }}">
-                    @if($nabavna != 0)
-                        {!! format_money_pdf($nabavna, $currency) !!}
-                    @endif
-                </td>
-                <td class="cell-number {{ $prodazhna < 0 ? 'negative' : '' }}">
-                    @if($prodazhna != 0)
-                        {!! format_money_pdf($prodazhna, $currency) !!}
-                    @endif
-                </td>
-                <td class="cell-number">
-                    @if($promet !== null && $promet != 0)
-                        {!! format_money_pdf($promet, $currency) !!}
-                    @endif
-                </td>
+                <td>{{ $entry['service_name'] ?? '' }}</td>
+                <td class="cell-number">{!! format_money_pdf($withVat, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($vat, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($collected, $currency) !!}</td>
             </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr class="carry-row">
-                <td colspan="4" style="text-align: right; font-style: italic;">
-                    Пренос →
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalNabavna, $currency) !!}
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalProdazhna, $currency) !!}
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalPromet, $currency) !!}
-                </td>
+                <td colspan="6" style="text-align: right; font-style: italic;">Пренос →</td>
+                <td class="cell-number">{!! format_money_pdf($totalWithVat, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($totalVat, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($totalCollected, $currency) !!}</td>
             </tr>
             <tr class="total-row">
-                <td colspan="4" style="text-align: left;">
-                    ВКУПНО ({{ count($entries) }} записи)
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalNabavna, $currency) !!}
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalProdazhna, $currency) !!}
-                </td>
-                <td class="cell-number">
-                    {!! format_money_pdf($totalPromet, $currency) !!}
-                </td>
+                <td colspan="6" style="text-align: left;">ВКУПНО ({{ count($entries) }} записи)</td>
+                <td class="cell-number">{!! format_money_pdf($totalWithVat, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($totalVat, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($totalCollected, $currency) !!}</td>
             </tr>
         </tfoot>
     </table>
 
-    <p class="form-ref">Образец "ЕТ" — Евиденција во трговијата на мало / Правилник за евиденција Сл. весник 51/04; 89/04</p>
+    <p class="form-ref">Образец "ЕТУ" — Евиденција за вршење на трговски услуги / Правилник за евиденција Сл. весник 51/04; 89/04</p>
 
     <table class="signature-section">
         <tr>

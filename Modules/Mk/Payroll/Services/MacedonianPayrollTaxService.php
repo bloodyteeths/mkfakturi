@@ -7,21 +7,25 @@ use Modules\Mk\Payroll\DTOs\PayrollCalculationResult;
 /**
  * Macedonian Payroll Tax Service
  *
- * Calculates payroll taxes and contributions according to Macedonian tax law (2024 rates).
+ * Calculates payroll taxes and contributions per Закон за придонеси
+ * од задолжително социјално осигурување and Закон за данокот на
+ * личен доход.
  *
- * Tax and contribution rates:
- * - Income Tax: 10% flat (on taxable base = gross - employee contributions)
+ * Rates (2025):
  * - Pension (PIO): 18% total (9% employee + 9% employer)
  * - Health (ZO): 7.5% total (3.75% employee + 3.75% employer)
  * - Unemployment: 1.2% (employee only)
- * - Additional contribution: 0.5% (employee only, for professional diseases)
+ * - Additional: 0.5% (employee only, professional diseases)
+ * - Personal deduction: MKD 10,270/month (лично ослободување)
+ * - Income Tax: 10% on (gross − contributions − personal deduction)
  *
+ * Contribution base: clamped to 50%–16× national average salary.
  * All monetary values are in cents (integer).
  */
 class MacedonianPayrollTaxService
 {
-    // 2024 Macedonian Tax Rates
-    private const INCOME_TAX_RATE = 0.10; // 10% flat rate
+    // Income tax rate
+    private const INCOME_TAX_RATE = 0.10; // 10%
 
     // Employee contribution rates
     private const PENSION_EMPLOYEE_RATE = 0.09; // 9%
@@ -34,54 +38,57 @@ class MacedonianPayrollTaxService
     private const HEALTH_EMPLOYER_RATE = 0.0375; // 3.75%
 
     // Contribution base limits (P7-05)
-    // Min: 50% of national average salary (MKD 63,154 / 2 = 31,577)
-    // Max: 16x national average salary (MKD 1,010,464)
     private const DEFAULT_MIN_CONTRIBUTION_BASE = 3157700;  // MKD 31,577 in cents
     private const DEFAULT_MAX_CONTRIBUTION_BASE = 101046400; // MKD 1,010,464 in cents
 
+    // Personal deduction (лично ослободување) — Закон за данокот на личен доход
+    private const DEFAULT_PERSONAL_DEDUCTION = 1027000; // MKD 10,270 in cents
+
     /**
-     * Calculate payroll from gross salary
+     * Calculate payroll from gross salary.
      *
-     * Steps:
-     * 1. Calculate employee contributions (pension, health, unemployment, additional)
-     * 2. Calculate taxable base (gross - employee contributions)
-     * 3. Calculate income tax (10% of taxable base)
-     * 4. Calculate net salary (taxable base - income tax)
-     * 5. Calculate employer contributions (pension, health)
-     * 6. Calculate total employer cost (gross + employer contributions)
+     * Formula per MK law:
+     * 1. Contributions on clamped base (50%–16× avg salary)
+     * 2. Taxable base = gross − employee contributions − personal deduction
+     * 3. Income tax = 10% × taxable base
+     * 4. Net = gross − contributions − income tax
      *
      * @param int $grossCents Gross salary in cents
      * @return PayrollCalculationResult
      */
     public function calculateFromGross(int $grossCents): PayrollCalculationResult
     {
-        // P7-05: Clamp gross to contribution base limits for social contribution calculations
+        // P7-05: Clamp gross to contribution base limits
         $contributionBase = $this->clampToContributionBase($grossCents);
 
-        // Step 1: Calculate employee contributions (on clamped base)
+        // Step 1: Employee contributions (on clamped base)
         $pensionEmployee = $this->calculatePensionEmployee($contributionBase);
         $healthEmployee = $this->calculateHealthEmployee($contributionBase);
         $unemployment = $this->calculateUnemployment($contributionBase);
         $additionalContribution = $this->calculateAdditionalContribution($contributionBase);
 
-        // Step 2: Calculate taxable base (gross - employee contributions)
         $totalEmployeeContributions = $pensionEmployee
             + $healthEmployee
             + $unemployment
             + $additionalContribution;
-        $taxableBase = $grossCents - $totalEmployeeContributions;
 
-        // Step 3: Calculate income tax (10% of taxable base)
+        // Step 2: Personal deduction (лично ослободување)
+        $personalDeduction = $this->getPersonalDeduction();
+
+        // Step 3: Taxable base = gross − contributions − personal deduction
+        $taxableBase = max(0, $grossCents - $totalEmployeeContributions - $personalDeduction);
+
+        // Step 4: Income tax (10% of taxable base)
         $incomeTax = $this->calculateIncomeTax($taxableBase);
 
-        // Step 4: Calculate net salary (taxable base - income tax)
-        $netSalary = $taxableBase - $incomeTax;
+        // Step 5: Net salary = gross − contributions − income tax
+        $netSalary = $grossCents - $totalEmployeeContributions - $incomeTax;
 
-        // Step 5: Calculate employer contributions (on clamped base)
+        // Step 6: Employer contributions (on clamped base)
         $pensionEmployer = $this->calculatePensionEmployer($contributionBase);
         $healthEmployer = $this->calculateHealthEmployer($contributionBase);
 
-        // Step 6: Calculate totals
+        // Totals
         $totalEmployeeDeductions = $totalEmployeeContributions + $incomeTax;
         $totalEmployerCost = $grossCents + $pensionEmployer + $healthEmployer;
 
@@ -89,6 +96,7 @@ class MacedonianPayrollTaxService
             grossSalary: $grossCents,
             netSalary: $netSalary,
             taxableBase: $taxableBase,
+            personalDeduction: $personalDeduction,
             pensionEmployee: $pensionEmployee,
             pensionEmployer: $pensionEmployer,
             healthEmployee: $healthEmployee,
@@ -269,6 +277,19 @@ class MacedonianPayrollTaxService
     {
         return (int) round($taxableBaseCents * self::INCOME_TAX_RATE);
     }
+
+    /**
+     * Get personal deduction (лично ослободување) amount.
+     *
+     * Per Закон за данокот на личен доход, the personal deduction
+     * is subtracted from gross − contributions before calculating income tax.
+     *
+     * @return int Personal deduction in cents
+     */
+    public function getPersonalDeduction(): int
+    {
+        return (int) config('mk.payroll.personal_deduction', self::DEFAULT_PERSONAL_DEDUCTION);
+    }
 }
 
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT

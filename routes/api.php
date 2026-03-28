@@ -1869,6 +1869,17 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
         Route::get('/trade-book', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'tradeBook']);
         Route::get('/trade-book/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'tradeBookExport']);
 
+        // Образец ПЛТ — Приемен лист (per-bill)
+        Route::get('/plt/{bill}/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'pltExport']);
+
+        // Образец МЕТГ — Материјална евиденција (wholesale)
+        Route::get('/metg', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'metgData']);
+        Route::get('/metg/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'metgExport']);
+
+        // Образец ЕТУ — Трговски услуги
+        Route::get('/etu', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'etuData']);
+        Route::get('/etu/export', [\App\Http\Controllers\V1\Partner\PartnerAccountingReportsController::class, 'etuExport']);
+
         // F1: Compensations (Partner)
         Route::prefix('compensations')->group(function () {
             Route::get('/', [\App\Http\Controllers\V1\Partner\PartnerCompensationController::class, 'index']);
