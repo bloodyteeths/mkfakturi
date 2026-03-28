@@ -26,7 +26,7 @@ class WacAuditController extends Controller
      */
     protected function resolveCompanyId(Request $request): int
     {
-        return (int) ($request->route('company') ?: $this->resolveCompanyId($request));
+        return (int) ($request->route('company') ?: $request->header('company'));
     }
 
     /**
