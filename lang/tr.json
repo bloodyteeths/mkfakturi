@@ -4360,7 +4360,15 @@
             "invoice": "Satış (Fatura)",
             "adjustment": "Düzeltme",
             "transfer_in": "Alım",
-            "transfer_out": "Изevetвање"
+            "transfer_out": "Изevetвање",
+            "inventory_document": "Envanter Belgesi",
+            "goods_receipt": "Mal Alım Fişi",
+            "production_consume": "Üretim Tüketimi",
+            "production_output": "Üretim Çıktısı",
+            "production_byproduct": "Yan Ürün",
+            "production_wastage": "Fire",
+            "wac_correction": "AOF Düzeltmesi",
+            "return": "İade"
         },
         "avg_cost": "Ortalama Maliyet",
         "last_movement": "Son Hareket",

@@ -50,6 +50,20 @@
         Документи
       </router-link>
       <router-link
+        to="/admin/stock/trade/nivelacii"
+        class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap"
+        :class="isActive('/admin/stock/trade') ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+      >
+        {{ $t('trade.nivelacii_title', 'Трговски') }}
+      </router-link>
+      <router-link
+        to="/admin/stock/trade/kap"
+        class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap"
+        :class="isActive('/admin/stock/trade/kap') ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+      >
+        {{ $t('trade.tab_kap', 'КАП') }}
+      </router-link>
+      <router-link
         to="/admin/stock/warehouses"
         class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap"
         :class="isActive('/admin/stock/warehouses') ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
@@ -71,6 +85,11 @@ const isActive = (path) => {
   // Exact match for /admin/stock (inventory page)
   if (path === '/admin/stock') {
     return route.path === '/admin/stock' || route.path === '/admin/stock/'
+  }
+  // For trade tabs, use more specific matching to avoid overlap
+  if (path === '/admin/stock/trade') {
+    // Active for /admin/stock/trade/nivelacii* but NOT /admin/stock/trade/kap
+    return route.path.startsWith('/admin/stock/trade/nivelacii') || route.path === '/admin/stock/trade'
   }
   // Prefix match for sub-pages
   return route.path.startsWith(path)

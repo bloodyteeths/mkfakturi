@@ -6776,7 +6776,15 @@
             "initial": "Initial",
             "invoice": "Sale (Invoice)",
             "transfer_in": "Transfer In",
-            "transfer_out": "Transfer Out"
+            "transfer_out": "Transfer Out",
+            "inventory_document": "Inventory Document",
+            "goods_receipt": "Goods Receipt",
+            "production_consume": "Production Consume",
+            "production_output": "Production Output",
+            "production_byproduct": "Production Byproduct",
+            "production_wastage": "Production Wastage",
+            "wac_correction": "WAC Correction",
+            "return": "Return"
         },
         "stock_value": "Stock Value",
         "title": "Stock",

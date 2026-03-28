@@ -1021,7 +1021,15 @@
             "invoice": "Проpoжба (Faturë)",
             "adjustment": "Корекцdheја",
             "transfer_in": "Прdheем",
-            "transfer_out": "Dheзpoвање"
+            "transfer_out": "Dheзpoвање",
+            "inventory_document": "Dokument inventari",
+            "goods_receipt": "Pranim malli",
+            "production_consume": "Konsum prodhimi",
+            "production_output": "Prodhim",
+            "production_byproduct": "Nënprodukt",
+            "production_wastage": "Humbje",
+            "wac_correction": "Korrigjim WAC",
+            "return": "Kthim"
         },
         "sku": "Шdheфра",
         "barcode": "Баркnga",

@@ -146,6 +146,12 @@ const InventoryDocumentsIndex = () => import('@/scripts/admin/views/stock/docume
 const InventoryDocumentCreate = () => import('@/scripts/admin/views/stock/documents/Create.vue')
 const InventoryDocumentView = () => import('@/scripts/admin/views/stock/documents/View.vue')
 
+// Trade Documents (КАП, Нивелација, ПЛТ маржа)
+const NivelacijaIndex = () => import('@/scripts/admin/views/stock/trade/NivelacijaIndex.vue')
+const NivelacijaCreate = () => import('@/scripts/admin/views/stock/trade/NivelacijaCreate.vue')
+const NivelacijaView = () => import('@/scripts/admin/views/stock/trade/NivelacijaView.vue')
+const KapView = () => import('@/scripts/admin/views/stock/trade/KapView.vue')
+
 // Client Documents (P8-01) + AI Document Hub
 const ClientDocuments = () => import('@/scripts/admin/views/documents/ClientDocuments.vue')
 const DocumentReview = () => import('@/scripts/admin/views/documents/DocumentReview.vue')
@@ -199,6 +205,14 @@ const GeneralLedger = () =>
   import('@/scripts/admin/views/reports/GeneralLedger.vue')
 const JournalEntries = () =>
   import('@/scripts/admin/views/reports/JournalEntries.vue')
+const TrialBalance = () =>
+  import('@/scripts/admin/views/reports/TrialBalance.vue')
+const BalanceSheet = () =>
+  import('@/scripts/admin/views/reports/BalanceSheet.vue')
+const IncomeStatement = () =>
+  import('@/scripts/admin/views/reports/IncomeStatement.vue')
+const ProfitLossReport = () =>
+  import('@/scripts/admin/views/reports/ProfitLossReport.vue')
 
 // Installation
 const Installation = () =>
@@ -574,6 +588,38 @@ export default [
         name: 'stock.documents.edit',
         meta: { requiresAuth: true, ability: abilities.EDIT_ITEM },
         component: InventoryDocumentCreate,
+      },
+
+      // Trade Documents (КАП, Нивелација)
+      {
+        path: 'stock/trade/nivelacii',
+        name: 'stock.trade.nivelacii',
+        meta: { requiresAuth: true, ability: abilities.VIEW_ITEM },
+        component: NivelacijaIndex,
+      },
+      {
+        path: 'stock/trade/nivelacii/create',
+        name: 'stock.trade.nivelacija.create',
+        meta: { requiresAuth: true, ability: abilities.CREATE_ITEM },
+        component: NivelacijaCreate,
+      },
+      {
+        path: 'stock/trade/nivelacii/:id',
+        name: 'stock.trade.nivelacija.view',
+        meta: { requiresAuth: true, ability: abilities.VIEW_ITEM },
+        component: NivelacijaView,
+      },
+      {
+        path: 'stock/trade/nivelacii/:id/edit',
+        name: 'stock.trade.nivelacija.edit',
+        meta: { requiresAuth: true, ability: abilities.EDIT_ITEM },
+        component: NivelacijaCreate,
+      },
+      {
+        path: 'stock/trade/kap',
+        name: 'stock.trade.kap',
+        meta: { requiresAuth: true, ability: abilities.VIEW_ITEM },
+        component: KapView,
       },
 
       // Client Documents (P8-01) + AI Document Hub
@@ -1799,6 +1845,30 @@ export default [
         component: () => import('./views/reports/EquityChanges.vue'),
       },
       {
+        path: 'reports/trial-balance',
+        name: 'reports.trial-balance',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: TrialBalance,
+      },
+      {
+        path: 'reports/balance-sheet',
+        name: 'reports.balance-sheet',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: BalanceSheet,
+      },
+      {
+        path: 'reports/income-statement',
+        name: 'reports.income-statement',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: IncomeStatement,
+      },
+      {
+        path: 'reports/profit-loss',
+        name: 'reports.profit-loss',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: ProfitLossReport,
+      },
+      {
         path: 'accounting/fixed-assets',
         name: 'accounting.fixed-assets',
         meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
@@ -1893,6 +1963,6 @@ export default [
   { path: '/:catchAll(.*)', component: NotFoundPage },
 ]
 
-// CLAUDE-CHECKPOINT: Added GeneralLedger and JournalEntries report routes
+// CLAUDE-CHECKPOINT: Added GeneralLedger, JournalEntries, TrialBalance, BalanceSheet, IncomeStatement, ProfitLoss report routes
 // CLAUDE-CHECKPOINT: Removed certificates route - no UI component available
 // LLM-CHECKPOINT

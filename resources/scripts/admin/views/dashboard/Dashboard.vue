@@ -7,7 +7,7 @@ import AiChatWidget from './widgets/AiChatWidget.vue'
 import QuickActionsWidget from './widgets/QuickActionsWidget.vue'
 import UnpaidSummaryWidget from './widgets/UnpaidSummaryWidget.vue'
 import RecentPaymentsWidget from './widgets/RecentPaymentsWidget.vue'
-import StockSummaryWidget from './widgets/StockSummaryWidget.vue'
+import StockDashboardWidget from '@/scripts/admin/components/StockDashboardWidget.vue'
 import DeadlinesWidget from './widgets/DeadlinesWidget.vue'
 import FiscalDeviceWidget from './widgets/FiscalDeviceWidget.vue'
 import OnboardingChecklistWidget from './widgets/OnboardingChecklistWidget.vue'
@@ -83,7 +83,7 @@ onMounted(() => {
     <!-- Deadlines & Stock Widgets -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4 lg:mb-6">
       <DeadlinesWidget />
-      <StockSummaryWidget v-if="stockEnabled" />
+      <StockDashboardWidget v-if="stockEnabled" />
     </div>
 
     <!-- Fiscal Device Status (only if company has configured devices) -->

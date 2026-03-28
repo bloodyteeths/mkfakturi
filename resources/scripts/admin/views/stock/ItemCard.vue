@@ -204,7 +204,7 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="movement in stockStore.itemCard.movements" :key="movement.id">
+              <tr v-for="movement in stockStore.itemCard.movements" :key="movement.id" :class="getRowClass(movement.source_type)">
                 <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
                   {{ movement.date }}
                 </td>
@@ -313,6 +313,14 @@ function getSourceClasses(sourceType) {
     adjustment: 'bg-amber-100 text-amber-700',
     transfer_in: 'bg-blue-100 text-blue-700',
     transfer_out: 'bg-purple-100 text-purple-700',
+    inventory_document: 'bg-slate-100 text-slate-700',
+    goods_receipt: 'bg-teal-100 text-teal-700',
+    production_consume: 'bg-orange-100 text-orange-700',
+    production_output: 'bg-emerald-100 text-emerald-700',
+    production_byproduct: 'bg-lime-100 text-lime-700',
+    production_wastage: 'bg-rose-100 text-rose-700',
+    wac_correction: 'bg-indigo-100 text-indigo-700',
+    return: 'bg-cyan-100 text-cyan-700',
   }
   return classes[sourceType] || 'bg-gray-100 text-gray-700'
 }
@@ -327,8 +335,21 @@ function getSourceDotClass(sourceType) {
     adjustment: 'bg-amber-500',
     transfer_in: 'bg-blue-500',
     transfer_out: 'bg-purple-500',
+    inventory_document: 'bg-slate-500',
+    goods_receipt: 'bg-teal-500',
+    production_consume: 'bg-orange-500',
+    production_output: 'bg-emerald-500',
+    production_byproduct: 'bg-lime-500',
+    production_wastage: 'bg-rose-500',
+    wac_correction: 'bg-indigo-500',
+    return: 'bg-cyan-500',
   }
   return dots[sourceType] || 'bg-gray-500'
+}
+
+function getRowClass(sourceType) {
+  if (sourceType === 'wac_correction') return 'bg-indigo-50'
+  return ''
 }
 
 function getSourceLabel(sourceType) {

@@ -993,7 +993,15 @@
             "invoice": "Продажба (Фактура)",
             "adjustment": "Корекција",
             "transfer_in": "Прием",
-            "transfer_out": "Издавање"
+            "transfer_out": "Издавање",
+            "inventory_document": "Попис",
+            "goods_receipt": "Приемница",
+            "production_consume": "Потрошувачка",
+            "production_output": "Производство",
+            "production_byproduct": "Нуспроизвод",
+            "production_wastage": "Расход",
+            "wac_correction": "ПСВ Корекција",
+            "return": "Поврат"
         },
         "sku": "Шифра",
         "barcode": "Баркод",
