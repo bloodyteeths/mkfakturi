@@ -10,6 +10,8 @@ import os
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
+import asyncio
+
 import httpx
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -31,6 +33,68 @@ except Exception:  # pragma: no cover - optional OCR pipeline
     np = None  # type: ignore
 
 app = FastAPI(title="Invoice2Data Microservice", version="1.0.0")
+
+# ── Gemini API retry helper ──────────────────────────────────────
+GEMINI_MAX_RETRIES = int(os.getenv("GEMINI_MAX_RETRIES", "3"))
+GEMINI_RETRY_BACKOFF = [2, 5, 10]  # seconds between retries
+
+
+async def _gemini_post_with_retry(
+    url: str,
+    payload: dict,
+    timeout: float = 90.0,
+) -> Optional[httpx.Response]:
+    """
+    POST to Gemini API with exponential backoff retry on transient errors.
+    Returns the response on success, or None after all retries exhausted.
+    """
+    logger = logging.getLogger(__name__)
+
+    for attempt in range(1, GEMINI_MAX_RETRIES + 1):
+        try:
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                resp = await client.post(
+                    url,
+                    json=payload,
+                    headers={"Content-Type": "application/json"},
+                )
+
+            if resp.status_code == 200:
+                data = resp.json()
+                if "error" not in data:
+                    return resp
+
+            # Retryable status codes: 429 (rate limit), 500, 502, 503, 529
+            if resp.status_code in (429, 500, 502, 503, 529):
+                backoff = GEMINI_RETRY_BACKOFF[min(attempt - 1, len(GEMINI_RETRY_BACKOFF) - 1)]
+                logger.warning(
+                    f"Gemini API {resp.status_code} on attempt {attempt}/{GEMINI_MAX_RETRIES}, "
+                    f"retrying in {backoff}s: {resp.text[:100]}"
+                )
+                await asyncio.sleep(backoff)
+                continue
+
+            # Non-retryable error (400, 401, 403, etc.)
+            logger.warning(f"Gemini API error {resp.status_code}: {resp.text[:200]}")
+            return None
+
+        except httpx.TimeoutException:
+            backoff = GEMINI_RETRY_BACKOFF[min(attempt - 1, len(GEMINI_RETRY_BACKOFF) - 1)]
+            logger.warning(
+                f"Gemini API timeout on attempt {attempt}/{GEMINI_MAX_RETRIES}, "
+                f"retrying in {backoff}s"
+            )
+            await asyncio.sleep(backoff)
+            continue
+        except Exception as e:
+            logger.warning(f"Gemini API error on attempt {attempt}: {e}")
+            if attempt < GEMINI_MAX_RETRIES:
+                await asyncio.sleep(GEMINI_RETRY_BACKOFF[min(attempt - 1, len(GEMINI_RETRY_BACKOFF) - 1)])
+                continue
+            return None
+
+    logger.warning(f"Gemini API failed after {GEMINI_MAX_RETRIES} attempts")
+    return None
 
 
 def load_templates():
@@ -1379,23 +1443,11 @@ async def _extract_with_gemini(
     }
 
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            resp = await client.post(
-                url,
-                json=payload,
-                headers={"Content-Type": "application/json"},
-            )
-
-        if resp.status_code != 200:
-            logger.warning(
-                f"Gemini API error {resp.status_code}: {resp.text[:200]}"
-            )
+        resp = await _gemini_post_with_retry(url, payload, timeout=90.0)
+        if resp is None:
             return None
 
         data = resp.json()
-        if "error" in data:
-            logger.warning(f"Gemini error: {data['error'].get('message', '')}")
-            return None
 
         # Extract text from response
         text = (
@@ -1603,23 +1655,11 @@ async def _extract_invoice_with_gemini(
     }
 
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            resp = await client.post(
-                url,
-                json=payload,
-                headers={"Content-Type": "application/json"},
-            )
-
-        if resp.status_code != 200:
-            logger.warning(
-                f"Gemini invoice API error {resp.status_code}: {resp.text[:200]}"
-            )
+        resp = await _gemini_post_with_retry(url, payload, timeout=90.0)
+        if resp is None:
             return None
 
         data = resp.json()
-        if "error" in data:
-            logger.warning(f"Gemini error: {data['error'].get('message', '')}")
-            return None
 
         # Check finish reason for truncation
         candidate = data.get("candidates", [{}])[0]
@@ -1801,9 +1841,9 @@ async def _classify_document_with_gemini(
     }
 
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            resp = await client.post(url, json=payload)
-            resp.raise_for_status()
+        resp = await _gemini_post_with_retry(url, payload, timeout=90.0)
+        if resp is None:
+            return None
 
         data = resp.json()
         text = (
@@ -2017,9 +2057,9 @@ async def _extract_with_gemini_prompt(
     }
 
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            resp = await client.post(url, json=payload)
-            resp.raise_for_status()
+        resp = await _gemini_post_with_retry(url, payload, timeout=90.0)
+        if resp is None:
+            return None
 
         data = resp.json()
         text = (
