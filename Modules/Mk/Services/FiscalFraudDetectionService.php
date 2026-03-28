@@ -206,17 +206,20 @@ class FiscalFraudDetectionService
                 ->exists();
 
             if (!$hasZReport) {
+                $hoursBefore = $closeHour - $hour;
+                $closeTime = $closeEvent->event_at->format('H:i');
+
                 return $this->createAlert(
                     $closeEvent->company_id,
                     $closeEvent->fiscal_device_id,
                     $closeEvent->user_id,
                     FiscalFraudAlert::TYPE_UNEXPECTED_CLOSE,
                     'high',
-                    "Фискалниот апарат е затворен во {$closeEvent->event_at->format('H:i')} без Z-извештај, {$closeHour - $hour} часа пред крај на работно време.",
+                    "Фискалниот апарат е затворен во {$closeTime} без Z-извештај, {$hoursBefore} часа пред крај на работно време.",
                     [
                         'event_id' => $closeEvent->id,
                         'close_at' => $closeEvent->event_at->toDateTimeString(),
-                        'hours_before_end' => $closeHour - $hour,
+                        'hours_before_end' => $hoursBefore,
                     ]
                 );
             }
