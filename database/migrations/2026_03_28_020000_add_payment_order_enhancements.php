@@ -19,26 +19,14 @@ return new class extends Migration
         }
 
         // Add PP50-specific fields to payment_batch_items
-        if (Schema::hasTable('payment_batch_items')) {
+        if (Schema::hasTable('payment_batch_items') && !Schema::hasColumn('payment_batch_items', 'payment_code')) {
             Schema::table('payment_batch_items', function (Blueprint $table) {
-                if (!Schema::hasColumn('payment_batch_items', 'payment_code')) {
-                    $table->string('payment_code', 3)->nullable()->after('currency_code');
-                }
-                if (!Schema::hasColumn('payment_batch_items', 'tax_number')) {
-                    $table->string('tax_number', 13)->nullable()->after('description');
-                }
-                if (!Schema::hasColumn('payment_batch_items', 'municipality_code')) {
-                    $table->string('municipality_code', 10)->nullable()->after('tax_number');
-                }
-                if (!Schema::hasColumn('payment_batch_items', 'revenue_code')) {
-                    $table->string('revenue_code', 10)->nullable()->after('municipality_code');
-                }
-                if (!Schema::hasColumn('payment_batch_items', 'program_code')) {
-                    $table->string('program_code', 10)->nullable()->after('revenue_code');
-                }
-                if (!Schema::hasColumn('payment_batch_items', 'approval_reference')) {
-                    $table->string('approval_reference', 50)->nullable()->after('program_code');
-                }
+                $table->string('payment_code', 3)->nullable()->after('currency_code');
+                $table->string('tax_number', 13)->nullable()->after('description');
+                $table->string('municipality_code', 10)->nullable()->after('tax_number');
+                $table->string('revenue_code', 10)->nullable()->after('municipality_code');
+                $table->string('program_code', 10)->nullable()->after('revenue_code');
+                $table->string('approval_reference', 50)->nullable()->after('program_code');
             });
         }
     }
