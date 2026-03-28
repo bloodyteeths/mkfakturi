@@ -19,7 +19,7 @@ export default function () {
     discount_val: 0,
     discount: 0,
     starts_at: null,
-    send_automatically: true,
+    send_automatically: false,
     status: 'ACTIVE',
     company_id: null,
     next_invoice_at: null,

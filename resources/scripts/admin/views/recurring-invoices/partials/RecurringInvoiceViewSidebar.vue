@@ -287,7 +287,7 @@ onBeforeUnmount(() => {
                 text-gray-600
               "
             >
-              {{ invoice.invoice_number }}
+              {{ invoice.formatted_starts_at }}
             </div>
             <BaseRecurringInvoiceStatusBadge
               :status="invoice.status"

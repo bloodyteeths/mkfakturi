@@ -30,7 +30,7 @@
         route.name !== 'recurring-invoices.view' &&
         userStore.hasAbilities(abilities.VIEW_RECURRING_INVOICE)
       "
-      :to="`recurring-invoices/${row.id}/view`"
+      :to="`/admin/recurring-invoices/${row.id}/view`"
     >
       <BaseDropdownItem>
         <BaseIcon

@@ -22,7 +22,7 @@
             to="/admin/recurring-invoices"
           />
           <BaseBreadcrumbItem
-            v-if="$route.name === 'invoices.edit'"
+            v-if="$route.name === 'recurring-invoices.edit'"
             :title="$t('recurring_invoices.edit_invoice')"
             to="#"
             active
@@ -35,7 +35,7 @@
             :to="`/invoices/pdf/${recurringInvoiceStore.newRecurringInvoice.unique_hash}`"
           >
             <BaseButton
-              v-if="$route.name === 'invoices.edit'"
+              v-if="$route.name === 'recurring-invoices.edit'"
               target="_blank"
               class="mr-3"
               variant="primary-outline"
@@ -191,7 +191,7 @@ let router = useRouter()
 
 let isLoadingContent = computed(
   () =>
-    recurringInvoiceStore.isFetchingInvoice ||
+    recurringInvoiceStore.isFetchingViewData ||
     recurringInvoiceStore.isFetchingInitialSettings
 )
 
@@ -263,7 +263,7 @@ const v$ = useVuelidate(
 recurringInvoiceStore.resetCurrentRecurringInvoice()
 recurringInvoiceStore.fetchRecurringInvoiceInitialSettings(isEdit.value)
 customFieldStore.resetCustomFields()
-v$.value.$reset
+v$.value.$reset()
 
 watch(
   () => recurringInvoiceStore.newRecurringInvoice.customer,
@@ -342,9 +342,5 @@ function submitCreate(data) {
     .catch((err) => {
       isSaving.value = false
     })
-}
-
-function checkValid() {
-  return false
 }
 </script>

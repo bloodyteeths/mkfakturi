@@ -269,12 +269,23 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
               ids: ids,
             })
             .then((response) => {
-              this.selectedRecurringInvoices.forEach((invoice) => {
+              if (id) {
                 let index = this.recurringInvoices.findIndex(
-                  (_inv) => _inv.id === invoice.id
+                  (_inv) => _inv.id === id
                 )
-                this.recurringInvoices.splice(index, 1)
-              })
+                if (index !== -1) {
+                  this.recurringInvoices.splice(index, 1)
+                }
+              } else {
+                this.selectedRecurringInvoices.forEach((invoiceId) => {
+                  let index = this.recurringInvoices.findIndex(
+                    (_inv) => _inv.id === invoiceId
+                  )
+                  if (index !== -1) {
+                    this.recurringInvoices.splice(index, 1)
+                  }
+                })
+              }
               this.selectedRecurringInvoices = []
               resolve(response)
             })

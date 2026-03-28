@@ -62,6 +62,10 @@ class RecurringInvoice extends Model
 
     public function getFormattedNextInvoiceAtAttribute()
     {
+        if (! $this->next_invoice_at) {
+            return null;
+        }
+
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->next_invoice_at)->translatedFormat($dateFormat);
@@ -69,6 +73,10 @@ class RecurringInvoice extends Model
 
     public function getFormattedLimitDateAttribute()
     {
+        if (! $this->limit_date) {
+            return null;
+        }
+
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->limit_date)->format($dateFormat);
@@ -393,7 +401,7 @@ class RecurringInvoice extends Model
 
     public function markStatusAsCompleted()
     {
-        if ($this->status == $this->status) {
+        if ($this->status !== self::COMPLETED) {
             $this->status = self::COMPLETED;
             $this->save();
         }

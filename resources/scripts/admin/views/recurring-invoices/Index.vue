@@ -269,7 +269,7 @@
         </template>
 
         <!-- Actions -->
-        <template v-if="canViewActions" #cell-actions="{ row }">
+        <template v-if="canViewActions()" #cell-actions="{ row }">
           <RecurringInvoiceIndexDropdown :row="row.data" :table="table" />
         </template>
       </BaseTable>
@@ -383,7 +383,7 @@ onUnmounted(() => {
 })
 
 const currentStatusIndex = computed(() => {
-  return statusList.value.findIndex((status) => status === filters.status)
+  return statusList.value.findIndex((status) => status.value === filters.status)
 })
 
 function canViewActions() {
@@ -471,7 +471,6 @@ function clearFilter() {
   filters.status = ''
   filters.from_date = ''
   filters.to_date = ''
-  filters.invoice_number = ''
   activeTab.value = t('general.all')
 }
 
