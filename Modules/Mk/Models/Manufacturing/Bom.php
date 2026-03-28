@@ -222,7 +222,7 @@ class Bom extends Model
     protected function getItemWac(Item $item): int
     {
         $stockService = app(\App\Services\StockService::class);
-        $stock = $stockService->getItemStock($item->id, $this->company_id);
+        $stock = $stockService->getItemStock($this->company_id, $item->id);
 
         return $stock['weighted_average_cost'] ?? 0;
     }
