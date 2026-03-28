@@ -70,6 +70,27 @@ class StockMovement extends Model
 
     public const SOURCE_PRODUCTION_WASTAGE = 'production_wastage';
 
+    public const SOURCE_WAC_CORRECTION = 'wac_correction';
+
+    public const SOURCE_RETURN = 'return';
+
+    protected static function booted(): void
+    {
+        static::updating(function (StockMovement $movement) {
+            // Allow updating frozen_at itself (for the freeze operation)
+            if ($movement->isDirty('frozen_at') && ! $movement->getOriginal('frozen_at')) {
+                return;
+            }
+
+            if ($movement->isFrozen()) {
+                throw new \RuntimeException(
+                    "Cannot modify frozen stock movement #{$movement->id}. "
+                    . 'Frozen movements are immutable to preserve WAC chain integrity.'
+                );
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -80,6 +101,7 @@ class StockMovement extends Model
             'balance_quantity' => 'decimal:4',
             'balance_value' => 'integer',
             'meta' => 'array',
+            'frozen_at' => 'datetime',
         ];
     }
 
@@ -224,6 +246,12 @@ class StockMovement extends Model
             self::SOURCE_TRANSFER_OUT => 'Transfer Out',
             self::SOURCE_INVENTORY_DOCUMENT => 'Inventory Document',
             self::SOURCE_GOODS_RECEIPT => 'Goods Receipt',
+            self::SOURCE_PRODUCTION_CONSUME => 'Production Consume',
+            self::SOURCE_PRODUCTION_OUTPUT => 'Production Output',
+            self::SOURCE_PRODUCTION_BYPRODUCT => 'Production Byproduct',
+            self::SOURCE_PRODUCTION_WASTAGE => 'Production Wastage',
+            self::SOURCE_WAC_CORRECTION => 'WAC Correction',
+            self::SOURCE_RETURN => 'POS Return',
         ];
 
         return $labels[$this->source_type] ?? $this->source_type;
@@ -240,5 +268,13 @@ class StockMovement extends Model
         }
 
         return (int) round($this->balance_value / $this->balance_quantity);
+    }
+
+    /**
+     * Check if this movement is frozen (immutable).
+     */
+    public function isFrozen(): bool
+    {
+        return $this->frozen_at !== null;
     }
 }

@@ -50,6 +50,12 @@ export const useStockStore = (useWindow = false) => {
         grand_total: { quantity: 0, value: 0 }
       },
       isLoadingValuation: false,
+      // WAC Audit state
+      wacAuditRuns: [],
+      wacAuditTotal: 0,
+      currentAuditRun: null,
+      currentProposal: null,
+      isLoadingAudit: false,
     }),
 
     getters: {
@@ -502,6 +508,93 @@ export const useStockStore = (useWindow = false) => {
         try {
           const params = warehouseId ? { warehouse_id: warehouseId } : {}
           const response = await axios.get(`/stock/items/${itemId}/stock`, { params })
+          return response.data
+        } catch (err) {
+          handleError(err)
+          throw err
+        }
+      },
+
+      // WAC Audit actions
+      async fetchWacAuditRuns(params = {}) {
+        this.isLoadingAudit = true
+        try {
+          const response = await axios.get('/stock/wac-audit', { params })
+          this.wacAuditRuns = response.data.data || []
+          this.wacAuditTotal = response.data.meta?.total || 0
+          return response.data
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoadingAudit = false
+        }
+      },
+
+      async runWacAudit(data = {}) {
+        this.isLoadingAudit = true
+        try {
+          const response = await axios.post('/stock/wac-audit/run', data)
+          this.currentAuditRun = response.data.data
+          return response.data
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoadingAudit = false
+        }
+      },
+
+      async fetchWacAuditDetail(auditRunId) {
+        this.isLoadingAudit = true
+        try {
+          const response = await axios.get(`/stock/wac-audit/${auditRunId}`)
+          this.currentAuditRun = response.data.data
+          return response.data.data
+        } catch (err) {
+          handleError(err)
+          throw err
+        } finally {
+          this.isLoadingAudit = false
+        }
+      },
+
+      async triggerAiAnalysis(auditRunId) {
+        try {
+          const response = await axios.post(`/stock/wac-audit/${auditRunId}/analyze`)
+          return response.data
+        } catch (err) {
+          handleError(err)
+          throw err
+        }
+      },
+
+      async generateCorrectionProposal(auditRunId) {
+        try {
+          const response = await axios.post(`/stock/wac-audit/${auditRunId}/proposal/generate`)
+          this.currentProposal = response.data.data
+          return response.data
+        } catch (err) {
+          handleError(err)
+          throw err
+        }
+      },
+
+      async approveProposal(proposalId) {
+        try {
+          const response = await axios.post(`/stock/wac-audit/proposals/${proposalId}/approve`)
+          this.currentProposal = response.data.data?.proposal || null
+          return response.data
+        } catch (err) {
+          handleError(err)
+          throw err
+        }
+      },
+
+      async rejectProposal(proposalId, notes = '') {
+        try {
+          const response = await axios.post(`/stock/wac-audit/proposals/${proposalId}/reject`, { notes })
+          this.currentProposal = response.data.data
           return response.data
         } catch (err) {
           handleError(err)

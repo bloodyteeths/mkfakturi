@@ -393,6 +393,9 @@ class StockService
             // Update item's quantity field if tracked
             $this->updateItemQuantity($itemId, $warehouseId);
 
+            // Auto-freeze earlier movements in same chain
+            $this->autoFreezeOnNewMovement($companyId, $itemId, $warehouseId, $movement->id);
+
             DB::commit();
 
             Log::info('Stock movement recorded', [
@@ -749,6 +752,90 @@ class StockService
                 'valuation_reports' => true,
             ],
             'created_date' => '2025-11-30',
+        ];
+    }
+
+    /**
+     * Auto-freeze all earlier movements in the same (item, warehouse) chain.
+     * Called after a new movement is recorded to enforce WAC immutability.
+     */
+    protected function autoFreezeOnNewMovement(int $companyId, int $itemId, int $warehouseId, int $newMovementId): void
+    {
+        StockMovement::where('company_id', $companyId)
+            ->where('item_id', $itemId)
+            ->where('warehouse_id', $warehouseId)
+            ->whereNull('frozen_at')
+            ->where('id', '<', $newMovementId)
+            ->update(['frozen_at' => Carbon::now()]);
+    }
+
+    /**
+     * Validate movement input before recording.
+     * Returns array with 'errors' (blocking) and 'warnings' (non-blocking).
+     */
+    public function validateMovementInput(
+        int $companyId,
+        int $warehouseId,
+        int $itemId,
+        float $quantity,
+        ?int $unitCost,
+        ?string $movementDate = null
+    ): array {
+        $errors = [];
+        $warnings = [];
+
+        // Error: unit_cost required and must be positive for stock IN
+        if ($quantity > 0 && ($unitCost === null || $unitCost <= 0)) {
+            $errors[] = 'Unit cost must be greater than zero for stock IN movements.';
+        }
+
+        // Error: movement_date in the future
+        if ($movementDate) {
+            $parsedDate = Carbon::parse($movementDate);
+            if ($parsedDate->isAfter(Carbon::now()->endOfDay())) {
+                $errors[] = 'Movement date cannot be in the future.';
+            }
+        }
+
+        // Warning: out-of-order date
+        if ($movementDate) {
+            $latestMovement = StockMovement::where('company_id', $companyId)
+                ->where('item_id', $itemId)
+                ->where('warehouse_id', $warehouseId)
+                ->orderBy('movement_date', 'desc')
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if ($latestMovement && Carbon::parse($movementDate)->isBefore($latestMovement->movement_date)) {
+                $warnings[] = 'Movement date is before the latest movement ('
+                    . $latestMovement->movement_date->format('Y-m-d')
+                    . '). This may affect WAC chain calculations.';
+            }
+        }
+
+        // Warning: unit_cost deviation from historical average
+        if ($quantity > 0 && $unitCost !== null && $unitCost > 0) {
+            $avgCost = StockMovement::where('company_id', $companyId)
+                ->where('item_id', $itemId)
+                ->where('quantity', '>', 0)
+                ->whereNotNull('unit_cost')
+                ->where('unit_cost', '>', 0)
+                ->avg('unit_cost');
+
+            if ($avgCost && $avgCost > 0) {
+                $deviation = abs($unitCost - $avgCost) / $avgCost;
+                if ($deviation > 3.0) {
+                    $warnings[] = 'Unit cost (' . number_format($unitCost / 100, 2) . ') deviates significantly from the historical average ('
+                        . number_format($avgCost / 100, 2) . '). Please verify.';
+                }
+            }
+        }
+
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'has_errors' => count($errors) > 0,
+            'has_warnings' => count($warnings) > 0,
         ];
     }
 }
