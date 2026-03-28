@@ -62,6 +62,14 @@ class StockMovement extends Model
 
     public const SOURCE_GOODS_RECEIPT = 'goods_receipt';
 
+    public const SOURCE_PRODUCTION_CONSUME = 'production_consume';
+
+    public const SOURCE_PRODUCTION_OUTPUT = 'production_output';
+
+    public const SOURCE_PRODUCTION_BYPRODUCT = 'production_byproduct';
+
+    public const SOURCE_PRODUCTION_WASTAGE = 'production_wastage';
+
     protected function casts(): array
     {
         return [

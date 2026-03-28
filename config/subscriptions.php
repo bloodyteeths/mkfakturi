@@ -188,6 +188,7 @@ return [
                 'custom_fields' => true,
                 'api_access' => true,         // API available in Business (matches landing page)
                 'ai_suggestions' => 'advanced', // Advanced AI
+                'manufacturing' => true,      // BOM + Production Orders
             ],
             'limits' => [
                 'expenses_per_month' => null,
@@ -204,6 +205,8 @@ return [
                 'proformas_per_month' => 200,
                 'projects_total' => 100,
                 'warehouses_total' => 20,
+                'boms_total' => 100,
+                'production_orders_per_month' => 500,
                 'deadlines_custom' => 200,
                 'client_documents_per_month' => 500,
                 'efaktura_per_month' => null,
@@ -237,6 +240,7 @@ return [
                 'priority_support' => true,
                 'multi_location' => true,
                 'ifrs_reports' => true,
+                'manufacturing' => true,      // BOM + Production Orders
             ],
             'limits' => [
                 // All unlimited except AI (token costs)

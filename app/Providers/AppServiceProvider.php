@@ -308,6 +308,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Models\StockMovement::observe(\App\Observers\StockMovementGlObserver::class);
         }
 
+        // Manufacturing module observers (behind accounting backbone flag)
+        if ($isEnabled) {
+            \Modules\Mk\Models\Manufacturing\ProductionOrder::observe(\Modules\Mk\Observers\ProductionOrderObserver::class);
+        }
+
         // Company observer - seeds chart of accounts for new companies (Partner Accounting Phase 4)
         \App\Models\Company::observe(\App\Observers\CompanyObserver::class);
     }

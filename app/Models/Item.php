@@ -101,6 +101,14 @@ class Item extends Model
     }
 
     /**
+     * Get the BOMs where this item is the output product.
+     */
+    public function boms(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\Modules\Mk\Models\Manufacturing\Bom::class, 'output_item_id');
+    }
+
+    /**
      * Scope a query to search items by name, SKU, barcode, or description.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query

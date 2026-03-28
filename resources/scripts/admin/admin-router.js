@@ -1320,6 +1320,74 @@ export default [
         component: () => import('@/scripts/admin/views/collections/Index.vue'),
       },
 
+      // Manufacturing Module
+      {
+        path: 'manufacturing',
+        name: 'manufacturing.index',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: () => import('@/scripts/admin/views/manufacturing/Index.vue'),
+      },
+      {
+        path: 'manufacturing/boms',
+        name: 'manufacturing.bom.index',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: () => import('@/scripts/admin/views/manufacturing/bom/Index.vue'),
+      },
+      {
+        path: 'manufacturing/boms/create',
+        name: 'manufacturing.bom.create',
+        meta: { ability: abilities.CREATE_ITEM },
+        component: () => import('@/scripts/admin/views/manufacturing/bom/Create.vue'),
+      },
+      {
+        path: 'manufacturing/boms/:id',
+        name: 'manufacturing.bom.view',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: () => import('@/scripts/admin/views/manufacturing/bom/View.vue'),
+      },
+      {
+        path: 'manufacturing/orders',
+        name: 'manufacturing.order.index',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: () => import('@/scripts/admin/views/manufacturing/orders/Index.vue'),
+      },
+      {
+        path: 'manufacturing/orders/create',
+        name: 'manufacturing.order.create',
+        meta: { ability: abilities.CREATE_ITEM },
+        component: () => import('@/scripts/admin/views/manufacturing/orders/Create.vue'),
+      },
+      {
+        path: 'manufacturing/orders/:id',
+        name: 'manufacturing.order.view',
+        meta: { ability: abilities.VIEW_ITEM },
+        component: () => import('@/scripts/admin/views/manufacturing/orders/View.vue'),
+      },
+      {
+        path: 'manufacturing/orders/:id/complete',
+        name: 'manufacturing.order.complete',
+        meta: { ability: abilities.CREATE_ITEM },
+        component: () => import('@/scripts/admin/views/manufacturing/orders/Complete.vue'),
+      },
+      {
+        path: 'manufacturing/reports/cost-analysis',
+        name: 'manufacturing.report.cost-analysis',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/manufacturing/reports/CostAnalysis.vue'),
+      },
+      {
+        path: 'manufacturing/reports/variance',
+        name: 'manufacturing.report.variance',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/manufacturing/reports/VarianceReport.vue'),
+      },
+      {
+        path: 'manufacturing/reports/wastage',
+        name: 'manufacturing.report.wastage',
+        meta: { ability: abilities.VIEW_FINANCIAL_REPORT },
+        component: () => import('@/scripts/admin/views/manufacturing/reports/WastageReport.vue'),
+      },
+
       // F6: Purchase Orders
       {
         path: 'purchase-orders',

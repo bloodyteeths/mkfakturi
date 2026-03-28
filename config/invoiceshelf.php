@@ -531,6 +531,18 @@ return [
             'feature_flag' => 'accounting_backbone',
         ],
         [
+            'title' => 'navigation.manufacturing',
+            'group' => 2,
+            'submenu' => 'operations',
+            'link' => '/admin/manufacturing',
+            'icon' => 'CogIcon',
+            'name' => 'Manufacturing',
+            'owner_only' => false,
+            'ability' => '',
+            'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
+        [
             'title' => 'navigation.projects',
             'group' => 2,
             'submenu' => 'operations',

@@ -975,6 +975,7 @@ Route::prefix('/v1')->group(function () {
                 Route::delete('/boms/{bom}', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'destroy']);
                 Route::post('/boms/{bom}/duplicate', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'duplicate']);
                 Route::get('/boms/{bom}/cost', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'cost']);
+                Route::get('/boms/{bom}/stock-availability', [\Modules\Mk\Http\Controllers\Manufacturing\BomController::class, 'stockAvailability']);
 
                 // Production Orders / Работни налози
                 Route::get('/orders', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionOrderController::class, 'index']);
@@ -1001,6 +1002,14 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/orders/{order}/pdf/izdatnica', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'izdatnicaPdf']);
                 Route::get('/orders/{order}/pdf/trebovnica', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'trebovnicaPdf']);
                 Route::get('/boms/{bom}/pdf/normativ', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'normativPdf']);
+                Route::get('/items/{item}/pdf/lagerska-kartica', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionReportController::class, 'lagerskaKarticaPdf']);
+
+                // AI-powered features
+                Route::post('/ai/suggest-materials', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionAiController::class, 'suggestMaterials']);
+                Route::get('/ai/boms/{bom}/predict-wastage', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionAiController::class, 'predictWastage']);
+                Route::get('/ai/orders/{order}/detect-anomalies', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionAiController::class, 'detectAnomalies']);
+                Route::post('/ai/parse-intent', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionAiController::class, 'parseIntent']);
+                Route::get('/ai/orders/{order}/explain-variance', [\Modules\Mk\Http\Controllers\Manufacturing\ProductionAiController::class, 'explainVariance']);
             });
 
             // Daily Closing & Period Lock (Phase 3)

@@ -122,6 +122,10 @@ if [ "$RAILWAY_ENVIRONMENT" != "" ]; then
     php artisan db:seed --class=MacedonianChartOfAccountsSeeder --force
     echo "Macedonian Chart of Accounts seeder completed"
 
+    # Seed Manufacturing test data (idempotent - Company 2 only)
+    echo "Seeding Manufacturing test data..."
+    php artisan db:seed --class=ManufacturingTestSeeder --force || echo "ManufacturingTestSeeder failed or table not ready"
+
     # Seed Leave Types (idempotent - safe to run multiple times)
     echo "Seeding Leave Types..."
     php artisan db:seed --class=LeaveTypesSeeder --force || echo "LeaveTypesSeeder failed or table not ready"

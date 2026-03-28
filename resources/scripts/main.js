@@ -32,6 +32,9 @@ window.Facturino.addMessages(docMessages)
 import budgetMessages from '@/scripts/admin/i18n/budgets.js'
 window.Facturino.addMessages(budgetMessages)
 
+import mfgMessages from '@/scripts/admin/i18n/manufacturing.js'
+window.Facturino.addMessages(mfgMessages)
+
 // Register service worker for PWA support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
