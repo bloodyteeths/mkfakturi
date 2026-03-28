@@ -7,10 +7,12 @@ use App\Http\Requests\SupportContactRequest;
 use App\Mail\SupportContactConfirmation;
 use App\Mail\SupportContactNotification;
 use App\Models\SupportContact;
+use App\Models\SupportContactReply;
 use App\Services\ClawdNotifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class SupportContactController extends Controller
 {
@@ -136,9 +138,12 @@ class SupportContactController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        $sortBy = in_array($request->get('sort_by'), ['created_at', 'subject', 'name', 'category', 'priority', 'status', 'assigned_to']) ? $request->get('sort_by') : 'created_at';
+        $sortOrder = $request->get('sort_order') === 'asc' ? 'asc' : 'desc';
+
         $query = SupportContact::query()
-            ->with(['user', 'company'])
-            ->orderBy('created_at', 'desc');
+            ->with(['user', 'company', 'assignedTo'])
+            ->orderBy($sortBy, $sortOrder);
 
         if ($request->has('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
@@ -154,8 +159,11 @@ class SupportContactController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('subject', 'like', "%{$search}%")
-                    ->orWhere('reference_number', 'like', "%{$search}%");
+                    ->orWhere('subject', 'like', "%{$search}%");
+                // Search by ID for reference number (SUP-000123 → 123)
+                if (preg_match('/SUP-?0*(\d+)/i', $search, $m)) {
+                    $q->orWhere('id', (int) $m[1]);
+                }
             });
         }
 
