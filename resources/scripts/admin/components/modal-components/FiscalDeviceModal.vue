@@ -220,6 +220,7 @@ const isErpnetFp = computed(() => {
 })
 
 const connectionTypeOptions = [
+  { id: 'webserial', label: 'USB (WebSerial)' },
   { id: 'tcp', label: 'TCP/IP' },
   { id: 'serial', label: 'RS232 Serial' },
   { id: 'bluetooth', label: 'Bluetooth' },

@@ -5,6 +5,30 @@
   >
     <FiscalDeviceModal />
 
+    <!-- Setup Guide (shown when no devices configured) -->
+    <div v-if="showSetupGuide" class="mb-6 rounded-lg border border-indigo-200 bg-indigo-50 p-5">
+      <h4 class="text-sm font-semibold text-indigo-900 mb-3">
+        {{ $t('fiscal.setup_guide_title') }}
+      </h4>
+      <ol class="space-y-3 text-sm text-indigo-800">
+        <li class="flex items-start gap-3">
+          <span class="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-indigo-200 text-indigo-700 text-xs font-bold">1</span>
+          <span>{{ $t('fiscal.setup_step_1') }}</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-indigo-200 text-indigo-700 text-xs font-bold">2</span>
+          <span>{{ $t('fiscal.setup_step_2') }}</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-indigo-200 text-indigo-700 text-xs font-bold">3</span>
+          <span>{{ $t('fiscal.setup_step_3') }}</span>
+        </li>
+      </ol>
+      <p class="mt-3 text-xs text-indigo-600">
+        {{ $t('fiscal.setup_note') }}
+      </p>
+    </div>
+
     <!-- ErpNet.FP Sidecar Status Banner -->
     <div
       v-if="erpnetStatus !== null"
@@ -48,6 +72,11 @@
           {{ printer.model || 'Unknown' }} — SN: {{ printer.serialNumber || printer.id }}
         </div>
       </div>
+    </div>
+
+    <!-- WebSerial Direct USB Connection -->
+    <div class="mb-4">
+      <WebSerialDevicePicker />
     </div>
 
     <template #action>
@@ -106,6 +135,7 @@ import axios from 'axios'
 
 import FiscalDeviceDropdown from '@/scripts/admin/components/dropdowns/FiscalDeviceIndexDropdown.vue'
 import FiscalDeviceModal from '@/scripts/admin/components/modal-components/FiscalDeviceModal.vue'
+import WebSerialDevicePicker from '@/scripts/admin/components/WebSerialDevicePicker.vue'
 
 const { t } = useI18n()
 
@@ -113,6 +143,9 @@ const fiscalDeviceStore = useFiscalDeviceStore()
 const modalStore = useModalStore()
 const table = ref(null)
 const erpnetStatus = ref(null)
+const deviceCount = ref(null)
+
+const showSetupGuide = computed(() => deviceCount.value === 0)
 
 async function checkErpnetStatus() {
   try {
@@ -178,7 +211,7 @@ function getDeviceLabel(deviceType) {
 }
 
 function connectionLabel(type) {
-  const labels = { tcp: 'TCP/IP', serial: 'RS232', bluetooth: 'Bluetooth', 'erpnet-fp': 'ErpNet.FP' }
+  const labels = { tcp: 'TCP/IP', serial: 'RS232', bluetooth: 'Bluetooth', 'erpnet-fp': 'ErpNet.FP', webserial: 'USB (WebSerial)' }
   return labels[type] || type
 }
 
@@ -188,6 +221,7 @@ function connectionBadgeClass(type) {
     serial: 'bg-yellow-50 text-yellow-800 ring-1 ring-inset ring-yellow-600/20',
     bluetooth: 'bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-700/10',
     'erpnet-fp': 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-700/10',
+    webserial: 'bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-700/10',
   }
   return classes[type] || 'bg-gray-50 text-gray-600'
 }
@@ -200,6 +234,7 @@ async function fetchData({ page, filter, sort }) {
   }
 
   let response = await fiscalDeviceStore.fetchFiscalDevices(data)
+  deviceCount.value = (response.data.data || []).length
 
   return {
     data: response.data.data,

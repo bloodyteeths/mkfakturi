@@ -44,6 +44,10 @@ window.Facturino.addMessages(tradeMessages)
 import fiscalPrinterMessages from '@/scripts/admin/i18n/fiscal-printer.js'
 window.Facturino.addMessages(fiscalPrinterMessages)
 
+// Auto-connect fiscal printer on app boot (if previously granted)
+import { fiscalAutoConnectPlugin } from '@/scripts/admin/plugins/fiscal-auto-connect.js'
+window.Facturino.booting(fiscalAutoConnectPlugin)
+
 // Register service worker for PWA support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

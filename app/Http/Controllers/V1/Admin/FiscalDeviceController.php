@@ -62,7 +62,7 @@ class FiscalDeviceController extends Controller
             'device_type' => 'required|string|max:50',
             'name' => 'nullable|string|max:100',
             'serial_number' => 'required|string|max:100',
-            'connection_type' => 'nullable|string|in:tcp,serial,bluetooth,erpnet-fp',
+            'connection_type' => 'nullable|string|in:tcp,serial,bluetooth,erpnet-fp,webserial',
             'ip_address' => 'nullable|ip',
             'port' => 'nullable|integer|min:1|max:65535',
             'serial_port' => 'nullable|string|max:100',
@@ -136,7 +136,7 @@ class FiscalDeviceController extends Controller
 
         $validated = $request->validate([
             'name' => 'nullable|string|max:100',
-            'connection_type' => 'nullable|string|in:tcp,serial,bluetooth,erpnet-fp',
+            'connection_type' => 'nullable|string|in:tcp,serial,bluetooth,erpnet-fp,webserial',
             'ip_address' => 'nullable|ip',
             'port' => 'nullable|integer|min:1|max:65535',
             'serial_port' => 'nullable|string|max:100',
@@ -357,4 +357,114 @@ class FiscalDeviceController extends Controller
 
         return response()->json($receipts);
     }
+
+    /**
+     * Record a fiscal receipt printed via browser WebSerial.
+     *
+     * The browser communicates directly with the fiscal device via WebSerial API,
+     * then POSTs the result here for server-side record-keeping.
+     */
+    public function recordReceipt(Request $request, int $id): JsonResponse
+    {
+        $companyId = $request->header('company');
+        $device = FiscalDevice::forCompany($companyId)->findOrFail($id);
+
+        $validated = $request->validate([
+            'invoice_id' => 'required|integer|exists:invoices,id',
+            'receipt_number' => 'required|string|max:50',
+            'fiscal_id' => 'required|string|max:100',
+            'amount' => 'required|integer',
+            'vat_amount' => 'required|integer',
+            'raw_response' => 'nullable|string|max:10000',
+            'source' => 'required|string|in:webserial,erpnet-fp,manual',
+        ]);
+
+        // Prevent duplicate fiscalization of same invoice on same device
+        $existingReceipt = FiscalReceipt::where('fiscal_device_id', $device->id)
+            ->where('invoice_id', $validated['invoice_id'])
+            ->first();
+
+        if ($existingReceipt) {
+            return response()->json([
+                'error' => 'This invoice has already been fiscalized on this device',
+                'existing_receipt' => $existingReceipt,
+            ], 422);
+        }
+
+        $receipt = FiscalReceipt::create([
+            'company_id' => $companyId,
+            'fiscal_device_id' => $device->id,
+            'invoice_id' => $validated['invoice_id'],
+            'receipt_number' => $validated['receipt_number'],
+            'amount' => $validated['amount'],
+            'vat_amount' => $validated['vat_amount'],
+            'fiscal_id' => $validated['fiscal_id'],
+            'raw_response' => $validated['raw_response'],
+            'metadata' => json_encode(['source' => $validated['source']]),
+        ]);
+
+        Log::info('Fiscal receipt recorded', [
+            'receipt_id' => $receipt->id,
+            'device_id' => $device->id,
+            'invoice_id' => $validated['invoice_id'],
+            'fiscal_id' => $validated['fiscal_id'],
+            'source' => $validated['source'],
+        ]);
+
+        return response()->json(['data' => $receipt], 201);
+    }
+
+    /**
+     * Record a Z-report printed via browser WebSerial.
+     */
+    public function recordZReport(Request $request, int $id): JsonResponse
+    {
+        $companyId = $request->header('company');
+        $device = FiscalDevice::forCompany($companyId)->findOrFail($id);
+
+        $validated = $request->validate([
+            'report_number' => 'required|string|max:50',
+            'total_amount' => 'required|string',
+            'total_vat' => 'required|string',
+            'receipt_count' => 'required|string',
+            'raw_response' => 'nullable|string|max:10000',
+            'source' => 'required|string|in:webserial,erpnet-fp,manual',
+        ]);
+
+        // Compare with system receipt records for reconciliation
+        $systemTotal = FiscalReceipt::forDevice($device->id)
+            ->whereDate('created_at', today())
+            ->sum('amount');
+
+        $systemCount = FiscalReceipt::forDevice($device->id)
+            ->whereDate('created_at', today())
+            ->count();
+
+        Log::info('Z-report recorded', [
+            'device_id' => $device->id,
+            'report_number' => $validated['report_number'],
+            'device_total' => $validated['total_amount'],
+            'system_total' => $systemTotal,
+            'source' => $validated['source'],
+        ]);
+
+        return response()->json([
+            'data' => [
+                'report_number' => $validated['report_number'],
+                'device_totals' => [
+                    'total_amount' => $validated['total_amount'],
+                    'total_vat' => $validated['total_vat'],
+                    'receipt_count' => $validated['receipt_count'],
+                ],
+                'system_totals' => [
+                    'total_amount' => $systemTotal,
+                    'receipt_count' => $systemCount,
+                ],
+                'reconciled' => (string) $systemTotal === $validated['total_amount']
+                    && (string) $systemCount === $validated['receipt_count'],
+            ],
+        ]);
+    }
 }
+
+// CLAUDE-CHECKPOINT

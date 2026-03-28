@@ -49,13 +49,13 @@ class FiscalDeviceManager
 
     /** @var array<string, string> Default connection type per device */
     private array $defaultConnectionTypes = [
-        'daisy' => 'tcp',
-        'david' => 'tcp',
-        'razvigorec' => 'serial',
-        'severec' => 'serial',
-        'expert-sx' => 'serial',
-        'pelisterec' => 'bluetooth',
-        'alpha' => 'serial',
+        'daisy' => 'webserial',
+        'david' => 'webserial',
+        'razvigorec' => 'webserial',
+        'severec' => 'webserial',
+        'expert-sx' => 'webserial',
+        'pelisterec' => 'webserial',
+        'alpha' => 'webserial',
         'erpnet-fp' => 'tcp',
     ];
 

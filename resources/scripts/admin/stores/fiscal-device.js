@@ -18,12 +18,14 @@ export const useFiscalDeviceStore = (useWindow = false) => {
         device_type: '',
         name: '',
         serial_number: '',
-        connection_type: 'tcp',
+        connection_type: 'webserial',
         ip_address: '',
         port: 4999,
         serial_port: '',
         is_active: true,
       },
+      webserialConnected: false,
+      webserialDeviceInfo: null,
     }),
 
     getters: {
@@ -37,7 +39,7 @@ export const useFiscalDeviceStore = (useWindow = false) => {
           device_type: '',
           name: '',
           serial_number: '',
-          connection_type: 'tcp',
+          connection_type: 'webserial',
           ip_address: '',
           port: 4999,
           serial_port: '',
@@ -146,6 +148,19 @@ export const useFiscalDeviceStore = (useWindow = false) => {
               reject(err)
             })
         })
+      },
+
+      recordReceipt(deviceId, receiptData) {
+        return axios.post(`/fiscal-devices/${deviceId}/record-receipt`, receiptData)
+      },
+
+      recordZReport(deviceId, reportData) {
+        return axios.post(`/fiscal-devices/${deviceId}/record-z-report`, reportData)
+      },
+
+      setWebserialState({ connected, deviceInfo }) {
+        this.webserialConnected = connected
+        this.webserialDeviceInfo = deviceInfo
       },
     },
   })()

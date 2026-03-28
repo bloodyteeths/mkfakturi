@@ -18,6 +18,7 @@ import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
 import EInvoiceTab from '@/scripts/admin/views/invoices/partials/EInvoiceTab.vue'
 import EInvoiceInboxTab from '@/scripts/admin/views/invoices/partials/EInvoiceInboxTab.vue'
 import ProfitTab from '@/scripts/admin/views/invoices/partials/ProfitTab.vue'
+import FiscalizeButton from '@/scripts/admin/components/FiscalizeButton.vue'
 
 import abilities from '@/scripts/admin/stub/abilities'
 
@@ -341,6 +342,13 @@ onSearched = debounce(onSearched, 500)
             {{ $t('invoices.record_payment') }}
           </BaseButton>
         </router-link>
+
+        <!-- Fiscal Receipt (WebSerial) -->
+        <FiscalizeButton
+          v-if="invoiceData.status !== 'DRAFT'"
+          :invoice="invoiceData"
+          class="ml-3"
+        />
 
         <!-- Invoice Dropdown  -->
         <InvoiceDropdown
