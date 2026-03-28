@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Фактура - {{ $invoice->invoice_number }}</title>
+    <title>@if($invoice->type === 'advance')Аванс фактура @elseif($invoice->type === 'final')Финална фактура @else Фактура @endif - {{ $invoice->invoice_number }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
     <style type="text/css">
@@ -263,7 +263,15 @@
                     @endif
                 </td>
                 <td width="50%" style="text-align:right; vertical-align:bottom;">
-                    <div style="font-size:24px; font-weight:bold; color:#2D2D2D; letter-spacing:0.15em;">ФАКТУРА</div>
+                    <div style="font-size:24px; font-weight:bold; color:#2D2D2D; letter-spacing:0.15em;">
+                        @if($invoice->type === 'advance')
+                            ADVANCE INVOICE / АВАНС ФАКТУРА
+                        @elseif($invoice->type === 'final')
+                            FINAL INVOICE / ФИНАЛНА ФАКТУРА
+                        @else
+                            INVOICE / ФАКТУРА
+                        @endif
+                    </div>
                 </td>
             </tr>
         </table>
@@ -342,13 +350,21 @@
                 </td>
                 <td width="25%">
                     <span class="meta-label">Ден на извршен промет</span>
-                    <span class="meta-value">{{ $invoice->formattedInvoiceDate }}</span>
+                    <span class="meta-value">{{ $invoice->formattedPerformanceDate ?? $invoice->formattedInvoiceDate }}</span>
                 </td>
                 <td width="25%">
                     <span class="meta-label">Рок на плаќање</span>
                     <span class="meta-value">{{ $invoice->formattedDueDate }}</span>
                 </td>
             </tr>
+            @if($invoice->performance_date && $invoice->performance_date != $invoice->invoice_date)
+            <tr>
+                <td colspan="4">
+                    <span class="meta-label">Date of Performance</span>
+                    <span class="meta-value">{{ $invoice->formattedPerformanceDate }}</span>
+                </td>
+            </tr>
+            @endif
         </table>
     </div>
 
@@ -475,6 +491,55 @@
         <div style="clear: both;"></div>
     </div>
 
+    {{-- Reverse Charge Notice (Article 32-а ЗДДВ) --}}
+    @if($invoice->is_reverse_charge)
+    <div style="margin-top: 10px; padding: 8px; border: 1px solid #dc3545; background: #fff3f3; font-size: 10px;">
+        <strong>{{ __('invoices.reverse_charge') }}</strong><br>
+        ПРЕНЕСУВАЊЕ НА ДАНОЧНА ОБВРСКА — Член 32-а од Законот за данокот на додадена вредност.<br>
+        Даночен должник е примателот на прометот. ДДВ не е пресметан на оваа фактура.<br>
+        <em>Reverse charge — VAT liability transferred to recipient per Art. 32-a VAT Law.</em>
+    </div>
+    @endif
+
+    {{-- Advance Invoice Notice (Article 14 ЗДДВ) --}}
+    @if($invoice->type === 'advance')
+    <div style="margin-top: 10px; padding: 8px; border: 1px solid #0d6efd; background: #f0f7ff; font-size: 10px;">
+        <strong>АВАНС ФАКТУРА / ADVANCE INVOICE</strong><br>
+        Издадена согласно чл. 14 од Законот за данокот на додадена вредност.<br>
+        Оваа фактура се однесува на примен аванс и ќе биде одбиена од финалната фактура.<br>
+        <em>Advance payment invoice per Art. 14 VAT Law. Will be deducted from final invoice.</em>
+    </div>
+    @endif
+
+    {{-- Advance Deduction Table for Final Invoices (Article 53/9 ЗДДВ) --}}
+    @if($invoice->type === 'final' && $invoice->advanceInvoices->count() > 0)
+    <div style="margin-top: 10px; padding: 8px; border: 1px solid #198754; background: #f0fff4; font-size: 10px;">
+        <strong>Одбивање на аванси (чл. 53 ст. 9 ЗДДВ) / Advance Deduction</strong>
+        <table width="100%" style="margin-top: 5px; font-size: 9px;" cellpadding="3">
+            <tr style="background: #e8f5e9;">
+                <th align="left">Број / Number</th>
+                <th align="left">Датум / Date</th>
+                <th align="right">Износ / Amount</th>
+            </tr>
+            @foreach($invoice->advanceInvoices as $advance)
+            <tr>
+                <td>{{ $advance->invoice_number }}</td>
+                <td>{{ $advance->formattedInvoiceDate }}</td>
+                <td align="right">{!! format_money_pdf($advance->total, $invoice->customer->currency) !!}</td>
+            </tr>
+            @endforeach
+            <tr style="border-top: 1px solid #198754; font-weight: bold;">
+                <td colspan="2">Вкупно одбиени аванси / Total deducted:</td>
+                <td align="right">{!! format_money_pdf($invoice->total_advances_amount, $invoice->customer->currency) !!}</td>
+            </tr>
+            <tr style="font-weight: bold; font-size: 11px;">
+                <td colspan="2">ПРЕОСТАНАТО ЗА ПЛАЌАЊЕ / REMAINING DUE:</td>
+                <td align="right">{!! format_money_pdf($invoice->remaining_after_advances, $invoice->customer->currency) !!}</td>
+            </tr>
+        </table>
+    </div>
+    @endif
+
     {{-- Payment Details --}}
     <div class="payment-details">
         <div class="payment-title">Детали за плаќање</div>
@@ -520,6 +585,7 @@
     <div class="footer">
         <strong>Фактурата е валидна без печат и потпис согласно Законот за даночна постапка.</strong>
     </div>
+    {{-- CLAUDE-CHECKPOINT --}}
 </body>
 
 </html>

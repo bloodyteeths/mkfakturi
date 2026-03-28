@@ -112,6 +112,10 @@ class InvoicesRequest extends FormRequest
                 'nullable',
                 'boolean',
             ],
+            'performance_date' => [
+                'nullable',
+                'date',
+            ],
         ];
 
         $companyCurrency = CompanySetting::getSetting('currency', $this->header('company'));
@@ -351,6 +355,7 @@ class InvoicesRequest extends FormRequest
                 'project_id' => $this->project_id,
                 'type' => $this->input('type', 'standard'),
                 'is_reverse_charge' => (bool) $this->input('is_reverse_charge', false),
+                'performance_date' => $this->input('performance_date'),
             ])
             ->toArray();
     }
@@ -360,3 +365,4 @@ class InvoicesRequest extends FormRequest
         return (bool) $this->input('allow_duplicate', false);
     }
 }
+// CLAUDE-CHECKPOINT

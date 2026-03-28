@@ -59,6 +59,7 @@ class Invoice extends Model implements HasMedia
         'deleted_at',
         'invoice_date',
         'due_date',
+        'performance_date',
     ];
 
     protected $guarded = [
@@ -69,6 +70,7 @@ class Invoice extends Model implements HasMedia
         'formattedCreatedAt',
         'formattedInvoiceDate',
         'formattedDueDate',
+        'formattedPerformanceDate',
         'invoicePdfUrl',
     ];
 
@@ -91,6 +93,7 @@ class Invoice extends Model implements HasMedia
             'discount' => 'float',
             'discount_val' => 'integer',
             'exchange_rate' => 'float',
+            'performance_date' => 'date',
         ];
     }
 
@@ -333,6 +336,17 @@ class Invoice extends Model implements HasMedia
     }
 
     /**
+     * Formatted performance date (Ден на извршен промет) per ЗДДВ Член 53.
+     * Falls back to invoice_date if performance_date is not set.
+     */
+    public function getFormattedPerformanceDateAttribute($value)
+    {
+        $date = $this->performance_date ?? $this->invoice_date;
+
+        return Carbon::parse($date)->translatedFormat($this->getCachedDateFormat());
+    }
+
+    /**
      * Accessor for tax_total - fallback to tax if null
      * This keeps older records working where only tax was stored.
      */
@@ -471,6 +485,10 @@ class Invoice extends Model implements HasMedia
             $query->where('project_id', $projectId);
         })->when($filters['type'] ?? null, function ($query, $type) {
             $query->where('type', $type);
+        })->when($filters['performance_date_from'] ?? null, function ($query, $from) {
+            $query->where('performance_date', '>=', Carbon::parse($from)->format('Y-m-d'));
+        })->when($filters['performance_date_to'] ?? null, function ($query, $to) {
+            $query->where('performance_date', '<=', Carbon::parse($to)->format('Y-m-d'));
         })->when(isset($filters['is_reverse_charge']), function ($query) use ($filters) {
             $query->where('is_reverse_charge', (bool) $filters['is_reverse_charge']);
         })->when($filters['orderByField'] ?? null, function ($query, $orderByField) use ($filters) {
@@ -828,6 +846,8 @@ class Invoice extends Model implements HasMedia
             ]);
         }
 
+        $bankAccount = CompanySetting::getSetting('bank_account', $company->id);
+
         view()->share([
             'invoice' => $this,
             'customFields' => $customFields,
@@ -840,6 +860,7 @@ class Invoice extends Model implements HasMedia
             'signature' => $signature,
             'taxes' => $taxes,
             'casysQrDataUri' => $casysQrDataUri,
+            'bank_account' => $bankAccount,
         ]);
 
         $template = PdfTemplateUtils::findFormattedTemplate('invoice', $invoiceTemplate, '');

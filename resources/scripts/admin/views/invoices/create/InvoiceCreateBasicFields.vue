@@ -38,6 +38,18 @@
       </BaseInputGroup>
 
       <BaseInputGroup
+        :label="$t('invoices.performance_date')"
+        :content-loading="isLoading"
+      >
+        <BaseDatePicker
+          v-model="invoiceStore.newInvoice.performance_date"
+          :content-loading="isLoading"
+          :calendar-button="true"
+          calendar-button-icon="calendar"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup
         :label="$t('invoices.invoice_number')"
         :content-loading="isLoading"
         :error="v.invoice_number.$error && v.invoice_number.$errors[0].$message"
@@ -144,3 +156,4 @@ const time24h = computed(() => {
 })
 
 </script>
+// CLAUDE-CHECKPOINT: Added performance_date field to invoice basic fields

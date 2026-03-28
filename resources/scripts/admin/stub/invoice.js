@@ -38,5 +38,7 @@ export default function () {
     project_id: null,
     type: 'standard',
     is_reverse_charge: false,
+    performance_date: '',
   }
 }
+// CLAUDE-CHECKPOINT: Added performance_date to invoice stub

@@ -115,6 +115,14 @@
           <BaseInputGroup label="ЕМБС (Матичен број)">
             <BaseInput v-model="companyForm.registration_number" type="text" />
           </BaseInputGroup>
+
+          <BaseInputGroup :label="$t('settings.company_info.bank_account')">
+            <BaseInput
+              v-model="companyForm.bank_account"
+              type="text"
+              placeholder="e.g. 300000000123456"
+            />
+          </BaseInputGroup>
         </div>
       </BaseInputGrid>
 
@@ -179,6 +187,7 @@ const companyForm = reactive({
   tax_id: null,
   vat_id: null,
   registration_number: null,
+  bank_account: null,
   address: {
     address_street_1: '',
     address_street_2: '',
@@ -353,4 +362,5 @@ function removeCompany(id) {
     size: 'sm',
   })
 }
+// CLAUDE-CHECKPOINT
 </script>

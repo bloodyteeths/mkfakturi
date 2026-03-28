@@ -4866,7 +4866,25 @@
         "weeks": "Weeks",
         "working": "Working",
         "year": "Year",
-        "years": "{years} Year"
+        "years": "{years} Year",
+        "contract_reference": "Contract Reference",
+        "next_invoice": "Next Invoice",
+        "clone": "Clone",
+        "cloned_message": "Recurring invoice cloned successfully",
+        "activate": "Activate",
+        "paused_message": "Recurring invoice paused",
+        "activated_message": "Recurring invoice activated",
+        "generated_message": "Invoice generated successfully",
+        "generation_failed": "Invoice generation failed — limit may be reached",
+        "pause_selected": "Pause Selected",
+        "activate_selected": "Activate Selected",
+        "frequency.every_week": "Every Week",
+        "frequency.every_15_days": "Every 15 Days",
+        "frequency.every_month": "Every Month",
+        "frequency.every_quarter": "Every Quarter",
+        "frequency.every_6_months": "Every 6 Months",
+        "frequency.every_year": "Every Year",
+        "frequency.custom": "Custom (CRON)"
     },
     "reports": {
         "cash_flow": {

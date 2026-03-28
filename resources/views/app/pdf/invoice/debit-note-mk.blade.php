@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>@if($invoice->type === 'advance')Аванс фактура@elseif($invoice->type === 'final')Финална фактура@else Фактура @endif - {{ $invoice->invoice_number }}</title>
+    <title>Книжно задолжување - {{ $invoice->invoice_number }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style type="text/css">
         body { font-family: "DejaVu Sans"; font-size: 10px; margin: 10px; }
         .header { text-align: center; margin-bottom: 8px; border-bottom: 2px solid #333; padding-bottom: 5px; }
         .header h1 { margin: 0; font-size: 16px; }
+        .header h2 { margin: 2px 0 0 0; font-size: 11px; color: #666; font-weight: normal; }
         .info-grid { width: 100%; margin-bottom: 8px; }
         .info-col { float: left; width: 48%; vertical-align: top; padding: 3px; }
         .section-title { font-weight: bold; font-size: 11px; margin-bottom: 3px; border-bottom: 1px solid #ccc; }
@@ -28,6 +29,8 @@
         .footer { margin-top: 10px; font-size: 9px; color: #666; }
         .notes-section { margin-top: 4px; padding: 4px; background: #f9f9f9; border: 1px solid #ddd; font-size: 8px; }
         .notes-section p { margin: 1px 0; }
+        .reference-box { margin-top: 6px; padding: 6px; border: 2px solid #c0392b; background: #fdedec; font-size: 10px; }
+        .reason-box { margin-top: 6px; padding: 6px; border: 1px solid #e6a817; background: #fef9e7; font-size: 10px; }
     </style>
 </head>
 <body>
@@ -36,22 +39,22 @@
         @if ($logo)
             <img style="height:30px; margin-bottom:3px;" src="{{ \App\Space\ImageUtils::toBase64Src($logo) }}" alt="Лого">
         @endif
-        <h1>
-            @if($invoice->type === 'advance')
-                АВАНС ФАКТУРА
-            @elseif($invoice->type === 'final')
-                ФИНАЛНА ФАКТУРА
-            @else
-                ФАКТУРА
-            @endif
-        </h1>
+        <h1>КНИЖНО ЗАДОЛЖУВАЊЕ / DEBIT NOTE</h1>
+        <h2>{{ $invoice->invoice_number }}</h2>
     </div>
+
+    {{-- Reference to Original Invoice --}}
+    @if($invoice->reference_number)
+    <div class="reference-box">
+        <strong>Се однесува на фактура бр. / Refers to invoice no.:</strong> {{ $invoice->reference_number }}
+    </div>
+    @endif
 
     {{-- Issuer & Buyer Information --}}
     <div class="info-grid">
         {{-- Issuer (Supplier) Block --}}
         <div class="info-col" style="border-right: 1px solid #ccc;">
-            <div class="section-title">ИЗДАВАЧ НА ФАКТУРА</div>
+            <div class="section-title">ИЗДАВАЧ НА КНИЖНО ЗАДОЛЖУВАЊЕ</div>
             <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->company->name ?? '' }}</span></div>
             @php
                 $addr = $invoice->company ? $invoice->company->address : null;
@@ -92,7 +95,7 @@
 
         {{-- Buyer Block --}}
         <div class="info-col">
-            <div class="section-title">ПРИМАТЕЛ НА ФАКТУРА</div>
+            <div class="section-title">ПРИМАТЕЛ</div>
             <div><span class="field-label">Назив:</span> <span class="field-value">{{ $invoice->customer->company_name ?: ($invoice->customer->name ?? '') }}</span></div>
             @php
                 $custAddr = $invoice->customer ? $invoice->customer->billingAddress : null;
@@ -128,10 +131,10 @@
     </div>
     <div style="clear: both;"></div>
 
-    {{-- Invoice Metadata --}}
+    {{-- Debit Note Metadata --}}
     <table style="width:100%; margin-bottom:6px; border-collapse:collapse;">
         <tr>
-            <td style="padding:3px; border:1px solid #333; width:25%;"><strong>Број на фактура:</strong></td>
+            <td style="padding:3px; border:1px solid #333; width:25%;"><strong>Број на документ:</strong></td>
             <td style="padding:3px; border:1px solid #333; width:25%;">{{ $invoice->invoice_number }}</td>
             <td style="padding:3px; border:1px solid #333; width:25%;"><strong>Датум на издавање:</strong></td>
             <td style="padding:3px; border:1px solid #333; width:25%;">{{ $invoice->formattedInvoiceDate }}</td>
@@ -143,6 +146,14 @@
             <td style="padding:3px; border:1px solid #333;">{{ $invoice->formattedDueDate }}</td>
         </tr>
     </table>
+
+    {{-- Reason for Debit Note --}}
+    @if($invoice->notes)
+    <div class="reason-box">
+        <strong>Причина за задолжување / Reason:</strong><br>
+        {{ $invoice->notes }}
+    </div>
+    @endif
 
     {{-- Items Table --}}
     <table class="items">
@@ -162,11 +173,8 @@
             @php $index = 1; @endphp
             @foreach ($invoice->items as $item)
                 @php
-                    // Calculate base amount (price before tax)
                     $itemBaseAmount = $item->total;
                     $itemTaxPercent = 0;
-
-                    // Get tax percentage for this item
                     if($invoice->tax_per_item === 'YES' && $item->taxes->count() > 0) {
                         $firstTax = $item->taxes->first();
                         $itemTaxPercent = $firstTax->percent ?? 0;
@@ -202,9 +210,7 @@
         </thead>
         <tbody>
             @php
-                // Group taxes by rate
                 $taxesByRate = collect();
-
                 if ($invoice->tax_per_item === 'YES') {
                     foreach ($invoice->items as $item) {
                         foreach ($item->taxes as $tax) {
@@ -212,8 +218,6 @@
                             if (!$taxesByRate->has($rate)) {
                                 $taxesByRate->put($rate, ['base' => 0, 'tax' => 0]);
                             }
-
-                            // Get existing values, modify, and put back
                             $existing = $taxesByRate->get($rate);
                             $existing['base'] += $item->total;
                             $existing['tax'] += $tax->amount;
@@ -260,7 +264,7 @@
             <td class="total-value">{!! format_money_pdf($invoice->tax, $invoice->customer->currency) !!}</td>
         </tr>
         <tr class="grand-total">
-            <td class="total-label">ВКУПНО ЗА ПЛАЌАЊЕ:</td>
+            <td class="total-label">ВКУПНО ЗА ЗАДОЛЖУВАЊЕ:</td>
             <td class="total-value" style="font-size:13px;">{!! format_money_pdf($invoice->total, $invoice->customer->currency) !!}</td>
         </tr>
         @if($invoice->due_amount > 0 && $invoice->paid_status !== App\Models\Invoice::STATUS_PAID)
@@ -275,63 +279,8 @@
     @if($invoice->is_reverse_charge)
         <div style="margin-top: 6px; padding: 4px; border: 1px solid #c0392b; background: #fdedec; font-size: 9px;">
             <strong>ПРЕНЕСУВАЊЕ НА ДАНОЧНА ОБВРСКА</strong> — Член 32-а од Законот за данокот на додадена вредност.
-            Даночен должник е примателот на прометот. ДДВ не е пресметан на оваа фактура.
+            Даночен должник е примателот на прометот. ДДВ не е пресметан на ова книжно задолжување.
         </div>
-    @endif
-
-    {{-- Advance Invoice Notice (Article 14 ЗДДВ) --}}
-    @if($invoice->type === 'advance')
-        <div style="margin-top: 6px; padding: 4px; border: 1px solid #e6a817; background: #fef9e7; font-size: 9px;">
-            <strong>АВАНС ФАКТУРА</strong> — Издадена согласно чл. 14 од Законот за данокот на додадена вредност.
-            Оваа фактура се однесува на примен аванс (предуплата) и ќе биде одбиена од финалната фактура.
-        </div>
-    @endif
-
-    {{-- Advance Deduction Table for Final Invoices (Article 53/9 ЗДДВ) --}}
-    @if($invoice->type === 'final' && $invoice->advanceInvoices->count() > 0)
-        <table style="width: 100%; border-collapse: collapse; margin-top: 6px;">
-            <thead>
-                <tr>
-                    <th colspan="3" style="padding: 4px; background: #e8f5e9; border: 1px solid #333; text-align: left; font-size: 10px;">
-                        Одбивање на аванси (чл. 53 ст. 9 ЗДДВ)
-                    </th>
-                </tr>
-                <tr>
-                    <th style="padding: 3px; background: #f0f0f0; border: 1px solid #333; text-align: left; font-size: 9px;">Аванс фактура бр.</th>
-                    <th style="padding: 3px; background: #f0f0f0; border: 1px solid #333; text-align: left; font-size: 9px;">Датум</th>
-                    <th style="padding: 3px; background: #f0f0f0; border: 1px solid #333; text-align: right; font-size: 9px;">Износ</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $totalAdvances = 0; @endphp
-                @foreach($invoice->advanceInvoices as $advance)
-                    @php $totalAdvances += $advance->total; @endphp
-                    <tr>
-                        <td style="padding: 3px; border: 1px solid #ccc; font-size: 9px;">{{ $advance->invoice_number }}</td>
-                        <td style="padding: 3px; border: 1px solid #ccc; font-size: 9px;">{{ $advance->formattedInvoiceDate }}</td>
-                        <td style="padding: 3px; border: 1px solid #ccc; font-size: 9px; text-align: right;">
-                            {!! format_money_pdf($advance->total, $invoice->customer->currency) !!}
-                        </td>
-                    </tr>
-                @endforeach
-                <tr style="background: #f0f0f0;">
-                    <td colspan="2" style="padding: 3px; border: 1px solid #333; font-weight: bold; text-align: right; font-size: 9px;">
-                        Вкупно одбиени аванси:
-                    </td>
-                    <td style="padding: 3px; border: 1px solid #333; font-weight: bold; text-align: right; font-size: 9px;">
-                        -{!! format_money_pdf($totalAdvances, $invoice->customer->currency) !!}
-                    </td>
-                </tr>
-                <tr style="background: #e8f5e9;">
-                    <td colspan="2" style="padding: 4px; border: 1px solid #333; font-weight: bold; text-align: right; font-size: 10px;">
-                        ПРЕОСТАНАТО ЗА ПЛАЌАЊЕ:
-                    </td>
-                    <td style="padding: 4px; border: 1px solid #333; font-weight: bold; text-align: right; font-size: 10px;">
-                        {!! format_money_pdf($invoice->total - $totalAdvances, $invoice->customer->currency) !!}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
     @endif
 
     {{-- Payment Details --}}
@@ -406,7 +355,7 @@
     {{-- Footer / Legal Text --}}
     <div class="footer" style="margin-top: 6px; border-top: 1px solid #ccc; padding-top: 3px;">
         <div style="text-align: center; font-size: 8px;">
-            <strong>Фактурата е валидна без печат и потпис согласно Законот за даночна постапка.</strong>
+            <strong>Книжното задолжување е валидно без печат и потпис согласно Законот за даночна постапка.</strong>
         </div>
     </div>
     {{-- CLAUDE-CHECKPOINT --}}

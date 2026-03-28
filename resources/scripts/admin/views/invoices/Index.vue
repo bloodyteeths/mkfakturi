@@ -133,6 +133,14 @@
           @remove="filters.type = ''"
         />
       </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('invoices.reverse_charge_filter')">
+        <div class="flex items-center gap-2 mt-1">
+          <BaseSwitch
+            v-model="filters.is_reverse_charge"
+          />
+        </div>
+      </BaseInputGroup>
     </BaseFilterWrapper>
 
     <BaseEmptyPlaceholder
@@ -204,6 +212,7 @@
             <BaseTab :title="$t('general.draft')" filter="DRAFT" />
             <BaseTab :title="$t('general.sent')" filter="SENT" />
             <BaseTab :title="$t('general.due')" filter="DUE" />
+            <BaseTab :title="$t('invoices.overdue')" filter="OVERDUE" />
           </BaseTabGroup>
 
           <BaseDropdown
@@ -466,6 +475,7 @@ let filters = reactive({
   invoice_number: '',
   project_id: route.query.project_id || '',
   type: '',
+  is_reverse_charge: false,
 })
 
 const invoiceTypeOptions = [
@@ -570,6 +580,7 @@ async function fetchData({ page, filter, sort }) {
     invoice_number: filters.invoice_number,
     project_id: filters.project_id,
     type: filters.type,
+    is_reverse_charge: filters.is_reverse_charge ? 1 : '',
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,
@@ -618,6 +629,10 @@ function setStatusFilter(val) {
       filters.status = 'DUE'
       break
 
+    case t('invoices.overdue'):
+      filters.status = 'OVERDUE'
+      break
+
     default:
       filters.status = ''
       break
@@ -643,6 +658,7 @@ function clearFilter() {
   filters.invoice_number = ''
   filters.project_id = ''
   filters.type = ''
+  filters.is_reverse_charge = false
 
   activeTab.value = t('general.all')
 }
@@ -761,6 +777,10 @@ function setActiveTab(val) {
       activeTab.value = t('general.due')
       break
 
+    case 'OVERDUE':
+      activeTab.value = t('invoices.overdue')
+      break
+
     case 'COMPLETED':
       activeTab.value = t('invoices.completed')
       break
@@ -787,4 +807,4 @@ function setActiveTab(val) {
   }
 }
 </script>
-// CLAUDE-CHECKPOINT: Added export button to invoices index view
+// CLAUDE-CHECKPOINT: Added Overdue tab, Reverse Charge filter toggle, and updated filter handling
