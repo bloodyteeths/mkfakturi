@@ -1320,6 +1320,14 @@ export default [
         component: () => import('@/scripts/admin/views/collections/Index.vue'),
       },
 
+      // Fiscal Receipts — Фискални Сметки
+      {
+        path: 'fiscal-receipts',
+        name: 'fiscal-receipts.index',
+        meta: { isOwner: true, ability: abilities.VIEW_FISCAL_MONITOR },
+        component: () => import('@/scripts/admin/views/fiscal-receipts/Index.vue'),
+      },
+
       // Fiscal Monitor — Cash Register Fraud Detection
       {
         path: 'fiscal-monitor',

@@ -503,6 +503,8 @@ Route::prefix('/v1')->group(function () {
             // Fiscal Devices (P10-02)
             // ----------------------------------
 
+            Route::get('fiscal-receipts', [FiscalDeviceController::class, 'allReceipts']);
+
             Route::prefix('fiscal-devices')->group(function () {
                 Route::get('/', [FiscalDeviceController::class, 'index']);
                 Route::post('/', [FiscalDeviceController::class, 'store']);

@@ -33,6 +33,7 @@ class FiscalReceipt extends Model
         'fiscal_id',
         'raw_response',
         'metadata',
+        'source',
     ];
 
     protected $casts = [
@@ -49,6 +50,11 @@ class FiscalReceipt extends Model
     public function fiscalDevice(): BelongsTo
     {
         return $this->belongsTo(FiscalDevice::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     public function scopeForCompany($query, int $companyId)

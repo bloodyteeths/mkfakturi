@@ -400,6 +400,7 @@ class FiscalDeviceController extends Controller
             'vat_amount' => $validated['vat_amount'],
             'fiscal_id' => $validated['fiscal_id'],
             'raw_response' => $validated['raw_response'],
+            'source' => $validated['source'],
             'metadata' => json_encode(['source' => $validated['source']]),
         ]);
 
@@ -464,6 +465,37 @@ class FiscalDeviceController extends Controller
                     && (string) $systemCount === $validated['receipt_count'],
             ],
         ]);
+    }
+    /**
+     * List all fiscal receipts for the company (paginated).
+     */
+    public function allReceipts(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        $query = FiscalReceipt::forCompany($companyId)
+            ->with(['fiscalDevice:id,name,device_type', 'invoice:id,invoice_number,total,status'])
+            ->orderBy($request->get('orderByField', 'created_at'), $request->get('orderBy', 'desc'));
+
+        if ($request->filled('fiscal_device_id')) {
+            $query->where('fiscal_device_id', $request->input('fiscal_device_id'));
+        }
+
+        if ($request->filled('source')) {
+            $query->where('source', $request->input('source'));
+        }
+
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->input('from_date'));
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->input('to_date'));
+        }
+
+        $receipts = $query->paginate($request->get('limit', 25));
+
+        return response()->json($receipts);
     }
 }
 

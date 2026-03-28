@@ -543,6 +543,18 @@ return [
             'feature_flag' => 'accounting_backbone',
         ],
         [
+            'title' => 'navigation.fiscal_receipts',
+            'group' => 2,
+            'submenu' => 'operations',
+            'link' => '/admin/fiscal-receipts',
+            'icon' => 'ReceiptPercentIcon',
+            'name' => 'Fiscal Receipts',
+            'owner_only' => false,
+            'ability' => 'view-fiscal-monitor',
+            'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
+        [
             'title' => 'navigation.fiscal_monitor',
             'group' => 2,
             'submenu' => 'operations',
