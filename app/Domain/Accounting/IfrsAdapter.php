@@ -385,13 +385,13 @@ class IfrsAdapter
 
         return Account::firstOrCreate(
             [
-                'account_type' => Account::PAYABLE,
-                'category_id' => null,
-                'name' => $accountName,
+                'code' => '222',
                 'entity_id' => $entityId,
             ],
             [
-                'code' => '222',
+                'account_type' => Account::PAYABLE,
+                'category_id' => null,
+                'name' => $accountName,
                 'currency_id' => $this->getCurrencyId($companyId),
             ]
         );
@@ -878,9 +878,8 @@ class IfrsAdapter
             // Query per-account balances using ifrs_ledgers
             $rows = DB::select("
                 SELECT
-                    a.id,
                     a.code,
-                    a.name,
+                    MIN(a.name) as name,
                     a.account_type,
                     COALESCE(SUM(CASE WHEN l.posting_date < ? AND l.entry_type = 'D' THEN l.amount / l.rate ELSE 0 END), 0) as pre_debit,
                     COALESCE(SUM(CASE WHEN l.posting_date < ? AND l.entry_type = 'C' THEN l.amount / l.rate ELSE 0 END), 0) as pre_credit,
@@ -889,7 +888,7 @@ class IfrsAdapter
                 FROM ifrs_accounts a
                 LEFT JOIN ifrs_ledgers l ON a.id = l.post_account AND l.entity_id = a.entity_id AND l.deleted_at IS NULL
                 WHERE a.entity_id = ? AND a.deleted_at IS NULL
-                GROUP BY a.id, a.code, a.name, a.account_type
+                GROUP BY a.code, a.account_type
                 HAVING (pre_debit <> 0 OR pre_credit <> 0 OR period_debit <> 0 OR period_credit <> 0)
                 ORDER BY a.code
             ", [$fromDate, $fromDate, $fromDate, $toDate, $fromDate, $toDate, $entity->id]);
@@ -1590,16 +1589,16 @@ class IfrsAdapter
         $accountName = $userAccount ? $userAccount->name : $fallbackName;
         $accountCode = $userAccount ? $userAccount->code : $fallbackCode;
 
-        // Get or create corresponding IFRS account
+        // Get or create corresponding IFRS account (search by code to prevent duplicates)
         return Account::firstOrCreate(
+            [
+                'code' => $accountCode,
+                'entity_id' => $entityId,
+            ],
             [
                 'account_type' => $ifrsAccountType,
                 'category_id' => null,
                 'name' => $accountName,
-                'entity_id' => $entityId,
-            ],
-            [
-                'code' => $accountCode,
                 'currency_id' => $this->getCurrencyId($companyId),
             ]
         );
@@ -1738,13 +1737,13 @@ class IfrsAdapter
 
         return Account::firstOrCreate(
             [
-                'account_type' => Account::BANK,
-                'category_id' => null,
-                'name' => $accountName,
+                'code' => $code,
                 'entity_id' => $entityId,
             ],
             [
-                'code' => $code,
+                'account_type' => Account::BANK,
+                'category_id' => null,
+                'name' => $accountName,
                 'currency_id' => $this->getCurrencyId($companyId),
             ]
         );
@@ -1769,13 +1768,13 @@ class IfrsAdapter
                 if ($userAccount) {
                     return Account::firstOrCreate(
                         [
-                            'account_type' => Account::CONTROL,
-                            'category_id' => null,
-                            'name' => $userAccount->name,
+                            'code' => $userAccount->code,
                             'entity_id' => $entityId,
                         ],
                         [
-                            'code' => $userAccount->code,
+                            'account_type' => Account::CONTROL,
+                            'category_id' => null,
+                            'name' => $userAccount->name,
                             'currency_id' => $this->getCurrencyId($companyId),
                         ]
                     );
@@ -1961,13 +1960,13 @@ class IfrsAdapter
         if ($userAccount) {
             return Account::firstOrCreate(
                 [
-                    'account_type' => Account::CURRENT_ASSET,
-                    'category_id' => null,
-                    'name' => $userAccount->name,
+                    'code' => '1302',
                     'entity_id' => $entityId,
                 ],
                 [
-                    'code' => '1302',
+                    'account_type' => Account::CURRENT_ASSET,
+                    'category_id' => null,
+                    'name' => $userAccount->name,
                     'currency_id' => $this->getCurrencyId($companyId),
                 ]
             );
@@ -1991,13 +1990,13 @@ class IfrsAdapter
         if ($userAccount) {
             return Account::firstOrCreate(
                 [
-                    'account_type' => Account::CONTROL,
-                    'category_id' => null,
-                    'name' => $userAccount->name,
+                    'code' => '2302',
                     'entity_id' => $entityId,
                 ],
                 [
-                    'code' => '2302',
+                    'account_type' => Account::CONTROL,
+                    'category_id' => null,
+                    'name' => $userAccount->name,
                     'currency_id' => $this->getCurrencyId($companyId),
                 ]
             );
@@ -2271,13 +2270,13 @@ class IfrsAdapter
 
         return Account::firstOrCreate(
             [
-                'account_type' => Account::OPERATING_EXPENSE,
-                'category_id' => null,
-                'name' => $categoryName,
+                'code' => $accountCode,
                 'entity_id' => $entityId,
             ],
             [
-                'code' => $accountCode,
+                'account_type' => Account::OPERATING_EXPENSE,
+                'category_id' => null,
+                'name' => $categoryName,
                 'currency_id' => $this->getCurrencyId($companyId),
             ]
         );
@@ -2364,21 +2363,32 @@ class IfrsAdapter
             // Set user's entity context for IFRS EntityScope
             $this->setUserEntityContext($entity);
 
-            // Get the account by ID or code
+            // Get ALL accounts with the same code (handles duplicates from legacy bug)
             if ($accountId) {
                 $account = Account::where('entity_id', $entity->id)->find($accountId);
+                if (! $account) {
+                    return ['error' => 'Account not found in IFRS ledger. This account may not have any transactions yet.'];
+                }
+                // Find all accounts with the same code for complete data
+                $accounts = Account::where('entity_id', $entity->id)
+                    ->where('code', $account->code)
+                    ->whereNull('deleted_at')
+                    ->get();
             } elseif ($accountCode) {
-                $account = Account::where('entity_id', $entity->id)->where('code', $accountCode)->first();
+                $accounts = Account::where('entity_id', $entity->id)
+                    ->where('code', $accountCode)
+                    ->whereNull('deleted_at')
+                    ->get();
+                if ($accounts->isEmpty()) {
+                    return ['error' => 'Account not found in IFRS ledger. This account may not have any transactions yet.'];
+                }
+                $account = $accounts->first();
             } else {
                 return ['error' => 'Account ID or code is required'];
             }
 
-            if (! $account) {
-                return ['error' => 'Account not found in IFRS ledger. This account may not have any transactions yet.'];
-            }
-
-            // Use the found account's ID for subsequent queries
-            $accountId = $account->id;
+            // Use ALL account IDs for the same code (merges duplicates)
+            $accountIds = $accounts->pluck('id')->toArray();
 
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
@@ -2387,7 +2397,7 @@ class IfrsAdapter
             // IFRS uses 'D' for debit and 'C' for credit (Balance::DEBIT, Balance::CREDIT)
             $openingBalance = DB::table('ifrs_ledgers')
                 ->where('entity_id', $entity->id)
-                ->where('post_account', $accountId)
+                ->whereIn('post_account', $accountIds)
                 ->where('posting_date', '<', $start->toDateString())
                 ->selectRaw('
                     SUM(CASE WHEN entry_type = ? THEN amount ELSE 0 END) -
@@ -2401,7 +2411,7 @@ class IfrsAdapter
                 ->join('ifrs_transactions as t', 'l.transaction_id', '=', 't.id')
                 ->leftJoin('ifrs_line_items as li', 'l.line_item_id', '=', 'li.id')
                 ->where('l.entity_id', $entity->id)
-                ->where('l.post_account', $accountId)
+                ->whereIn('l.post_account', $accountIds)
                 ->whereBetween('l.posting_date', [$start->toDateString(), $end->toDateString()])
                 ->select(array_filter([
                     'l.posting_date as date',
@@ -2483,8 +2493,12 @@ class IfrsAdapter
 
             $this->setUserEntityContext($entity);
 
-            $account = Account::where('entity_id', $entity->id)->where('code', $accountCode)->first();
-            if (! $account) {
+            // Get ALL accounts with the same code (handles duplicates from legacy bug)
+            $accounts = Account::where('entity_id', $entity->id)
+                ->where('code', $accountCode)
+                ->whereNull('deleted_at')
+                ->get();
+            if ($accounts->isEmpty()) {
                 // Account exists in local chart but not in IFRS ledger — return empty results
                 $localAccount = \App\Models\Account::where('company_id', $company->id)->where('code', $accountCode)->first();
                 return [
@@ -2502,6 +2516,8 @@ class IfrsAdapter
                     ],
                 ];
             }
+            $account = $accounts->first();
+            $accountIds = $accounts->pluck('id')->toArray();
 
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
@@ -2514,7 +2530,7 @@ class IfrsAdapter
                 ->join('ifrs_transactions as t', 'l.transaction_id', '=', 't.id')
                 ->leftJoin('ifrs_line_items as li', 'l.line_item_id', '=', 'li.id')
                 ->where('l.entity_id', $entity->id)
-                ->where('l.post_account', $account->id)
+                ->whereIn('l.post_account', $accountIds)
                 ->whereBetween('l.posting_date', [$start->toDateString(), $end->toDateString()])
                 ->select([
                     'l.posting_date as date',
@@ -2532,7 +2548,7 @@ class IfrsAdapter
             $openingEntries = DB::table('ifrs_ledgers as l')
                 ->leftJoin('ifrs_line_items as li', 'l.line_item_id', '=', 'li.id')
                 ->where('l.entity_id', $entity->id)
-                ->where('l.post_account', $account->id)
+                ->whereIn('l.post_account', $accountIds)
                 ->where('l.posting_date', '<', $start->toDateString())
                 ->select([
                     $counterpartySelect,
@@ -3416,13 +3432,13 @@ class IfrsAdapter
                 if ($userAccount) {
                     return Account::firstOrCreate(
                         [
-                            'account_type' => Account::CURRENT_ASSET,
-                            'category_id' => null,
-                            'name' => $userAccount->name,
+                            'code' => $userAccount->code,
                             'entity_id' => $entityId,
                         ],
                         [
-                            'code' => $userAccount->code,
+                            'account_type' => Account::CURRENT_ASSET,
+                            'category_id' => null,
+                            'name' => $userAccount->name,
                             'currency_id' => $this->getCurrencyId($companyId),
                         ]
                     );
@@ -3631,13 +3647,13 @@ class IfrsAdapter
             if ($userAccount) {
                 return Account::firstOrCreate(
                     [
-                        'account_type' => Account::INVENTORY,
-                        'category_id' => null,
-                        'name' => $userAccount->name,
+                        'code' => $userAccount->code,
                         'entity_id' => $entityId,
                     ],
                     [
-                        'code' => $userAccount->code,
+                        'account_type' => Account::INVENTORY,
+                        'category_id' => null,
+                        'name' => $userAccount->name,
                         'currency_id' => $this->getCurrencyId($companyId),
                     ]
                 );
@@ -3673,13 +3689,13 @@ class IfrsAdapter
             if ($userAccount) {
                 return Account::firstOrCreate(
                     [
-                        'account_type' => Account::DIRECT_EXPENSE,
-                        'category_id' => null,
-                        'name' => $userAccount->name,
+                        'code' => $userAccount->code,
                         'entity_id' => $entityId,
                     ],
                     [
-                        'code' => $userAccount->code,
+                        'account_type' => Account::DIRECT_EXPENSE,
+                        'category_id' => null,
+                        'name' => $userAccount->name,
                         'currency_id' => $this->getCurrencyId($companyId),
                     ]
                 );
@@ -3715,13 +3731,13 @@ class IfrsAdapter
             if ($userAccount) {
                 return Account::firstOrCreate(
                     [
-                        'account_type' => Account::CURRENT_ASSET,
-                        'category_id' => null,
-                        'name' => $userAccount->name,
+                        'code' => $userAccount->code,
                         'entity_id' => $entityId,
                     ],
                     [
-                        'code' => $userAccount->code,
+                        'account_type' => Account::CURRENT_ASSET,
+                        'category_id' => null,
+                        'name' => $userAccount->name,
                         'currency_id' => $this->getCurrencyId($companyId),
                     ]
                 );
