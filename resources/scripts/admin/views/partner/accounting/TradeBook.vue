@@ -1060,10 +1060,12 @@ function closePdfPreview() {
 async function loadBillOptions() {
   if (!selectedCompanyId.value) return
   try {
-    const response = await window.axios.get(`/partner/companies/${selectedCompanyId.value}/bills`, {
-      params: { limit: 100, status: 'SENT' },
+    // Bills are on admin route /bills, company via header (no partner bills route)
+    const response = await window.axios.get('/bills', {
+      params: { limit: 100 },
+      headers: { company: selectedCompanyId.value },
     })
-    const bills = response.data?.data || response.data?.bills?.data || []
+    const bills = (response.data?.data || []).filter(b => b.status !== 'DRAFT')
     billOptions.value = bills.map(b => ({
       id: b.id,
       label: `${b.bill_number} — ${b.supplier?.name || ''} (${b.bill_date || ''})`,
