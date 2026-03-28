@@ -164,17 +164,6 @@ const copy = {
       ],
       footnote: '*Бесплатно до 30 продажби/месец. Starter: 12\u20AC за 60, Standard: 39\u20AC за 500.',
     },
-    pricing: {
-      title: 'Едноставни цени, без скриени трошоци',
-      subtitle: 'Без такси по трансакција. Без договор. Откажете кога сакате.',
-      plans: [
-        { name: 'Бесплатно', price: '0\u20AC', sales: '30/месец', best: false, desc: '~1 продажба/ден. Доволно да пробате.' },
-        { name: 'Starter', price: '12\u20AC', sales: '60/месец', best: false, desc: '~2/ден. Мал киоск или тезга.' },
-        { name: 'Standard', price: '39\u20AC', sales: '500/месец', best: true, desc: '~17/ден. Најпопуларен за мали продавници.' },
-        { name: 'Business', price: '59\u20AC', sales: '3,000/месец', best: false, desc: '~100/ден. Фреквентна продавница или кафуле.' },
-        { name: 'Max', price: '149\u20AC', sales: 'Неограничено', best: false, desc: 'Ланец, франшиза, high-volume.' },
-      ],
-    },
     faq: {
       title: 'Најчести прашања',
       items: [
@@ -346,17 +335,6 @@ const copy = {
         ['Instalimi', 'Hapni Chrome', 'Teknik', 'Teknik', 'Teknik + server'],
       ],
       footnote: '*Falas deri ne 30 shitje/muaj. Starter: 12\u20AC per 60, Standard: 39\u20AC per 500.',
-    },
-    pricing: {
-      title: 'Cmime te thjeshta, pa kosto te fshehura',
-      subtitle: 'Pa tarifa per transaksion. Pa kontrate. Anuloni kur te doni.',
-      plans: [
-        { name: 'Falas', price: '0\u20AC', sales: '30/muaj', best: false, desc: '~1 shitje/dite. Mjaftueshem per te provuar.' },
-        { name: 'Starter', price: '12\u20AC', sales: '60/muaj', best: false, desc: '~2/dite. Kiosk i vogel ose tezge.' },
-        { name: 'Standard', price: '39\u20AC', sales: '500/muaj', best: true, desc: '~17/dite. Me i popullarizuari per dyqane te vogla.' },
-        { name: 'Business', price: '59\u20AC', sales: '3,000/muaj', best: false, desc: '~100/dite. Dyqan frekuent ose kafe.' },
-        { name: 'Max', price: '149\u20AC', sales: 'Pakufizuar', best: false, desc: 'Zinxhir, franshize, high-volume.' },
-      ],
     },
     faq: {
       title: 'Pyetjet me te shpeshta',
@@ -530,17 +508,6 @@ const copy = {
       ],
       footnote: '*30 satisa kadar ucretsiz/ay. Starter: 12\u20AC 60 satis, Standard: 39\u20AC 500 satis.',
     },
-    pricing: {
-      title: 'Basit fiyatlar, gizli maliyet yok',
-      subtitle: 'Islem basi ucret yok. Sozlesme yok. Istediginiz zaman iptal edin.',
-      plans: [
-        { name: 'Ucretsiz', price: '0\u20AC', sales: '30/ay', best: false, desc: '~1 satis/gun. Test etmek icin yeterli.' },
-        { name: 'Starter', price: '12\u20AC', sales: '60/ay', best: false, desc: '~2/gun. Kucuk kiosk veya tezgah.' },
-        { name: 'Standard', price: '39\u20AC', sales: '500/ay', best: true, desc: '~17/gun. Kucuk magazalar icin en populer.' },
-        { name: 'Business', price: '59\u20AC', sales: '3,000/ay', best: false, desc: '~100/gun. Yogun magaza veya kafe.' },
-        { name: 'Max', price: '149\u20AC', sales: 'Sinirsiz', best: false, desc: 'Zincir, franchise, yuksek hacim.' },
-      ],
-    },
     faq: {
       title: 'Sikca sorulan sorular',
       items: [
@@ -712,17 +679,6 @@ const copy = {
         ['Installation', 'Open Chrome', 'Technician', 'Technician', 'Technician + server'],
       ],
       footnote: '*Free up to 30 sales/month. Starter: \u20AC12 for 60, Standard: \u20AC39 for 500.',
-    },
-    pricing: {
-      title: 'Simple pricing, no hidden costs',
-      subtitle: 'No per-transaction fees. No contract. Cancel anytime.',
-      plans: [
-        { name: 'Free', price: '\u20AC0', sales: '30/month', best: false, desc: '~1 sale/day. Enough to try it out.' },
-        { name: 'Starter', price: '\u20AC12', sales: '60/month', best: false, desc: '~2/day. Small kiosk or stand.' },
-        { name: 'Standard', price: '\u20AC39', sales: '500/month', best: true, desc: '~17/day. Most popular for small shops.' },
-        { name: 'Business', price: '\u20AC59', sales: '3,000/month', best: false, desc: '~100/day. Busy store or cafe.' },
-        { name: 'Max', price: '\u20AC149', sales: 'Unlimited', best: false, desc: 'Chain, franchise, high-volume.' },
-      ],
     },
     faq: {
       title: 'Frequently asked questions',
@@ -986,60 +942,6 @@ export default async function PosPage({
           </div>
 
           <p className="mt-4 text-xs text-gray-400 text-center">{t.comparison.footnote}</p>
-        </div>
-      </section>
-
-      {/* ── Pricing ── */}
-      <section className="py-10 md:py-20 bg-gray-50">
-        <div className="container mx-auto max-w-6xl px-4">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-2xl md:text-4xl font-extrabold text-gray-900 mb-3">
-              {t.pricing.title}
-            </h2>
-            <p className="text-gray-500 text-sm md:text-lg">{t.pricing.subtitle}</p>
-          </div>
-
-          <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-5">
-            {t.pricing.plans.map((plan, i) => (
-              <div
-                key={i}
-                className={`rounded-2xl p-5 md:p-6 text-center transition-shadow ${
-                  plan.best
-                    ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 ring-2 ring-indigo-600 scale-105'
-                    : 'bg-white border border-gray-200 shadow-sm hover:shadow-md'
-                }`}
-              >
-                <h3
-                  className={`text-sm font-bold uppercase tracking-wider mb-2 ${
-                    plan.best ? 'text-indigo-200' : 'text-gray-400'
-                  }`}
-                >
-                  {plan.name}
-                </h3>
-                <div
-                  className={`text-3xl md:text-4xl font-black mb-1 ${
-                    plan.best ? 'text-white' : 'text-gray-900'
-                  }`}
-                >
-                  {plan.price}
-                </div>
-                <div
-                  className={`text-sm font-semibold mb-3 ${
-                    plan.best ? 'text-indigo-200' : 'text-indigo-600'
-                  }`}
-                >
-                  {plan.sales}
-                </div>
-                <p
-                  className={`text-xs leading-relaxed ${
-                    plan.best ? 'text-indigo-100' : 'text-gray-500'
-                  }`}
-                >
-                  {plan.desc}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
