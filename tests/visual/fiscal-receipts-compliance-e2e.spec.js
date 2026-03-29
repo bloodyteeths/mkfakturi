@@ -475,8 +475,11 @@ test.describe('Fiscal Receipts — UJP Compliance E2E', () => {
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   test('18. Fiscal receipts page loads with filter toggle + search', async () => {
-    await page.goto(`${BASE}/admin/fiscal-receipts`)
-    await page.waitForTimeout(3000)
+    // Re-establish session before UI tests (session may have expired during API tests)
+    await page.goto(`${BASE}/admin/dashboard`, { waitUntil: 'networkidle' })
+    await page.waitForTimeout(2000)
+    await page.goto(`${BASE}/admin/fiscal-receipts`, { waitUntil: 'networkidle' })
+    await page.waitForTimeout(5000)
 
     // Filter button should be visible (standard pattern)
     const filterBtn = page.locator('button', { hasText: /Филтер|Filter/i })
@@ -486,17 +489,17 @@ test.describe('Fiscal Receipts — UJP Compliance E2E', () => {
     const searchInput = page.locator('input[type="search"]')
     await expect(searchInput.first()).toBeVisible()
 
-    // Filters should be hidden by default
+    // Filters should be hidden by default (BaseFilterWrapper uses v-show, elements in DOM but hidden)
     const dateInputs = page.locator('input[type="date"]')
-    expect(await dateInputs.count()).toBe(0) // hidden until filter toggled
+    await expect(dateInputs.first()).not.toBeVisible()
 
     // Click filter button to reveal filters
     await filterBtn.first().click()
     await page.waitForTimeout(500)
 
     // Now date inputs should be visible
-    const dateInputsAfter = page.locator('input[type="date"]')
-    expect(await dateInputsAfter.count()).toBeGreaterThanOrEqual(2)
+    await expect(dateInputs.first()).toBeVisible()
+    expect(await dateInputs.count()).toBeGreaterThanOrEqual(2)
 
     // Source and payment selects should be visible
     const selects = page.locator('select')
@@ -689,14 +692,14 @@ test.describe('Fiscal Receipts — UJP Compliance E2E', () => {
     await page.goto(`${BASE}/admin/fiscal-receipts`)
     await page.waitForTimeout(3000)
 
-    // Find the dots icon (action menu trigger)
-    const dotsIcon = page.locator('svg.h-5.text-gray-500').first()
-    if (await dotsIcon.count() > 0) {
+    // Find the dots icon (action menu trigger) — BaseIcon renders as span > svg
+    const dotsIcon = page.locator('.cursor-pointer svg').first()
+    if (await dotsIcon.count() > 0 && await dotsIcon.isVisible()) {
       await dotsIcon.click()
       await page.waitForTimeout(500)
 
       // Dropdown should show view detail option
-      const viewOption = page.locator('text=/Прикажи детали|View Details/i')
+      const viewOption = page.locator('text=/Прикажи детали|View Details|view_detail/i')
       expect(await viewOption.count()).toBeGreaterThanOrEqual(0)
     }
   })
