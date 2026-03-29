@@ -494,6 +494,69 @@ class PayrollReportController extends Controller
     }
 
     /**
+     * Download unified PP50 PDF with all payroll payment slips (one page per contribution type + income tax).
+     */
+    public function downloadAllPP50(PayrollRun $payrollRun)
+    {
+        $this->authorize('view', $payrollRun);
+
+        $payrollRun->load(['lines' => fn ($q) => $q->included(), 'company']);
+        $company = $payrollRun->company;
+
+        $bankAccount = \App\Models\BankAccount::where('company_id', $company->id)
+            ->orderBy('id')
+            ->first();
+
+        $period = sprintf('%02d/%d', $payrollRun->period_month, $payrollRun->period_year);
+
+        $types = [
+            ['column' => 'pension_contribution_employee', 'revenue_code' => '722315', 'label' => 'Придонес за ПИО (18.8%)'],
+            ['column' => 'health_contribution_employee', 'revenue_code' => '722313', 'label' => 'Придонес за здравство (7.5%)'],
+            ['column' => 'unemployment_contribution', 'revenue_code' => '722316', 'label' => 'Придонес за вработување (1.2%)'],
+            ['column' => 'additional_contribution', 'revenue_code' => '722317', 'label' => 'Додатен придонес (0.5%)'],
+            ['column' => 'income_tax_amount', 'revenue_code' => '713111', 'label' => 'Данок на личен доход (ДЛД 10%)'],
+        ];
+
+        $pp50Service = app(\Modules\Mk\Services\Pp50PdfService::class);
+        $slips = [];
+
+        foreach ($types as $config) {
+            $totalAmount = $payrollRun->lines->sum($config['column']);
+            if ($totalAmount <= 0) {
+                continue;
+            }
+
+            $slips[] = $pp50Service->buildSlip(
+                debtorName: $company->name,
+                debtorIban: $bankAccount?->iban ?? $bankAccount?->account_number ?? '',
+                debtorBank: $bankAccount?->bank_name ?? '',
+                creditorName: 'Управа за јавни приходи',
+                creditorIban: '',
+                creditorBank: '',
+                amountCents: $totalAmount,
+                currencyCode: 'MKD',
+                revenueCode: $config['revenue_code'],
+                municipalityCode: $company->municipality_code ?? '80',
+                paymentReference: '',
+                description: $config['label'] . ' - ' . $period,
+                date: now()->format('d.m.Y'),
+                billNumber: ''
+            );
+        }
+
+        if (empty($slips)) {
+            return response()->json(['error' => 'No payroll amounts to generate payment slips.'], 422);
+        }
+
+        view()->share(['slips' => $slips]);
+        $pdf = \PDF::loadView('app.pdf.reports.pp50');
+
+        $filename = sprintf('PP50_payroll_%d_%02d.pdf', $payrollRun->period_year, $payrollRun->period_month);
+
+        return $pdf->download($filename);
+    }
+
+    /**
      * Download PP50 payment slip PDF for a specific contribution type.
      *
      * In MK, ALL contributions are deducted from gross — no employer add-on.

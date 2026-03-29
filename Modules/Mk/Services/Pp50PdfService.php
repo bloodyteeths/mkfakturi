@@ -211,7 +211,7 @@ class Pp50PdfService
     /**
      * Build a single PP50 slip data array.
      */
-    protected function buildSlip(
+    public function buildSlip(
         string $debtorName,
         string $debtorIban,
         string $debtorBank,

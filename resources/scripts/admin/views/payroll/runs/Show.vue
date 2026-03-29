@@ -96,29 +96,9 @@
             {{ $t('payroll.rekapitular') }}
           </BaseDropdownItem>
 
-          <BaseDropdownItem @click="downloadPP50('pio')">
-            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP50 ПИО (18.8%)
-          </BaseDropdownItem>
-
-          <BaseDropdownItem @click="downloadPP50('health')">
-            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP50 Здравство (7.5%)
-          </BaseDropdownItem>
-
-          <BaseDropdownItem @click="downloadPP50('unemployment')">
-            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP50 Невработеност (1.2%)
-          </BaseDropdownItem>
-
-          <BaseDropdownItem @click="downloadPP50('additional')">
-            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP50 Доп. придонес (0.5%)
-          </BaseDropdownItem>
-
-          <BaseDropdownItem @click="downloadPP50('income_tax')">
-            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP50 ДЛД (10%)
+          <BaseDropdownItem @click="downloadAllPP50">
+            <BaseIcon name="DocumentArrowDownIcon" class="h-5 mr-3 text-indigo-600" />
+            PP50 Сите налози
           </BaseDropdownItem>
         </BaseDropdown>
 
@@ -698,6 +678,20 @@ async function downloadRekapitular() {
     notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
   } catch (error) {
     console.error('Error downloading rekapitular:', error)
+    notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
+  }
+}
+
+async function downloadAllPP50() {
+  try {
+    const response = await axios.get(
+      `payroll-reports/download-all-pp50/${run.value.id}`,
+      { responseType: 'blob' }
+    )
+    downloadBlob(response.data, `PP50_payroll_${run.value.period_year}_${String(run.value.period_month).padStart(2, '0')}.pdf`)
+    notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
+  } catch (error) {
+    console.error('Error downloading PP50:', error)
     notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
   }
 }

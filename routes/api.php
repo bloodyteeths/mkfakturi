@@ -493,6 +493,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/payroll-reports/download-mpin-xml', [PayrollReportController::class, 'downloadMpinXml']);
                 Route::get('/payroll-reports/download-ddv04-xml', [PayrollReportController::class, 'downloadDdv04Xml']);
                 Route::get('/payroll-reports/download-pddgi-xml', [PayrollReportController::class, 'downloadPddGiXml']);
+                Route::get('/payroll-reports/download-all-pp50/{payrollRun}', [PayrollReportController::class, 'downloadAllPP50']);
                 Route::get('/payroll-reports/download-pp50/{payrollRun}/{type}', [PayrollReportController::class, 'downloadPP50']);
                 Route::get('/payroll-reports/download-pp30/{payrollRun}', [PayrollReportController::class, 'downloadPP30']);
                 Route::get('/payroll-reports/download-rekapitular/{payrollRun}', [PayrollReportController::class, 'downloadRekapitular']);
