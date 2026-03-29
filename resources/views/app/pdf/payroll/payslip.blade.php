@@ -200,11 +200,11 @@
                     <td colspan="2">{{ __('payroll.employee_contributions') }}</td>
                 </tr>
                 <tr>
-                    <td>{{ __('payroll.pension_pio') }} - 9%</td>
+                    <td>{{ __('payroll.pension_pio') }} - 18.8%</td>
                     <td class="amount money-format">-{{ number_format($payrollRunLine->pension_contribution_employee / 100, 2, '.', ',') }}</td>
                 </tr>
                 <tr>
-                    <td>{{ __('payroll.health_zo') }} - 3.75%</td>
+                    <td>{{ __('payroll.health_zo') }} - 7.5%</td>
                     <td class="amount money-format">-{{ number_format($payrollRunLine->health_contribution_employee / 100, 2, '.', ',') }}</td>
                 </tr>
                 <tr>
@@ -257,12 +257,10 @@
             <div class="info-value">{{ __('payroll.iban') }}: {{ $employee->bank_account_iban }}</div>
         </div>
 
-        <!-- Employer Contributions (Information Only) -->
+        <!-- Employer Cost (MK model: employer cost = gross, no add-on) -->
         <div class="info-section" style="margin-top: 20px; background-color: #f8f9fa; padding: 10px; border-left: 3px solid #3498db;">
-            <div class="info-label" style="color: #3498db;">{{ __('payroll.employer_contributions_info') }}:</div>
-            <div class="info-value">{{ __('payroll.pension_pio') }} - 9%: {{ number_format($payrollRunLine->pension_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
-            <div class="info-value">{{ __('payroll.health_zo') }} - 3.75%: {{ number_format($payrollRunLine->health_contribution_employer / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
-            <div class="info-value" style="margin-top: 5px; font-weight: bold;">{{ __('payroll.total_employer_cost') }}: {{ number_format($payrollRunLine->total_employer_cost / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
+            <div class="info-label" style="color: #3498db;">{{ __('payroll.total_employer_cost') }}:</div>
+            <div class="info-value" style="font-weight: bold;">{{ number_format($payrollRunLine->gross_salary / 100, 2, '.', ',') }} {{ $employee->currency->code }}</div>
         </div>
 
         <!-- Footer -->

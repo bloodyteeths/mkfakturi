@@ -283,11 +283,11 @@
                     <td colspan="2">ПРИДОНЕСИ НА ВРАБОТЕН</td>
                 </tr>
                 <tr>
-                    <td>Пензиски фонд (ПИО) - 9%</td>
+                    <td>Пензиски фонд (ПИО) - 18.8%</td>
                     <td class="amount money-format">-{{ number_format($payrollRunLine->pension_contribution_employee / 100, 2, '.', ',') }}</td>
                 </tr>
                 <tr>
-                    <td>Здравствено осигурување (ЗО) - 3.75%</td>
+                    <td>Здравствено осигурување (ЗО) - 7.5%</td>
                     <td class="amount money-format">-{{ number_format($payrollRunLine->health_contribution_employee / 100, 2, '.', ',') }}</td>
                 </tr>
                 <tr>
@@ -304,7 +304,7 @@
                     <td colspan="2">ДАНОЦИ</td>
                 </tr>
                 @php
-                    $personalDeduction = $payrollRunLine->personal_deduction ?? config('mk.payroll.personal_deduction', 1027000);
+                    $personalDeduction = $payrollRunLine->personal_deduction ?: config('mk.payroll.personal_deduction', 1027000);
                     $totalContributions = $payrollRunLine->pension_contribution_employee
                         + $payrollRunLine->health_contribution_employee
                         + $payrollRunLine->unemployment_contribution
@@ -366,12 +366,12 @@
                 @endif
             </div>
 
-            <!-- Employer Contributions -->
+            <!-- Employer Cost -->
             <div class="info-col">
                 <div class="employer-box">
-                    <div class="info-label">Придонеси на работодавач:</div>
-                    <div class="info-value">ПИО 9%: {{ number_format($payrollRunLine->pension_contribution_employer / 100, 2, '.', ',') }} | ЗО 3.75%: {{ number_format($payrollRunLine->health_contribution_employer / 100, 2, '.', ',') }}</div>
-                    <div class="info-value" style="font-weight: bold;">Вкупен трошок: {{ number_format($payrollRunLine->total_employer_cost / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
+                    <div class="info-label">Трошок на работодавач:</div>
+                    <div class="info-value" style="font-weight: bold;">Вкупен трошок: {{ number_format($payrollRunLine->gross_salary / 100, 2, '.', ',') }} {{ $employee->currency->code ?? 'MKD' }}</div>
+                    <div class="info-value" style="color: #666; font-size: 8px;">Во МК сите придонеси се на товар на бруто платата</div>
                 </div>
             </div>
         </div>

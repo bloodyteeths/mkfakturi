@@ -253,6 +253,7 @@ class PayrollRunController extends Controller
                     'health_contribution_employer' => $calculation->healthEmployer,
                     'unemployment_contribution' => $calculation->unemployment,
                     'additional_contribution' => $calculation->additionalContribution,
+                    'personal_deduction' => $calculation->personalDeduction,
                     'transport_allowance' => 0,
                     'meal_allowance' => 0,
                     'other_additions' => [],
