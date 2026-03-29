@@ -1989,12 +1989,24 @@ export default [
         component: () => import('./views/accounting/FixedAssets.vue'),
       },
 
-      // Support Contact
+      // Support Tickets
       {
         path: 'support',
         name: 'support.index',
         meta: { requiresAuth: true },
         component: SupportIndex,
+      },
+      {
+        path: 'support/create',
+        name: 'support.create',
+        meta: { requiresAuth: true },
+        component: () => import('@/scripts/admin/views/support/Create.vue'),
+      },
+      {
+        path: 'support/:id',
+        name: 'support.view',
+        meta: { requiresAuth: true },
+        component: () => import('@/scripts/admin/views/support/View.vue'),
       },
 
       // Super Admin Support Tickets (Cross-Tenant View)

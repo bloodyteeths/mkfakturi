@@ -483,7 +483,7 @@ const getInitials = (name) => {
 }
 
 const isCustomerMessage = (message) => {
-  return message.user_id !== ticket.value?.user_id
+  return message.user_id === ticket.value?.user_id
 }
 
 const canEditMessage = (message) => {
