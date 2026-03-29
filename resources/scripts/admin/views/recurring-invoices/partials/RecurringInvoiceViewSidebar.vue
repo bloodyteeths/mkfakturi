@@ -9,6 +9,15 @@ import { useRecurringInvoiceStore } from '@/scripts/admin/stores/recurring-invoi
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
+const props = defineProps({
+  showMobile: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+const emit = defineEmits(['close'])
+
 const recurringInvoiceStore = useRecurringInvoiceStore()
 const globalStore = useGlobalStore()
 
@@ -148,11 +157,19 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <!-- Mobile overlay -->
+  <div
+    v-if="props.showMobile"
+    class="fixed inset-0 z-40 bg-black bg-opacity-50 xl:hidden"
+    @click="emit('close')"
+  />
+
   <!-- sidebar -->
   <div
     :class="[
-      'fixed top-0 left-0 hidden h-full pt-16 pb-[6.4rem] bg-white w-88 xl:block',
-      globalStore.isSidebarCollapsed ? 'ml-16' : 'ml-56 xl:ml-64'
+      'fixed top-0 left-0 h-full pt-16 pb-[6.4rem] bg-white w-88 z-50 transition-transform duration-300',
+      props.showMobile ? 'translate-x-0' : '-translate-x-full xl:translate-x-0',
+      globalStore.isSidebarCollapsed ? 'ml-0 xl:ml-16' : 'ml-0 xl:ml-56 2xl:ml-64'
     ]"
   >
     <div

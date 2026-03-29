@@ -1,5 +1,5 @@
 <template>
-  <div class="col-span-5 pr-0">
+  <div class="col-span-12 lg:col-span-5 pr-0">
     <BaseCustomerSelectPopup
       v-model="recurringInvoiceStore.newRecurringInvoice.customer"
       :valid="v.customer_id"
@@ -20,8 +20,7 @@
           {{ $t('recurring_invoices.send_automatically') }}
         </p>
         <p
-          class="p-0 m-0 text-xs leading-tight text-left text-gray-500"
-          style="max-width: 480px"
+          class="p-0 m-0 text-xs leading-tight text-left text-gray-500 max-w-full lg:max-w-[480px]"
         >
           {{ $t('recurring_invoices.send_automatically_desc') }}
         </p>
@@ -32,7 +31,8 @@
   <div
     class="
       grid grid-cols-1
-      col-span-7
+      col-span-12
+      lg:col-span-7
       gap-4
       mt-8
       lg:gap-6 lg:mt-0 lg:grid-cols-2

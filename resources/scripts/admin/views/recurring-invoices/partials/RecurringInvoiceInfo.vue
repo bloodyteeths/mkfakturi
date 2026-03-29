@@ -36,7 +36,7 @@
         "
         :label="$t('recurring_invoices.limit_by')"
         :content-loading="isLoading"
-        :value="recurringInvoiceStore.newRecurringInvoice?.limit_by"
+        :value="getLimitByLabel(recurringInvoiceStore.newRecurringInvoice?.limit_by)"
       />
 
       <BaseDescriptionListItem
@@ -74,12 +74,23 @@
 <script setup>
 import { ref, computed, watch, reactive, inject } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useRecurringInvoiceStore } from '@/scripts/admin/stores/recurring-invoice'
 import Invoices from './Invoices.vue'
 
 const recurringInvoiceStore = useRecurringInvoiceStore()
+const { t } = useI18n()
 
 const route = useRoute()
+
+function getLimitByLabel(limitBy) {
+  const map = {
+    NONE: t('recurring_invoices.limit.none'),
+    DATE: t('recurring_invoices.limit.date'),
+    COUNT: t('recurring_invoices.limit.count'),
+  }
+  return map[limitBy] || limitBy
+}
 
 let isLoading = computed(() => {
   return recurringInvoiceStore.isFetchingViewData

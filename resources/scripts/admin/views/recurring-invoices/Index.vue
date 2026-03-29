@@ -117,7 +117,7 @@
       </template>
     </BaseEmptyPlaceholder>
 
-    <div v-show="!showEmptyScreen" class="relative table-container">
+    <div v-show="!showEmptyScreen" class="relative table-container overflow-x-auto">
       <div
         class="
           relative
