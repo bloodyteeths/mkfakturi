@@ -125,6 +125,103 @@ class TradeDocumentsController extends Controller
     }
 
     // ==========================================
+    // ПЛТ — Приемен лист во трговијата на мало
+    // ==========================================
+
+    /**
+     * ПЛТ calculation data for a bill (JSON).
+     */
+    public function pltData(Request $request, int $company, int $billId): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $bill = Bill::where('company_id', $company)
+            ->where('id', $billId)
+            ->without(['creator', 'company'])
+            ->with(['supplier', 'items.item.unit', 'items.taxes.taxType'])
+            ->first();
+
+        if (! $bill) {
+            return response()->json(['error' => 'Bill not found'], 404);
+        }
+
+        $markupOverrides = $request->input('markup_overrides', []);
+        $result = $this->calcService->calculatePlt($bill, $markupOverrides);
+
+        $marginCheck = $this->calcService->validateMarginCaps($result['items'], 'retail');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'items' => $result['items'],
+                'totals' => $result['totals'],
+                'bill_number' => $bill->bill_number,
+                'supplier_name' => $bill->supplier?->name ?? '',
+                'bill_date' => $bill->bill_date instanceof \DateTimeInterface
+                    ? $bill->bill_date->format('Y-m-d')
+                    : ($bill->bill_date ?? ''),
+            ],
+            'margin_check' => $marginCheck,
+        ]);
+    }
+
+    /**
+     * ПЛТ PDF export for a bill.
+     */
+    public function pltExport(Request $request, int $company, int $billId): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            abort(403, 'Access denied');
+        }
+
+        $companyModel = Company::find($company);
+        if (! $companyModel) {
+            abort(404, 'Company not found');
+        }
+        $companyModel->load('address');
+
+        $bill = Bill::where('company_id', $company)
+            ->where('id', $billId)
+            ->without(['creator', 'company'])
+            ->with(['supplier', 'items.item.unit', 'items.taxes.taxType'])
+            ->first();
+
+        if (! $bill) {
+            abort(404, 'Bill not found');
+        }
+
+        $markupOverrides = $request->input('markup_overrides', []);
+        $result = $this->calcService->calculatePlt($bill, $markupOverrides);
+
+        $currency = Currency::find(CompanySetting::getSetting('currency', $company));
+
+        $billDate = $bill->bill_date instanceof \DateTimeInterface
+            ? $bill->bill_date->format('Y-m-d')
+            : ($bill->bill_date ?? '');
+
+        view()->share([
+            'company' => $companyModel,
+            'bill' => $bill,
+            'bill_date' => substr((string) $billDate, 0, 10),
+            'supplier_name' => $bill->supplier?->name ?? '',
+            'supplier_address' => $bill->supplier?->address_street_1 ?? '',
+            'items' => $result['items'],
+            'totals' => $result['totals'],
+            'currency' => $currency,
+        ]);
+
+        $pdf = PDF::loadView('app.pdf.reports.trade-plt');
+        $pdf->setPaper('a4', 'landscape');
+
+        return $pdf->download("plt_{$bill->bill_number}_{$billDate}.pdf");
+    }
+    // CLAUDE-CHECKPOINT
+
+    // ==========================================
     // Нивелација CRUD
     // ==========================================
 
