@@ -8,36 +8,38 @@
       </BaseBreadcrumb>
 
       <template #actions>
-        <div class="flex flex-wrap gap-2">
-          <!-- Edit Button -->
+        <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto">
+          <!-- Edit Button (draft only) -->
           <BaseButton
             v-if="canEdit"
             variant="primary-outline"
+            class="w-full sm:w-auto"
             @click="toggleEditMode"
           >
             <template #left="slotProps">
               <BaseIcon name="PencilSquareIcon" :class="slotProps.class" />
             </template>
-            {{ isEditing ? t('cancel') : t('edit_batch') }}
+            {{ isEditing ? t('go_back') : t('edit_batch') }}
           </BaseButton>
 
-          <!-- Approve Button -->
+          <!-- Primary Next-Step Action -->
           <BaseButton
             v-if="canApprove && !isEditing"
-            variant="primary-outline"
+            variant="primary"
+            class="w-full sm:w-auto"
             :loading="isApproving"
             @click="approveBatch"
           >
             <template #left="slotProps">
               <BaseIcon name="CheckCircleIcon" :class="slotProps.class" />
             </template>
-            {{ t('approve', 'Approve') }}
+            {{ t('approve') }}
           </BaseButton>
 
-          <!-- Export CSV/XML Button -->
           <BaseButton
             v-if="canExport && !isEditing"
             variant="primary"
+            class="w-full sm:w-auto"
             :loading="isExporting"
             @click="exportBatch"
           >
@@ -47,61 +49,10 @@
             {{ t('export_file') }}
           </BaseButton>
 
-          <!-- Download PP30 PDF Button -->
-          <BaseButton
-            v-if="canExportPp30 && !isEditing"
-            variant="primary-outline"
-            :loading="isDownloadingPp30"
-            @click="downloadPp30Pdf"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="PrinterIcon" :class="slotProps.class" />
-            </template>
-            {{ t('pp30_pdf') }}
-          </BaseButton>
-
-          <!-- Download PP50 PDF Button -->
-          <BaseButton
-            v-if="canExportPp50 && !isEditing"
-            variant="primary-outline"
-            :loading="isDownloadingPp50"
-            @click="downloadPp50Pdf"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="PrinterIcon" :class="slotProps.class" />
-            </template>
-            {{ t('download_pp50') }}
-          </BaseButton>
-
-          <!-- Print Button -->
-          <BaseButton
-            v-if="batch && !isEditing"
-            variant="primary-outline"
-            @click="printPage"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="PrinterIcon" :class="slotProps.class" />
-            </template>
-            {{ t('print') }}
-          </BaseButton>
-
-          <!-- Duplicate Button -->
-          <BaseButton
-            v-if="batch && !isEditing"
-            variant="primary-outline"
-            :loading="isDuplicating"
-            @click="duplicateBatch"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="DocumentDuplicateIcon" :class="slotProps.class" />
-            </template>
-            {{ t('duplicate_batch') }}
-          </BaseButton>
-
-          <!-- Confirm Button -->
           <BaseButton
             v-if="canConfirm && !isEditing"
             variant="success"
+            class="w-full sm:w-auto"
             :loading="isConfirming"
             @click="confirmBatch"
           >
@@ -111,18 +62,78 @@
             {{ t('confirm_payment') }}
           </BaseButton>
 
-          <!-- Cancel Button -->
-          <BaseButton
-            v-if="canCancel && !isEditing"
-            variant="danger-outline"
-            :loading="isCancelling"
-            @click="cancelBatch"
-          >
-            <template #left="slotProps">
-              <BaseIcon name="XCircleIcon" :class="slotProps.class" />
-            </template>
-            {{ t('cancel') }}
-          </BaseButton>
+          <!-- More Actions Dropdown -->
+          <div v-if="batch && !isEditing" class="relative w-full sm:w-auto">
+            <BaseButton
+              variant="primary-outline"
+              class="w-full sm:w-auto"
+              @click="showMoreMenu = !showMoreMenu"
+            >
+              <template #left="slotProps">
+                <BaseIcon name="EllipsisVerticalIcon" :class="slotProps.class" />
+              </template>
+              <span class="sm:hidden">{{ t('more_actions') }}</span>
+            </BaseButton>
+
+            <div
+              v-if="showMoreMenu"
+              class="absolute right-0 z-20 mt-1 w-52 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+            >
+              <!-- PP30 PDF -->
+              <button
+                v-if="canExportPp30"
+                class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                :disabled="isDownloadingPp30"
+                @click="downloadPp30Pdf(); showMoreMenu = false"
+              >
+                <BaseIcon name="PrinterIcon" class="h-4 w-4 text-gray-400" />
+                {{ t('pp30_pdf') }}
+              </button>
+
+              <!-- PP50 PDF -->
+              <button
+                v-if="canExportPp50"
+                class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                :disabled="isDownloadingPp50"
+                @click="downloadPp50Pdf(); showMoreMenu = false"
+              >
+                <BaseIcon name="PrinterIcon" class="h-4 w-4 text-gray-400" />
+                {{ t('download_pp50') }}
+              </button>
+
+              <!-- Print -->
+              <button
+                class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                @click="printPage(); showMoreMenu = false"
+              >
+                <BaseIcon name="PrinterIcon" class="h-4 w-4 text-gray-400" />
+                {{ t('print') }}
+              </button>
+
+              <!-- Duplicate -->
+              <button
+                class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                :disabled="isDuplicating"
+                @click="duplicateBatch(); showMoreMenu = false"
+              >
+                <BaseIcon name="DocumentDuplicateIcon" class="h-4 w-4 text-gray-400" />
+                {{ t('duplicate_batch') }}
+              </button>
+
+              <!-- Cancel Order -->
+              <template v-if="canCancel">
+                <div class="my-1 border-t border-gray-100"></div>
+                <button
+                  class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                  :disabled="isCancelling"
+                  @click="cancelBatch(); showMoreMenu = false"
+                >
+                  <BaseIcon name="XCircleIcon" class="h-4 w-4 text-red-400" />
+                  {{ t('cancel_order') }}
+                </button>
+              </template>
+            </div>
+          </div>
         </div>
       </template>
     </BasePageHeader>
@@ -178,7 +189,7 @@
 
       <!-- Batch Header Card -->
       <div v-if="!isEditing" class="mb-6 rounded-lg bg-white p-6 shadow">
-        <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
           <div>
             <p class="text-xs font-medium uppercase text-gray-500">{{ t('batch_number') }}</p>
             <p class="text-sm font-bold text-gray-900">{{ batch.batch_number }}</p>
@@ -223,18 +234,28 @@
 
         <!-- Status Pipeline -->
         <div class="mt-6 border-t border-gray-200 pt-4">
-          <div class="flex items-center justify-between">
-            <div v-for="(step, idx) in statusPipeline" :key="step.key" class="flex items-center">
-              <div
-                class="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold"
-                :class="stepClass(step.key)"
-              >
-                {{ idx + 1 }}
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+            <div v-for="(step, idx) in statusPipeline" :key="step.key" class="flex items-center sm:flex-col sm:items-center">
+              <div class="flex items-center sm:flex-col">
+                <div
+                  class="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold"
+                  :class="stepClass(step.key)"
+                >
+                  {{ idx + 1 }}
+                </div>
+                <span class="ml-2 text-xs sm:ml-0 sm:mt-1 sm:text-center" :class="isStepActive(step.key) ? 'font-medium text-gray-900' : 'text-gray-400'">
+                  {{ step.label }}
+                </span>
               </div>
-              <span class="ml-2 text-xs" :class="isStepActive(step.key) ? 'font-medium text-gray-900' : 'text-gray-400'">
-                {{ step.label }}
+              <!-- Step hint for current step -->
+              <span
+                v-if="isCurrentStep(step.key)"
+                class="ml-2 text-[10px] text-primary-500 sm:ml-0 sm:mt-0.5 sm:text-center"
+              >
+                {{ stepHint(step.key) }}
               </span>
-              <div v-if="idx < statusPipeline.length - 1" class="mx-3 h-px w-8 bg-gray-300 sm:w-12"></div>
+              <!-- Connector line (horizontal on desktop, vertical on mobile) -->
+              <div v-if="idx < statusPipeline.length - 1" class="ml-3 hidden h-px w-8 bg-gray-300 sm:mx-3 sm:block sm:w-12"></div>
             </div>
           </div>
         </div>
@@ -242,24 +263,24 @@
         <!-- PP50 Fields Display -->
         <div v-if="batch.format === 'pp50' && hasPp50Data" class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3">
           <h4 class="mb-2 text-xs font-medium uppercase text-amber-800">{{ t('pp50_fields') }}</h4>
-          <div class="grid grid-cols-2 gap-2 text-sm md:grid-cols-5">
-            <div v-if="pp50DataFromItems.tax_number">
+          <div class="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2 lg:grid-cols-5">
+            <div v-if="pp50DataFromItems.tax_number" :title="t('tax_number_hint')">
               <span class="text-xs text-gray-500">{{ t('tax_number') }}:</span>
               <p class="font-medium">{{ pp50DataFromItems.tax_number }}</p>
             </div>
-            <div v-if="pp50DataFromItems.revenue_code">
+            <div v-if="pp50DataFromItems.revenue_code" :title="t('revenue_code_hint')">
               <span class="text-xs text-gray-500">{{ t('revenue_code') }}:</span>
               <p class="font-medium">{{ pp50DataFromItems.revenue_code }}</p>
             </div>
-            <div v-if="pp50DataFromItems.program_code">
+            <div v-if="pp50DataFromItems.program_code" :title="t('program_code_hint')">
               <span class="text-xs text-gray-500">{{ t('program_code') }}:</span>
               <p class="font-medium">{{ pp50DataFromItems.program_code }}</p>
             </div>
-            <div v-if="pp50DataFromItems.municipality_code">
+            <div v-if="pp50DataFromItems.municipality_code" :title="t('municipality_code_hint')">
               <span class="text-xs text-gray-500">{{ t('municipality_code') }}:</span>
               <p class="font-medium">{{ pp50DataFromItems.municipality_code }}</p>
             </div>
-            <div v-if="pp50DataFromItems.approval_reference">
+            <div v-if="pp50DataFromItems.approval_reference" :title="t('approval_reference_hint')">
               <span class="text-xs text-gray-500">{{ t('approval_reference') }}:</span>
               <p class="font-medium">{{ pp50DataFromItems.approval_reference }}</p>
             </div>
@@ -272,7 +293,7 @@
           <p class="mt-1 text-sm text-gray-700">{{ batch.notes }}</p>
         </div>
 
-        <div class="mt-4 flex gap-6 text-xs text-gray-500">
+        <div class="mt-4 flex flex-col gap-2 text-xs text-gray-500 sm:flex-row sm:gap-6">
           <span v-if="batch.created_by">
             {{ t('created_by', 'Created by') }}: {{ batch.created_by?.name || '-' }}
           </span>
@@ -288,13 +309,13 @@
 
       <!-- Confirmation Banner -->
       <div v-if="pendingAction" class="mb-4 rounded-lg border-2 p-4" :class="pendingAction === 'confirm' ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p class="text-sm font-medium" :class="pendingAction === 'confirm' ? 'text-green-800' : 'text-red-800'">
             {{ pendingAction === 'confirm' ? t('confirm_warning') : t('cancel_warning') }}
           </p>
           <div class="flex gap-2">
             <BaseButton variant="primary-outline" size="sm" @click="dismissAction">
-              {{ t('cancel') }}
+              {{ t('go_back') }}
             </BaseButton>
             <BaseButton
               :variant="pendingAction === 'confirm' ? 'success' : 'danger'"
@@ -302,7 +323,7 @@
               :loading="pendingAction === 'confirm' ? isConfirming : isCancelling"
               @click="pendingAction === 'confirm' ? confirmBatch() : cancelBatch()"
             >
-              {{ pendingAction === 'confirm' ? t('confirm_payment') : t('cancel') }}
+              {{ pendingAction === 'confirm' ? t('confirm_payment') : t('cancel_order') }}
             </BaseButton>
           </div>
         </div>
@@ -427,6 +448,7 @@ const isEditing = ref(false)
 const batch = ref(null)
 const bankAccounts = ref([])
 const pendingAction = ref(null)
+const showMoreMenu = ref(false)
 
 const editForm = ref({
   batch_date: '',
@@ -485,6 +507,19 @@ const statusPipeline = computed(() => {
 })
 
 const statusOrder = ['draft', 'pending_approval', 'approved', 'exported', 'sent_to_bank', 'confirmed']
+
+// Close dropdown on outside click
+function handleOutsideClick(e) {
+  if (showMoreMenu.value && !e.target.closest('.relative')) {
+    showMoreMenu.value = false
+  }
+}
+onMounted(() => {
+  document.addEventListener('click', handleOutsideClick)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleOutsideClick)
+})
 
 function toggleEditMode() {
   if (isEditing.value) {
@@ -736,6 +771,31 @@ function isStepActive(stepKey) {
   const currentIdx = statusOrder.indexOf(batch.value.status)
   const stepIdx = statusOrder.indexOf(stepKey)
   return stepIdx <= currentIdx
+}
+
+function isCurrentStep(stepKey) {
+  if (!batch.value) return false
+  const status = batch.value.status
+  if (status === 'cancelled' || status === 'confirmed') return false
+  // Map current status to the pipeline step that needs action
+  const stepMap = {
+    draft: 'draft',
+    pending_approval: 'draft',
+    approved: 'approved',
+    exported: 'exported',
+    sent_to_bank: 'exported',
+  }
+  return stepMap[status] === stepKey
+}
+
+function stepHint(stepKey) {
+  const hints = {
+    draft: t('hint_draft'),
+    approved: t('hint_approved'),
+    exported: t('hint_exported'),
+    confirmed: t('hint_confirmed'),
+  }
+  return hints[stepKey] || ''
 }
 
 function stepClass(stepKey) {

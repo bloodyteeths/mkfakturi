@@ -12,7 +12,7 @@
             <template #left="slotProps">
               <BaseIcon name="PlusIcon" :class="slotProps.class" />
             </template>
-            {{ t('new_batch') }}
+            <span class="hidden sm:inline">{{ t('new_batch') }}</span>
           </BaseButton>
         </router-link>
       </template>
@@ -20,7 +20,7 @@
 
     <!-- Quick Stats Bar -->
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+      <div class="rounded-lg border border-red-200 bg-red-50 p-3 sm:p-4">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <BaseIcon name="ExclamationTriangleIcon" class="h-6 w-6 text-red-500" />
@@ -33,7 +33,7 @@
         </div>
       </div>
 
-      <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+      <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-3 sm:p-4">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <BaseIcon name="ClockIcon" class="h-6 w-6 text-yellow-500" />
@@ -46,7 +46,7 @@
         </div>
       </div>
 
-      <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <div class="rounded-lg border border-blue-200 bg-blue-50 p-3 sm:p-4">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <BaseIcon name="CalendarDaysIcon" class="h-6 w-6 text-blue-500" />
@@ -61,71 +61,90 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-6 flex flex-wrap items-center gap-4 rounded-lg bg-white p-4 shadow">
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-700">{{ t('status') }}:</label>
-        <select
-          v-model="filters.status"
-          class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
-          @change="loadBatches"
-        >
-          <option value="">{{ t('all') }}</option>
-          <option value="draft">{{ t('status_draft') }}</option>
-          <option value="approved">{{ t('status_approved') }}</option>
-          <option value="exported">{{ t('status_exported') }}</option>
-          <option value="confirmed">{{ t('status_confirmed') }}</option>
-          <option value="cancelled">{{ t('cancelled', 'Cancelled') }}</option>
-        </select>
-      </div>
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-700">{{ t('format') }}:</label>
-        <select
-          v-model="filters.format"
-          class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
-          @change="loadBatches"
-        >
-          <option value="">{{ t('all_formats') }}</option>
-          <option value="pp30">PP30</option>
-          <option value="pp50">PP50</option>
-          <option value="sepa_sct">SEPA</option>
-          <option value="csv">CSV</option>
-        </select>
-      </div>
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-700">{{ t('search') }}:</label>
-        <input
-          v-model="filters.search"
-          type="text"
-          class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
-          :placeholder="t('batch_number')"
-          @input="debouncedLoadBatches"
-        />
-      </div>
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-700">{{ t('date') }}:</label>
-        <input v-model="filters.from_date" type="date" class="rounded-md border-gray-300 text-sm shadow-sm" @change="loadBatches" />
-        <span class="text-gray-400">&ndash;</span>
-        <input v-model="filters.to_date" type="date" class="rounded-md border-gray-300 text-sm shadow-sm" @change="loadBatches" />
+    <div class="mb-6 rounded-lg bg-white p-4 shadow">
+      <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium text-gray-700">{{ t('status') }}:</label>
+          <select
+            v-model="filters.status"
+            class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            @change="resetPageAndLoad"
+          >
+            <option value="">{{ t('all') }}</option>
+            <option value="draft">{{ t('status_draft') }}</option>
+            <option value="approved">{{ t('status_approved') }}</option>
+            <option value="exported">{{ t('status_exported') }}</option>
+            <option value="confirmed">{{ t('status_confirmed') }}</option>
+            <option value="cancelled">{{ t('cancelled', 'Cancelled') }}</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium text-gray-700">{{ t('format') }}:</label>
+          <select
+            v-model="filters.format"
+            class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            @change="resetPageAndLoad"
+          >
+            <option value="">{{ t('all_formats') }}</option>
+            <option value="pp30">PP30</option>
+            <option value="pp50">PP50</option>
+            <option value="sepa_sct">SEPA</option>
+            <option value="csv">CSV</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium text-gray-700">{{ t('search') }}:</label>
+          <input
+            v-model="filters.search"
+            type="text"
+            class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            :placeholder="t('batch_number')"
+            @input="debouncedLoadBatches"
+          />
+        </div>
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <label class="text-sm font-medium text-gray-700">{{ t('date') }}:</label>
+          <div class="flex items-center gap-2">
+            <input v-model="filters.from_date" type="date" class="rounded-md border-gray-300 text-sm shadow-sm" @change="resetPageAndLoad" />
+            <span class="text-gray-400">&ndash;</span>
+            <input v-model="filters.to_date" type="date" class="rounded-md border-gray-300 text-sm shadow-sm" @change="resetPageAndLoad" />
+          </div>
+        </div>
+        <!-- Clear filters button -->
+        <div v-if="activeFilterCount > 0" class="flex items-center">
+          <button
+            class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+            @click="clearAllFilters"
+          >
+            <BaseIcon name="XMarkIcon" class="h-4 w-4" />
+            {{ t('clear_filters') }}
+            <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary-100 text-xs font-bold text-primary-700">
+              {{ activeFilterCount }}
+            </span>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Bulk Actions Bar -->
-    <div v-if="selectedBatchIds.length > 0" class="mb-4 flex items-center gap-3 rounded-lg border border-primary-200 bg-primary-50 p-3">
+    <div v-if="selectedBatchIds.length > 0" class="mb-4 flex flex-col gap-3 rounded-lg border border-primary-200 bg-primary-50 p-3 sm:flex-row sm:items-center">
       <span class="text-sm font-medium text-primary-800">
         {{ selectedBatchIds.length }} {{ t('selected_count') }}
       </span>
-      <BaseButton variant="primary-outline" size="sm" :loading="isBulkApproving" @click="bulkApprove">
-        {{ t('bulk_approve') }}
-      </BaseButton>
-      <BaseButton variant="primary" size="sm" :loading="isBulkExporting" @click="bulkExport">
-        {{ t('bulk_export') }}
-      </BaseButton>
-      <BaseButton variant="danger-outline" size="sm" :loading="isBulkCancelling" @click="bulkCancel">
-        {{ t('bulk_cancel') }}
-      </BaseButton>
-      <BaseButton variant="primary-outline" size="sm" @click="selectedBatchIds = []">
-        {{ t('clear') }}
-      </BaseButton>
+      <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
+        <BaseButton variant="primary-outline" size="sm" class="w-full sm:w-auto" :loading="isBulkApproving" @click="bulkApprove">
+          {{ t('bulk_approve') }}
+        </BaseButton>
+        <BaseButton variant="primary" size="sm" class="w-full sm:w-auto" :loading="isBulkExporting" @click="bulkExport">
+          {{ t('bulk_export') }}
+        </BaseButton>
+        <BaseButton variant="danger-outline" size="sm" class="w-full sm:w-auto" :loading="isBulkCancelling" @click="bulkCancel">
+          {{ t('bulk_cancel') }}
+        </BaseButton>
+        <BaseButton variant="primary-outline" size="sm" class="w-full sm:w-auto" @click="selectedBatchIds = []">
+          {{ t('clear') }}
+        </BaseButton>
+      </div>
     </div>
 
     <!-- Batches Table -->
@@ -162,8 +181,8 @@
                   {{ t('date') }}
                   <span v-if="sortBy === 'batch_date'" class="ml-1">{{ sortOrder === 'asc' ? '\u2191' : '\u2193' }}</span>
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('format', 'Format') }}</th>
-                <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500">{{ t('items', 'Items') }}</th>
+                <th class="hidden px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 sm:table-cell">{{ t('format', 'Format') }}</th>
+                <th class="hidden px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 sm:table-cell">{{ t('items', 'Items') }}</th>
                 <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 cursor-pointer select-none" @click="toggleSort('total_amount')">
                   {{ t('total') }}
                   <span v-if="sortBy === 'total_amount'" class="ml-1">{{ sortOrder === 'asc' ? '\u2191' : '\u2193' }}</span>
@@ -196,7 +215,7 @@
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
                   {{ formatDate(batch.batch_date) }}
                 </td>
-                <td class="whitespace-nowrap px-4 py-3 text-sm">
+                <td class="hidden whitespace-nowrap px-4 py-3 text-sm sm:table-cell">
                   <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
                     {{ formatLabel(batch.format) }}
                   </span>
@@ -204,11 +223,11 @@
                     {{ t('urgency_urgent') }}
                   </span>
                 </td>
-                <td class="whitespace-nowrap px-4 py-3 text-center text-sm text-gray-900">
+                <td class="hidden whitespace-nowrap px-4 py-3 text-center text-sm text-gray-900 sm:table-cell">
                   {{ batch.item_count }}
                 </td>
                 <td class="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-gray-900">
-                  {{ formatMoney(batch.total_amount) }}
+                  {{ formatMoney(batch.total_amount, batch.currency_code) }}
                 </td>
                 <td class="whitespace-nowrap px-4 py-3 text-center text-sm">
                   <span
@@ -231,13 +250,52 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Pagination Footer -->
+        <div class="flex flex-col items-center justify-between gap-3 border-t border-gray-200 bg-gray-50 px-4 py-3 sm:flex-row">
+          <div class="flex items-center gap-3 text-sm text-gray-700">
+            <span>
+              {{ t('showing') }} {{ paginationFrom }}-{{ paginationTo }} {{ t('of') }} {{ pagination.total }}
+            </span>
+            <select
+              v-model="pagination.perPage"
+              class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+              @change="onPerPageChange"
+            >
+              <option :value="15">15</option>
+              <option :value="30">30</option>
+              <option :value="50">50</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="pagination.currentPage <= 1"
+              @click="goToPage(pagination.currentPage - 1)"
+            >
+              {{ t('previous') }}
+            </button>
+            <span class="text-sm text-gray-600">
+              {{ pagination.currentPage }} / {{ pagination.lastPage || 1 }}
+            </span>
+            <button
+              class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="pagination.currentPage >= pagination.lastPage"
+              @click="goToPage(pagination.currentPage + 1)"
+            >
+              {{ t('next') }}
+            </button>
+          </div>
+        </div>
       </template>
 
+      <!-- Empty State -->
       <div v-else class="p-12 text-center">
-        <BaseIcon name="BanknotesIcon" class="mx-auto h-12 w-12 text-gray-400" />
-        <h3 class="mt-2 text-sm font-medium text-gray-900">{{ t('no_orders', 'No payment orders yet') }}</h3>
-        <p class="mt-1 text-sm text-gray-500">{{ t('no_orders_hint', 'Create a payment order to pay your suppliers.') }}</p>
-        <div class="mt-4">
+        <BaseIcon name="BanknotesIcon" class="mx-auto h-16 w-16 text-gray-300" />
+        <h3 class="mt-4 text-base font-semibold text-gray-900">{{ t('empty_title') }}</h3>
+        <p class="mt-2 text-sm text-gray-500">{{ t('empty_description') }}</p>
+        <p class="mt-1 text-xs text-gray-400">{{ t('empty_formats_hint') }}</p>
+        <div class="mt-6">
           <router-link to="/admin/payment-orders/create">
             <BaseButton variant="primary">
               <template #left="slotProps">
@@ -298,6 +356,33 @@ const filters = ref({
   to_date: '',
 })
 
+const pagination = ref({
+  currentPage: 1,
+  lastPage: 1,
+  total: 0,
+  perPage: 15,
+})
+
+const paginationFrom = computed(() => {
+  if (pagination.value.total === 0) return 0
+  return (pagination.value.currentPage - 1) * pagination.value.perPage + 1
+})
+
+const paginationTo = computed(() => {
+  const to = pagination.value.currentPage * pagination.value.perPage
+  return Math.min(to, pagination.value.total)
+})
+
+const activeFilterCount = computed(() => {
+  let count = 0
+  if (filters.value.status) count++
+  if (filters.value.format) count++
+  if (filters.value.search) count++
+  if (filters.value.from_date) count++
+  if (filters.value.to_date) count++
+  return count
+})
+
 const allSelected = computed(() => {
   if (batches.value.length === 0) return false
   return batches.value.every((b) => selectedBatchIds.value.includes(b.id))
@@ -306,7 +391,36 @@ const allSelected = computed(() => {
 let searchTimeout = null
 function debouncedLoadBatches() {
   clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => loadBatches(), 300)
+  searchTimeout = setTimeout(() => {
+    pagination.value.currentPage = 1
+    loadBatches()
+  }, 300)
+}
+
+function resetPageAndLoad() {
+  pagination.value.currentPage = 1
+  loadBatches()
+}
+
+function clearAllFilters() {
+  filters.value.status = ''
+  filters.value.format = ''
+  filters.value.search = ''
+  filters.value.from_date = ''
+  filters.value.to_date = ''
+  pagination.value.currentPage = 1
+  loadBatches()
+}
+
+function goToPage(page) {
+  if (page < 1 || page > pagination.value.lastPage) return
+  pagination.value.currentPage = page
+  loadBatches()
+}
+
+function onPerPageChange() {
+  pagination.value.currentPage = 1
+  loadBatches()
 }
 
 onMounted(() => {
@@ -344,7 +458,12 @@ function toggleSelectAll() {
 async function loadBatches() {
   isLoading.value = true
   try {
-    const params = { sort_by: sortBy.value, sort_order: sortOrder.value }
+    const params = {
+      sort_by: sortBy.value,
+      sort_order: sortOrder.value,
+      page: pagination.value.currentPage,
+      limit: pagination.value.perPage,
+    }
     if (filters.value.status) params.status = filters.value.status
     if (filters.value.format) params.format = filters.value.format
     if (filters.value.search) params.search = filters.value.search
@@ -352,7 +471,20 @@ async function loadBatches() {
     if (filters.value.to_date) params.to_date = filters.value.to_date
     const response = await window.axios.get('/payment-orders', { params })
     const result = response.data
-    batches.value = result.data?.data || result.data || []
+    const paginatedData = result.data
+    if (paginatedData && paginatedData.data && typeof paginatedData.current_page !== 'undefined') {
+      batches.value = paginatedData.data
+      pagination.value.currentPage = paginatedData.current_page
+      pagination.value.lastPage = paginatedData.last_page
+      pagination.value.total = paginatedData.total
+      pagination.value.perPage = paginatedData.per_page
+    } else {
+      // Fallback for non-paginated response
+      batches.value = paginatedData?.data || paginatedData || []
+      pagination.value.total = batches.value.length
+      pagination.value.lastPage = 1
+      pagination.value.currentPage = 1
+    }
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
@@ -449,11 +581,13 @@ function viewBatch(id) {
   router.push(`/admin/payment-orders/${id}`)
 }
 
-function formatMoney(amount) {
+function formatMoney(amount, currencyCode) {
   if (amount === null || amount === undefined) return '-'
   const value = Math.abs(amount) / 100
   const sign = amount < 0 ? '-' : ''
-  return sign + new Intl.NumberFormat(formattedLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' \u0434\u0435\u043d.'
+  const formatted = new Intl.NumberFormat(formattedLocale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)
+  const suffix = currencyCode === 'EUR' ? ' \u20AC' : ' \u0434\u0435\u043d.'
+  return sign + formatted + suffix
 }
 
 function formatDate(dateStr) {

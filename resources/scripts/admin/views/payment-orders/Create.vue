@@ -8,10 +8,40 @@
       </BaseBreadcrumb>
     </BasePageHeader>
 
+    <!-- Step Indicators -->
+    <div class="mb-6 flex items-center justify-center gap-2 sm:gap-4">
+      <div
+        v-for="(step, idx) in steps"
+        :key="idx"
+        class="flex items-center gap-2"
+      >
+        <div
+          class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors"
+          :class="currentStep >= idx + 1
+            ? 'bg-primary-600 text-white'
+            : 'bg-gray-200 text-gray-500'"
+        >
+          {{ idx + 1 }}
+        </div>
+        <span
+          class="hidden text-sm font-medium sm:inline"
+          :class="currentStep >= idx + 1 ? 'text-primary-700' : 'text-gray-400'"
+        >
+          {{ step }}
+        </span>
+        <div
+          v-if="idx < steps.length - 1"
+          class="mx-1 h-px w-6 sm:w-12"
+          :class="currentStep > idx + 1 ? 'bg-primary-400' : 'bg-gray-200'"
+        ></div>
+      </div>
+    </div>
+
     <!-- Settings Panel -->
     <div class="mb-6 rounded-lg bg-white p-6 shadow">
-      <h3 class="mb-4 text-lg font-medium text-gray-900">{{ t('order_settings', 'Order Settings') }}</h3>
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <h3 class="mb-4 text-lg font-medium text-gray-900">{{ t('order_settings') }}</h3>
+      <!-- Row 1: Date, Format, Urgency -->
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <BaseInputGroup :label="t('execution_date')" required>
           <BaseDatePicker v-model="form.batch_date" :calendar-button="true" calendar-button-icon="CalendarDaysIcon" />
         </BaseInputGroup>
@@ -37,21 +67,29 @@
             <option value="itno">{{ t('urgency_urgent') }}</option>
           </select>
         </BaseInputGroup>
-
+      </div>
+      <!-- Row 2: Payment Code, Bank Account, Notes -->
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <BaseInputGroup :label="t('payment_code')">
           <select
             v-model="form.payment_code"
             class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
           >
             <option value="">-</option>
-            <option value="110">110 - {{ t('payment_code_110') }}</option>
-            <option value="120">120 - {{ t('payment_code_120') }}</option>
-            <option value="130">130 - {{ t('payment_code_130') }}</option>
-            <option value="140">140 - {{ t('payment_code_140') }}</option>
-            <option value="220">220 - {{ t('payment_code_220') }}</option>
-            <option value="450">450 - {{ t('payment_code_450') }}</option>
-            <option value="460">460 - {{ t('payment_code_460') }}</option>
-            <option value="470">470 - {{ t('payment_code_470') }}</option>
+            <optgroup :label="t('optgroup_transactions')">
+              <option value="110">110 - {{ t('payment_code_110') }}</option>
+              <option value="120">120 - {{ t('payment_code_120') }}</option>
+              <option value="130">130 - {{ t('payment_code_130') }}</option>
+              <option value="140">140 - {{ t('payment_code_140') }}</option>
+            </optgroup>
+            <optgroup :label="t('optgroup_personal_income')">
+              <option value="220">220 - {{ t('payment_code_220') }}</option>
+            </optgroup>
+            <optgroup :label="t('optgroup_public_charges')">
+              <option value="450">450 - {{ t('payment_code_450') }}</option>
+              <option value="460">460 - {{ t('payment_code_460') }}</option>
+              <option value="470">470 - {{ t('payment_code_470') }}</option>
+            </optgroup>
           </select>
         </BaseInputGroup>
 
@@ -79,8 +117,9 @@
 
       <!-- PP50 Public Revenue Fields -->
       <div v-if="form.format === 'pp50'" class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4">
-        <h4 class="mb-3 text-sm font-medium text-amber-800">{{ t('pp50_fields') }}</h4>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
+        <h4 class="mb-1 text-sm font-medium text-amber-800">{{ t('pp50_fields') }}</h4>
+        <p class="mb-3 text-xs text-amber-600">{{ t('pp50_help') }}</p>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <BaseInputGroup :label="t('tax_number')">
             <input
               v-model="form.tax_number"
@@ -126,30 +165,32 @@
     </div>
 
     <!-- Quick Select Buttons -->
-    <div class="mb-4 flex flex-wrap items-center gap-3">
-      <BaseButton variant="danger-outline" size="sm" @click="selectOverdue">
-        <template #left="slotProps">
-          <BaseIcon name="ExclamationTriangleIcon" :class="slotProps.class" />
-        </template>
-        {{ t('select_overdue', 'Select All Overdue') }}
-      </BaseButton>
-      <BaseButton variant="warning-outline" size="sm" @click="selectDueThisWeek">
-        <template #left="slotProps">
-          <BaseIcon name="ClockIcon" :class="slotProps.class" />
-        </template>
-        {{ t('select_due_week', 'Select All Due This Week') }}
-      </BaseButton>
-      <BaseButton variant="primary-outline" size="sm" @click="selectDueThisMonth">
-        <template #left="slotProps">
-          <BaseIcon name="CalendarDaysIcon" :class="slotProps.class" />
-        </template>
-        {{ t('select_due_month') }}
-      </BaseButton>
-      <BaseButton v-if="selectedBillIds.length > 0" variant="primary-outline" size="sm" @click="clearSelection">
-        {{ t('clear', 'Clear') }} ({{ selectedBillIds.length }})
-      </BaseButton>
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
+        <BaseButton variant="danger-outline" size="sm" @click="selectOverdue">
+          <template #left="slotProps">
+            <BaseIcon name="ExclamationTriangleIcon" :class="slotProps.class" />
+          </template>
+          {{ t('select_overdue', 'Select All Overdue') }}
+        </BaseButton>
+        <BaseButton variant="warning-outline" size="sm" @click="selectDueThisWeek">
+          <template #left="slotProps">
+            <BaseIcon name="ClockIcon" :class="slotProps.class" />
+          </template>
+          {{ t('select_due_week', 'Select All Due This Week') }}
+        </BaseButton>
+        <BaseButton variant="primary-outline" size="sm" @click="selectDueThisMonth">
+          <template #left="slotProps">
+            <BaseIcon name="CalendarDaysIcon" :class="slotProps.class" />
+          </template>
+          {{ t('select_due_month') }}
+        </BaseButton>
+        <BaseButton v-if="selectedBillIds.length > 0" variant="primary-outline" size="sm" @click="clearSelection">
+          {{ t('clear', 'Clear') }} ({{ selectedBillIds.length }})
+        </BaseButton>
+      </div>
 
-      <div class="ml-auto flex items-center gap-2">
+      <div class="flex items-center gap-2 sm:ml-auto">
         <label class="text-sm text-gray-600">{{ t('supplier_filter', 'Filter by supplier') }}:</label>
         <input
           v-model="supplierFilter"
@@ -181,7 +222,7 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="w-12 px-4 py-3">
+                <th class="sticky left-0 z-10 w-12 bg-gray-50 px-4 py-3">
                   <input
                     type="checkbox"
                     class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
@@ -189,13 +230,13 @@
                     @change="toggleSelectAll"
                   />
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('supplier', 'Supplier') }}</th>
+                <th class="sticky left-12 z-10 bg-gray-50 px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('supplier', 'Supplier') }}</th>
                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('bill_number', 'Bill Number') }}</th>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('description') }}</th>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('date') }}</th>
+                <th class="hidden px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 sm:table-cell">{{ t('description') }}</th>
+                <th class="hidden px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 md:table-cell">{{ t('date') }}</th>
                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ t('due_date', 'Due Date') }}</th>
-                <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">{{ t('due_amount', 'Due Amount') }}</th>
-                <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500">{{ t('status') }}</th>
+                <th class="sticky right-0 z-10 bg-gray-50 px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">{{ t('due_amount', 'Due Amount') }}</th>
+                <th class="hidden px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 sm:table-cell">{{ t('status') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -208,7 +249,7 @@
                   'bg-yellow-50': bill.is_due_soon && !bill.is_overdue,
                 }"
               >
-                <td class="px-4 py-3">
+                <td class="sticky left-0 z-10 bg-inherit px-4 py-3">
                   <input
                     type="checkbox"
                     class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
@@ -217,7 +258,7 @@
                     @change="toggleBill(bill.id)"
                   />
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-900">
+                <td class="sticky left-12 z-10 bg-inherit px-4 py-3 text-sm text-gray-900">
                   <div class="font-medium">{{ bill.supplier?.name }}</div>
                   <div v-if="bill.supplier?.iban" class="text-xs text-gray-500">{{ bill.supplier.iban }}</div>
                   <div v-else class="text-xs text-red-500">{{ t('no_iban', 'No IBAN') }}</div>
@@ -225,19 +266,19 @@
                 <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-primary-600">
                   {{ bill.bill_number }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-500 max-w-[200px] truncate" :title="bill.notes || bill.description || ''">
+                <td class="hidden px-4 py-3 text-sm text-gray-500 max-w-[200px] truncate sm:table-cell" :title="bill.notes || bill.description || ''">
                   {{ truncate(bill.notes || bill.description, 30) || t('no_description') }}
                 </td>
-                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
+                <td class="hidden whitespace-nowrap px-4 py-3 text-sm text-gray-900 md:table-cell">
                   {{ formatDate(bill.bill_date) }}
                 </td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
                   {{ formatDate(bill.due_date) }}
                 </td>
-                <td class="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-gray-900">
+                <td class="sticky right-0 z-10 bg-inherit whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-gray-900">
                   {{ formatMoney(bill.due_amount) }}
                 </td>
-                <td class="whitespace-nowrap px-4 py-3 text-center text-sm">
+                <td class="hidden whitespace-nowrap px-4 py-3 text-center text-sm sm:table-cell">
                   <span
                     v-if="bill.is_overdue"
                     class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700"
@@ -272,7 +313,7 @@
 
     <!-- Running Total Footer -->
     <div v-if="selectedBillIds.length > 0" class="mt-6 rounded-lg border border-primary-200 bg-primary-50 p-4">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p class="text-sm font-medium text-primary-800">
             {{ t('selected_bills', 'Selected bills') }}: {{ selectedBillIds.length }}
@@ -281,7 +322,13 @@
             {{ t('total') }}: {{ formatMoney(selectedTotal) }}
           </p>
         </div>
-        <BaseButton variant="primary" :loading="isCreating" :disabled="selectedBillIds.length === 0 || !form.batch_date" @click="createBatch">
+        <BaseButton
+          variant="primary"
+          :loading="isCreating"
+          :disabled="selectedBillIds.length === 0 || !form.batch_date"
+          class="w-full sm:w-auto"
+          @click="createBatch"
+        >
           <template #left="slotProps">
             <BaseIcon name="BanknotesIcon" :class="slotProps.class" />
           </template>
@@ -304,6 +351,19 @@ const notificationStore = useNotificationStore()
 const currentLocale = ref(document.documentElement.lang || 'mk')
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
 const formattedLocale = computed(() => localeMap[currentLocale.value] || 'mk-MK')
+
+// Step indicators
+const steps = computed(() => [
+  t('step_settings'),
+  t('step_select_bills'),
+  t('step_review'),
+])
+
+const currentStep = computed(() => {
+  if (selectedBillIds.value.length > 0) return 3
+  if (!isLoadingBills.value && bills.value.length > 0) return 2
+  return 1
+})
 
 // Watch for locale changes
 const observer = new MutationObserver(() => {
@@ -413,25 +473,51 @@ function toggleSelectAll() {
   }
 }
 
+function showQuickSelectToast(count, total) {
+  if (count === 0) {
+    notificationStore.showNotification({
+      type: 'info',
+      message: t('quick_select_none'),
+    })
+  } else {
+    notificationStore.showNotification({
+      type: 'info',
+      message: `${count} ${t('bills_selected')} — ${t('total')}: ${formatMoney(total)}`,
+    })
+  }
+}
+
 function selectOverdue() {
-  const overdueIds = bills.value.filter((b) => b.is_overdue).map((b) => b.id)
+  const overdueBills = bills.value.filter((b) => b.is_overdue)
+  const overdueIds = overdueBills.map((b) => b.id)
+  const newIds = overdueIds.filter(id => !selectedBillIds.value.includes(id))
   selectedBillIds.value = [...new Set([...selectedBillIds.value, ...overdueIds])]
+  const total = overdueBills.reduce((sum, b) => sum + (b.due_amount || 0), 0)
+  showQuickSelectToast(newIds.length, total)
 }
 
 function selectDueThisWeek() {
-  const dueIds = bills.value.filter((b) => b.is_due_soon || b.is_overdue).map((b) => b.id)
+  const dueBills = bills.value.filter((b) => b.is_due_soon || b.is_overdue)
+  const dueIds = dueBills.map((b) => b.id)
+  const newIds = dueIds.filter(id => !selectedBillIds.value.includes(id))
   selectedBillIds.value = [...new Set([...selectedBillIds.value, ...dueIds])]
+  const total = dueBills.reduce((sum, b) => sum + (b.due_amount || 0), 0)
+  showQuickSelectToast(newIds.length, total)
 }
 
 function selectDueThisMonth() {
   const now = new Date()
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-  const dueIds = bills.value.filter((b) => {
+  const dueBills = bills.value.filter((b) => {
     if (!b.due_date) return false
     const due = new Date(b.due_date)
     return due <= endOfMonth
-  }).map((b) => b.id)
+  })
+  const dueIds = dueBills.map((b) => b.id)
+  const newIds = dueIds.filter(id => !selectedBillIds.value.includes(id))
   selectedBillIds.value = [...new Set([...selectedBillIds.value, ...dueIds])]
+  const total = dueBills.reduce((sum, b) => sum + (b.due_amount || 0), 0)
+  showQuickSelectToast(newIds.length, total)
 }
 
 function clearSelection() {
