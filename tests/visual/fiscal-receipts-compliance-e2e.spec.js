@@ -709,13 +709,15 @@ test.describe('Fiscal Receipts — UJP Compliance E2E', () => {
       payment_type: 'card',
       operator_name: 'Картичен Оператер',
     })
-    // Might be 422 if invoice already fiscalized on this device
+    // 422 if invoice already fiscalized on this device, 502 transient Railway
     expect([201, 422]).toContain(res.status)
+    if (res.status === 201) {
+      expect(res.data.data.payment_type).toBe('card')
+    }
   })
 
   test('30. Record receipt with minimal fields (backward compat)', async () => {
-    // Create a fresh invoice-like scenario — use a different device trick
-    // Just verify the API accepts without the new fields
+    // Just verify the API accepts without the new compliance fields
     const res = await apiPost(page, `fiscal-devices/${testDeviceId}/record-receipt`, {
       invoice_id: testInvoiceId,
       receipt_number: `COMP-MIN-${Date.now()}`,
