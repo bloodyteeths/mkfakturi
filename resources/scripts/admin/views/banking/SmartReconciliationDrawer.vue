@@ -429,6 +429,8 @@
                       <option value="Персонален данок">{{ $t('banking.tax_personal', 'Персонален данок (PIT)') }}</option>
                       <option value="ФПИОМ">{{ $t('banking.tax_pension', 'ФПИОМ (Pension Fund)') }}</option>
                       <option value="ФЗОМ">{{ $t('banking.tax_health', 'ФЗОМ (Health Fund)') }}</option>
+                      <option value="Вработување">{{ $t('banking.tax_employment', 'Вработување (Employment Fund)') }}</option>
+                      <option value="Професионален придонес">{{ $t('banking.tax_additional', 'Професионален придонес (Additional 0.5%)') }}</option>
                       <option value="Аконтација">{{ $t('banking.tax_advance', 'Аконтација (Advance Tax)') }}</option>
                       <option value="Друг данок">{{ $t('banking.tax_other', 'Друг данок (Other Tax)') }}</option>
                     </select>

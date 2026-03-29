@@ -89,8 +89,12 @@ Available expense categories for this company:
 {$categoryList}
 
 Keyword hints:
-- "плата", "salary", "wages", "придонес за вработен", "paga", "нето плата" → payroll/salary
-- "УЈП", "ДДВ", "данок", "данок на добивка", "аконтација", "tatim", "TVSH", "ФПИОМ", "ФЗОМ" → tax_payment
+- "плата", "salary", "wages", "paga", "нето плата", "neto" → payroll/salary (link_payroll)
+- "придонес", "пио", "ФПИОМ", "fpiom", "pension", "пензиско" → payroll pension contribution (tax_payment sub_type ФПИОМ)
+- "здравств", "ФЗОМ", "fzom", "health" → payroll health contribution (tax_payment sub_type ФЗОМ)
+- "вработување", "employment", "невработеност" → payroll employment fund (tax_payment sub_type Вработување)
+- "персонален данок", "данок од плата", "ПДД" → payroll income tax (tax_payment sub_type Персонален данок)
+- "УЈП", "ДДВ", "данок на добивка", "аконтација", "tatim", "TVSH" → tax_payment
 - "кредит", "рата", "ануитет", "лизинг", "kredi", "loan", "leasing" → loan_repayment
 - "провизија", "камата банка", "komision", "fee", "банкарска провизија" → bank fee (expense)
 - "ЕВН", "EVN", "Телеком", "водовод", "electricity", "water", "комунална" → utility (expense)

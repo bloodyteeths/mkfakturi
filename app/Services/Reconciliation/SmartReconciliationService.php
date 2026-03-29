@@ -356,6 +356,14 @@ class SmartReconciliationService
 
     /**
      * Layer 4: Match debit transactions to payroll runs.
+     *
+     * Payroll generates 6 separate bank charges per MPIN declaration:
+     * 1. Net salary (нето плата) → total_net
+     * 2. ФПИОМ pension → sum(pension_contribution_employee + pension_contribution_employer)
+     * 3. ФЗОМ health → sum(health_contribution_employee + health_contribution_employer)
+     * 4. Employment fund (вработување) → sum(unemployment_contribution)
+     * 5. Additional contribution (професионален 0.5%) → sum(additional_contribution)
+     * 6. Personal income tax (ПДД) → sum(income_tax_amount)
      */
     private function tryMatchPayroll(BankTransaction $tx, int $companyId): ?SmartSuggestion
     {
@@ -366,20 +374,30 @@ class SmartReconciliationService
             return null;
         }
 
-        // Salary keywords in description
-        $salaryKeywords = ['плата', 'salary', 'wages', 'придонес', 'payroll', 'paga', 'neto', 'нето'];
+        // Payroll-related keywords
+        $payrollKeywords = [
+            'плата', 'salary', 'wages', 'payroll', 'paga', 'neto', 'нето',
+            'придонес', 'пио', 'piom', 'фпиом', 'fpiom', 'pension',
+            'здравств', 'fzom', 'фзом', 'health',
+            'вработување', 'employment', 'punësim',
+            'персонален данок', 'данок од плата', 'pit', 'tatim',
+            'мпин', 'mpin', 'декларација',
+        ];
         $description = mb_strtolower(($tx->description ?? '').($tx->remittance_info ?? ''));
-        $hasSalaryKeyword = false;
-        foreach ($salaryKeywords as $kw) {
+        $hasPayrollKeyword = false;
+        $matchedKeyword = '';
+        foreach ($payrollKeywords as $kw) {
             if (str_contains($description, $kw)) {
-                $hasSalaryKeyword = true;
+                $hasPayrollKeyword = true;
+                $matchedKeyword = $kw;
                 break;
             }
         }
 
         $payrollRuns = PayrollRun::where('company_id', $companyId)
-            ->whereIn('status', ['approved', 'posted'])
-            ->get(['id', 'total_net', 'total_gross', 'period_year', 'period_month', 'period_start', 'period_end', 'status']);
+            ->whereIn('status', ['approved', 'posted', 'paid'])
+            ->with('lines')
+            ->get(['id', 'total_net', 'total_gross', 'total_employer_tax', 'total_employee_tax', 'period_year', 'period_month', 'period_start', 'period_end', 'status']);
 
         if ($payrollRuns->isEmpty()) {
             return null;
@@ -387,48 +405,73 @@ class SmartReconciliationService
 
         $bestScore = 0;
         $bestRun = null;
+        $bestChargeType = 'net_salary';
 
         foreach ($payrollRuns as $run) {
-            $score = 0;
+            // Aggregate contribution amounts from payroll run lines
+            $totals = $this->aggregatePayrollContributions($run);
 
-            // Amount matching — compare to total_net (what actually gets paid out)
-            $netAmount = (int) $run->total_net;
-            if ($netAmount > 0 && $txAmount > 0) {
-                $ratio = min($txAmount, $netAmount) / max($txAmount, $netAmount);
-                if ($ratio >= 0.98) {
+            // Check each charge type against the bank transaction amount
+            $chargeTypes = [
+                'net_salary' => ['amount' => (int) $run->total_net, 'label' => 'Нето плата'],
+                'pension' => ['amount' => $totals['pension'], 'label' => 'ФПИОМ (пензиско)'],
+                'health' => ['amount' => $totals['health'], 'label' => 'ФЗОМ (здравствено)'],
+                'employment' => ['amount' => $totals['employment'], 'label' => 'Вработување'],
+                'additional' => ['amount' => $totals['additional'], 'label' => 'Професионален придонес'],
+                'pit' => ['amount' => $totals['pit'], 'label' => 'Персонален данок'],
+                'total_contributions' => ['amount' => $totals['total_contributions'], 'label' => 'Вкупни придонеси и ПДД'],
+                'gross' => ['amount' => (int) $run->total_gross, 'label' => 'Бруто плата'],
+            ];
+
+            foreach ($chargeTypes as $type => $info) {
+                if ($info['amount'] <= 0) {
+                    continue;
+                }
+
+                $score = 0;
+
+                // Amount matching
+                $ratio = min($txAmount, $info['amount']) / max($txAmount, $info['amount']);
+                if ($ratio >= 0.99) {
+                    $score += 55; // Near-exact match
+                } elseif ($ratio >= 0.98) {
                     $score += 50;
-                } elseif ($ratio >= 0.90) {
-                    $score += 30; // Multiple payments for one run
+                } elseif ($ratio >= 0.95) {
+                    $score += 35;
                 }
-            }
 
-            // Also check gross amount (employer might pay gross + contributions in one transfer)
-            $grossAmount = (int) $run->total_gross;
-            if ($grossAmount > 0 && $txAmount > 0) {
-                $ratio = min($txAmount, $grossAmount) / max($txAmount, $grossAmount);
-                if ($ratio >= 0.98) {
-                    $score += 40;
+                // Date proximity (contributions due by 15th of next month)
+                if ($run->period_end && $txDate) {
+                    $daysDiff = abs($txDate->diffInDays($run->period_end));
+                    if ($daysDiff <= 20) {
+                        $score += 20;
+                    } elseif ($daysDiff <= 35) {
+                        $score += 10;
+                    }
                 }
-            }
 
-            // Date proximity (within 10 days of period end)
-            if ($run->period_end && $txDate) {
-                $daysDiff = abs($txDate->diffInDays($run->period_end));
-                if ($daysDiff <= 5) {
-                    $score += 20;
-                } elseif ($daysDiff <= 10) {
-                    $score += 10;
+                // Keyword boost
+                if ($hasPayrollKeyword) {
+                    $score += 25;
+                    // Extra boost if keyword matches the charge type
+                    if ($type === 'pension' && in_array($matchedKeyword, ['пио', 'piom', 'фпиом', 'fpiom', 'pension'])) {
+                        $score += 10;
+                    } elseif ($type === 'health' && in_array($matchedKeyword, ['здравств', 'fzom', 'фзом', 'health'])) {
+                        $score += 10;
+                    } elseif ($type === 'pit' && in_array($matchedKeyword, ['персонален данок', 'данок од плата', 'pit', 'tatim'])) {
+                        $score += 10;
+                    } elseif ($type === 'employment' && in_array($matchedKeyword, ['вработување', 'employment', 'punësim'])) {
+                        $score += 10;
+                    } elseif ($type === 'net_salary' && in_array($matchedKeyword, ['плата', 'salary', 'neto', 'нето', 'paga'])) {
+                        $score += 10;
+                    }
                 }
-            }
 
-            // Salary keyword boost
-            if ($hasSalaryKeyword) {
-                $score += 25;
-            }
-
-            if ($score > $bestScore) {
-                $bestScore = $score;
-                $bestRun = $run;
+                if ($score > $bestScore) {
+                    $bestScore = $score;
+                    $bestRun = $run;
+                    $bestChargeType = $type;
+                }
             }
         }
 
@@ -438,14 +481,62 @@ class SmartReconciliationService
 
         $confidence = min(0.95, $bestScore / 100);
         $period = sprintf('%04d-%02d', $bestRun->period_year, $bestRun->period_month);
+        $chargeLabel = $chargeTypes[$bestChargeType]['label'] ?? $bestChargeType;
+        $chargeAmount = $chargeTypes[$bestChargeType]['amount'] ?? 0;
+
+        // For contributions, use tax_payment action (not link_payroll)
+        $contributionTypes = ['pension', 'health', 'employment', 'additional', 'pit', 'total_contributions'];
+        if (in_array($bestChargeType, $contributionTypes)) {
+            // Map charge type to tax sub-type
+            $subTypeMap = [
+                'pension' => 'ФПИОМ',
+                'health' => 'ФЗОМ',
+                'employment' => 'Вработување',
+                'additional' => 'Професионален придонес',
+                'pit' => 'Персонален данок',
+                'total_contributions' => 'Вкупни придонеси',
+            ];
+
+            return new SmartSuggestion(
+                action: SmartSuggestion::ACTION_TAX_PAYMENT,
+                confidence: $confidence,
+                reason: "Плата {$period} — {$chargeLabel}: ".number_format($chargeAmount / 100, 0).' ден',
+                targetId: $bestRun->id,
+                targetLabel: "Payroll {$period} — {$chargeLabel}",
+                categoryName: $subTypeMap[$bestChargeType] ?? null,
+            );
+        }
 
         return new SmartSuggestion(
             action: SmartSuggestion::ACTION_LINK_PAYROLL,
             confidence: $confidence,
-            reason: "Payroll {$period} — Net: ".number_format($bestRun->total_net / 100, 0).' ден',
+            reason: "Плата {$period} — {$chargeLabel}: ".number_format($chargeAmount / 100, 0).' ден',
             targetId: $bestRun->id,
             targetLabel: "Payroll {$period}",
         );
+    }
+
+    /**
+     * Aggregate individual contribution totals from payroll run lines.
+     */
+    private function aggregatePayrollContributions(PayrollRun $run): array
+    {
+        $lines = $run->lines;
+
+        $pension = $lines->sum('pension_contribution_employee') + $lines->sum('pension_contribution_employer');
+        $health = $lines->sum('health_contribution_employee') + $lines->sum('health_contribution_employer');
+        $employment = $lines->sum('unemployment_contribution');
+        $additional = $lines->sum('additional_contribution');
+        $pit = $lines->sum('income_tax_amount');
+
+        return [
+            'pension' => (int) $pension,
+            'health' => (int) $health,
+            'employment' => (int) $employment,
+            'additional' => (int) $additional,
+            'pit' => (int) $pit,
+            'total_contributions' => (int) ($pension + $health + $employment + $additional + $pit),
+        ];
     }
 
     /**
