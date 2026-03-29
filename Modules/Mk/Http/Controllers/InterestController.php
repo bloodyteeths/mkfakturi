@@ -173,7 +173,8 @@ class InterestController extends Controller
                 ->where('status', 'calculated')
                 ->update(['status' => 'invoiced']);
 
-            return $pdf->download("kamatna-nota-{$data['note_number']}.pdf");
+            $safeNoteNumber = str_replace('/', '-', $data['note_number']);
+            return $pdf->download("kamatna-nota-{$safeNoteNumber}.pdf");
         } catch (ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
