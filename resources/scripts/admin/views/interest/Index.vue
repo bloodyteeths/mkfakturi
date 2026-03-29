@@ -2,115 +2,141 @@
   <BasePage>
     <BasePageHeader :title="t('title')">
       <template #actions>
-        <BaseButton
-          variant="primary"
-          :loading="isCalculating"
-          @click="batchCalculate"
-        >
-          <template #left="slotProps">
-            <BaseIcon :class="slotProps.class" name="CalculatorIcon" />
-          </template>
-          {{ t('batch_calculate') }}
-        </BaseButton>
+        <div class="flex items-center gap-2">
+          <!-- As-of date input -->
+          <div class="hidden sm:flex items-center gap-1">
+            <label class="text-xs text-gray-500 whitespace-nowrap">{{ t('as_of_date') }}:</label>
+            <BaseDatePicker
+              v-model="asOfDate"
+              class="w-36"
+              :calendar-button="true"
+              calendar-button-icon="CalendarDaysIcon"
+            />
+          </div>
+          <BaseButton
+            variant="primary"
+            :loading="isCalculating"
+            @click="confirmBatchCalculate"
+          >
+            <template #left="slotProps">
+              <BaseIcon :class="slotProps.class" name="CalculatorIcon" />
+            </template>
+            <span class="hidden sm:inline">{{ t('batch_calculate') }}</span>
+            <span class="sm:hidden">{{ t('calculate') }}</span>
+          </BaseButton>
+        </div>
       </template>
     </BasePageHeader>
 
-    <!-- Summary Cards -->
-    <div v-if="summary" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-      <div class="bg-white rounded-lg shadow p-4">
-        <p class="text-xs text-gray-500 uppercase">{{ t('total_interest') }}</p>
-        <p class="text-2xl font-bold text-gray-900">{{ formatMoney(summary.total_interest) }}</p>
-      </div>
-      <div class="bg-white rounded-lg shadow p-4">
-        <p class="text-xs text-gray-500 uppercase">{{ t('pending') }}</p>
-        <p class="text-2xl font-bold text-amber-600">{{ formatMoney(summary.calculated?.amount || 0) }}</p>
-        <p class="text-xs text-gray-400">{{ summary.calculated?.count || 0 }} {{ t('items') }}</p>
-      </div>
-      <div class="bg-white rounded-lg shadow p-4">
-        <p class="text-xs text-gray-500 uppercase">{{ t('invoiced') }}</p>
-        <p class="text-2xl font-bold text-blue-600">{{ formatMoney(summary.invoiced?.amount || 0) }}</p>
-        <p class="text-xs text-gray-400">{{ summary.invoiced?.count || 0 }} {{ t('items') }}</p>
-      </div>
-      <div class="bg-white rounded-lg shadow p-4">
-        <p class="text-xs text-gray-500 uppercase">{{ t('status_paid') }}</p>
-        <p class="text-2xl font-bold text-green-600">{{ formatMoney(summary.paid?.amount || 0) }}</p>
-        <p class="text-xs text-gray-400">{{ summary.paid?.count || 0 }} {{ t('items') }}</p>
-      </div>
-      <div class="bg-white rounded-lg shadow p-4">
-        <p class="text-xs text-gray-500 uppercase">{{ t('status_waived') }}</p>
-        <p class="text-2xl font-bold text-gray-400">{{ formatMoney(summary.waived?.amount || 0) }}</p>
-        <p class="text-xs text-gray-400">{{ summary.waived?.count || 0 }} {{ t('items') }}</p>
+    <!-- Summary Cards — compact, scrollable on mobile -->
+    <div v-if="summary" class="flex gap-3 mb-4 overflow-x-auto pb-1 -mx-1 px-1 snap-x">
+      <div
+        v-for="card in summaryCards"
+        :key="card.key"
+        class="min-w-[130px] flex-1 rounded-lg shadow p-3 snap-start"
+        :class="card.bg"
+      >
+        <p class="text-[10px] uppercase tracking-wide" :class="card.labelColor">{{ card.label }}</p>
+        <p class="text-lg sm:text-xl font-bold" :class="card.valueColor">{{ formatMoney(card.amount) }}</p>
+        <p v-if="card.count !== undefined" class="text-[10px]" :class="card.countColor">{{ card.count }} {{ t('items') }}</p>
       </div>
     </div>
 
-    <!-- Rate Override Card -->
-    <div class="bg-white rounded-lg shadow p-4 mb-6">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div class="flex items-center gap-4">
-          <div>
-            <p class="text-sm font-medium text-gray-700">{{ t('annual_rate') }}</p>
-            <p class="text-xs text-gray-400 mt-0.5">{{ t('rate_help') }}</p>
+    <!-- Settings toggle (rate + legal info collapsed) -->
+    <div class="mb-4">
+      <button
+        class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+        @click="showSettings = !showSettings"
+      >
+        <BaseIcon
+          :name="showSettings ? 'ChevronDownIcon' : 'ChevronRightIcon'"
+          class="h-4 w-4"
+        />
+        {{ t('settings_and_info') }} — {{ customRate }}%
+        <span
+          class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium"
+          :class="isCustomRate ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'"
+        >
+          {{ isCustomRate ? t('custom') : t('statutory') }}
+        </span>
+      </button>
+
+      <transition
+        enter-active-class="transition-all duration-200 ease-out"
+        leave-active-class="transition-all duration-150 ease-in"
+        enter-from-class="opacity-0 max-h-0"
+        enter-to-class="opacity-100 max-h-48"
+        leave-from-class="opacity-100 max-h-48"
+        leave-to-class="opacity-0 max-h-0"
+      >
+        <div v-if="showSettings" class="mt-2 overflow-hidden">
+          <!-- Rate override -->
+          <div class="bg-white rounded-lg shadow p-4 mb-2">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div class="flex items-center gap-3 flex-1">
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-700">{{ t('annual_rate') }}</p>
+                  <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">{{ t('rate_help') }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <BaseInput
+                    v-model="customRate"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    class="w-24"
+                    :disabled="isSavingRate"
+                  >
+                    <template #right>
+                      <span class="text-gray-400 text-sm">%</span>
+                    </template>
+                  </BaseInput>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <BaseButton
+                  size="sm"
+                  variant="primary"
+                  :loading="isSavingRate"
+                  @click="saveRate"
+                >
+                  {{ $t('general.save') }}
+                </BaseButton>
+                <BaseButton
+                  v-if="isCustomRate"
+                  size="sm"
+                  variant="primary-outline"
+                  @click="resetRate"
+                >
+                  {{ t('reset_to_default') }}
+                </BaseButton>
+              </div>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <BaseInput
-              v-model="customRate"
-              type="number"
-              step="0.01"
-              min="0"
-              max="100"
-              class="w-28"
-              :disabled="isSavingRate"
-            >
-              <template #right>
-                <span class="text-gray-400 text-sm">%</span>
-              </template>
-            </BaseInput>
-            <span
-              v-if="isCustomRate"
-              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 whitespace-nowrap"
-            >
-              {{ t('custom') }}
-            </span>
-            <span
-              v-else
-              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 whitespace-nowrap"
-            >
-              {{ t('statutory') }}
-            </span>
+          <!-- Legal info -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700">
+            <p><strong>{{ t('nbrm_rate') }}:</strong> {{ t('mk_law_info') }}</p>
+            <p class="mt-0.5 text-blue-500">{{ t('formula_info') }}</p>
           </div>
         </div>
-        <div class="flex gap-2">
-          <BaseButton
-            size="sm"
-            variant="primary"
-            :loading="isSavingRate"
-            @click="saveRate"
-          >
-            {{ $t('general.save') }}
-          </BaseButton>
-          <BaseButton
-            v-if="isCustomRate"
-            size="sm"
-            variant="primary-outline"
-            @click="resetRate"
-          >
-            {{ t('reset_to_default') }}
-          </BaseButton>
-        </div>
-      </div>
+      </transition>
     </div>
 
-    <!-- Info Banner -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
-      <p class="text-sm text-blue-800">
-        <strong>{{ t('nbrm_rate') }}:</strong> {{ t('mk_law_info') }}
-      </p>
-      <p class="text-xs text-blue-600 mt-1">{{ t('formula_info') }}</p>
+    <!-- Mobile as-of-date (shown only on small screens) -->
+    <div class="sm:hidden mb-3">
+      <BaseInputGroup :label="t('as_of_date')">
+        <BaseDatePicker
+          v-model="asOfDate"
+          :calendar-button="true"
+          calendar-button-icon="CalendarDaysIcon"
+        />
+      </BaseInputGroup>
     </div>
 
-    <!-- Filters -->
-    <div class="p-4 bg-white rounded-lg shadow mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <!-- Filters — responsive -->
+    <div class="p-3 sm:p-4 bg-white rounded-lg shadow mb-4">
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <BaseInputGroup :label="t('status')">
           <BaseMultiselect
             v-model="filters.status"
@@ -153,7 +179,7 @@
           />
         </BaseInputGroup>
 
-        <div class="flex items-end gap-2">
+        <div class="flex items-end gap-2 col-span-2 sm:col-span-1">
           <BaseButton
             variant="primary"
             class="flex-1"
@@ -163,7 +189,8 @@
             <template #left="slotProps">
               <BaseIcon :class="slotProps.class" name="MagnifyingGlassIcon" />
             </template>
-            {{ $t('reports.update_report') }}
+            <span class="hidden sm:inline">{{ $t('reports.update_report') }}</span>
+            <span class="sm:hidden">{{ t('calculate') }}</span>
           </BaseButton>
           <BaseButton
             v-if="calculations.length > 0"
@@ -184,23 +211,21 @@
           <div class="h-4 bg-gray-200 rounded w-20"></div>
           <div class="h-4 bg-gray-200 rounded flex-1"></div>
           <div class="h-4 bg-gray-200 rounded w-16"></div>
-          <div class="h-4 bg-gray-200 rounded w-20"></div>
-          <div class="h-4 bg-gray-200 rounded w-16"></div>
         </div>
       </div>
     </div>
 
     <!-- Table -->
     <template v-else-if="calculations.length > 0">
-      <!-- Generate Note Action Bar -->
+      <!-- Bulk Action Bar -->
       <div
         v-if="selectedIds.length > 0"
-        class="bg-amber-50 border border-amber-200 rounded-t-lg px-6 py-3 flex items-center justify-between"
+        class="bg-amber-50 border border-amber-200 rounded-t-lg px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
       >
         <span class="text-sm text-amber-800">
           {{ selectedIds.length }} {{ t('select_for_note') }}
         </span>
-        <div class="flex gap-2">
+        <div v-if="canGenerateNote" class="flex gap-2">
           <BaseButton
             variant="primary"
             size="sm"
@@ -210,7 +235,8 @@
             <template #left="slotProps">
               <BaseIcon :class="slotProps.class" name="DocumentArrowDownIcon" />
             </template>
-            {{ t('generate_note') }}
+            <span class="hidden sm:inline">{{ t('generate_note') }}</span>
+            <span class="sm:hidden">PDF</span>
           </BaseButton>
           <BaseButton
             variant="primary-outline"
@@ -221,17 +247,22 @@
             <template #left="slotProps">
               <BaseIcon :class="slotProps.class" name="EnvelopeIcon" />
             </template>
-            {{ t('send_note') }}
+            <span class="hidden sm:inline">{{ t('send_note') }}</span>
+            <span class="sm:hidden">Email</span>
           </BaseButton>
         </div>
+        <p v-else class="text-xs text-amber-600">
+          {{ t('mixed_customers_warning') }}
+        </p>
       </div>
 
-      <div class="bg-white rounded-lg shadow overflow-hidden" :class="{ 'rounded-t-none': selectedIds.length > 0 }">
+      <!-- Desktop Table -->
+      <div class="bg-white rounded-lg shadow overflow-hidden hidden md:block" :class="{ 'rounded-t-none': selectedIds.length > 0 }">
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 w-10">
                   <input
                     type="checkbox"
                     class="rounded border-gray-300"
@@ -239,43 +270,20 @@
                     @change="toggleSelectAll"
                   />
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('customer_name')">
-                  {{ t('customer') }}
-                  <span v-if="sortField === 'customer_name'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+                <th
+                  v-for="col in visibleColumns"
+                  :key="col.field"
+                  class="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider select-none"
+                  :class="[
+                    col.align === 'right' ? 'text-right' : 'text-left',
+                    col.sortable ? 'cursor-pointer hover:text-gray-700' : ''
+                  ]"
+                  @click="col.sortable && toggleSort(col.field)"
+                >
+                  {{ col.label }}
+                  <span v-if="sortField === col.field" class="ml-0.5">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('invoice_number')">
-                  {{ t('invoice_number') }}
-                  <span v-if="sortField === 'invoice_number'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('due_date')">
-                  {{ t('due_date') }}
-                  <span v-if="sortField === 'due_date'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
-                </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('principal_amount')">
-                  {{ t('principal') }}
-                  <span v-if="sortField === 'principal_amount'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
-                </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('days_overdue')">
-                  {{ t('days_overdue') }}
-                  <span v-if="sortField === 'days_overdue'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
-                </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('annual_rate')">
-                  {{ t('rate') }}
-                  <span v-if="sortField === 'annual_rate'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
-                </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('interest_amount')">
-                  {{ t('interest_amount') }}
-                  <span v-if="sortField === 'interest_amount'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('calculation_date')">
-                  {{ t('calculation_date') }}
-                  <span v-if="sortField === 'calculation_date'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
-                </th>
-                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700" @click="toggleSort('status')">
-                  {{ t('status') }}
-                  <span v-if="sortField === 'status'" class="ml-1">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
-                </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase w-16">
                   {{ t('actions') }}
                 </th>
               </tr>
@@ -286,7 +294,7 @@
                 :key="calc.id"
                 class="hover:bg-gray-50"
               >
-                <td class="px-4 py-4">
+                <td class="px-3 py-3">
                   <input
                     v-if="calc.status === 'calculated' || calc.status === 'invoiced'"
                     type="checkbox"
@@ -295,10 +303,10 @@
                     v-model="selectedIds"
                   />
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                   {{ calc.customer?.name || '-' }}
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-primary-500">
+                <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-primary-500">
                   <router-link
                     v-if="calc.invoice?.id"
                     :to="`/admin/invoices/${calc.invoice.id}/view`"
@@ -308,30 +316,24 @@
                   </router-link>
                   <span v-else>-</span>
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
                   {{ formatDateMK(calc.invoice?.due_date) }}
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-right text-gray-900">
+                <td class="px-3 py-3 whitespace-nowrap text-sm text-right text-gray-900">
                   {{ formatMoney(calc.principal_amount) }}
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-right text-red-600 font-medium">
+                <td class="px-3 py-3 whitespace-nowrap text-sm text-right text-red-600 font-medium">
                   {{ calc.days_overdue }}
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                  {{ calc.annual_rate }}%
-                </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-right font-bold text-gray-900">
+                <td class="px-3 py-3 whitespace-nowrap text-sm text-right font-bold text-gray-900">
                   {{ formatMoney(calc.interest_amount) }}
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ formatDateMK(calc.calculation_date) }}
-                </td>
-                <td class="px-4 py-4 whitespace-nowrap text-center">
-                  <span :class="statusBadgeClass(calc.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                <td class="px-3 py-3 whitespace-nowrap text-center">
+                  <span :class="statusBadgeClass(calc.status)" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">
                     {{ statusLabel(calc.status) }}
                   </span>
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-right text-sm">
+                <td class="px-3 py-3 whitespace-nowrap text-right text-sm">
                   <InterestActionDropdown
                     v-if="calc.status !== 'paid'"
                     :row="calc"
@@ -346,7 +348,7 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="meta && meta.last_page > 1" class="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+        <div v-if="meta && meta.last_page > 1" class="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
           <p class="text-sm text-gray-500">
             {{ meta.total }} {{ t('items') }}
           </p>
@@ -397,45 +399,106 @@
           </div>
         </div>
       </div>
+
+      <!-- Mobile Card List -->
+      <div class="md:hidden space-y-2" :class="{ 'rounded-t-none': selectedIds.length > 0 }">
+        <div
+          v-for="calc in calculations"
+          :key="'m-' + calc.id"
+          class="bg-white rounded-lg shadow p-3"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-start gap-2 min-w-0 flex-1">
+              <input
+                v-if="calc.status === 'calculated' || calc.status === 'invoiced'"
+                type="checkbox"
+                class="rounded border-gray-300 mt-1 flex-shrink-0"
+                :value="calc.id"
+                v-model="selectedIds"
+              />
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">{{ calc.customer?.name || '-' }}</p>
+                <router-link
+                  v-if="calc.invoice?.id"
+                  :to="`/admin/invoices/${calc.invoice.id}/view`"
+                  class="text-xs text-primary-500 hover:underline"
+                >
+                  {{ calc.invoice?.invoice_number || '-' }}
+                </router-link>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <span :class="statusBadgeClass(calc.status)" class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium">
+                {{ statusLabel(calc.status) }}
+              </span>
+              <InterestActionDropdown
+                v-if="calc.status !== 'paid'"
+                :row="calc"
+                @generate="onDropdownGenerate"
+                @waive="onDropdownWaive"
+                @revert="onDropdownRevert"
+              />
+            </div>
+          </div>
+          <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
+            <div>
+              <p class="text-gray-400">{{ t('principal') }}</p>
+              <p class="font-medium text-gray-900">{{ formatMoney(calc.principal_amount) }}</p>
+            </div>
+            <div>
+              <p class="text-gray-400">{{ t('days_overdue') }}</p>
+              <p class="font-medium text-red-600">{{ calc.days_overdue }}</p>
+            </div>
+            <div>
+              <p class="text-gray-400">{{ t('interest_amount') }}</p>
+              <p class="font-bold text-gray-900">{{ formatMoney(calc.interest_amount) }}</p>
+            </div>
+          </div>
+          <div class="mt-1.5 flex justify-between text-[10px] text-gray-400">
+            <span>{{ t('due_date') }}: {{ formatDateMK(calc.invoice?.due_date) }}</span>
+            <span>{{ formatDateMK(calc.calculation_date) }}</span>
+          </div>
+        </div>
+
+        <!-- Mobile Pagination -->
+        <div v-if="meta && meta.last_page > 1" class="flex items-center justify-between pt-2">
+          <p class="text-xs text-gray-500">
+            {{ meta.current_page }}/{{ meta.last_page }} ({{ meta.total }})
+          </p>
+          <div class="flex gap-1">
+            <BaseButton
+              v-if="meta.current_page > 1"
+              variant="primary-outline"
+              size="sm"
+              @click="fetchCalculations(meta.current_page - 1)"
+            >
+              &lsaquo;
+            </BaseButton>
+            <BaseButton
+              v-if="meta.current_page < meta.last_page"
+              variant="primary-outline"
+              size="sm"
+              @click="fetchCalculations(meta.current_page + 1)"
+            >
+              &rsaquo;
+            </BaseButton>
+          </div>
+        </div>
+      </div>
     </template>
 
     <!-- Empty State -->
     <div
       v-else-if="!isLoading"
-      class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 py-16"
+      class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 py-12 sm:py-16"
     >
-      <BaseIcon name="CalculatorIcon" class="h-12 w-12 text-gray-400" />
+      <BaseIcon name="CalculatorIcon" class="h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
         {{ t('no_calculations') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm text-gray-500 text-center px-4">
         {{ t('no_calculations_description') }}
       </p>
-    </div>
-
-    <!-- Customer Summary Section -->
-    <div v-if="summary && summary.by_customer && summary.by_customer.length > 0" class="mt-8">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">{{ t('by_customer') }}</h3>
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('customer') }}</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('total_principal') }}</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('total_interest') }}</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">#</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="row in summary.by_customer" :key="row.customer_id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 text-sm text-gray-900">{{ row.customer_name }}</td>
-              <td class="px-6 py-4 text-sm text-right text-gray-500">{{ formatMoney(row.total_principal) }}</td>
-              <td class="px-6 py-4 text-sm text-right font-bold text-gray-900">{{ formatMoney(row.total_interest) }}</td>
-              <td class="px-6 py-4 text-sm text-right text-gray-400">{{ row.count }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
   </BasePage>
 </template>
@@ -466,6 +529,7 @@ const isGenerating = ref(false)
 const isSending = ref(false)
 const selectedIds = ref([])
 const asOfDate = ref(null)
+const showSettings = ref(false)
 
 // Sort state
 const sortField = ref('calculation_date')
@@ -490,9 +554,40 @@ const statusOptions = [
   { value: 'waived', label: t('status_waived') },
 ]
 
+// Summary cards config
+const summaryCards = computed(() => {
+  if (!summary.value) return []
+  return [
+    { key: 'total', label: t('total_interest'), amount: summary.value.total_interest, bg: 'bg-white', labelColor: 'text-gray-500', valueColor: 'text-gray-900', countColor: '' },
+    { key: 'pending', label: t('pending'), amount: summary.value.calculated?.amount || 0, count: summary.value.calculated?.count || 0, bg: 'bg-amber-50', labelColor: 'text-amber-600', valueColor: 'text-amber-800', countColor: 'text-amber-500' },
+    { key: 'invoiced', label: t('invoiced'), amount: summary.value.invoiced?.amount || 0, count: summary.value.invoiced?.count || 0, bg: 'bg-blue-50', labelColor: 'text-blue-600', valueColor: 'text-blue-800', countColor: 'text-blue-500' },
+    { key: 'paid', label: t('status_paid'), amount: summary.value.paid?.amount || 0, count: summary.value.paid?.count || 0, bg: 'bg-green-50', labelColor: 'text-green-600', valueColor: 'text-green-800', countColor: 'text-green-500' },
+    { key: 'waived', label: t('status_waived'), amount: summary.value.waived?.amount || 0, count: summary.value.waived?.count || 0, bg: 'bg-gray-50', labelColor: 'text-gray-500', valueColor: 'text-gray-500', countColor: 'text-gray-400' },
+  ]
+})
+
+// Table columns — removed 'rate' (same for all rows) and 'calculation_date' (usually today)
+const visibleColumns = computed(() => [
+  { field: 'customer_name', label: t('customer'), align: 'left', sortable: true },
+  { field: 'invoice_number', label: t('invoice_number'), align: 'left', sortable: true },
+  { field: 'due_date', label: t('due_date'), align: 'left', sortable: true },
+  { field: 'principal_amount', label: t('principal'), align: 'right', sortable: true },
+  { field: 'days_overdue', label: t('days_overdue'), align: 'right', sortable: true },
+  { field: 'interest_amount', label: t('interest_amount'), align: 'right', sortable: true },
+  { field: 'status', label: t('status'), align: 'center', sortable: true },
+])
+
 const allSelected = computed(() => {
   const selectableItems = calculations.value.filter(c => c.status === 'calculated' || c.status === 'invoiced')
   return selectableItems.length > 0 && selectedIds.value.length === selectableItems.length
+})
+
+// Check if all selected calculations belong to the same customer
+const canGenerateNote = computed(() => {
+  if (selectedIds.value.length === 0) return false
+  const selectedCalcs = calculations.value.filter(c => selectedIds.value.includes(c.id))
+  const customerIds = new Set(selectedCalcs.map(c => c.customer_id))
+  return customerIds.size === 1
 })
 
 const paginationPages = computed(() => {
@@ -526,11 +621,11 @@ function formatMoney(cents) {
 
 function formatDateMK(dateStr) {
   if (!dateStr) return '-'
-  const d = new Date(dateStr)
-  if (isNaN(d.getTime())) return dateStr
-  const dd = String(d.getDate()).padStart(2, '0')
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const yyyy = d.getFullYear()
+  // Parse YYYY-MM-DD string directly to avoid timezone issues
+  const parts = String(dateStr).split('T')[0].split('-')
+  if (parts.length !== 3) return dateStr
+  const [yyyy, mm, dd] = parts
+  if (!yyyy || !mm || !dd) return dateStr
   return `${dd}.${mm}.${yyyy}`
 }
 
@@ -719,7 +814,7 @@ async function exportCsv() {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `interest-${new Date().toISOString().slice(0,10)}.csv`
+    link.download = `kamatna-presmetka-${new Date().toISOString().slice(0,10)}.csv`
     link.click()
     URL.revokeObjectURL(url)
   } catch (error) {
@@ -731,6 +826,13 @@ async function exportCsv() {
 }
 
 // Actions
+function confirmBatchCalculate() {
+  const dateLabel = asOfDate.value || t('today_label')
+  const msg = t('confirm_batch_calculate').replace('{date}', dateLabel)
+  if (!confirm(msg)) return
+  batchCalculate()
+}
+
 async function batchCalculate() {
   isCalculating.value = true
   try {
@@ -760,15 +862,6 @@ function getSelectedCustomerPayload() {
   const selectedCalcs = calculations.value.filter(c => selectedIds.value.includes(c.id))
   if (selectedCalcs.length === 0) return null
 
-  const customerIds = [...new Set(selectedCalcs.map(c => c.customer_id))]
-  if (customerIds.length > 1) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: t('mixed_customers_warning'),
-    })
-    return null
-  }
-
   return {
     customer_id: selectedCalcs[0].customer_id,
     calculation_ids: selectedIds.value,
@@ -777,7 +870,7 @@ function getSelectedCustomerPayload() {
 }
 
 async function generateNote() {
-  if (selectedIds.value.length === 0) return
+  if (selectedIds.value.length === 0 || !canGenerateNote.value) return
   const payload = getSelectedCustomerPayload()
   if (!payload) return
 
@@ -826,7 +919,7 @@ async function generateNote() {
 }
 
 async function sendNote() {
-  if (selectedIds.value.length === 0) return
+  if (selectedIds.value.length === 0 || !canGenerateNote.value) return
   const payload = getSelectedCustomerPayload()
   if (!payload) return
 

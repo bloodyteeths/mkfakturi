@@ -71,6 +71,9 @@ export default {
       note_sent: 'Каматната нота е испратена на {email}.',
       send_note_confirm: 'Испрати каматна нота на {name}?',
       error_sending_note: 'Грешка при испраќање на каматна нота',
+      settings_and_info: 'Поставки и формула',
+      confirm_batch_calculate: 'Пресметај камата за сите задоцнети фактури на датум {date}?',
+      today_label: 'денес',
     }
   },
   en: {
@@ -145,6 +148,9 @@ export default {
       note_sent: 'Interest note sent to {email}.',
       send_note_confirm: 'Send interest note to {name}?',
       error_sending_note: 'Error sending interest note',
+      settings_and_info: 'Settings & formula',
+      confirm_batch_calculate: 'Calculate interest for all overdue invoices as of {date}?',
+      today_label: 'today',
     }
   },
   tr: {
@@ -219,6 +225,9 @@ export default {
       note_sent: 'Faiz notu {email} adresine gonderildi.',
       send_note_confirm: '{name} musterisine faiz notu gonder?',
       error_sending_note: 'Faiz notu gonderme hatasi',
+      settings_and_info: 'Ayarlar ve formul',
+      confirm_batch_calculate: '{date} tarihi itibariyle tum gecikmiş faturalar icin faiz hesaplansin mi?',
+      today_label: 'bugun',
     }
   },
   sq: {
@@ -293,6 +302,9 @@ export default {
       note_sent: 'Nota e interesit u dergua ne {email}.',
       send_note_confirm: 'Dergo noten e interesit per {name}?',
       error_sending_note: 'Gabim ne dergimin e notes se interesit',
+      settings_and_info: 'Cilesimet dhe formula',
+      confirm_batch_calculate: 'Llogarit interesin per te gjitha faturat e vonuara deri me daten {date}?',
+      today_label: 'sot',
     }
   }
 }

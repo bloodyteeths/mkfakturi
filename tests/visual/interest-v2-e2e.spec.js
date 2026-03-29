@@ -179,10 +179,9 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
   // ═══════════════════════════════════════════════════════════
 
   test('1. Page shows 5 summary cards including waived', async () => {
-    // Should already be on interest page from test above
-    // Use first() to get only the top summary grid, not the customer summary below
-    const summaryGrid = page.locator('.grid.grid-cols-1.md\\:grid-cols-5').first()
-    const cards = summaryGrid.locator('> div')
+    // Summary cards are now in a horizontal flex container
+    const summaryContainer = page.locator('.flex.gap-3.mb-4.overflow-x-auto').first()
+    const cards = summaryContainer.locator('> div')
     await expect(cards).toHaveCount(5)
 
     // 5th card should contain the waived status text
@@ -298,7 +297,7 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
     // Check that sortable headers exist with cursor-pointer class
     const sortableHeaders = page.locator('th.cursor-pointer')
     const count = await sortableHeaders.count()
-    expect(count).toBeGreaterThanOrEqual(8) // 9 sortable columns
+    expect(count).toBeGreaterThanOrEqual(6) // 7 sortable columns (removed rate + calc_date)
     console.log(`  ✓ ${count} clickable sort headers in table`)
 
     // Click a header and verify sort indicator appears
@@ -321,28 +320,20 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
     // Already on interest page
     await page.waitForTimeout(1000)
 
-    // Get all date cells (due date = 4th column, calculation date = 9th column)
-    const rows = page.locator('tbody tr')
+    // Desktop table: due date = 4th column (index 3), calc_date removed from table
+    const rows = page.locator('.hidden.md\\:block tbody tr')
     const rowCount = await rows.count()
 
     if (rowCount > 0) {
       // Check due date column (index 3 = 4th td)
       const dueDate = await rows.first().locator('td').nth(3).textContent()
-      // Check calculation date column (index 8 = 9th td)
-      const calcDate = await rows.first().locator('td').nth(8).textContent()
 
       const mkDatePattern = /^\d{2}\.\d{2}\.\d{4}$/
-      // Due date may be a link, so trim
       const dueTrimmed = dueDate.trim()
-      const calcTrimmed = calcDate.trim()
 
       if (dueTrimmed !== '-') {
         expect(dueTrimmed).toMatch(mkDatePattern)
         console.log(`  ✓ Due date formatted: ${dueTrimmed}`)
-      }
-      if (calcTrimmed !== '-') {
-        expect(calcTrimmed).toMatch(mkDatePattern)
-        console.log(`  ✓ Calc date formatted: ${calcTrimmed}`)
       }
     } else {
       console.log('  SKIP: No rows in table to check date format')
@@ -358,8 +349,8 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
     const rowCount = await rows.count()
 
     if (rowCount > 0) {
-      // Invoice number is in 3rd column (index 2), should contain a <a> or router-link
-      const invoiceCell = rows.first().locator('td').nth(2)
+      // Desktop table: Invoice number is in 3rd column (index 2)
+      const invoiceCell = page.locator('.hidden.md\\:block tbody tr').first().locator('td').nth(2)
       const link = invoiceCell.locator('a')
       const linkCount = await link.count()
 
@@ -387,7 +378,7 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
 
     if (totalItems > 15) {
       // Should have prev/next navigation buttons (« ‹ › »)
-      const paginationDiv = page.locator('.px-6.py-3.border-t.border-gray-200')
+      const paginationDiv = page.locator('.px-4.py-3.border-t.border-gray-200')
       await expect(paginationDiv).toBeVisible()
 
       const paginationText = await paginationDiv.textContent()
@@ -785,8 +776,8 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
     await page.goto(`${BASE}/admin/interest`, { waitUntil: 'networkidle' })
     await page.waitForTimeout(2000)
 
-    // Find a dropdown trigger (ellipsis icon)
-    const dropdownTrigger = page.locator('tbody tr').first().locator('svg, [name="EllipsisHorizontalIcon"]').last()
+    // Find a dropdown trigger (ellipsis icon) in desktop table
+    const dropdownTrigger = page.locator('.hidden.md\\:block tbody tr').first().locator('svg, [name="EllipsisHorizontalIcon"]').last()
     const triggerVisible = await dropdownTrigger.isVisible().catch(() => false)
 
     if (triggerVisible) {
