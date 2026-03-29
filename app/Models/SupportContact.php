@@ -16,6 +16,10 @@ class SupportContact extends Model
      *
      * @var array<string>
      */
+    protected $appends = [
+        'reference_number',
+    ];
+
     protected $fillable = [
         'user_id',
         'company_id',
