@@ -422,7 +422,6 @@ class ReconciliationController extends Controller
 
         $transaction = BankTransaction::forCompany($company->id)
             ->where('id', $request->transaction_id)
-            ->unreconciled()
             ->firstOrFail();
 
         // Verify expense category belongs to this company
@@ -462,7 +461,6 @@ class ReconciliationController extends Controller
 
         $transaction = BankTransaction::forCompany($company->id)
             ->where('id', $request->transaction_id)
-            ->unreconciled()
             ->firstOrFail();
 
         $bill = Bill::where('company_id', $company->id)
@@ -511,7 +509,6 @@ class ReconciliationController extends Controller
 
         $transaction = BankTransaction::forCompany($company->id)
             ->where('id', $request->transaction_id)
-            ->unreconciled()
             ->firstOrFail();
 
         $payrollRun = PayrollRun::where('company_id', $company->id)
@@ -546,7 +543,6 @@ class ReconciliationController extends Controller
 
         $transaction = BankTransaction::forCompany($company->id)
             ->where('id', $request->transaction_id)
-            ->unreconciled()
             ->firstOrFail();
 
         if ($request->notes) {
@@ -722,7 +718,6 @@ class ReconciliationController extends Controller
 
         $transaction = BankTransaction::forCompany($company->id)
             ->where('id', $request->transaction_id)
-            ->unreconciled()
             ->firstOrFail();
 
         $amountCents = (int) round(abs((float) $transaction->amount) * 100);
@@ -818,7 +813,6 @@ class ReconciliationController extends Controller
 
         $transaction = BankTransaction::forCompany($company->id)
             ->where('id', $request->transaction_id)
-            ->unreconciled()
             ->firstOrFail();
 
         $action = $request->action;
