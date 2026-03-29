@@ -706,13 +706,12 @@ class ReconciliationController extends Controller
 
         $payment = \App\Models\Payment::create([
             'company_id' => $company->id,
+            'user_id' => Auth::id(),
             'amount' => $amountCents,
             'base_amount' => $amountCents,
             'payment_date' => $transaction->transaction_date,
             'payment_number' => $paymentNumber,
             'notes' => $request->notes ?? $transaction->description ?? 'Non-invoice income',
-            'source_type' => 'bank_transaction',
-            'source_id' => $transaction->id,
         ]);
 
         $transaction->markAsReconciled('income', $payment->id);

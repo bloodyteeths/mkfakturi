@@ -35,12 +35,21 @@ class SmartAiCategorizer
     {
         $company = Company::find($tx->company_id);
         if ($company && ! $this->checkUsageLimit($company)) {
+            Log::info('[SmartAiCategorizer] Usage limit reached', [
+                'transaction_id' => $tx->id,
+                'company_id' => $tx->company_id,
+            ]);
+
             return null;
         }
 
         try {
             $provider = app(GeminiProvider::class);
         } catch (\Exception $e) {
+            Log::warning('[SmartAiCategorizer] Provider init failed', [
+                'error' => $e->getMessage(),
+            ]);
+
             return null;
         }
 
