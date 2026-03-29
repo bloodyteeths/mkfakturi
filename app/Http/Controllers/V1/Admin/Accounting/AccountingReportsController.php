@@ -794,7 +794,172 @@ class AccountingReportsController extends Controller
         return response()->json(['success' => true, 'data' => $result]);
     }
 
-    // CLAUDE-CHECKPOINT: Added cashFlow and equityChanges endpoints
+    /**
+     * Cash Book — GL entries for cash accounts (class 10x).
+     */
+    public function cashBook(Request $request): JsonResponse
+    {
+        $company = Company::find($request->header('company'));
+        $this->authorize('view', $company);
+
+        $start = $request->input('start_date', now()->startOfYear()->toDateString());
+        $end = $request->input('end_date', now()->toDateString());
+        $accountCode = $request->input('account_code', '100');
+
+        $result = $this->ifrsAdapter->getGeneralLedger($company->id, $accountCode, $start, $end);
+
+        if (isset($result['error'])) {
+            return response()->json($result, 400);
+        }
+
+        return response()->json(['success' => true, 'data' => $result]);
+    }
+
+    /**
+     * Cash Book CSV/PDF export.
+     */
+    public function cashBookExport(Request $request)
+    {
+        $company = Company::find($request->header('company'));
+        $this->authorize('view', $company);
+
+        $start = $request->input('start_date', now()->startOfYear()->toDateString());
+        $end = $request->input('end_date', now()->toDateString());
+        $accountCode = $request->input('account_code', '100');
+        $format = $request->input('format', 'pdf');
+
+        $result = $this->ifrsAdapter->getGeneralLedger($company->id, $accountCode, $start, $end);
+
+        if ($format === 'csv') {
+            $csv = "Account,Date,Document,Description,Debit,Credit,Balance\n";
+            foreach ($result['entries'] ?? [] as $entry) {
+                $csv .= implode(',', [
+                    $accountCode,
+                    $entry['date'] ?? '',
+                    '"' . str_replace('"', '""', $entry['reference'] ?? '') . '"',
+                    '"' . str_replace('"', '""', $entry['narration'] ?? '') . '"',
+                    $entry['debit'] ?? 0,
+                    $entry['credit'] ?? 0,
+                    $entry['balance'] ?? 0,
+                ]) . "\n";
+            }
+            return response($csv, 200, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=cash-book-{$start}-to-{$end}.csv",
+            ]);
+        }
+
+        $locale = \App\Models\CompanySetting::getSetting('language', $company->id) ?? 'mk';
+        app()->setLocale($locale);
+
+        $pdf = \PDF::loadView('app.pdf.reports.cash-book', [
+            'company' => $company,
+            'account_code' => $accountCode,
+            'account_name' => $result['account_name'] ?? 'Каса',
+            'from_date' => $start,
+            'to_date' => $end,
+            'opening_balance' => $result['opening_balance'] ?? 0,
+            'entries' => $result['entries'] ?? [],
+            'closing_balance' => $result['closing_balance'] ?? 0,
+        ]);
+
+        return $pdf->stream("cash-book-{$start}-to-{$end}.pdf");
+    }
+
+    /**
+     * VAT Books — input/output invoices with VAT breakdown.
+     */
+    public function vatBooks(Request $request): JsonResponse
+    {
+        $company = Company::find($request->header('company'));
+        $this->authorize('view', $company);
+
+        $start = $request->input('start_date', now()->startOfYear()->toDateString());
+        $end = $request->input('end_date', now()->toDateString());
+
+        // Output VAT (invoices)
+        $invoices = \App\Models\Invoice::where('company_id', $company->id)
+            ->whereBetween('invoice_date', [$start, $end])
+            ->where('status', '!=', 'DRAFT')
+            ->select('id', 'invoice_number', 'invoice_date', 'sub_total', 'tax', 'total', 'due_amount')
+            ->with(['customer:id,name'])
+            ->orderBy('invoice_date')
+            ->get();
+
+        // Input VAT (bills)
+        $bills = \App\Models\Bill::where('company_id', $company->id)
+            ->whereBetween('bill_date', [$start, $end])
+            ->where('status', '!=', 'DRAFT')
+            ->select('id', 'bill_number', 'bill_date', 'sub_total', 'tax', 'total', 'due_amount')
+            ->without(['supplier', 'currency', 'company'])
+            ->with(['supplier:id,name'])
+            ->orderBy('bill_date')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'output' => $invoices,
+                'input' => $bills,
+                'period' => ['start' => $start, 'end' => $end],
+            ],
+        ]);
+    }
+
+    /**
+     * VAT Books CSV/PDF export.
+     */
+    public function vatBooksExport(Request $request)
+    {
+        $company = Company::find($request->header('company'));
+        $this->authorize('view', $company);
+
+        $start = $request->input('start_date', now()->startOfYear()->toDateString());
+        $end = $request->input('end_date', now()->toDateString());
+        $format = $request->input('format', 'pdf');
+
+        $invoices = \App\Models\Invoice::where('company_id', $company->id)
+            ->whereBetween('invoice_date', [$start, $end])
+            ->where('status', '!=', 'DRAFT')
+            ->with(['customer:id,name'])
+            ->orderBy('invoice_date')
+            ->get();
+
+        $bills = \App\Models\Bill::where('company_id', $company->id)
+            ->whereBetween('bill_date', [$start, $end])
+            ->where('status', '!=', 'DRAFT')
+            ->without(['supplier', 'currency', 'company'])
+            ->with(['supplier:id,name'])
+            ->orderBy('bill_date')
+            ->get();
+
+        if ($format === 'csv') {
+            $csv = "Type,Number,Date,Party,SubTotal,Tax,Total\n";
+            foreach ($invoices as $inv) {
+                $csv .= "Output,{$inv->invoice_number},{$inv->invoice_date},\"{$inv->customer->name}\",{$inv->sub_total},{$inv->tax},{$inv->total}\n";
+            }
+            foreach ($bills as $bill) {
+                $csv .= "Input,{$bill->bill_number},{$bill->bill_date},\"{$bill->supplier->name}\",{$bill->sub_total},{$bill->tax},{$bill->total}\n";
+            }
+            return response($csv, 200, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=vat-books-{$start}-to-{$end}.csv",
+            ]);
+        }
+
+        $locale = \App\Models\CompanySetting::getSetting('language', $company->id) ?? 'mk';
+        app()->setLocale($locale);
+
+        $pdf = \PDF::loadView('app.pdf.reports.vat-books', [
+            'company' => $company,
+            'from_date' => $start,
+            'to_date' => $end,
+            'output_invoices' => $invoices,
+            'input_bills' => $bills,
+        ]);
+
+        return $pdf->stream("vat-books-{$start}-to-{$end}.pdf");
+    }
 
     /**
      * Check if accounting backbone feature is enabled

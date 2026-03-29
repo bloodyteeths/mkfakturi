@@ -761,4 +761,62 @@ class StockReportsController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Physical Inventory Count List PDF (Попис на залихи).
+     */
+    public function inventoryCountListPdf(Request $request)
+    {
+        $company = Company::find($request->header('company'));
+        $this->authorize('view', $company);
+
+        $asOfDate = $request->input('as_of_date', now()->toDateString());
+        $warehouseId = $request->input('warehouse_id');
+
+        $warehouses = $warehouseId
+            ? Warehouse::where('id', $warehouseId)->where('company_id', $company->id)->get()
+            : Warehouse::where('company_id', $company->id)->get();
+
+        $items = Item::where('company_id', $company->id)
+            ->where('is_stock_tracked', true)
+            ->with(['unit:id,name'])
+            ->orderBy('name')
+            ->get();
+
+        $rows = [];
+        foreach ($items as $item) {
+            $totalQty = 0;
+            $totalValue = 0;
+
+            foreach ($warehouses as $warehouse) {
+                $stock = $this->getStockAsOfDate($company->id, $item->id, $warehouse->id, $asOfDate);
+                $totalQty += $stock['quantity'];
+                $totalValue += $stock['total_value'];
+            }
+
+            if ($totalQty != 0 || $totalValue != 0) {
+                $unitPrice = $totalQty != 0 ? round($totalValue / $totalQty, 2) : 0;
+                $rows[] = [
+                    'code' => $item->sku ?? $item->id,
+                    'name' => $item->name,
+                    'unit' => $item->unit->name ?? 'пар.',
+                    'book_qty' => $totalQty,
+                    'unit_price' => $unitPrice,
+                    'book_value' => round($totalValue, 2),
+                ];
+            }
+        }
+
+        $locale = \App\Models\CompanySetting::getSetting('language', $company->id) ?? 'mk';
+        app()->setLocale($locale);
+
+        $pdf = \PDF::loadView('app.pdf.reports.inventory-count-list', [
+            'company' => $company,
+            'as_of_date' => $asOfDate,
+            'warehouse_name' => $warehouseId ? $warehouses->first()?->name : 'Сите магацини',
+            'items' => $rows,
+        ]);
+
+        return $pdf->stream("popis-na-zalihi-{$asOfDate}.pdf");
+    }
 }

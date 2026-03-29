@@ -965,6 +965,12 @@ Route::prefix('/v1')->group(function () {
                 Route::post('/journal-entries/{transaction}/reverse', [AccountingReportsController::class, 'reverseJournalEntry']);
                 Route::get('/cash-flow', [AccountingReportsController::class, 'cashFlow']);
                 Route::get('/equity-changes', [AccountingReportsController::class, 'equityChanges']);
+                Route::get('/cash-book', [AccountingReportsController::class, 'cashBook']);
+                Route::get('/cash-book/export', [AccountingReportsController::class, 'cashBookExport']);
+                Route::get('/vat-books', [AccountingReportsController::class, 'vatBooks']);
+                Route::get('/vat-books/export', [AccountingReportsController::class, 'vatBooksExport']);
+                Route::get('/trade-documents', [\App\Http\Controllers\V1\Admin\Report\TradeDocumentsReportController::class, 'index']);
+                Route::get('/trade-documents/trade-book/export', [\App\Http\Controllers\V1\Admin\Report\TradeDocumentsReportController::class, 'tradeBookExport']);
                 Route::post('/backfill-invoices', [AccountingReportsController::class, 'backfillInvoices']);
 
                 // Fixed Assets
@@ -1031,6 +1037,7 @@ Route::prefix('/v1')->group(function () {
 
                 // Inventory List (for physical counting)
                 Route::get('/inventory-list', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryList']);
+                Route::get('/inventory-count-list/pdf', [\App\Http\Controllers\V1\Admin\Stock\StockReportsController::class, 'inventoryCountListPdf']);
             });
 
             // Manufacturing Module

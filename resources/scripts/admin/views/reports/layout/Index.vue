@@ -46,6 +46,12 @@
         <TaxReport ref="report" />
       </BaseTab>
       <BaseTab
+        :title="$t('reports.trade_documents.title', 'Trade Documents')"
+        tab-panel-container="px-0 py-0"
+      >
+        <TradeDocuments ref="report" />
+      </BaseTab>
+      <BaseTab
         :title="$t('reports.projects.title')"
         tab-panel-container="px-0 py-0"
       >
@@ -99,6 +105,18 @@
           >
             <EquityChanges ref="report" />
           </BaseTab>
+          <BaseTab
+            :title="$t('reports.accounting.cash_book', 'Cash Book')"
+            tab-panel-container="px-0 py-0"
+          >
+            <CashBook ref="report" />
+          </BaseTab>
+          <BaseTab
+            :title="$t('reports.accounting.vat_books', 'VAT Books')"
+            tab-panel-container="px-0 py-0"
+          >
+            <VatBooks ref="report" />
+          </BaseTab>
         </BaseTabGroup>
       </BaseTab>
     </BaseTabGroup>
@@ -119,6 +137,9 @@ import GeneralLedger from '../GeneralLedger.vue'
 import JournalEntries from '../JournalEntries.vue'
 import CashFlow from '../CashFlow.vue'
 import EquityChanges from '../EquityChanges.vue'
+import CashBook from '../CashBook.vue'
+import VatBooks from '../VatBooks.vue'
+import TradeDocuments from '../TradeDocuments.vue'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 // Feature flag constant
