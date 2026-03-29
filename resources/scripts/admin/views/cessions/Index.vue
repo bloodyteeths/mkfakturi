@@ -34,7 +34,7 @@
         </span>
       </template>
       <template #cell-amount="{ row }">
-        {{ formatAmount(row.data.amount) }}
+        {{ formatAmount(row.data.amount) }} <span class="text-gray-400 text-xs">ден</span>
       </template>
       <template #cell-actions="{ row }">
         <div class="flex justify-end gap-2">
@@ -59,11 +59,11 @@ const table = ref(null)
 
 const columns = computed(() => [
   { key: 'cession_date', label: t('payments.date') },
-  { key: 'cession_number', label: t('payments.payment_number') },
+  { key: 'cession_number', label: '# Број' },
   { key: 'cedent_name', label: t('cedent') },
   { key: 'cessionary_name', label: t('cessionary') },
   { key: 'debtor_name', label: t('cession_debtor') },
-  { key: 'amount', label: t('transferred_amount') },
+  { key: 'amount', label: 'Износ' },
   { key: 'status', label: t('general.status') },
   { key: 'actions', label: '', sortable: false },
 ])

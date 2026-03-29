@@ -78,10 +78,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
-const fromDate = ref('')
-const toDate = ref('')
+// Default to current month
+const now = new Date()
+const fromDate = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`)
+const toDate = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`)
 const loading = ref(false)
 const generated = ref(false)
 const entries = ref([])
@@ -114,6 +116,8 @@ async function generate() {
     loading.value = false
   }
 }
+
+onMounted(() => generate())
 
 function downloadPdf() {
   const url = `/api/v1/reports/cash-journal/pdf?from_date=${fromDate.value}&to_date=${toDate.value}`

@@ -18,7 +18,7 @@
         />
       </BaseInputGroup>
 
-      <BaseInputGroup :label="$t('general.partner') || 'Партнер'">
+      <BaseInputGroup :label="$t('general.partner')">
         <BaseCustomerSelectInput
           v-if="partnerType === 'customer'"
           v-model="partnerId"
