@@ -82,7 +82,16 @@
                 <td>{{ number_format($totals['unemployment'] / 100, 0, '.', ',') }}</td>
                 <td>{{ number_format($totals['additional'] / 100, 0, '.', ',') }}</td>
                 <td>{{ number_format($totals['total_employee_contributions'] / 100, 0, '.', ',') }}</td>
-                <td>{{ number_format(($totals['gross_salary'] - $totals['total_employee_contributions']) / 100, 0, '.', ',') }}</td>
+                @php
+                    $totalTaxableBase = 0;
+                    foreach ($lines as $l) {
+                        $lContribs = $l->pension_contribution_employee + $l->health_contribution_employee
+                            + $l->unemployment_contribution + $l->additional_contribution;
+                        $lDeduction = $l->personal_deduction ?: config('mk.payroll.personal_deduction', 1039000);
+                        $totalTaxableBase += max(0, $l->gross_salary - $lContribs - $lDeduction);
+                    }
+                @endphp
+                <td>{{ number_format($totalTaxableBase / 100, 0, '.', ',') }}</td>
                 <td>{{ number_format($totals['income_tax'] / 100, 0, '.', ',') }}</td>
                 <td>{{ number_format($totals['net_salary'] / 100, 0, '.', ',') }}</td>
             </tr>
