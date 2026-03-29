@@ -33,6 +33,17 @@
             {{ $t('banking.add_account', 'Додај сметка') }}
           </BaseButton>
 
+          <!-- Reconciliation (most-used action) -->
+          <BaseButton
+            variant="primary-outline"
+            @click="router.push({ name: 'banking.reconciliation' })"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="ArrowsRightLeftIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('banking.reconciliation') }}
+          </BaseButton>
+
           <!-- Secondary actions dropdown -->
           <BaseDropdown width-class="w-48">
             <template #activator>
@@ -43,10 +54,6 @@
                 {{ $t('general.more', 'Повеќе') }}
               </BaseButton>
             </template>
-            <BaseDropdownItem @click="router.push({ name: 'banking.reconciliation' })">
-              <BaseIcon name="ArrowsRightLeftIcon" class="mr-3 h-5 w-5 text-gray-500" />
-              {{ $t('banking.reconciliation') || 'Reconciliation' }}
-            </BaseDropdownItem>
             <BaseDropdownItem @click="router.push({ name: 'banking.matching-rules' })">
               <BaseIcon name="AdjustmentsHorizontalIcon" class="mr-3 h-5 w-5 text-gray-500" />
               {{ $t('matching_rules.title') || 'Matching Rules' }}
@@ -66,18 +73,6 @@
             <BaseDropdownItem @click="exportTransactions">
               <BaseIcon name="ArrowDownTrayIcon" class="mr-3 h-5 w-5 text-gray-500" />
               {{ $t('banking.export', 'Export CSV') }}
-            </BaseDropdownItem>
-            <BaseDropdownItem @click="downloadBankStatement">
-              <BaseIcon name="DocumentTextIcon" class="mr-3 h-5 w-5 text-gray-500" />
-              {{ $t('banking.bank_statement', 'Извод од банка') }}
-            </BaseDropdownItem>
-            <BaseDropdownItem @click="downloadIos">
-              <BaseIcon name="DocumentDuplicateIcon" class="mr-3 h-5 w-5 text-gray-500" />
-              {{ $t('banking.ios_report', 'ИОС извештај') }}
-            </BaseDropdownItem>
-            <BaseDropdownItem @click="downloadDailyCashReport">
-              <BaseIcon name="BanknotesIcon" class="mr-3 h-5 w-5 text-gray-500" />
-              {{ $t('banking.daily_cash_report', 'Дневен извештај за каса') }}
             </BaseDropdownItem>
           </BaseDropdown>
         </div>
@@ -192,6 +187,63 @@
         <BaseContentPlaceholdersBox :rounded="true" />
         <BaseContentPlaceholdersBox :rounded="true" />
       </BaseContentPlaceholders>
+    </div>
+
+    <!-- MK Document Quick Actions -->
+    <div v-if="!showEmptyScreen && !isLoadingAccounts" class="mt-6">
+      <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">
+        {{ $t('banking.documents', 'Документи') }}
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <button
+          class="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-primary-400 hover:shadow transition-all text-left"
+          @click="downloadBankStatement"
+        >
+          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+            <BaseIcon name="DocumentTextIcon" class="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900">{{ $t('banking.bank_statement', 'Извод од банка') }}</p>
+            <p class="text-xs text-gray-500">PDF</p>
+          </div>
+        </button>
+        <button
+          class="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-primary-400 hover:shadow transition-all text-left"
+          @click="downloadIos"
+        >
+          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+            <BaseIcon name="DocumentDuplicateIcon" class="h-5 w-5 text-green-600" />
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900">{{ $t('banking.ios_report', 'ИОС извештај') }}</p>
+            <p class="text-xs text-gray-500">PDF</p>
+          </div>
+        </button>
+        <button
+          class="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-primary-400 hover:shadow transition-all text-left"
+          @click="downloadDailyCashReport"
+        >
+          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+            <BaseIcon name="BanknotesIcon" class="h-5 w-5 text-amber-600" />
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900">{{ $t('banking.daily_cash_report', 'Дневен извештај') }}</p>
+            <p class="text-xs text-gray-500">PDF</p>
+          </div>
+        </button>
+        <button
+          class="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-primary-400 hover:shadow transition-all text-left"
+          @click="router.push({ name: 'banking.reconciliation' })"
+        >
+          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+            <BaseIcon name="ArrowsRightLeftIcon" class="h-5 w-5 text-purple-600" />
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900">{{ $t('banking.reconciliation') }}</p>
+            <p class="text-xs text-gray-500">{{ $t('banking.match_invoices', 'Спои фактури') }}</p>
+          </div>
+        </button>
+      </div>
     </div>
 
     <!-- Recent Transactions Section -->

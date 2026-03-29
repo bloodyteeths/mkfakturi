@@ -55,9 +55,58 @@
 
     <!-- Unmatched Transactions -->
     <div class="mt-8">
-      <h2 class="text-xl font-semibold text-gray-900 mb-4">
-        {{ $t('banking.unmatched_transactions') }}
-      </h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">
+          {{ $t('banking.unmatched_transactions') }}
+          <span v-if="filteredTransactions.length !== unmatchedTransactions.length" class="text-sm font-normal text-gray-500">
+            ({{ filteredTransactions.length }} / {{ unmatchedTransactions.length }})
+          </span>
+        </h2>
+        <div class="flex items-center gap-2">
+          <!-- Bulk Mark Reviewed -->
+          <BaseButton
+            v-if="selectedTxIds.length > 0"
+            variant="primary-outline"
+            size="sm"
+            @click="bulkMarkReviewed"
+            :disabled="isBulkProcessing"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="CheckIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('banking.mark_reviewed_count', { count: selectedTxIds.length }) || `Mark ${selectedTxIds.length} Reviewed` }}
+          </BaseButton>
+        </div>
+      </div>
+
+      <!-- Search & Filter Bar -->
+      <div v-if="unmatchedTransactions.length > 0" class="flex flex-wrap items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+        <div class="flex-1 min-w-[200px]">
+          <input
+            v-model="txSearch"
+            type="text"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+            :placeholder="$t('banking.search_transactions', 'Пребарај по опис, контрапартија...')"
+          />
+        </div>
+        <select
+          v-model="txFilterType"
+          class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+        >
+          <option value="all">{{ $t('banking.all_types', 'Сите типови') }}</option>
+          <option value="credit">{{ $t('banking.credit', 'Приход') }}</option>
+          <option value="debit">{{ $t('banking.debit', 'Расход') }}</option>
+        </select>
+        <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            :checked="isAllSelected"
+            @change="toggleSelectAll"
+          />
+          {{ $t('banking.select_all', 'Избери сите') }}
+        </label>
+      </div>
 
       <div v-if="isLoading" class="flex justify-center py-8">
         <BaseContentPlaceholders>
@@ -70,13 +119,26 @@
         <p>{{ $t('banking.all_transactions_matched') }}</p>
       </div>
 
+      <div v-else-if="filteredTransactions.length === 0" class="text-center py-8 text-gray-500">
+        <p>{{ $t('banking.no_matching_results', 'Нема резултати за пребарувањето') }}</p>
+      </div>
+
       <div v-else class="space-y-4">
         <div
-          v-for="tx in unmatchedTransactions"
+          v-for="tx in filteredTransactions"
           :key="tx.id"
           class="bg-white rounded-lg shadow p-6 border border-gray-200"
         >
           <div class="flex items-start justify-between">
+            <!-- Checkbox for bulk select -->
+            <div class="flex-shrink-0 mr-3 pt-1">
+              <input
+                type="checkbox"
+                class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                :checked="selectedTxIds.includes(tx.id)"
+                @change="toggleTxSelection(tx.id)"
+              />
+            </div>
             <!-- Transaction Info -->
             <div class="flex-1">
               <div class="flex items-center space-x-4 mb-2">
@@ -537,6 +599,77 @@ const expenseCategoryId = ref(null)
 const expenseNotes = ref('')
 const selectedBillId = ref(null)
 const selectedPayrollRunId = ref(null)
+
+// Search, filter, and bulk select state
+const txSearch = ref('')
+const txFilterType = ref('all')
+const selectedTxIds = ref([])
+const isBulkProcessing = ref(false)
+
+const filteredTransactions = computed(() => {
+  let list = unmatchedTransactions.value
+  if (txFilterType.value !== 'all') {
+    list = list.filter(tx =>
+      txFilterType.value === 'credit' ? isCredit(tx) : !isCredit(tx)
+    )
+  }
+  if (txSearch.value) {
+    const q = txSearch.value.toLowerCase()
+    list = list.filter(tx =>
+      (tx.description || '').toLowerCase().includes(q) ||
+      (tx.counterparty_name || '').toLowerCase().includes(q) ||
+      (tx.remittance_info || '').toLowerCase().includes(q) ||
+      String(tx.amount).includes(q)
+    )
+  }
+  return list
+})
+
+const isAllSelected = computed(() => {
+  return filteredTransactions.value.length > 0 &&
+    filteredTransactions.value.every(tx => selectedTxIds.value.includes(tx.id))
+})
+
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    const visibleIds = filteredTransactions.value.map(tx => tx.id)
+    selectedTxIds.value = selectedTxIds.value.filter(id => !visibleIds.includes(id))
+  } else {
+    const visibleIds = filteredTransactions.value.map(tx => tx.id)
+    const merged = new Set([...selectedTxIds.value, ...visibleIds])
+    selectedTxIds.value = [...merged]
+  }
+}
+
+const toggleTxSelection = (id) => {
+  const idx = selectedTxIds.value.indexOf(id)
+  if (idx === -1) {
+    selectedTxIds.value.push(id)
+  } else {
+    selectedTxIds.value.splice(idx, 1)
+  }
+}
+
+const bulkMarkReviewed = async () => {
+  if (selectedTxIds.value.length === 0) return
+  isBulkProcessing.value = true
+  try {
+    await axios.post('/banking/reconciliation/bulk-mark-reviewed', {
+      transaction_ids: selectedTxIds.value,
+    })
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('banking.bulk_reviewed_success', '{count} transactions marked as reviewed').replace('{count}', selectedTxIds.value.length),
+    })
+    selectedTxIds.value = []
+    await fetchData(meta.value.current_page)
+  } catch (error) {
+    console.error('Bulk mark reviewed failed:', error)
+    notificationStore.showNotification({ type: 'error', message: t('banking.action_failed', 'Action failed') })
+  } finally {
+    isBulkProcessing.value = false
+  }
+}
 
 // Methods
 const fetchData = async (page = 1) => {
