@@ -349,6 +349,7 @@
 
       <!-- Transactions List Component -->
       <TransactionsList
+        ref="transactionsListRef"
         :filters="filters"
         :accounts="connectedAccounts"
         @categorize="openCategorizationModal"
@@ -476,6 +477,7 @@ const showAddAccountModal = ref(false)
 const isCreatingAccount = ref(false)
 const newAccount = ref({ bank_name: '', account_number: '', opening_balance: null })
 const selectedTransaction = ref(null)
+const transactionsListRef = ref(null)
 const showFilters = ref(false)
 
 // Filters
@@ -642,6 +644,8 @@ const openSmartDrawer = (transaction) => {
 const onTransactionReconciled = () => {
   showSmartDrawer.value = false
   selectedTransaction.value = null
+  // Refresh the transactions list to show updated reconciliation status
+  transactionsListRef.value?.refresh()
 }
 
 const manualEntryAccounts = computed(() => {

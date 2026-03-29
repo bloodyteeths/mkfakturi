@@ -176,7 +176,7 @@ class BankTransaction extends Model
             'linked_id' => null,
             'matched_invoice_id' => null,
             'reconciled_at' => null,
-            'processing_status' => self::STATUS_PENDING,
+            'processing_status' => self::STATUS_UNPROCESSED,
             'reconciliation_status' => 'unreconciled',
             'processed_at' => null,
         ]);

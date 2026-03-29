@@ -18,6 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Mk\Services\Matcher;
 
 /**
@@ -424,6 +425,10 @@ class ReconciliationController extends Controller
             ->where('id', $request->transaction_id)
             ->firstOrFail();
 
+        if ($transaction->isReconciled()) {
+            return response()->json(['message' => 'Transaction is already reconciled'], 422);
+        }
+
         // Verify expense category belongs to this company
         ExpenseCategory::where('company_id', $company->id)
             ->where('id', $request->expense_category_id)
@@ -463,8 +468,13 @@ class ReconciliationController extends Controller
             ->where('id', $request->transaction_id)
             ->firstOrFail();
 
+        if ($transaction->isReconciled()) {
+            return response()->json(['message' => 'Transaction is already reconciled'], 422);
+        }
+
         $bill = Bill::where('company_id', $company->id)
             ->where('id', $request->bill_id)
+            ->whereIn('paid_status', ['UNPAID', 'PARTIALLY_PAID'])
             ->firstOrFail();
 
         DB::transaction(function () use ($transaction, $bill, $company) {
@@ -510,6 +520,10 @@ class ReconciliationController extends Controller
         $transaction = BankTransaction::forCompany($company->id)
             ->where('id', $request->transaction_id)
             ->firstOrFail();
+
+        if ($transaction->isReconciled()) {
+            return response()->json(['message' => 'Transaction is already reconciled'], 422);
+        }
 
         // Allow linking to runs that are already 'paid' — payroll has 6 separate
         // bank charges (net, ФПИОМ, ФЗОМ, employment, additional, PIT)
@@ -730,6 +744,10 @@ class ReconciliationController extends Controller
             ->where('id', $request->transaction_id)
             ->firstOrFail();
 
+        if ($transaction->isReconciled()) {
+            return response()->json(['message' => 'Transaction is already reconciled'], 422);
+        }
+
         $amountCents = (int) round(abs((float) $transaction->amount) * 100);
 
         // Create a standalone payment (no invoice) to track the income
@@ -749,7 +767,7 @@ class ReconciliationController extends Controller
             'notes' => $request->notes ?? $transaction->description ?? 'Non-invoice income',
         ]);
 
-        $transaction->markAsReconciled('income', $payment->id);
+        $transaction->markAsReconciled(BankTransaction::LINKED_INCOME, $payment->id);
 
         return response()->json([
             'success' => true,
@@ -825,6 +843,10 @@ class ReconciliationController extends Controller
         $transaction = BankTransaction::forCompany($company->id)
             ->where('id', $request->transaction_id)
             ->firstOrFail();
+
+        if ($transaction->isReconciled()) {
+            return response()->json(['message' => 'Transaction is already reconciled'], 422);
+        }
 
         $action = $request->action;
         $amountCents = (int) round(abs((float) $transaction->amount) * 100);

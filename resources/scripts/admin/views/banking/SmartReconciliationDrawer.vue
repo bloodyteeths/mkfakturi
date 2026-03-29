@@ -639,20 +639,16 @@ const fetchSuggestion = async () => {
 }
 
 const fetchReferenceData = async () => {
-  try {
-    const [catRes, billRes, invRes, payRes] = await Promise.all([
-      axios.get('/banking/reconciliation/expense-categories'),
-      axios.get('/banking/reconciliation/unpaid-bills'),
-      axios.get('/banking/reconciliation/unpaid-invoices'),
-      axios.get('/banking/reconciliation/payroll-runs'),
-    ])
-    expenseCategories.value = catRes.data.data || []
-    unpaidBills.value = billRes.data.data || []
-    unpaidInvoices.value = invRes.data.data || []
-    payrollRuns.value = payRes.data.data || []
-  } catch (e) {
-    // Non-critical — manual options just won't have data
-  }
+  const results = await Promise.allSettled([
+    axios.get('/banking/reconciliation/expense-categories'),
+    axios.get('/banking/reconciliation/unpaid-bills'),
+    axios.get('/banking/reconciliation/unpaid-invoices'),
+    axios.get('/banking/reconciliation/payroll-runs'),
+  ])
+  expenseCategories.value = results[0].status === 'fulfilled' ? (results[0].value.data.data || []) : []
+  unpaidBills.value = results[1].status === 'fulfilled' ? (results[1].value.data.data || []) : []
+  unpaidInvoices.value = results[2].status === 'fulfilled' ? (results[2].value.data.data || []) : []
+  payrollRuns.value = results[3].status === 'fulfilled' ? (results[3].value.data.data || []) : []
 }
 
 const acceptSuggestion = async (s) => {
