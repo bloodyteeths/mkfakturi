@@ -36,6 +36,19 @@
       </div>
     </div>
 
+    <!-- Search -->
+    <div v-if="rules.length > 0" class="mb-4">
+      <div class="relative max-w-sm">
+        <BaseIcon name="MagnifyingGlassIcon" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <input
+          v-model="searchQuery"
+          type="text"
+          class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:ring-primary-500 focus:border-primary-500"
+          :placeholder="t('search_placeholder') || 'Search rules...'"
+        />
+      </div>
+    </div>
+
     <!-- Loading -->
     <div v-if="isLoading" class="bg-white rounded-lg shadow p-6">
       <div class="space-y-4 animate-pulse">
@@ -74,7 +87,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
-          <tr v-for="rule in rules" :key="rule.id" class="hover:bg-gray-50">
+          <tr v-for="rule in paginatedRules" :key="rule.id" class="hover:bg-gray-50">
             <td class="whitespace-nowrap px-4 py-3 text-sm">
               <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
                 {{ matchTypeLabel(rule.match_type) }}
@@ -123,6 +136,14 @@
           </tr>
         </tbody>
       </table>
+      <!-- Pagination -->
+      <div v-if="filteredRules.length > rulesPageSize" class="px-4 py-3 border-t border-gray-200 flex items-center justify-between text-sm text-gray-600">
+        <span>{{ t('showing') || 'Showing' }} {{ (rulesPage - 1) * rulesPageSize + 1 }}–{{ Math.min(rulesPage * rulesPageSize, filteredRules.length) }} {{ t('of_total') || 'of' }} {{ filteredRules.length }}</span>
+        <div class="flex items-center space-x-2">
+          <button :disabled="rulesPage <= 1" class="px-2 py-1 border rounded disabled:opacity-50" @click="rulesPage--">&laquo;</button>
+          <button :disabled="rulesPage >= totalRulesPages" class="px-2 py-1 border rounded disabled:opacity-50" @click="rulesPage++">&raquo;</button>
+        </div>
+      </div>
     </div>
 
     <!-- Empty state -->
@@ -319,6 +340,9 @@ const tabs = computed(() => [
 const rules = ref([])
 const costCenters = ref([])
 const isLoading = ref(false)
+const searchQuery = ref('')
+const rulesPage = ref(1)
+const rulesPageSize = 10
 const showRuleForm = ref(false)
 const editingRule = ref(null)
 const isSavingRule = ref(false)
@@ -348,6 +372,25 @@ const accountOptions = computed(() =>
     display: `${a.code} - ${a.name}`,
   }))
 )
+
+// Filtered & paginated rules
+const filteredRules = computed(() => {
+  if (!searchQuery.value) return rules.value
+  const q = searchQuery.value.toLowerCase()
+  return rules.value.filter(r =>
+    (r.match_value || '').toLowerCase().includes(q) ||
+    (r.match_type || '').toLowerCase().includes(q) ||
+    (r.cost_center?.name || '').toLowerCase().includes(q)
+  )
+})
+const totalRulesPages = computed(() => Math.ceil(filteredRules.value.length / rulesPageSize))
+const paginatedRules = computed(() => {
+  const start = (rulesPage.value - 1) * rulesPageSize
+  return filteredRules.value.slice(start, start + rulesPageSize)
+})
+
+// Reset page when search changes
+watch(searchQuery, () => { rulesPage.value = 1 })
 
 // Computed
 const matchValueHelp = computed(() => {

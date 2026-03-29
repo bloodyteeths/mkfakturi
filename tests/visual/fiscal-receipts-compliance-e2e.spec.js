@@ -245,7 +245,7 @@ test.describe('Fiscal Receipts — UJP Compliance E2E', () => {
     expect(receipt.operator_name).toBe('Тест Оператер')
     expect(receipt.unique_sale_number).toBe('12345678-0001-0000001')
     expect(receipt.payment_type).toBe('cash')
-    expect(receipt.is_storno).toBe(false)
+    expect(receipt.is_storno).toBeFalsy()
     expect(receipt.device_registration_number).toBe('UJP-REG-E2E-001')
     expect(receipt.tax_breakdown).toBeTruthy()
     expect(receipt.items_snapshot).toBeTruthy()

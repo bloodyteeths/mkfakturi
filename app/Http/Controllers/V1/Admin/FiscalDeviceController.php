@@ -435,6 +435,7 @@ class FiscalDeviceController extends Controller
             'items_snapshot' => $validated['items_snapshot'] ?? null,
             'device_receipt_datetime' => $validated['device_receipt_datetime'] ?? null,
             'device_registration_number' => $validated['device_registration_number'] ?? null,
+            'is_storno' => false,
         ]);
 
         Log::info('Fiscal receipt recorded', [

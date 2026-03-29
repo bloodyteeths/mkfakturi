@@ -2,6 +2,33 @@
   <BasePage>
     <BasePageHeader :title="t('summary')">
       <template #actions>
+        <!-- View toggle: Summary vs P&L -->
+        <div class="flex border border-gray-300 rounded-md overflow-hidden mr-3">
+          <button
+            class="px-3 py-1.5 text-sm font-medium"
+            :class="viewMode === 'summary' ? 'bg-primary-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+            @click="viewMode = 'summary'"
+          >
+            {{ t('summary') }}
+          </button>
+          <button
+            class="px-3 py-1.5 text-sm font-medium"
+            :class="viewMode === 'pnl' ? 'bg-primary-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+            @click="viewMode = 'pnl'"
+          >
+            {{ t('profit_loss') }}
+          </button>
+        </div>
+
+        <BaseButton
+          v-if="summaryData && summaryData.centers && summaryData.centers.length > 0"
+          variant="primary-outline"
+          class="mr-2"
+          @click="exportPdf"
+        >
+          PDF
+        </BaseButton>
+
         <BaseButton
           v-if="summaryData && summaryData.centers && summaryData.centers.length > 0"
           variant="primary-outline"
@@ -78,8 +105,38 @@
 
     <!-- Summary Content -->
     <template v-else-if="summaryData">
-      <!-- Bar Chart -->
-      <div v-if="summaryData.centers && summaryData.centers.length > 0" class="bg-white rounded-lg shadow p-6 mb-6">
+      <!-- P&L View -->
+      <div v-if="viewMode === 'pnl' && summaryData.centers && summaryData.centers.length > 0" class="bg-white rounded-lg shadow overflow-hidden mb-6">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+          <h3 class="text-sm font-medium text-gray-700">{{ t('profit_loss') }}</h3>
+        </div>
+        <div class="p-6">
+          <div v-for="center in summaryData.centers" :key="center.cost_center_id" class="mb-6 last:mb-0">
+            <div class="flex items-center mb-2">
+              <span class="inline-block h-3 w-3 rounded-full mr-2" :style="{ backgroundColor: center.color }"></span>
+              <span class="text-sm font-medium text-gray-900">{{ center.name }}</span>
+              <span v-if="center.code" class="ml-1 text-gray-400 font-mono text-xs">({{ center.code }})</span>
+            </div>
+            <div class="grid grid-cols-3 gap-4 ml-5">
+              <div class="bg-green-50 rounded-lg p-3">
+                <div class="text-xs text-green-600 mb-1">{{ t('revenue') }}</div>
+                <div class="text-sm font-semibold text-green-700">{{ formatMoney(center.total_credit) }} ден.</div>
+              </div>
+              <div class="bg-red-50 rounded-lg p-3">
+                <div class="text-xs text-red-600 mb-1">{{ t('total_expenses') }}</div>
+                <div class="text-sm font-semibold text-red-700">{{ formatMoney(center.total_debit) }} ден.</div>
+              </div>
+              <div :class="(center.net || 0) >= 0 ? 'bg-green-50' : 'bg-red-50'" class="rounded-lg p-3">
+                <div class="text-xs mb-1" :class="(center.net || 0) >= 0 ? 'text-green-600' : 'text-red-600'">{{ t('net_result') }}</div>
+                <div class="text-sm font-semibold" :class="(center.net || 0) >= 0 ? 'text-green-700' : 'text-red-700'">{{ formatMoney(center.net) }} ден.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bar Chart (Summary view) -->
+      <div v-if="viewMode === 'summary' && summaryData.centers && summaryData.centers.length > 0" class="bg-white rounded-lg shadow p-6 mb-6">
         <h3 class="text-sm font-medium text-gray-700 mb-4">{{ t('expenses') }}</h3>
         <div class="space-y-3">
           <div v-for="center in summaryData.centers" :key="center.cost_center_id" class="flex items-center">
@@ -112,8 +169,8 @@
         </div>
       </div>
 
-      <!-- Data Table -->
-      <div v-if="summaryData.centers && summaryData.centers.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
+      <!-- Data Table (Summary view) -->
+      <div v-if="viewMode === 'summary' && summaryData.centers && summaryData.centers.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
@@ -152,13 +209,13 @@
                 </div>
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right text-green-700">
-                {{ formatMoney(center.total_credit) }}
+                {{ formatMoney(center.total_credit) }} ден.
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right text-red-600">
-                {{ formatMoney(center.total_debit) }}
+                {{ formatMoney(center.total_debit) }} ден.
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right font-medium" :class="center.net >= 0 ? 'text-green-700' : 'text-red-600'">
-                {{ formatMoney(center.net) }}
+                {{ formatMoney(center.net) }} ден.
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right text-gray-600">
                 {{ center.percentage }}%
@@ -256,28 +313,40 @@
               <div v-for="i in 6" :key="i" class="h-4 bg-gray-200 rounded"></div>
             </div>
 
-            <table v-else-if="trialBalanceData?.accounts?.length > 0" class="min-w-full divide-y divide-gray-200">
+            <table v-else-if="trialBalanceData?.accounts?.length > 0" class="min-w-full divide-y divide-gray-200 text-xs">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ $t('settings.accounts.code') }}</th>
-                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ $t('settings.accounts.name') }}</th>
-                  <th class="px-3 py-2 text-right text-xs font-medium text-gray-500">{{ $t('reports.accounting.general_ledger.debit') }}</th>
-                  <th class="px-3 py-2 text-right text-xs font-medium text-gray-500">{{ $t('reports.accounting.general_ledger.credit') }}</th>
+                  <th class="px-2 py-2 text-left font-medium text-gray-500">{{ $t('settings.accounts.code') }}</th>
+                  <th class="px-2 py-2 text-left font-medium text-gray-500">{{ $t('settings.accounts.name') }}</th>
+                  <th class="px-2 py-2 text-right font-medium text-gray-500">{{ t('opening_debit') }}</th>
+                  <th class="px-2 py-2 text-right font-medium text-gray-500">{{ t('opening_credit') }}</th>
+                  <th class="px-2 py-2 text-right font-medium text-gray-500">{{ t('period_debit') }}</th>
+                  <th class="px-2 py-2 text-right font-medium text-gray-500">{{ t('period_credit') }}</th>
+                  <th class="px-2 py-2 text-right font-medium text-gray-500">{{ t('closing_debit') }}</th>
+                  <th class="px-2 py-2 text-right font-medium text-gray-500">{{ t('closing_credit') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
                 <tr v-for="(account, idx) in trialBalanceData.accounts" :key="idx" class="hover:bg-gray-50">
-                  <td class="px-3 py-2 text-sm font-mono text-gray-600">{{ account.code }}</td>
-                  <td class="px-3 py-2 text-sm text-gray-900">{{ account.name }}</td>
-                  <td class="px-3 py-2 text-sm text-right">{{ account.period_debit > 0 ? formatMoney(account.period_debit) : '' }}</td>
-                  <td class="px-3 py-2 text-sm text-right">{{ account.period_credit > 0 ? formatMoney(account.period_credit) : '' }}</td>
+                  <td class="px-2 py-2 font-mono text-gray-600">{{ account.code }}</td>
+                  <td class="px-2 py-2 text-gray-900">{{ account.name }}</td>
+                  <td class="px-2 py-2 text-right">{{ account.opening_debit > 0 ? formatMoney(account.opening_debit) : '' }}</td>
+                  <td class="px-2 py-2 text-right">{{ account.opening_credit > 0 ? formatMoney(account.opening_credit) : '' }}</td>
+                  <td class="px-2 py-2 text-right">{{ account.period_debit > 0 ? formatMoney(account.period_debit) : '' }}</td>
+                  <td class="px-2 py-2 text-right">{{ account.period_credit > 0 ? formatMoney(account.period_credit) : '' }}</td>
+                  <td class="px-2 py-2 text-right">{{ account.closing_debit > 0 ? formatMoney(account.closing_debit) : '' }}</td>
+                  <td class="px-2 py-2 text-right">{{ account.closing_credit > 0 ? formatMoney(account.closing_credit) : '' }}</td>
                 </tr>
               </tbody>
               <tfoot class="bg-gray-100 font-semibold">
                 <tr>
-                  <td colspan="2" class="px-3 py-2 text-sm">{{ $t('general.total') }}</td>
-                  <td class="px-3 py-2 text-sm text-right">{{ formatMoney(trialBalanceData.totals?.period_debit) }}</td>
-                  <td class="px-3 py-2 text-sm text-right">{{ formatMoney(trialBalanceData.totals?.period_credit) }}</td>
+                  <td colspan="2" class="px-2 py-2">{{ $t('general.total') }}</td>
+                  <td class="px-2 py-2 text-right">{{ formatMoney(trialBalanceData.totals?.opening_debit) }}</td>
+                  <td class="px-2 py-2 text-right">{{ formatMoney(trialBalanceData.totals?.opening_credit) }}</td>
+                  <td class="px-2 py-2 text-right">{{ formatMoney(trialBalanceData.totals?.period_debit) }}</td>
+                  <td class="px-2 py-2 text-right">{{ formatMoney(trialBalanceData.totals?.period_credit) }}</td>
+                  <td class="px-2 py-2 text-right">{{ formatMoney(trialBalanceData.totals?.closing_debit) }}</td>
+                  <td class="px-2 py-2 text-right">{{ formatMoney(trialBalanceData.totals?.closing_credit) }}</td>
                 </tr>
               </tfoot>
             </table>
@@ -321,6 +390,7 @@ const summaryData = ref(null)
 const isLoading = ref(false)
 const isExporting = ref(false)
 const hasSearched = ref(false)
+const viewMode = ref('summary') // 'summary' or 'pnl'
 
 // Trial balance modal
 const showTrialBalanceModal = ref(false)
@@ -444,6 +514,10 @@ async function exportToCsv() {
   } finally {
     isExporting.value = false
   }
+}
+
+function exportPdf() {
+  window.print()
 }
 
 function formatMoney(amount) {
