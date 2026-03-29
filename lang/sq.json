@@ -97,8 +97,17 @@
         "budgets": "Planifikimi i buxhetit dhe analiza e devijimeve",
         "bi_dashboard": "Grafikone inteligjence biznesi dhe KPI",
         "custom_reports": "Ndërtoni raporte financiare të personalizuara",
-        "operations": "Kompensime, porosi, qendrat e kostos dhe projekte",
-        "finance": "Analiza BI, buxhete, kamatë, arkëtime dhe raporte të personalizuara"
+        "operations": "POS, stoku, prodhimi, porositë dhe projektet",
+        "finance": "Analiza BI, buxhete, kamatë, arkëtime dhe raporte të personalizuara",
+        "documents_group": "Oferta, fatura, fatura blerje dhe ngarkime dokumentesh",
+        "contacts": "Klientët dhe furnitorët",
+        "money": "Pagesat, shpenzimet dhe bankingu",
+        "pos": "Pika e shitjes për transaksione me pakicë dhe kuponë fiskalë",
+        "manufacturing": "Urdhëra prodhimi, qendrat e punës dhe ndjekja në fabrikë",
+        "fiscal_receipts": "Historiku i kuponëve fiskalë dhe gjurma e auditimit",
+        "fiscal_monitor": "Monitorim i arkave në kohë reale dhe alarme mashtrimi",
+        "setup_wizard": "Udhëzues hap-pas-hapi për konfigurimin e kompanisë",
+        "support": "Merrni ndihmë dhe paraqisni kërkesa mbështetjeje"
     },
     "general": {
         "company_name": "Emri në kompania",
@@ -2328,13 +2337,19 @@
         "status_posted": "Regjistruar",
         "approve_expense": "Mirato shpenzimin",
         "approved_message": "Shpenzimi u miratua me sukses",
+        "posted_message": "Shpenzimi u regjistrua me sukses",
         "clone_expense": "Dupliko shpenzimin",
         "cloned_message": "Shpenzimi u duplikua me sukses",
         "print_expense": "Printo shpenzimin",
         "nalog_za_isplata": "Urdhër pagese",
         "kniga_primeni_fakturi": "Libri i faturave të pranuara",
         "financial_details": "Detajet financiare",
-        "vat_recap": "Rekapitulimi i TVSH-së"
+        "vat_recap": "Rekapitulimi i TVSH-së",
+        "rashoden_nalog": "Urdhër disbursimi (PDF)",
+        "basic_info": "Informacionet bazë",
+        "supplier_details": "Furnizuesi dhe fatura",
+        "accounting_details": "TVSH dhe kontabilitet",
+        "optional_details": "Detaje shtesë"
     },
     "login": {
         "email": "Email",

@@ -133,6 +133,28 @@
         </router-link>
       </li>
 
+      <!-- Cmd+K quick navigation -->
+      <li class="relative hidden md:block float-left ml-1 sm:ml-2">
+        <button
+          @click="$emit('openCommandPalette')"
+          class="
+            flex items-center gap-1.5
+            h-8 md:h-9 px-2.5
+            text-xs text-gray-500
+            bg-white rounded
+            cursor-pointer hover:bg-gray-100
+            border border-gray-200
+          "
+          :title="$t('general.search_menu')"
+        >
+          <BaseIcon name="MagnifyingGlassIcon" class="w-4 h-4 text-gray-400" />
+          <span class="text-gray-400 hidden lg:inline">{{ $t('general.search_menu') }}</span>
+          <kbd class="ml-1 rounded border border-gray-200 px-1 text-[10px] font-medium text-gray-400">
+            {{ isMac ? '⌘' : 'Ctrl' }}+K
+          </kbd>
+        </button>
+      </li>
+
       <li class="ml-1 sm:ml-2">
         <GlobalSearchBar
           v-if="
@@ -253,6 +275,10 @@ import MainLogo from '@/scripts/components/icons/MainLogo.vue'
 import MobileMenuToggle from '@/scripts/admin/components/mobile/MobileMenuToggle.vue'
 
 import abilities from '@/scripts/admin/stub/abilities'
+
+defineEmits(['openCommandPalette'])
+
+const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
 
 const authStore = useAuthStore()
 const userStore = useUserStore()

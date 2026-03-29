@@ -104,6 +104,35 @@
                 <span class="text-xl font-bold text-primary-500">Facturino</span>
               </div>
 
+              <!-- Favorites section (mobile) -->
+              <nav v-if="getFavoriteItems().length > 0" class="mt-3 space-y-1">
+                <div class="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                  {{ $t('navigation.favorites') }}
+                </div>
+                <router-link
+                  v-for="fav in getFavoriteItems()"
+                  :key="fav.link"
+                  :to="fav.link"
+                  :class="[
+                    hasActiveUrl(fav.link)
+                      ? 'text-primary-500 border-primary-500 bg-gray-100'
+                      : 'text-black',
+                    'cursor-pointer px-0 pl-4 py-2 border-transparent flex items-center border-l-4 border-solid text-sm not-italic font-medium',
+                  ]"
+                  @click="close"
+                >
+                  <BaseIcon
+                    :name="fav.icon"
+                    :class="[
+                      hasActiveUrl(fav.link) ? 'text-primary-500' : 'text-gray-400',
+                      'mr-4 shrink-0 h-4 w-4',
+                    ]"
+                  />
+                  <span>{{ $t(fav.title) }}</span>
+                </router-link>
+                <div class="mx-4 mt-2 border-b border-gray-100"></div>
+              </nav>
+
               <nav
                 v-for="(menu, index) in globalStore.menuGroups"
                 :key="index"
@@ -243,9 +272,10 @@
 
 <script setup>
 import { ref, reactive, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
+import { useSidebarMenu } from '@/scripts/admin/composables/useSidebarMenu'
+import { useFavorites } from '@/scripts/admin/composables/useFavorites'
 
 import {
   Dialog,
@@ -258,93 +288,34 @@ import MainLogo from '@/scripts/components/icons/MainLogo.vue'
 
 const route = useRoute()
 const globalStore = useGlobalStore()
-const { t } = useI18n()
+
+const {
+  hasActiveUrl,
+  getHint,
+  hasSubmenus,
+  isSubmenuActive,
+  getOrganizedMenu,
+  autoExpandActiveSubmenus,
+} = useSidebarMenu()
+
+const { getFavoriteItems, isFavorite, toggleFavorite } = useFavorites()
 
 const isOpen = ref(false)
-
-// Submenu config (same definitions as desktop sidebar)
-const submenuConfig = {
-  setup: { title: 'partner.accounting.submenu.setup', icon: 'WrenchScrewdriverIcon' },
-  ledgers: { title: 'partner.accounting.submenu.ledgers', icon: 'BookOpenIcon' },
-  reports: { title: 'partner.accounting.submenu.reports', icon: 'ChartBarSquareIcon' },
-  compliance: { title: 'partner.accounting.submenu.compliance', icon: 'ShieldCheckIcon' },
-  operations: { title: 'navigation.operations', icon: 'Cog6ToothIcon' },
-  finance: { title: 'navigation.finance', icon: 'ChartPieIcon' },
-}
-
 const expandedMobileSubmenus = reactive({})
-
-function hasSubmenus(menu) {
-  return menu.some(item => item.submenu)
-}
-
-function isSubmenuActive(items) {
-  return items.some(item => hasActiveUrl(item.link))
-}
-
-function getOrganizedMenu(menu) {
-  const result = []
-  const groups = {}
-  const insertedGroups = new Set()
-
-  menu.forEach(item => {
-    if (item.submenu && submenuConfig[item.submenu]) {
-      if (!groups[item.submenu]) {
-        groups[item.submenu] = []
-      }
-      groups[item.submenu].push(item)
-
-      if (!insertedGroups.has(item.submenu)) {
-        insertedGroups.add(item.submenu)
-        result.push({
-          type: 'submenu',
-          key: item.submenu,
-          title: submenuConfig[item.submenu].title,
-          icon: submenuConfig[item.submenu].icon,
-          items: groups[item.submenu],
-        })
-      }
-    } else {
-      result.push({ type: 'item', key: item.link, item })
-    }
-  })
-
-  return result
-}
 
 function toggleSubmenu(key) {
   expandedMobileSubmenus[key] = !expandedMobileSubmenus[key]
 }
 
-function getHint(titleKey) {
-  const hintKey = titleKey.replace('navigation.', 'navigation_hints.')
-  const hint = t(hintKey)
-  return hint !== hintKey ? hint : ''
-}
-
 function open() {
   isOpen.value = true
   globalStore.setSidebarVisibility(true)
-
-  // Auto-expand submenus with active routes
-  for (const menu of globalStore.menuGroups) {
-    if (!hasSubmenus(menu)) continue
-    const organized = getOrganizedMenu(menu)
-    for (const group of organized) {
-      if (group.type === 'submenu' && isSubmenuActive(group.items)) {
-        expandedMobileSubmenus[group.key] = true
-      }
-    }
-  }
+  autoExpandActiveSubmenus(expandedMobileSubmenus)
 }
 
 function close() {
   isOpen.value = false
   globalStore.setSidebarVisibility(false)
-}
-
-function hasActiveUrl(url) {
-  return route.path.indexOf(url) > -1
 }
 
 // Close on route change
@@ -356,6 +327,4 @@ watch(
     }
   }
 )
-
-// CLAUDE-CHECKPOINT
 </script>

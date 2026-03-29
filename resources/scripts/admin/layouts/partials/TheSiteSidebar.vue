@@ -8,10 +8,57 @@
   >
     <!-- Scrollable Menu Items -->
     <div class="flex-1 overflow-y-auto pb-32">
+      <!-- Favorites section -->
+      <div v-if="getFavoriteItems().length > 0" class="p-0 m-0 mt-4 list-none">
+        <div
+          v-if="!globalStore.isSidebarCollapsed"
+          class="px-6 mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400"
+        >
+          {{ $t('navigation.favorites') }}
+        </div>
+        <div v-else class="flex justify-center mb-1">
+          <BaseIcon name="StarIcon" class="h-3 w-3 text-gray-300" />
+        </div>
+        <router-link
+          v-for="fav in getFavoriteItems()"
+          :key="fav.link"
+          :to="fav.link"
+          class="sidebar-item group relative flex items-center py-2 border-l-4 border-solid text-sm cursor-pointer transition-colors duration-150"
+          :class="[
+            hasActiveUrl(fav.link)
+              ? 'text-primary-500 border-primary-500 bg-gray-100'
+              : 'text-gray-700 border-transparent hover:bg-gray-50 hover:text-gray-900',
+            globalStore.isSidebarCollapsed ? 'justify-center px-0' : 'pl-6 pr-4'
+          ]"
+          @mouseenter="showTooltip($event, fav)"
+          @mouseleave="hideTooltip"
+        >
+          <BaseIcon
+            :name="fav.icon"
+            :class="[
+              hasActiveUrl(fav.link) ? 'text-primary-500' : 'text-gray-400',
+              'shrink-0 h-4 w-4 transition-colors duration-150',
+              globalStore.isSidebarCollapsed ? '' : 'mr-3'
+            ]"
+          />
+          <span v-if="!globalStore.isSidebarCollapsed" class="truncate flex-1 text-sm">
+            {{ $t(fav.title) }}
+          </span>
+          <button
+            v-if="!globalStore.isSidebarCollapsed"
+            @click.prevent.stop="toggleFavorite(fav.link)"
+            class="shrink-0 h-4 w-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+          >
+            <BaseIcon name="StarIcon" class="h-4 w-4" />
+          </button>
+        </router-link>
+        <div class="mx-4 mt-2 border-b border-gray-100"></div>
+      </div>
+
       <div
         v-for="(menu, groupIndex) in globalStore.menuGroups"
         :key="groupIndex"
-        class="p-0 m-0 mt-6 list-none"
+        class="p-0 m-0 mt-4 list-none"
       >
         <!-- Groups with submenus (accounting section) -->
         <template v-if="hasSubmenus(menu)">
@@ -82,10 +129,14 @@
                     ]"
                   />
                   <span class="truncate flex-1">{{ $t(item.title) }}</span>
-                  <BaseIcon
-                    name="InformationCircleIcon"
-                    class="shrink-0 h-4 w-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-                  />
+                  <button
+                    v-if="!globalStore.isSidebarCollapsed"
+                    @click.prevent.stop="toggleFavorite(item.link)"
+                    class="shrink-0 h-4 w-4 transition-opacity duration-150"
+                    :class="isFavorite(item.link) ? 'text-amber-400 opacity-100' : 'text-gray-300 hover:text-amber-400 opacity-0 group-hover:opacity-100'"
+                  >
+                    <BaseIcon name="StarIcon" class="h-4 w-4" />
+                  </button>
                 </router-link>
               </div>
             </template>
@@ -120,11 +171,14 @@
               >
                 {{ $t(group.item.title) }}
               </span>
-              <BaseIcon
+              <button
                 v-if="!globalStore.isSidebarCollapsed"
-                name="InformationCircleIcon"
-                class="shrink-0 h-4 w-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-              />
+                @click.prevent.stop="toggleFavorite(group.item.link)"
+                class="shrink-0 h-4 w-4 transition-opacity duration-150"
+                :class="isFavorite(group.item.link) ? 'text-amber-400 opacity-100' : 'text-gray-300 hover:text-amber-400 opacity-0 group-hover:opacity-100'"
+              >
+                <BaseIcon name="StarIcon" class="h-4 w-4" />
+              </button>
             </router-link>
           </template>
         </template>
@@ -164,12 +218,15 @@
               {{ $t(item.title) }}
             </span>
 
-            <!-- Info icon - only shown when expanded, visible on hover -->
-            <BaseIcon
+            <!-- Favorite star toggle - only shown when expanded, visible on hover -->
+            <button
               v-if="!globalStore.isSidebarCollapsed"
-              name="InformationCircleIcon"
-              class="shrink-0 h-4 w-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-            />
+              @click.prevent.stop="toggleFavorite(item.link)"
+              class="shrink-0 h-4 w-4 transition-opacity duration-150"
+              :class="isFavorite(item.link) ? 'text-amber-400 opacity-100' : 'text-gray-300 hover:text-amber-400 opacity-0 group-hover:opacity-100'"
+            >
+              <BaseIcon name="StarIcon" class="h-4 w-4" />
+            </button>
           </router-link>
         </template>
       </div>
@@ -231,25 +288,23 @@ import { reactive, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
+import { useSidebarMenu } from '@/scripts/admin/composables/useSidebarMenu'
+import { useFavorites } from '@/scripts/admin/composables/useFavorites'
 
 const route = useRoute()
 const globalStore = useGlobalStore()
 const { t } = useI18n()
 
-// Submenu group definitions (title i18n key + icon)
-const submenuConfig = {
-  // Partner accounting submenus
-  setup: { title: 'partner.accounting.submenu.setup', icon: 'WrenchScrewdriverIcon' },
-  ledgers: { title: 'partner.accounting.submenu.ledgers', icon: 'BookOpenIcon' },
-  reports: { title: 'partner.accounting.submenu.reports', icon: 'ChartBarSquareIcon' },
-  compliance: { title: 'partner.accounting.submenu.compliance', icon: 'ShieldCheckIcon' },
-  // Main sidebar collapsible sections
-  operations: { title: 'navigation.operations', icon: 'Cog6ToothIcon' },
-  finance: { title: 'navigation.finance', icon: 'ChartPieIcon' },
-}
+const {
+  hasActiveUrl,
+  getHintKey,
+  hasSubmenus,
+  isSubmenuActive,
+  getOrganizedMenu,
+  autoExpandActiveSubmenus,
+} = useSidebarMenu()
 
-// Order in which submenu groups appear in the sidebar
-const submenuOrder = ['setup', 'ledgers', 'reports', 'compliance', 'operations', 'finance']
+const { favorites, isFavorite, toggleFavorite, getFavoriteItems } = useFavorites()
 
 // Track which submenus are expanded
 const expandedSubmenus = reactive({})
@@ -265,58 +320,6 @@ const tooltip = reactive({
 
 let tooltipTimeout = null
 
-function hasActiveUrl(url) {
-  return route.path.indexOf(url) > -1
-}
-
-function getHintKey(titleKey) {
-  return titleKey.replace('navigation.', 'navigation_hints.')
-}
-
-// Check if any menu group has submenu items
-function hasSubmenus(menu) {
-  return menu.some(item => item.submenu)
-}
-
-// Check if any item in a submenu is currently active
-function isSubmenuActive(items) {
-  return items.some(item => hasActiveUrl(item.link))
-}
-
-// Organize a menu group into submenu sections + loose items
-// Preserves original item order: submenu group appears at the position of its first child
-function getOrganizedMenu(menu) {
-  const result = []
-  const groups = {}
-  const insertedGroups = new Set()
-
-  menu.forEach(item => {
-    if (item.submenu && submenuConfig[item.submenu]) {
-      if (!groups[item.submenu]) {
-        groups[item.submenu] = []
-      }
-      groups[item.submenu].push(item)
-
-      // Insert the submenu group at the position of the first child item
-      if (!insertedGroups.has(item.submenu)) {
-        insertedGroups.add(item.submenu)
-        result.push({
-          type: 'submenu',
-          key: item.submenu,
-          title: submenuConfig[item.submenu].title,
-          icon: submenuConfig[item.submenu].icon,
-          items: groups[item.submenu], // reference - will accumulate subsequent items
-        })
-      }
-    } else {
-      // Regular item (no submenu) - render inline
-      result.push({ type: 'item', key: item.link, item })
-    }
-  })
-
-  return result
-}
-
 // Handle submenu header click
 function handleSubmenuClick(key) {
   if (globalStore.isSidebarCollapsed) {
@@ -327,25 +330,12 @@ function handleSubmenuClick(key) {
   }
 }
 
-// Auto-expand submenu that contains the active route
-function autoExpandActiveSubmenus() {
-  for (const menu of globalStore.menuGroups) {
-    if (!hasSubmenus(menu)) continue
-    const organized = getOrganizedMenu(menu)
-    for (const group of organized) {
-      if (group.type === 'submenu' && isSubmenuActive(group.items)) {
-        expandedSubmenus[group.key] = true
-      }
-    }
-  }
-}
-
 // Auto-expand on route change
-watch(() => route.path, autoExpandActiveSubmenus, { immediate: true })
+watch(() => route.path, () => autoExpandActiveSubmenus(expandedSubmenus), { immediate: true })
 
 // Also auto-expand once menu data is loaded from bootstrap
 watch(() => globalStore.mainMenu.length, (len) => {
-  if (len > 0) autoExpandActiveSubmenus()
+  if (len > 0) autoExpandActiveSubmenus(expandedSubmenus)
 })
 
 function showTooltip(event, item) {

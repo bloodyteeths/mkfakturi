@@ -3,9 +3,11 @@
     <OfflineBanner />
     <NotificationRoot />
 
-    <SiteHeader />
+    <SiteHeader @open-command-palette="showCommandPalette = true" />
 
     <SiteSidebar />
+
+    <CommandPalette v-model="showCommandPalette" />
 
     <ExchangeRateBulkUpdateModal />
 
@@ -34,7 +36,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
-import { onMounted, computed } from 'vue'
+import { onMounted, onUnmounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import { useModalStore } from '@/scripts/stores/modal'
@@ -43,6 +45,7 @@ import { useCompanyStore } from '@/scripts/admin/stores/company'
 
 import SiteHeader from '@/scripts/admin/layouts/partials/TheSiteHeader.vue'
 import SiteSidebar from '@/scripts/admin/layouts/partials/TheSiteSidebar.vue'
+import CommandPalette from '@/scripts/admin/components/CommandPalette.vue'
 import NotificationRoot from '@/scripts/components/notifications/NotificationRoot.vue'
 import ExchangeRateBulkUpdateModal from '@/scripts/admin/components/modal-components/ExchangeRateBulkUpdateModal.vue'
 import LimitExceededModal from '@/scripts/admin/components/LimitExceededModal.vue'
@@ -60,15 +63,28 @@ const { t } = useI18n()
 const exchangeRateStore = useExchangeRateStore()
 const companyStore = useCompanyStore()
 
+const showCommandPalette = ref(false)
+
 const isAppLoaded = computed(() => {
   return globalStore.isAppLoaded
 })
+
+// Cmd+K / Ctrl+K to open command palette
+function handleKeydown(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault()
+    showCommandPalette.value = true
+  }
+}
+
 
 function handleRefresh() {
   window.location.reload()
 }
 
 onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+
   // Start bootstrap but don't block UI - app will show once isAppLoaded becomes true
   globalStore.bootstrap().then((res) => {
     // After bootstrap, redirect partner users away from admin dashboard
@@ -146,5 +162,9 @@ onMounted(() => {
       })
     }
   })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
 })
 </script>
