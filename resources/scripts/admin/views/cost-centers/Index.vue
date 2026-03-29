@@ -33,7 +33,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          :placeholder="t('search_placeholder') || 'Пребарај...'"
+          :placeholder="t('search') + '...'"
           class="block w-full rounded-md border-gray-300 pl-10 pr-4 py-2 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
         />
       </div>
