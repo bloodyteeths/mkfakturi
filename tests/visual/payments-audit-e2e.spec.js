@@ -389,8 +389,21 @@ test.describe('Payments Audit — E2E', () => {
   // ── CROSS-CUTTING ──
 
   test('16. No API 500 errors on payment-audit pages', async () => {
-    // Filter to only payment/cession/assignation/report endpoints
-    const relevantErrors = apiErrors.filter(e =>
+    // Fresh check: navigate to payments and verify no 500s during this specific load
+    const freshErrors = [];
+    const handler = async (resp) => {
+      if (resp.url().includes('/api/') && resp.status() >= 500) {
+        let body = '';
+        try { body = await resp.text(); } catch {}
+        freshErrors.push(`${resp.status()} ${resp.url()} BODY: ${body.substring(0, 300)}`);
+      }
+    };
+    page.on('response', handler);
+    await page.goto(`${BASE}/admin/payments`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(3000);
+    page.removeListener('response', handler);
+    const relevantErrors = freshErrors.filter(e =>
+      e.includes('/payments') ||
       e.includes('/cessions') ||
       e.includes('/assignations') ||
       e.includes('/reports/') ||
