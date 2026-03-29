@@ -66,6 +66,12 @@
       </BasePageHeader>
 
       <BaseCard>
+        <!-- Section: Basic Info -->
+        <div class="px-4 pt-4 pb-1">
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+            {{ $t('expenses.basic_info') }}
+          </h3>
+        </div>
         <BaseInputGrid>
           <BaseInputGroup
             :label="$t('expenses.category')"
@@ -176,6 +182,13 @@
             :customer-currency="expenseStore.currentExpense.currency_id"
           />
 
+          <!-- Section: Supplier & Invoice -->
+          <div class="col-span-2 mt-2 pt-3 border-t border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              {{ $t('expenses.supplier_details') }}
+            </h3>
+          </div>
+
           <!-- Supplier (Добавувач) -->
           <BaseInputGroup
             :content-loading="isFetchingInitialData"
@@ -199,6 +212,13 @@
               :placeholder="$t('expenses.invoice_number_placeholder')"
             />
           </BaseInputGroup>
+
+          <!-- Section: VAT / Accounting -->
+          <div class="col-span-2 mt-2 pt-3 border-t border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              {{ $t('expenses.accounting_details') }}
+            </h3>
+          </div>
 
           <!-- VAT Rate -->
           <BaseInputGroup
@@ -244,6 +264,13 @@
               disabled
             />
           </BaseInputGroup>
+
+          <!-- Section: Optional -->
+          <div class="col-span-2 mt-2 pt-3 border-t border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              {{ $t('expenses.optional_details') }}
+            </h3>
+          </div>
 
           <BaseInputGroup
             :content-loading="isFetchingInitialData"
@@ -611,6 +638,14 @@ async function loadData() {
   // Pre-fill from AI draft
   if (!isEdit.value && route.query.draft_id) {
     await loadAiDraft(route.query.draft_id)
+  }
+
+  // Auto-calculate VAT for existing expenses that lack VAT data
+  if (isEdit.value) {
+    const exp = expenseStore.currentExpense
+    if (exp.amount > 0 && (!exp.tax_base || exp.tax_base === 0)) {
+      onVatRateChange()
+    }
   }
 
   isFetchingInitialData.value = false

@@ -215,4 +215,21 @@ class ExpensesController extends Controller
 
         return new ExpenseResource($expense);
     }
+
+    public function post(Expense $expense)
+    {
+        $this->authorize('update', $expense);
+
+        if ($expense->status !== 'approved') {
+            return response()->json([
+                'error' => 'invalid_status',
+                'message' => 'Only approved expenses can be posted.',
+            ], 422);
+        }
+
+        $expense->update(['status' => 'posted']);
+
+        return new ExpenseResource($expense);
+    }
 }
+// CLAUDE-CHECKPOINT: Added post action for approved→posted workflow

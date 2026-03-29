@@ -59,6 +59,32 @@
       {{ $t('general.approve') }}
     </BaseDropdownItem>
 
+    <!-- post expense (approved → posted) -->
+    <BaseDropdownItem
+      v-if="userStore.hasAbilities(abilities.EDIT_EXPENSE) && row.status === 'approved'"
+      @click="postExpense(row.id)"
+    >
+      <BaseIcon
+        name="BookOpenIcon"
+        class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+      />
+      {{ $t('general.post') }}
+    </BaseDropdownItem>
+
+    <!-- download PDF -->
+    <a
+      :href="`/api/v1/expenses/${row.id}/rashoden-nalog`"
+      target="_blank"
+    >
+      <BaseDropdownItem>
+        <BaseIcon
+          name="DocumentArrowDownIcon"
+          class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500"
+        />
+        {{ $t('general.download_pdf') }}
+      </BaseDropdownItem>
+    </a>
+
     <!-- delete expense  -->
     <BaseDropdownItem
       v-if="userStore.hasAbilities(abilities.DELETE_EXPENSE)"
@@ -118,6 +144,14 @@ function cloneExpense(id) {
 
 function approveExpense(id) {
   expenseStore.approveExpense(id).then((res) => {
+    if (res) {
+      props.loadData && props.loadData()
+    }
+  })
+}
+
+function postExpense(id) {
+  expenseStore.postExpense(id).then((res) => {
     if (res) {
       props.loadData && props.loadData()
     }

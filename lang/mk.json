@@ -185,7 +185,6 @@
         "approve": "Одобри",
         "post": "Книжи",
         "documents": "Документи",
-        "download_pdf": "Преземи PDF",
         "sent": "Испратено",
         "all": "Сите",
         "select_all": "Избери се",
@@ -329,7 +328,8 @@
         "refresh": "Освежи",
         "accept": "Прифати",
         "type": "Тип",
-        "year": "Година"
+        "year": "Година",
+        "partner": "Партнер"
     },
     "accounting": {
         "journal_entries": {

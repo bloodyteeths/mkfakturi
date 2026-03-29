@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      class="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer group"
+      class="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer"
       :style="{ paddingLeft: `${depth * 24 + 16}px` }"
       @click="$emit('edit', node)"
     >
@@ -32,7 +32,7 @@
         {{ node.code }}
       </span>
 
-      <!-- Name -->
+      <!-- Name (highlight search match) -->
       <span class="text-sm font-medium text-gray-900 flex-1 truncate">
         {{ node.name }}
       </span>
@@ -53,8 +53,8 @@
         {{ node.is_active ? $t('general.active') : $t('general.inactive') }}
       </span>
 
-      <!-- Actions (visible on hover) -->
-      <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+      <!-- Actions — always visible -->
+      <div class="flex items-center space-x-1 flex-shrink-0">
         <button
           class="p-1 rounded text-primary-500 hover:text-primary-700 hover:bg-primary-50"
           :title="t('add_child')"
@@ -86,6 +86,7 @@
         :key="child.id"
         :node="child"
         :depth="depth + 1"
+        :search-query="searchQuery"
         @edit="(n) => $emit('edit', n)"
         @add-child="(n) => $emit('add-child', n)"
         @delete="(n) => $emit('delete', n)"
@@ -115,6 +116,10 @@ const props = defineProps({
   depth: {
     type: Number,
     default: 0,
+  },
+  searchQuery: {
+    type: String,
+    default: '',
   },
 })
 

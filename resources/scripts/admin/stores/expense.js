@@ -287,6 +287,25 @@ export const useExpenseStore = (useWindow = false) => {
         })
       },
 
+      postExpense(id) {
+        return new Promise((resolve, reject) => {
+          axios
+            .post(`/expenses/${id}/post`)
+            .then((response) => {
+              const notificationStore = useNotificationStore()
+              notificationStore.showNotification({
+                type: 'success',
+                message: global.t('expenses.posted_message'),
+              })
+              resolve(response)
+            })
+            .catch((err) => {
+              handleError(err)
+              reject(err)
+            })
+        })
+      },
+
       fetchPaymentModes(params) {
         return new Promise((resolve, reject) => {
           axios

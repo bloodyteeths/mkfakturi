@@ -112,7 +112,7 @@
         "add_company": "Firma ekle",
         "view_pdf": "PDF görüntüle",
         "copy_pdf_url": "PDF bağlantısını kopyala",
-        "download_pdf": "PDF indir",
+        "download_pdf": "PDF İndir",
         "save": "Kaydet",
         "create": "Oluştur",
         "cancel": "İptal",
@@ -171,6 +171,8 @@
         "posted": "Kaydedildi",
         "clone": "Kopyala",
         "approve": "Onayla",
+        "post": "Kaydet",
+        "documents": "Belgeler",
         "sent": "Gönderildi",
         "all": "Tümü",
         "select_all": "Hepsini Seç",
@@ -322,7 +324,8 @@
         "refresh": "Yenile",
         "accept": "Kabul Et",
         "type": "Tür",
-        "year": "Yıl"
+        "year": "Yıl",
+        "partner": "Partner"
     },
     "dashboard": {
         "select_year": "Yılı seçin",
@@ -4327,7 +4330,7 @@
         "city": "Şehir",
         "state": "İl",
         "country": "Ülke",
-        "zip": "Posta kodu",
+        "zip": "Posta Kodu",
         "tax_number": "Vergi numarası",
         "contact_name": "İletişim kişisi",
         "currency": "Para birimi",
@@ -4416,8 +4419,7 @@
         "notes_placeholder": "Bu tedarikçi hakkında dahili notlar...",
         "added_on": "Eklenme Tarihi",
         "duplicate_warning": "Benzer bilgilere sahip bir tedarikçi zaten mevcut",
-        "company_registration_number": "Şirket Kayıt Numarası",
-        "zip": "Posta Kodu"
+        "company_registration_number": "Şirket Kayıt Numarası"
     },
     "projects": {
         "title": "Projeler",

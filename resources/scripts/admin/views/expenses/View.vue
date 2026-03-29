@@ -105,17 +105,17 @@
           <div class="flex justify-between items-center">
             <span class="text-gray-600">{{ $t('expenses.tax_base') }}</span>
             <BaseFormatMoney
-              :amount="expense.tax_base || 0"
+              :amount="computedTaxBase"
               :currency="expense.currency"
             />
           </div>
 
           <div class="flex justify-between items-center">
             <span class="text-gray-600">
-              {{ $t('expenses.vat_amount') }} ({{ expense.vat_rate || 0 }}%)
+              {{ $t('expenses.vat_amount') }} ({{ expense.vat_rate || 18 }}%)
             </span>
             <BaseFormatMoney
-              :amount="expense.vat_amount || 0"
+              :amount="computedVatAmount"
               :currency="expense.currency"
             />
           </div>
@@ -148,8 +148,45 @@
               {{ $t('expenses.download_receipt') }}
             </a>
           </div>
+
+          <!-- PDF Download -->
+          <div class="border-t pt-4 mt-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">{{ $t('general.documents') }}</h4>
+            <a
+              :href="`/api/v1/expenses/${expense.id}/rashoden-nalog`"
+              target="_blank"
+              class="inline-flex items-center text-primary-500 hover:text-primary-600"
+            >
+              <BaseIcon name="DocumentArrowDownIcon" class="h-4 mr-1" />
+              {{ $t('expenses.rashoden_nalog') }}
+            </a>
+          </div>
         </div>
       </BaseCard>
+
+      <!-- Actions Bar (below cards) -->
+      <div v-if="expense.status !== 'posted'" class="col-span-1 lg:col-span-2 flex gap-3">
+        <BaseButton
+          v-if="expense.status === 'draft' && userStore.hasAbilities(abilities.EDIT_EXPENSE)"
+          variant="primary-outline"
+          @click="approveExpense"
+        >
+          <template #left="slotProps">
+            <BaseIcon name="CheckCircleIcon" :class="slotProps.class" />
+          </template>
+          {{ $t('general.approve') }}
+        </BaseButton>
+        <BaseButton
+          v-if="expense.status === 'approved' && userStore.hasAbilities(abilities.EDIT_EXPENSE)"
+          variant="primary"
+          @click="postExpense"
+        >
+          <template #left="slotProps">
+            <BaseIcon name="BookOpenIcon" :class="slotProps.class" />
+          </template>
+          {{ $t('general.post') }}
+        </BaseButton>
+      </div>
     </div>
   </BasePage>
 </template>
@@ -172,10 +209,35 @@ const expense = ref(null)
 const isLoading = ref(true)
 
 const pageTitle = computed(() => {
-  if (expense.value?.expense_number) {
-    return `${t('expenses.view_expense')} — ${expense.value.expense_number}`
+  const e = expense.value
+  if (e?.expense_number) {
+    return `${t('expenses.view_expense')} — ${e.expense_number}`
+  }
+  if (e?.id) {
+    return `${t('expenses.view_expense')} #${e.id}`
   }
   return t('expenses.view_expense')
+})
+
+// Compute VAT on the fly for old expenses that have no VAT data
+const computedTaxBase = computed(() => {
+  const e = expense.value
+  if (!e) return 0
+  if (e.tax_base && e.tax_base > 0) return e.tax_base
+  if (e.amount > 0 && e.vat_rate > 0) {
+    return Math.round(e.amount / (1 + e.vat_rate / 100))
+  }
+  return e.amount || 0
+})
+
+const computedVatAmount = computed(() => {
+  const e = expense.value
+  if (!e) return 0
+  if (e.vat_amount && e.vat_amount > 0) return e.vat_amount
+  if (e.amount > 0 && e.vat_rate > 0) {
+    return e.amount - computedTaxBase.value
+  }
+  return 0
 })
 
 onMounted(async () => {
@@ -186,4 +248,14 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+async function approveExpense() {
+  await expenseStore.approveExpense(route.params.id)
+  expense.value = { ...expense.value, status: 'approved' }
+}
+
+async function postExpense() {
+  await expenseStore.postExpense(route.params.id)
+  expense.value = { ...expense.value, status: 'posted' }
+}
 </script>

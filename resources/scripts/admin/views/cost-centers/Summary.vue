@@ -2,24 +2,6 @@
   <BasePage>
     <BasePageHeader :title="t('summary')">
       <template #actions>
-        <!-- View toggle: Summary vs P&L -->
-        <div class="flex border border-gray-300 rounded-md overflow-hidden mr-3">
-          <button
-            class="px-3 py-1.5 text-sm font-medium"
-            :class="viewMode === 'summary' ? 'bg-primary-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
-            @click="viewMode = 'summary'"
-          >
-            {{ t('summary') }}
-          </button>
-          <button
-            class="px-3 py-1.5 text-sm font-medium"
-            :class="viewMode === 'pnl' ? 'bg-primary-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
-            @click="viewMode = 'pnl'"
-          >
-            {{ t('profit_loss') }}
-          </button>
-        </div>
-
         <BaseButton
           v-if="summaryData && summaryData.centers && summaryData.centers.length > 0"
           variant="primary-outline"
@@ -62,15 +44,11 @@
     <div class="p-6 bg-white rounded-lg shadow mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <BaseInputGroup :label="$t('reports.accounting.from_date')" required>
-          <BaseDatePicker
-            v-model="filters.from_date"
-          />
+          <BaseDatePicker v-model="filters.from_date" />
         </BaseInputGroup>
 
         <BaseInputGroup :label="$t('reports.accounting.to_date')" required>
-          <BaseDatePicker
-            v-model="filters.to_date"
-          />
+          <BaseDatePicker v-model="filters.to_date" />
         </BaseInputGroup>
 
         <div class="flex items-end md:col-span-2">
@@ -97,80 +75,15 @@
           <div class="h-4 bg-gray-200 rounded flex-1"></div>
           <div class="h-4 bg-gray-200 rounded w-24"></div>
           <div class="h-4 bg-gray-200 rounded w-24"></div>
-          <div class="h-4 bg-gray-200 rounded w-24"></div>
           <div class="h-4 bg-gray-200 rounded w-16"></div>
         </div>
       </div>
     </div>
 
-    <!-- Summary Content -->
+    <!-- Content -->
     <template v-else-if="summaryData">
-      <!-- P&L View -->
-      <div v-if="viewMode === 'pnl' && summaryData.centers && summaryData.centers.length > 0" class="bg-white rounded-lg shadow overflow-hidden mb-6">
-        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-          <h3 class="text-sm font-medium text-gray-700">{{ t('profit_loss') }}</h3>
-        </div>
-        <div class="p-6">
-          <div v-for="center in summaryData.centers" :key="center.cost_center_id" class="mb-6 last:mb-0">
-            <div class="flex items-center mb-2">
-              <span class="inline-block h-3 w-3 rounded-full mr-2" :style="{ backgroundColor: center.color }"></span>
-              <span class="text-sm font-medium text-gray-900">{{ center.name }}</span>
-              <span v-if="center.code" class="ml-1 text-gray-400 font-mono text-xs">({{ center.code }})</span>
-            </div>
-            <div class="grid grid-cols-3 gap-4 ml-5">
-              <div class="bg-green-50 rounded-lg p-3">
-                <div class="text-xs text-green-600 mb-1">{{ t('revenue') }}</div>
-                <div class="text-sm font-semibold text-green-700">{{ formatMoney(center.total_credit) }} ден.</div>
-              </div>
-              <div class="bg-red-50 rounded-lg p-3">
-                <div class="text-xs text-red-600 mb-1">{{ t('total_expenses') }}</div>
-                <div class="text-sm font-semibold text-red-700">{{ formatMoney(center.total_debit) }} ден.</div>
-              </div>
-              <div :class="(center.net || 0) >= 0 ? 'bg-green-50' : 'bg-red-50'" class="rounded-lg p-3">
-                <div class="text-xs mb-1" :class="(center.net || 0) >= 0 ? 'text-green-600' : 'text-red-600'">{{ t('net_result') }}</div>
-                <div class="text-sm font-semibold" :class="(center.net || 0) >= 0 ? 'text-green-700' : 'text-red-700'">{{ formatMoney(center.net) }} ден.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bar Chart (Summary view) -->
-      <div v-if="viewMode === 'summary' && summaryData.centers && summaryData.centers.length > 0" class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-sm font-medium text-gray-700 mb-4">{{ t('expenses') }}</h3>
-        <div class="space-y-3">
-          <div v-for="center in summaryData.centers" :key="center.cost_center_id" class="flex items-center">
-            <div class="w-32 text-sm text-gray-700 truncate flex-shrink-0 flex items-center">
-              <span
-                class="inline-block h-3 w-3 rounded-full mr-2 flex-shrink-0"
-                :style="{ backgroundColor: center.color }"
-              ></span>
-              {{ center.name }}
-            </div>
-            <div class="flex-1 mx-3">
-              <div class="bg-gray-100 rounded-full h-5 overflow-hidden">
-                <div
-                  class="h-full rounded-full transition-all duration-500"
-                  :style="{
-                    width: `${center.percentage}%`,
-                    backgroundColor: center.color,
-                    minWidth: center.percentage > 0 ? '4px' : '0',
-                  }"
-                ></div>
-              </div>
-            </div>
-            <div class="w-24 text-sm text-right text-gray-900 font-medium flex-shrink-0">
-              {{ formatMoney(center.total_debit) }}
-            </div>
-            <div class="w-16 text-xs text-right text-gray-500 flex-shrink-0 ml-2">
-              {{ center.percentage }}%
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Data Table (Summary view) -->
-      <div v-if="viewMode === 'summary' && summaryData.centers && summaryData.centers.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
+      <!-- Data Table -->
+      <div v-if="summaryData.centers && summaryData.centers.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
@@ -187,7 +100,7 @@
                 {{ t('net') }}
               </th>
               <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                % {{ $t('general.total') }}
+                %
               </th>
               <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                 {{ $t('general.actions') }}
@@ -214,7 +127,7 @@
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right text-red-600">
                 {{ formatMoney(center.total_debit) }} ден.
               </td>
-              <td class="whitespace-nowrap px-4 py-3 text-sm text-right font-medium" :class="center.net >= 0 ? 'text-green-700' : 'text-red-600'">
+              <td class="whitespace-nowrap px-4 py-3 text-sm text-right font-medium" :class="(center.net || 0) >= 0 ? 'text-green-700' : 'text-red-600'">
                 {{ formatMoney(center.net) }} ден.
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right text-gray-600">
@@ -231,38 +144,36 @@
             </tr>
           </tbody>
           <tfoot class="bg-gray-100">
-            <!-- Assigned total -->
             <tr class="font-semibold border-t-2 border-gray-300">
               <td class="px-4 py-3 text-sm text-gray-900">
                 {{ $t('general.total') }} ({{ t('assigned') }})
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right text-green-700">
-                {{ formatMoney(summaryData.grand_total?.total_credit) }}
+                {{ formatMoney(summaryData.grand_total?.total_credit) }} ден.
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right text-red-600">
-                {{ formatMoney(summaryData.grand_total?.total_debit) }}
+                {{ formatMoney(summaryData.grand_total?.total_debit) }} ден.
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right" :class="(summaryData.grand_total?.net || 0) >= 0 ? 'text-green-700' : 'text-red-600'">
-                {{ formatMoney(summaryData.grand_total?.net) }}
+                {{ formatMoney(summaryData.grand_total?.net) }} ден.
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right text-gray-600">
                 100%
               </td>
               <td></td>
             </tr>
-            <!-- Unassigned -->
             <tr v-if="summaryData.unassigned && (summaryData.unassigned.total_debit > 0 || summaryData.unassigned.total_credit > 0)" class="text-gray-500">
               <td class="px-4 py-3 text-sm italic">
                 {{ t('unassigned') }}
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right">
-                {{ formatMoney(summaryData.unassigned.total_credit) }}
+                {{ formatMoney(summaryData.unassigned.total_credit) }} ден.
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right">
-                {{ formatMoney(summaryData.unassigned.total_debit) }}
+                {{ formatMoney(summaryData.unassigned.total_debit) }} ден.
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-right">
-                {{ formatMoney(summaryData.unassigned.net) }}
+                {{ formatMoney(summaryData.unassigned.net) }} ден.
               </td>
               <td colspan="2"></td>
             </tr>
@@ -270,7 +181,7 @@
         </table>
       </div>
 
-      <!-- Empty state after search -->
+      <!-- Empty state -->
       <div
         v-else-if="hasSearched"
         class="bg-white rounded-lg shadow p-12 text-center"
@@ -285,12 +196,12 @@
       </div>
     </template>
 
-    <!-- Trial Balance Modal for a specific cost center -->
+    <!-- Trial Balance Modal -->
     <div v-if="showTrialBalanceModal" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen p-4">
         <div class="fixed inset-0 bg-black bg-opacity-30" @click="showTrialBalanceModal = false"></div>
 
-        <div class="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[80vh] flex flex-col">
           <!-- Header -->
           <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50 rounded-t-lg">
             <div class="flex items-center">
@@ -299,7 +210,7 @@
                 :style="{ backgroundColor: selectedCenterForTB?.color || '#6366f1' }"
               ></span>
               <h3 class="text-lg font-medium text-gray-900">
-                {{ selectedCenterForTB?.name }} - {{ $t('partner.accounting.trial_balance') }}
+                {{ selectedCenterForTB?.name }}
               </h3>
             </div>
             <button class="text-gray-400 hover:text-gray-600" @click="showTrialBalanceModal = false">
@@ -390,7 +301,6 @@ const summaryData = ref(null)
 const isLoading = ref(false)
 const isExporting = ref(false)
 const hasSearched = ref(false)
-const viewMode = ref('summary') // 'summary' or 'pnl'
 
 // Trial balance modal
 const showTrialBalanceModal = ref(false)
@@ -523,7 +433,7 @@ function exportPdf() {
 function formatMoney(amount) {
   if (amount === null || amount === undefined) return '-'
   try {
-    const formatted = new Intl.NumberFormat(undefined, {
+    const formatted = new Intl.NumberFormat('mk-MK', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(Math.abs(amount))

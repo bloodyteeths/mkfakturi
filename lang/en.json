@@ -1579,7 +1579,6 @@
         "approve": "Approve",
         "post": "Post",
         "documents": "Documents",
-        "download_pdf": "Download PDF",
         "due": "Due",
         "edit": "Edit",
         "email": "Email",
@@ -1732,7 +1731,8 @@
         "you_got_lost": "Whoops! You got Lost!",
         "refresh": "Refresh",
         "accept": "Accept",
-        "year": "Year"
+        "year": "Year",
+        "partner": "Partner"
     },
     "global_search": {
         "customers": "Customers",

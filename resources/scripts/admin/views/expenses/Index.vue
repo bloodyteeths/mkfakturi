@@ -347,21 +347,15 @@ const expenseColumns = computed(() => {
       sortable: false,
     },
     {
-      key: 'expense_number',
-      label: t('expenses.expense_number'),
-      thClass: 'extra',
-      tdClass: 'font-medium text-gray-500',
-    },
-    {
       key: 'expense_date',
       label: t('expenses.date'),
-      thClass: 'extra',
+      thClass: '',
       tdClass: 'font-medium text-gray-900',
     },
     {
       key: 'name',
       label: t('expenses.category'),
-      thClass: 'extra',
+      thClass: '',
       tdClass: 'cursor-pointer font-medium text-primary-500',
     },
     {
