@@ -300,6 +300,7 @@
         :filters="filters"
         :accounts="connectedAccounts"
         @categorize="openCategorizationModal"
+        @reconcile="openSmartDrawer"
       />
     </div>
 
@@ -309,11 +310,18 @@
       @connected="onBankConnected"
     />
 
-    <!-- Transaction Categorization Modal -->
+    <!-- Transaction Categorization Modal (legacy) -->
     <TransactionCategorization
       v-model="showCategorizationModal"
       :transaction="selectedTransaction"
       @categorized="onTransactionCategorized"
+    />
+
+    <!-- Smart Reconciliation Drawer -->
+    <SmartReconciliationDrawer
+      v-model="showSmartDrawer"
+      :transaction="selectedTransaction"
+      @reconciled="onTransactionReconciled"
     />
 
     <!-- Manual Entry Modal -->
@@ -397,6 +405,7 @@ import ConnectBank from './ConnectBank.vue'
 import TransactionsList from './TransactionsList.vue'
 import TransactionCategorization from './TransactionCategorization.vue'
 import ManualEntryModal from './ManualEntryModal.vue'
+import SmartReconciliationDrawer from './SmartReconciliationDrawer.vue'
 import { BanknotesIcon } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -409,6 +418,7 @@ const connectedAccounts = ref([])
 const isLoadingAccounts = ref(true)
 const showConnectModal = ref(false)
 const showCategorizationModal = ref(false)
+const showSmartDrawer = ref(false)
 const showManualEntryModal = ref(false)
 const showAddAccountModal = ref(false)
 const isCreatingAccount = ref(false)
@@ -569,6 +579,16 @@ const openCategorizationModal = (transaction) => {
 
 const onTransactionCategorized = () => {
   showCategorizationModal.value = false
+  selectedTransaction.value = null
+}
+
+const openSmartDrawer = (transaction) => {
+  selectedTransaction.value = transaction
+  showSmartDrawer.value = true
+}
+
+const onTransactionReconciled = () => {
+  showSmartDrawer.value = false
   selectedTransaction.value = null
 }
 

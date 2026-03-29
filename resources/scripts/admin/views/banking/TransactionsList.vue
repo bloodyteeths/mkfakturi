@@ -102,18 +102,21 @@
       </template>
 
       <template #cell-category="{ row }">
-        <div v-if="row.data.category">
+        <div v-if="row.data.linked_type || row.data.category">
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            {{ row.data.category.name }}
+            {{ row.data.category?.name || linkedTypeLabel(row.data.linked_type) }}
           </span>
         </div>
-        <div v-else>
+        <div v-else-if="!row.data.matched_invoice_id">
           <BaseButton
-            variant="link"
+            variant="primary-outline"
             size="sm"
-            @click="$emit('categorize', row.data)"
+            @click="$emit('reconcile', row.data)"
           >
-            {{ $t('banking.categorize') }}
+            <template #left="slotProps">
+              <BaseIcon name="SparklesIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('banking.reconcile', 'Reconcile') }}
           </BaseButton>
         </div>
       </template>
@@ -153,18 +156,11 @@
             {{ $t('general.view') }}
           </BaseDropdownItem>
           <BaseDropdownItem
-            v-if="!row.data.category"
-            @click="$emit('categorize', row.data)"
+            v-if="!row.data.matched_invoice_id && !row.data.linked_type"
+            @click="$emit('reconcile', row.data)"
           >
-            <BaseIcon name="TagIcon" class="mr-3 text-gray-600" />
-            {{ $t('banking.categorize') }}
-          </BaseDropdownItem>
-          <BaseDropdownItem
-            v-if="!row.data.matched_invoice_id && isCredit(row.data)"
-            @click="matchToInvoice(row.data)"
-          >
-            <BaseIcon name="LinkIcon" class="mr-3 text-gray-600" />
-            {{ $t('banking.match_invoice') }}
+            <BaseIcon name="SparklesIcon" class="mr-3 text-primary-600" />
+            {{ $t('banking.reconcile', 'Reconcile') }}
           </BaseDropdownItem>
           <BaseDropdownItem
             v-if="row.data.matched_invoice_id"
@@ -343,7 +339,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['categorize', 'refresh'])
+const emit = defineEmits(['categorize', 'reconcile', 'refresh'])
 
 const { t } = useI18n()
 const router = useRouter()
@@ -371,6 +367,17 @@ watch(() => props.filters, () => {
 
 // Helpers
 const isCredit = (tx) => tx.transaction_type === 'credit'
+
+const linkedTypeLabel = (type) => {
+  const labels = {
+    expense: t('banking.expense', 'Expense'),
+    bill_payment: t('banking.bill_payment', 'Bill Payment'),
+    payroll_run: t('banking.payroll', 'Payroll'),
+    reviewed: t('banking.reviewed', 'Reviewed'),
+    income: t('banking.income', 'Income'),
+  }
+  return labels[type] || type || ''
+}
 
 // Table columns
 const transactionColumns = computed(() => [

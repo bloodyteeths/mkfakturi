@@ -426,6 +426,7 @@ Route::prefix('/v1')->group(function () {
             Route::post('/expenses/delete', [ExpensesController::class, 'delete'])->middleware('throttle:strict');
             Route::post('/expenses/{expense}/clone', [ExpensesController::class, 'clone']);
             Route::post('/expenses/{expense}/approve', [ExpensesController::class, 'approve']);
+            Route::post('/expenses/{expense}/post', [ExpensesController::class, 'post']);
 
             Route::apiResource('expenses', ExpensesController::class);
 
@@ -1488,6 +1489,11 @@ Route::prefix('/v1')->group(function () {
                     Route::get('/unpaid-bills', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getUnpaidBills']);
                     Route::get('/payroll-runs', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getPayrollRuns']);
                     Route::post('/generate-pp30', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'generatePp30']);
+
+                    // Smart reconciliation
+                    Route::post('/smart-suggest', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'smartSuggest']);
+                    Route::post('/bulk-smart-suggest', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'bulkSmartSuggest']);
+                    Route::post('/record-income', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'recordIncome']);
                 });
 
                 // Matching Rules (P0-09)

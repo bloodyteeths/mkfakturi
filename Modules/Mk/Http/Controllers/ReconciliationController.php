@@ -623,6 +623,108 @@ class ReconciliationController extends Controller
     }
 
     /**
+     * Smart suggestion for any bank transaction (credit or debit).
+     */
+    public function smartSuggest(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_id' => 'required|integer|exists:bank_transactions,id',
+        ]);
+
+        $company = $this->getCompany();
+        $locale = $request->input('locale', app()->getLocale() ?: 'mk');
+
+        $transaction = BankTransaction::forCompany($company->id)
+            ->where('id', $request->transaction_id)
+            ->firstOrFail();
+
+        $service = new \App\Services\Reconciliation\SmartReconciliationService();
+        $suggestion = $service->suggest($transaction, $locale);
+
+        return response()->json([
+            'success' => true,
+            'suggestion' => $suggestion->toArray(),
+        ]);
+    }
+
+    /**
+     * Bulk smart suggestions for multiple transactions.
+     */
+    public function bulkSmartSuggest(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_ids' => 'required|array|min:1|max:50',
+            'transaction_ids.*' => 'integer|exists:bank_transactions,id',
+        ]);
+
+        $company = $this->getCompany();
+        $locale = $request->input('locale', app()->getLocale() ?: 'mk');
+
+        $transactions = BankTransaction::forCompany($company->id)
+            ->whereIn('id', $request->transaction_ids)
+            ->unreconciled()
+            ->get();
+
+        $service = new \App\Services\Reconciliation\SmartReconciliationService();
+        $suggestions = [];
+
+        foreach ($transactions as $tx) {
+            $suggestions[$tx->id] = $service->suggest($tx, $locale)->toArray();
+        }
+
+        return response()->json([
+            'success' => true,
+            'suggestions' => $suggestions,
+        ]);
+    }
+
+    /**
+     * Record a credit transaction as non-invoice income.
+     */
+    public function recordIncome(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_id' => 'required|integer|exists:bank_transactions,id',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $company = $this->getCompany();
+
+        $transaction = BankTransaction::forCompany($company->id)
+            ->where('id', $request->transaction_id)
+            ->unreconciled()
+            ->firstOrFail();
+
+        $amountCents = (int) round(abs((float) $transaction->amount) * 100);
+
+        // Create a standalone payment (no invoice) to track the income
+        $year = date('Y');
+        $sequence = \App\Models\Payment::where('company_id', $company->id)
+            ->whereYear('created_at', $year)
+            ->count() + 1;
+        $paymentNumber = sprintf('INC-%d-%06d', $year, $sequence);
+
+        $payment = \App\Models\Payment::create([
+            'company_id' => $company->id,
+            'amount' => $amountCents,
+            'base_amount' => $amountCents,
+            'payment_date' => $transaction->transaction_date,
+            'payment_number' => $paymentNumber,
+            'notes' => $request->notes ?? $transaction->description ?? 'Non-invoice income',
+            'source_type' => 'bank_transaction',
+            'source_id' => $transaction->id,
+        ]);
+
+        $transaction->markAsReconciled('income', $payment->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction recorded as income',
+            'payment_id' => $payment->id,
+        ]);
+    }
+
+    /**
      * Get the current company from the authenticated user.
      *
      * P0-13: Resolves company from request header and validates user access.

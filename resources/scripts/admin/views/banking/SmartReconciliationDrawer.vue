@@ -1,0 +1,610 @@
+<template>
+  <div
+    v-if="modelValue"
+    class="fixed inset-0 z-50 overflow-hidden"
+  >
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-gray-500/50" @click="close" />
+
+    <!-- Drawer panel -->
+    <div class="absolute inset-y-0 right-0 flex max-w-full pl-10">
+      <div class="w-screen max-w-md">
+        <div class="flex h-full flex-col bg-white shadow-xl">
+          <!-- Header -->
+          <div class="bg-primary-50 px-6 py-4 border-b">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-semibold text-gray-900">
+                {{ $t('banking.smart_reconcile', 'Reconcile Transaction') }}
+              </h2>
+              <button @click="close" class="text-gray-400 hover:text-gray-600">
+                <BaseIcon name="XMarkIcon" class="h-5 w-5" />
+              </button>
+            </div>
+
+            <!-- Transaction Summary -->
+            <div v-if="transaction" class="mt-3 space-y-1">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">{{ formatDate(transaction.transaction_date) }}</span>
+                <span
+                  class="text-lg font-bold"
+                  :class="isCredit ? 'text-green-600' : 'text-red-600'"
+                >
+                  {{ formatAmount(transaction) }}
+                </span>
+              </div>
+              <p v-if="transaction.counterparty_name" class="text-sm font-medium text-gray-800">
+                {{ transaction.counterparty_name }}
+              </p>
+              <p class="text-xs text-gray-500 truncate">
+                {{ transaction.description || transaction.remittance_info }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1 overflow-y-auto px-6 py-4">
+            <!-- Loading -->
+            <div v-if="isLoading" class="flex items-center justify-center py-12">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
+              <span class="ml-3 text-sm text-gray-600">{{ $t('banking.analyzing', 'Analyzing transaction...') }}</span>
+            </div>
+
+            <!-- AI Suggestion (Primary) -->
+            <div v-else-if="suggestion" class="space-y-4">
+              <div class="rounded-lg border-2 p-4" :class="suggestionBorderClass">
+                <!-- Action icon + label -->
+                <div class="flex items-start space-x-3">
+                  <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" :class="suggestionIconBgClass">
+                    <BaseIcon :name="suggestionIcon" class="h-5 w-5 text-white" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-900">
+                      {{ suggestionTitle }}
+                    </p>
+                    <p v-if="suggestion.target_label" class="text-sm text-gray-700 mt-0.5">
+                      {{ suggestion.target_label }}
+                    </p>
+                    <p v-if="suggestion.category_name" class="text-sm text-gray-700 mt-0.5">
+                      {{ $t('banking.category', 'Category') }}: {{ suggestion.category_name }}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                      {{ suggestion.reason }}
+                    </p>
+                    <div class="flex items-center mt-1">
+                      <div class="w-20 bg-gray-200 rounded-full h-1.5 mr-2">
+                        <div
+                          class="h-1.5 rounded-full"
+                          :class="confidenceBarClass"
+                          :style="{ width: `${Math.round(suggestion.confidence * 100)}%` }"
+                        />
+                      </div>
+                      <span class="text-xs text-gray-500">
+                        {{ Math.round(suggestion.confidence * 100) }}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Accept Button -->
+                <button
+                  @click="acceptSuggestion(suggestion)"
+                  :disabled="isAccepting"
+                  class="mt-3 w-full flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                >
+                  <BaseIcon name="CheckIcon" class="h-4 w-4 mr-2" />
+                  {{ $t('banking.accept', 'Accept') }}
+                </button>
+              </div>
+
+              <!-- Alternatives -->
+              <div v-if="suggestion.alternatives && suggestion.alternatives.length > 0">
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                  {{ $t('banking.alternatives', 'Other Options') }}
+                </p>
+                <div class="space-y-2">
+                  <button
+                    v-for="(alt, idx) in suggestion.alternatives"
+                    :key="idx"
+                    @click="acceptSuggestion(alt)"
+                    :disabled="isAccepting"
+                    class="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors"
+                  >
+                    <p class="text-sm font-medium text-gray-800">
+                      {{ getActionLabel(alt.action) }}
+                    </p>
+                    <p v-if="alt.target_label" class="text-xs text-gray-500">{{ alt.target_label }}</p>
+                    <p v-if="alt.category_name" class="text-xs text-gray-500">{{ alt.category_name }}</p>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Manual Override Section -->
+              <div class="border-t pt-4 mt-4">
+                <button
+                  @click="showManualOptions = !showManualOptions"
+                  class="flex items-center text-sm text-gray-600 hover:text-gray-900"
+                >
+                  <BaseIcon
+                    :name="showManualOptions ? 'ChevronUpIcon' : 'ChevronDownIcon'"
+                    class="h-4 w-4 mr-1"
+                  />
+                  {{ $t('banking.manual_options', 'Manual Options') }}
+                </button>
+
+                <div v-if="showManualOptions" class="mt-3 space-y-2">
+                  <!-- Create Expense (debits) -->
+                  <button
+                    v-if="!isCredit"
+                    @click="manualAction = 'expense'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'expense' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="ReceiptPercentIcon" class="h-4 w-4 mr-2 text-red-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.create_expense', 'Create Expense') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Record Income (credits) -->
+                  <button
+                    v-if="isCredit"
+                    @click="manualAction = 'income'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'income' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="BanknotesIcon" class="h-4 w-4 mr-2 text-green-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.record_income', 'Record as Income') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Link to Bill (debits) -->
+                  <button
+                    v-if="!isCredit"
+                    @click="manualAction = 'bill'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'bill' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="DocumentTextIcon" class="h-4 w-4 mr-2 text-blue-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.link_to_bill', 'Link to Bill') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Link to Invoice (credits) -->
+                  <button
+                    v-if="isCredit"
+                    @click="manualAction = 'invoice'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'invoice' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="DocumentCheckIcon" class="h-4 w-4 mr-2 text-blue-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.link_to_invoice', 'Link to Invoice') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Link to Payroll (debits) -->
+                  <button
+                    v-if="!isCredit"
+                    @click="manualAction = 'payroll'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'payroll' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="UserGroupIcon" class="h-4 w-4 mr-2 text-purple-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.link_to_payroll', 'Link to Payroll') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Mark as Reviewed -->
+                  <button
+                    @click="manualAction = 'reviewed'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'reviewed' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="CheckCircleIcon" class="h-4 w-4 mr-2 text-gray-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.mark_reviewed', 'Mark as Reviewed') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Manual Sub-Forms -->
+                  <div v-if="manualAction === 'expense'" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                    <select
+                      v-model="selectedCategoryId"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                      <option :value="null" disabled>{{ $t('banking.select_category', 'Select category...') }}</option>
+                      <option v-for="cat in expenseCategories" :key="cat.id" :value="cat.id">
+                        {{ cat.name }}
+                      </option>
+                    </select>
+                    <textarea
+                      v-model="manualNotes"
+                      :placeholder="$t('banking.notes', 'Notes...')"
+                      rows="2"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <button
+                      @click="submitManualExpense"
+                      :disabled="!selectedCategoryId || isAccepting"
+                      class="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {{ $t('banking.create_expense', 'Create Expense') }}
+                    </button>
+                  </div>
+
+                  <div v-if="manualAction === 'bill'" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                    <select
+                      v-model="selectedBillId"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                      <option :value="null" disabled>{{ $t('banking.select_bill', 'Select bill...') }}</option>
+                      <option v-for="bill in unpaidBills" :key="bill.id" :value="bill.id">
+                        {{ bill.bill_number }} — {{ bill.supplier_name }} ({{ bill.total }} ден)
+                      </option>
+                    </select>
+                    <button
+                      @click="submitManualBill"
+                      :disabled="!selectedBillId || isAccepting"
+                      class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {{ $t('banking.link_to_bill', 'Link to Bill') }}
+                    </button>
+                  </div>
+
+                  <div v-if="manualAction === 'invoice'" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                    <select
+                      v-model="selectedInvoiceId"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                      <option :value="null" disabled>{{ $t('banking.select_invoice', 'Select invoice...') }}</option>
+                      <option v-for="inv in unpaidInvoices" :key="inv.id" :value="inv.id">
+                        {{ inv.invoice_number }} — {{ inv.customer_name }} ({{ inv.total }} ден)
+                      </option>
+                    </select>
+                    <button
+                      @click="submitManualInvoice"
+                      :disabled="!selectedInvoiceId || isAccepting"
+                      class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {{ $t('banking.match_invoice', 'Match to Invoice') }}
+                    </button>
+                  </div>
+
+                  <div v-if="manualAction === 'payroll'" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                    <select
+                      v-model="selectedPayrollId"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                      <option :value="null" disabled>{{ $t('banking.select_payroll', 'Select payroll run...') }}</option>
+                      <option v-for="run in payrollRuns" :key="run.id" :value="run.id">
+                        {{ run.period }} — {{ run.total_net }} ден ({{ run.status }})
+                      </option>
+                    </select>
+                    <button
+                      @click="submitManualPayroll"
+                      :disabled="!selectedPayrollId || isAccepting"
+                      class="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                    >
+                      {{ $t('banking.link_to_payroll', 'Link to Payroll') }}
+                    </button>
+                  </div>
+
+                  <div v-if="manualAction === 'income'" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                    <textarea
+                      v-model="manualNotes"
+                      :placeholder="$t('banking.income_notes', 'e.g. Bank interest, Refund from...')"
+                      rows="2"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <button
+                      @click="submitManualIncome"
+                      :disabled="isAccepting"
+                      class="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    >
+                      {{ $t('banking.record_income', 'Record as Income') }}
+                    </button>
+                  </div>
+
+                  <div v-if="manualAction === 'reviewed'" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                    <textarea
+                      v-model="manualNotes"
+                      :placeholder="$t('banking.review_notes', 'Notes (optional)...')"
+                      rows="2"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <button
+                      @click="submitManualReviewed"
+                      :disabled="isAccepting"
+                      class="w-full px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-50"
+                    >
+                      {{ $t('banking.mark_reviewed', 'Mark as Reviewed') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error -->
+            <div v-if="error" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p class="text-sm text-red-600">{{ error }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useNotificationStore } from '@/scripts/stores/notification'
+import axios from 'axios'
+
+const props = defineProps({
+  modelValue: Boolean,
+  transaction: Object,
+})
+
+const emit = defineEmits(['update:modelValue', 'reconciled'])
+
+const { t } = useI18n()
+const notificationStore = useNotificationStore()
+
+// State
+const isLoading = ref(false)
+const isAccepting = ref(false)
+const suggestion = ref(null)
+const error = ref(null)
+const showManualOptions = ref(false)
+const manualAction = ref(null)
+const manualNotes = ref('')
+const selectedCategoryId = ref(null)
+const selectedBillId = ref(null)
+const selectedInvoiceId = ref(null)
+const selectedPayrollId = ref(null)
+
+// Reference data
+const expenseCategories = ref([])
+const unpaidBills = ref([])
+const unpaidInvoices = ref([])
+const payrollRuns = ref([])
+
+const isCredit = computed(() => props.transaction?.transaction_type === 'credit')
+
+// Fetch smart suggestion when drawer opens
+watch(() => props.modelValue, async (isOpen) => {
+  if (isOpen && props.transaction) {
+    resetState()
+    await fetchSuggestion()
+    await fetchReferenceData()
+  }
+})
+
+const resetState = () => {
+  suggestion.value = null
+  error.value = null
+  isLoading.value = false
+  isAccepting.value = false
+  showManualOptions.value = false
+  manualAction.value = null
+  manualNotes.value = ''
+  selectedCategoryId.value = null
+  selectedBillId.value = null
+  selectedInvoiceId.value = null
+  selectedPayrollId.value = null
+}
+
+const fetchSuggestion = async () => {
+  isLoading.value = true
+  try {
+    const { data } = await axios.post('/banking/reconciliation/smart-suggest', {
+      transaction_id: props.transaction.id,
+    })
+    suggestion.value = data.suggestion
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Failed to analyze transaction'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const fetchReferenceData = async () => {
+  try {
+    const [catRes, billRes, invRes, payRes] = await Promise.all([
+      axios.get('/banking/reconciliation/expense-categories'),
+      axios.get('/banking/reconciliation/unpaid-bills'),
+      axios.get('/banking/reconciliation/unpaid-invoices'),
+      axios.get('/banking/reconciliation/payroll-runs'),
+    ])
+    expenseCategories.value = catRes.data.data || []
+    unpaidBills.value = billRes.data.data || []
+    unpaidInvoices.value = invRes.data.data || []
+    payrollRuns.value = payRes.data.data || []
+  } catch (e) {
+    // Non-critical — manual options just won't have data
+  }
+}
+
+const acceptSuggestion = async (s) => {
+  isAccepting.value = true
+  error.value = null
+
+  try {
+    const txId = props.transaction.id
+
+    switch (s.action) {
+      case 'create_expense':
+        await axios.post('/banking/reconciliation/record-expense', {
+          transaction_id: txId,
+          expense_category_id: s.category_id,
+          notes: s.reason,
+        })
+        break
+
+      case 'link_bill':
+        await axios.post('/banking/reconciliation/link-bill', {
+          transaction_id: txId,
+          bill_id: s.target_id,
+        })
+        break
+
+      case 'link_invoice':
+        await axios.post('/banking/reconciliation/manual-match', {
+          transaction_id: txId,
+          invoice_id: s.target_id,
+        })
+        break
+
+      case 'link_payroll':
+        await axios.post('/banking/reconciliation/link-payroll', {
+          transaction_id: txId,
+          payroll_run_id: s.target_id,
+        })
+        break
+
+      case 'record_income':
+        await axios.post('/banking/reconciliation/record-income', {
+          transaction_id: txId,
+          notes: s.reason,
+        })
+        break
+
+      case 'mark_reviewed':
+        await axios.post('/banking/reconciliation/mark-reviewed', {
+          transaction_id: txId,
+          notes: s.reason,
+        })
+        break
+
+      default:
+        throw new Error(`Unknown action: ${s.action}`)
+    }
+
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('banking.reconciled_success', 'Transaction reconciled'),
+    })
+    emit('reconciled')
+    close()
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Failed to reconcile'
+  } finally {
+    isAccepting.value = false
+  }
+}
+
+// Manual form submissions
+const submitManualExpense = () => acceptSuggestion({
+  action: 'create_expense',
+  category_id: selectedCategoryId.value,
+  reason: manualNotes.value || '',
+})
+
+const submitManualBill = () => acceptSuggestion({
+  action: 'link_bill',
+  target_id: selectedBillId.value,
+})
+
+const submitManualInvoice = () => acceptSuggestion({
+  action: 'link_invoice',
+  target_id: selectedInvoiceId.value,
+})
+
+const submitManualPayroll = () => acceptSuggestion({
+  action: 'link_payroll',
+  target_id: selectedPayrollId.value,
+})
+
+const submitManualIncome = () => acceptSuggestion({
+  action: 'record_income',
+  reason: manualNotes.value || '',
+})
+
+const submitManualReviewed = () => acceptSuggestion({
+  action: 'mark_reviewed',
+  reason: manualNotes.value || '',
+})
+
+const close = () => {
+  emit('update:modelValue', false)
+}
+
+// Display helpers
+const actionLabels = {
+  link_bill: 'Link to Bill',
+  link_invoice: 'Match to Invoice',
+  link_payroll: 'Link to Payroll',
+  create_expense: 'Create Expense',
+  record_income: 'Record as Income',
+  mark_reviewed: 'Mark as Reviewed',
+}
+
+const getActionLabel = (action) => {
+  return t(`banking.action_${action}`, actionLabels[action] || action)
+}
+
+const suggestionTitle = computed(() => {
+  if (!suggestion.value) return ''
+  return getActionLabel(suggestion.value.action)
+})
+
+const suggestionIcon = computed(() => {
+  const icons = {
+    link_bill: 'DocumentTextIcon',
+    link_invoice: 'DocumentCheckIcon',
+    link_payroll: 'UserGroupIcon',
+    create_expense: 'ReceiptPercentIcon',
+    record_income: 'BanknotesIcon',
+    mark_reviewed: 'CheckCircleIcon',
+  }
+  return icons[suggestion.value?.action] || 'SparklesIcon'
+})
+
+const suggestionBorderClass = computed(() => {
+  const conf = suggestion.value?.confidence || 0
+  if (conf >= 0.8) return 'border-green-300 bg-green-50'
+  if (conf >= 0.6) return 'border-yellow-300 bg-yellow-50'
+  return 'border-gray-300 bg-gray-50'
+})
+
+const suggestionIconBgClass = computed(() => {
+  const map = {
+    link_bill: 'bg-blue-500',
+    link_invoice: 'bg-blue-500',
+    link_payroll: 'bg-purple-500',
+    create_expense: 'bg-red-500',
+    record_income: 'bg-green-500',
+    mark_reviewed: 'bg-gray-500',
+  }
+  return map[suggestion.value?.action] || 'bg-gray-500'
+})
+
+const confidenceBarClass = computed(() => {
+  const conf = suggestion.value?.confidence || 0
+  if (conf >= 0.8) return 'bg-green-500'
+  if (conf >= 0.6) return 'bg-yellow-500'
+  return 'bg-red-500'
+})
+
+const formatDate = (date) => {
+  if (!date) return '-'
+  return new Date(date).toLocaleDateString('mk-MK', {
+    year: 'numeric', month: 'short', day: 'numeric',
+  })
+}
+
+const formatAmount = (tx) => {
+  if (!tx) return '-'
+  const sign = tx.transaction_type === 'credit' ? '+' : '-'
+  return `${sign} ${new Intl.NumberFormat('mk-MK', {
+    style: 'currency',
+    currency: tx.currency || 'MKD',
+  }).format(Math.abs(tx.amount))}`
+}
+</script>
+
+<!-- CLAUDE-CHECKPOINT -->
