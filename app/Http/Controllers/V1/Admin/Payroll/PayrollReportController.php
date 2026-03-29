@@ -528,6 +528,11 @@ class PayrollReportController extends Controller
                 'revenue_code' => '722317',
                 'label' => 'Додатен придонес (0.5%)',
             ],
+            'income_tax' => [
+                'column' => 'income_tax_amount',
+                'revenue_code' => '713111',
+                'label' => 'Данок на личен доход (ДЛД 10%)',
+            ],
         ];
 
         if (! isset($typeMap[$type])) {
@@ -572,52 +577,15 @@ class PayrollReportController extends Controller
     }
 
     /**
-     * Download PP30 payment slip PDF for income tax (ДЛД).
+     * Download PP30 payment slip PDF for income tax.
      *
-     * Income tax uses PP30 (not PP50) because it's not a social contribution
-     * — it's Данок на личен доход, revenue code 713111.
+     * @deprecated Use downloadPP50 with type=income_tax instead.
+     * Income tax is a budget payment (713111) → PP50, not PP30.
+     * Kept for backward compatibility with existing routes.
      */
     public function downloadPP30(PayrollRun $payrollRun)
     {
-        $this->authorize('view', $payrollRun);
-
-        $payrollRun->load(['lines' => fn ($q) => $q->included(), 'company']);
-        $company = $payrollRun->company;
-
-        $totalIncomeTax = $payrollRun->lines->sum('income_tax_amount');
-
-        if ($totalIncomeTax <= 0) {
-            return response()->json(['error' => 'No income tax amount.'], 422);
-        }
-
-        // Get company bank account
-        $bankAccount = \App\Models\BankAccount::where('company_id', $company->id)
-            ->orderBy('id')
-            ->first();
-
-        $period = sprintf('%02d/%d', $payrollRun->period_month, $payrollRun->period_year);
-
-        // Use PP50 service since income tax is also a budget payment (revenue code 713111)
-        $pp50Service = app(\Modules\Mk\Services\Pp50PdfService::class);
-        $pdf = $pp50Service->generate([
-            'debtor_name' => $company->name,
-            'debtor_iban' => $bankAccount?->iban ?? $bankAccount?->account_number ?? '',
-            'debtor_bank' => $bankAccount?->bank_name ?? '',
-            'creditor_name' => 'Управа за јавни приходи',
-            'creditor_iban' => '',
-            'creditor_bank' => '',
-            'amount' => $totalIncomeTax,
-            'currency_code' => 'MKD',
-            'revenue_code' => '713111',
-            'municipality_code' => $company->municipality_code ?? '80',
-            'payment_reference' => '',
-            'description' => 'Данок на личен доход (ДЛД 10%) - ' . $period,
-            'date' => now()->format('d.m.Y'),
-        ]);
-
-        $filename = sprintf('PP30_DLD_%d_%02d.pdf', $payrollRun->period_year, $payrollRun->period_month);
-
-        return $pdf->download($filename);
+        return $this->downloadPP50($payrollRun, 'income_tax');
     }
 }
 

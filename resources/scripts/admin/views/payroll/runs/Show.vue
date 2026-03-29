@@ -116,9 +116,9 @@
             PP50 Доп. придонес (0.5%)
           </BaseDropdownItem>
 
-          <BaseDropdownItem @click="downloadPP30">
+          <BaseDropdownItem @click="downloadPP50('income_tax')">
             <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP30 ДЛД (10%)
+            PP50 ДЛД (10%)
           </BaseDropdownItem>
         </BaseDropdown>
 
@@ -716,18 +716,5 @@ async function downloadPP50(type) {
   }
 }
 
-async function downloadPP30() {
-  try {
-    const response = await axios.get(
-      `payroll-reports/download-pp30/${run.value.id}`,
-      { responseType: 'blob' }
-    )
-    downloadBlob(response.data, `PP30_DLD_${run.value.period_year}_${String(run.value.period_month).padStart(2, '0')}.pdf`)
-    notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
-  } catch (error) {
-    console.error('Error downloading PP30:', error)
-    notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
-  }
-}
 </script>
 
