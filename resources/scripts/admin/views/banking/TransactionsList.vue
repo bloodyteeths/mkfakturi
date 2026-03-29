@@ -381,6 +381,10 @@ const linkedTypeLabel = (type) => {
     loan_repayment: t('banking.loan_repayment', 'Loan Repayment'),
     tax_payment: t('banking.tax_payment', 'Tax Payment'),
     internal_transfer: t('banking.internal_transfer', 'Internal Transfer'),
+    cash_deposit: t('banking.cash_deposit', 'Cash Deposit'),
+    cash_withdrawal: t('banking.cash_withdrawal', 'Cash Withdrawal'),
+    advance_received: t('banking.advance_received', 'Advance Received'),
+    advance_paid: t('banking.advance_paid', 'Advance Paid'),
   }
   return labels[type] || type || ''
 }

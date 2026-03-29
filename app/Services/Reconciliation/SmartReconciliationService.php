@@ -37,6 +37,18 @@ class SmartReconciliationService
         $isDebit = $tx->transaction_type === 'debit' || ($tx->transaction_type === null && $tx->amount < 0);
         $alternatives = [];
 
+        // Layer 0: Government IBAN auto-detection (debits only)
+        // MK government payments go through НБРМ treasury (bank code 100)
+        if ($isDebit) {
+            $govSuggestion = $this->tryMatchGovernmentIban($tx);
+            if ($govSuggestion && $govSuggestion->confidence >= 0.9) {
+                return $govSuggestion;
+            }
+            if ($govSuggestion) {
+                $alternatives[] = $govSuggestion;
+            }
+        }
+
         // Layer 1: User-defined matching rules
         $ruleSuggestion = $this->tryMatchingRules($tx, $companyId);
         if ($ruleSuggestion && $ruleSuggestion->confidence >= 0.9) {
@@ -111,6 +123,134 @@ class SmartReconciliationService
             reason: $this->t('smart_reconciliation.no_suggestion', $locale),
             alternatives: $alternatives,
         );
+    }
+
+    /**
+     * Layer 0: Detect government/institutional payments via IBAN prefix + creditor name.
+     *
+     * MK IBAN format: MK + 2 check + 3-digit bank code + 10-digit account + 2 national
+     * Bank code 100 = НБРМ (National Bank) = all treasury/government accounts
+     * Payment accounts starting with 840- = трезорски сметки (treasury accounts)
+     *
+     * Known government institution names that appear as creditor in bank statements:
+     * - УЈП / Управа за јавни приходи (tax office)
+     * - ФПИОМ / Фонд за ПИОМ (pension fund)
+     * - ФЗОМ / Фонд за здравство (health fund)
+     * - АВРМ / Агенција за вработување (employment agency)
+     * - Царинска управа (customs)
+     */
+    private function tryMatchGovernmentIban(BankTransaction $tx): ?SmartSuggestion
+    {
+        $iban = $tx->creditor_iban ?? '';
+        $creditor = mb_strtolower($tx->creditor_name ?? '');
+        $description = mb_strtolower(($tx->description ?? '').($tx->remittance_info ?? ''));
+        $allText = $creditor.' '.$description;
+
+        // Check 1: IBAN starts with MK..100 (НБРМ treasury)
+        $isTreasuryIban = false;
+        if (mb_strlen($iban) >= 7) {
+            // MK IBAN: MK + 2 check digits + bank code (positions 4-6)
+            $bankCode = substr($iban, 4, 3);
+            $isTreasuryIban = $bankCode === '100';
+        }
+
+        // Check 2: Known government institution names
+        $govInstitutions = [
+            // УЈП — Управа за јавни приходи (Public Revenue Office)
+            ['patterns' => ['ujp', 'управа за јавни приходи', 'управа за јавни', 'јавни приходи'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'УЈП — Управа за јавни приходи', 'sub_type' => null],
+            // ФПИОМ — Pension fund
+            ['patterns' => ['фпиом', 'фонд за пиом', 'пензиско осигурување', 'фонд за пензиско', 'piom', 'fpiom'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'ФПИОМ — Пензиско осигурување', 'sub_type' => 'ФПИОМ'],
+            // ФЗОМ — Health fund
+            ['patterns' => ['фзом', 'фонд за здравств', 'здравствено осигурување', 'fzom'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'ФЗОМ — Здравствено осигурување', 'sub_type' => 'ФЗОМ'],
+            // АВРМ — Employment agency
+            ['patterns' => ['аврм', 'агенција за вработување', 'avrm', 'вработување'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'АВРМ — Агенција за вработување', 'sub_type' => 'Вработување'],
+            // Царинска управа — Customs
+            ['patterns' => ['царинска управа', 'царина', 'customs', 'carina'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'Царинска управа — Царински давачки', 'sub_type' => 'Царина'],
+            // Municipality / Local government
+            ['patterns' => ['општина', 'општина скопје', 'комунална такса', 'фирмарина'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'Општина — Комунална такса', 'sub_type' => 'Комунална такса'],
+        ];
+
+        foreach ($govInstitutions as $gov) {
+            foreach ($gov['patterns'] as $pattern) {
+                if (str_contains($allText, $pattern)) {
+                    $confidence = $isTreasuryIban ? 0.95 : 0.88;
+
+                    return new SmartSuggestion(
+                        action: $gov['action'],
+                        confidence: $confidence,
+                        reason: $gov['reason'],
+                        categoryName: $gov['sub_type'],
+                    );
+                }
+            }
+        }
+
+        // If treasury IBAN but no institution name match — still likely tax/government payment
+        if ($isTreasuryIban) {
+            // Try to determine specific type from description keywords
+            $subType = $this->detectTaxSubTypeFromDescription($allText);
+
+            return new SmartSuggestion(
+                action: SmartSuggestion::ACTION_TAX_PAYMENT,
+                confidence: 0.85,
+                reason: 'Трезорска сметка (НБРМ) — државно плаќање',
+                categoryName: $subType,
+            );
+        }
+
+        // Known bank IBANs / names — for loan repayments
+        $bankKeywords = [
+            'комерцијална банка', 'стопанска банка', 'нлб банка', 'nlb',
+            'халк банка', 'halk', 'тtк банка', 'ttk', 'прокредит', 'procredit',
+            'шпаркасе', 'sparkasse', 'силк роуд', 'silk road',
+            'уни банка', 'uni bank', 'капитал банка', 'capital bank',
+        ];
+        foreach ($bankKeywords as $bank) {
+            if (str_contains($creditor, $bank)) {
+                // Bank as creditor + debit → likely loan repayment or bank fee
+                // Check if amount suggests loan (>5000 MKD) vs fee (<5000 MKD)
+                $amount = abs((float) $tx->amount);
+                if ($amount >= 5000) {
+                    return new SmartSuggestion(
+                        action: SmartSuggestion::ACTION_LOAN_REPAYMENT,
+                        confidence: 0.7,
+                        reason: "Банка: {$tx->creditor_name} — веројатно отплата на кредит",
+                    );
+                }
+                // Small amounts to banks = fees — let AI handle via create_expense
+                break;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Detect tax sub-type from transaction description keywords.
+     */
+    private function detectTaxSubTypeFromDescription(string $text): ?string
+    {
+        $taxKeywords = [
+            'ддв' => 'ДДВ', 'ddv' => 'ДДВ', 'vat' => 'ДДВ', 'tvsh' => 'ДДВ',
+            'данок на добивка' => 'Данок на добивка', 'profit tax' => 'Данок на добивка',
+            'персонален данок' => 'Персонален данок', 'данок на доход' => 'Персонален данок',
+            'фпиом' => 'ФПИОМ', 'пензиско' => 'ФПИОМ', 'piom' => 'ФПИОМ',
+            'фзом' => 'ФЗОМ', 'здравствено' => 'ФЗОМ', 'fzom' => 'ФЗОМ',
+            'вработување' => 'Вработување', 'невработеност' => 'Вработување',
+            'професионален' => 'Професионален придонес', 'дополнителен' => 'Професионален придонес',
+            'царина' => 'Царина', 'customs' => 'Царина',
+            'акциза' => 'Акциза', 'excise' => 'Акциза',
+            'комунална' => 'Комунална такса', 'фирмарина' => 'Комунална такса',
+            'аконтација' => 'Аконтација',
+        ];
+
+        foreach ($taxKeywords as $keyword => $subType) {
+            if (str_contains($text, $keyword)) {
+                return $subType;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -635,6 +775,10 @@ class SmartReconciliationService
             BankTransaction::LINKED_LOAN_REPAYMENT => SmartSuggestion::ACTION_LOAN_REPAYMENT,
             BankTransaction::LINKED_TAX_PAYMENT => SmartSuggestion::ACTION_TAX_PAYMENT,
             BankTransaction::LINKED_INTERNAL_TRANSFER => SmartSuggestion::ACTION_INTERNAL_TRANSFER,
+            BankTransaction::LINKED_CASH_DEPOSIT => SmartSuggestion::ACTION_CASH_DEPOSIT,
+            BankTransaction::LINKED_CASH_WITHDRAWAL => SmartSuggestion::ACTION_CASH_WITHDRAWAL,
+            BankTransaction::LINKED_ADVANCE_RECEIVED => SmartSuggestion::ACTION_ADVANCE_RECEIVED,
+            BankTransaction::LINKED_ADVANCE_PAID => SmartSuggestion::ACTION_ADVANCE_PAID,
             default => null,
         };
 

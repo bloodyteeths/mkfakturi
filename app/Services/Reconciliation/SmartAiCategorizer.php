@@ -107,6 +107,12 @@ Keyword hints:
 - "осигурување", "полиса", "sigurim", "insurance" → insurance (expense or income depending on direction)
 - "закупнина", "наем", "rent received" → rental income (record_income for credits)
 - "судска", "gjyqësore", "court", "извршител" → legal/court (expense or income)
+- "царина", "customs", "doganë", "gümrük", "увоз" → customs/import duties (tax_payment sub_type Царина)
+- "акциза", "excise", "akcizë" → excise tax (tax_payment sub_type Акциза)
+- "комунална такса", "фирмарина", "komunale" → communal tax (tax_payment sub_type Комунална такса)
+- "депонирање", "готовина", "cash deposit", "депозит каса" → cash_deposit (credits) or cash_withdrawal (debits)
+- "подигнување", "cash withdrawal", "ATM", "благајна" → cash_withdrawal (debits)
+- "аванс", "advance", "предуплата", "prepayment", "paradhëni", "avans" → advance_received (credits) or advance_paid (debits)
 
 Return ONLY valid JSON (no markdown, no explanation):
 {"action": "create_expense", "category_id": 5, "category_name": "Utilities", "confidence": 0.85, "reason": "Description matches utility payment"}
@@ -140,19 +146,23 @@ PROMPT;
 For OUTGOING (debit) transactions, choose one action:
 - "create_expense": Regular business expenses (utilities, rent, supplies, fees, subscriptions, office, transport, marketing, repairs, insurance premiums, professional services, software, telecom). Set category_id to best matching expense category.
 - "link_payroll": Salary/wage/contribution payments to employees. Set category_id to null.
-- "tax_payment": Tax payments to government (УЈП/UJP, ДДВ/VAT, данок на добивка/profit tax, персонален данок/personal income tax, придонеси за ФПИОМ/ФЗОМ pension/health fund contributions). Set category_id to null.
+- "tax_payment": Tax payments to government (УЈП/UJP, ДДВ/VAT, данок на добивка/profit tax, персонален данок/personal income tax, придонеси за ФПИОМ/ФЗОМ pension/health, царина/customs, акциза/excise, комунална такса). Set category_id to null. Include "sub_type" field with specific tax name.
 - "loan_repayment": Loan installments, credit repayments, leasing payments to banks or financial institutions. Set category_id to null.
 - "owner_withdrawal": Owner/shareholder withdrawing capital, dividend payout to owner, personal withdrawal by owner (повлекување капитал, дивиденда, лично подигнување). Set category_id to null.
+- "cash_withdrawal": Cash withdrawal from bank to cash register (подигнување готовина, ATM, благајна). Set category_id to null.
+- "advance_paid": Advance payment to supplier before receiving goods/invoice (аванс, предуплата, prepayment). Set category_id to null.
 - "internal_transfer": Transfer to company's own account at another bank, or between own accounts. Set category_id to null.
 - "mark_reviewed": Only if none of the above fit. Set category_id to null.
 
 Rules (check in this order):
-1. Salary/payroll keywords (плата, нето, придонес за вработен, paga) → "link_payroll"
-2. Tax keywords (УЈП, ДДВ, данок, ФПИОМ, ФЗОМ, tatim, TVSH, аконтација) → "tax_payment"
-3. Loan keywords (кредит, рата, ануитет, лизинг, kredi, loan, leasing) → "loan_repayment"
-4. Owner keywords (сопственик, дивиденда, повлекување, лично подигнување, ortaku, divident) → "owner_withdrawal"
-5. Internal transfer (own account name, same company IBAN) → "internal_transfer"
-6. Everything else → "create_expense" with best category
+1. Cash withdrawal keywords (подигнување готовина, ATM, благајна, cash withdrawal) → "cash_withdrawal"
+2. Salary/payroll keywords (плата, нето, придонес за вработен, paga) → "link_payroll"
+3. Tax keywords (УЈП, ДДВ, данок, ФПИОМ, ФЗОМ, tatim, TVSH, аконтација, царина, акциза, комунална такса) → "tax_payment"
+4. Loan keywords (кредит, рата, ануитет, лизинг, kredi, loan, leasing) → "loan_repayment"
+5. Owner keywords (сопственик, дивиденда, повлекување, лично подигнување, ortaku, divident) → "owner_withdrawal"
+6. Advance payment keywords (аванс, предуплата, авансно плаќање, avans, paradhëni) → "advance_paid"
+7. Internal transfer (own account name, same company IBAN) → "internal_transfer"
+8. Everything else → "create_expense" with best category
 INSTRUCTIONS;
     }
 
@@ -164,16 +174,20 @@ For INCOMING (credit) transactions, choose one action:
 - "record_income": Non-invoice income: bank interest, refunds, insurance payouts, government grants/subsidies, court awards, rental income received. Set category_id to null.
 - "owner_contribution": Owner/shareholder adding capital, founder's deposit, personal investment by owner (влог на капитал, основачки влог, капитална инвестиција, ortaku, kapital). Set category_id to null.
 - "loan_received": Loan disbursement from bank, credit line drawdown, financial institution deposit (кредит примен, дисбурзирање, kredi e marrë). Set category_id to null.
+- "cash_deposit": Cash deposit from cash register to bank (депонирање готовина, cash deposit, готовински уплата). Set category_id to null.
+- "advance_received": Advance payment from customer before invoice (аванс, предуплата, авансна уплата, paradhëni). Set category_id to null.
 - "internal_transfer": Transfer from company's own account at another bank, or between own accounts. Set category_id to null.
 - "mark_reviewed": Only if none of the above fit. Set category_id to null.
 
 Rules (check in this order):
-1. Owner/capital keywords (сопственик, влог, основач, капитал, ortaku, themelues) → "owner_contribution"
-2. Loan keywords (кредит, заем, дисбурзирање, banka, kredi, loan disbursement) + counterparty is bank → "loan_received"
-3. Interest/refund/grant (камата, поврат, субвенција, дотација, interest, refund, grant) → "record_income"
-4. Internal transfer (own account, same company) → "internal_transfer"
-5. Customer payment / service / goods → "link_invoice"
-6. Everything else → "record_income"
+1. Cash deposit keywords (депонирање, готовинска уплата, cash deposit, благајна) → "cash_deposit"
+2. Owner/capital keywords (сопственик, влог, основач, капитал, ortaku, themelues) → "owner_contribution"
+3. Loan keywords (кредит, заем, дисбурзирање, banka, kredi, loan disbursement) + counterparty is bank → "loan_received"
+4. Advance payment keywords (аванс, предуплата, авансна уплата, avans, paradhëni) → "advance_received"
+5. Interest/refund/grant (камата, поврат, субвенција, дотација, interest, refund, grant) → "record_income"
+6. Internal transfer (own account, same company) → "internal_transfer"
+7. Customer payment / service / goods → "link_invoice"
+8. Everything else → "record_income"
 INSTRUCTIONS;
     }
 
@@ -203,6 +217,10 @@ INSTRUCTIONS;
             SmartSuggestion::ACTION_LOAN_REPAYMENT,
             SmartSuggestion::ACTION_TAX_PAYMENT,
             SmartSuggestion::ACTION_INTERNAL_TRANSFER,
+            SmartSuggestion::ACTION_CASH_DEPOSIT,
+            SmartSuggestion::ACTION_CASH_WITHDRAWAL,
+            SmartSuggestion::ACTION_ADVANCE_RECEIVED,
+            SmartSuggestion::ACTION_ADVANCE_PAID,
         ];
 
         if (! $action || ! in_array($action, $validActions)) {
@@ -214,10 +232,12 @@ INSTRUCTIONS;
             SmartSuggestion::ACTION_CREATE_EXPENSE, SmartSuggestion::ACTION_LINK_BILL,
             SmartSuggestion::ACTION_LINK_PAYROLL, SmartSuggestion::ACTION_OWNER_WITHDRAWAL,
             SmartSuggestion::ACTION_LOAN_REPAYMENT, SmartSuggestion::ACTION_TAX_PAYMENT,
+            SmartSuggestion::ACTION_CASH_WITHDRAWAL, SmartSuggestion::ACTION_ADVANCE_PAID,
         ];
         $creditOnlyActions = [
             SmartSuggestion::ACTION_RECORD_INCOME, SmartSuggestion::ACTION_LINK_INVOICE,
             SmartSuggestion::ACTION_OWNER_CONTRIBUTION, SmartSuggestion::ACTION_LOAN_RECEIVED,
+            SmartSuggestion::ACTION_CASH_DEPOSIT, SmartSuggestion::ACTION_ADVANCE_RECEIVED,
         ];
         // internal_transfer and mark_reviewed can be either direction
 

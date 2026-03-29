@@ -282,6 +282,58 @@
                     </div>
                   </button>
 
+                  <!-- Cash Deposit (credits) -->
+                  <button
+                    v-if="isCredit"
+                    @click="manualAction = 'cash_deposit'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'cash_deposit' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="BanknotesIcon" class="h-4 w-4 mr-2 text-emerald-600" />
+                      <span class="text-sm font-medium">{{ $t('banking.cash_deposit', 'Cash Deposit') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Cash Withdrawal (debits) -->
+                  <button
+                    v-if="!isCredit"
+                    @click="manualAction = 'cash_withdrawal'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'cash_withdrawal' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="BanknotesIcon" class="h-4 w-4 mr-2 text-emerald-600" />
+                      <span class="text-sm font-medium">{{ $t('banking.cash_withdrawal', 'Cash Withdrawal') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Advance Received (credits) -->
+                  <button
+                    v-if="isCredit"
+                    @click="manualAction = 'advance_received'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'advance_received' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="ClockIcon" class="h-4 w-4 mr-2 text-orange-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.advance_received', 'Advance Payment Received') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Advance Paid (debits) -->
+                  <button
+                    v-if="!isCredit"
+                    @click="manualAction = 'advance_paid'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'advance_paid' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="ClockIcon" class="h-4 w-4 mr-2 text-orange-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.advance_paid', 'Advance Payment to Supplier') }}</span>
+                    </div>
+                  </button>
+
                   <!-- Internal Transfer (both) -->
                   <button
                     @click="manualAction = 'internal_transfer'"
@@ -422,7 +474,20 @@
                   </div>
 
                   <!-- Financial transaction sub-forms -->
-                  <div v-if="['owner_contribution', 'owner_withdrawal', 'loan_received', 'loan_repayment', 'internal_transfer'].includes(manualAction)" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                  <div v-if="['owner_contribution', 'owner_withdrawal', 'loan_received', 'loan_repayment', 'internal_transfer', 'cash_deposit', 'cash_withdrawal', 'advance_received', 'advance_paid'].includes(manualAction)" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                    <!-- Interest amount for loan repayment -->
+                    <div v-if="manualAction === 'loan_repayment'" class="space-y-1">
+                      <label class="text-xs font-medium text-gray-600">{{ $t('banking.interest_portion', 'Interest portion (optional)') }}</label>
+                      <input
+                        v-model="interestAmount"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        :placeholder="$t('banking.interest_amount_placeholder', 'e.g. 1500.00')"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      />
+                      <p class="text-xs text-gray-400">{{ $t('banking.interest_help', 'If set, principal and interest will be posted to separate GL accounts') }}</p>
+                    </div>
                     <textarea
                       v-model="manualNotes"
                       :placeholder="$t('banking.financial_notes', 'Notes (e.g. reason, reference number)...')"
@@ -452,6 +517,9 @@
                       <option value="Вработување">{{ $t('banking.tax_employment', 'Вработување (Employment Fund)') }}</option>
                       <option value="Професионален придонес">{{ $t('banking.tax_additional', 'Професионален придонес (Additional 0.5%)') }}</option>
                       <option value="Аконтација">{{ $t('banking.tax_advance', 'Аконтација (Advance Tax)') }}</option>
+                      <option value="Царина">{{ $t('banking.tax_customs', 'Царина (Customs Duties)') }}</option>
+                      <option value="Акциза">{{ $t('banking.tax_excise', 'Акциза (Excise Tax)') }}</option>
+                      <option value="Комунална такса">{{ $t('banking.tax_communal', 'Комунална такса (Communal Tax)') }}</option>
                       <option value="Друг данок">{{ $t('banking.tax_other', 'Друг данок (Other Tax)') }}</option>
                     </select>
                     <textarea
@@ -512,6 +580,7 @@ const selectedBillId = ref(null)
 const selectedInvoiceId = ref(null)
 const selectedPayrollId = ref(null)
 const taxSubType = ref(null)
+const interestAmount = ref(null)
 
 // Reference data
 const expenseCategories = ref([])
@@ -551,6 +620,7 @@ const resetState = () => {
   selectedInvoiceId.value = null
   selectedPayrollId.value = null
   taxSubType.value = null
+  interestAmount.value = null
 }
 
 const fetchSuggestion = async () => {
@@ -641,11 +711,16 @@ const acceptSuggestion = async (s) => {
       case 'loan_repayment':
       case 'tax_payment':
       case 'internal_transfer':
+      case 'cash_deposit':
+      case 'cash_withdrawal':
+      case 'advance_received':
+      case 'advance_paid':
         await axios.post('/banking/reconciliation/record-financial', {
           transaction_id: txId,
           action: s.action,
           notes: s.reason,
-          sub_type: s.sub_type || null,
+          sub_type: s.sub_type || (s.action === 'tax_payment' ? s.category_name : null) || null,
+          interest_amount: s.action === 'loan_repayment' ? (s.interest_amount || null) : null,
         })
         break
 
@@ -702,6 +777,7 @@ const submitFinancialTransaction = (action) => acceptSuggestion({
   action,
   reason: manualNotes.value || '',
   sub_type: action === 'tax_payment' ? taxSubType.value : null,
+  interest_amount: action === 'loan_repayment' && interestAmount.value ? parseFloat(interestAmount.value) : null,
 })
 
 const close = () => {
@@ -722,6 +798,10 @@ const actionLabels = {
   loan_repayment: 'Loan Repayment',
   tax_payment: 'Tax Payment',
   internal_transfer: 'Internal Transfer',
+  cash_deposit: 'Cash Deposit',
+  cash_withdrawal: 'Cash Withdrawal',
+  advance_received: 'Advance Payment Received',
+  advance_paid: 'Advance Payment to Supplier',
 }
 
 const getActionLabel = (action) => {
@@ -747,6 +827,10 @@ const suggestionIcon = computed(() => {
     loan_repayment: 'BuildingOffice2Icon',
     tax_payment: 'CalculatorIcon',
     internal_transfer: 'ArrowsRightLeftIcon',
+    cash_deposit: 'BanknotesIcon',
+    cash_withdrawal: 'BanknotesIcon',
+    advance_received: 'ClockIcon',
+    advance_paid: 'ClockIcon',
   }
   return icons[suggestion.value?.action] || 'SparklesIcon'
 })
@@ -772,6 +856,10 @@ const suggestionIconBgClass = computed(() => {
     loan_repayment: 'bg-cyan-500',
     tax_payment: 'bg-amber-600',
     internal_transfer: 'bg-gray-600',
+    cash_deposit: 'bg-emerald-600',
+    cash_withdrawal: 'bg-emerald-600',
+    advance_received: 'bg-orange-500',
+    advance_paid: 'bg-orange-500',
   }
   return map[suggestion.value?.action] || 'bg-gray-500'
 })

@@ -36,6 +36,16 @@ class SmartSuggestion
 
     public const ACTION_INTERNAL_TRANSFER = 'internal_transfer';
 
+    // Cash operations
+    public const ACTION_CASH_DEPOSIT = 'cash_deposit';
+
+    public const ACTION_CASH_WITHDRAWAL = 'cash_withdrawal';
+
+    // Advance payments
+    public const ACTION_ADVANCE_RECEIVED = 'advance_received';
+
+    public const ACTION_ADVANCE_PAID = 'advance_paid';
+
     public function __construct(
         public string $action,
         public float $confidence,

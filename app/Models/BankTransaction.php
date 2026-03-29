@@ -142,6 +142,14 @@ class BankTransaction extends Model
 
     const LINKED_INTERNAL_TRANSFER = 'internal_transfer';
 
+    const LINKED_CASH_DEPOSIT = 'cash_deposit';
+
+    const LINKED_CASH_WITHDRAWAL = 'cash_withdrawal';
+
+    const LINKED_ADVANCE_RECEIVED = 'advance_received';
+
+    const LINKED_ADVANCE_PAID = 'advance_paid';
+
     /**
      * Mark this transaction as reconciled with a linked record.
      */

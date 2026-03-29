@@ -804,9 +804,10 @@ class ReconciliationController extends Controller
     {
         $request->validate([
             'transaction_id' => 'required|integer|exists:bank_transactions,id',
-            'action' => 'required|string|in:owner_contribution,owner_withdrawal,loan_received,loan_repayment,tax_payment,internal_transfer',
+            'action' => 'required|string|in:owner_contribution,owner_withdrawal,loan_received,loan_repayment,tax_payment,internal_transfer,cash_deposit,cash_withdrawal,advance_received,advance_paid',
             'notes' => 'nullable|string|max:500',
             'sub_type' => 'nullable|string|max:100', // e.g. "ДДВ", "данок на добивка", "ФПИОМ" for tax
+            'interest_amount' => 'nullable|numeric|min:0', // For loan_repayment: interest portion
         ]);
 
         $company = $this->getCompany();
@@ -828,6 +829,10 @@ class ReconciliationController extends Controller
             'loan_repayment' => BankTransaction::LINKED_LOAN_REPAYMENT,
             'tax_payment' => BankTransaction::LINKED_TAX_PAYMENT,
             'internal_transfer' => BankTransaction::LINKED_INTERNAL_TRANSFER,
+            'cash_deposit' => BankTransaction::LINKED_CASH_DEPOSIT,
+            'cash_withdrawal' => BankTransaction::LINKED_CASH_WITHDRAWAL,
+            'advance_received' => BankTransaction::LINKED_ADVANCE_RECEIVED,
+            'advance_paid' => BankTransaction::LINKED_ADVANCE_PAID,
         ];
 
         // MK Chart of Accounts GL mapping (Правилник 174/2011)
@@ -838,6 +843,10 @@ class ReconciliationController extends Controller
             'loan_repayment' => ['debit' => '2900', 'credit' => '1000'], // Долгорочни кредити / Жиро-сметка
             'tax_payment' => ['debit' => '2700', 'credit' => '1000'], // Обврски за даноци / Жиро-сметка
             'internal_transfer' => ['debit' => '1001', 'credit' => '1000'], // Девизна сметка / Жиро-сметка
+            'cash_deposit' => ['debit' => '1000', 'credit' => '1020'], // Жиро-сметка / Каса-благајна
+            'cash_withdrawal' => ['debit' => '1020', 'credit' => '1000'], // Каса-благајна / Жиро-сметка
+            'advance_received' => ['debit' => '1000', 'credit' => '2410'], // Жиро-сметка / Примени аванси
+            'advance_paid' => ['debit' => '1500', 'credit' => '1000'], // Дадени аванси / Жиро-сметка
         ];
 
         // Tax sub-type GL refinement
@@ -875,6 +884,21 @@ class ReconciliationController extends Controller
                 'данок од плата' => '2540',
                 // Advance tax
                 'аконтација' => '2700',
+                // Customs duties / Царина
+                'царина' => '1310',       // ДДВ при увоз / Царински давачки
+                'customs' => '1310',
+                'doganë' => '1310',
+                'gümrük' => '1310',
+                'увоз' => '1310',
+                // Excise tax / Акциза
+                'акциза' => '4310',       // Акцизи
+                'excise' => '4310',
+                'akcizë' => '4310',
+                // Communal tax / Комунална такса
+                'комунална такса' => '4650', // Комунални такси
+                'komunale' => '4650',
+                'komunal' => '4650',
+                'фирмарина' => '4650',     // Firmarina (business sign tax)
             ];
             $subTypeLower = mb_strtolower($subType);
             foreach ($taxGlMap as $keyword => $account) {
@@ -911,34 +935,82 @@ class ReconciliationController extends Controller
                 // MK account names for GL codes
                 $accountNames = [
                     '1000' => 'Жиро-сметка', '1001' => 'Девизна сметка',
+                    '1020' => 'Каса-благајна', '1310' => 'ДДВ при увоз / Царина',
+                    '1500' => 'Дадени аванси', '2410' => 'Примени аванси',
                     '2520' => 'Обврски за ФПИОМ (пензиско)', '2530' => 'Обврски за ФЗОМ (здравствено)',
                     '2540' => 'Обврски за персонален данок', '2550' => 'Обврски за вработување',
                     '2560' => 'Обврски за професионален придонес', '2700' => 'Обврски за ДДВ',
                     '2710' => 'Обврски за данок на добивка', '2900' => 'Долгорочни кредити',
                     '3010' => 'Основна главнина', '3220' => 'Повлечен капитал',
+                    '4310' => 'Акцизи', '4650' => 'Комунални такси',
+                    '4720' => 'Расходи за камати',
                 ];
 
-                $ifrs->postJournalEntry($company, [
-                    'date' => $transaction->transaction_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
-                    'narration' => $narration,
-                    'reference' => "BANK-TX-{$transaction->id}",
-                    'line_items' => [
-                        [
-                            'account_code' => $gl['debit'],
-                            'account_name' => $accountNames[$gl['debit']] ?? $gl['debit'],
-                            'amount' => $amountCents,
-                            'credited' => false,
-                            'counterparty_name' => $counterparty,
+                // Loan repayment with interest split — post two GL entries
+                $interestAmount = $request->interest_amount ? (int) round(abs((float) $request->interest_amount) * 100) : 0;
+                if ($action === 'loan_repayment' && $interestAmount > 0 && $interestAmount < $amountCents) {
+                    $principalCents = $amountCents - $interestAmount;
+                    $ifrs->postJournalEntry($company, [
+                        'date' => $transaction->transaction_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
+                        'narration' => $narration,
+                        'reference' => "BANK-TX-{$transaction->id}",
+                        'line_items' => [
+                            // Principal: DR 2900 / CR 1000
+                            [
+                                'account_code' => '2900',
+                                'account_name' => $accountNames['2900'],
+                                'amount' => $principalCents,
+                                'credited' => false,
+                                'counterparty_name' => $counterparty,
+                            ],
+                            [
+                                'account_code' => '1000',
+                                'account_name' => $accountNames['1000'],
+                                'amount' => $principalCents,
+                                'credited' => true,
+                                'counterparty_name' => $counterparty,
+                            ],
+                            // Interest: DR 4720 / CR 1000
+                            [
+                                'account_code' => '4720',
+                                'account_name' => $accountNames['4720'],
+                                'amount' => $interestAmount,
+                                'credited' => false,
+                                'counterparty_name' => $counterparty,
+                            ],
+                            [
+                                'account_code' => '1000',
+                                'account_name' => $accountNames['1000'],
+                                'amount' => $interestAmount,
+                                'credited' => true,
+                                'counterparty_name' => $counterparty,
+                            ],
                         ],
-                        [
-                            'account_code' => $gl['credit'],
-                            'account_name' => $accountNames[$gl['credit']] ?? $gl['credit'],
-                            'amount' => $amountCents,
-                            'credited' => true,
-                            'counterparty_name' => $counterparty,
+                    ]);
+                } else {
+                    // Standard single GL entry
+                    $ifrs->postJournalEntry($company, [
+                        'date' => $transaction->transaction_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
+                        'narration' => $narration,
+                        'reference' => "BANK-TX-{$transaction->id}",
+                        'line_items' => [
+                            [
+                                'account_code' => $gl['debit'],
+                                'account_name' => $accountNames[$gl['debit']] ?? $gl['debit'],
+                                'amount' => $amountCents,
+                                'credited' => false,
+                                'counterparty_name' => $counterparty,
+                            ],
+                            [
+                                'account_code' => $gl['credit'],
+                                'account_name' => $accountNames[$gl['credit']] ?? $gl['credit'],
+                                'amount' => $amountCents,
+                                'credited' => true,
+                                'counterparty_name' => $counterparty,
+                            ],
                         ],
-                    ],
-                ]);
+                    ]);
+                }
             }
         } catch (\Exception $e) {
             // IFRS posting is non-critical — transaction is still reconciled
@@ -956,6 +1028,10 @@ class ReconciliationController extends Controller
             'loan_repayment' => 'loan repayment',
             'tax_payment' => 'tax payment',
             'internal_transfer' => 'internal transfer',
+            'cash_deposit' => 'cash deposit',
+            'cash_withdrawal' => 'cash withdrawal',
+            'advance_received' => 'advance payment received',
+            'advance_paid' => 'advance payment to supplier',
         ];
 
         return response()->json([
