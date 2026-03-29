@@ -1,174 +1,206 @@
 <template>
-  <form action="" class="relative" @submit.prevent="updatePreferencesData">
-    <BaseSettingCard
-      :title="$t('settings.menu_title.preferences')"
-      :description="$t('settings.preferences.general_settings')"
-    >
-      <BaseInputGrid class="mt-5">
-        <BaseInputGroup
-          :content-loading="isFetchingInitialData"
-          :label="$t('settings.preferences.currency')"
-          :help-text="$t('settings.preferences.company_currency_unchangeable')"
-          :error="v$.currency.$error && v$.currency.$errors[0].$message"
-          required
-        >
-          <BaseMultiselect
-            v-model="settingsForm.currency"
+  <BaseSettingCard
+    :title="$t('settings.menu_title.preferences')"
+    :description="$t('settings.preferences.general_settings')"
+  >
+    <BaseTabGroup class="mt-5">
+      <!-- Tab 1: Formats -->
+      <BaseTab :title="$t('settings.preferences.tab_formats')">
+        <form @submit.prevent="updatePreferencesData">
+          <BaseInputGrid>
+            <BaseInputGroup
+              :content-loading="isFetchingInitialData"
+              :label="$t('settings.preferences.currency')"
+              :help-text="$t('settings.preferences.company_currency_unchangeable')"
+              :error="v$.currency.$error && v$.currency.$errors[0].$message"
+              required
+            >
+              <BaseMultiselect
+                v-model="settingsForm.currency"
+                :content-loading="isFetchingInitialData"
+                :options="globalStore.currencies"
+                label="name"
+                value-prop="id"
+                :searchable="true"
+                track-by="name"
+                :invalid="v$.currency.$error"
+                disabled
+                class="w-full"
+              >
+              </BaseMultiselect>
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :content-loading="isFetchingInitialData"
+              :label="$t('settings.preferences.exchange_rate_provider')"
+              :help-text="$t('settings.preferences.exchange_rate_provider_help')"
+            >
+              <BaseMultiselect
+                v-model="settingsForm.exchange_rate_provider"
+                :content-loading="isFetchingInitialData"
+                :options="exchangeRateProviders"
+                label="label"
+                value-prop="id"
+                track-by="label"
+                :searchable="false"
+                class="w-full"
+                @update:modelValue="onExchangeRateProviderChange"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('settings.preferences.default_language')"
+              :content-loading="isFetchingInitialData"
+              :error="v$.language.$error && v$.language.$errors[0].$message"
+              required
+            >
+              <BaseMultiselect
+                v-model="settingsForm.language"
+                :content-loading="isFetchingInitialData"
+                :options="globalStore.config.languages"
+                label="name"
+                value-prop="code"
+                class="w-full"
+                track-by="name"
+                :searchable="true"
+                :invalid="v$.language.$error"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('settings.preferences.time_zone')"
+              :content-loading="isFetchingInitialData"
+              :error="v$.time_zone.$error && v$.time_zone.$errors[0].$message"
+              required
+            >
+              <BaseMultiselect
+                v-model="settingsForm.time_zone"
+                :content-loading="isFetchingInitialData"
+                :options="timeZonesWithOffset"
+                label="displayKey"
+                value-prop="value"
+                track-by="displayKey"
+                :searchable="true"
+                :invalid="v$.time_zone.$error"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('settings.preferences.date_format')"
+              :content-loading="isFetchingInitialData"
+              :error="
+                v$.carbon_date_format.$error &&
+                v$.carbon_date_format.$errors[0].$message
+              "
+              required
+            >
+              <BaseMultiselect
+                v-model="settingsForm.carbon_date_format"
+                :content-loading="isFetchingInitialData"
+                :options="globalStore.dateFormats"
+                label="display_date"
+                value-prop="carbon_format_value"
+                track-by="display_date"
+                :searchable="true"
+                :invalid="v$.carbon_date_format.$error"
+                class="w-full"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :content-loading="isFetchingInitialData"
+              :error="v$.fiscal_year.$error && v$.fiscal_year.$errors[0].$message"
+              :label="$t('settings.preferences.fiscal_year')"
+              required
+            >
+              <BaseMultiselect
+                v-model="settingsForm.fiscal_year"
+                :content-loading="isFetchingInitialData"
+                :options="fiscalYearsList"
+                label="key"
+                value-prop="value"
+                :invalid="v$.fiscal_year.$error"
+                track-by="key"
+                :searchable="true"
+                class="w-full"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('settings.preferences.time_format')"
+              :content-loading="isFetchingInitialData"
+              :error="
+                v$.carbon_time_format.$error &&
+                v$.carbon_time_format.$errors[0].$message
+              "
+              required
+            >
+              <BaseMultiselect
+                v-model="settingsForm.carbon_time_format"
+                :content-loading="isFetchingInitialData"
+                :options="globalStore.timeFormats"
+                label="display_time"
+                value-prop="carbon_format_value"
+                track-by="display_time"
+                :searchable="true"
+                :invalid="v$.carbon_time_format.$error"
+                class="w-full"
+              />
+            </BaseInputGroup>
+          </BaseInputGrid>
+
+          <BaseButton
             :content-loading="isFetchingInitialData"
-            :options="globalStore.currencies"
-            label="name"
-            value-prop="id"
-            :searchable="true"
-            track-by="name"
-            :invalid="v$.currency.$error"
-            disabled
-            class="w-full"
+            :disabled="isSaving"
+            :loading="isSaving"
+            type="submit"
+            class="mt-6"
           >
-          </BaseMultiselect>
-        </BaseInputGroup>
+            <template #left="slotProps">
+              <BaseIcon name="ArrowDownOnSquareIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('settings.company_info.save') }}
+          </BaseButton>
+        </form>
+      </BaseTab>
 
-        <BaseInputGroup
-          :content-loading="isFetchingInitialData"
-          :label="$t('settings.preferences.exchange_rate_provider')"
-          :help-text="$t('settings.preferences.exchange_rate_provider_help')"
-        >
-          <BaseMultiselect
-            v-model="settingsForm.exchange_rate_provider"
-            :content-loading="isFetchingInitialData"
-            :options="exchangeRateProviders"
-            label="label"
-            value-prop="id"
-            track-by="label"
-            :searchable="false"
-            class="w-full"
-            @update:modelValue="onExchangeRateProviderChange"
-          />
-        </BaseInputGroup>
+      <!-- Tab 2: Features (toggles auto-save on change) -->
+      <BaseTab :title="$t('settings.preferences.tab_features')">
+        <BaseSwitchSection
+          v-model="invoiceUseTimeField"
+          :title="$t('settings.preferences.invoice_use_time')"
+          :description="$t('settings.preferences.invoice_use_time_description')"
+        />
 
-        <BaseInputGroup
-          :label="$t('settings.preferences.default_language')"
-          :content-loading="isFetchingInitialData"
-          :error="v$.language.$error && v$.language.$errors[0].$message"
-          required
-        >
-          <BaseMultiselect
-            v-model="settingsForm.language"
-            :content-loading="isFetchingInitialData"
-            :options="globalStore.config.languages"
-            label="name"
-            value-prop="code"
-            class="w-full"
-            track-by="name"
-            :searchable="true"
-            :invalid="v$.language.$error"
-          />
-        </BaseInputGroup>
+        <BaseDivider class="mt-6 mb-2" />
 
-        <BaseInputGroup
-          :label="$t('settings.preferences.time_zone')"
-          :content-loading="isFetchingInitialData"
-          :error="v$.time_zone.$error && v$.time_zone.$errors[0].$message"
-          required
-        >
-          <BaseMultiselect
-            v-model="settingsForm.time_zone"
-            :content-loading="isFetchingInitialData"
-            :options="timeZonesWithOffset"
-            label="displayKey"
-            value-prop="value"
-            track-by="displayKey"
-            :searchable="true"
-            :invalid="v$.time_zone.$error"
-          />
-        </BaseInputGroup>
+        <BaseSwitchSection
+          v-model="discountPerItemField"
+          :title="$t('settings.preferences.discount_per_item')"
+          :description="$t('settings.preferences.discount_setting_description')"
+        />
 
-        <BaseInputGroup
-          :label="$t('settings.preferences.date_format')"
-          :content-loading="isFetchingInitialData"
-          :error="
-            v$.carbon_date_format.$error &&
-            v$.carbon_date_format.$errors[0].$message
-          "
-          required
-        >
-          <BaseMultiselect
-            v-model="settingsForm.carbon_date_format"
-            :content-loading="isFetchingInitialData"
-            :options="globalStore.dateFormats"
-            label="display_date"
-            value-prop="carbon_format_value"
-            track-by="display_date"
-            :searchable="true"
-            :invalid="v$.carbon_date_format.$error"
-            class="w-full"
-          />
+        <BaseDivider v-if="stockEnabled" class="mt-6 mb-2" />
 
-        </BaseInputGroup>
+        <BaseSwitchSection
+          v-if="stockEnabled"
+          v-model="allowNegativeStockField"
+          :title="$t('settings.preferences.allow_negative_stock')"
+          :description="$t('settings.preferences.allow_negative_stock_description')"
+        />
 
-        <BaseInputGroup
-          :content-loading="isFetchingInitialData"
-          :error="v$.fiscal_year.$error && v$.fiscal_year.$errors[0].$message"
-          :label="$t('settings.preferences.fiscal_year')"
-          required
-        >
-          <BaseMultiselect
-            v-model="settingsForm.fiscal_year"
-            :content-loading="isFetchingInitialData"
-            :options="fiscalYearsList"
-            label="key"
-            value-prop="value"
-            :invalid="v$.fiscal_year.$error"
-            track-by="key"
-            :searchable="true"
-            class="w-full"
-          />
-        </BaseInputGroup>
-        
-        <BaseInputGroup
-          :label="$t('settings.preferences.time_format')"
-          :content-loading="isFetchingInitialData"
-          :error="
-            v$.carbon_time_format.$error &&
-            v$.carbon_time_format.$errors[0].$message
-          "
-          required
-        >
-          <BaseMultiselect
-            v-model="settingsForm.carbon_time_format"
-            :content-loading="isFetchingInitialData"
-            :options="globalStore.timeFormats"
-            label="display_time"
-            value-prop="carbon_format_value"
-            track-by="display_time"
-            :searchable="true"
-            :invalid="v$.carbon_time_format.$error"
-            class="w-full"
-          />
-        </BaseInputGroup>
-      </BaseInputGrid>
+        <BaseDivider v-if="accountingBackboneEnabled" class="mt-6 mb-2" />
 
-      <BaseSwitchSection
-        v-model="invoiceUseTimeField"
-        :title="$t('settings.preferences.invoice_use_time')"
-        :description="$t('settings.preferences.invoice_use_time_description')"
-      />
+        <BaseSwitchSection
+          v-if="accountingBackboneEnabled"
+          v-model="ifrsEnabledField"
+          :title="$t('settings.preferences.ifrs_enabled')"
+          :description="$t('settings.preferences.ifrs_enabled_description')"
+        />
+      </BaseTab>
 
-      <BaseButton
-        :content-loading="isFetchingInitialData"
-        :disabled="isSaving"
-        :loading="isSaving"
-        type="submit"
-        class="mt-6"
-      >
-        <template #left="slotProps">
-          <BaseIcon name="ArrowDownOnSquareIcon" :class="slotProps.class" />
-        </template>
-        {{ $t('settings.company_info.save') }}
-      </BaseButton>
-
-      <BaseDivider class="mt-6 mb-2" />
-
-      <ul>
+      <!-- Tab 3: Links -->
+      <BaseTab :title="$t('settings.preferences.tab_links')">
         <form @submit.prevent="submitData">
           <BaseSwitchSection
             v-model="expirePdfField"
@@ -176,7 +208,6 @@
             :description="$t('settings.preferences.expire_setting_description')"
           />
 
-          <!--pdf_link_expiry_days -->
           <BaseInputGroup
             v-if="expirePdfField"
             :content-loading="isFetchingInitialData"
@@ -206,35 +237,9 @@
             {{ $t('general.save') }}
           </BaseButton>
         </form>
-
-        <BaseDivider class="mt-6 mb-2" />
-
-        <BaseSwitchSection
-          v-model="discountPerItemField"
-          :title="$t('settings.preferences.discount_per_item')"
-          :description="$t('settings.preferences.discount_setting_description')"
-        />
-
-        <BaseDivider v-if="stockEnabled" class="mt-6 mb-2" />
-
-        <BaseSwitchSection
-          v-if="stockEnabled"
-          v-model="allowNegativeStockField"
-          :title="$t('settings.preferences.allow_negative_stock')"
-          :description="$t('settings.preferences.allow_negative_stock_description')"
-        />
-
-        <BaseDivider v-if="accountingBackboneEnabled" class="mt-6 mb-2" />
-
-        <BaseSwitchSection
-          v-if="accountingBackboneEnabled"
-          v-model="ifrsEnabledField"
-          :title="$t('settings.preferences.ifrs_enabled')"
-          :description="$t('settings.preferences.ifrs_enabled_description')"
-        />
-      </ul>
-    </BaseSettingCard>
-  </form>
+      </BaseTab>
+    </BaseTabGroup>
+  </BaseSettingCard>
 </template>
 
 <script setup>
@@ -355,12 +360,16 @@ const invoiceUseTimeField = computed({
   },
   set: async (newValue) => {
     const value = newValue ? 'YES' : 'NO'
-    let data = {
-      settings: {
-        invoice_use_time: value,
-      },
-    }
     settingsForm.invoice_use_time = value
+
+    await companyStore.updateCompanySettings({
+      data: {
+        settings: {
+          invoice_use_time: value,
+        },
+      },
+      message: 'general.setting_updated',
+    })
   }
 })
 

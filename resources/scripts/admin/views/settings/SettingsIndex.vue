@@ -42,6 +42,7 @@
               v-for="(menuItem, index) in section.items"
               :key="menuItem.link"
               :title="$t(menuItem.title)"
+              :subtitle="getSubtitle(menuItem.link)"
               :to="menuItem.link"
               :active="hasActiveUrl(menuItem.link)"
               :index="index"
@@ -76,6 +77,28 @@ let currentSetting = ref({})
 const globalStore = useGlobalStore()
 const route = useRoute()
 const router = useRouter()
+
+const SUBTITLE_MAP = {
+  '/admin/settings/account-settings': 'settings.subtitles.account_settings',
+  '/admin/settings/privacy-data': 'settings.subtitles.privacy_data',
+  '/admin/settings/company-info': 'settings.subtitles.company_info',
+  '/admin/settings/preferences': 'settings.subtitles.preferences',
+  '/admin/settings/notifications': 'settings.subtitles.notifications',
+  '/admin/settings/customization': 'settings.subtitles.customization',
+  '/admin/settings/tax-types': 'settings.subtitles.tax_types',
+  '/admin/settings/payment-mode': 'settings.subtitles.payment_mode',
+  '/admin/settings/custom-fields': 'settings.subtitles.custom_fields',
+  '/admin/settings/notes': 'settings.subtitles.notes',
+  '/admin/settings/expense-category': 'settings.subtitles.expense_category',
+  '/admin/settings/roles-settings': 'settings.subtitles.roles',
+  '/admin/settings/partner-settings': 'settings.subtitles.partner',
+  '/admin/settings/fiscal-devices': 'settings.subtitles.fiscal_devices',
+  '/admin/settings/pos': 'settings.subtitles.pos',
+  '/admin/settings/online-payments': 'settings.subtitles.online_payments',
+  '/admin/settings/woocommerce': 'settings.subtitles.woocommerce',
+  '/admin/settings/efaktura': 'settings.subtitles.efaktura',
+  '/admin/settings/billing': 'settings.subtitles.billing',
+}
 
 const GROUP_LABELS = {
   account: 'settings.groups.account',
@@ -125,6 +148,11 @@ watchEffect(() => {
 
   currentSetting.value = item
 })
+
+function getSubtitle(link) {
+  const key = SUBTITLE_MAP[link]
+  return key ? t(key) : ''
+}
 
 function hasActiveUrl(url) {
   return route.path.indexOf(url) > -1

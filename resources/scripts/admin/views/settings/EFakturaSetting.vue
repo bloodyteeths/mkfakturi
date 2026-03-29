@@ -1,12 +1,12 @@
 <template>
   <BaseSettingCard
-    title="E-Faktura Settings"
-    description="Configure the e-invoice submission mode and UJP portal/API credentials for the Macedonian tax authority."
+    :title="$t('settings.efaktura.title')"
+    :description="$t('settings.efaktura.description')"
   >
     <div class="grid-cols-2 col-span-1 mt-14">
       <!-- Submission Mode Toggle -->
       <BaseInputGroup
-        label="Submission Mode"
+        :label="$t('settings.efaktura.submission_mode')"
         class="my-2"
       >
         <BaseMultiselect
@@ -16,17 +16,14 @@
           label="label"
           :can-deselect="false"
         />
-        <p class="mt-1 text-xs text-gray-500">
-          <strong>Portal:</strong> Submit via web portal scraping (legacy).
-          <strong>API:</strong> Submit via official UJP REST API (recommended when available).
-        </p>
+        <p class="mt-1 text-xs text-gray-500" v-html="$t('settings.efaktura.mode_help')" />
       </BaseInputGroup>
 
       <BaseDivider class="mt-4 mb-4" />
 
       <!-- Environment -->
       <BaseInputGroup
-        label="Environment"
+        :label="$t('settings.efaktura.environment')"
         class="my-2"
       >
         <BaseMultiselect
@@ -36,16 +33,14 @@
           label="label"
           :can-deselect="false"
         />
-        <p class="mt-1 text-xs text-gray-500">
-          Use <strong>Sandbox</strong> for testing. Switch to <strong>Production</strong> for live submissions.
-        </p>
+        <p class="mt-1 text-xs text-gray-500" v-html="$t('settings.efaktura.environment_help')" />
       </BaseInputGroup>
 
       <BaseDivider class="mt-4 mb-4" />
 
       <!-- Portal URL -->
       <BaseInputGroup
-        label="Portal / API Base URL"
+        :label="$t('settings.efaktura.base_url')"
         class="my-2"
       >
         <BaseInput
@@ -56,37 +51,37 @@
       </BaseInputGroup>
 
       <!-- Portal Credentials Section (shown in portal mode or always for fallback) -->
-      <h6 class="text-sm font-semibold text-gray-700 mt-6 mb-3">Portal Credentials</h6>
+      <h6 class="text-sm font-semibold text-gray-700 mt-6 mb-3">{{ $t('settings.efaktura.portal_credentials') }}</h6>
       <p class="text-xs text-gray-500 mb-4">
-        Username and password for the UJP e-Faktura web portal. Required for portal mode.
+        {{ $t('settings.efaktura.portal_credentials_help') }}
       </p>
 
       <BaseInputGroup
-        label="Username"
+        :label="$t('settings.efaktura.username')"
         class="my-2"
       >
         <BaseInput
           v-model="settingsForm.efaktura_username"
           type="text"
-          placeholder="Portal username"
+          :placeholder="$t('settings.efaktura.username_placeholder')"
         />
       </BaseInputGroup>
 
       <BaseInputGroup
-        label="Password"
+        :label="$t('settings.efaktura.password')"
         class="my-2"
       >
         <BaseInput
           v-model="settingsForm.efaktura_password"
           :type="showPassword ? 'text' : 'password'"
-          placeholder="Portal password"
+          :placeholder="$t('settings.efaktura.password_placeholder')"
         />
         <button
           type="button"
           class="mt-1 text-sm text-indigo-600 hover:text-indigo-800"
           @click="showPassword = !showPassword"
         >
-          {{ showPassword ? 'Hide' : 'Show' }} password
+          {{ showPassword ? $t('settings.efaktura.hide_password') : $t('settings.efaktura.show_password') }}
         </button>
       </BaseInputGroup>
 
@@ -94,44 +89,44 @@
       <template v-if="settingsForm.efaktura_mode === 'api'">
         <BaseDivider class="mt-4 mb-4" />
 
-        <h6 class="text-sm font-semibold text-gray-700 mb-3">API Credentials</h6>
+        <h6 class="text-sm font-semibold text-gray-700 mb-3">{{ $t('settings.efaktura.api_credentials') }}</h6>
         <p class="text-xs text-gray-500 mb-4">
-          API key and secret for the UJP REST API. Required for API mode.
+          {{ $t('settings.efaktura.api_credentials_help') }}
         </p>
 
         <BaseInputGroup
-          label="API Key"
+          :label="$t('settings.efaktura.api_key')"
           class="my-2"
         >
           <BaseInput
             v-model="settingsForm.efaktura_api_key"
             :type="showApiKey ? 'text' : 'password'"
-            placeholder="API key"
+            :placeholder="$t('settings.efaktura.api_key_placeholder')"
           />
           <button
             type="button"
             class="mt-1 text-sm text-indigo-600 hover:text-indigo-800"
             @click="showApiKey = !showApiKey"
           >
-            {{ showApiKey ? 'Hide' : 'Show' }} API key
+            {{ showApiKey ? $t('settings.efaktura.hide_api_key') : $t('settings.efaktura.show_api_key') }}
           </button>
         </BaseInputGroup>
 
         <BaseInputGroup
-          label="API Secret"
+          :label="$t('settings.efaktura.api_secret')"
           class="my-2"
         >
           <BaseInput
             v-model="settingsForm.efaktura_api_secret"
             :type="showApiSecret ? 'text' : 'password'"
-            placeholder="API secret"
+            :placeholder="$t('settings.efaktura.api_secret_placeholder')"
           />
           <button
             type="button"
             class="mt-1 text-sm text-indigo-600 hover:text-indigo-800"
             @click="showApiSecret = !showApiSecret"
           >
-            {{ showApiSecret ? 'Hide' : 'Show' }} API secret
+            {{ showApiSecret ? $t('settings.efaktura.hide_api_secret') : $t('settings.efaktura.show_api_secret') }}
           </button>
         </BaseInputGroup>
       </template>
@@ -140,7 +135,7 @@
 
       <!-- Timeout -->
       <BaseInputGroup
-        label="Request Timeout (seconds)"
+        :label="$t('settings.efaktura.timeout')"
         class="my-2 max-w-xs"
       >
         <BaseInput
@@ -154,7 +149,7 @@
 
       <!-- Max Retries -->
       <BaseInputGroup
-        label="Max Retries"
+        :label="$t('settings.efaktura.max_retries')"
         class="my-2 max-w-xs"
       >
         <BaseInput
@@ -171,11 +166,11 @@
         class="mt-4 p-3 rounded-lg text-sm"
         :class="settingsForm.efaktura_mode === 'api' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'"
       >
-        <strong>Current mode:</strong>
-        {{ settingsForm.efaktura_mode === 'api' ? 'API (REST) — uses UjpApiClient' : 'Portal (scraping) — uses UjpPortalClient' }}
+        <strong>{{ $t('settings.efaktura.current_mode') }}</strong>
+        {{ settingsForm.efaktura_mode === 'api' ? $t('settings.efaktura.mode_api_label') : $t('settings.efaktura.mode_portal_label') }}
         &middot;
-        <strong>Environment:</strong>
-        {{ settingsForm.efaktura_environment === 'sandbox' ? 'Sandbox (test)' : 'Production (live)' }}
+        <strong>{{ $t('settings.efaktura.environment_label') }}</strong>
+        {{ settingsForm.efaktura_environment === 'sandbox' ? $t('settings.efaktura.env_sandbox') : $t('settings.efaktura.env_production') }}
       </div>
 
       <BaseButton
@@ -192,17 +187,19 @@
             name="ArrowDownOnSquareIcon"
           />
         </template>
-        Save E-Faktura Settings
+        {{ $t('settings.efaktura.save') }}
       </BaseButton>
     </div>
   </BaseSettingCard>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
 
+const { t } = useI18n()
 const notificationStore = useNotificationStore()
 
 const isSaving = ref(false)
@@ -211,15 +208,15 @@ const showPassword = ref(false)
 const showApiKey = ref(false)
 const showApiSecret = ref(false)
 
-const modeOptions = [
-  { label: 'Portal (web scraping)', value: 'portal' },
-  { label: 'API (REST — recommended)', value: 'api' },
-]
+const modeOptions = computed(() => [
+  { label: t('settings.efaktura.mode_portal'), value: 'portal' },
+  { label: t('settings.efaktura.mode_api'), value: 'api' },
+])
 
-const environmentOptions = [
-  { label: 'Production (live submissions)', value: 'production' },
-  { label: 'Sandbox (test submissions)', value: 'sandbox' },
-]
+const environmentOptions = computed(() => [
+  { label: t('settings.efaktura.env_production_option'), value: 'production' },
+  { label: t('settings.efaktura.env_sandbox_option'), value: 'sandbox' },
+])
 
 const settingsForm = reactive({
   efaktura_mode: 'portal',
@@ -276,12 +273,12 @@ async function saveSettings() {
     })
     notificationStore.showNotification({
       type: 'success',
-      message: 'E-Faktura settings saved.',
+      message: t('settings.efaktura.saved'),
     })
   } catch (e) {
     notificationStore.showNotification({
       type: 'error',
-      message: e.response?.data?.message || 'Failed to save E-Faktura settings.',
+      message: e.response?.data?.message || t('settings.efaktura.save_failed'),
     })
   } finally {
     isSaving.value = false

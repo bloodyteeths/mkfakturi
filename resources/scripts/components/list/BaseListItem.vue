@@ -3,7 +3,10 @@
     <span v-if="hasIconSlot" class="mr-3">
       <slot name="icon" />
     </span>
-    <span>{{ title }}</span>
+    <span class="flex flex-col min-w-0">
+      <span class="truncate">{{ title }}</span>
+      <span v-if="subtitle" class="text-[11px] leading-tight text-gray-400 truncate mt-0.5">{{ subtitle }}</span>
+    </span>
   </router-link>
 </template>
 
@@ -18,6 +21,11 @@ export default {
       required: false,
       default: '',
     },
+    subtitle: {
+      type: String,
+      required: false,
+      default: '',
+    },
     active: {
       type: Boolean,
       required: true,
@@ -28,7 +36,7 @@ export default {
     },
   },
   setup(props, { slots }) {
-    const defaultClass = `cursor-pointer pb-2 pr-0 text-sm font-medium leading-5  flex items-center`
+    const defaultClass = `cursor-pointer pb-2 pr-0 text-sm font-medium leading-5  flex items-start`
     let hasIconSlot = computed(() => {
       return !!slots.icon
     })

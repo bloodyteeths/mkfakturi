@@ -1,13 +1,13 @@
 <template>
   <BaseSettingCard
-    title="WooCommerce Integration"
-    description="Sync orders from your WooCommerce store into Facturino invoices."
+    :title="$t('settings.woocommerce.title')"
+    :description="$t('settings.woocommerce.description')"
   >
     <div class="grid-cols-2 col-span-1 mt-14">
       <!-- Connection -->
-      <h6 class="text-sm font-semibold text-gray-700 mb-3">Connection</h6>
+      <h6 class="text-sm font-semibold text-gray-700 mb-3">{{ $t('settings.woocommerce.connection') }}</h6>
 
-      <BaseInputGroup label="Store URL" class="my-2" required>
+      <BaseInputGroup :label="$t('settings.woocommerce.store_url')" class="my-2" required>
         <BaseInput
           v-model="settingsForm.store_url"
           type="url"
@@ -15,7 +15,7 @@
         />
       </BaseInputGroup>
 
-      <BaseInputGroup label="Consumer Key" class="my-2" required>
+      <BaseInputGroup :label="$t('settings.woocommerce.consumer_key')" class="my-2" required>
         <BaseInput
           v-model="settingsForm.consumer_key"
           type="text"
@@ -23,7 +23,7 @@
         />
       </BaseInputGroup>
 
-      <BaseInputGroup label="Consumer Secret" class="my-2" required>
+      <BaseInputGroup :label="$t('settings.woocommerce.consumer_secret')" class="my-2" required>
         <BaseInput
           v-model="settingsForm.consumer_secret"
           :type="showSecret ? 'text' : 'password'"
@@ -34,7 +34,7 @@
           class="mt-1 text-sm text-indigo-600 hover:text-indigo-800"
           @click="showSecret = !showSecret"
         >
-          {{ showSecret ? 'Hide' : 'Show' }}
+          {{ showSecret ? $t('settings.woocommerce.hide') : $t('settings.woocommerce.show') }}
         </button>
       </BaseInputGroup>
 
@@ -52,7 +52,7 @@
               name="SignalIcon"
             />
           </template>
-          Test Connection
+          {{ $t('settings.woocommerce.test_connection') }}
         </BaseButton>
 
         <div
@@ -60,35 +60,31 @@
           class="p-2 rounded-lg text-sm"
           :class="connectionStatus.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'"
         >
-          {{ connectionStatus.success ? 'Connected: ' + (connectionStatus.store_name || 'OK') : 'Error: ' + connectionStatus.error }}
+          {{ connectionStatus.success ? $t('settings.woocommerce.connected') + (connectionStatus.store_name || 'OK') : $t('settings.woocommerce.error') + connectionStatus.error }}
         </div>
       </div>
 
       <BaseDivider class="mt-2 mb-4" />
 
       <!-- Sync Settings -->
-      <h6 class="text-sm font-semibold text-gray-700 mb-3">Sync Settings</h6>
+      <h6 class="text-sm font-semibold text-gray-700 mb-3">{{ $t('settings.woocommerce.sync_settings') }}</h6>
 
       <ul class="divide-y divide-gray-200 mb-4">
         <BaseSwitchSection
           v-model="autoSyncField"
-          title="Auto-sync"
-          description="Automatically sync new orders on a schedule."
+          :title="$t('settings.woocommerce.auto_sync')"
+          :description="$t('settings.woocommerce.auto_sync_desc')"
         />
       </ul>
 
       <BaseInputGroup
         v-if="autoSyncField"
-        label="Sync Frequency"
+        :label="$t('settings.woocommerce.sync_frequency')"
         class="my-2 max-w-xs"
       >
         <BaseMultiselect
           v-model="settingsForm.sync_frequency"
-          :options="[
-            { label: 'Every 15 minutes', value: '15' },
-            { label: 'Every hour', value: '60' },
-            { label: 'Every 4 hours', value: '240' },
-          ]"
+          :options="frequencyOptions"
           value-prop="value"
           label="label"
           :can-deselect="false"
@@ -98,26 +94,26 @@
       <BaseDivider class="mt-4 mb-4" />
 
       <!-- Tax Mapping -->
-      <h6 class="text-sm font-semibold text-gray-700 mb-3">Tax Mapping</h6>
+      <h6 class="text-sm font-semibold text-gray-700 mb-3">{{ $t('settings.woocommerce.tax_mapping') }}</h6>
 
       <div class="grid grid-cols-2 gap-4 mb-4">
-        <BaseInputGroup label="WC 'Standard' tax">
+        <BaseInputGroup :label="$t('settings.woocommerce.tax_standard')">
           <BaseMultiselect
             v-model="settingsForm.tax_mapping_standard"
             :options="taxOptions"
             value-prop="value"
             label="label"
-            placeholder="Select tax type"
+            :placeholder="$t('settings.woocommerce.tax_select')"
           />
         </BaseInputGroup>
 
-        <BaseInputGroup label="WC 'Reduced' tax">
+        <BaseInputGroup :label="$t('settings.woocommerce.tax_reduced')">
           <BaseMultiselect
             v-model="settingsForm.tax_mapping_reduced"
             :options="taxOptions"
             value-prop="value"
             label="label"
-            placeholder="Select tax type"
+            :placeholder="$t('settings.woocommerce.tax_select')"
           />
         </BaseInputGroup>
       </div>
@@ -136,7 +132,7 @@
               name="ArrowDownOnSquareIcon"
             />
           </template>
-          Save Settings
+          {{ $t('settings.woocommerce.save') }}
         </BaseButton>
 
         <BaseButton
@@ -152,24 +148,24 @@
               name="ArrowPathIcon"
             />
           </template>
-          Sync Now
+          {{ $t('settings.woocommerce.sync_now') }}
         </BaseButton>
       </div>
 
       <!-- Sync History -->
       <BaseDivider class="mt-6 mb-4" />
-      <h6 class="text-sm font-semibold text-gray-700 mb-3">Sync History</h6>
+      <h6 class="text-sm font-semibold text-gray-700 mb-3">{{ $t('settings.woocommerce.sync_history') }}</h6>
 
       <div v-if="syncHistory.length === 0" class="text-sm text-gray-500 py-4">
-        No sync history yet.
+        {{ $t('settings.woocommerce.no_history') }}
       </div>
 
       <table v-else class="w-full text-sm">
         <thead>
           <tr class="text-left text-gray-500 border-b">
-            <th class="py-2">Time</th>
-            <th class="py-2">Orders</th>
-            <th class="py-2">Status</th>
+            <th class="py-2">{{ $t('settings.woocommerce.time') }}</th>
+            <th class="py-2">{{ $t('settings.woocommerce.orders') }}</th>
+            <th class="py-2">{{ $t('settings.woocommerce.status') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -185,7 +181,7 @@
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
                 :class="entry.status === 'success' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'"
               >
-                {{ entry.status === 'success' ? 'Success' : entry.error_count + ' errors' }}
+                {{ entry.status === 'success' ? $t('settings.woocommerce.status_success') : $t('settings.woocommerce.status_errors', { count: entry.error_count }) }}
               </span>
             </td>
           </tr>
@@ -197,9 +193,11 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import axios from 'axios'
 
+const { t } = useI18n()
 const notificationStore = useNotificationStore()
 
 const isSaving = ref(false)
@@ -224,12 +222,18 @@ const autoSyncField = computed({
   set: (val) => { settingsForm.auto_sync = val },
 })
 
-const taxOptions = [
-  { label: 'DDV 18%', value: '18' },
-  { label: 'DDV 5%', value: '5' },
-  { label: 'DDV 10%', value: '10' },
-  { label: 'No tax (0%)', value: '0' },
-]
+const frequencyOptions = computed(() => [
+  { label: t('settings.woocommerce.freq_15'), value: '15' },
+  { label: t('settings.woocommerce.freq_60'), value: '60' },
+  { label: t('settings.woocommerce.freq_240'), value: '240' },
+])
+
+const taxOptions = computed(() => [
+  { label: t('settings.woocommerce.tax_18'), value: '18' },
+  { label: t('settings.woocommerce.tax_5'), value: '5' },
+  { label: t('settings.woocommerce.tax_10'), value: '10' },
+  { label: t('settings.woocommerce.tax_0'), value: '0' },
+])
 
 onMounted(async () => {
   await loadSettings()
@@ -296,12 +300,12 @@ async function saveSettings() {
 
     notificationStore.showNotification({
       type: 'success',
-      message: 'WooCommerce settings saved',
+      message: t('settings.woocommerce.saved'),
     })
   } catch (e) {
     notificationStore.showNotification({
       type: 'error',
-      message: e.response?.data?.message || 'Failed to save settings',
+      message: e.response?.data?.message || t('settings.woocommerce.save_failed'),
     })
   } finally {
     isSaving.value = false
@@ -315,7 +319,7 @@ async function syncNow() {
     await axios.post('/api/v1/woocommerce/sync')
     notificationStore.showNotification({
       type: 'success',
-      message: 'Sync started. Check back in a moment.',
+      message: t('settings.woocommerce.sync_started'),
     })
 
     // Refresh history after a short delay
@@ -323,7 +327,7 @@ async function syncNow() {
   } catch (e) {
     notificationStore.showNotification({
       type: 'error',
-      message: e.response?.data?.message || 'Failed to start sync',
+      message: e.response?.data?.message || t('settings.woocommerce.sync_failed'),
     })
   } finally {
     isSyncing.value = false
