@@ -81,6 +81,52 @@
           {{ $t('payroll.download_all_payslips') }}
         </BaseButton>
 
+        <BaseDropdown v-if="run.status !== 'draft'" class="ml-2">
+          <template #activator>
+            <BaseButton variant="primary-outline">
+              <template #left="slotProps">
+                <BaseIcon name="DocumentArrowDownIcon" :class="slotProps.class" />
+              </template>
+              {{ $t('payroll.documents') }}
+            </BaseButton>
+          </template>
+
+          <BaseDropdownItem @click="downloadRekapitular">
+            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
+            {{ $t('payroll.rekapitular') }}
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="downloadPP50('pio_ee')">
+            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
+            PP50 PIO EE
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="downloadPP50('pio_er')">
+            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
+            PP50 PIO ER
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="downloadPP50('zo_ee')">
+            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
+            PP50 ZO EE
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="downloadPP50('zo_er')">
+            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
+            PP50 ZO ER
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="downloadPP50('unemployment')">
+            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
+            PP50 {{ $t('payroll.unemployment') }}
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="downloadPP30">
+            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
+            PP30 {{ $t('payroll.income_tax') }}
+          </BaseDropdownItem>
+        </BaseDropdown>
+
         <BaseButton
           v-if="canRecalculate"
           variant="warning-outline"
@@ -141,15 +187,6 @@
         </p>
       </BaseCard>
 
-      <BaseCard class="p-6">
-        <p class="text-sm font-medium text-gray-600">{{ $t('payroll.total_employer_tax') }}</p>
-        <p class="mt-2 text-2xl font-semibold text-gray-900">
-          <BaseFormatMoney
-            :amount="run.total_employer_tax"
-            :currency="companyStore.selectedCompanyCurrency"
-          />
-        </p>
-      </BaseCard>
     </div>
 
     <!-- Payroll Lines Table -->
@@ -642,6 +679,59 @@ async function deleteRun() {
       type: 'error',
       message: error.response?.data?.message || t('general.something_went_wrong'),
     })
+  }
+}
+
+function downloadBlob(data, filename) {
+  const url = window.URL.createObjectURL(new Blob([data]))
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', filename)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+async function downloadRekapitular() {
+  try {
+    const response = await axios.get(
+      `payroll-runs/${run.value.id}/rekapitular`,
+      { responseType: 'blob' }
+    )
+    downloadBlob(response.data, `rekapitular_${run.value.id}.pdf`)
+    notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
+  } catch (error) {
+    console.error('Error downloading rekapitular:', error)
+    notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
+  }
+}
+
+async function downloadPP50(type) {
+  try {
+    const response = await axios.get(
+      `payroll-runs/${run.value.id}/pp50`,
+      { params: { type }, responseType: 'blob' }
+    )
+    downloadBlob(response.data, `PP50_${type}_${run.value.id}.pdf`)
+    notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
+  } catch (error) {
+    console.error('Error downloading PP50:', error)
+    notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
+  }
+}
+
+async function downloadPP30() {
+  try {
+    const response = await axios.get(
+      `payroll-runs/${run.value.id}/pp30`,
+      { responseType: 'blob' }
+    )
+    downloadBlob(response.data, `PP30_${run.value.id}.pdf`)
+    notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
+  } catch (error) {
+    console.error('Error downloading PP30:', error)
+    notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
   }
 }
 </script>

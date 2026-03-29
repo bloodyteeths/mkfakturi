@@ -121,16 +121,19 @@ class PayrollGLService
             ]);
 
             // DEBIT: Employer Contributions (pension + health)
-            // Use total_employer_tax which is set by the controller
+            // In MK model, ALL contributions are from gross — employer cost = gross, no add-on.
+            // Only post DR 421 if there are actual employer contributions (non-MK scenarios).
             $employerContributions = ($run->total_employer_tax ?? 0) / 100;
-            LineItem::create([
-                'transaction_id' => $transaction->id,
-                'account_id' => $employerContributionAccount->id,
-                'amount' => $employerContributions,
-                'quantity' => 1,
-                'credited' => false, // Debit entry
-                'entity_id' => $entity->id,
-            ]);
+            if ($employerContributions > 0) {
+                LineItem::create([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $employerContributionAccount->id,
+                    'amount' => $employerContributions,
+                    'quantity' => 1,
+                    'credited' => false, // Debit entry
+                    'entity_id' => $entity->id,
+                ]);
+            }
 
             // CREDIT: Net Salary Payable (what employees receive)
             LineItem::create([
@@ -142,17 +145,95 @@ class PayrollGLService
                 'entity_id' => $entity->id,
             ]);
 
-            // CREDIT: Tax & Contribution Liabilities (employee deductions + employer contributions)
-            $employeeDeductions = ($run->total_employee_tax ?? 0) / 100;
-            $totalLiabilities = $employeeDeductions + $employerContributions;
-            LineItem::create([
-                'transaction_id' => $transaction->id,
-                'account_id' => $taxLiabilityAccount->id,
-                'amount' => $totalLiabilities,
-                'quantity' => 1,
-                'credited' => true, // Credit entry
-                'entity_id' => $entity->id,
-            ]);
+            // CREDIT: Split liability sub-accounts (2440/2450/2460/2470/2480)
+            // Aggregate contribution amounts from all payroll lines
+            $totalPensionEE = 0;
+            $totalPensionER = 0;
+            $totalHealthEE = 0;
+            $totalHealthER = 0;
+            $totalUnemployment = 0;
+            $totalAdditional = 0;
+            $totalIncomeTax = 0;
+
+            foreach ($run->lines as $line) {
+                $totalPensionEE += $line->pension_contribution_employee ?? 0;
+                $totalPensionER += $line->pension_contribution_employer ?? 0;
+                $totalHealthEE += $line->health_contribution_employee ?? 0;
+                $totalHealthER += $line->health_contribution_employer ?? 0;
+                $totalUnemployment += $line->unemployment_contribution ?? 0;
+                $totalAdditional += $line->additional_contribution ?? 0;
+                $totalIncomeTax += $line->income_tax_amount ?? 0;
+            }
+
+            // CR 2440 — Pension (EE + ER)
+            $pensionAccount = $this->getOrCreateLiabilitySubAccount($run->company_id, $entity->id, '2440', 'Обврски за пензиско осигурување');
+            $pensionTotal = ($totalPensionEE + $totalPensionER) / 100;
+            if ($pensionTotal > 0) {
+                LineItem::create([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $pensionAccount->id,
+                    'amount' => $pensionTotal,
+                    'quantity' => 1,
+                    'credited' => true,
+                    'entity_id' => $entity->id,
+                ]);
+            }
+
+            // CR 2450 — Health (EE + ER)
+            $healthAccount = $this->getOrCreateLiabilitySubAccount($run->company_id, $entity->id, '2450', 'Обврски за здравствено осигурување');
+            $healthTotal = ($totalHealthEE + $totalHealthER) / 100;
+            if ($healthTotal > 0) {
+                LineItem::create([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $healthAccount->id,
+                    'amount' => $healthTotal,
+                    'quantity' => 1,
+                    'credited' => true,
+                    'entity_id' => $entity->id,
+                ]);
+            }
+
+            // CR 2460 — Unemployment
+            $unemploymentAccount = $this->getOrCreateLiabilitySubAccount($run->company_id, $entity->id, '2460', 'Обврски за осигурување од невработеност');
+            $unemploymentTotal = $totalUnemployment / 100;
+            if ($unemploymentTotal > 0) {
+                LineItem::create([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $unemploymentAccount->id,
+                    'amount' => $unemploymentTotal,
+                    'quantity' => 1,
+                    'credited' => true,
+                    'entity_id' => $entity->id,
+                ]);
+            }
+
+            // CR 2470 — Additional contribution
+            $additionalAccount = $this->getOrCreateLiabilitySubAccount($run->company_id, $entity->id, '2470', 'Обврски за дополнителен придонес');
+            $additionalTotal = $totalAdditional / 100;
+            if ($additionalTotal > 0) {
+                LineItem::create([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $additionalAccount->id,
+                    'amount' => $additionalTotal,
+                    'quantity' => 1,
+                    'credited' => true,
+                    'entity_id' => $entity->id,
+                ]);
+            }
+
+            // CR 2480 — Income tax (PDD-GI)
+            $incomeTaxAccount = $this->getOrCreateLiabilitySubAccount($run->company_id, $entity->id, '2480', 'Обврски за данок на личен доход');
+            $incomeTaxTotal = $totalIncomeTax / 100;
+            if ($incomeTaxTotal > 0) {
+                LineItem::create([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $incomeTaxAccount->id,
+                    'amount' => $incomeTaxTotal,
+                    'quantity' => 1,
+                    'credited' => true,
+                    'entity_id' => $entity->id,
+                ]);
+            }
 
             // Reload line items before posting (required by IFRS package)
             $transaction->load('lineItems');
@@ -269,38 +350,97 @@ class PayrollGLService
         $totalGross = ($run->total_gross ?? 0) / 100;
         $totalNet = ($run->total_net ?? 0) / 100;
         $employerContributions = ($run->total_employer_tax ?? 0) / 100;
-        $employeeDeductions = ($run->total_employee_tax ?? 0) / 100;
-        $totalLiabilities = $employeeDeductions + $employerContributions;
+
+        // Aggregate contribution amounts from lines
+        $totalPensionEE = 0;
+        $totalPensionER = 0;
+        $totalHealthEE = 0;
+        $totalHealthER = 0;
+        $totalUnemployment = 0;
+        $totalAdditional = 0;
+        $totalIncomeTax = 0;
+
+        if ($run->lines) {
+            foreach ($run->lines as $line) {
+                $totalPensionEE += $line->pension_contribution_employee ?? 0;
+                $totalPensionER += $line->pension_contribution_employer ?? 0;
+                $totalHealthEE += $line->health_contribution_employee ?? 0;
+                $totalHealthER += $line->health_contribution_employer ?? 0;
+                $totalUnemployment += $line->unemployment_contribution ?? 0;
+                $totalAdditional += $line->additional_contribution ?? 0;
+                $totalIncomeTax += $line->income_tax_amount ?? 0;
+            }
+        }
+
+        $pensionTotal = ($totalPensionEE + $totalPensionER) / 100;
+        $healthTotal = ($totalHealthEE + $totalHealthER) / 100;
+        $unemploymentTotal = $totalUnemployment / 100;
+        $additionalTotal = $totalAdditional / 100;
+        $incomeTaxTotal = $totalIncomeTax / 100;
+        $totalLiabilities = $pensionTotal + $healthTotal + $unemploymentTotal + $additionalTotal + $incomeTaxTotal;
+
+        $lines = [
+            [
+                'account_code' => '420',
+                'account_name' => 'Плати на вработени (Salary Expense)',
+                'debit' => $totalGross,
+                'credit' => 0,
+            ],
+        ];
+
+        // Only include DR 421 if there are actual employer contributions (not in MK model)
+        if ($employerContributions > 0) {
+            $lines[] = [
+                'account_code' => '421',
+                'account_name' => 'Придонеси на товар на работодавач (Employer Contributions)',
+                'debit' => $employerContributions,
+                'credit' => 0,
+            ];
+        }
+
+        $lines = array_merge($lines, [
+            [
+                'account_code' => '240',
+                'account_name' => 'Обврски за нето плати (Net Salary Payable)',
+                'debit' => 0,
+                'credit' => $totalNet,
+            ],
+            [
+                'account_code' => '2440',
+                'account_name' => 'Обврски за пензиско осигурување (Pension)',
+                'debit' => 0,
+                'credit' => $pensionTotal,
+            ],
+            [
+                'account_code' => '2450',
+                'account_name' => 'Обврски за здравствено осигурување (Health)',
+                'debit' => 0,
+                'credit' => $healthTotal,
+            ],
+            [
+                'account_code' => '2460',
+                'account_name' => 'Обврски за осигурување од невработеност (Unemployment)',
+                'debit' => 0,
+                'credit' => $unemploymentTotal,
+            ],
+            [
+                'account_code' => '2470',
+                'account_name' => 'Обврски за дополнителен придонес (Additional)',
+                'debit' => 0,
+                'credit' => $additionalTotal,
+            ],
+            [
+                'account_code' => '2480',
+                'account_name' => 'Обврски за данок на личен доход (Income Tax)',
+                'debit' => 0,
+                'credit' => $incomeTaxTotal,
+            ],
+        ];
 
         return [
             'narration' => "Payroll Run #{$run->id}",
             'date' => $run->payment_date ?? Carbon::now()->toDateString(),
-            'lines' => [
-                [
-                    'account_code' => '420',
-                    'account_name' => 'Плати на вработени (Salary Expense)',
-                    'debit' => $totalGross,
-                    'credit' => 0,
-                ],
-                [
-                    'account_code' => '421',
-                    'account_name' => 'Придонеси на товар на работодавач (Employer Contributions)',
-                    'debit' => $employerContributions,
-                    'credit' => 0,
-                ],
-                [
-                    'account_code' => '240',
-                    'account_name' => 'Обврски за нето плати (Net Salary Payable)',
-                    'debit' => 0,
-                    'credit' => $totalNet,
-                ],
-                [
-                    'account_code' => '241',
-                    'account_name' => 'Обврски за придонеси (Tax & Contribution Liabilities)',
-                    'debit' => 0,
-                    'credit' => $totalLiabilities,
-                ],
-            ],
+            'lines' => $lines,
             'totals' => [
                 'debit' => ($totalGross + $employerContributions),
                 'credit' => ($totalNet + $totalLiabilities),
@@ -461,6 +601,24 @@ class PayrollGLService
             ],
             [
                 'name' => 'Обврски за придонеси',
+                'currency_id' => $this->getCurrencyId($companyId),
+            ]
+        );
+    }
+
+    /**
+     * Get or create a liability sub-account for payroll postings
+     */
+    private function getOrCreateLiabilitySubAccount(int $companyId, int $entityId, string $code, string $name): Account
+    {
+        return Account::firstOrCreate(
+            [
+                'account_type' => Account::CURRENT_LIABILITY,
+                'code' => $code,
+                'entity_id' => $entityId,
+            ],
+            [
+                'name' => $name,
                 'currency_id' => $this->getCurrencyId($companyId),
             ]
         );

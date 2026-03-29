@@ -7751,6 +7751,8 @@
         "employee_deductions": "Çalışan kesintileri",
         "earnings": "Kazançlar",
         "income_tax": "Gelir vergisi",
+        "pension": "Emeklilik",
+        "health": "Sağlık",
         "pension_employee": "Emeklilik (Çalışan)",
         "pension_employer": "Emeklilik (İşveren)",
         "personal_deduction": "Kişisel indirim (Md. 10 ZDDLD)",

@@ -11,13 +11,18 @@ use Modules\Mk\Payroll\DTOs\PayrollCalculationResult;
  * од задолжително социјално осигурување and Закон за данокот на
  * личен доход.
  *
- * Rates (2025):
- * - Pension (PIO): 18% total (9% employee + 9% employer)
- * - Health (ZO): 7.5% total (3.75% employee + 3.75% employer)
- * - Unemployment: 1.2% (employee only)
- * - Additional: 0.5% (employee only, professional diseases)
+ * Rates (2024+, per Закон за придонеси од задолжително социјално осигурување):
+ * - Pension (ПИО): 18.8% of gross (full amount deducted from gross)
+ * - Health (Здравство): 7.5% of gross (full amount deducted from gross)
+ * - Unemployment (Невработеност): 1.2% of gross
+ * - Additional (Професионален): 0.5% of gross (professional diseases)
  * - Personal deduction: MKD 10,270/month (лично ослободување)
- * - Income Tax: 10% on (gross − contributions − personal deduction)
+ * - Income Tax: 10% on (gross − all contributions − personal deduction)
+ *
+ * IMPORTANT: In MK, ALL contributions are deducted from gross salary.
+ * There is NO separate "employer contribution" added on top of gross.
+ * The employer's total cost = gross salary (not gross + extras).
+ * This matches the UJP МПИН declaration form (Образец МПИН).
  *
  * Contribution base: clamped to 50%–16× national average salary.
  * All monetary values are in cents (integer).
@@ -27,15 +32,12 @@ class MacedonianPayrollTaxService
     // Income tax rate
     private const INCOME_TAX_RATE = 0.10; // 10%
 
-    // Employee contribution rates
-    private const PENSION_EMPLOYEE_RATE = 0.09; // 9%
-    private const HEALTH_EMPLOYEE_RATE = 0.0375; // 3.75%
+    // Contribution rates (2024+ per Закон за придонеси)
+    // ALL deducted from gross salary — no separate employer add-on in MK
+    private const PENSION_RATE = 0.188; // 18.8% — full rate per UJP МПИН
+    private const HEALTH_RATE = 0.075; // 7.5% — full rate per UJP МПИН
     private const UNEMPLOYMENT_RATE = 0.012; // 1.2%
     private const ADDITIONAL_CONTRIBUTION_RATE = 0.005; // 0.5%
-
-    // Employer contribution rates
-    private const PENSION_EMPLOYER_RATE = 0.09; // 9%
-    private const HEALTH_EMPLOYER_RATE = 0.0375; // 3.75%
 
     // Contribution base limits (P7-05)
     private const DEFAULT_MIN_CONTRIBUTION_BASE = 3157700;  // MKD 31,577 in cents
@@ -61,46 +63,40 @@ class MacedonianPayrollTaxService
         // P7-05: Clamp gross to contribution base limits
         $contributionBase = $this->clampToContributionBase($grossCents);
 
-        // Step 1: Employee contributions (on clamped base)
-        $pensionEmployee = $this->calculatePensionEmployee($contributionBase);
-        $healthEmployee = $this->calculateHealthEmployee($contributionBase);
+        // Step 1: ALL contributions deducted from gross (MK model — no employer add-on)
+        $pension = $this->calculatePension($contributionBase);
+        $health = $this->calculateHealth($contributionBase);
         $unemployment = $this->calculateUnemployment($contributionBase);
         $additionalContribution = $this->calculateAdditionalContribution($contributionBase);
 
-        $totalEmployeeContributions = $pensionEmployee
-            + $healthEmployee
-            + $unemployment
-            + $additionalContribution;
+        $totalContributions = $pension + $health + $unemployment + $additionalContribution;
 
         // Step 2: Personal deduction (лично ослободување)
         $personalDeduction = $this->getPersonalDeduction();
 
-        // Step 3: Taxable base = gross − contributions − personal deduction
-        $taxableBase = max(0, $grossCents - $totalEmployeeContributions - $personalDeduction);
+        // Step 3: Taxable base = gross − ALL contributions − personal deduction
+        $taxableBase = max(0, $grossCents - $totalContributions - $personalDeduction);
 
         // Step 4: Income tax (10% of taxable base)
         $incomeTax = $this->calculateIncomeTax($taxableBase);
 
         // Step 5: Net salary = gross − contributions − income tax
-        $netSalary = $grossCents - $totalEmployeeContributions - $incomeTax;
+        $netSalary = $grossCents - $totalContributions - $incomeTax;
 
-        // Step 6: Employer contributions (on clamped base)
-        $pensionEmployer = $this->calculatePensionEmployer($contributionBase);
-        $healthEmployer = $this->calculateHealthEmployer($contributionBase);
-
-        // Totals
-        $totalEmployeeDeductions = $totalEmployeeContributions + $incomeTax;
-        $totalEmployerCost = $grossCents + $pensionEmployer + $healthEmployer;
+        // In MK, employer cost = gross (no additional employer contributions)
+        // pensionEmployee/pensionEmployer kept for backward compat but both = full rate
+        $totalEmployeeDeductions = $totalContributions + $incomeTax;
+        $totalEmployerCost = $grossCents; // Employer pays gross, nothing extra
 
         return new PayrollCalculationResult(
             grossSalary: $grossCents,
             netSalary: $netSalary,
             taxableBase: $taxableBase,
             personalDeduction: $personalDeduction,
-            pensionEmployee: $pensionEmployee,
-            pensionEmployer: $pensionEmployer,
-            healthEmployee: $healthEmployee,
-            healthEmployer: $healthEmployer,
+            pensionEmployee: $pension,
+            pensionEmployer: 0, // No separate employer portion in MK
+            healthEmployee: $health,
+            healthEmployer: 0, // No separate employer portion in MK
             unemployment: $unemployment,
             additionalContribution: $additionalContribution,
             incomeTax: $incomeTax,
@@ -223,35 +219,19 @@ class MacedonianPayrollTaxService
     }
 
     /**
-     * Calculate employee pension contribution (9% of gross)
+     * Calculate pension contribution (18.8% of gross — full rate, deducted from gross)
      */
-    private function calculatePensionEmployee(int $grossCents): int
+    private function calculatePension(int $grossCents): int
     {
-        return (int) round($grossCents * self::PENSION_EMPLOYEE_RATE);
+        return (int) round($grossCents * self::PENSION_RATE);
     }
 
     /**
-     * Calculate employer pension contribution (9% of gross)
+     * Calculate health contribution (7.5% of gross — full rate, deducted from gross)
      */
-    private function calculatePensionEmployer(int $grossCents): int
+    private function calculateHealth(int $grossCents): int
     {
-        return (int) round($grossCents * self::PENSION_EMPLOYER_RATE);
-    }
-
-    /**
-     * Calculate employee health contribution (3.75% of gross)
-     */
-    private function calculateHealthEmployee(int $grossCents): int
-    {
-        return (int) round($grossCents * self::HEALTH_EMPLOYEE_RATE);
-    }
-
-    /**
-     * Calculate employer health contribution (3.75% of gross)
-     */
-    private function calculateHealthEmployer(int $grossCents): int
-    {
-        return (int) round($grossCents * self::HEALTH_EMPLOYER_RATE);
+        return (int) round($grossCents * self::HEALTH_RATE);
     }
 
     /**

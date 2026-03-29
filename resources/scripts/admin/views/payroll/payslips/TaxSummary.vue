@@ -34,12 +34,12 @@
         <BaseButton
           variant="primary"
           class="ml-2"
-          @click="downloadDdv04Xml"
+          @click="downloadPddGiXml"
         >
           <template #left="slotProps">
             <BaseIcon name="DocumentArrowDownIcon" :class="slotProps.class" />
           </template>
-          {{ $t('payroll.download_ddv04_xml') }}
+          {{ $t('payroll.download_pddgi_xml') }}
         </BaseButton>
       </template>
     </BasePageHeader>
@@ -107,16 +107,6 @@
       </BaseCard>
 
       <BaseCard class="p-6">
-        <p class="text-sm font-medium text-gray-600">{{ $t('payroll.total_employer_tax') }}</p>
-        <p class="mt-2 text-2xl font-semibold text-gray-900">
-          <BaseFormatMoney
-            :amount="summary.total_employer_tax"
-            :currency="companyStore.selectedCompanyCurrency"
-          />
-        </p>
-      </BaseCard>
-
-      <BaseCard class="p-6">
         <p class="text-sm font-medium text-gray-600">{{ $t('payroll.total_net') }}</p>
         <p class="mt-2 text-2xl font-semibold text-gray-900">
           <BaseFormatMoney
@@ -152,10 +142,10 @@
             <tbody class="bg-white divide-y divide-gray-200">
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ $t('payroll.pension_employee') }}
+                  {{ $t('payroll.pension') }} (ПИО)
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                  9%
+                  18.8%
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                   <BaseFormatMoney
@@ -166,42 +156,14 @@
               </tr>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ $t('payroll.pension_employer') }}
+                  {{ $t('payroll.health') }} (Здравство)
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                  9%
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                  <BaseFormatMoney
-                    :amount="summary.pension_employer"
-                    :currency="companyStore.selectedCompanyCurrency"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ $t('payroll.health_employee') }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                  3.75%
+                  7.5%
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                   <BaseFormatMoney
                     :amount="summary.health_employee"
-                    :currency="companyStore.selectedCompanyCurrency"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ $t('payroll.health_employer') }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                  3.75%
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                  <BaseFormatMoney
-                    :amount="summary.health_employer"
                     :currency="companyStore.selectedCompanyCurrency"
                   />
                 </td>
@@ -304,12 +266,9 @@ const summary = ref({
   total_gross: 0,
   total_net: 0,
   total_employee_tax: 0,
-  total_employer_tax: 0,
   total_tax: 0,
   pension_employee: 0,
-  pension_employer: 0,
   health_employee: 0,
-  health_employer: 0,
   unemployment: 0,
   additional: 0,
   income_tax: 0,
@@ -435,31 +394,31 @@ async function downloadMpinXml() {
   }
 }
 
-async function downloadDdv04Xml() {
+async function downloadPddGiXml() {
   try {
     const params = {
       year: filters.year,
     }
 
     const response = await axios.get(
-      'payroll-reports/download-ddv04-xml',
+      'payroll-reports/download-pddgi-xml',
       { params, responseType: 'blob' }
     )
 
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `DDV04_${filters.year}.xml`)
+    link.setAttribute('download', `PDDGI_${filters.year}.xml`)
     document.body.appendChild(link)
     link.click()
     link.remove()
 
     notificationStore.showNotification({
       type: 'success',
-      message: t('payroll.ddv04_xml_downloaded'),
+      message: t('payroll.pddgi_xml_downloaded'),
     })
   } catch (error) {
-    console.error('Error downloading DDV-04 XML:', error)
+    console.error('Error downloading PDD-GI XML:', error)
     notificationStore.showNotification({
       type: 'error',
       message: error.response?.data?.error || t('general.something_went_wrong'),

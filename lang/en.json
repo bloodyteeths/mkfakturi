@@ -4412,6 +4412,8 @@
         "payslips": "Payslips",
         "payslips_downloaded": "Payslips downloaded successfully",
         "pending_runs": "Pending Runs",
+        "pension": "Pension",
+        "health": "Health",
         "pension_employee": "Pension (Employee)",
         "pension_employer": "Pension (Employer)",
         "personal_deduction": "Personal Deduction (Art. 10 ZDDLD)",
