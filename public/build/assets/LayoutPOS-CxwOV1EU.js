@@ -1,1 +1,0 @@
-import{B as o,C as t,R as r,K as a}from"./vendor-vue-BMtMPquY.js";const s={class:"fixed inset-0 bg-gray-100 dark:bg-gray-900 flex flex-col overflow-hidden"},i={__name:"LayoutPOS",setup(n){return(c,_)=>{const e=a("router-view");return t(),o("div",s,[r(e)])}}};export{i as default};
