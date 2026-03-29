@@ -1,10 +1,10 @@
 <template>
   <BasePage>
     <!-- Page Header -->
-    <BasePageHeader title="Payouts">
+    <BasePageHeader :title="$t('payouts.title')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem title="Payouts" to="#" active />
+        <BaseBreadcrumbItem :title="$t('payouts.title')" to="#" active />
       </BaseBreadcrumb>
 
       <template #actions>
@@ -25,7 +25,7 @@
             <template #left="slotProps">
               <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
             </template>
-            Export CSV
+            {{ $t('payouts.export_pending_csv') }}
           </BaseButton>
         </div>
       </template>
@@ -33,76 +33,83 @@
 
     <!-- Filters -->
     <BaseFilterWrapper :show="showFilters" class="mt-5" @clear="clearFilter">
-      <BaseInputGroup label="Search" class="text-left">
+      <BaseInputGroup :label="$t('payouts.search')" class="text-left">
         <BaseInput
           v-model="filters.search"
           type="text"
           name="search"
           autocomplete="off"
-          placeholder="Partner name or email..."
+          :placeholder="$t('payouts.search_placeholder')"
         />
       </BaseInputGroup>
 
-      <BaseInputGroup label="Status" class="text-left">
+      <BaseInputGroup :label="$t('payouts.status')" class="text-left">
         <BaseSelect v-model="filters.status" @change="refreshTable">
-          <option value="">All</option>
-          <option value="pending">Pending</option>
-          <option value="processing">Processing</option>
-          <option value="completed">Completed</option>
-          <option value="failed">Failed</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="">{{ $t('payouts.all') }}</option>
+          <option value="pending">{{ $t('payouts.pending') }}</option>
+          <option value="processing">{{ $t('payouts.processing') }}</option>
+          <option value="completed">{{ $t('payouts.completed') }}</option>
+          <option value="failed">{{ $t('payouts.failed') }}</option>
+          <option value="cancelled">{{ $t('payouts.cancelled') }}</option>
         </BaseSelect>
       </BaseInputGroup>
 
-      <BaseInputGroup label="Method" class="text-left">
+      <BaseInputGroup :label="$t('payouts.method')" class="text-left">
         <BaseSelect v-model="filters.payout_method" @change="refreshTable">
-          <option value="">All</option>
-          <option value="bank_transfer">Bank Transfer</option>
-          <option value="stripe_connect">Stripe Connect</option>
+          <option value="">{{ $t('payouts.all') }}</option>
+          <option value="bank_transfer">{{ $t('payouts.bank_transfer') }}</option>
+          <option value="stripe_connect">{{ $t('payouts.stripe_connect') }}</option>
         </BaseSelect>
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('payouts.date_from')" class="text-left">
+        <BaseInput
+          v-model="filters.date_from"
+          type="date"
+          name="date_from"
+        />
+      </BaseInputGroup>
+
+      <BaseInputGroup :label="$t('payouts.date_to')" class="text-left">
+        <BaseInput
+          v-model="filters.date_to"
+          type="date"
+          name="date_to"
+        />
       </BaseInputGroup>
     </BaseFilterWrapper>
 
     <!-- Statistics Cards -->
     <div v-if="stats" class="grid grid-cols-1 gap-4 mt-6 md:grid-cols-4">
       <div class="p-4 bg-white border border-gray-200 rounded-lg">
-        <div class="text-sm text-gray-500">Pending Amount</div>
+        <div class="text-sm text-gray-500">{{ $t('payouts.pending_amount') }}</div>
         <div class="text-2xl font-semibold text-orange-600">
-          <span v-if="globalStore.companySettings?.currency">
-            <BaseFormatMoney
-              :amount="stats.total_pending_amount"
-              :currency="globalStore.companySettings.currency"
-            />
-          </span>
-          <span v-else>{{ parseFloat(stats.total_pending_amount).toFixed(2) }}</span>
+          <BaseFormatMoney
+            :amount="stats.total_pending_amount"
+            :currency="mkdCurrency"
+          />
         </div>
       </div>
       <div class="p-4 bg-white border border-gray-200 rounded-lg">
-        <div class="text-sm text-gray-500">Pending Payouts</div>
+        <div class="text-sm text-gray-500">{{ $t('payouts.pending_payouts') }}</div>
         <div class="text-2xl font-semibold text-orange-600">{{ stats.total_pending_count }}</div>
       </div>
       <div class="p-4 bg-white border border-gray-200 rounded-lg">
-        <div class="text-sm text-gray-500">Completed This Month</div>
+        <div class="text-sm text-gray-500">{{ $t('payouts.completed_this_month') }}</div>
         <div class="text-2xl font-semibold text-green-600">
-          <span v-if="globalStore.companySettings?.currency">
-            <BaseFormatMoney
-              :amount="stats.completed_this_month"
-              :currency="globalStore.companySettings.currency"
-            />
-          </span>
-          <span v-else>{{ parseFloat(stats.completed_this_month).toFixed(2) }}</span>
+          <BaseFormatMoney
+            :amount="stats.completed_this_month"
+            :currency="mkdCurrency"
+          />
         </div>
       </div>
       <div class="p-4 bg-white border border-gray-200 rounded-lg">
-        <div class="text-sm text-gray-500">Total Paid (All Time)</div>
+        <div class="text-sm text-gray-500">{{ $t('payouts.total_paid_all_time') }}</div>
         <div class="text-2xl font-semibold">
-          <span v-if="globalStore.companySettings?.currency">
-            <BaseFormatMoney
-              :amount="stats.total_completed_all_time"
-              :currency="globalStore.companySettings.currency"
-            />
-          </span>
-          <span v-else>{{ parseFloat(stats.total_completed_all_time).toFixed(2) }}</span>
+          <BaseFormatMoney
+            :amount="stats.total_completed_all_time"
+            :currency="mkdCurrency"
+          />
         </div>
       </div>
     </div>
@@ -110,8 +117,8 @@
     <!-- Empty State -->
     <BaseEmptyPlaceholder
       v-show="showEmptyScreen"
-      title="No payouts"
-      description="No payout records found. Payouts are created automatically when partner commissions are processed."
+      :title="$t('payouts.no_payouts')"
+      :description="$t('payouts.no_payouts_desc')"
     >
       <AstronautIcon class="mt-5 mb-4" />
     </BaseEmptyPlaceholder>
@@ -136,15 +143,10 @@
         </template>
 
         <template #cell-amount="{ row }">
-          <span v-if="globalStore.companySettings?.currency">
-            <BaseFormatMoney
-              :amount="row.data.amount || 0"
-              :currency="globalStore.companySettings.currency"
-            />
-          </span>
-          <span v-else>
-            {{ parseFloat(row.data.amount || 0).toFixed(2) }} {{ row.data.currency || 'MKD' }}
-          </span>
+          <BaseFormatMoney
+            :amount="row.data.amount || 0"
+            :currency="mkdCurrency"
+          />
         </template>
 
         <template #cell-payout_method="{ row }">
@@ -154,7 +156,7 @@
               ? 'bg-purple-100 text-purple-800'
               : 'bg-blue-100 text-blue-800'"
           >
-            {{ row.data.payout_method === 'stripe_connect' ? 'Stripe' : 'Bank Transfer' }}
+            {{ row.data.payout_method === 'stripe_connect' ? $t('payouts.stripe') : $t('payouts.bank_transfer') }}
           </span>
         </template>
 
@@ -169,7 +171,7 @@
               'bg-gray-100 text-gray-800': row.data.status === 'cancelled',
             }"
           >
-            {{ row.data.status }}
+            {{ $t(`payouts.${row.data.status}`) }}
           </span>
         </template>
 
@@ -181,8 +183,8 @@
 
         <template #cell-bank_info="{ row }">
           <div class="text-xs">
-            <div class="text-gray-700">{{ row.data.partner_bank_name }}</div>
-            <div class="text-gray-400 font-mono">{{ row.data.partner_bank_account }}</div>
+            <div class="text-gray-700">{{ row.data.partner_bank_name || $t('payouts.not_provided') }}</div>
+            <div class="text-gray-400 font-mono">{{ row.data.partner_bank_account || $t('payouts.not_provided') }}</div>
           </div>
         </template>
 
@@ -194,7 +196,7 @@
 
             <BaseDropdownItem @click="$router.push(`/admin/payouts/${row.data.id}/view`)">
               <BaseIcon name="EyeIcon" class="mr-3 text-gray-600" />
-              View
+              {{ $t('payouts.view') }}
             </BaseDropdownItem>
 
             <BaseDropdownItem
@@ -202,7 +204,7 @@
               @click="openMarkPaidModal(row.data)"
             >
               <BaseIcon name="CheckCircleIcon" class="mr-3 text-green-600" />
-              Mark as Paid
+              {{ $t('payouts.mark_as_paid') }}
             </BaseDropdownItem>
 
             <BaseDropdownItem
@@ -210,15 +212,15 @@
               @click="openMarkFailedModal(row.data)"
             >
               <BaseIcon name="ExclamationTriangleIcon" class="mr-3 text-orange-600" />
-              Mark as Failed
+              {{ $t('payouts.mark_as_failed') }}
             </BaseDropdownItem>
 
             <BaseDropdownItem
               v-if="row.data.status === 'pending' || row.data.status === 'processing'"
-              @click="cancelPayout(row.data)"
+              @click="openCancelModal(row.data)"
             >
               <BaseIcon name="XCircleIcon" class="mr-3 text-red-600" />
-              Cancel
+              {{ $t('payouts.cancel') }}
             </BaseDropdownItem>
           </BaseDropdown>
         </template>
@@ -228,34 +230,33 @@
     <!-- Mark as Paid Modal -->
     <BaseModal :show="showPayModal" @close="showPayModal = false">
       <template #header>
-        <h3 class="text-lg font-medium">Mark Payout as Paid</h3>
+        <h3 class="text-lg font-medium">{{ $t('payouts.mark_as_paid') }}</h3>
       </template>
 
       <div class="p-4">
         <p class="mb-4 text-sm text-gray-600">
-          Confirm payment to <strong>{{ selectedPayout?.partner_name }}</strong>
-          for <strong>{{ selectedPayout?.amount }} {{ selectedPayout?.currency || 'MKD' }}</strong>
+          {{ $t('payouts.confirm_mark_paid', { name: selectedPayout?.partner_name, amount: formatMkd(selectedPayout?.amount) }) }}
         </p>
 
-        <BaseInputGroup label="Payment Reference (SEPA / Transaction ID)" class="text-left">
+        <BaseInputGroup :label="$t('payouts.payment_reference')" class="text-left">
           <BaseInput
             v-model="paymentReference"
             type="text"
-            placeholder="e.g. SEPA-2026-02-001"
+            :placeholder="$t('payouts.payment_ref_placeholder')"
           />
         </BaseInputGroup>
       </div>
 
       <template #footer>
         <BaseButton variant="primary-outline" class="mr-3" @click="showPayModal = false">
-          Cancel
+          {{ $t('payouts.cancel') }}
         </BaseButton>
         <BaseButton
           :loading="isProcessing"
           :disabled="!paymentReference.trim()"
           @click="confirmMarkPaid"
         >
-          Confirm Payment
+          {{ $t('payouts.confirm_payment') }}
         </BaseButton>
       </template>
     </BaseModal>
@@ -263,27 +264,26 @@
     <!-- Mark as Failed Modal -->
     <BaseModal :show="showFailModal" @close="showFailModal = false">
       <template #header>
-        <h3 class="text-lg font-medium">Mark Payout as Failed</h3>
+        <h3 class="text-lg font-medium">{{ $t('payouts.mark_as_failed') }}</h3>
       </template>
 
       <div class="p-4">
         <p class="mb-4 text-sm text-gray-600">
-          Mark payout to <strong>{{ selectedPayout?.partner_name }}</strong>
-          for <strong>{{ selectedPayout?.amount }} {{ selectedPayout?.currency || 'MKD' }}</strong> as failed.
+          {{ $t('payouts.confirm_mark_failed', { name: selectedPayout?.partner_name, amount: formatMkd(selectedPayout?.amount) }) }}
         </p>
 
-        <BaseInputGroup label="Failure Reason" class="text-left">
+        <BaseInputGroup :label="$t('payouts.failure_reason')" class="text-left">
           <BaseInput
             v-model="failReason"
             type="text"
-            placeholder="e.g. Bank rejected transfer, incorrect IBAN..."
+            :placeholder="$t('payouts.failure_reason_placeholder')"
           />
         </BaseInputGroup>
       </div>
 
       <template #footer>
         <BaseButton variant="primary-outline" class="mr-3" @click="showFailModal = false">
-          Cancel
+          {{ $t('payouts.cancel') }}
         </BaseButton>
         <BaseButton
           variant="danger"
@@ -291,7 +291,42 @@
           :disabled="!failReason.trim()"
           @click="confirmMarkFailed"
         >
-          Mark as Failed
+          {{ $t('payouts.mark_as_failed') }}
+        </BaseButton>
+      </template>
+    </BaseModal>
+
+    <!-- Cancel Payout Modal -->
+    <BaseModal :show="showCancelModal" @close="showCancelModal = false">
+      <template #header>
+        <h3 class="text-lg font-medium">{{ $t('payouts.cancel_payout') }}</h3>
+      </template>
+
+      <div class="p-4">
+        <p class="mb-4 text-sm text-gray-600">
+          {{ $t('payouts.confirm_cancel', { name: selectedPayout?.partner_name, amount: formatMkd(selectedPayout?.amount) }) }}
+        </p>
+
+        <BaseInputGroup :label="$t('payouts.cancel_reason')" class="text-left">
+          <BaseInput
+            v-model="cancelReason"
+            type="text"
+            :placeholder="$t('payouts.cancel_reason_placeholder')"
+          />
+        </BaseInputGroup>
+      </div>
+
+      <template #footer>
+        <BaseButton variant="primary-outline" class="mr-3" @click="showCancelModal = false">
+          {{ $t('payouts.cancel') }}
+        </BaseButton>
+        <BaseButton
+          variant="danger"
+          :loading="isProcessing"
+          :disabled="!cancelReason.trim()"
+          @click="confirmCancel"
+        >
+          {{ $t('payouts.cancel_payout') }}
         </BaseButton>
       </template>
     </BaseModal>
@@ -299,16 +334,24 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, reactive, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import AstronautIcon from '@/scripts/components/icons/empty/AstronautIcon.vue'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
+const { t } = useI18n()
 const router = useRouter()
 const notificationStore = useNotificationStore()
 const globalStore = useGlobalStore()
+
+const mkdCurrency = { id: 0, name: 'Macedonian Denar', code: 'MKD', symbol: 'ден', precision: 2, thousand_separator: '.', decimal_separator: ',' }
+
+function formatMkd(amount) {
+  return `${parseFloat(amount || 0).toLocaleString('mk-MK', { minimumFractionDigits: 2 })} ден`
+}
 
 const tableComponent = ref(null)
 const showFilters = ref(false)
@@ -319,44 +362,61 @@ const paymentReference = ref('')
 const isProcessing = ref(false)
 const showFailModal = ref(false)
 const failReason = ref('')
+const showCancelModal = ref(false)
+const cancelReason = ref('')
 
 const filters = reactive({
   search: '',
   status: '',
   payout_method: '',
+  date_from: '',
+  date_to: '',
 })
 
-const payoutColumns = ref([
+// Debounced search auto-trigger
+let searchTimeout = null
+watch(() => filters.search, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    refreshTable()
+  }, 400)
+})
+
+// Date filter auto-trigger
+watch(() => filters.date_from, () => refreshTable())
+watch(() => filters.date_to, () => refreshTable())
+
+const payoutColumns = computed(() => [
   {
     key: 'partner_name',
-    label: 'Partner',
+    label: t('payouts.partner'),
     thClass: 'extra',
     tdClass: 'font-medium text-gray-900',
     sortable: false,
   },
   {
     key: 'amount',
-    label: 'Amount',
+    label: t('payouts.amount'),
     sortable: true,
   },
   {
     key: 'payout_method',
-    label: 'Method',
+    label: t('payouts.method'),
     sortable: true,
   },
   {
     key: 'status',
-    label: 'Status',
+    label: t('payouts.status'),
     sortable: true,
   },
   {
     key: 'payout_date',
-    label: 'Date',
+    label: t('payouts.date'),
     sortable: true,
   },
   {
     key: 'bank_info',
-    label: 'Bank Info',
+    label: t('payouts.bank_info'),
     sortable: false,
   },
   {
@@ -376,6 +436,8 @@ async function fetchData({ page, filter, sort }) {
     search: filters.search,
     status: filters.status,
     payout_method: filters.payout_method,
+    date_from: filters.date_from || undefined,
+    date_to: filters.date_to || undefined,
     sort_by: sort.fieldName || 'created_at',
     sort_order: sort.order || 'desc',
   }
@@ -410,6 +472,8 @@ function clearFilter() {
   filters.search = ''
   filters.status = ''
   filters.payout_method = ''
+  filters.date_from = ''
+  filters.date_to = ''
   refreshTable()
 }
 
@@ -433,7 +497,7 @@ async function confirmMarkPaid() {
     })
     notificationStore.showNotification({
       type: 'success',
-      message: 'Payout marked as completed.',
+      message: t('payouts.mark_as_paid'),
     })
     showPayModal.value = false
     refreshTable()
@@ -441,7 +505,7 @@ async function confirmMarkPaid() {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.error || 'Failed to mark payout as completed.',
+      message: error.response?.data?.error || t('payouts.mark_as_failed'),
     })
   } finally {
     isProcessing.value = false
@@ -464,7 +528,7 @@ async function confirmMarkFailed() {
     })
     notificationStore.showNotification({
       type: 'success',
-      message: 'Payout marked as failed.',
+      message: t('payouts.mark_as_failed'),
     })
     showFailModal.value = false
     refreshTable()
@@ -472,31 +536,41 @@ async function confirmMarkFailed() {
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.error || 'Failed to mark payout as failed.',
+      message: error.response?.data?.error || t('payouts.mark_as_failed'),
     })
   } finally {
     isProcessing.value = false
   }
 }
 
-async function cancelPayout(payout) {
-  if (!confirm(`Cancel payout of ${payout.amount} ${payout.currency || 'MKD'} to ${payout.partner_name}?`)) return
+function openCancelModal(payout) {
+  selectedPayout.value = payout
+  cancelReason.value = ''
+  showCancelModal.value = true
+}
 
+async function confirmCancel() {
+  if (!cancelReason.value.trim()) return
+
+  isProcessing.value = true
   try {
-    await axios.post(`/payouts/${payout.id}/cancel`, {
-      reason: 'Cancelled by admin',
+    await axios.post(`/payouts/${selectedPayout.value.id}/cancel`, {
+      reason: cancelReason.value,
     })
     notificationStore.showNotification({
       type: 'success',
-      message: 'Payout cancelled. Commission events released back to unpaid.',
+      message: t('payouts.cancel_payout'),
     })
+    showCancelModal.value = false
     refreshTable()
     fetchStats()
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.error || 'Failed to cancel payout.',
+      message: error.response?.data?.error || t('payouts.cancel_payout'),
     })
+  } finally {
+    isProcessing.value = false
   }
 }
 

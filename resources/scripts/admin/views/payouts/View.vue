@@ -1,15 +1,15 @@
 <template>
   <BasePage>
     <!-- Page Header -->
-    <BasePageHeader title="Payout Details">
+    <BasePageHeader :title="$t('payouts.details')">
       <BaseBreadcrumb>
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
-        <BaseBreadcrumbItem title="Payouts" to="/admin/payouts" />
+        <BaseBreadcrumbItem :title="$t('payouts.title')" to="/admin/payouts" />
         <BaseBreadcrumbItem :title="`#${payoutId}`" to="#" active />
       </BaseBreadcrumb>
 
       <template #actions>
-        <div class="flex items-center justify-end space-x-3">
+        <div class="flex flex-wrap items-center justify-end gap-3">
           <BaseButton
             v-if="payout && (payout.status === 'pending' || payout.status === 'processing')"
             @click="openMarkPaidModal"
@@ -17,7 +17,7 @@
             <template #left="slotProps">
               <BaseIcon name="CheckCircleIcon" :class="slotProps.class" />
             </template>
-            Mark as Paid
+            {{ $t('payouts.mark_as_paid') }}
           </BaseButton>
 
           <BaseButton
@@ -28,25 +28,25 @@
             <template #left="slotProps">
               <BaseIcon name="ExclamationTriangleIcon" :class="slotProps.class" />
             </template>
-            Mark as Failed
+            {{ $t('payouts.mark_as_failed') }}
           </BaseButton>
 
           <BaseButton
             v-if="payout && (payout.status === 'pending' || payout.status === 'processing')"
             variant="danger-outline"
-            @click="cancelPayout"
+            @click="openCancelModal"
           >
             <template #left="slotProps">
               <BaseIcon name="XCircleIcon" :class="slotProps.class" />
             </template>
-            Cancel Payout
+            {{ $t('payouts.cancel_payout') }}
           </BaseButton>
         </div>
       </template>
     </BasePageHeader>
 
     <div v-if="isLoading" class="flex items-center justify-center py-20">
-      <div class="text-gray-400">Loading...</div>
+      <div class="text-gray-400">{{ $t('payouts.loading') }}</div>
     </div>
 
     <div v-else-if="payout" class="mt-6 space-y-6">
@@ -54,22 +54,19 @@
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <!-- Payout Info Card -->
         <div class="p-6 bg-white border border-gray-200 rounded-lg">
-          <h3 class="mb-4 text-lg font-medium text-gray-900">Payout Info</h3>
+          <h3 class="mb-4 text-lg font-medium text-gray-900">{{ $t('payouts.payout_info') }}</h3>
           <dl class="space-y-3">
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-500">Amount</dt>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.amount') }}</dt>
               <dd class="text-sm font-medium text-gray-900">
-                <span v-if="globalStore.companySettings?.currency">
-                  <BaseFormatMoney
-                    :amount="payout.amount || 0"
-                    :currency="globalStore.companySettings.currency"
-                  />
-                </span>
-                <span v-else>{{ payout.amount }} {{ payout.currency || 'MKD' }}</span>
+                <BaseFormatMoney
+                  :amount="payout.amount || 0"
+                  :currency="mkdCurrency"
+                />
               </dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-500">Status</dt>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.status') }}</dt>
               <dd>
                 <span
                   class="px-2 py-1 text-xs font-medium rounded"
@@ -81,32 +78,32 @@
                     'bg-gray-100 text-gray-800': payout.status === 'cancelled',
                   }"
                 >
-                  {{ payout.status }}
+                  {{ $t(`payouts.${payout.status}`) }}
                 </span>
               </dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-500">Method</dt>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.method') }}</dt>
               <dd class="text-sm text-gray-900">
-                {{ payout.payout_method === 'stripe_connect' ? 'Stripe Connect' : 'Bank Transfer' }}
+                {{ payout.payout_method === 'stripe_connect' ? $t('payouts.stripe_connect') : $t('payouts.bank_transfer') }}
               </dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-500">Payout Date</dt>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.payout_date') }}</dt>
               <dd class="text-sm text-gray-900">
                 {{ payout.payout_date ? new Date(payout.payout_date).toLocaleDateString() : '-' }}
               </dd>
             </div>
             <div v-if="payout.payment_reference" class="flex justify-between">
-              <dt class="text-sm text-gray-500">Payment Reference</dt>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.payment_reference') }}</dt>
               <dd class="text-sm font-mono text-gray-900">{{ payout.payment_reference }}</dd>
             </div>
             <div v-if="payout.processed_at" class="flex justify-between">
-              <dt class="text-sm text-gray-500">Processed At</dt>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.processed_at') }}</dt>
               <dd class="text-sm text-gray-900">{{ new Date(payout.processed_at).toLocaleString() }}</dd>
             </div>
             <div v-if="payout.processor" class="flex justify-between">
-              <dt class="text-sm text-gray-500">Processed By</dt>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.processed_by') }}</dt>
               <dd class="text-sm text-gray-900">{{ payout.processor.name }}</dd>
             </div>
           </dl>
@@ -114,10 +111,10 @@
 
         <!-- Partner Bank Details Card -->
         <div class="p-6 bg-white border border-gray-200 rounded-lg">
-          <h3 class="mb-4 text-lg font-medium text-gray-900">Partner Bank Details</h3>
+          <h3 class="mb-4 text-lg font-medium text-gray-900">{{ $t('payouts.partner_bank_details') }}</h3>
           <dl class="space-y-3">
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-500">Partner</dt>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.partner') }}</dt>
               <dd class="text-sm text-gray-900">
                 <router-link
                   v-if="payout.partner"
@@ -129,16 +126,16 @@
               </dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-500">Email</dt>
-              <dd class="text-sm text-gray-900">{{ payout.partner_email }}</dd>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.email') }}</dt>
+              <dd class="text-sm text-gray-900">{{ payout.partner_email || $t('payouts.not_provided') }}</dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-500">Bank Name</dt>
-              <dd class="text-sm text-gray-900">{{ payout.partner_bank_name }}</dd>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.bank_name') }}</dt>
+              <dd class="text-sm text-gray-900">{{ payout.partner_bank_name || $t('payouts.not_provided') }}</dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-500">Account (IBAN)</dt>
-              <dd class="text-sm font-mono text-gray-900">{{ payout.partner_bank_account }}</dd>
+              <dt class="text-sm text-gray-500">{{ $t('payouts.account_iban') }}</dt>
+              <dd class="text-sm font-mono text-gray-900">{{ payout.partner_bank_account || $t('payouts.not_provided') }}</dd>
             </div>
           </dl>
         </div>
@@ -147,9 +144,9 @@
       <!-- Commission Events Table -->
       <div class="p-6 bg-white border border-gray-200 rounded-lg">
         <h3 class="mb-4 text-lg font-medium text-gray-900">
-          Commission Events
+          {{ $t('payouts.commission_events') }}
           <span class="ml-2 text-sm font-normal text-gray-400">
-            ({{ payout.events?.length || 0 }} events)
+            ({{ payout.events?.length || 0 }})
           </span>
         </h3>
 
@@ -157,11 +154,11 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
-                <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Type</th>
-                <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Company</th>
-                <th class="px-3 py-2 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">Amount</th>
-                <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Month</th>
-                <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Date</th>
+                <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">{{ $t('payouts.event_type') }}</th>
+                <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">{{ $t('payouts.event_company') }}</th>
+                <th class="px-3 py-2 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">{{ $t('payouts.amount') }}</th>
+                <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">{{ $t('payouts.event_month') }}</th>
+                <th class="px-3 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">{{ $t('payouts.date') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -183,13 +180,10 @@
                   {{ event.company?.name || '-' }}
                 </td>
                 <td class="px-3 py-2 text-sm text-right font-mono">
-                  <span v-if="globalStore.companySettings?.currency">
-                    <BaseFormatMoney
-                      :amount="event.amount || 0"
-                      :currency="globalStore.companySettings.currency"
-                    />
-                  </span>
-                  <span v-else>{{ event.amount }}</span>
+                  <BaseFormatMoney
+                    :amount="event.amount || 0"
+                    :currency="mkdCurrency"
+                  />
                 </td>
                 <td class="px-3 py-2 text-sm text-gray-600">{{ event.month_ref || '-' }}</td>
                 <td class="px-3 py-2 text-sm text-gray-600">
@@ -200,7 +194,7 @@
           </table>
         </div>
         <div v-else class="py-8 text-center text-gray-400 text-sm">
-          No commission events linked to this payout.
+          {{ $t('payouts.no_events') }}
         </div>
       </div>
     </div>
@@ -208,34 +202,33 @@
     <!-- Mark as Paid Modal -->
     <BaseModal :show="showPayModal" @close="showPayModal = false">
       <template #header>
-        <h3 class="text-lg font-medium">Mark Payout as Paid</h3>
+        <h3 class="text-lg font-medium">{{ $t('payouts.mark_as_paid') }}</h3>
       </template>
 
       <div class="p-4">
         <p class="mb-4 text-sm text-gray-600">
-          Confirm payment of <strong>{{ payout?.amount }} {{ payout?.currency || 'MKD' }}</strong>
-          to <strong>{{ payout?.partner_name }}</strong>
+          {{ $t('payouts.confirm_mark_paid', { name: payout?.partner_name, amount: formatMkd(payout?.amount) }) }}
         </p>
 
-        <BaseInputGroup label="Payment Reference (SEPA / Transaction ID)" class="text-left">
+        <BaseInputGroup :label="$t('payouts.payment_reference')" class="text-left">
           <BaseInput
             v-model="paymentReference"
             type="text"
-            placeholder="e.g. SEPA-2026-02-001"
+            :placeholder="$t('payouts.payment_ref_placeholder')"
           />
         </BaseInputGroup>
       </div>
 
       <template #footer>
         <BaseButton variant="primary-outline" class="mr-3" @click="showPayModal = false">
-          Cancel
+          {{ $t('payouts.cancel') }}
         </BaseButton>
         <BaseButton
           :loading="isProcessing"
           :disabled="!paymentReference.trim()"
           @click="confirmMarkPaid"
         >
-          Confirm Payment
+          {{ $t('payouts.confirm_payment') }}
         </BaseButton>
       </template>
     </BaseModal>
@@ -243,27 +236,26 @@
     <!-- Mark as Failed Modal -->
     <BaseModal :show="showFailModal" @close="showFailModal = false">
       <template #header>
-        <h3 class="text-lg font-medium">Mark Payout as Failed</h3>
+        <h3 class="text-lg font-medium">{{ $t('payouts.mark_as_failed') }}</h3>
       </template>
 
       <div class="p-4">
         <p class="mb-4 text-sm text-gray-600">
-          Mark payout of <strong>{{ payout?.amount }} {{ payout?.currency || 'MKD' }}</strong>
-          to <strong>{{ payout?.partner_name }}</strong> as failed.
+          {{ $t('payouts.confirm_mark_failed', { name: payout?.partner_name, amount: formatMkd(payout?.amount) }) }}
         </p>
 
-        <BaseInputGroup label="Failure Reason" class="text-left">
+        <BaseInputGroup :label="$t('payouts.failure_reason')" class="text-left">
           <BaseInput
             v-model="failReason"
             type="text"
-            placeholder="e.g. Bank rejected transfer, incorrect IBAN..."
+            :placeholder="$t('payouts.failure_reason_placeholder')"
           />
         </BaseInputGroup>
       </div>
 
       <template #footer>
         <BaseButton variant="primary-outline" class="mr-3" @click="showFailModal = false">
-          Cancel
+          {{ $t('payouts.cancel') }}
         </BaseButton>
         <BaseButton
           variant="danger"
@@ -271,7 +263,42 @@
           :disabled="!failReason.trim()"
           @click="confirmMarkFailed"
         >
-          Mark as Failed
+          {{ $t('payouts.mark_as_failed') }}
+        </BaseButton>
+      </template>
+    </BaseModal>
+
+    <!-- Cancel Payout Modal -->
+    <BaseModal :show="showCancelModal" @close="showCancelModal = false">
+      <template #header>
+        <h3 class="text-lg font-medium">{{ $t('payouts.cancel_payout') }}</h3>
+      </template>
+
+      <div class="p-4">
+        <p class="mb-4 text-sm text-gray-600">
+          {{ $t('payouts.confirm_cancel', { name: payout?.partner_name, amount: formatMkd(payout?.amount) }) }}
+        </p>
+
+        <BaseInputGroup :label="$t('payouts.cancel_reason')" class="text-left">
+          <BaseInput
+            v-model="cancelReason"
+            type="text"
+            :placeholder="$t('payouts.cancel_reason_placeholder')"
+          />
+        </BaseInputGroup>
+      </div>
+
+      <template #footer>
+        <BaseButton variant="primary-outline" class="mr-3" @click="showCancelModal = false">
+          {{ $t('payouts.cancel') }}
+        </BaseButton>
+        <BaseButton
+          variant="danger"
+          :loading="isProcessing"
+          :disabled="!cancelReason.trim()"
+          @click="confirmCancel"
+        >
+          {{ $t('payouts.cancel_payout') }}
         </BaseButton>
       </template>
     </BaseModal>
@@ -281,14 +308,22 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const notificationStore = useNotificationStore()
 const globalStore = useGlobalStore()
+
+const mkdCurrency = { id: 0, name: 'Macedonian Denar', code: 'MKD', symbol: 'ден', precision: 2, thousand_separator: '.', decimal_separator: ',' }
+
+function formatMkd(amount) {
+  return `${parseFloat(amount || 0).toLocaleString('mk-MK', { minimumFractionDigits: 2 })} ден`
+}
 
 const payoutId = route.params.id
 const payout = ref(null)
@@ -298,6 +333,8 @@ const paymentReference = ref('')
 const isProcessing = ref(false)
 const showFailModal = ref(false)
 const failReason = ref('')
+const showCancelModal = ref(false)
+const cancelReason = ref('')
 
 async function fetchPayout() {
   isLoading.value = true
@@ -330,14 +367,14 @@ async function confirmMarkPaid() {
     })
     notificationStore.showNotification({
       type: 'success',
-      message: 'Payout marked as completed.',
+      message: t('payouts.mark_as_paid'),
     })
     showPayModal.value = false
     fetchPayout()
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.error || 'Failed to mark payout as completed.',
+      message: error.response?.data?.error || t('payouts.mark_as_failed'),
     })
   } finally {
     isProcessing.value = false
@@ -359,37 +396,46 @@ async function confirmMarkFailed() {
     })
     notificationStore.showNotification({
       type: 'success',
-      message: 'Payout marked as failed.',
+      message: t('payouts.mark_as_failed'),
     })
     showFailModal.value = false
     fetchPayout()
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.error || 'Failed to mark payout as failed.',
+      message: error.response?.data?.error || t('payouts.mark_as_failed'),
     })
   } finally {
     isProcessing.value = false
   }
 }
 
-async function cancelPayout() {
-  if (!confirm('Cancel this payout? Commission events will be released back to unpaid.')) return
+function openCancelModal() {
+  cancelReason.value = ''
+  showCancelModal.value = true
+}
 
+async function confirmCancel() {
+  if (!cancelReason.value.trim()) return
+
+  isProcessing.value = true
   try {
     await axios.post(`/payouts/${payoutId}/cancel`, {
-      reason: 'Cancelled by admin',
+      reason: cancelReason.value,
     })
     notificationStore.showNotification({
       type: 'success',
-      message: 'Payout cancelled.',
+      message: t('payouts.cancel_payout'),
     })
+    showCancelModal.value = false
     fetchPayout()
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
-      message: error.response?.data?.error || 'Failed to cancel payout.',
+      message: error.response?.data?.error || t('payouts.cancel_payout'),
     })
+  } finally {
+    isProcessing.value = false
   }
 }
 
