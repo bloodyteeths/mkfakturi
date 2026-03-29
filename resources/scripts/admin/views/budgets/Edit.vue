@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <AdvancedBudgetForm
+    <UnifiedBudgetForm
       v-else-if="budget"
       :initial-data="budget"
       :is-edit="true"
@@ -29,7 +29,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useI18n } from 'vue-i18n'
-import AdvancedBudgetForm from './AdvancedBudgetForm.vue'
+import UnifiedBudgetForm from './UnifiedBudgetForm.vue'
 
 const route = useRoute()
 const router = useRouter()

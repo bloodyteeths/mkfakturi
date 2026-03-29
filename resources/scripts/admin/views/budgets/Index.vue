@@ -2,7 +2,7 @@
   <BasePage>
     <BasePageHeader :title="t('title')">
       <template #actions>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-3">
           <!-- Search -->
           <input
             v-model="searchQuery"
@@ -11,44 +11,22 @@
             class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 w-48"
           />
 
-          <!-- Status Filter -->
-          <select
-            v-model="filterStatus"
-            class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
-          >
-            <option value="">{{ t('status') }}: {{ t('all') }}</option>
-            <option value="draft">{{ t('draft') }}</option>
-            <option value="approved">{{ t('approved') }}</option>
-            <option value="locked">{{ t('locked') }}</option>
-            <option value="archived">{{ t('archived') }}</option>
-          </select>
-
-          <!-- Year Filter -->
-          <select
-            v-model="filterYear"
-            class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
-          >
-            <option value="">{{ t('period') }}: {{ t('all') }}</option>
-            <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
-          </select>
-
-          <!-- Scenario Filter -->
-          <select
-            v-model="filterScenario"
-            class="rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
-          >
-            <option value="">{{ t('scenario') }}: {{ t('all') }}</option>
-            <option value="expected">{{ t('scenario_expected') }}</option>
-            <option value="optimistic">{{ t('scenario_optimistic') }}</option>
-            <option value="pessimistic">{{ t('scenario_pessimistic') }}</option>
-          </select>
-
-          <!-- Export CSV -->
+          <!-- Filter Toggle -->
           <button
-            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            @click="exportCsv"
+            class="inline-flex items-center gap-1.5 px-3 py-2 border rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+            :class="showFilters
+              ? 'border-primary-500 text-primary-700 bg-primary-50'
+              : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'"
+            @click="showFilters = !showFilters"
           >
-            {{ t('export_csv') }}
+            <BaseIcon name="FunnelIcon" class="h-4 w-4" />
+            {{ t('filters') || 'Филтри' }}
+            <span
+              v-if="activeFilterCount > 0"
+              class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary-600 text-white text-xs font-bold"
+            >
+              {{ activeFilterCount }}
+            </span>
           </button>
 
           <BaseButton variant="primary" @click="$router.push({ name: 'budgets.create' })">
@@ -61,19 +39,96 @@
       </template>
     </BasePageHeader>
 
-    <!-- Quick Stats -->
+    <!-- Collapsible Filters Panel -->
+    <transition
+      enter-active-class="transition ease-out duration-200"
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition ease-in duration-150"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <div v-show="showFilters" class="bg-white rounded-lg shadow p-4 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Status Filter -->
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('status') }}</label>
+            <select
+              v-model="filterStatus"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            >
+              <option value="">{{ t('all') }}</option>
+              <option value="draft">{{ t('draft') }}</option>
+              <option value="approved">{{ t('approved') }}</option>
+              <option value="locked">{{ t('locked') }}</option>
+              <option value="archived">{{ t('archived') }}</option>
+            </select>
+          </div>
+
+          <!-- Year Filter -->
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('period') }}</label>
+            <select
+              v-model="filterYear"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            >
+              <option value="">{{ t('all') }}</option>
+              <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
+            </select>
+          </div>
+
+          <!-- Scenario Filter -->
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('scenario') }}</label>
+            <select
+              v-model="filterScenario"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            >
+              <option value="">{{ t('all') }}</option>
+              <option value="expected">{{ t('scenario_expected') }}</option>
+              <option value="optimistic">{{ t('scenario_optimistic') }}</option>
+              <option value="pessimistic">{{ t('scenario_pessimistic') }}</option>
+            </select>
+          </div>
+
+          <!-- Cost Center Filter -->
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('cost_center') }}</label>
+            <select
+              v-model="filterCostCenter"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            >
+              <option value="">{{ t('all') }}</option>
+              <option v-for="cc in costCenterOptions" :key="cc.id" :value="cc.id">{{ cc.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Clear Filters -->
+        <div v-if="activeFilterCount > 0" class="mt-3 text-right">
+          <button
+            class="text-sm text-primary-600 hover:text-primary-800 font-medium"
+            @click="clearFilters"
+          >
+            {{ t('clear_filters') || 'Избриши филтри' }}
+          </button>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Stats Cards -->
     <div v-if="!isLoading" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div class="bg-white rounded-lg shadow p-4">
-        <p class="text-sm font-medium text-gray-500">{{ t('total_budgets') }}</p>
-        <p class="mt-1 text-2xl font-semibold text-gray-900">{{ budgets.length }}</p>
+        <p class="text-sm font-medium text-gray-500">{{ t('total_amount') }}</p>
+        <p class="mt-1 text-2xl font-semibold text-gray-900">{{ formatNumber(totalBudgetedAmount) }}</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <p class="text-sm font-medium text-gray-500">{{ t('drafts_pending') || 'Нацрти' }}</p>
+        <p class="mt-1 text-2xl font-semibold text-yellow-600">{{ draftCount }}</p>
       </div>
       <div class="bg-white rounded-lg shadow p-4">
         <p class="text-sm font-medium text-gray-500">{{ t('active_budgets') }}</p>
         <p class="mt-1 text-2xl font-semibold text-green-600">{{ activeBudgetsCount }}</p>
-      </div>
-      <div class="bg-white rounded-lg shadow p-4">
-        <p class="text-sm font-medium text-gray-500">{{ t('current_year_total') }}</p>
-        <p class="mt-1 text-2xl font-semibold text-primary-600">{{ currentYearCount }}</p>
       </div>
     </div>
 
@@ -94,13 +149,22 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
+            <th class="w-10 px-4 py-3">
+              <input
+                type="checkbox"
+                class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                :checked="allSelected"
+                :indeterminate="someSelected && !allSelected"
+                @change="toggleSelectAll"
+              />
+            </th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('name') }}</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('period') }}</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('scenario') }}</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('status') }}</th>
             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('total_amount') }}</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('cost_center') }}</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('general.actions') }}</th>
+            <th class="w-12 px-4 py-3"></th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
@@ -108,8 +172,17 @@
             v-for="budget in paginatedBudgets"
             :key="budget.id"
             class="hover:bg-gray-50 cursor-pointer"
+            :class="{ 'bg-primary-50': selectedIds.includes(budget.id) }"
             @click="$router.push({ name: 'budgets.view', params: { id: budget.id } })"
           >
+            <td class="px-4 py-3" @click.stop>
+              <input
+                type="checkbox"
+                class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                :checked="selectedIds.includes(budget.id)"
+                @change="toggleSelect(budget.id)"
+              />
+            </td>
             <td class="px-4 py-3">
               <div class="text-sm font-medium text-gray-900">
                 <span v-if="budget.number" class="text-gray-500 font-normal">{{ budget.number }} &middot; </span>{{ budget.name }}
@@ -155,30 +228,80 @@
               </span>
               <span v-else class="text-gray-400">-</span>
             </td>
-            <td class="whitespace-nowrap px-4 py-3 text-right text-sm">
-              <button
-                v-if="budget.status === 'approved' || budget.status === 'locked'"
-                class="text-primary-600 hover:text-primary-800 mr-2"
-                @click.stop="$router.push({ name: 'budgets.view', params: { id: budget.id } })"
-                :title="t('vs_actual')"
-              >
-                <BaseIcon name="ChartBarIcon" class="h-4 w-4" />
-              </button>
-              <button
-                v-if="budget.status === 'draft'"
-                class="text-primary-600 hover:text-primary-800 mr-2"
-                @click.stop="$router.push({ name: 'budgets.edit', params: { id: budget.id } })"
-                :title="t('edit')"
-              >
-                <BaseIcon name="PencilSquareIcon" class="h-4 w-4" />
-              </button>
-              <button
-                v-if="budget.status === 'draft'"
-                class="text-red-600 hover:text-red-800"
-                @click.stop="confirmDelete(budget)"
-              >
-                <BaseIcon name="TrashIcon" class="h-4 w-4" />
-              </button>
+            <td class="whitespace-nowrap px-4 py-3 text-right text-sm" @click.stop>
+              <div class="relative">
+                <button
+                  class="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none"
+                  @click="toggleDropdown(budget.id)"
+                >
+                  <BaseIcon name="EllipsisVerticalIcon" class="h-5 w-5" />
+                </button>
+
+                <!-- Row Action Dropdown -->
+                <div
+                  v-show="openDropdownId === budget.id"
+                  class="absolute right-0 top-8 z-30 w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 py-1"
+                >
+                  <!-- View -->
+                  <button
+                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    @click="goTo('budgets.view', budget.id)"
+                  >
+                    <BaseIcon name="EyeIcon" class="h-4 w-4 text-gray-400" />
+                    {{ t('view') || 'Прегледај' }}
+                  </button>
+
+                  <!-- Edit (draft only) -->
+                  <button
+                    v-if="budget.status === 'draft'"
+                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    @click="goTo('budgets.edit', budget.id)"
+                  >
+                    <BaseIcon name="PencilSquareIcon" class="h-4 w-4 text-gray-400" />
+                    {{ t('edit') }}
+                  </button>
+
+                  <!-- Clone -->
+                  <button
+                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    @click="cloneBudget(budget.id)"
+                  >
+                    <BaseIcon name="DocumentDuplicateIcon" class="h-4 w-4 text-gray-400" />
+                    {{ t('clone') || 'Клонирај' }}
+                  </button>
+
+                  <!-- Archive (approved/locked only) -->
+                  <button
+                    v-if="budget.status === 'approved' || budget.status === 'locked'"
+                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    @click="archiveBudget(budget.id)"
+                  >
+                    <BaseIcon name="ArchiveBoxIcon" class="h-4 w-4 text-gray-400" />
+                    {{ t('archive') || 'Архивирај' }}
+                  </button>
+
+                  <!-- Export PDF -->
+                  <button
+                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    @click="exportPdf(budget.id)"
+                  >
+                    <BaseIcon name="ArrowDownTrayIcon" class="h-4 w-4 text-gray-400" />
+                    {{ t('export_pdf') || 'Извези PDF' }}
+                  </button>
+
+                  <div class="border-t border-gray-100 my-1"></div>
+
+                  <!-- Delete (draft only) -->
+                  <button
+                    v-if="budget.status === 'draft'"
+                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    @click="confirmDelete(budget)"
+                  >
+                    <BaseIcon name="TrashIcon" class="h-4 w-4 text-red-400" />
+                    {{ t('delete') || 'Избриши' }}
+                  </button>
+                </div>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -224,17 +347,70 @@
       </BaseButton>
     </div>
 
+    <!-- Bulk Action Bar -->
+    <transition
+      enter-active-class="transition ease-out duration-200"
+      enter-from-class="opacity-0 translate-y-4"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition ease-in duration-150"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 translate-y-4"
+    >
+      <div
+        v-if="selectedIds.length > 0"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 rounded-lg bg-gray-900 px-5 py-3 shadow-xl text-white"
+      >
+        <span class="text-sm font-medium">
+          {{ selectedIds.length }} {{ t('selected') || 'избрани' }}
+        </span>
+
+        <button
+          v-if="selectedDraftIds.length > 0"
+          class="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition-colors"
+          @click="bulkDelete"
+        >
+          <BaseIcon name="TrashIcon" class="h-4 w-4" />
+          {{ t('delete') || 'Избриши' }} ({{ selectedDraftIds.length }})
+        </button>
+
+        <button
+          v-if="selectedArchivableIds.length > 0"
+          class="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+          @click="bulkArchive"
+        >
+          <BaseIcon name="ArchiveBoxIcon" class="h-4 w-4" />
+          {{ t('archive') || 'Архивирај' }} ({{ selectedArchivableIds.length }})
+        </button>
+
+        <button
+          class="ml-2 rounded-md p-1 text-gray-400 hover:text-white transition-colors"
+          @click="selectedIds = []"
+        >
+          <BaseIcon name="XMarkIcon" class="h-5 w-5" />
+        </button>
+      </div>
+    </transition>
+
+    <!-- Dropdown Backdrop (click-outside handler) -->
+    <div
+      v-if="openDropdownId !== null"
+      class="fixed inset-0 z-20"
+      @click="openDropdownId = null"
+    ></div>
+
   </BasePage>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { useI18n } from 'vue-i18n'
 import { debounce } from 'lodash'
 import budgetMessages from '@/scripts/admin/i18n/budgets.js'
 
+const router = useRouter()
 const notificationStore = useNotificationStore()
 const dialogStore = useDialogStore()
 const { t: $t } = useI18n()
@@ -254,10 +430,16 @@ const isLoading = ref(false)
 const filterStatus = ref('')
 const filterYear = ref('')
 const filterScenario = ref('')
+const filterCostCenter = ref('')
 const searchQuery = ref('')
 const deletingBudget = ref(null)
 const currentPage = ref(1)
 const perPage = 15
+
+// UX State
+const showFilters = ref(false)
+const selectedIds = ref([])
+const openDropdownId = ref(null)
 
 // Computed
 const currentYear = new Date().getFullYear()
@@ -269,25 +451,50 @@ const yearOptions = computed(() => {
   return years
 })
 
-const activeBudgetsCount = computed(() => {
-  return budgets.value.filter(b => b.status === 'approved' || b.status === 'draft').length
+const costCenterOptions = computed(() => {
+  const seen = new Map()
+  for (const b of budgets.value) {
+    if (b.cost_center && !seen.has(b.cost_center.id)) {
+      seen.set(b.cost_center.id, b.cost_center)
+    }
+  }
+  return Array.from(seen.values())
 })
 
-const currentYearCount = computed(() => {
-  return budgets.value.filter(b => {
-    const startYear = new Date(b.start_date).getFullYear()
-    const endYear = new Date(b.end_date).getFullYear()
-    return startYear <= currentYear && endYear >= currentYear
-  }).length
+const activeFilterCount = computed(() => {
+  let count = 0
+  if (filterStatus.value) count++
+  if (filterYear.value) count++
+  if (filterScenario.value) count++
+  if (filterCostCenter.value) count++
+  return count
+})
+
+const totalBudgetedAmount = computed(() => {
+  return budgets.value.reduce((sum, b) => sum + Number(b.total_amount || 0), 0)
+})
+
+const draftCount = computed(() => {
+  return budgets.value.filter(b => b.status === 'draft').length
+})
+
+const activeBudgetsCount = computed(() => {
+  return budgets.value.filter(b => b.status === 'approved' || b.status === 'locked').length
 })
 
 const filteredBudgets = computed(() => {
-  if (!searchQuery.value) return budgets.value
-  const q = searchQuery.value.toLowerCase()
-  return budgets.value.filter(b => {
-    return (b.name && b.name.toLowerCase().includes(q))
-      || (b.number && b.number.toLowerCase().includes(q))
-  })
+  let result = budgets.value
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(b => {
+      return (b.name && b.name.toLowerCase().includes(q))
+        || (b.number && b.number.toLowerCase().includes(q))
+    })
+  }
+  if (filterCostCenter.value) {
+    result = result.filter(b => b.cost_center && b.cost_center.id === Number(filterCostCenter.value))
+  }
+  return result
 })
 
 const totalPages = computed(() => {
@@ -297,6 +504,30 @@ const totalPages = computed(() => {
 const paginatedBudgets = computed(() => {
   const start = (currentPage.value - 1) * perPage
   return filteredBudgets.value.slice(start, start + perPage)
+})
+
+// Bulk selection computed
+const allSelected = computed(() => {
+  if (paginatedBudgets.value.length === 0) return false
+  return paginatedBudgets.value.every(b => selectedIds.value.includes(b.id))
+})
+
+const someSelected = computed(() => {
+  return paginatedBudgets.value.some(b => selectedIds.value.includes(b.id))
+})
+
+const selectedDraftIds = computed(() => {
+  return selectedIds.value.filter(id => {
+    const b = budgets.value.find(x => x.id === id)
+    return b && b.status === 'draft'
+  })
+})
+
+const selectedArchivableIds = computed(() => {
+  return selectedIds.value.filter(id => {
+    const b = budgets.value.find(x => x.id === id)
+    return b && (b.status === 'approved' || b.status === 'locked')
+  })
 })
 
 // Reset to page 1 when search changes
@@ -313,7 +544,7 @@ const debouncedLoad = debounce(() => {
   loadBudgets()
 }, 300)
 
-watch([filterStatus, filterYear, filterScenario], () => {
+watch([filterStatus, filterYear, filterScenario, filterCostCenter], () => {
   currentPage.value = 1
   debouncedLoad()
 })
@@ -329,6 +560,7 @@ async function loadBudgets() {
 
     const response = await window.axios.get('/budgets', { params })
     budgets.value = response.data?.data || []
+    selectedIds.value = []
   } catch (error) {
     notificationStore.showNotification({
       type: 'error',
@@ -337,6 +569,13 @@ async function loadBudgets() {
   } finally {
     isLoading.value = false
   }
+}
+
+function clearFilters() {
+  filterStatus.value = ''
+  filterYear.value = ''
+  filterScenario.value = ''
+  filterCostCenter.value = ''
 }
 
 function formatDate(dateStr) {
@@ -390,46 +629,106 @@ function scenarioBadgeClass(scenario) {
   return classes[scenario] || 'bg-gray-100 text-gray-600'
 }
 
-function exportCsv() {
-  const rows = filteredBudgets.value
-  if (!rows.length) return
-
-  const headers = [
-    t('budget_number'),
-    t('name'),
-    t('period'),
-    t('scenario'),
-    t('status'),
-    t('total_amount'),
-    t('cost_center'),
-    t('created_by_label'),
-  ]
-
-  const csvRows = [headers.join(',')]
-  for (const b of rows) {
-    const row = [
-      b.number || '',
-      `"${(b.name || '').replace(/"/g, '""')}"`,
-      `${b.start_date || ''} - ${b.end_date || ''}`,
-      b.scenario || '',
-      b.status || '',
-      b.total_amount || 0,
-      b.cost_center ? `"${b.cost_center.name}"` : '',
-      b.created_by_user ? `"${b.created_by_user.name}"` : '',
-    ]
-    csvRows.push(row.join(','))
+// Selection
+function toggleSelectAll() {
+  if (allSelected.value) {
+    const pageIds = paginatedBudgets.value.map(b => b.id)
+    selectedIds.value = selectedIds.value.filter(id => !pageIds.includes(id))
+  } else {
+    const pageIds = paginatedBudgets.value.map(b => b.id)
+    const merged = new Set([...selectedIds.value, ...pageIds])
+    selectedIds.value = Array.from(merged)
   }
+}
 
-  const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `budgets-${new Date().toISOString().slice(0, 10)}.csv`
-  link.click()
-  URL.revokeObjectURL(url)
+function toggleSelect(id) {
+  const idx = selectedIds.value.indexOf(id)
+  if (idx >= 0) {
+    selectedIds.value.splice(idx, 1)
+  } else {
+    selectedIds.value.push(id)
+  }
+}
+
+// Row action dropdown
+function toggleDropdown(id) {
+  openDropdownId.value = openDropdownId.value === id ? null : id
+}
+
+function goTo(routeName, id) {
+  openDropdownId.value = null
+  router.push({ name: routeName, params: { id } })
+}
+
+// Actions
+async function cloneBudget(id) {
+  openDropdownId.value = null
+  try {
+    await window.axios.post(`/budgets/${id}/clone`)
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('cloned_success') || 'Budget cloned successfully',
+    })
+    await loadBudgets()
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.error || t('error_loading'),
+    })
+  }
+}
+
+async function archiveBudget(id) {
+  openDropdownId.value = null
+  dialogStore
+    .openDialog({
+      title: $t('general.are_you_sure'),
+      message: t('confirm_archive') || 'Archive this budget?',
+      yesLabel: $t('general.ok'),
+      noLabel: $t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        try {
+          await window.axios.post(`/budgets/${id}/archive`)
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('archived_success') || 'Budget archived successfully',
+          })
+          await loadBudgets()
+        } catch (error) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.error || t('error_loading'),
+          })
+        }
+      }
+    })
+}
+
+async function exportPdf(id) {
+  openDropdownId.value = null
+  try {
+    const response = await window.axios.get(`/budgets/${id}/pdf`, { responseType: 'blob' })
+    const url = URL.createObjectURL(response.data)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `budget-${id}.pdf`
+    link.click()
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.error || t('error_loading'),
+    })
+  }
 }
 
 function confirmDelete(budget) {
+  openDropdownId.value = null
   deletingBudget.value = budget
   dialogStore
     .openDialog({
@@ -450,6 +749,79 @@ function confirmDelete(budget) {
             message: t('deleted_success') || 'Deleted successfully',
           })
           deletingBudget.value = null
+          await loadBudgets()
+        } catch (error) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.error || t('error_loading'),
+          })
+        }
+      }
+    })
+}
+
+// Bulk actions
+function bulkDelete() {
+  const ids = [...selectedDraftIds.value]
+  if (!ids.length) return
+
+  dialogStore
+    .openDialog({
+      title: $t('general.are_you_sure'),
+      message: (t('confirm_bulk_delete') || 'Delete {count} draft budgets?').replace('{count}', ids.length),
+      yesLabel: $t('general.ok'),
+      noLabel: $t('general.cancel'),
+      variant: 'danger',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        try {
+          for (const id of ids) {
+            await window.axios.delete(`/budgets/${id}`)
+          }
+          notificationStore.showNotification({
+            type: 'success',
+            message: (t('bulk_deleted_success') || '{count} budgets deleted').replace('{count}', ids.length),
+          })
+          selectedIds.value = []
+          await loadBudgets()
+        } catch (error) {
+          notificationStore.showNotification({
+            type: 'error',
+            message: error.response?.data?.error || t('error_loading'),
+          })
+        }
+      }
+    })
+}
+
+function bulkArchive() {
+  const ids = [...selectedArchivableIds.value]
+  if (!ids.length) return
+
+  dialogStore
+    .openDialog({
+      title: $t('general.are_you_sure'),
+      message: (t('confirm_bulk_archive') || 'Archive {count} budgets?').replace('{count}', ids.length),
+      yesLabel: $t('general.ok'),
+      noLabel: $t('general.cancel'),
+      variant: 'primary',
+      hideNoButton: false,
+      size: 'lg',
+    })
+    .then(async (res) => {
+      if (res) {
+        try {
+          for (const id of ids) {
+            await window.axios.post(`/budgets/${id}/archive`)
+          }
+          notificationStore.showNotification({
+            type: 'success',
+            message: (t('bulk_archived_success') || '{count} budgets archived').replace('{count}', ids.length),
+          })
+          selectedIds.value = []
           await loadBudgets()
         } catch (error) {
           notificationStore.showNotification({

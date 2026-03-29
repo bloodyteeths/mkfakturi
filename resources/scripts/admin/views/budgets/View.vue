@@ -2,7 +2,8 @@
   <BasePage>
     <BasePageHeader :title="budget ? budget.name : t('view')">
       <template #actions>
-        <div v-if="budget" class="flex items-center space-x-2">
+        <div v-if="budget" class="flex items-center space-x-3">
+          <!-- Status badge -->
           <span
             class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
             :class="statusBadgeClass(budget.status)"
@@ -10,17 +11,7 @@
             {{ statusLabel(budget.status) }}
           </span>
 
-          <BaseButton
-            v-if="budget.status === 'draft'"
-            variant="primary-outline"
-            @click="$router.push({ name: 'budgets.edit', params: { id: budget.id } })"
-          >
-            <template #left="slotProps">
-              <BaseIcon :class="slotProps.class" name="PencilSquareIcon" />
-            </template>
-            {{ t('edit') }}
-          </BaseButton>
-
+          <!-- Primary action: next status transition -->
           <BaseButton
             v-if="budget.status === 'draft'"
             variant="primary"
@@ -31,7 +22,7 @@
 
           <BaseButton
             v-if="budget.status === 'approved'"
-            variant="primary-outline"
+            variant="primary"
             @click="confirmLock"
           >
             <template #left="slotProps">
@@ -40,47 +31,106 @@
             {{ t('lock') }}
           </BaseButton>
 
-          <BaseButton
-            v-if="budget.status === 'approved' || budget.status === 'locked'"
-            variant="primary-outline"
-            @click="confirmArchive"
-          >
-            {{ t('archive') || 'Архивирај' }}
-          </BaseButton>
+          <!-- More dropdown -->
+          <div class="relative">
+            <BaseButton
+              variant="primary-outline"
+              @click="showMoreMenu = !showMoreMenu"
+            >
+              <template #left="slotProps">
+                <BaseIcon :class="slotProps.class" name="EllipsisVerticalIcon" />
+              </template>
+              {{ t('more') || 'Повеќе' }}
+            </BaseButton>
 
-          <BaseButton
-            variant="primary-outline"
-            @click="exportCsv"
-          >
-            CSV
-          </BaseButton>
+            <!-- Backdrop to close menu on outside click -->
+            <div
+              v-show="showMoreMenu"
+              class="fixed inset-0 z-10"
+              @click="showMoreMenu = false"
+            ></div>
 
-          <BaseButton
-            variant="primary-outline"
-            @click="exportPdf"
-          >
-            PDF
-          </BaseButton>
+            <!-- Dropdown menu -->
+            <div
+              v-show="showMoreMenu"
+              class="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20"
+            >
+              <!-- Edit (draft only) -->
+              <button
+                v-if="budget.status === 'draft'"
+                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                @click="showMoreMenu = false; $router.push({ name: 'budgets.edit', params: { id: budget.id } })"
+              >
+                <BaseIcon class="h-4 w-4 mr-2 text-gray-400" name="PencilSquareIcon" />
+                {{ t('edit') }}
+              </button>
 
-          <BaseButton
-            v-if="comparison && (budget.status === 'approved' || budget.status === 'locked')"
-            variant="primary-outline"
-            @click="exportComparisonPdf"
-          >
-            {{ t('export_comparison_pdf') }}
-          </BaseButton>
+              <!-- Clone (always) -->
+              <button
+                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                @click="showMoreMenu = false; cloneBudget()"
+              >
+                <BaseIcon class="h-4 w-4 mr-2 text-gray-400" name="DocumentDuplicateIcon" />
+                {{ t('clone') || 'Клонирај' }}
+              </button>
 
-          <BaseButton
-            v-if="budget.status !== 'locked' && budget.status !== 'archived'"
-            variant="danger"
-            @click="confirmDelete"
-          >
-            <template #left="slotProps">
-              <BaseIcon :class="slotProps.class" name="TrashIcon" />
-            </template>
-            {{ t('delete') }}
-          </BaseButton>
+              <div class="border-t border-gray-100 my-1"></div>
 
+              <!-- Export CSV -->
+              <button
+                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                @click="showMoreMenu = false; exportCsv()"
+              >
+                <BaseIcon class="h-4 w-4 mr-2 text-gray-400" name="TableCellsIcon" />
+                CSV
+              </button>
+
+              <!-- Export PDF -->
+              <button
+                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                @click="showMoreMenu = false; exportPdf()"
+              >
+                <BaseIcon class="h-4 w-4 mr-2 text-gray-400" name="DocumentTextIcon" />
+                PDF
+              </button>
+
+              <!-- Export Comparison PDF (only if comparison exists) -->
+              <button
+                v-if="comparison && (budget.status === 'approved' || budget.status === 'locked')"
+                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                @click="showMoreMenu = false; exportComparisonPdf()"
+              >
+                <BaseIcon class="h-4 w-4 mr-2 text-gray-400" name="ChartBarIcon" />
+                {{ t('export_comparison_pdf') }}
+              </button>
+
+              <!-- Archive (approved/locked) -->
+              <template v-if="budget.status === 'approved' || budget.status === 'locked'">
+                <div class="border-t border-gray-100 my-1"></div>
+                <button
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                  @click="showMoreMenu = false; confirmArchive()"
+                >
+                  <BaseIcon class="h-4 w-4 mr-2 text-gray-400" name="ArchiveBoxIcon" />
+                  {{ t('archive') || 'Архивирај' }}
+                </button>
+              </template>
+
+              <!-- Delete (draft only, danger) -->
+              <template v-if="budget.status === 'draft'">
+                <div class="border-t border-gray-100 my-1"></div>
+                <button
+                  class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                  @click="showMoreMenu = false; confirmDelete()"
+                >
+                  <BaseIcon class="h-4 w-4 mr-2 text-red-400" name="TrashIcon" />
+                  {{ t('delete') }}
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <!-- Back button -->
           <BaseButton variant="primary-outline" @click="$router.push({ name: 'budgets.index' })">
             {{ $t('general.back') }}
           </BaseButton>
@@ -100,6 +150,46 @@
     </div>
 
     <template v-else-if="budget">
+      <!-- Status Timeline Breadcrumb -->
+      <div class="bg-white rounded-lg shadow px-6 py-4 mb-6">
+        <div class="flex items-center justify-between max-w-lg mx-auto">
+          <template v-for="(step, idx) in statusSteps" :key="step.key">
+            <!-- Step circle + label -->
+            <div class="flex flex-col items-center">
+              <div
+                class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 transition-colors"
+                :class="stepCircleClass(step.key)"
+              >
+                <!-- Completed: green checkmark -->
+                <svg
+                  v-if="isStepCompleted(step.key)"
+                  class="w-4 h-4 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="3"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span v-else>{{ idx + 1 }}</span>
+              </div>
+              <span
+                class="text-xs mt-1 font-medium"
+                :class="isStepCurrent(step.key) ? 'text-primary-500' : isStepCompleted(step.key) ? 'text-green-600' : 'text-gray-400'"
+              >
+                {{ step.label }}
+              </span>
+            </div>
+            <!-- Connecting line -->
+            <div
+              v-if="idx < statusSteps.length - 1"
+              class="flex-1 h-0.5 mx-2 mb-5"
+              :class="isStepCompleted(statusSteps[idx + 1].key) || isStepCurrent(statusSteps[idx + 1].key) ? 'bg-green-400' : 'bg-gray-200'"
+            ></div>
+          </template>
+        </div>
+      </div>
+
       <!-- Budget Info Card -->
       <div class="bg-white rounded-lg shadow p-6 mb-6">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -303,6 +393,39 @@ function periodTypeLabel(periodType) {
 const budget = ref(null)
 const comparison = ref(null)
 const isLoading = ref(false)
+const showMoreMenu = ref(false)
+
+// Status timeline steps
+const statusSteps = [
+  { key: 'draft', label: t('draft') },
+  { key: 'approved', label: t('approved') },
+  { key: 'locked', label: t('locked') },
+  { key: 'archived', label: t('archived') },
+]
+
+const statusOrder = ['draft', 'approved', 'locked', 'archived']
+
+function isStepCompleted(stepKey) {
+  if (!budget.value) return false
+  const currentIdx = statusOrder.indexOf(budget.value.status)
+  const stepIdx = statusOrder.indexOf(stepKey)
+  return stepIdx < currentIdx
+}
+
+function isStepCurrent(stepKey) {
+  if (!budget.value) return false
+  return budget.value.status === stepKey
+}
+
+function stepCircleClass(stepKey) {
+  if (isStepCompleted(stepKey)) {
+    return 'bg-green-500 border-green-500 text-white'
+  }
+  if (isStepCurrent(stepKey)) {
+    return 'bg-primary-500 border-primary-500 text-white'
+  }
+  return 'bg-white border-gray-300 text-gray-400'
+}
 
 // Computed
 const sortedLines = computed(() => {
@@ -581,6 +704,25 @@ function confirmArchive() {
         }
       }
     })
+}
+
+async function cloneBudget() {
+  try {
+    const response = await window.axios.post(`/budgets/${budget.value.id}/clone`)
+    const newId = response.data?.data?.id
+    if (newId) {
+      notificationStore.showNotification({
+        type: 'success',
+        message: t('clone_success') || 'Budget cloned successfully',
+      })
+      router.push({ name: 'budgets.view', params: { id: newId } })
+    }
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.error || t('error_loading'),
+    })
+  }
 }
 </script>
 
