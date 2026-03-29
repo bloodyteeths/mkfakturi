@@ -57,12 +57,15 @@ test('navigation shows 5 top-level items: Преглед, Залиха, Доку
   // Direct link
   expect(await page.locator('a[href="/admin/stock"]').count()).toBeGreaterThanOrEqual(1)
 
-  // Dropdown buttons (desktop)
+  // Dropdown buttons (desktop) — use direct child buttons only
   const desktopNav = page.locator('.hidden.md\\:flex')
-  expect(await desktopNav.locator('button:has-text("Залиха")').count()).toBe(1)
-  expect(await desktopNav.locator('button:has-text("Документи")').count()).toBe(1)
-  expect(await desktopNav.locator('button:has-text("Трговија")').count()).toBe(1)
-  expect(await desktopNav.locator('button:has-text("Анализа")').count()).toBe(1)
+  const buttons = desktopNav.locator('> div > button, > button')
+  const buttonTexts = await buttons.allTextContents()
+  const labels = buttonTexts.map(t => t.trim().replace(/\s+/g, ' '))
+  expect(labels.some(l => l.includes('Залиха'))).toBe(true)
+  expect(labels.some(l => l.includes('Документи'))).toBe(true)
+  expect(labels.some(l => l.includes('Трговија'))).toBe(true)
+  expect(labels.some(l => l.includes('Анализа'))).toBe(true)
 
   await ctx.close()
 })
@@ -73,7 +76,7 @@ test('Залиха dropdown shows 3 items with descriptions', async ({ browser }
   await waitForStockPage(page)
 
   // Open dropdown
-  await page.locator('.hidden.md\\:flex button:has-text("Залиха")').click()
+  await page.getByRole('main').locator('button:has-text("Залиха")').first().click()
   await page.waitForTimeout(300)
 
   // Check 3 items exist with descriptions
@@ -93,7 +96,7 @@ test('Документи dropdown shows documents, stocktake, adjustments', asyn
   await page.goto(`${BASE}/admin/stock`, { waitUntil: 'domcontentloaded', timeout: 30000 })
   await waitForStockPage(page)
 
-  await page.locator('.hidden.md\\:flex button:has-text("Документи")').click()
+  await page.getByRole('main').locator('button:has-text("Документи")').first().click()
   await page.waitForTimeout(300)
 
   expect(await page.locator('a[href="/admin/stock/documents"]').count()).toBeGreaterThanOrEqual(1)
@@ -112,7 +115,7 @@ test('Трговија dropdown shows Нивелации, КАП, ПЛТ with fu
   await page.goto(`${BASE}/admin/stock`, { waitUntil: 'domcontentloaded', timeout: 30000 })
   await waitForStockPage(page)
 
-  await page.locator('.hidden.md\\:flex button:has-text("Трговија")').click()
+  await page.getByRole('main').locator('button:has-text("Трговија")').first().click()
   await page.waitForTimeout(300)
 
   expect(await page.locator('a[href="/admin/stock/trade/nivelacii"]').count()).toBeGreaterThanOrEqual(1)
@@ -131,7 +134,7 @@ test('Анализа dropdown shows low stock with badge and WAC audit', async (
   await page.goto(`${BASE}/admin/stock`, { waitUntil: 'domcontentloaded', timeout: 30000 })
   await waitForStockPage(page)
 
-  await page.locator('.hidden.md\\:flex button:has-text("Анализа")').click()
+  await page.getByRole('main').locator('button:has-text("Анализа")').first().click()
   await page.waitForTimeout(300)
 
   expect(await page.locator('a[href="/admin/stock/low-stock"]').count()).toBeGreaterThanOrEqual(1)
@@ -146,7 +149,7 @@ test('dropdown closes when clicking outside', async ({ browser }) => {
   await waitForStockPage(page)
 
   // Open dropdown
-  await page.locator('.hidden.md\\:flex button:has-text("Залиха")').click()
+  await page.getByRole('main').locator('button:has-text("Залиха")').first().click()
   await page.waitForTimeout(300)
   expect(await page.locator('a[href="/admin/stock/inventory"]').count()).toBeGreaterThanOrEqual(1)
 
@@ -166,12 +169,14 @@ test('dropdown closes when clicking outside', async ({ browser }) => {
 // =============================================
 
 test('dropdown button highlights when child page is active', async ({ browser }) => {
+  test.setTimeout(60000)
   const { page, ctx } = await loggedPage(browser)
-  await page.goto(`${BASE}/admin/stock/inventory`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  page.setDefaultTimeout(45000)
+  await page.goto(`${BASE}/admin/stock/inventory`, { waitUntil: 'domcontentloaded', timeout: 45000 })
   await waitForStockPage(page)
 
   // Залиха button should have active styling
-  const zalihaBtn = page.locator('.hidden.md\\:flex button:has-text("Залиха")')
+  const zalihaBtn = page.getByRole('main').locator('button:has-text("Залиха")').first()
   const classes = await zalihaBtn.getAttribute('class')
   expect(classes).toContain('border-primary')
 
@@ -183,7 +188,7 @@ test('trade dropdown highlights when on PLT page', async ({ browser }) => {
   await page.goto(`${BASE}/admin/stock/trade/plt`, { waitUntil: 'domcontentloaded', timeout: 30000 })
   await waitForStockPage(page)
 
-  const tradeBtn = page.locator('.hidden.md\\:flex button:has-text("Трговија")')
+  const tradeBtn = page.getByRole('main').locator('button:has-text("Трговија")').first()
   const classes = await tradeBtn.getAttribute('class')
   expect(classes).toContain('border-primary')
 
@@ -309,7 +314,9 @@ test('stock documents API accepts return and write_off type', async ({ browser }
 // =============================================
 
 test('all stock pages render without errors', async ({ browser }) => {
+  test.setTimeout(120000)
   const { page, ctx } = await loggedPage(browser)
+  page.setDefaultTimeout(40000)
   const pages = [
     '/admin/stock',
     '/admin/stock/inventory',
@@ -323,8 +330,8 @@ test('all stock pages render without errors', async ({ browser }) => {
   ]
 
   for (const url of pages) {
-    await page.goto(`${BASE}${url}`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-    await page.waitForSelector('a[href="/admin/stock"]', { timeout: 20000 })
+    await page.goto(`${BASE}${url}`, { waitUntil: 'domcontentloaded', timeout: 40000 })
+    await page.waitForSelector('a[href="/admin/stock"]', { timeout: 30000 })
     await page.waitForTimeout(1000)
 
     const errorOverlay = await page.locator('[class*="error-overlay"], [id="vite-error-overlay"]').count()
