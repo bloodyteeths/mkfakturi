@@ -27,13 +27,17 @@ class ProcessAffiliatePayouts extends Command
      *
      * @var string
      */
-    protected $description = 'Process monthly affiliate payouts for eligible partners';
+    protected $description = '[DEPRECATED] Use partner:process-payouts instead. Process monthly affiliate payouts for eligible partners.';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
+        $this->warn('⚠ DEPRECATED: This command is superseded by partner:process-payouts which includes credit wallet deductions and Stripe Connect support.');
+        $this->warn('  Run: php artisan partner:process-payouts');
+        $this->newLine();
+
         $this->info('Starting affiliate payout processing...');
 
         // Determine target month
@@ -196,9 +200,10 @@ class ProcessAffiliatePayouts extends Command
                 $payout = Payout::create([
                     'partner_id' => $partner->id,
                     'amount' => $amount,
+                    'currency' => 'MKD',
                     'status' => 'pending',
                     'payout_date' => Carbon::now()->addDays(config('affiliate.payout_day', 5)),
-                    'payment_method' => null, // To be set by admin
+                    'payout_method' => 'bank_transfer',
                     'details' => [
                         'month_ref' => $monthRef,
                         'event_count' => $events->count(),

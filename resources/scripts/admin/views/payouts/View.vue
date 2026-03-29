@@ -21,7 +21,18 @@
           </BaseButton>
 
           <BaseButton
-            v-if="payout && payout.status === 'pending'"
+            v-if="payout && (payout.status === 'pending' || payout.status === 'processing')"
+            variant="warning-outline"
+            @click="openMarkFailedModal"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="ExclamationTriangleIcon" :class="slotProps.class" />
+            </template>
+            Mark as Failed
+          </BaseButton>
+
+          <BaseButton
+            v-if="payout && (payout.status === 'pending' || payout.status === 'processing')"
             variant="danger-outline"
             @click="cancelPayout"
           >
@@ -228,6 +239,42 @@
         </BaseButton>
       </template>
     </BaseModal>
+
+    <!-- Mark as Failed Modal -->
+    <BaseModal :show="showFailModal" @close="showFailModal = false">
+      <template #header>
+        <h3 class="text-lg font-medium">Mark Payout as Failed</h3>
+      </template>
+
+      <div class="p-4">
+        <p class="mb-4 text-sm text-gray-600">
+          Mark payout of <strong>{{ payout?.amount }} {{ payout?.currency || 'MKD' }}</strong>
+          to <strong>{{ payout?.partner_name }}</strong> as failed.
+        </p>
+
+        <BaseInputGroup label="Failure Reason" class="text-left">
+          <BaseInput
+            v-model="failReason"
+            type="text"
+            placeholder="e.g. Bank rejected transfer, incorrect IBAN..."
+          />
+        </BaseInputGroup>
+      </div>
+
+      <template #footer>
+        <BaseButton variant="primary-outline" class="mr-3" @click="showFailModal = false">
+          Cancel
+        </BaseButton>
+        <BaseButton
+          variant="danger"
+          :loading="isProcessing"
+          :disabled="!failReason.trim()"
+          @click="confirmMarkFailed"
+        >
+          Mark as Failed
+        </BaseButton>
+      </template>
+    </BaseModal>
   </BasePage>
 </template>
 
@@ -249,6 +296,8 @@ const isLoading = ref(true)
 const showPayModal = ref(false)
 const paymentReference = ref('')
 const isProcessing = ref(false)
+const showFailModal = ref(false)
+const failReason = ref('')
 
 async function fetchPayout() {
   isLoading.value = true
@@ -289,6 +338,35 @@ async function confirmMarkPaid() {
     notificationStore.showNotification({
       type: 'error',
       message: error.response?.data?.error || 'Failed to mark payout as completed.',
+    })
+  } finally {
+    isProcessing.value = false
+  }
+}
+
+function openMarkFailedModal() {
+  failReason.value = ''
+  showFailModal.value = true
+}
+
+async function confirmMarkFailed() {
+  if (!failReason.value.trim()) return
+
+  isProcessing.value = true
+  try {
+    await axios.post(`/payouts/${payoutId}/fail`, {
+      reason: failReason.value,
+    })
+    notificationStore.showNotification({
+      type: 'success',
+      message: 'Payout marked as failed.',
+    })
+    showFailModal.value = false
+    fetchPayout()
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.error || 'Failed to mark payout as failed.',
     })
   } finally {
     isProcessing.value = false

@@ -26,7 +26,7 @@ class CalculatePayouts extends Command
      *
      * @var string
      */
-    protected $description = 'Calculate and create monthly payouts for verified partners (runs on 5th of each month)';
+    protected $description = '[DEPRECATED] Use partner:process-payouts instead. Calculate and create monthly payouts for verified partners.';
 
     /**
      * Minimum payout threshold (€100)
@@ -38,6 +38,10 @@ class CalculatePayouts extends Command
      */
     public function handle(): int
     {
+        $this->warn('⚠ DEPRECATED: This command is superseded by partner:process-payouts which includes credit wallet deductions and Stripe Connect support.');
+        $this->warn('  Run: php artisan partner:process-payouts');
+        $this->newLine();
+
         $dryRun = $this->option('dry-run');
 
         // Determine month to process (previous month by default)
@@ -101,9 +105,10 @@ class CalculatePayouts extends Command
                     $payout = Payout::create([
                         'partner_id' => $partner->id,
                         'amount' => $totalCommission,
+                        'currency' => 'MKD',
                         'status' => 'pending',
                         'payout_date' => now()->startOfMonth()->addDays(4), // 5th of current month
-                        'payment_method' => 'bank_transfer',
+                        'payout_method' => $partner->stripe_account_id ? 'stripe_connect' : 'bank_transfer',
                         'details' => [
                             'month_ref' => $monthRef,
                             'event_count' => $unpaidEvents->count(),
@@ -214,7 +219,7 @@ class CalculatePayouts extends Command
         fputcsv($csv, [
             'Partner Name',
             'IBAN',
-            'Amount (EUR)',
+            'Amount (MKD)',
             'Reference',
             'Payout ID',
             'Month',
