@@ -44,7 +44,8 @@ class MacedonianPayrollTaxService
     private const DEFAULT_MAX_CONTRIBUTION_BASE = 101046400; // MKD 1,010,464 in cents
 
     // Personal deduction (лично ослободување) — Закон за данокот на личен доход
-    private const DEFAULT_PERSONAL_DEDUCTION = 1027000; // MKD 10,270 in cents
+    // Updated for 2026: verified against UJP МПІН Образец 20848268 (02/2026)
+    private const DEFAULT_PERSONAL_DEDUCTION = 1039000; // MKD 10,390 in cents
 
     /**
      * Calculate payroll from gross salary.
@@ -219,11 +220,20 @@ class MacedonianPayrollTaxService
     }
 
     /**
+     * Round to whole denars (nearest 100 cents) — matches UJP МПИН rounding.
+     * UJP calculates in whole denars, not sub-denar (стотинки) precision.
+     */
+    private function roundToDenar(float $cents): int
+    {
+        return (int) (round($cents / 100) * 100);
+    }
+
+    /**
      * Calculate pension contribution (18.8% of gross — full rate, deducted from gross)
      */
     private function calculatePension(int $grossCents): int
     {
-        return (int) round($grossCents * self::PENSION_RATE);
+        return $this->roundToDenar($grossCents * self::PENSION_RATE);
     }
 
     /**
@@ -231,7 +241,7 @@ class MacedonianPayrollTaxService
      */
     private function calculateHealth(int $grossCents): int
     {
-        return (int) round($grossCents * self::HEALTH_RATE);
+        return $this->roundToDenar($grossCents * self::HEALTH_RATE);
     }
 
     /**
@@ -239,7 +249,7 @@ class MacedonianPayrollTaxService
      */
     private function calculateUnemployment(int $grossCents): int
     {
-        return (int) round($grossCents * self::UNEMPLOYMENT_RATE);
+        return $this->roundToDenar($grossCents * self::UNEMPLOYMENT_RATE);
     }
 
     /**
@@ -247,7 +257,7 @@ class MacedonianPayrollTaxService
      */
     private function calculateAdditionalContribution(int $grossCents): int
     {
-        return (int) round($grossCents * self::ADDITIONAL_CONTRIBUTION_RATE);
+        return $this->roundToDenar($grossCents * self::ADDITIONAL_CONTRIBUTION_RATE);
     }
 
     /**
@@ -255,7 +265,7 @@ class MacedonianPayrollTaxService
      */
     private function calculateIncomeTax(int $taxableBaseCents): int
     {
-        return (int) round($taxableBaseCents * self::INCOME_TAX_RATE);
+        return $this->roundToDenar($taxableBaseCents * self::INCOME_TAX_RATE);
     }
 
     /**

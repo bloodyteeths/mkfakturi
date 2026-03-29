@@ -329,7 +329,7 @@ class UjpEfilingService
 
         // Tax
         $tax = $dom->createElement('Tax');
-        $personalDeduction = $line->personal_deduction ?? config('mk.payroll.personal_deduction', 1027000);
+        $personalDeduction = $line->personal_deduction ?: config('mk.payroll.personal_deduction', 1039000);
         $taxableBase = max(0, $line->gross_salary
             - $line->pension_contribution_employee
             - $line->health_contribution_employee

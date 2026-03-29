@@ -485,7 +485,7 @@ return [
         'national_avg_salary' => 6315400,        // MKD 63,154 in cents
 
         // Personal deduction (лично ослободување) — Закон за данокот на личен доход
-        'personal_deduction' => 1027000,            // MKD 10,270 in cents per month
+        'personal_deduction' => 1039000,            // MKD 10,390 in cents per month (2026, per UJP МПІН)
 
         // Seniority bonus (минат труд) — Колективен договор / Закон за работни односи
         'seniority_rate_per_year' => 0.005,         // 0.5% of gross per year of service
@@ -493,6 +493,20 @@ return [
         // Night work premium (ноќна работа) — Art. 105 Закон за работни односи
         // Hours between 22:00-06:00 get 35% premium (same as regular OT rate)
         'night_work_multiplier' => 1.35,            // 135% of base hourly rate
+
+        // MK Public holidays (Закон за празниците на Република Македонија)
+        // Fixed-date holidays as MM-DD. Variable holidays (Easter, Bajram) not included.
+        'public_holidays' => [
+            '01-01', // Нова Година
+            '01-07', // Божик (Orthodox Christmas)
+            '05-01', // Ден на трудот
+            '05-24', // Св. Кирил и Методиј
+            '08-02', // Ден на Републиката (Илинден)
+            '09-08', // Ден на независноста
+            '10-11', // Ден на народното востание
+            '10-23', // Ден на македонската револуционерна борба
+            '12-08', // Св. Климент Охридски
+        ],
     ],
 
     /*

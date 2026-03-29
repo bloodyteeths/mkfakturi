@@ -304,7 +304,7 @@
                     <td colspan="2">ДАНОЦИ</td>
                 </tr>
                 @php
-                    $personalDeduction = $payrollRunLine->personal_deduction ?: config('mk.payroll.personal_deduction', 1027000);
+                    $personalDeduction = $payrollRunLine->personal_deduction ?: config('mk.payroll.personal_deduction', 1039000);
                     $totalContributions = $payrollRunLine->pension_contribution_employee
                         + $payrollRunLine->health_contribution_employee
                         + $payrollRunLine->unemployment_contribution

@@ -41,23 +41,23 @@ class MacedonianPayrollTaxServiceTest extends TestCase
         $grossCents = 3423500;
         $result = $this->service->calculateFromGross($grossCents);
 
-        // ПИО: 18.8% of 34,235 = 6,436.18 → 6,436
-        $this->assertEquals(643618, $result->pensionEmployee, 'Pension should be 18.8% of gross (UJP: 6,436)');
-        // Здравство: 7.5% of 34,235 = 2,567.63 → 2,568
-        $this->assertEquals(256763, $result->healthEmployee, 'Health should be 7.5% of gross (UJP: 2,568)');
-        // Професионален: 0.5% = 171.18 → 171
-        $this->assertEquals(17118, $result->additionalContribution, 'Professional should be 0.5% (UJP: 171)');
-        // Невработеност: 1.2% = 410.82 → 411
-        $this->assertEquals(41082, $result->unemployment, 'Unemployment should be 1.2% (UJP: 411)');
+        // ПИО: 18.8% of 34,235 = 6,436 (rounded to whole denar per UJP)
+        $this->assertEquals(643600, $result->pensionEmployee, 'Pension should be 18.8% of gross (UJP: 6,436)');
+        // Здравство: 7.5% of 34,235 = 2,568 (rounded to whole denar)
+        $this->assertEquals(256800, $result->healthEmployee, 'Health should be 7.5% of gross (UJP: 2,568)');
+        // Професионален: 0.5% = 171 (rounded to whole denar)
+        $this->assertEquals(17100, $result->additionalContribution, 'Professional should be 0.5% (UJP: 171)');
+        // Невработеност: 1.2% = 411 (rounded to whole denar)
+        $this->assertEquals(41100, $result->unemployment, 'Unemployment should be 1.2% (UJP: 411)');
 
         // Total contributions: 9,586 (28%)
         $totalContribs = $result->getTotalEmployeeContributions();
-        $this->assertEqualsWithDelta(958581, $totalContribs, 100, 'Total contributions ~9,586 MKD');
+        $this->assertEquals(958600, $totalContribs, 'Total contributions 9,586 MKD');
 
-        // Taxable: 34,235 - 9,586 - 10,270 = 14,379
-        // PIT: ~1,426 (UJP shows 1,426)
-        // Net: 34,235 - 9,586 - 1,426 = 23,223 (UJP shows 23,223)
-        $this->assertEqualsWithDelta(2322300, $result->netSalary, 20000, 'Net should be ~23,223 MKD (UJP verified)');
+        // Taxable: 34,235 - 9,586 - 10,390 = 14,259
+        // PIT: 1,426 (10% of 14,259 rounded to whole denar)
+        // Net: 34,235 - 9,586 - 1,426 = 23,223 (matches UJP declaration exactly)
+        $this->assertEquals(2322300, $result->netSalary, 'Net should be 23,223 MKD (UJP verified)');
 
         // Employer cost = gross (no add-on in MK)
         $this->assertEquals($grossCents, $result->totalEmployerCost, 'Employer cost = gross in MK');
@@ -123,32 +123,32 @@ class MacedonianPayrollTaxServiceTest extends TestCase
     public function it_calculates_correct_taxable_base()
     {
         // Taxable = max(0, Gross - 28% contributions - personal deduction)
-        // max(0, 10,000,000 - 2,800,000 - 1,027,000) = 6,173,000
+        // max(0, 10,000,000 - 2,800,000 - 1,039,000) = 6,161,000
         $grossCents = 10000000;
         $result = $this->service->calculateFromGross($grossCents);
 
-        $this->assertEquals(6173000, $result->taxableBase, 'Taxable base = gross - 28% - 10,270');
+        $this->assertEquals(6161000, $result->taxableBase, 'Taxable base = gross - 28% - 10,390');
     }
 
     /** @test */
     public function it_calculates_correct_income_tax()
     {
-        // 10% of 6,173,000 = 617,300
+        // 10% of 6,161,000 = 616,100
         $grossCents = 10000000;
         $result = $this->service->calculateFromGross($grossCents);
 
-        $this->assertEquals(617300, $result->incomeTax, 'Income tax should be 10% of taxable base');
+        $this->assertEquals(616100, $result->incomeTax, 'Income tax should be 10% of taxable base');
     }
 
     /** @test */
     public function it_calculates_correct_net_salary()
     {
         // Net = Gross - contributions - income tax
-        // 10,000,000 - 2,800,000 - 617,300 = 6,582,700
+        // 10,000,000 - 2,800,000 - 616,100 = 6,583,900
         $grossCents = 10000000;
         $result = $this->service->calculateFromGross($grossCents);
 
-        $this->assertEquals(6582700, $result->netSalary, 'Net salary should be 65,827 MKD');
+        $this->assertEquals(6583900, $result->netSalary, 'Net salary should be 65,839 MKD');
     }
 
     /** @test */
@@ -177,9 +177,9 @@ class MacedonianPayrollTaxServiceTest extends TestCase
     {
         // Gross: 100,000 MKD
         // Contributions: 28,000 (28%)
-        // Taxable: 100,000 - 28,000 - 10,270 = 61,730
-        // PIT: 6,173
-        // Net: 100,000 - 28,000 - 6,173 = 65,827
+        // Taxable: 100,000 - 28,000 - 10,390 = 61,610
+        // PIT: 6,161
+        // Net: 100,000 - 28,000 - 6,161 = 65,839
         // Employer cost: 100,000
 
         $grossCents = 10000000;
@@ -187,9 +187,9 @@ class MacedonianPayrollTaxServiceTest extends TestCase
 
         $this->assertEquals(10000000, $result->grossSalary);
         $this->assertEquals(2800000, $result->getTotalEmployeeContributions());
-        $this->assertEquals(6173000, $result->taxableBase);
-        $this->assertEquals(617300, $result->incomeTax);
-        $this->assertEquals(6582700, $result->netSalary);
+        $this->assertEquals(6161000, $result->taxableBase);
+        $this->assertEquals(616100, $result->incomeTax);
+        $this->assertEquals(6583900, $result->netSalary);
         $this->assertEquals(10000000, $result->totalEmployerCost);
     }
 
@@ -197,11 +197,11 @@ class MacedonianPayrollTaxServiceTest extends TestCase
     public function it_calculates_correct_total_deductions()
     {
         // Total deductions = contributions + income tax
-        // 2,800,000 + 617,300 = 3,417,300
+        // 2,800,000 + 616,100 = 3,416,100
         $grossCents = 10000000;
         $result = $this->service->calculateFromGross($grossCents);
 
-        $this->assertEquals(3417300, $result->totalEmployeeDeductions);
+        $this->assertEquals(3416100, $result->totalEmployeeDeductions);
     }
 
     /** @test */
@@ -211,20 +211,20 @@ class MacedonianPayrollTaxServiceTest extends TestCase
         $grossCents = 2000000;
         $result = $this->service->calculateFromGross($grossCents);
 
-        // Contributions on clamped base (3,157,700):
-        // 18.8% = 593,648, 7.5% = 236,828, 1.2% = 37,892, 0.5% = 15,789
-        // Total ≈ 884,157
+        // Contributions on clamped base (3,157,700) with whole-denar rounding:
+        // 18.8% = 593,600, 7.5% = 236,800, 1.2% = 37,900, 0.5% = 15,800
+        // Total = 884,100
         $totalContribs = $result->getTotalEmployeeContributions();
-        $this->assertEqualsWithDelta(884157, $totalContribs, 100, 'Contributions on clamped base');
+        $this->assertEquals(884100, $totalContribs, 'Contributions on clamped base');
 
-        // Taxable: max(0, 2,000,000 - 884,157 - 1,027,000) = 88,843
-        $this->assertEqualsWithDelta(88843, $result->taxableBase, 100);
+        // Taxable: max(0, 2,000,000 - 884,100 - 1,039,000) = 76,900
+        $this->assertEquals(76900, $result->taxableBase);
 
-        // PIT: ~8,884
-        $this->assertEqualsWithDelta(8884, $result->incomeTax, 100);
+        // PIT: 10% of 76,900 = 7,690 → rounded to 7,700
+        $this->assertEquals(7700, $result->incomeTax);
 
-        // Net: 2,000,000 - 884,157 - 8,884 ≈ 1,106,959
-        $this->assertEqualsWithDelta(1106959, $result->netSalary, 200);
+        // Net: 2,000,000 - 884,100 - 7,700 = 1,108,200
+        $this->assertEquals(1108200, $result->netSalary);
     }
 
     /** @test */
@@ -237,14 +237,14 @@ class MacedonianPayrollTaxServiceTest extends TestCase
         // 28% of 200,000 = 56,000
         $this->assertEquals(5600000, $result->getTotalEmployeeContributions());
 
-        // Taxable: 200,000 - 56,000 - 10,270 = 133,730
-        $this->assertEquals(13373000, $result->taxableBase);
+        // Taxable: 200,000 - 56,000 - 10,390 = 133,610
+        $this->assertEquals(13361000, $result->taxableBase);
 
-        // PIT: 13,373
-        $this->assertEquals(1337300, $result->incomeTax);
+        // PIT: 13,361
+        $this->assertEquals(1336100, $result->incomeTax);
 
-        // Net: 200,000 - 56,000 - 13,373 = 130,627
-        $this->assertEquals(13062700, $result->netSalary);
+        // Net: 200,000 - 56,000 - 13,361 = 130,639
+        $this->assertEquals(13063900, $result->netSalary);
 
         // Employer cost = gross
         $this->assertEquals(20000000, $result->totalEmployerCost);
@@ -286,7 +286,7 @@ class MacedonianPayrollTaxServiceTest extends TestCase
         $grossCents = 10000000;
         $netSalary = $this->service->calculateNetSalary($grossCents);
 
-        $this->assertEquals(6582700, $netSalary, 'Net salary shortcut should return 65,827 MKD');
+        $this->assertEquals(6583900, $netSalary, 'Net salary shortcut should return 65,839 MKD');
     }
 
     /** @test */
@@ -309,7 +309,7 @@ class MacedonianPayrollTaxServiceTest extends TestCase
         $this->assertArrayHasKey('netSalary', $breakdown);
         $this->assertArrayHasKey('incomeTax', $breakdown);
         $this->assertEquals(10000000, $breakdown['grossSalary']);
-        $this->assertEquals(6582700, $breakdown['netSalary']);
+        $this->assertEquals(6583900, $breakdown['netSalary']);
     }
 
     /** @test */

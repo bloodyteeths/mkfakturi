@@ -29,10 +29,8 @@ class ContributionBaseCapTest extends TestCase
         $result = $this->service->calculateFromGross(2000000);
 
         // Contributions should be calculated on MIN base (3,157,700 cents), not actual gross
-        // Pension: 3,157,700 * 0.188 = 593,648 (full rate per MK law)
-        $minBase = 3157700;
-        $expectedPension = (int) round($minBase * 0.188);
-        $this->assertEquals($expectedPension, $result->pensionEmployee);
+        // Pension: 3,157,700 * 0.188 = 593,648 → rounded to whole denar = 593,600
+        $this->assertEquals(593600, $result->pensionEmployee);
 
         // But gross and net are based on actual salary
         $this->assertEquals(2000000, $result->grossSalary);
@@ -45,10 +43,8 @@ class ContributionBaseCapTest extends TestCase
         $result = $this->service->calculateFromGross(120000000);
 
         // Contributions should be calculated on MAX base (101,046,400 cents)
-        // In MK, ALL contributions are from gross — no separate employer add-on
-        $maxBase = 101046400;
-        $expectedPension = (int) round($maxBase * 0.188);
-        $this->assertEquals($expectedPension, $result->pensionEmployee);
+        // Pension: 101,046,400 * 0.188 = 18,996,723 → rounded to whole denar = 18,996,700
+        $this->assertEquals(18996700, $result->pensionEmployee);
 
         // No employer contributions in MK model
         $this->assertEquals(0, $result->pensionEmployer);
@@ -61,8 +57,8 @@ class ContributionBaseCapTest extends TestCase
         $result = $this->service->calculateFromGross(6000000);
 
         // Contributions should be calculated on actual gross (full 18.8% rate)
-        $expectedPension = (int) round(6000000 * 0.188);
-        $this->assertEquals($expectedPension, $result->pensionEmployee);
+        // 6,000,000 * 0.188 = 1,128,000 (already whole denars)
+        $this->assertEquals(1128000, $result->pensionEmployee);
     }
 
     /** @test */
@@ -94,14 +90,15 @@ class ContributionBaseCapTest extends TestCase
         // Income tax = 10% of taxable base (taxable base uses actual gross minus capped contributions)
         $this->assertGreaterThan(0, $result->incomeTax);
 
-        // Tax should be based on actual gross minus capped contributions
+        // Tax should be based on actual gross minus capped contributions (whole-denar rounded)
         $maxBase = 101046400;
-        $cappedContributions = (int) round($maxBase * 0.188)  // pension (full rate)
-            + (int) round($maxBase * 0.075) // health (full rate)
-            + (int) round($maxBase * 0.012)  // unemployment
-            + (int) round($maxBase * 0.005); // additional
-        $expectedTaxableBase = max(0, 120000000 - $cappedContributions - 1027000);
-        $expectedTax = (int) round($expectedTaxableBase * 0.10);
+        $roundToDenar = fn($v) => (int) (round($v / 100) * 100);
+        $cappedContributions = $roundToDenar($maxBase * 0.188)  // pension
+            + $roundToDenar($maxBase * 0.075) // health
+            + $roundToDenar($maxBase * 0.012)  // unemployment
+            + $roundToDenar($maxBase * 0.005); // additional
+        $expectedTaxableBase = max(0, 120000000 - $cappedContributions - 1039000);
+        $expectedTax = $roundToDenar($expectedTaxableBase * 0.10);
         $this->assertEquals($expectedTax, $result->incomeTax);
     }
 }
