@@ -23,9 +23,9 @@ trait GeneratesMenuTrait
             // Pre-fetch once: feature flags (cached) and company for tier checks
             $featureFlags = \App\Models\Setting::getFeatureFlags();
             $company = null;
+            $companyId = request()->header('company');
             $currentTier = null;
             if (!$isSuperAdmin) {
-                $companyId = request()->header('company');
                 if ($companyId) {
                     $company = \App\Models\Company::find($companyId);
                     if ($company) {
@@ -35,6 +35,9 @@ trait GeneratesMenuTrait
                 }
             }
             $hierarchy = config('subscriptions.plan_hierarchy', []);
+
+            // Lazy-loaded: whether company has fiscal devices (only queried if needed)
+            $hasFiscalDevices = null;
 
             foreach ($items as $data) {
                 // Super admin only menu items (infrastructure settings)
@@ -65,6 +68,19 @@ trait GeneratesMenuTrait
                                 continue;
                             }
                         }
+                    }
+                }
+
+                // Fiscal device check — hide fiscal menu items if company has no devices
+                $requiresFiscalDevice = $data->data['requires_fiscal_device'] ?? false;
+                if ($requiresFiscalDevice && !$isSuperAdmin) {
+                    if ($hasFiscalDevices === null) {
+                        $hasFiscalDevices = $companyId
+                            ? \App\Models\FiscalDevice::where('company_id', $companyId)->exists()
+                            : false;
+                    }
+                    if (!$hasFiscalDevices) {
+                        continue;
                     }
                 }
 

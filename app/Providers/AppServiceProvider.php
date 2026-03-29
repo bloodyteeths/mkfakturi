@@ -201,7 +201,8 @@ class AppServiceProvider extends ServiceProvider
             ->data('model', $data['model'])
             ->data('group', $data['group'])
             ->data('super_admin_only', $data['super_admin_only'] ?? false)
-            ->data('feature_flag', $data['feature_flag'] ?? false);
+            ->data('feature_flag', $data['feature_flag'] ?? false)
+            ->data('requires_fiscal_device', $data['requires_fiscal_device'] ?? false);
 
         if ($item && !empty($data['submenu'])) {
             $item->data('submenu', $data['submenu']);

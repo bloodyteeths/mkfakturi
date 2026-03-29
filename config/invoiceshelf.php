@@ -636,6 +636,7 @@ return [
             'ability' => 'view-fiscal-monitor',
             'model' => '',
             'feature_flag' => 'accounting_backbone',
+            'requires_fiscal_device' => true,
         ],
         [
             'title' => 'navigation.fiscal_monitor',
@@ -647,6 +648,7 @@ return [
             'ability' => 'view-fiscal-monitor',
             'model' => '',
             'feature_flag' => 'accounting_backbone',
+            'requires_fiscal_device' => true,
         ],
         [
             'title' => 'navigation.payroll',
