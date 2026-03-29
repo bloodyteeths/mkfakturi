@@ -88,11 +88,9 @@ class PayrollReportController extends Controller
             $summary['total_unemployment'] +
             $summary['total_additional'];
 
-        $summary['total_employer_contributions'] = $summary['total_pension_employer'] +
-            $summary['total_health_employer'];
-
-        $summary['total_employer_cost'] = $summary['total_gross'] +
-            $summary['total_employer_contributions'];
+        // MK model: no separate employer contributions — employer cost = gross
+        $summary['total_employer_contributions'] = 0;
+        $summary['total_employer_cost'] = $summary['total_gross'];
 
         return response()->json([
             'data' => $summary,
@@ -165,7 +163,7 @@ class PayrollReportController extends Controller
                 'total_net' => $ytdNet,
                 'total_employer_tax' => $ytdEmployerTax,
                 'total_employee_tax' => $ytdEmployeeTax,
-                'total_employer_cost' => $ytdGross + $ytdEmployerTax,
+                'total_employer_cost' => $ytdGross, // MK: employer cost = gross
                 'payroll_runs_count' => $ytdRuns->count(),
             ],
         ];
@@ -281,7 +279,7 @@ class PayrollReportController extends Controller
                     'total_net' => $runs->sum('total_net'),
                     'total_employer_tax' => $runs->sum('total_employer_tax'),
                     'total_employee_tax' => $runs->sum('total_employee_tax'),
-                    'total_employer_cost' => $runs->sum('total_gross') + $runs->sum('total_employer_tax'),
+                    'total_employer_cost' => $runs->sum('total_gross'), // MK: employer cost = gross
                 ],
             ],
         ]);
@@ -480,6 +478,147 @@ class PayrollReportController extends Controller
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ]);
     }
+    /**
+     * Download Рекапитулар PDF for a payroll run.
+     */
+    public function downloadRekapitular(PayrollRun $payrollRun)
+    {
+        $this->authorize('view', $payrollRun);
+
+        $documentService = app(\Modules\Mk\Payroll\Services\PayrollDocumentService::class);
+        $pdf = $documentService->generateRekapitular($payrollRun);
+
+        $filename = sprintf('rekapitular_%d_%02d.pdf', $payrollRun->period_year, $payrollRun->period_month);
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Download PP50 payment slip PDF for a specific contribution type.
+     *
+     * In MK, ALL contributions are deducted from gross — no employer add-on.
+     * Types: pio (pension 18.8%), health (7.5%), unemployment (1.2%), additional (0.5%)
+     */
+    public function downloadPP50(PayrollRun $payrollRun, string $type)
+    {
+        $this->authorize('view', $payrollRun);
+
+        $payrollRun->load(['lines' => fn ($q) => $q->included(), 'company']);
+        $company = $payrollRun->company;
+
+        // Map type to contribution column and revenue code
+        $typeMap = [
+            'pio' => [
+                'column' => 'pension_contribution_employee',
+                'revenue_code' => '722315',
+                'label' => 'Придонес за ПИО (18.8%)',
+            ],
+            'health' => [
+                'column' => 'health_contribution_employee',
+                'revenue_code' => '722313',
+                'label' => 'Придонес за здравство (7.5%)',
+            ],
+            'unemployment' => [
+                'column' => 'unemployment_contribution',
+                'revenue_code' => '722316',
+                'label' => 'Придонес за вработување (1.2%)',
+            ],
+            'additional' => [
+                'column' => 'additional_contribution',
+                'revenue_code' => '722317',
+                'label' => 'Додатен придонес (0.5%)',
+            ],
+        ];
+
+        if (! isset($typeMap[$type])) {
+            return response()->json(['error' => 'Invalid PP50 type.'], 422);
+        }
+
+        $config = $typeMap[$type];
+        $column = $config['column'];
+        $totalAmount = $payrollRun->lines->sum($column);
+
+        if ($totalAmount <= 0) {
+            return response()->json(['error' => 'No amount for this contribution type.'], 422);
+        }
+
+        // Get company bank account
+        $bankAccount = \App\Models\BankAccount::where('company_id', $company->id)
+            ->orderBy('id')
+            ->first();
+
+        $period = sprintf('%02d/%d', $payrollRun->period_month, $payrollRun->period_year);
+
+        $pp50Service = app(\Modules\Mk\Services\Pp50PdfService::class);
+        $pdf = $pp50Service->generate([
+            'debtor_name' => $company->name,
+            'debtor_iban' => $bankAccount?->iban ?? $bankAccount?->account_number ?? '',
+            'debtor_bank' => $bankAccount?->bank_name ?? '',
+            'creditor_name' => 'Управа за јавни приходи',
+            'creditor_iban' => '',
+            'creditor_bank' => '',
+            'amount' => $totalAmount,
+            'currency_code' => 'MKD',
+            'revenue_code' => $config['revenue_code'],
+            'municipality_code' => $company->municipality_code ?? '80',
+            'payment_reference' => '',
+            'description' => $config['label'] . ' - ' . $period,
+            'date' => now()->format('d.m.Y'),
+        ]);
+
+        $filename = sprintf('PP50_%s_%d_%02d.pdf', $type, $payrollRun->period_year, $payrollRun->period_month);
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Download PP30 payment slip PDF for income tax (ДЛД).
+     *
+     * Income tax uses PP30 (not PP50) because it's not a social contribution
+     * — it's Данок на личен доход, revenue code 713111.
+     */
+    public function downloadPP30(PayrollRun $payrollRun)
+    {
+        $this->authorize('view', $payrollRun);
+
+        $payrollRun->load(['lines' => fn ($q) => $q->included(), 'company']);
+        $company = $payrollRun->company;
+
+        $totalIncomeTax = $payrollRun->lines->sum('income_tax_amount');
+
+        if ($totalIncomeTax <= 0) {
+            return response()->json(['error' => 'No income tax amount.'], 422);
+        }
+
+        // Get company bank account
+        $bankAccount = \App\Models\BankAccount::where('company_id', $company->id)
+            ->orderBy('id')
+            ->first();
+
+        $period = sprintf('%02d/%d', $payrollRun->period_month, $payrollRun->period_year);
+
+        // Use PP50 service since income tax is also a budget payment (revenue code 713111)
+        $pp50Service = app(\Modules\Mk\Services\Pp50PdfService::class);
+        $pdf = $pp50Service->generate([
+            'debtor_name' => $company->name,
+            'debtor_iban' => $bankAccount?->iban ?? $bankAccount?->account_number ?? '',
+            'debtor_bank' => $bankAccount?->bank_name ?? '',
+            'creditor_name' => 'Управа за јавни приходи',
+            'creditor_iban' => '',
+            'creditor_bank' => '',
+            'amount' => $totalIncomeTax,
+            'currency_code' => 'MKD',
+            'revenue_code' => '713111',
+            'municipality_code' => $company->municipality_code ?? '80',
+            'payment_reference' => '',
+            'description' => 'Данок на личен доход (ДЛД 10%) - ' . $period,
+            'date' => now()->format('d.m.Y'),
+        ]);
+
+        $filename = sprintf('PP30_DLD_%d_%02d.pdf', $payrollRun->period_year, $payrollRun->period_month);
+
+        return $pdf->download($filename);
+    }
 }
 
-// LLM-CHECKPOINT
+// CLAUDE-CHECKPOINT

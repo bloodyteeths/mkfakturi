@@ -96,34 +96,29 @@
             {{ $t('payroll.rekapitular') }}
           </BaseDropdownItem>
 
-          <BaseDropdownItem @click="downloadPP50('pio_ee')">
+          <BaseDropdownItem @click="downloadPP50('pio')">
             <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP50 PIO EE
+            PP50 ПИО (18.8%)
           </BaseDropdownItem>
 
-          <BaseDropdownItem @click="downloadPP50('pio_er')">
+          <BaseDropdownItem @click="downloadPP50('health')">
             <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP50 PIO ER
-          </BaseDropdownItem>
-
-          <BaseDropdownItem @click="downloadPP50('zo_ee')">
-            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP50 ZO EE
-          </BaseDropdownItem>
-
-          <BaseDropdownItem @click="downloadPP50('zo_er')">
-            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP50 ZO ER
+            PP50 Здравство (7.5%)
           </BaseDropdownItem>
 
           <BaseDropdownItem @click="downloadPP50('unemployment')">
             <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP50 {{ $t('payroll.unemployment') }}
+            PP50 Невработеност (1.2%)
+          </BaseDropdownItem>
+
+          <BaseDropdownItem @click="downloadPP50('additional')">
+            <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
+            PP50 Доп. придонес (0.5%)
           </BaseDropdownItem>
 
           <BaseDropdownItem @click="downloadPP30">
             <BaseIcon name="DocumentTextIcon" class="h-5 mr-3 text-gray-600" />
-            PP30 {{ $t('payroll.income_tax') }}
+            PP30 ДЛД (10%)
           </BaseDropdownItem>
         </BaseDropdown>
 
@@ -696,10 +691,10 @@ function downloadBlob(data, filename) {
 async function downloadRekapitular() {
   try {
     const response = await axios.get(
-      `payroll-runs/${run.value.id}/rekapitular`,
+      `payroll-reports/download-rekapitular/${run.value.id}`,
       { responseType: 'blob' }
     )
-    downloadBlob(response.data, `rekapitular_${run.value.id}.pdf`)
+    downloadBlob(response.data, `rekapitular_${run.value.period_year}_${String(run.value.period_month).padStart(2, '0')}.pdf`)
     notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
   } catch (error) {
     console.error('Error downloading rekapitular:', error)
@@ -710,10 +705,10 @@ async function downloadRekapitular() {
 async function downloadPP50(type) {
   try {
     const response = await axios.get(
-      `payroll-runs/${run.value.id}/pp50`,
-      { params: { type }, responseType: 'blob' }
+      `payroll-reports/download-pp50/${run.value.id}/${type}`,
+      { responseType: 'blob' }
     )
-    downloadBlob(response.data, `PP50_${type}_${run.value.id}.pdf`)
+    downloadBlob(response.data, `PP50_${type}_${run.value.period_year}_${String(run.value.period_month).padStart(2, '0')}.pdf`)
     notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
   } catch (error) {
     console.error('Error downloading PP50:', error)
@@ -724,10 +719,10 @@ async function downloadPP50(type) {
 async function downloadPP30() {
   try {
     const response = await axios.get(
-      `payroll-runs/${run.value.id}/pp30`,
+      `payroll-reports/download-pp30/${run.value.id}`,
       { responseType: 'blob' }
     )
-    downloadBlob(response.data, `PP30_${run.value.id}.pdf`)
+    downloadBlob(response.data, `PP30_DLD_${run.value.period_year}_${String(run.value.period_month).padStart(2, '0')}.pdf`)
     notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
   } catch (error) {
     console.error('Error downloading PP30:', error)

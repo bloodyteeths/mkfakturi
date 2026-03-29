@@ -98,10 +98,9 @@ class PartnerPayrollReportController extends Controller
             $summary['total_health_employee'] +
             $summary['total_unemployment'] +
             $summary['total_additional'];
-        $summary['total_employer_contributions'] = $summary['total_pension_employer'] +
-            $summary['total_health_employer'];
-        $summary['total_employer_cost'] = $summary['total_gross'] +
-            $summary['total_employer_contributions'];
+        // MK model: no separate employer contributions — employer cost = gross
+        $summary['total_employer_contributions'] = 0;
+        $summary['total_employer_cost'] = $summary['total_gross'];
 
         return response()->json(['data' => $summary]);
     }
@@ -224,7 +223,7 @@ class PartnerPayrollReportController extends Controller
                     'total_net' => $runs->sum('total_net'),
                     'total_employer_tax' => $runs->sum('total_employer_tax'),
                     'total_employee_tax' => $runs->sum('total_employee_tax'),
-                    'total_employer_cost' => $runs->sum('total_gross') + $runs->sum('total_employer_tax'),
+                    'total_employer_cost' => $runs->sum('total_gross'), // MK: employer cost = gross
                 ],
             ],
         ]);
@@ -291,11 +290,9 @@ class PartnerPayrollReportController extends Controller
                     ($line->health_contribution_employee ?? 0) +
                     ($line->unemployment_contribution ?? 0) +
                     ($line->additional_contribution ?? 0);
-                $emplerContribs = ($line->pension_contribution_employer ?? 0) +
-                    ($line->health_contribution_employer ?? 0);
                 $employees[$empId]['total_employee_contributions'] += $empContribs;
-                $employees[$empId]['total_employer_contributions'] += $emplerContribs;
-                $employees[$empId]['employer_cost'] += $line->gross_salary + $emplerContribs;
+                $employees[$empId]['total_employer_contributions'] += 0; // MK: no employer add-on
+                $employees[$empId]['employer_cost'] += $line->gross_salary; // MK: employer cost = gross
             }
         }
 
