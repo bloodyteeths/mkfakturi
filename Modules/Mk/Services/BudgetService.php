@@ -669,6 +669,11 @@ class BudgetService
         foreach ($grouped as $key => $lines) {
             [$accountType, $periodStart, $periodEnd] = explode('|', $key);
 
+            // Skip lines with missing period dates
+            if (empty($periodStart) || empty($periodEnd)) {
+                continue;
+            }
+
             $budgeted = $lines->sum('amount');
 
             // Query actual from ledger, filtering by cost center if budget has one

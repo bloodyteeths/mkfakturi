@@ -410,8 +410,14 @@ class BudgetController extends Controller
             return response()->json(['error' => 'Budget not found'], 404);
         }
 
-        $comparison = $this->service->getBudgetVsActual($budget);
-        $summary = $this->service->getVarianceSummary($budget);
+        try {
+            $comparison = $this->service->getBudgetVsActual($budget);
+            $summary = $this->service->getVarianceSummary($budget);
+        } catch (\Exception $e) {
+            \Log::warning('Budget vs-actual failed', ['budget_id' => $id, 'error' => $e->getMessage()]);
+            $comparison = [];
+            $summary = ['total_budgeted' => 0, 'total_actual' => 0, 'total_variance' => 0, 'by_account_type' => []];
+        }
 
         return response()->json([
             'success' => true,
