@@ -659,8 +659,11 @@ class BudgetService
         $result = [];
 
         // Group budget lines by account_type + period for efficient querying
-        $grouped = $budget->lines->groupBy(function (BudgetLine $line) {
-            return $line->account_type . '|' . $line->period_start->toDateString() . '|' . $line->period_end->toDateString();
+        $grouped = $budget->lines->groupBy(function (BudgetLine $line) use ($budget) {
+            $start = $line->period_start ?? $budget->start_date;
+            $end = $line->period_end ?? $budget->end_date;
+
+            return $line->account_type . '|' . ($start ? $start->toDateString() : '') . '|' . ($end ? $end->toDateString() : '');
         });
 
         foreach ($grouped as $key => $lines) {
