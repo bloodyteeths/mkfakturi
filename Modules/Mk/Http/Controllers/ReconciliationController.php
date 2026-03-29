@@ -128,25 +128,51 @@ class ReconciliationController extends Controller
             ])
             ->firstOrFail();
 
-        // Create match using Matcher service (confidence = 100 for manual match)
-        $matcher = new Matcher($company->id);
-        $match = [
-            'transaction_id' => $transaction->id,
-            'invoice_id' => $invoice->id,
-            'amount' => (float) $transaction->amount,
-            'confidence' => 100.0,
-            'invoice_number' => $invoice->invoice_number,
-            'invoice_total' => (float) $invoice->total / 100,
-        ];
+        // Create a Reconciliation record and use the proper posting service
+        // which correctly converts to cents and calls subtractInvoicePayment()
+        $recon = Reconciliation::firstOrCreate(
+            [
+                'company_id' => $company->id,
+                'bank_transaction_id' => $transaction->id,
+            ],
+            [
+                'invoice_id' => $invoice->id,
+                'status' => Reconciliation::STATUS_MATCHED,
+                'match_type' => Reconciliation::MATCH_TYPE_MANUAL,
+                'confidence' => 100.0,
+                'matched_by' => $request->user()->id,
+                'matched_at' => now(),
+            ]
+        );
 
-        // Use reflection to call the protected method or duplicate logic here
-        // For now, do the matching inline
-        $this->createPaymentAndUpdateInvoice($transaction, $invoice, $match);
+        // Ensure invoice_id is set (in case recon already existed without it)
+        if (! $recon->invoice_id) {
+            $recon->update(['invoice_id' => $invoice->id]);
+        }
+
+        $service = new ReconciliationPostingService();
+        $result = $service->post($recon);
+
+        if (! $result->ok) {
+            return response()->json([
+                'success' => false,
+                'message' => $result->errorMessage ?? 'Failed to post payment',
+            ], 422);
+        }
+
+        // Bank transaction is already marked as matched by ReconciliationPostingService::post()
 
         return response()->json([
             'success' => true,
             'message' => 'Transaction matched successfully',
-            'match' => $match,
+            'match' => [
+                'transaction_id' => $transaction->id,
+                'invoice_id' => $invoice->id,
+                'amount' => (float) $transaction->amount,
+                'confidence' => 100.0,
+                'invoice_number' => $invoice->invoice_number,
+                'invoice_total' => (float) $invoice->total / 100,
+            ],
         ]);
     }
 
