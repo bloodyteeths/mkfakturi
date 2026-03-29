@@ -77,7 +77,6 @@ class Payment extends Model implements HasMedia
         'customer:id,name,email,phone,vat_number,tax_id',
         'paymentMethod:id,name,account_code',
         'currency:id,name,code,symbol',
-        'company',
     ];
 
     protected function casts(): array
