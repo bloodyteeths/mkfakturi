@@ -2,11 +2,9 @@
 
 namespace Modules\Mk\Services;
 
-use App\Models\BankAccount;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\Payment;
 use Carbon\Carbon;
 use PDF;
 
@@ -26,70 +24,59 @@ class IosPdfService
         $from = $from ? Carbon::parse($from) : Carbon::now()->startOfYear();
         $to = $to ? Carbon::parse($to) : Carbon::now();
 
+        $interestRate = 10; // Legal default interest rate in MK (%)
+
         $invoices = Invoice::where('company_id', $company->id)
             ->where('customer_id', $customer->id)
             ->whereBetween('invoice_date', [$from, $to])
             ->orderBy('invoice_date')
             ->get();
 
-        $payments = Payment::where('company_id', $company->id)
-            ->where('customer_id', $customer->id)
-            ->whereBetween('payment_date', [$from, $to])
-            ->orderBy('payment_date')
-            ->get();
-
         $items = [];
-        $totalDebit = 0;
-        $totalCredit = 0;
+        $subtotalDue = 0;
+        $subtotalInterest = 0;
 
         foreach ($invoices as $inv) {
-            $amount = (float) $inv->total / 100;
+            $total = (int) $inv->total;
+            $paidAmount = (int) ($inv->paid_status === 'PAID' ? $total : ($inv->payments()->sum('amount') ?? 0));
+            $dueAmount = max(0, $total - $paidAmount);
+
+            $daysOverdue = 0;
+            $interest = 0;
+            if ($inv->due_date && $dueAmount > 0) {
+                $dueDate = Carbon::parse($inv->due_date);
+                if (Carbon::now()->greaterThan($dueDate)) {
+                    $daysOverdue = (int) Carbon::now()->diffInDays($dueDate);
+                    $interest = (int) round($dueAmount * ($interestRate / 100) * ($daysOverdue / 365));
+                }
+            }
+
             $items[] = [
-                'document_number' => $inv->invoice_number,
-                'date' => Carbon::parse($inv->invoice_date)->format('d.m.Y'),
+                'invoice_number' => $inv->invoice_number,
+                'invoice_date' => Carbon::parse($inv->invoice_date)->format('d.m.Y'),
                 'due_date' => $inv->due_date ? Carbon::parse($inv->due_date)->format('d.m.Y') : '-',
-                'description' => 'Фактура',
-                'debit' => $amount,
-                'credit' => 0,
-                'sort_date' => $inv->invoice_date,
+                'total' => $total,
+                'due_amount' => $dueAmount,
+                'days_overdue' => $daysOverdue,
+                'interest' => $interest,
             ];
-            $totalDebit += $amount;
+            $subtotalDue += $dueAmount;
+            $subtotalInterest += $interest;
         }
 
-        foreach ($payments as $pay) {
-            $amount = (float) $pay->amount / 100;
-            $items[] = [
-                'document_number' => $pay->payment_number ?? '-',
-                'date' => Carbon::parse($pay->payment_date)->format('d.m.Y'),
-                'due_date' => '-',
-                'description' => 'Уплата',
-                'debit' => 0,
-                'credit' => $amount,
-                'sort_date' => $pay->payment_date,
-            ];
-            $totalCredit += $amount;
-        }
-
-        usort($items, fn ($a, $b) => strcmp($a['sort_date'], $b['sort_date']));
-
-        $bankAccount = BankAccount::where('company_id', $company->id)
-            ->where('is_active', true)
-            ->first();
+        $logo = $company->logo ?? null;
 
         $pdf = PDF::loadView('app.pdf.reports.ios', [
             'company' => $company,
-            'partner_name' => $customer->name,
-            'partner_vat' => $customer->vat_number ?? '',
-            'partner_tax_id' => $customer->tax_id ?? '',
-            'partner_address' => trim(($customer->billing_address_street_1 ?? '') . ', ' . ($customer->billing_city ?? ''), ', '),
-            'bank_account' => $bankAccount?->iban ?? $bankAccount?->account_number ?? '-',
+            'customer' => $customer,
+            'logo' => $logo,
+            'today' => now()->format('d.m.Y'),
             'items' => $items,
-            'total_debit' => $totalDebit,
-            'total_credit' => $totalCredit,
-            'currency' => 'МКД',
-            'date' => now()->format('d.m.Y'),
-            'period_from' => $from->format('d.m.Y'),
-            'period_to' => $to->format('d.m.Y'),
+            'subtotal_due' => $subtotalDue,
+            'subtotal_interest' => $subtotalInterest,
+            'subtotal_total_with_interest' => $subtotalDue + $subtotalInterest,
+            'interest_rate' => $interestRate,
+            'currency_symbol' => 'ден.',
         ]);
 
         $pdf->setPaper('a4', 'portrait');

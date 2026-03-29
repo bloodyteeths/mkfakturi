@@ -9,6 +9,7 @@ use App\Models\FiscalReceipt;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Modules\Mk\Models\FiscalDeviceEvent;
@@ -251,7 +252,7 @@ class FiscalFraudController extends Controller
         $this->authorizeAccess($request);
 
         $companyId = (int) $request->header('company');
-        $company = Company::find($companyId);
+        $company = Company::with('address')->find($companyId);
 
         $from = $request->filled('from')
             ? Carbon::parse($request->query('from'))
@@ -268,16 +269,21 @@ class FiscalFraudController extends Controller
         $generatedAt = Carbon::now('Europe/Skopje')->format('d.m.Y H:i');
         $totalEvents = $report['total_events'] ?? 0;
 
-        $pdf = Pdf::loadView('app.pdf.reports.fiscal-audit', [
-            'company' => $company,
-            'report' => $report,
-            'from' => $from->toDateString(),
-            'to' => $to->toDateString(),
-            'generatedAt' => $generatedAt,
-            'totalEvents' => $totalEvents,
-        ]);
+        try {
+            $pdf = Pdf::loadView('app.pdf.reports.fiscal-audit', [
+                'company' => $company,
+                'report' => $report,
+                'from' => $from->toDateString(),
+                'to' => $to->toDateString(),
+                'generatedAt' => $generatedAt,
+                'totalEvents' => $totalEvents,
+            ]);
 
-        return $pdf->download("fiscal-audit-{$from->toDateString()}-{$to->toDateString()}.pdf");
+            return $pdf->download("fiscal-audit-{$from->toDateString()}-{$to->toDateString()}.pdf");
+        } catch (\Throwable $e) {
+            Log::error('PDF export failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => 'PDF generation failed: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

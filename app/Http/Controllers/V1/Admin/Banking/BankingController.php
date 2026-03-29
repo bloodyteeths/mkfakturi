@@ -1427,32 +1427,38 @@ PROMPT;
             ->get();
 
         $openingBalance = (float) ($account->opening_balance ?? 0);
-        $items = [];
-        $runningBalance = $openingBalance;
+        $txData = [];
+        $totalCredit = 0;
+        $totalDebit = 0;
 
         foreach ($transactions as $tx) {
             $amount = (float) $tx->amount;
             if ($tx->transaction_type === 'credit') {
-                $runningBalance += $amount;
+                $totalCredit += $amount;
             } else {
-                $runningBalance -= $amount;
+                $totalDebit += $amount;
             }
-            $items[] = [
+            $txData[] = [
                 'date' => \Carbon\Carbon::parse($tx->transaction_date)->format('d.m.Y'),
                 'description' => $tx->description ?? '',
+                'counterparty' => $tx->creditor_name ?? $tx->debtor_name ?? '',
                 'reference' => $tx->transaction_reference ?? '',
-                'debit' => $tx->transaction_type === 'debit' ? $amount : 0,
-                'credit' => $tx->transaction_type === 'credit' ? $amount : 0,
-                'balance' => $runningBalance,
+                'type' => $tx->transaction_type ?? 'debit',
+                'amount' => $amount,
             ];
         }
 
         $pdf = \PDF::loadView('app.pdf.reports.bank-statement', [
             'company' => $company,
             'account' => $account,
-            'items' => $items,
+            'bank_name' => $account->bank_name ?? '',
+            'account_number' => $account->account_number ?? '',
+            'iban' => $account->iban ?? '',
+            'currency' => 'МКД',
+            'transactions' => $txData,
             'opening_balance' => $openingBalance,
-            'closing_balance' => $runningBalance,
+            'total_credit' => $totalCredit,
+            'total_debit' => $totalDebit,
             'period_from' => $from->format('d.m.Y'),
             'period_to' => $to->format('d.m.Y'),
             'date' => now()->format('d.m.Y'),
