@@ -6,159 +6,76 @@
         <BaseBreadcrumbItem :title="$t('fiscal_monitor.title')" to="#" active />
       </BaseBreadcrumb>
       <template #actions>
-        <BaseButton variant="primary" class="ml-2" @click="refreshDashboard">
+        <BaseButton variant="primary" size="sm" @click="refreshDashboard">
           <template #left="slotProps">
             <BaseIcon name="ArrowPathIcon" :class="slotProps.class" />
           </template>
-          {{ $t('general.refresh') }}
+          <span class="hidden sm:inline">{{ $t('general.refresh') }}</span>
         </BaseButton>
       </template>
     </BasePageHeader>
 
-    <!-- Tab Navigation -->
-    <div class="flex border-b border-gray-200 mt-4">
+    <!-- Tab Navigation — scrollable on mobile -->
+    <div class="flex border-b border-gray-200 mt-4 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
       <button
-        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
-        :class="activeTab === 'dashboard' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
-        @click="activeTab = 'dashboard'"
+        class="px-3 sm:px-4 py-2 text-sm font-medium border-b-2 -mb-px whitespace-nowrap border-indigo-500 text-indigo-600"
       >
         {{ $t('fiscal_monitor.tab_dashboard') }}
       </button>
       <button
-        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
-        :class="activeTab === 'audit' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+        class="px-3 sm:px-4 py-2 text-sm font-medium border-b-2 -mb-px whitespace-nowrap border-transparent text-gray-500 hover:text-gray-700"
         @click="$router.push('/admin/fiscal-monitor/audit')"
       >
         {{ $t('fiscal_monitor.tab_audit') }}
       </button>
       <button
-        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
-        :class="activeTab === 'receipts' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+        class="px-3 sm:px-4 py-2 text-sm font-medium border-b-2 -mb-px whitespace-nowrap border-transparent text-gray-500 hover:text-gray-700"
         @click="$router.push('/admin/fiscal-receipts')"
       >
         {{ $t('fiscal_monitor.tab_receipts') }}
       </button>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
-      <BaseCard class="p-4 text-center">
-        <p class="text-2xl font-bold text-gray-900">{{ dashboard.summary?.total_devices || 0 }}</p>
-        <p class="text-sm text-gray-500">{{ $t('fiscal_monitor.total_devices') }}</p>
+    <!-- Summary Cards — 2 cols mobile, 3 on tablet, 5 on desktop -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-5">
+      <BaseCard class="p-3 text-center">
+        <p class="text-xl sm:text-2xl font-bold text-gray-900">{{ dashboard.summary?.total_devices || 0 }}</p>
+        <p class="text-xs sm:text-sm text-gray-500">{{ $t('fiscal_monitor.total_devices') }}</p>
       </BaseCard>
-      <BaseCard class="p-4 text-center">
-        <p class="text-2xl font-bold text-green-600">{{ dashboard.summary?.open_devices || 0 }}</p>
-        <p class="text-sm text-gray-500">{{ $t('fiscal_monitor.open_devices') }}</p>
+      <BaseCard class="p-3 text-center">
+        <p class="text-xl sm:text-2xl font-bold text-green-600">{{ dashboard.summary?.open_devices || 0 }}</p>
+        <p class="text-xs sm:text-sm text-gray-500">{{ $t('fiscal_monitor.open_devices') }}</p>
       </BaseCard>
-      <BaseCard class="p-4 text-center">
-        <p class="text-2xl font-bold text-gray-400">{{ dashboard.summary?.closed_devices || 0 }}</p>
-        <p class="text-sm text-gray-500">{{ $t('fiscal_monitor.closed_devices') }}</p>
+      <BaseCard class="p-3 text-center">
+        <p class="text-xl sm:text-2xl font-bold text-gray-400">{{ dashboard.summary?.closed_devices || 0 }}</p>
+        <p class="text-xs sm:text-sm text-gray-500">{{ $t('fiscal_monitor.closed_devices') }}</p>
       </BaseCard>
-      <BaseCard class="p-4 text-center">
-        <p class="text-2xl font-bold" :class="dashboard.summary?.open_alerts > 0 ? 'text-red-600' : 'text-green-600'">
+      <BaseCard class="p-3 text-center">
+        <p class="text-xl sm:text-2xl font-bold" :class="dashboard.summary?.open_alerts > 0 ? 'text-red-600' : 'text-green-600'">
           {{ dashboard.summary?.open_alerts || 0 }}
         </p>
-        <p class="text-sm text-gray-500">{{ $t('fiscal_monitor.open_alerts') }}</p>
+        <p class="text-xs sm:text-sm text-gray-500">{{ $t('fiscal_monitor.open_alerts') }}</p>
       </BaseCard>
-      <BaseCard class="p-4 text-center">
-        <p class="text-2xl font-bold text-red-700">{{ dashboard.summary?.critical_alerts || 0 }}</p>
-        <p class="text-sm text-gray-500">{{ $t('fiscal_monitor.critical_alerts') }}</p>
+      <BaseCard class="p-3 text-center col-span-2 sm:col-span-1">
+        <p class="text-xl sm:text-2xl font-bold text-red-700">{{ dashboard.summary?.critical_alerts || 0 }}</p>
+        <p class="text-xs sm:text-sm text-gray-500">{{ $t('fiscal_monitor.critical_alerts') }}</p>
       </BaseCard>
     </div>
 
-    <!-- Device Status Grid -->
-    <div class="mt-6">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('fiscal_monitor.device_status') }}</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <BaseCard
-          v-for="device in dashboard.devices"
-          :key="device.device.id"
-          class="p-4 cursor-pointer hover:shadow-md transition-shadow"
-          @click="$router.push(`/admin/fiscal-monitor/device/${device.device.id}`)"
-        >
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center">
-              <span
-                class="w-3 h-3 rounded-full mr-2"
-                :class="device.status === 'open' ? 'bg-green-500' : 'bg-gray-300'"
-              />
-              <h4 class="font-medium text-gray-900">{{ device.device.name }}</h4>
-            </div>
-            <span
-              class="px-2 py-1 rounded-full text-xs font-medium"
-              :class="device.status === 'open'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-gray-100 text-gray-600'"
-            >
-              {{ device.status === 'open' ? $t('fiscal_monitor.status_open') : $t('fiscal_monitor.status_closed') }}
-            </span>
-          </div>
-
-          <div class="text-sm text-gray-500 space-y-1">
-            <p>{{ $t('fiscal_monitor.serial') }}: {{ device.device.serial_number }}</p>
-            <p>{{ $t('fiscal_monitor.type') }}: {{ device.device.type }}</p>
-          </div>
-
-          <div v-if="device.last_event" class="mt-3 pt-3 border-t border-gray-100 text-sm">
-            <p class="text-gray-500">
-              {{ $t('fiscal_monitor.last_event') }}: {{ getEventLabel(device.last_event.type) }}
-              <span class="text-gray-400">{{ formatTime(device.last_event.at) }}</span>
-            </p>
-            <p v-if="device.last_event.user" class="text-gray-400">
-              {{ device.last_event.user }}
-            </p>
-          </div>
-
-          <div class="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <p class="text-gray-500">{{ $t('fiscal_monitor.today_receipts') }}</p>
-              <p class="font-medium text-gray-900">{{ device.today.receipt_count }}</p>
-            </div>
-            <div>
-              <p class="text-gray-500">{{ $t('fiscal_monitor.today_revenue') }}</p>
-              <p class="font-medium text-gray-900">
-                <BaseFormatMoney :amount="device.today.revenue" :currency="companyStore.selectedCompanyCurrency" />
-              </p>
-            </div>
-          </div>
-
-          <!-- Today's event timeline -->
-          <div v-if="device.today.events?.length" class="mt-3 pt-3 border-t border-gray-100">
-            <p class="text-xs text-gray-400 mb-1">{{ $t('fiscal_monitor.timeline') }}</p>
-            <div class="flex flex-wrap gap-1">
-              <span
-                v-for="(evt, idx) in device.today.events"
-                :key="idx"
-                class="px-1.5 py-0.5 rounded text-xs"
-                :class="getEventBadgeClass(evt.type)"
-                :title="`${evt.at} — ${getEventLabel(evt.type)}`"
-              >
-                {{ evt.at }}
-              </span>
-            </div>
-          </div>
-        </BaseCard>
-      </div>
-
-      <div v-if="!dashboard.devices?.length && !isLoading" class="text-center py-12 text-gray-400">
-        {{ $t('fiscal_monitor.no_devices') }}
-      </div>
-    </div>
-
-    <!-- Fraud Alerts -->
-    <div class="mt-8">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">
+    <!-- Fraud Alerts — shown FIRST if any exist (most important info) -->
+    <div v-if="dashboard.alerts?.length" class="mt-6">
+      <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 flex items-center">
         {{ $t('fiscal_monitor.fraud_alerts') }}
-        <span v-if="dashboard.alerts?.length" class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-sm">
+        <span class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs sm:text-sm">
           {{ dashboard.alerts.length }}
         </span>
       </h3>
 
-      <div v-if="dashboard.alerts?.length" class="space-y-3">
+      <div class="space-y-2">
         <BaseCard
           v-for="alert in visibleAlerts"
           :key="alert.id"
-          class="p-4"
+          class="p-3 sm:p-4"
           :class="{
             'border-l-4 border-red-500': alert.severity === 'critical',
             'border-l-4 border-orange-400': alert.severity === 'high',
@@ -166,9 +83,10 @@
             'border-l-4 border-blue-300': alert.severity === 'low',
           }"
         >
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-1">
+          <!-- Mobile: stacked layout -->
+          <div class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-0 sm:justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-1.5 mb-1">
                 <span
                   class="px-2 py-0.5 rounded-full text-xs font-medium"
                   :class="getSeverityClass(alert.severity)"
@@ -178,7 +96,7 @@
                 <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
                   {{ getAlertTypeLabel(alert.alert_type) }}
                 </span>
-                <span class="text-xs text-gray-400">
+                <span class="text-xs text-gray-400 truncate">
                   {{ alert.fiscal_device?.name || alert.fiscal_device?.serial_number }}
                 </span>
               </div>
@@ -188,11 +106,13 @@
                 <span v-if="alert.user"> — {{ alert.user.name }}</span>
               </p>
             </div>
-            <div class="flex gap-1 ml-4">
+            <!-- Action buttons — full width on mobile -->
+            <div class="flex gap-1.5 sm:ml-4 sm:flex-shrink-0">
               <BaseButton
                 v-if="alert.status === 'open'"
                 size="sm"
                 variant="primary-outline"
+                class="flex-1 sm:flex-none text-xs"
                 @click="updateAlertStatus(alert.id, 'acknowledged')"
               >
                 {{ $t('fiscal_monitor.acknowledge') }}
@@ -201,6 +121,7 @@
                 v-if="alert.status !== 'resolved' && alert.status !== 'false_positive'"
                 size="sm"
                 variant="primary-outline"
+                class="flex-1 sm:flex-none text-xs"
                 @click="openResolveModal(alert)"
               >
                 {{ $t('fiscal_monitor.resolve') }}
@@ -209,8 +130,7 @@
           </div>
         </BaseCard>
 
-        <!-- Show More / Less -->
-        <div v-if="dashboard.alerts.length > 5" class="text-center">
+        <div v-if="dashboard.alerts.length > 5" class="text-center pt-1">
           <button
             class="text-sm text-indigo-600 hover:text-indigo-800"
             @click="showAllAlerts = !showAllAlerts"
@@ -220,19 +140,122 @@
           </button>
         </div>
       </div>
+    </div>
 
-      <div v-else-if="!isLoading" class="text-center py-8 text-gray-400">
-        {{ $t('fiscal_monitor.no_alerts') }}
+    <!-- Device Status Grid — 1 col mobile, 2 tablet, 3 desktop -->
+    <div class="mt-6">
+      <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3">{{ $t('fiscal_monitor.device_status') }}</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <BaseCard
+          v-for="device in dashboard.devices"
+          :key="device.device.id"
+          class="p-3 sm:p-4 cursor-pointer hover:shadow-md transition-shadow active:bg-gray-50"
+          @click="$router.push(`/admin/fiscal-monitor/device/${device.device.id}`)"
+        >
+          <!-- Device header with status -->
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center min-w-0">
+              <span
+                class="w-2.5 h-2.5 rounded-full mr-2 flex-shrink-0"
+                :class="device.status === 'open' ? 'bg-green-500' : 'bg-gray-300'"
+              />
+              <h4 class="font-medium text-gray-900 text-sm sm:text-base truncate">{{ device.device.name }}</h4>
+            </div>
+            <span
+              class="px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ml-2"
+              :class="device.status === 'open'
+                ? 'bg-green-100 text-green-800'
+                : 'bg-gray-100 text-gray-600'"
+            >
+              {{ device.status === 'open' ? $t('fiscal_monitor.status_open') : $t('fiscal_monitor.status_closed') }}
+            </span>
+          </div>
+
+          <!-- Today's stats — compact 2-col -->
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <div>
+              <p class="text-xs text-gray-400">{{ $t('fiscal_monitor.today_receipts') }}</p>
+              <p class="font-semibold text-gray-900">{{ device.today.receipt_count }}</p>
+            </div>
+            <div>
+              <p class="text-xs text-gray-400">{{ $t('fiscal_monitor.today_revenue') }}</p>
+              <p class="font-semibold text-gray-900">
+                <BaseFormatMoney :amount="device.today.revenue" :currency="companyStore.selectedCompanyCurrency" />
+              </p>
+            </div>
+          </div>
+
+          <!-- Timeline — show event type abbreviation + time -->
+          <div v-if="device.today.events?.length" class="mt-2 pt-2 border-t border-gray-100">
+            <div class="flex flex-wrap gap-1">
+              <span
+                v-for="(evt, idx) in device.today.events.slice(0, 8)"
+                :key="idx"
+                class="px-1.5 py-0.5 rounded text-xs"
+                :class="getEventBadgeClass(evt.type)"
+              >
+                {{ getEventAbbr(evt.type) }} {{ evt.at }}
+              </span>
+              <span v-if="device.today.events.length > 8" class="text-xs text-gray-400 py-0.5">
+                +{{ device.today.events.length - 8 }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Last event -->
+          <div v-if="device.last_event" class="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-400">
+            {{ $t('fiscal_monitor.last_event') }}: {{ getEventLabel(device.last_event.type) }}
+            {{ formatTime(device.last_event.at) }}
+          </div>
+        </BaseCard>
+      </div>
+
+      <!-- Empty state with guidance -->
+      <div v-if="!dashboard.devices?.length && !isLoading" class="text-center py-12">
+        <div class="text-gray-300 mb-3">
+          <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <p class="text-gray-400 text-sm">{{ $t('fiscal_monitor.no_devices') }}</p>
+        <BaseButton
+          variant="primary-outline"
+          size="sm"
+          class="mt-3"
+          @click="$router.push('/admin/settings/fiscal-devices')"
+        >
+          {{ $t('fiscal_monitor.add_device_cta') }}
+        </BaseButton>
       </div>
     </div>
 
-    <!-- Log Event Button -->
-    <div class="mt-8">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('fiscal_monitor.log_event') }}</h3>
-      <BaseCard class="p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <!-- No alerts state -->
+    <div v-if="!dashboard.alerts?.length && !isLoading && dashboard.devices?.length" class="mt-6">
+      <BaseCard class="p-4 text-center bg-green-50 border-green-200">
+        <p class="text-sm text-green-700">{{ $t('fiscal_monitor.no_alerts') }}</p>
+      </BaseCard>
+    </div>
+
+    <!-- Log Event — collapsed by default behind a button -->
+    <div class="mt-6">
+      <button
+        class="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-3"
+        @click="showLogEvent = !showLogEvent"
+      >
+        <svg
+          class="w-4 h-4 transition-transform"
+          :class="showLogEvent ? 'rotate-90' : ''"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        {{ $t('fiscal_monitor.log_event_advanced') }}
+      </button>
+
+      <BaseCard v-if="showLogEvent" class="p-3 sm:p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('fiscal_monitor.device') }}</label>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('fiscal_monitor.device') }}</label>
             <select v-model="newEvent.fiscal_device_id" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
               <option value="">{{ $t('fiscal_monitor.select_device') }}</option>
               <option v-for="d in dashboard.devices" :key="d.device.id" :value="d.device.id">
@@ -241,7 +264,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('fiscal_monitor.event_type') }}</label>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('fiscal_monitor.event_type') }}</label>
             <select v-model="newEvent.event_type" class="w-full border-gray-300 rounded-md shadow-sm text-sm">
               <option value="open">{{ $t('fiscal_monitor.event_open') }}</option>
               <option value="close">{{ $t('fiscal_monitor.event_close') }}</option>
@@ -251,7 +274,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('fiscal_monitor.cash_amount') }}</label>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('fiscal_monitor.cash_amount') }}</label>
             <input
               v-model.number="newEvent.cash_amount"
               type="number"
@@ -262,6 +285,8 @@
           <div class="flex items-end">
             <BaseButton
               variant="primary"
+              size="sm"
+              class="w-full sm:w-auto"
               :disabled="!newEvent.fiscal_device_id || !newEvent.event_type"
               @click="submitEvent"
             >
@@ -269,14 +294,14 @@
             </BaseButton>
           </div>
         </div>
-        <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Second row — notes + void reason -->
+        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input
             v-model="newEvent.notes"
             type="text"
             class="w-full border-gray-300 rounded-md shadow-sm text-sm"
             :placeholder="$t('fiscal_monitor.notes_placeholder')"
           />
-          <!-- Void reason dropdown (only when event_type is void) -->
           <select
             v-if="newEvent.event_type === 'void'"
             v-model="newEvent.void_reason"
@@ -295,10 +320,10 @@
     <!-- Resolve Alert Modal -->
     <div
       v-if="showResolveModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4"
       @click.self="showResolveModal = false"
     >
-      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <div class="bg-white rounded-t-xl sm:rounded-lg shadow-xl p-5 w-full sm:max-w-md max-h-[80vh] overflow-y-auto">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('fiscal_monitor.resolution_modal_title') }}</h3>
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('fiscal_monitor.resolution_status') }}</label>
@@ -315,11 +340,11 @@
             class="w-full border-gray-300 rounded-md shadow-sm text-sm"
           />
         </div>
-        <div class="flex justify-end gap-2">
-          <BaseButton variant="primary-outline" @click="showResolveModal = false">
+        <div class="flex gap-2">
+          <BaseButton variant="primary-outline" class="flex-1" @click="showResolveModal = false">
             {{ $t('fiscal_monitor.cancel') }}
           </BaseButton>
-          <BaseButton variant="primary" @click="confirmResolve">
+          <BaseButton variant="primary" class="flex-1" @click="confirmResolve">
             {{ $t('fiscal_monitor.confirm') }}
           </BaseButton>
         </div>
@@ -339,11 +364,11 @@ const { t } = useI18n()
 const companyStore = useCompanyStore()
 const notificationStore = useNotificationStore()
 
-const activeTab = ref('dashboard')
 const isLoading = ref(true)
 const dashboard = ref({ devices: [], alerts: [], summary: {} })
 const newEvent = ref({ fiscal_device_id: '', event_type: 'open', cash_amount: null, notes: '', void_reason: '' })
 const showAllAlerts = ref(false)
+const showLogEvent = ref(false)
 const showResolveModal = ref(false)
 const resolveAlertId = ref(null)
 const resolveNotes = ref('')
@@ -443,6 +468,11 @@ function getEventLabel(type) {
     status_check: t('fiscal_monitor.event_status_check'),
   }
   return labels[type] || type
+}
+
+function getEventAbbr(type) {
+  const abbrs = { open: 'O', close: 'C', z_report: 'Z', receipt: 'R', void: 'V', error: 'E', status_check: 'S' }
+  return abbrs[type] || '?'
 }
 
 function getEventBadgeClass(type) {

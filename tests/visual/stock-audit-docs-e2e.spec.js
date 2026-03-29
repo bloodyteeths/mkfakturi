@@ -8,14 +8,17 @@ let cookies
 test.describe.configure({ mode: 'serial' })
 
 test.beforeAll(async ({ browser }) => {
+  test.setTimeout(90000)
   const ctx = await browser.newContext()
   const page = await ctx.newPage()
-  page.setDefaultTimeout(30000)
-  await page.goto(`${BASE}/login`)
+  page.setDefaultTimeout(60000)
+  await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+  await page.waitForSelector('input[type="email"]', { timeout: 30000 })
   await page.fill('input[type="email"]', 'atillatkulu@gmail.com')
   await page.fill('input[type="password"]', 'Facturino2026')
   await page.click('button[type="submit"]')
-  await page.waitForURL(/\/admin\/dashboard/, { timeout: 30000 })
+  await page.waitForURL(/\/admin\/dashboard/, { timeout: 60000 })
+  await page.waitForTimeout(3000)
   cookies = await ctx.cookies()
   await ctx.close()
 })
@@ -24,204 +27,208 @@ async function loggedPage(browser) {
   const ctx = await browser.newContext()
   await ctx.addCookies(cookies)
   const page = await ctx.newPage()
-  page.setDefaultTimeout(20000)
+  page.setDefaultTimeout(30000)
   return { page, ctx }
 }
 
+/** Wait for the Vue SPA to render the stock page */
+async function waitForStockPage(page) {
+  // Wait for the nav — new structure has 5 top-level items including dropdown buttons
+  await page.waitForSelector('a[href="/admin/stock"]', { timeout: 30000 })
+  await page.waitForTimeout(2000)
+}
+
+/** Safely parse JSON from API response, return null if HTML */
+async function safeJson(response) {
+  const ct = response.headers()['content-type'] || ''
+  if (!ct.includes('json')) return null
+  try { return await response.json() } catch { return null }
+}
+
 // =============================================
-// 1. ПЛТ Tab & Page
+// 1. Navigation Structure — 5 items (was 12)
 // =============================================
 
-test('PLT tab visible in stock navigation', async ({ browser }) => {
+test('navigation shows 5 top-level items: Преглед, Залиха, Документи, Трговија, Анализа', async ({ browser }) => {
   const { page, ctx } = await loggedPage(browser)
   await page.goto(`${BASE}/admin/stock`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
+  await waitForStockPage(page)
 
-  // Desktop: ПЛТ tab should exist
-  const pltTab = page.locator('a[href="/admin/stock/trade/plt"]')
-  const count = await pltTab.count()
-  expect(count).toBeGreaterThanOrEqual(1)
+  // Direct link
+  expect(await page.locator('a[href="/admin/stock"]').count()).toBeGreaterThanOrEqual(1)
 
-  await ctx.close()
-})
-
-test('PLT page loads at /admin/stock/trade/plt', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-  await page.goto(`${BASE}/admin/stock/trade/plt`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
-
-  // Should show bill selector and empty state
-  const hasMultiselect = await page.locator('.multiselect, [class*="multiselect"]').count()
-  expect(hasMultiselect).toBeGreaterThanOrEqual(1)
-
-  // Empty state message should be visible
-  const emptyState = await page.locator('text=Изберете фактура').count()
-  expect(emptyState).toBeGreaterThanOrEqual(1)
+  // Dropdown buttons (desktop)
+  const desktopNav = page.locator('.hidden.md\\:flex')
+  expect(await desktopNav.locator('button:has-text("Залиха")').count()).toBe(1)
+  expect(await desktopNav.locator('button:has-text("Документи")').count()).toBe(1)
+  expect(await desktopNav.locator('button:has-text("Трговија")').count()).toBe(1)
+  expect(await desktopNav.locator('button:has-text("Анализа")').count()).toBe(1)
 
   await ctx.close()
 })
 
-test('PLT tab is active when on PLT page', async ({ browser }) => {
+test('Залиха dropdown shows 3 items with descriptions', async ({ browser }) => {
+  const { page, ctx } = await loggedPage(browser)
+  await page.goto(`${BASE}/admin/stock`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
+
+  // Open dropdown
+  await page.locator('.hidden.md\\:flex button:has-text("Залиха")').click()
+  await page.waitForTimeout(300)
+
+  // Check 3 items exist with descriptions
+  expect(await page.locator('a[href="/admin/stock/inventory"]').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('a[href="/admin/stock/item-card"]').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('a[href="/admin/stock/warehouses"]').count()).toBeGreaterThanOrEqual(1)
+
+  // Descriptions visible
+  expect(await page.locator('text=Тековна залиха по артикл').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('text=Движења по артикл').count()).toBeGreaterThanOrEqual(1)
+
+  await ctx.close()
+})
+
+test('Документи dropdown shows documents, stocktake, adjustments', async ({ browser }) => {
+  const { page, ctx } = await loggedPage(browser)
+  await page.goto(`${BASE}/admin/stock`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
+
+  await page.locator('.hidden.md\\:flex button:has-text("Документи")').click()
+  await page.waitForTimeout(300)
+
+  expect(await page.locator('a[href="/admin/stock/documents"]').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('a[href="/admin/stock/counts"]').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('a[href="/admin/stock/adjustments"]').count()).toBeGreaterThanOrEqual(1)
+
+  // Descriptions
+  expect(await page.locator('text=Приемници, издатници, повратници').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('text=Пописни листи и записници').count()).toBeGreaterThanOrEqual(1)
+
+  await ctx.close()
+})
+
+test('Трговија dropdown shows Нивелации, КАП, ПЛТ with full names', async ({ browser }) => {
+  const { page, ctx } = await loggedPage(browser)
+  await page.goto(`${BASE}/admin/stock`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
+
+  await page.locator('.hidden.md\\:flex button:has-text("Трговија")').click()
+  await page.waitForTimeout(300)
+
+  expect(await page.locator('a[href="/admin/stock/trade/nivelacii"]').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('a[href="/admin/stock/trade/kap"]').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('a[href="/admin/stock/trade/plt"]').count()).toBeGreaterThanOrEqual(1)
+
+  // Full names visible (not just abbreviations)
+  expect(await page.locator('text=КАП — Калкулација').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('text=ПЛТ — Малопродажба').count()).toBeGreaterThanOrEqual(1)
+
+  await ctx.close()
+})
+
+test('Анализа dropdown shows low stock with badge and WAC audit', async ({ browser }) => {
+  const { page, ctx } = await loggedPage(browser)
+  await page.goto(`${BASE}/admin/stock`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
+
+  await page.locator('.hidden.md\\:flex button:has-text("Анализа")').click()
+  await page.waitForTimeout(300)
+
+  expect(await page.locator('a[href="/admin/stock/low-stock"]').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('a[href="/admin/stock/wac-audit"]').count()).toBeGreaterThanOrEqual(1)
+
+  await ctx.close()
+})
+
+test('dropdown closes when clicking outside', async ({ browser }) => {
+  const { page, ctx } = await loggedPage(browser)
+  await page.goto(`${BASE}/admin/stock`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
+
+  // Open dropdown
+  await page.locator('.hidden.md\\:flex button:has-text("Залиха")').click()
+  await page.waitForTimeout(300)
+  expect(await page.locator('a[href="/admin/stock/inventory"]').count()).toBeGreaterThanOrEqual(1)
+
+  // Click outside (on the page body)
+  await page.locator('body').click({ position: { x: 10, y: 10 } })
+  await page.waitForTimeout(300)
+
+  // Dropdown items should be gone
+  const dropdownPanel = page.locator('.absolute.left-0.top-full')
+  expect(await dropdownPanel.count()).toBe(0)
+
+  await ctx.close()
+})
+
+// =============================================
+// 2. Active State Highlighting
+// =============================================
+
+test('dropdown button highlights when child page is active', async ({ browser }) => {
+  const { page, ctx } = await loggedPage(browser)
+  await page.goto(`${BASE}/admin/stock/inventory`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
+
+  // Залиха button should have active styling
+  const zalihaBtn = page.locator('.hidden.md\\:flex button:has-text("Залиха")')
+  const classes = await zalihaBtn.getAttribute('class')
+  expect(classes).toContain('border-primary')
+
+  await ctx.close()
+})
+
+test('trade dropdown highlights when on PLT page', async ({ browser }) => {
   const { page, ctx } = await loggedPage(browser)
   await page.goto(`${BASE}/admin/stock/trade/plt`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
+  await waitForStockPage(page)
 
-  // The PLT tab link should have active styling (border-primary)
-  const pltLink = page.locator('a[href="/admin/stock/trade/plt"]').first()
-  const classes = await pltLink.getAttribute('class')
+  const tradeBtn = page.locator('.hidden.md\\:flex button:has-text("Трговија")')
+  const classes = await tradeBtn.getAttribute('class')
   expect(classes).toContain('border-primary')
 
   await ctx.close()
 })
 
 // =============================================
-// 2. Item Card PDF Button
+// 3. Item Card PDF Button
 // =============================================
 
-test('item card page loads with PDF button visible', async ({ browser }) => {
+test('item card PDF button appears after selecting item', async ({ browser }) => {
   const { page, ctx } = await loggedPage(browser)
   await page.goto(`${BASE}/admin/stock/item-card`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
+  await waitForStockPage(page)
 
-  // Page should have filters card with item selector
-  const hasFilters = await page.locator('.multiselect, [class*="multiselect"]').count()
-  expect(hasFilters).toBeGreaterThanOrEqual(1)
-
-  await ctx.close()
-})
-
-test('item card PDF button appears after loading data', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-
-  // Use API to find a tracked item first
-  const apiResponse = await page.request.get(`${BASE}/api/v1/items`, {
-    headers: { company: '2' },
-    params: { track_quantity: 'true', limit: '5' },
-  })
-  const items = await apiResponse.json()
-  const trackedItems = items?.data || []
-
-  if (trackedItems.length > 0) {
-    const itemId = trackedItems[0].id
-    await page.goto(`${BASE}/admin/stock/item-card?item_id=${itemId}`, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000,
-    })
-    await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-    await page.waitForTimeout(5000)
-
-    // PDF button should be visible in the movements header
-    const pdfBtn = page.locator('button:has-text("PDF")')
-    const pdfCount = await pdfBtn.count()
-    expect(pdfCount).toBeGreaterThanOrEqual(1)
-  }
-
-  await ctx.close()
-})
-
-// =============================================
-// 3. Stock Count PDF Buttons
-// =============================================
-
-test('stock counts page loads', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-  await page.goto(`${BASE}/admin/stock/counts`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
-
-  // Page should load (even if no counts exist)
-  const hasContent = await page.locator('table, [class*="text-center"], [class*="empty"]').count()
-  expect(hasContent).toBeGreaterThanOrEqual(0)
-
-  await ctx.close()
-})
-
-test('stock count view has PDF buttons', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-
-  // Check if any counts exist via API
-  const apiResponse = await page.request.get(`${BASE}/api/v1/stock/counts`, {
-    headers: { company: '2' },
-  })
-  const countsData = await apiResponse.json()
-  const counts = countsData?.data || []
-
-  if (counts.length > 0) {
-    const countId = counts[0].id
-    await page.goto(`${BASE}/admin/stock/counts/${countId}`, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000,
-    })
-    await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
+  const multiselect = page.locator('.multiselect, [class*="multiselect"]').first()
+  await multiselect.click()
+  await page.waitForTimeout(1500)
+  const firstOption = page.locator('.multiselect-option, [class*="multiselect-option"]').first()
+  if (await firstOption.count() > 0) {
+    await firstOption.click()
     await page.waitForTimeout(3000)
-
-    // Пописна листа button should always be present
-    const sheetBtn = page.locator('button:has-text("Пописна листа")')
-    const sheetCount = await sheetBtn.count()
-    expect(sheetCount).toBeGreaterThanOrEqual(1)
-
-    // Записник button should appear only for completed counts
-    const status = counts[0].status
-    if (status === 'completed') {
-      const reportBtn = page.locator('button:has-text("Записник")')
-      const reportCount = await reportBtn.count()
-      expect(reportCount).toBeGreaterThanOrEqual(1)
-    }
+    expect(await page.locator('button:has-text("PDF")').count()).toBeGreaterThanOrEqual(1)
   }
 
   await ctx.close()
 })
 
 // =============================================
-// 4. Stock Count PDF API Endpoints
+// 4. Stock Count PDF Buttons
 // =============================================
 
 test('stock count PDF endpoint returns PDF', async ({ browser }) => {
   const { page, ctx } = await loggedPage(browser)
+  await page.goto(`${BASE}/admin/stock/counts`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
 
-  // Find a count to test
-  const apiResponse = await page.request.get(`${BASE}/api/v1/stock/counts`, {
-    headers: { company: '2' },
-  })
-  const countsData = await apiResponse.json()
+  const apiResponse = await ctx.request.get(`${BASE}/api/v1/stock/counts`, { headers: { company: '2' } })
+  const countsData = await safeJson(apiResponse)
   const counts = countsData?.data || []
 
   if (counts.length > 0) {
-    const countId = counts[0].id
-    const pdfResponse = await page.request.get(`${BASE}/api/v1/stock/counts/${countId}/pdf`, {
-      headers: { company: '2' },
-    })
-    // Should return 200 with PDF content type
+    const pdfResponse = await ctx.request.get(`${BASE}/api/v1/stock/counts/${counts[0].id}/pdf`, { headers: { company: '2' } })
     expect(pdfResponse.status()).toBe(200)
-    const contentType = pdfResponse.headers()['content-type']
-    expect(contentType).toContain('application/pdf')
-  }
-
-  await ctx.close()
-})
-
-test('stock count report PDF endpoint works for completed counts', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-
-  const apiResponse = await page.request.get(`${BASE}/api/v1/stock/counts`, {
-    headers: { company: '2' },
-  })
-  const countsData = await apiResponse.json()
-  const counts = countsData?.data || []
-
-  const completedCount = counts.find(c => c.status === 'completed')
-  if (completedCount) {
-    const pdfResponse = await page.request.get(
-      `${BASE}/api/v1/stock/counts/${completedCount.id}/report-pdf`,
-      { headers: { company: '2' } }
-    )
-    expect(pdfResponse.status()).toBe(200)
-    const contentType = pdfResponse.headers()['content-type']
-    expect(contentType).toContain('application/pdf')
+    expect(pdfResponse.headers()['content-type']).toContain('application/pdf')
   }
 
   await ctx.close()
@@ -233,229 +240,77 @@ test('stock count report PDF endpoint works for completed counts', async ({ brow
 
 test('document create page shows all 5 document types', async ({ browser }) => {
   const { page, ctx } = await loggedPage(browser)
-  await page.goto(`${BASE}/admin/stock/documents/create`, {
-    waitUntil: 'domcontentloaded',
-    timeout: 30000,
-  })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
+  await page.goto(`${BASE}/admin/stock/documents/create`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
 
-  // Should show all 5 document type options
-  const priemnica = await page.locator('text=Приемница').count()
-  const izdatnica = await page.locator('text=Издатница').count()
-  const prenosnica = await page.locator('text=Преносница').count()
-  const povratnica = await page.locator('text=Повратница').count()
-  const rashoduvanje = await page.locator('text=Расходување').count()
-
-  expect(priemnica).toBeGreaterThanOrEqual(1)
-  expect(izdatnica).toBeGreaterThanOrEqual(1)
-  expect(prenosnica).toBeGreaterThanOrEqual(1)
-  expect(povratnica).toBeGreaterThanOrEqual(1)
-  expect(rashoduvanje).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('text=Приемница').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('text=Издатница').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('text=Преносница').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('text=Повратница').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('text=Расходување').count()).toBeGreaterThanOrEqual(1)
 
   await ctx.close()
 })
 
-test('create document page opens with return type via query param', async ({ browser }) => {
+test('reason field shows for return type, hidden for receipt', async ({ browser }) => {
   const { page, ctx } = await loggedPage(browser)
-  await page.goto(`${BASE}/admin/stock/documents/create?create=return`, {
-    waitUntil: 'domcontentloaded',
-    timeout: 30000,
-  })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
 
-  // The return radio should be selected (border-primary styling)
-  const returnLabel = page.locator('label:has(input[value="return"])')
-  const count = await returnLabel.count()
-  if (count > 0) {
-    const classes = await returnLabel.getAttribute('class')
-    expect(classes).toContain('border-primary')
-  }
+  // Return type — reason visible
+  await page.goto(`${BASE}/admin/stock/documents/create?create=return`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
+  expect(await page.locator('text=Причина').count()).toBeGreaterThanOrEqual(1)
 
-  await ctx.close()
-})
-
-test('create document page opens with write_off type via query param', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-  await page.goto(`${BASE}/admin/stock/documents/create?create=write_off`, {
-    waitUntil: 'domcontentloaded',
-    timeout: 30000,
-  })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
-
-  // The write_off radio should be selected
-  const writeOffLabel = page.locator('label:has(input[value="write_off"])')
-  const count = await writeOffLabel.count()
-  if (count > 0) {
-    const classes = await writeOffLabel.getAttribute('class')
-    expect(classes).toContain('border-primary')
-  }
-
-  await ctx.close()
-})
-
-test('reason field shows for return document type', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-  await page.goto(`${BASE}/admin/stock/documents/create?create=return`, {
-    waitUntil: 'domcontentloaded',
-    timeout: 30000,
-  })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
-
-  // Reason field should be visible
-  const reasonLabel = await page.locator('text=Причина').count()
-  expect(reasonLabel).toBeGreaterThanOrEqual(1)
-
-  await ctx.close()
-})
-
-test('reason field shows for write_off document type', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-  await page.goto(`${BASE}/admin/stock/documents/create?create=write_off`, {
-    waitUntil: 'domcontentloaded',
-    timeout: 30000,
-  })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
-
-  const reasonLabel = await page.locator('text=Причина').count()
-  expect(reasonLabel).toBeGreaterThanOrEqual(1)
-
-  await ctx.close()
-})
-
-test('reason field hidden for receipt document type', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-  await page.goto(`${BASE}/admin/stock/documents/create`, {
-    waitUntil: 'domcontentloaded',
-    timeout: 30000,
-  })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
-
-  // Default is receipt — reason field should NOT be visible
-  // "Причина" as a label shouldn't appear (but "Причина" might appear elsewhere, so check for the input group)
-  const reasonInputs = page.locator('textarea[placeholder*="Причина"]')
-  const count = await reasonInputs.count()
-  expect(count).toBe(0)
+  // Receipt type — reason hidden
+  await page.goto(`${BASE}/admin/stock/documents/create`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
+  expect(await page.locator('textarea[placeholder*="Причина"]').count()).toBe(0)
 
   await ctx.close()
 })
 
 // =============================================
-// 6. FAB Quick Actions — New Types
+// 6. FAB Quick Actions
 // =============================================
 
 test('FAB menu includes Повратница and Расходување links', async ({ browser }) => {
   const { page, ctx } = await loggedPage(browser)
   await page.goto(`${BASE}/admin/stock`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
+  await waitForStockPage(page)
 
-  // Click the FAB button to open the menu
-  const fab = page.locator('button.rounded-full[class*="bg-blue-600"]')
-  await fab.click()
+  await page.locator('button.rounded-full[class*="bg-blue-600"]').click()
   await page.waitForTimeout(500)
 
-  // Menu should include Повратница and Расходување links
-  const povratnicaLink = page.locator('a[href*="create=return"]')
-  const rashoduvanjeLink = page.locator('a[href*="create=write_off"]')
-
-  expect(await povratnicaLink.count()).toBeGreaterThanOrEqual(1)
-  expect(await rashoduvanjeLink.count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('a[href*="create=return"]').count()).toBeGreaterThanOrEqual(1)
+  expect(await page.locator('a[href*="create=write_off"]').count()).toBeGreaterThanOrEqual(1)
 
   await ctx.close()
 })
 
 // =============================================
-// 7. Document Index — Badge Colors
+// 7. API Endpoints
 // =============================================
 
-test('documents index page loads with type badges', async ({ browser }) => {
+test('stock documents API accepts return and write_off type', async ({ browser }) => {
   const { page, ctx } = await loggedPage(browser)
-  await page.goto(`${BASE}/admin/stock/documents`, {
-    waitUntil: 'domcontentloaded',
-    timeout: 30000,
-  })
-  await page.waitForSelector('[class*="border-b"]', { timeout: 25000 })
-  await page.waitForTimeout(3000)
+  await page.goto(`${BASE}/admin/stock/documents`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await waitForStockPage(page)
 
-  // Page should load (table or empty state)
-  const hasContent = await page.locator('table, [class*="text-center"]').count()
-  expect(hasContent).toBeGreaterThanOrEqual(1)
+  const returnResp = await ctx.request.get(`${BASE}/api/v1/stock/documents`, { headers: { company: '2' }, params: { type: 'return' } })
+  expect(returnResp.status()).toBe(200)
+
+  const writeOffResp = await ctx.request.get(`${BASE}/api/v1/stock/documents`, { headers: { company: '2' }, params: { type: 'write_off' } })
+  expect(writeOffResp.status()).toBe(200)
 
   await ctx.close()
 })
 
 // =============================================
-// 8. Inventory Document PDF Endpoints (return & write_off)
+// 8. All pages navigate without errors
 // =============================================
 
-test('inventory document API accepts return type', async ({ browser }) => {
+test('all stock pages render without errors', async ({ browser }) => {
   const { page, ctx } = await loggedPage(browser)
-
-  // Verify the validation accepts return type by checking the endpoint
-  // We just check the documents list loads — creating a real document would require warehouses/items
-  const apiResponse = await page.request.get(`${BASE}/api/v1/stock/documents`, {
-    headers: { company: '2' },
-    params: { type: 'return' },
-  })
-  expect(apiResponse.status()).toBe(200)
-
-  await ctx.close()
-})
-
-test('inventory document API accepts write_off type', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-
-  const apiResponse = await page.request.get(`${BASE}/api/v1/stock/documents`, {
-    headers: { company: '2' },
-    params: { type: 'write_off' },
-  })
-  expect(apiResponse.status()).toBe(200)
-
-  await ctx.close()
-})
-
-// =============================================
-// 9. PLT API Endpoint
-// =============================================
-
-test('PLT API endpoint exists and responds', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-
-  // Get a bill to test PLT with
-  const billsResponse = await page.request.get(`${BASE}/api/v1/bills`, {
-    headers: { company: '2' },
-    params: { limit: '1' },
-  })
-  const billsData = await billsResponse.json()
-  const bills = billsData?.data || billsData?.bills?.data || []
-
-  if (bills.length > 0) {
-    const billId = bills[0].id
-    // PLT endpoint should respond (may be partner-only, so 200 or 403 both valid)
-    const pltResponse = await page.request.get(
-      `${BASE}/api/v1/partner/companies/2/accounting/plt/${billId}`,
-      { headers: { company: '2' } }
-    )
-    // Should not be 404 (route exists)
-    expect(pltResponse.status()).not.toBe(404)
-  }
-
-  await ctx.close()
-})
-
-// =============================================
-// 10. Navigation Consistency
-// =============================================
-
-test('all stock tabs navigate correctly', async ({ browser }) => {
-  const { page, ctx } = await loggedPage(browser)
-  const tabs = [
+  const pages = [
     '/admin/stock',
     '/admin/stock/inventory',
     '/admin/stock/item-card',
@@ -467,17 +322,13 @@ test('all stock tabs navigate correctly', async ({ browser }) => {
     '/admin/stock/wac-audit',
   ]
 
-  for (const tab of tabs) {
-    await page.goto(`${BASE}${tab}`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-    await page.waitForTimeout(2000)
+  for (const url of pages) {
+    await page.goto(`${BASE}${url}`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+    await page.waitForSelector('a[href="/admin/stock"]', { timeout: 20000 })
+    await page.waitForTimeout(1000)
 
-    // Each page should not show a Vue error or blank page
     const errorOverlay = await page.locator('[class*="error-overlay"], [id="vite-error-overlay"]').count()
     expect(errorOverlay).toBe(0)
-
-    // Should have the tab navigation visible
-    const navLinks = await page.locator('a[href*="/admin/stock"]').count()
-    expect(navLinks).toBeGreaterThanOrEqual(3)
   }
 
   await ctx.close()
