@@ -159,11 +159,11 @@ class SmartReconciliationService
             // УЈП — Управа за јавни приходи (Public Revenue Office)
             ['patterns' => ['ujp', 'управа за јавни приходи', 'управа за јавни', 'јавни приходи'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'УЈП — Управа за јавни приходи', 'sub_type' => null],
             // ФПИОМ — Pension fund
-            ['patterns' => ['фпиом', 'фонд за пиом', 'пензиско осигурување', 'фонд за пензиско', 'piom', 'fpiom'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'ФПИОМ — Пензиско осигурување', 'sub_type' => 'ФПИОМ'],
+            ['patterns' => ['фпиом', 'фонд за пиом', 'пензиско осигурување', 'фонд за пензиско', 'пензиски', 'piom', 'fpiom', 'pension fund', 'пензија', 'пио фонд'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'ФПИОМ — Пензиско осигурување', 'sub_type' => 'ФПИОМ'],
             // ФЗОМ — Health fund
-            ['patterns' => ['фзом', 'фонд за здравств', 'здравствено осигурување', 'fzom'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'ФЗОМ — Здравствено осигурување', 'sub_type' => 'ФЗОМ'],
+            ['patterns' => ['фзом', 'фонд за здравств', 'здравствено осигурување', 'здравствен', 'fzom', 'health fund', 'здравство'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'ФЗОМ — Здравствено осигурување', 'sub_type' => 'ФЗОМ'],
             // АВРМ — Employment agency
-            ['patterns' => ['аврм', 'агенција за вработување', 'avrm', 'вработување'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'АВРМ — Агенција за вработување', 'sub_type' => 'Вработување'],
+            ['patterns' => ['аврм', 'агенција за вработување', 'avrm', 'вработување', 'невработеност', 'employment agency'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'АВРМ — Агенција за вработување', 'sub_type' => 'Вработување'],
             // Царинска управа — Customs
             ['patterns' => ['царинска управа', 'царина', 'customs', 'carina'], 'action' => SmartSuggestion::ACTION_TAX_PAYMENT, 'reason' => 'Царинска управа — Царински давачки', 'sub_type' => 'Царина'],
             // Municipality / Local government
@@ -234,8 +234,8 @@ class SmartReconciliationService
             'ддв' => 'ДДВ', 'ddv' => 'ДДВ', 'vat' => 'ДДВ', 'tvsh' => 'ДДВ',
             'данок на добивка' => 'Данок на добивка', 'profit tax' => 'Данок на добивка',
             'персонален данок' => 'Персонален данок', 'данок на доход' => 'Персонален данок',
-            'фпиом' => 'ФПИОМ', 'пензиско' => 'ФПИОМ', 'piom' => 'ФПИОМ',
-            'фзом' => 'ФЗОМ', 'здравствено' => 'ФЗОМ', 'fzom' => 'ФЗОМ',
+            'фпиом' => 'ФПИОМ', 'пензиско' => 'ФПИОМ', 'пензиски' => 'ФПИОМ', 'piom' => 'ФПИОМ', 'пио' => 'ФПИОМ',
+            'фзом' => 'ФЗОМ', 'здравствено' => 'ФЗОМ', 'здравствен' => 'ФЗОМ', 'fzom' => 'ФЗОМ',
             'вработување' => 'Вработување', 'невработеност' => 'Вработување',
             'професионален' => 'Професионален придонес', 'дополнителен' => 'Професионален придонес',
             'царина' => 'Царина', 'customs' => 'Царина',
@@ -517,13 +517,16 @@ class SmartReconciliationService
         // Payroll-related keywords
         $payrollKeywords = [
             'плата', 'salary', 'wages', 'payroll', 'paga', 'neto', 'нето',
-            'придонес', 'пио', 'piom', 'фпиом', 'fpiom', 'pension',
+            'придонес', 'пио', 'piom', 'фпиом', 'fpiom', 'pension', 'пензиски', 'пензија',
             'здравств', 'fzom', 'фзом', 'health',
             'вработување', 'employment', 'punësim',
             'персонален данок', 'данок од плата', 'pit', 'tatim',
             'мпин', 'mpin', 'декларација',
         ];
-        $description = mb_strtolower(($tx->description ?? '').($tx->remittance_info ?? ''));
+        // Also check counterparty name — e.g. "Нето плата" is often the creditor name, not in description
+        $isDebit = $tx->transaction_type === 'debit' || ($tx->transaction_type === null && $tx->amount < 0);
+        $counterparty = $isDebit ? ($tx->creditor_name ?? '') : ($tx->debtor_name ?? '');
+        $description = mb_strtolower(($tx->description ?? '').($tx->remittance_info ?? '').' '.$counterparty);
         $hasPayrollKeyword = false;
         $matchedKeyword = '';
         foreach ($payrollKeywords as $kw) {

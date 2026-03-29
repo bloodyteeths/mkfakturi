@@ -511,15 +511,20 @@ class ReconciliationController extends Controller
             ->where('id', $request->transaction_id)
             ->firstOrFail();
 
+        // Allow linking to runs that are already 'paid' — payroll has 6 separate
+        // bank charges (net, ФПИОМ, ФЗОМ, employment, additional, PIT)
         $payrollRun = PayrollRun::where('company_id', $company->id)
             ->where('id', $request->payroll_run_id)
-            ->whereIn('status', ['approved', 'posted'])
+            ->whereIn('status', ['approved', 'posted', 'paid'])
             ->firstOrFail();
 
-        $payrollRun->update([
-            'status' => 'paid',
-            'paid_at' => now(),
-        ]);
+        // Only mark as 'paid' if not already paid
+        if ($payrollRun->status !== 'paid') {
+            $payrollRun->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+            ]);
+        }
 
         $transaction->markAsReconciled(BankTransaction::LINKED_PAYROLL_RUN, $payrollRun->id);
 
@@ -633,16 +638,21 @@ class ReconciliationController extends Controller
     {
         $company = $this->getCompany();
 
+        // Include 'paid' status too — payroll has 6 separate bank charges
+        // (net salary, ФПИОМ, ФЗОМ, employment, additional, PIT)
+        // so the run may already be partially reconciled
         $runs = PayrollRun::where('company_id', $company->id)
-            ->whereIn('status', ['approved', 'posted'])
+            ->whereIn('status', ['approved', 'posted', 'paid'])
             ->orderBy('period_start', 'desc')
-            ->get(['id', 'period_year', 'period_month', 'total_net', 'status']);
+            ->limit(24) // Last 2 years
+            ->get(['id', 'period_year', 'period_month', 'total_net', 'total_gross', 'status']);
 
         return response()->json([
             'data' => $runs->map(fn ($run) => [
                 'id' => $run->id,
                 'period' => sprintf('%d-%02d', $run->period_year, $run->period_month),
                 'total_net' => (float) $run->total_net / 100,
+                'total_gross' => (float) $run->total_gross / 100,
                 'status' => $run->status,
             ]),
         ]);

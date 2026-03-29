@@ -204,7 +204,7 @@
                     </div>
                   </button>
 
-                  <!-- Link to Payroll (debits) -->
+                  <!-- Link to Payroll (debits) — for NET SALARY only -->
                   <button
                     v-if="!isCredit"
                     @click="manualAction = 'payroll'"
@@ -213,8 +213,9 @@
                   >
                     <div class="flex items-center">
                       <BaseIcon name="UserGroupIcon" class="h-4 w-4 mr-2 text-purple-500" />
-                      <span class="text-sm font-medium">{{ $t('banking.link_to_payroll', 'Link to Payroll') }}</span>
+                      <span class="text-sm font-medium">{{ $t('banking.link_to_payroll', 'Link to Payroll (Net Salary)') }}</span>
                     </div>
+                    <p class="text-xs text-gray-400 mt-0.5 ml-6">{{ $t('banking.payroll_hint', 'For contributions (ФПИОМ, ФЗОМ, PIT) use Tax Payment instead') }}</p>
                   </button>
 
                   <!-- Owner Contribution (credits) -->
