@@ -52,7 +52,11 @@
         "custom_reports": "Özel Raporlar",
         "operations": "Operasyonlar",
         "finance": "Finans",
-        "setup_wizard": "Kurulum Sihirbazı"
+        "setup_wizard": "Kurulum Sihirbazı",
+        "documents_group": "Belgeler",
+        "contacts": "Kişiler",
+        "money": "Para",
+        "favorites": "Favoriler"
     },
     "navigation_hints": {
         "dashboard": "İşletmenize genel bakış: gelir, gider ve temel göstergeler",
@@ -169,6 +173,9 @@
         "select_a_status": "Bir durum seçin",
         "select_a_tax": "Vergi Seçiniz",
         "search": "Ara",
+        "search_menu": "Menüde ara...",
+        "navigate": "gezin",
+        "open": "aç",
         "are_you_sure": "Emin misiniz?",
         "list_is_empty": "Liste boş.",
         "no_tax_found": "Vergi bulunmadı!",
@@ -7762,7 +7769,9 @@
         "days_left": "gün kaldı",
         "recurring": "Tekrarlayan",
         "system_recurring": "Sistem tekrarlayan son tarih",
-        "upcoming": "Yaklaşan"
+        "upcoming": "Yaklaşan",
+        "deadline_name": "Son Tarih Adı",
+        "no_deadlines_filter": "Mevcut filtreye uyan son tarih bulunamadı"
     },
     "E-Faktura": "E-Fatura",
     "Viber Notifications": "Viber Bildirimleri",

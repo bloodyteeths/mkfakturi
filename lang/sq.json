@@ -53,7 +53,11 @@
         "custom_reports": "Raporte të Personalizuara",
         "operations": "Operacionet",
         "finance": "Financa",
-        "setup_wizard": "Magjistari i konfigurimit"
+        "setup_wizard": "Magjistari i konfigurimit",
+        "documents_group": "Dokumentet",
+        "contacts": "Kontaktet",
+        "money": "Paratë",
+        "favorites": "Të preferuarat"
     },
     "navigation_hints": {
         "dashboard": "Përmbledhje e biznesit tuaj: të ardhura, shpenzime dhe tregues kryesorë",
@@ -178,6 +182,9 @@
         "select_a_status": "Zgjidhni një status",
         "select_a_tax": "Zgjidhni një tatim",
         "search": "Kërkoni",
+        "search_menu": "Kërko në meny...",
+        "navigate": "navigoni",
+        "open": "hap",
         "are_you_sure": "A jeni të sigurt?",
         "list_is_empty": "Lista është e zbrazët.",
         "no_tax_found": "Nuk u gjet tatim!",
@@ -7115,7 +7122,9 @@
         "days_left": "ditë të mbetura",
         "recurring": "Periodik",
         "system_recurring": "Afat periodik i sistemit",
-        "upcoming": "Të ardhshme"
+        "upcoming": "Të ardhshme",
+        "deadline_name": "Emri i afatit",
+        "no_deadlines_filter": "Nuk ka afate që përputhen me filtrin aktual"
     },
     "E-Faktura": "E-Fatura",
     "Viber Notifications": "Njoftimet Viber",

@@ -15,60 +15,78 @@
       </template>
     </BasePageHeader>
 
-    <!-- KPI Summary Cards -->
-    <div class="grid grid-cols-1 gap-6 mt-6 md:grid-cols-4">
-      <!-- Overdue -->
-      <div class="relative flex items-center p-4 bg-white border-l-4 border-red-500 rounded shadow">
-        <div class="flex-shrink-0">
-          <BaseIcon name="ExclamationCircleIcon" class="h-8 w-8 text-red-500" />
+    <!-- KPI Cards — clickable to filter -->
+    <div class="grid grid-cols-2 gap-4 mt-6 md:grid-cols-4">
+      <button
+        class="relative flex items-center p-4 bg-white border-l-4 rounded shadow text-left transition-all"
+        :class="[
+          activeFilter === 'overdue' ? 'border-red-600 ring-2 ring-red-200' : 'border-red-400 hover:border-red-600',
+        ]"
+        @click="toggleFilter('overdue')"
+      >
+        <BaseIcon name="ExclamationCircleIcon" class="h-7 w-7 text-red-500 flex-shrink-0" />
+        <div class="ml-3">
+          <p class="text-xs text-gray-500">{{ $t('deadlines.overdue') }}</p>
+          <p class="text-xl font-bold text-red-600">{{ summary.overdue_count }}</p>
         </div>
-        <div class="ml-4">
-          <p class="text-sm font-medium text-gray-500">{{ $t('deadlines.overdue') }}</p>
-          <p class="text-2xl font-bold text-red-600">{{ summary.overdue_count }}</p>
-        </div>
-      </div>
+      </button>
 
-      <!-- Due This Week -->
-      <div class="relative flex items-center p-4 bg-white border-l-4 border-yellow-500 rounded shadow">
-        <div class="flex-shrink-0">
-          <BaseIcon name="ClockIcon" class="h-8 w-8 text-yellow-500" />
+      <button
+        class="relative flex items-center p-4 bg-white border-l-4 rounded shadow text-left transition-all"
+        :class="[
+          activeFilter === 'due_this_week' ? 'border-yellow-600 ring-2 ring-yellow-200' : 'border-yellow-400 hover:border-yellow-600',
+        ]"
+        @click="toggleFilter('due_this_week')"
+      >
+        <BaseIcon name="ClockIcon" class="h-7 w-7 text-yellow-500 flex-shrink-0" />
+        <div class="ml-3">
+          <p class="text-xs text-gray-500">{{ $t('deadlines.due_this_week') }}</p>
+          <p class="text-xl font-bold text-yellow-600">{{ summary.due_this_week }}</p>
         </div>
-        <div class="ml-4">
-          <p class="text-sm font-medium text-gray-500">{{ $t('deadlines.due_this_week') }}</p>
-          <p class="text-2xl font-bold text-yellow-600">{{ summary.due_this_week }}</p>
-        </div>
-      </div>
+      </button>
 
-      <!-- Due This Month -->
-      <div class="relative flex items-center p-4 bg-white border-l-4 border-blue-500 rounded shadow">
-        <div class="flex-shrink-0">
-          <BaseIcon name="CalendarIcon" class="h-8 w-8 text-blue-500" />
+      <button
+        class="relative flex items-center p-4 bg-white border-l-4 rounded shadow text-left transition-all"
+        :class="[
+          activeFilter === 'due_this_month' ? 'border-blue-600 ring-2 ring-blue-200' : 'border-blue-400 hover:border-blue-600',
+        ]"
+        @click="toggleFilter('due_this_month')"
+      >
+        <BaseIcon name="CalendarIcon" class="h-7 w-7 text-blue-500 flex-shrink-0" />
+        <div class="ml-3">
+          <p class="text-xs text-gray-500">{{ $t('deadlines.due_this_month') }}</p>
+          <p class="text-xl font-bold text-blue-600">{{ summary.due_this_month }}</p>
         </div>
-        <div class="ml-4">
-          <p class="text-sm font-medium text-gray-500">{{ $t('deadlines.due_this_month') }}</p>
-          <p class="text-2xl font-bold text-blue-600">{{ summary.due_this_month }}</p>
-        </div>
-      </div>
+      </button>
 
-      <!-- Completed This Month -->
-      <div class="relative flex items-center p-4 bg-white border-l-4 border-green-500 rounded shadow">
-        <div class="flex-shrink-0">
-          <BaseIcon name="CheckCircleIcon" class="h-8 w-8 text-green-500" />
+      <button
+        class="relative flex items-center p-4 bg-white border-l-4 rounded shadow text-left transition-all"
+        :class="[
+          activeFilter === 'completed' ? 'border-green-600 ring-2 ring-green-200' : 'border-green-400 hover:border-green-600',
+        ]"
+        @click="toggleFilter('completed')"
+      >
+        <BaseIcon name="CheckCircleIcon" class="h-7 w-7 text-green-500 flex-shrink-0" />
+        <div class="ml-3">
+          <p class="text-xs text-gray-500">{{ $t('deadlines.completed_this_month') }}</p>
+          <p class="text-xl font-bold text-green-600">{{ summary.completed_this_month }}</p>
         </div>
-        <div class="ml-4">
-          <p class="text-sm font-medium text-gray-500">{{ $t('deadlines.completed_this_month') }}</p>
-          <p class="text-2xl font-bold text-green-600">{{ summary.completed_this_month }}</p>
-        </div>
-      </div>
+      </button>
     </div>
 
-    <!-- Filters -->
-    <div class="mt-6 flex flex-wrap items-end gap-4 bg-white p-4 rounded shadow">
-      <div class="w-48">
-        <label class="block text-xs font-medium text-gray-500 mb-1">{{ $t('general.type') }}</label>
+    <!-- Filter bar — compact, only shows when actively filtering -->
+    <div
+      v-if="activeFilter || filters.type"
+      class="mt-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2"
+    >
+      <BaseIcon name="FunnelIcon" class="h-4 w-4 text-blue-500" />
+      <span class="text-sm text-blue-700">
+        {{ activeFilterLabel }}
+      </span>
+      <div v-if="!activeFilter" class="flex items-center gap-2">
         <select
           v-model="filters.type"
-          class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+          class="text-sm px-2 py-1 border border-blue-300 rounded bg-white"
           @change="loadDeadlines(1)"
         >
           <option value="">{{ $t('general.all') }}</option>
@@ -79,38 +97,34 @@
           <option value="custom">{{ $t('deadlines.type_custom') }}</option>
         </select>
       </div>
-      <div class="w-44">
-        <label class="block text-xs font-medium text-gray-500 mb-1">{{ $t('deadlines.status') }}</label>
-        <select
-          v-model="filters.status"
-          class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-          @change="loadDeadlines(1)"
-        >
-          <option value="">{{ $t('general.all') }}</option>
-          <option value="upcoming">{{ $t('deadlines.upcoming') }}</option>
-          <option value="due_today">{{ $t('deadlines.due_today') }}</option>
-          <option value="overdue">{{ $t('deadlines.overdue') }}</option>
-          <option value="completed">{{ $t('deadlines.completed') }}</option>
-        </select>
-      </div>
-      <BaseButton
-        v-if="filters.type || filters.status"
-        variant="primary-outline"
-        size="sm"
-        @click="clearFilters"
-      >
+      <button class="ml-auto text-sm text-blue-600 hover:text-blue-800 underline" @click="clearAllFilters">
         {{ $t('general.clear_all') }}
-      </BaseButton>
+      </button>
     </div>
 
-    <!-- Loading State -->
+    <!-- Type filter toggle (shown when no KPI filter active) -->
+    <div
+      v-if="!activeFilter && !filters.type"
+      class="mt-4 flex items-center gap-2"
+    >
+      <span class="text-xs text-gray-400 mr-1">{{ $t('general.type') }}:</span>
+      <button
+        v-for="typeOpt in typeOptions"
+        :key="typeOpt.value"
+        class="px-2.5 py-1 text-xs rounded-full border transition-all"
+        :class="filters.type === typeOpt.value
+          ? 'bg-primary-100 border-primary-300 text-primary-700'
+          : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400'"
+        @click="setTypeFilter(typeOpt.value)"
+      >
+        {{ typeOpt.label }}
+      </button>
+    </div>
+
+    <!-- Loading -->
     <div v-if="isLoading" class="flex items-center justify-center py-20">
       <BaseContentPlaceholders>
-        <BaseContentPlaceholdersBox
-          :rounded="true"
-          class="w-full"
-          style="height: 300px"
-        />
+        <BaseContentPlaceholdersBox :rounded="true" class="w-full" style="height: 300px" />
       </BaseContentPlaceholders>
     </div>
 
@@ -118,10 +132,13 @@
     <BaseEmptyPlaceholder
       v-show="!isLoading && deadlines.length === 0"
       :title="$t('deadlines.no_deadlines')"
-      :description="$t('deadlines.no_deadlines')"
+      :description="activeFilter ? $t('deadlines.no_deadlines_filter') : $t('deadlines.no_deadlines')"
     >
       <template #actions>
-        <BaseButton variant="primary-outline" @click="loadDeadlines(1)">
+        <BaseButton v-if="activeFilter || filters.type" variant="primary-outline" @click="clearAllFilters">
+          {{ $t('general.clear_all') }}
+        </BaseButton>
+        <BaseButton v-else variant="primary-outline" @click="loadDeadlines(1)">
           <template #left="slotProps">
             <BaseIcon name="ArrowPathIcon" :class="slotProps.class" />
           </template>
@@ -130,128 +147,96 @@
       </template>
     </BaseEmptyPlaceholder>
 
-    <!-- Deadlines Table -->
-    <div v-if="!isLoading && deadlines.length > 0" class="mt-6">
-      <BaseTable
-        ref="table"
-        :data="deadlines"
-        :columns="deadlineColumns"
-        class="mt-3"
+    <!-- Deadline Cards — grouped, clean layout -->
+    <div v-if="!isLoading && deadlines.length > 0" class="mt-4 space-y-2">
+      <div
+        v-for="deadline in deadlines"
+        :key="deadline.id"
+        class="bg-white rounded-lg shadow-sm border px-5 py-4 flex items-center gap-4 transition-all hover:shadow-md"
+        :class="getRowBorderClass(deadline)"
       >
-        <template #cell-title="{ row }">
-          <div class="flex items-center gap-2">
-            <div class="font-medium text-gray-900">
-              {{ locale === 'mk' ? (row.data.title_mk || row.data.title) : row.data.title }}
-            </div>
-            <span
-              v-if="row.data.is_recurring"
-              class="px-1.5 py-0.5 text-[10px] font-medium rounded bg-blue-50 text-blue-600"
-              :title="$t('deadlines.system_recurring')"
-            >
-              {{ $t('deadlines.recurring') }}
-            </span>
-            <span
-              v-else
-              class="px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-50 text-gray-500"
-            >
-              {{ $t('deadlines.type_custom') }}
-            </span>
-          </div>
-          <div v-if="row.data.description" class="text-xs text-gray-500 truncate max-w-xs">
-            {{ row.data.description }}
-          </div>
-        </template>
-
-        <template #cell-deadline_type="{ row }">
-          <span
-            :class="getTypeBadgeClass(row.data.deadline_type)"
-            class="px-2 py-1 text-xs font-medium rounded-full"
-          >
-            {{ getTypeLabel(row.data.deadline_type) }}
-          </span>
-        </template>
-
-        <template #cell-due_date="{ row }">
-          <div class="text-sm text-gray-900">
-            {{ formatDate(row.data.due_date) }}
-          </div>
+        <!-- Status indicator dot -->
+        <div class="flex-shrink-0">
           <div
-            :class="getDaysClass(row.data.days_remaining, row.data.status)"
+            class="w-3 h-3 rounded-full"
+            :class="getStatusDotClass(deadline.status)"
+          ></div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-semibold text-gray-900 truncate">
+              {{ locale === 'mk' ? (deadline.title_mk || deadline.title) : deadline.title }}
+            </h3>
+            <span
+              :class="getTypeBadgeClass(deadline.deadline_type)"
+              class="px-2 py-0.5 text-[11px] font-medium rounded-full flex-shrink-0"
+            >
+              {{ getTypeLabel(deadline.deadline_type) }}
+            </span>
+          </div>
+          <p v-if="deadline.description" class="text-xs text-gray-400 truncate mt-0.5">
+            {{ locale === 'mk' ? getDescriptionMk(deadline) : deadline.description }}
+          </p>
+        </div>
+
+        <!-- Due date + days -->
+        <div class="flex-shrink-0 text-right w-32">
+          <p class="text-sm font-medium text-gray-800">{{ formatDate(deadline.due_date) }}</p>
+          <p
+            :class="getDaysClass(deadline.days_remaining, deadline.status)"
             class="text-xs mt-0.5"
           >
-            {{ getDaysLabel(row.data.days_remaining, row.data.status) }}
-          </div>
-        </template>
+            {{ getDaysLabel(deadline.days_remaining, deadline.status) }}
+          </p>
+        </div>
 
-        <template #cell-status="{ row }">
-          <span
-            :class="getStatusBadgeClass(row.data.status)"
-            class="px-2 py-1 text-xs font-medium rounded-full"
+        <!-- Actions -->
+        <div class="flex-shrink-0 flex items-center gap-1.5">
+          <BaseButton
+            v-if="deadline.status !== 'completed'"
+            variant="primary"
+            size="sm"
+            :disabled="completingId === deadline.id"
+            @click="completeDeadline(deadline)"
           >
-            {{ getStatusLabel(row.data.status) }}
+            <template #left="slotProps">
+              <BaseIcon name="CheckIcon" :class="slotProps.class" />
+            </template>
+            {{ completingId === deadline.id ? '...' : $t('deadlines.mark_complete') }}
+          </BaseButton>
+          <span v-else class="text-xs text-green-600 font-medium px-2">
+            <BaseIcon name="CheckCircleIcon" class="h-4 w-4 inline -mt-0.5" />
+            {{ $t('deadlines.completed') }}
           </span>
-        </template>
 
-        <template #cell-completed_by="{ row }">
-          <span v-if="row.data.completed_by" class="text-sm text-gray-600">
-            {{ row.data.completed_by.name }}
-          </span>
-          <span v-else class="text-sm text-gray-400">—</span>
-        </template>
-
-        <template #cell-actions="{ row }">
-          <div class="flex items-center gap-2">
-            <BaseButton
-              v-if="row.data.status !== 'completed'"
-              variant="primary-outline"
-              size="sm"
-              :disabled="completingId === row.data.id"
-              @click="completeDeadline(row.data)"
-            >
-              <template #left="slotProps">
-                <BaseIcon name="CheckIcon" :class="slotProps.class" />
-              </template>
-              {{ completingId === row.data.id ? '...' : $t('deadlines.mark_complete') }}
-            </BaseButton>
-            <span
-              v-else
-              class="text-sm text-gray-400 italic"
-            >
-              {{ $t('deadlines.completed') }}
-            </span>
-            <!-- Edit button for custom deadlines -->
-            <BaseButton
-              v-if="!row.data.is_recurring && row.data.status !== 'completed'"
-              variant="primary-outline"
-              size="sm"
-              @click="openEditModal(row.data)"
-            >
-              <template #left="slotProps">
-                <BaseIcon name="PencilIcon" :class="slotProps.class" />
-              </template>
-            </BaseButton>
-            <BaseButton
-              v-if="!row.data.is_recurring"
-              variant="danger"
-              size="sm"
-              @click="confirmDelete(row.data)"
-            >
-              <template #left="slotProps">
-                <BaseIcon name="TrashIcon" :class="slotProps.class" />
-              </template>
-            </BaseButton>
-          </div>
-        </template>
-      </BaseTable>
+          <BaseButton
+            v-if="!deadline.is_recurring && deadline.status !== 'completed'"
+            variant="primary-outline"
+            size="sm"
+            @click="openEditModal(deadline)"
+          >
+            <BaseIcon name="PencilIcon" class="h-3.5 w-3.5" />
+          </BaseButton>
+          <BaseButton
+            v-if="!deadline.is_recurring"
+            variant="danger"
+            size="sm"
+            @click="confirmDelete(deadline)"
+          >
+            <BaseIcon name="TrashIcon" class="h-3.5 w-3.5" />
+          </BaseButton>
+        </div>
+      </div>
 
       <!-- Pagination -->
       <div
         v-if="pagination.lastPage > 1"
-        class="flex items-center justify-between mt-4 px-2"
+        class="flex items-center justify-between pt-3 px-1"
       >
-        <p class="text-sm text-gray-600">
-          {{ $t('general.showing') }} {{ pagination.from }}–{{ pagination.to }}
-          {{ $t('general.of') }} {{ pagination.total }}
+        <p class="text-xs text-gray-400">
+          {{ pagination.from }}–{{ pagination.to }} / {{ pagination.total }}
         </p>
         <div class="flex items-center gap-2">
           <BaseButton
@@ -262,9 +247,7 @@
           >
             {{ $t('general.previous') }}
           </BaseButton>
-          <span class="text-sm text-gray-600">
-            {{ pagination.currentPage }} / {{ pagination.lastPage }}
-          </span>
+          <span class="text-xs text-gray-500">{{ pagination.currentPage }}/{{ pagination.lastPage }}</span>
           <BaseButton
             variant="primary-outline"
             size="sm"
@@ -277,66 +260,58 @@
       </div>
     </div>
 
-    <!-- Create Deadline Modal -->
+    <!-- Create Modal — simplified, single title field -->
     <div v-if="showCreateModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
       <div class="flex items-center justify-center min-h-screen p-4">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeCreateModal"></div>
-        <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
           <div class="px-6 pt-5 pb-4">
             <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $t('deadlines.add_deadline') }}</h3>
-
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.title') }} (EN) *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.deadline_name') }} *</label>
                 <input
                   v-model="createForm.title"
                   type="text"
                   maxlength="255"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                  :placeholder="$t('deadlines.title')"
+                  :placeholder="locale === 'mk' ? 'пр. Квартален извештај за ДЗС' : 'e.g. Quarterly statistical report'"
                 />
               </div>
 
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.title') }} (MK)</label>
-                <input
-                  v-model="createForm.title_mk"
-                  type="text"
-                  maxlength="255"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                  placeholder="Наслов на македонски"
-                />
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('general.type') }}</label>
+                  <select
+                    v-model="createForm.deadline_type"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="custom">{{ $t('deadlines.type_custom') }}</option>
+                    <option value="vat_return">{{ $t('deadlines.type_vat_return') }}</option>
+                    <option value="mpin">{{ $t('deadlines.type_mpin') }}</option>
+                    <option value="cit_advance">{{ $t('deadlines.type_cit_advance') }}</option>
+                    <option value="annual_fs">{{ $t('deadlines.type_annual_fs') }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.due_date') }} *</label>
+                  <input
+                    v-model="createForm.due_date"
+                    type="date"
+                    :min="todayString"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                  />
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('general.type') }}</label>
-                <select
-                  v-model="createForm.deadline_type"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                >
-                  <option value="custom">{{ $t('deadlines.type_custom') }}</option>
-                  <option value="vat_return">{{ $t('deadlines.type_vat_return') }}</option>
-                  <option value="mpin">{{ $t('deadlines.type_mpin') }}</option>
-                  <option value="cit_advance">{{ $t('deadlines.type_cit_advance') }}</option>
-                  <option value="annual_fs">{{ $t('deadlines.type_annual_fs') }}</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.due_date') }} *</label>
-                <input
-                  v-model="createForm.due_date"
-                  type="date"
-                  :min="todayString"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('general.description') }}</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  {{ $t('general.description') }}
+                  <span class="text-gray-400 font-normal">({{ $t('general.optional') }})</span>
+                </label>
                 <textarea
                   v-model="createForm.description"
-                  rows="3"
+                  rows="2"
                   maxlength="1000"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                 ></textarea>
@@ -347,7 +322,6 @@
               </div>
             </div>
           </div>
-
           <div class="bg-gray-50 px-6 py-3 flex justify-end space-x-3 rounded-b-lg">
             <BaseButton variant="primary-outline" :disabled="isCreating" @click="closeCreateModal">
               {{ $t('general.cancel') }}
@@ -364,17 +338,16 @@
       </div>
     </div>
 
-    <!-- Edit Deadline Modal -->
+    <!-- Edit Modal -->
     <div v-if="showEditModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
       <div class="flex items-center justify-center min-h-screen p-4">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeEditModal"></div>
-        <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
           <div class="px-6 pt-5 pb-4">
             <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $t('deadlines.edit_deadline') }}</h3>
-
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.title') }} (EN) *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.deadline_name') }} *</label>
                 <input
                   v-model="editForm.title"
                   type="text"
@@ -382,17 +355,6 @@
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.title') }} (MK)</label>
-                <input
-                  v-model="editForm.title_mk"
-                  type="text"
-                  maxlength="255"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                />
-              </div>
-
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('deadlines.due_date') }} *</label>
                 <input
@@ -402,32 +364,28 @@
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
-
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('general.description') }}</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  {{ $t('general.description') }}
+                  <span class="text-gray-400 font-normal">({{ $t('general.optional') }})</span>
+                </label>
                 <textarea
                   v-model="editForm.description"
-                  rows="3"
+                  rows="2"
                   maxlength="1000"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                 ></textarea>
               </div>
-
               <div v-if="editError" class="bg-red-50 border border-red-200 rounded-md p-3">
                 <p class="text-sm text-red-700">{{ editError }}</p>
               </div>
             </div>
           </div>
-
           <div class="bg-gray-50 px-6 py-3 flex justify-end space-x-3 rounded-b-lg">
             <BaseButton variant="primary-outline" :disabled="isEditing" @click="closeEditModal">
               {{ $t('general.cancel') }}
             </BaseButton>
-            <BaseButton
-              variant="primary"
-              :disabled="!editForm.title || !editForm.due_date || isEditing"
-              @click="submitEdit"
-            >
+            <BaseButton variant="primary" :disabled="!editForm.title || !editForm.due_date || isEditing" @click="submitEdit">
               {{ isEditing ? '...' : $t('general.save') }}
             </BaseButton>
           </div>
@@ -447,14 +405,10 @@
               </div>
               <h3 class="text-lg font-medium text-gray-900">{{ $t('deadlines.confirm_delete') }}</h3>
             </div>
-            <p class="text-sm text-gray-500">
-              {{ deleteTarget?.title_mk || deleteTarget?.title }}
-            </p>
+            <p class="text-sm text-gray-500">{{ deleteTarget?.title_mk || deleteTarget?.title }}</p>
           </div>
           <div class="bg-gray-50 px-6 py-3 flex justify-end space-x-3 rounded-b-lg">
-            <BaseButton variant="primary-outline" @click="showDeleteModal = false">
-              {{ $t('general.cancel') }}
-            </BaseButton>
+            <BaseButton variant="primary-outline" @click="showDeleteModal = false">{{ $t('general.cancel') }}</BaseButton>
             <BaseButton variant="danger" :disabled="isDeleting" @click="executeDelete">
               {{ isDeleting ? '...' : $t('general.delete') }}
             </BaseButton>
@@ -478,131 +432,106 @@ const deadlines = ref([])
 const isLoading = ref(true)
 const completingId = ref(null)
 
-// Filters
-const filters = reactive({
-  type: '',
-  status: '',
-})
+// Active KPI filter (mutually exclusive with dropdown filters)
+const activeFilter = ref('')
+
+// Dropdown filters
+const filters = reactive({ type: '', status: '' })
 
 // Pagination
-const pagination = reactive({
-  currentPage: 1,
-  lastPage: 1,
-  total: 0,
-  from: 0,
-  to: 0,
-})
+const pagination = reactive({ currentPage: 1, lastPage: 1, total: 0, from: 0, to: 0 })
 
-// Create modal state
+// Create modal
 const showCreateModal = ref(false)
 const isCreating = ref(false)
 const createError = ref(null)
-const createForm = reactive({
-  title: '',
-  title_mk: '',
-  deadline_type: 'custom',
-  due_date: '',
-  description: '',
-})
+const createForm = reactive({ title: '', deadline_type: 'custom', due_date: '', description: '' })
 
-// Edit modal state
+// Edit modal
 const showEditModal = ref(false)
 const isEditing = ref(false)
 const editError = ref(null)
 const editingId = ref(null)
-const editForm = reactive({
-  title: '',
-  title_mk: '',
-  due_date: '',
-  description: '',
-})
+const editForm = reactive({ title: '', due_date: '', description: '' })
 
-// Delete modal state
+// Delete modal
 const showDeleteModal = ref(false)
 const isDeleting = ref(false)
 const deleteTarget = ref(null)
 
-// Fix: use local date parts instead of toISOString() which is UTC
 const todayString = computed(() => {
   const d = new Date()
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 })
 
-// KPI Summary — loaded from dedicated API
-const summary = reactive({
-  overdue_count: 0,
-  due_this_week: 0,
-  due_this_month: 0,
-  completed_this_month: 0,
-})
+// KPI Summary
+const summary = reactive({ overdue_count: 0, due_this_week: 0, due_this_month: 0, completed_this_month: 0 })
 
-// Table column definitions
-const deadlineColumns = computed(() => [
-  {
-    key: 'title',
-    label: t('deadlines.title'),
-    thClass: 'min-w-[250px]',
-  },
-  {
-    key: 'deadline_type',
-    label: t('general.type'),
-    thClass: 'w-36',
-  },
-  {
-    key: 'due_date',
-    label: t('deadlines.due_date'),
-    thClass: 'w-44',
-  },
-  {
-    key: 'status',
-    label: t('deadlines.status'),
-    thClass: 'w-32',
-  },
-  {
-    key: 'completed_by',
-    label: t('deadlines.completed_by'),
-    thClass: 'w-36',
-  },
-  {
-    key: 'actions',
-    label: '',
-    thClass: 'w-52',
-  },
+// Type filter options as pill buttons
+const typeOptions = computed(() => [
+  { value: 'vat_return', label: t('deadlines.type_vat_return') },
+  { value: 'mpin', label: t('deadlines.type_mpin') },
+  { value: 'cit_advance', label: t('deadlines.type_cit_advance') },
+  { value: 'annual_fs', label: t('deadlines.type_annual_fs') },
+  { value: 'custom', label: t('deadlines.type_custom') },
 ])
 
-/**
- * Load KPI summary from dedicated server-side endpoint.
- */
+const activeFilterLabel = computed(() => {
+  if (activeFilter.value === 'overdue') return t('deadlines.overdue')
+  if (activeFilter.value === 'due_this_week') return t('deadlines.due_this_week')
+  if (activeFilter.value === 'due_this_month') return t('deadlines.due_this_month')
+  if (activeFilter.value === 'completed') return t('deadlines.completed')
+  if (filters.type) return t(`deadlines.type_${filters.type}`)
+  return ''
+})
+
+// ── Data Loading ──
+
 const loadSummary = async () => {
   try {
     const { data } = await window.axios.get('/deadlines/summary')
-    summary.overdue_count = data.overdue_count ?? 0
-    summary.due_this_week = data.due_this_week ?? 0
-    summary.due_this_month = data.due_this_month ?? 0
-    summary.completed_this_month = data.completed_this_month ?? 0
+    Object.assign(summary, data)
   } catch {
-    // Silently fail — KPI is non-critical
+    // Non-critical
   }
 }
 
-/**
- * Load deadlines from the company API endpoint.
- */
 const loadDeadlines = async (page = 1) => {
   isLoading.value = true
   try {
     const params = { page, per_page: 25 }
-    if (filters.type) params.type = filters.type
-    if (filters.status) params.status = filters.status
+
+    // KPI filters map to status param (except due_this_week/month which we handle client-side)
+    if (activeFilter.value === 'overdue') {
+      params.status = 'overdue'
+    } else if (activeFilter.value === 'completed') {
+      params.status = 'completed'
+    } else if (!activeFilter.value) {
+      // No KPI filter — use dropdown filters
+      if (filters.type) params.type = filters.type
+      if (filters.status) params.status = filters.status
+    }
+    // For due_this_week / due_this_month we load all non-completed and filter client-side
 
     const { data } = await window.axios.get('/deadlines', { params })
-    const items = data.data || []
-    deadlines.value = items
+    let items = data.data || []
 
-    // Pagination
+    // Client-side date filtering for week/month KPI cards
+    if (activeFilter.value === 'due_this_week' || activeFilter.value === 'due_this_month') {
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const endDate = activeFilter.value === 'due_this_week'
+        ? new Date(today.getTime() + (7 - today.getDay()) * 86400000)
+        : new Date(today.getFullYear(), today.getMonth() + 1, 0)
+
+      items = items.filter((d) => {
+        if (d.status === 'completed') return false
+        const due = new Date(d.due_date)
+        return due >= today && due <= endDate
+      })
+    }
+
+    deadlines.value = items
     pagination.currentPage = data.current_page ?? 1
     pagination.lastPage = data.last_page ?? 1
     pagination.total = data.total ?? items.length
@@ -618,67 +547,63 @@ const loadDeadlines = async (page = 1) => {
   }
 }
 
-const clearFilters = () => {
+// ── Filter Actions ──
+
+const toggleFilter = (filter) => {
+  if (activeFilter.value === filter) {
+    activeFilter.value = ''
+  } else {
+    activeFilter.value = filter
+    filters.type = ''
+    filters.status = ''
+  }
+  loadDeadlines(1)
+}
+
+const setTypeFilter = (type) => {
+  filters.type = filters.type === type ? '' : type
+  activeFilter.value = ''
+  loadDeadlines(1)
+}
+
+const clearAllFilters = () => {
+  activeFilter.value = ''
   filters.type = ''
   filters.status = ''
   loadDeadlines(1)
 }
 
-/**
- * Mark a deadline as completed via the API.
- */
+// ── Actions ──
+
 const completeDeadline = async (deadline) => {
   if (completingId.value) return
-
   completingId.value = deadline.id
-
   try {
     const { data } = await window.axios.post(`/deadlines/${deadline.id}/complete`)
-
-    // Update the deadline in the list
     const index = deadlines.value.findIndex((d) => d.id === deadline.id)
-    if (index !== -1) {
-      deadlines.value[index] = data.data
-    }
-
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('deadlines.deadline_completed'),
-    })
-
-    // Refresh summary counts
+    if (index !== -1) deadlines.value[index] = data.data
+    notificationStore.showNotification({ type: 'success', message: t('deadlines.deadline_completed') })
     loadSummary()
   } catch (err) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: err?.response?.data?.error || 'Error completing deadline.',
-    })
+    notificationStore.showNotification({ type: 'error', message: err?.response?.data?.error || 'Error' })
   } finally {
     completingId.value = null
   }
 }
 
-/**
- * Submit the create deadline form.
- */
 const submitCreate = async () => {
   isCreating.value = true
   createError.value = null
-
   try {
+    // Send title as both EN and MK — user writes in their language
     await window.axios.post('/deadlines', {
       title: createForm.title,
-      title_mk: createForm.title_mk || null,
+      title_mk: createForm.title,
       deadline_type: createForm.deadline_type,
       due_date: createForm.due_date,
       description: createForm.description || null,
     })
-
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('deadlines.deadline_created'),
-    })
-
+    notificationStore.showNotification({ type: 'success', message: t('deadlines.deadline_created') })
     closeCreateModal()
     loadDeadlines(1)
     loadSummary()
@@ -697,21 +622,13 @@ const submitCreate = async () => {
 
 const closeCreateModal = () => {
   showCreateModal.value = false
-  createForm.title = ''
-  createForm.title_mk = ''
-  createForm.deadline_type = 'custom'
-  createForm.due_date = ''
-  createForm.description = ''
+  Object.assign(createForm, { title: '', deadline_type: 'custom', due_date: '', description: '' })
   createError.value = null
 }
 
-/**
- * Open edit modal for a custom deadline.
- */
 const openEditModal = (deadline) => {
   editingId.value = deadline.id
-  editForm.title = deadline.title
-  editForm.title_mk = deadline.title_mk || ''
+  editForm.title = deadline.title_mk || deadline.title
   editForm.due_date = deadline.due_date?.split('T')[0] || ''
   editForm.description = deadline.description || ''
   editError.value = null
@@ -728,25 +645,16 @@ const submitEdit = async () => {
   if (!editingId.value) return
   isEditing.value = true
   editError.value = null
-
   try {
     const { data } = await window.axios.patch(`/deadlines/${editingId.value}`, {
       title: editForm.title,
-      title_mk: editForm.title_mk || null,
+      title_mk: editForm.title,
       due_date: editForm.due_date,
       description: editForm.description || null,
     })
-
     const index = deadlines.value.findIndex((d) => d.id === editingId.value)
-    if (index !== -1) {
-      deadlines.value[index] = data.data
-    }
-
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('deadlines.deadline_updated'),
-    })
-
+    if (index !== -1) deadlines.value[index] = data.data
+    notificationStore.showNotification({ type: 'success', message: t('deadlines.deadline_updated') })
     closeEditModal()
     loadSummary()
   } catch (err) {
@@ -762,9 +670,6 @@ const submitEdit = async () => {
   }
 }
 
-/**
- * Open delete confirmation modal.
- */
 const confirmDelete = (deadline) => {
   deleteTarget.value = deadline
   showDeleteModal.value = true
@@ -773,69 +678,51 @@ const confirmDelete = (deadline) => {
 const executeDelete = async () => {
   if (!deleteTarget.value) return
   isDeleting.value = true
-
   try {
     await window.axios.delete(`/deadlines/${deleteTarget.value.id}`)
     deadlines.value = deadlines.value.filter((d) => d.id !== deleteTarget.value.id)
-    notificationStore.showNotification({
-      type: 'success',
-      message: t('deadlines.deadline_deleted'),
-    })
+    notificationStore.showNotification({ type: 'success', message: t('deadlines.deadline_deleted') })
     showDeleteModal.value = false
     deleteTarget.value = null
     loadSummary()
   } catch (err) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: err?.response?.data?.error || 'Failed to delete deadline.',
-    })
+    notificationStore.showNotification({ type: 'error', message: err?.response?.data?.error || 'Failed to delete.' })
   } finally {
     isDeleting.value = false
   }
 }
 
-// Display helpers
+// ── Display Helpers ──
 
-const getTypeLabel = (type) => {
-  return t(`deadlines.type_${type}`) || type
-}
+const getTypeLabel = (type) => t(`deadlines.type_${type}`) || type
 
-const getTypeBadgeClass = (type) => {
-  const classes = {
-    vat_return: 'bg-purple-100 text-purple-800',
-    mpin: 'bg-indigo-100 text-indigo-800',
-    cit_advance: 'bg-teal-100 text-teal-800',
-    annual_fs: 'bg-amber-100 text-amber-800',
-    custom: 'bg-gray-100 text-gray-800',
-  }
-  return classes[type] || 'bg-gray-100 text-gray-800'
-}
+const getTypeBadgeClass = (type) => ({
+  vat_return: 'bg-purple-100 text-purple-700',
+  mpin: 'bg-indigo-100 text-indigo-700',
+  cit_advance: 'bg-teal-100 text-teal-700',
+  annual_fs: 'bg-amber-100 text-amber-700',
+  custom: 'bg-gray-100 text-gray-600',
+})[type] || 'bg-gray-100 text-gray-600'
 
-const getStatusLabel = (status) => {
-  const labels = {
-    upcoming: t('deadlines.upcoming'),
-    due_today: t('deadlines.due_today'),
-    overdue: t('deadlines.overdue'),
-    completed: t('deadlines.completed'),
-  }
-  return labels[status] || status
-}
+const getStatusDotClass = (status) => ({
+  upcoming: 'bg-green-400',
+  due_today: 'bg-yellow-400 animate-pulse',
+  overdue: 'bg-red-500 animate-pulse',
+  completed: 'bg-gray-300',
+})[status] || 'bg-gray-300'
 
-const getStatusBadgeClass = (status) => {
-  const classes = {
-    upcoming: 'bg-green-100 text-green-800',
-    due_today: 'bg-yellow-100 text-yellow-800',
-    overdue: 'bg-red-100 text-red-800',
-    completed: 'bg-gray-100 text-gray-800',
-  }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+const getRowBorderClass = (deadline) => {
+  if (deadline.status === 'overdue') return 'border-l-4 border-l-red-400'
+  if (deadline.status === 'due_today') return 'border-l-4 border-l-yellow-400'
+  if (deadline.status === 'completed') return 'border-l-4 border-l-gray-200 opacity-60'
+  return 'border-l-4 border-l-green-300'
 }
 
 const getDaysClass = (daysRemaining, status) => {
   if (status === 'completed') return 'text-gray-400'
-  if (daysRemaining < 0) return 'text-red-600 font-medium'
-  if (daysRemaining === 0) return 'text-yellow-600 font-medium'
-  if (daysRemaining <= 3) return 'text-orange-500'
+  if (daysRemaining < 0) return 'text-red-600 font-semibold'
+  if (daysRemaining === 0) return 'text-yellow-600 font-semibold'
+  if (daysRemaining <= 3) return 'text-orange-500 font-medium'
   return 'text-gray-500'
 }
 
@@ -846,22 +733,29 @@ const getDaysLabel = (daysRemaining, status) => {
   return `${daysRemaining} ${t('deadlines.days_left')}`
 }
 
+const getDescriptionMk = (deadline) => {
+  // Return MK description if available, otherwise keep original
+  return deadline.description
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   try {
-    return new Date(dateString).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
+    return new Date(dateString).toLocaleDateString(locale.value === 'mk' ? 'mk-MK' : undefined, {
       day: 'numeric',
+      month: 'short',
+      year: 'numeric',
     })
   } catch {
     return dateString
   }
 }
 
-// Lifecycle
+// ── Lifecycle ──
+// Default: show upcoming deadlines, not the full history
 onMounted(() => {
-  loadDeadlines(1)
   loadSummary()
+  // Start with no filter — shows all sorted by due_date ASC
+  loadDeadlines(1)
 })
 </script>

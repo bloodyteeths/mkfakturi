@@ -56,7 +56,11 @@
         "custom_reports": "Прилагодени извештаи",
         "operations": "Операции",
         "finance": "Финансии",
-        "setup_wizard": "Волшебник за поставување"
+        "setup_wizard": "Волшебник за поставување",
+        "documents_group": "Документи",
+        "contacts": "Контакти",
+        "money": "Пари",
+        "favorites": "Омилени"
     },
     "navigation_hints": {
         "dashboard": "Преглед на бизнисот: приходи, трошоци и клучни показатели",
@@ -181,6 +185,9 @@
         "select_a_status": "Избери статус",
         "select_a_tax": "Избери данок",
         "search": "Пребарај",
+        "search_menu": "Пребарај мени...",
+        "navigate": "навигирај",
+        "open": "отвори",
         "are_you_sure": "Дали сте сигурни?",
         "list_is_empty": "Листата е празна.",
         "no_tax_found": "Не е најден данок!",
@@ -7288,7 +7295,9 @@
         "days_left": "дена преостанати",
         "recurring": "Периодичен",
         "system_recurring": "Системски периодичен рок",
-        "upcoming": "Претстојни"
+        "upcoming": "Претстојни",
+        "deadline_name": "Име на рок",
+        "no_deadlines_filter": "Нема рокови што одговараат на филтерот"
     },
     "bills.inbound_notification_subject": "Нова фактура пристигна: :number",
     "bills.inbound_notification_greeting": "Нова фактура пристигна",

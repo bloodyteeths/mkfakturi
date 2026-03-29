@@ -1672,6 +1672,9 @@
         "save": "Save",
         "saving": "Saving",
         "search": "Search",
+        "search_menu": "Search menu...",
+        "navigate": "navigate",
+        "open": "open",
         "select": "Select",
         "select_a_status": "Select a status",
         "select_status": "Select status",
@@ -3087,7 +3090,11 @@
         "custom_reports": "Custom Reports",
         "operations": "Operations",
         "finance": "Finance",
-        "setup_wizard": "Setup Wizard"
+        "setup_wizard": "Setup Wizard",
+        "documents_group": "Documents",
+        "contacts": "Contacts",
+        "money": "Money",
+        "favorites": "Favorites"
     },
     "navigation_hints": {
         "dashboard": "Overview of your business: revenue, expenses, and key metrics",
@@ -3117,7 +3124,10 @@
         "all_support_tickets": "View all support tickets",
         "payouts": "Partner commission payouts",
         "partners": "Manage partner accounts and portfolios",
-        "operations": "Compensations, orders, cost centers and projects",
+        "documents_group": "Estimates, invoices, bills and document uploads",
+        "contacts": "Customers and suppliers",
+        "money": "Payments, expenses and banking",
+        "operations": "POS, stock, manufacturing, orders and projects",
         "finance": "BI analysis, budgets, interest, collections and custom reports",
         "compensations": "Mutual debt settlements between companies",
         "payment_orders": "Bank payment instructions and transfers",
@@ -7914,7 +7924,9 @@
         "days_left": "days left",
         "recurring": "Recurring",
         "system_recurring": "System recurring deadline",
-        "upcoming": "Upcoming"
+        "upcoming": "Upcoming",
+        "deadline_name": "Deadline Name",
+        "no_deadlines_filter": "No deadlines match the current filter"
     },
     "bills.inbound_notification_subject": "New invoice received: :number",
     "bills.inbound_notification_greeting": "New Invoice Received",
