@@ -128,6 +128,20 @@ class BankTransaction extends Model
 
     const LINKED_REVIEWED = 'reviewed';
 
+    const LINKED_INCOME = 'income';
+
+    const LINKED_OWNER_CONTRIBUTION = 'owner_contribution';
+
+    const LINKED_OWNER_WITHDRAWAL = 'owner_withdrawal';
+
+    const LINKED_LOAN_RECEIVED = 'loan_received';
+
+    const LINKED_LOAN_REPAYMENT = 'loan_repayment';
+
+    const LINKED_TAX_PAYMENT = 'tax_payment';
+
+    const LINKED_INTERNAL_TRANSFER = 'internal_transfer';
+
     /**
      * Mark this transaction as reconciled with a linked record.
      */
@@ -140,6 +154,23 @@ class BankTransaction extends Model
             'processing_status' => self::STATUS_PROCESSED,
             'reconciliation_status' => 'reconciled',
             'processed_at' => now(),
+        ]);
+    }
+
+    /**
+     * Undo reconciliation — reset to unreconciled state.
+     * Does NOT delete linked records (expenses, payments) — only unlinks the transaction.
+     */
+    public function undoReconciliation(): void
+    {
+        $this->update([
+            'linked_type' => null,
+            'linked_id' => null,
+            'matched_invoice_id' => null,
+            'reconciled_at' => null,
+            'processing_status' => self::STATUS_PENDING,
+            'reconciliation_status' => 'unreconciled',
+            'processed_at' => null,
         ]);
     }
 

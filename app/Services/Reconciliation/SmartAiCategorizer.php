@@ -89,15 +89,20 @@ Available expense categories for this company:
 {$categoryList}
 
 Keyword hints:
-- "плата", "salary", "wages", "придонес", "paga" → payroll/salary
-- "даноци", "ДДВ", "УЈП", "данок", "tatim", "TVSH" → tax payment
-- "провизија", "камата банка", "komision", "fee" → bank fee
-- "кредит", "рата", "kredi", "loan" → loan payment
-- "ЕВН", "EVN", "Телеком", "водовод", "electricity", "water" → utility
-- "кирија", "закуп", "qira", "rent" → rent
-- "камата", "interest", "лихва" → bank interest income
-- "поврат", "refund", "враќање" → refund
-- "субвенција", "grant", "дотација" → government grant/subsidy
+- "плата", "salary", "wages", "придонес за вработен", "paga", "нето плата" → payroll/salary
+- "УЈП", "ДДВ", "данок", "данок на добивка", "аконтација", "tatim", "TVSH", "ФПИОМ", "ФЗОМ" → tax_payment
+- "кредит", "рата", "ануитет", "лизинг", "kredi", "loan", "leasing" → loan_repayment
+- "провизија", "камата банка", "komision", "fee", "банкарска провизија" → bank fee (expense)
+- "ЕВН", "EVN", "Телеком", "водовод", "electricity", "water", "комунална" → utility (expense)
+- "кирија", "закуп", "qira", "rent" → rent (expense)
+- "камата", "interest", "лихва", "камата на депозит" → bank interest income (record_income)
+- "поврат", "refund", "враќање", "рекламација" → refund (record_income)
+- "субвенција", "grant", "дотација", "државна помош" → government grant (record_income)
+- "сопственик", "влог", "основач", "капитал", "дивиденда", "ortaku", "themelues" → owner equity
+- "интерен трансфер", "меѓу сметки", "transferim", "own account" → internal_transfer
+- "осигурување", "полиса", "sigurim", "insurance" → insurance (expense or income depending on direction)
+- "закупнина", "наем", "rent received" → rental income (record_income for credits)
+- "судска", "gjyqësore", "court", "извршител" → legal/court (expense or income)
 
 Return ONLY valid JSON (no markdown, no explanation):
 {"action": "create_expense", "category_id": 5, "category_name": "Utilities", "confidence": 0.85, "reason": "Description matches utility payment"}
@@ -129,31 +134,42 @@ PROMPT;
     {
         return <<<'INSTRUCTIONS'
 For OUTGOING (debit) transactions, choose one action:
-- "create_expense": For regular business expenses (utilities, rent, supplies, fees, subscriptions, etc.). Set category_id to the best matching expense category.
-- "link_payroll": For salary/wage payments. Set category_id to null.
-- "mark_reviewed": For internal transfers between own accounts or transactions that don't need an expense record. Set category_id to null.
+- "create_expense": Regular business expenses (utilities, rent, supplies, fees, subscriptions, office, transport, marketing, repairs, insurance premiums, professional services, software, telecom). Set category_id to best matching expense category.
+- "link_payroll": Salary/wage/contribution payments to employees. Set category_id to null.
+- "tax_payment": Tax payments to government (УЈП/UJP, ДДВ/VAT, данок на добивка/profit tax, персонален данок/personal income tax, придонеси за ФПИОМ/ФЗОМ pension/health fund contributions). Set category_id to null.
+- "loan_repayment": Loan installments, credit repayments, leasing payments to banks or financial institutions. Set category_id to null.
+- "owner_withdrawal": Owner/shareholder withdrawing capital, dividend payout to owner, personal withdrawal by owner (повлекување капитал, дивиденда, лично подигнување). Set category_id to null.
+- "internal_transfer": Transfer to company's own account at another bank, or between own accounts. Set category_id to null.
+- "mark_reviewed": Only if none of the above fit. Set category_id to null.
 
-Rules:
-- If it looks like a salary/payroll payment → action = "link_payroll"
-- If it's a transfer to own account / internal transfer → action = "mark_reviewed"
-- For all other outgoing payments → action = "create_expense" with the best category
+Rules (check in this order):
+1. Salary/payroll keywords (плата, нето, придонес за вработен, paga) → "link_payroll"
+2. Tax keywords (УЈП, ДДВ, данок, ФПИОМ, ФЗОМ, tatim, TVSH, аконтација) → "tax_payment"
+3. Loan keywords (кредит, рата, ануитет, лизинг, kredi, loan, leasing) → "loan_repayment"
+4. Owner keywords (сопственик, дивиденда, повлекување, лично подигнување, ortaku, divident) → "owner_withdrawal"
+5. Internal transfer (own account name, same company IBAN) → "internal_transfer"
+6. Everything else → "create_expense" with best category
 INSTRUCTIONS;
     }
 
     private function creditActionInstructions(): string
     {
         return <<<'INSTRUCTIONS'
-For INCOMING (credit) transactions that are NOT customer payments, choose one action:
-- "record_income": For bank interest, refunds, government grants, insurance payouts, dividends, or other non-invoice income. Set category_id to null.
-- "mark_reviewed": For internal transfers from own accounts. Set category_id to null.
-- "link_invoice": If it looks like a customer payment. Set category_id to null.
+For INCOMING (credit) transactions, choose one action:
+- "link_invoice": Customer payment for goods/services — looks like it pays an invoice. Set category_id to null.
+- "record_income": Non-invoice income: bank interest, refunds, insurance payouts, government grants/subsidies, court awards, rental income received. Set category_id to null.
+- "owner_contribution": Owner/shareholder adding capital, founder's deposit, personal investment by owner (влог на капитал, основачки влог, капитална инвестиција, ortaku, kapital). Set category_id to null.
+- "loan_received": Loan disbursement from bank, credit line drawdown, financial institution deposit (кредит примен, дисбурзирање, kredi e marrë). Set category_id to null.
+- "internal_transfer": Transfer from company's own account at another bank, or between own accounts. Set category_id to null.
+- "mark_reviewed": Only if none of the above fit. Set category_id to null.
 
-Rules:
-- If counterparty is a bank or description mentions interest/камата → action = "record_income"
-- If description mentions refund/поврат/враќање → action = "record_income"
-- If description mentions grant/субвенција/дотација → action = "record_income"
-- If it's a transfer from own account → action = "mark_reviewed"
-- If it looks like a customer payment → action = "link_invoice"
+Rules (check in this order):
+1. Owner/capital keywords (сопственик, влог, основач, капитал, ortaku, themelues) → "owner_contribution"
+2. Loan keywords (кредит, заем, дисбурзирање, banka, kredi, loan disbursement) + counterparty is bank → "loan_received"
+3. Interest/refund/grant (камата, поврат, субвенција, дотација, interest, refund, grant) → "record_income"
+4. Internal transfer (own account, same company) → "internal_transfer"
+5. Customer payment / service / goods → "link_invoice"
+6. Everything else → "record_income"
 INSTRUCTIONS;
     }
 
@@ -177,6 +193,12 @@ INSTRUCTIONS;
             SmartSuggestion::ACTION_LINK_PAYROLL,
             SmartSuggestion::ACTION_LINK_INVOICE,
             SmartSuggestion::ACTION_MARK_REVIEWED,
+            SmartSuggestion::ACTION_OWNER_CONTRIBUTION,
+            SmartSuggestion::ACTION_OWNER_WITHDRAWAL,
+            SmartSuggestion::ACTION_LOAN_RECEIVED,
+            SmartSuggestion::ACTION_LOAN_REPAYMENT,
+            SmartSuggestion::ACTION_TAX_PAYMENT,
+            SmartSuggestion::ACTION_INTERNAL_TRANSFER,
         ];
 
         if (! $action || ! in_array($action, $validActions)) {
@@ -184,8 +206,16 @@ INSTRUCTIONS;
         }
 
         // Guard: AI must not suggest credit actions for debits or vice versa
-        $debitOnlyActions = [SmartSuggestion::ACTION_CREATE_EXPENSE, SmartSuggestion::ACTION_LINK_BILL, SmartSuggestion::ACTION_LINK_PAYROLL];
-        $creditOnlyActions = [SmartSuggestion::ACTION_RECORD_INCOME, SmartSuggestion::ACTION_LINK_INVOICE];
+        $debitOnlyActions = [
+            SmartSuggestion::ACTION_CREATE_EXPENSE, SmartSuggestion::ACTION_LINK_BILL,
+            SmartSuggestion::ACTION_LINK_PAYROLL, SmartSuggestion::ACTION_OWNER_WITHDRAWAL,
+            SmartSuggestion::ACTION_LOAN_REPAYMENT, SmartSuggestion::ACTION_TAX_PAYMENT,
+        ];
+        $creditOnlyActions = [
+            SmartSuggestion::ACTION_RECORD_INCOME, SmartSuggestion::ACTION_LINK_INVOICE,
+            SmartSuggestion::ACTION_OWNER_CONTRIBUTION, SmartSuggestion::ACTION_LOAN_RECEIVED,
+        ];
+        // internal_transfer and mark_reviewed can be either direction
 
         if ($isDebit && in_array($action, $creditOnlyActions)) {
             $action = SmartSuggestion::ACTION_CREATE_EXPENSE; // Fallback debit action

@@ -163,11 +163,11 @@
             {{ $t('banking.reconcile', 'Reconcile') }}
           </BaseDropdownItem>
           <BaseDropdownItem
-            v-if="row.data.matched_invoice_id"
-            @click="unmatchTransaction(row.data)"
+            v-if="row.data.linked_type || row.data.matched_invoice_id"
+            @click="reclassifyTransaction(row.data)"
           >
-            <BaseIcon name="ArrowUturnLeftIcon" class="mr-3 text-yellow-600" />
-            {{ $t('banking.unmatch') || 'Unmatch' }}
+            <BaseIcon name="ArrowPathIcon" class="mr-3 text-amber-600" />
+            {{ $t('banking.reclassify', 'Re-classify') }}
           </BaseDropdownItem>
           <BaseDropdownItem
             v-if="!row.data.matched_invoice_id"
@@ -339,7 +339,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['categorize', 'reconcile', 'refresh'])
+const emit = defineEmits(['categorize', 'reconcile', 'refresh', 'reclassify'])
 
 const { t } = useI18n()
 const router = useRouter()
@@ -375,6 +375,12 @@ const linkedTypeLabel = (type) => {
     payroll_run: t('banking.payroll', 'Payroll'),
     reviewed: t('banking.reviewed', 'Reviewed'),
     income: t('banking.income', 'Income'),
+    owner_contribution: t('banking.owner_contribution', 'Capital Contribution'),
+    owner_withdrawal: t('banking.owner_withdrawal', 'Capital Withdrawal'),
+    loan_received: t('banking.loan_received', 'Loan Received'),
+    loan_repayment: t('banking.loan_repayment', 'Loan Repayment'),
+    tax_payment: t('banking.tax_payment', 'Tax Payment'),
+    internal_transfer: t('banking.internal_transfer', 'Internal Transfer'),
   }
   return labels[type] || type || ''
 }
@@ -528,6 +534,26 @@ const unmatchTransaction = async (transaction) => {
     notificationStore.showNotification({
       type: 'error',
       message: error.response?.data?.message || 'Failed to unmatch transaction'
+    })
+  }
+}
+
+const reclassifyTransaction = async (transaction) => {
+  try {
+    await axios.post('/banking/reconciliation/undo', {
+      transaction_id: transaction.id,
+    })
+    notificationStore.showNotification({
+      type: 'success',
+      message: t('banking.reconciliation_undone', 'Reconciliation undone — you can now re-classify'),
+    })
+    refresh()
+    // Open the reconcile drawer for immediate re-classification
+    emit('reconcile', { ...transaction, linked_type: null, matched_invoice_id: null })
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: error.response?.data?.message || 'Failed to undo reconciliation',
     })
   }
 }

@@ -562,6 +562,36 @@ class ReconciliationController extends Controller
     }
 
     /**
+     * Bulk mark multiple transactions as reviewed.
+     */
+    public function bulkMarkAsReviewed(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_ids' => 'required|array|min:1|max:100',
+            'transaction_ids.*' => 'integer|exists:bank_transactions,id',
+        ]);
+
+        $company = $this->getCompany();
+
+        $transactions = BankTransaction::forCompany($company->id)
+            ->whereIn('id', $request->transaction_ids)
+            ->unreconciled()
+            ->get();
+
+        $count = 0;
+        foreach ($transactions as $transaction) {
+            $transaction->markAsReconciled(BankTransaction::LINKED_REVIEWED);
+            $count++;
+        }
+
+        return response()->json([
+            'success' => true,
+            'count' => $count,
+            'message' => "{$count} transactions marked as reviewed",
+        ]);
+    }
+
+    /**
      * Get expense categories for the company.
      */
     public function getExpenseCategories(): JsonResponse
@@ -720,6 +750,206 @@ class ReconciliationController extends Controller
             'success' => true,
             'message' => 'Transaction recorded as income',
             'payment_id' => $payment->id,
+        ]);
+    }
+
+    /**
+     * Undo reconciliation — reset a transaction to unreconciled state.
+     * Does NOT delete linked records (expenses, payments, etc.) — only unlinks.
+     * User can then re-reconcile with a different action.
+     */
+    public function undoReconciliation(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_id' => 'required|integer|exists:bank_transactions,id',
+        ]);
+
+        $company = $this->getCompany();
+
+        $transaction = BankTransaction::forCompany($company->id)
+            ->where('id', $request->transaction_id)
+            ->firstOrFail();
+
+        if (! $transaction->isReconciled()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction is not reconciled',
+            ], 422);
+        }
+
+        $previousType = $transaction->linked_type ?? 'invoice_match';
+        $previousId = $transaction->linked_id ?? $transaction->matched_invoice_id;
+
+        $transaction->undoReconciliation();
+
+        Log::info('[Reconciliation] Undo reconciliation', [
+            'transaction_id' => $transaction->id,
+            'previous_type' => $previousType,
+            'previous_linked_id' => $previousId,
+            'user_id' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reconciliation undone — transaction can now be re-classified',
+            'previous_type' => $previousType,
+        ]);
+    }
+
+    /**
+     * Record a bank transaction as a financial/equity transaction.
+     *
+     * Handles: owner_contribution, owner_withdrawal, loan_received,
+     * loan_repayment, tax_payment, internal_transfer.
+     *
+     * These create a reconciliation record with the correct linked_type
+     * and post to IFRS GL accounts when available.
+     */
+    public function recordFinancialTransaction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_id' => 'required|integer|exists:bank_transactions,id',
+            'action' => 'required|string|in:owner_contribution,owner_withdrawal,loan_received,loan_repayment,tax_payment,internal_transfer',
+            'notes' => 'nullable|string|max:500',
+            'sub_type' => 'nullable|string|max:100', // e.g. "ДДВ", "данок на добивка", "ФПИОМ" for tax
+        ]);
+
+        $company = $this->getCompany();
+
+        $transaction = BankTransaction::forCompany($company->id)
+            ->where('id', $request->transaction_id)
+            ->unreconciled()
+            ->firstOrFail();
+
+        $action = $request->action;
+        $amountCents = (int) round(abs((float) $transaction->amount) * 100);
+        $notes = $request->notes ?? $transaction->description ?? '';
+        $subType = $request->sub_type;
+
+        // Map action to linked_type constant
+        $linkedTypeMap = [
+            'owner_contribution' => BankTransaction::LINKED_OWNER_CONTRIBUTION,
+            'owner_withdrawal' => BankTransaction::LINKED_OWNER_WITHDRAWAL,
+            'loan_received' => BankTransaction::LINKED_LOAN_RECEIVED,
+            'loan_repayment' => BankTransaction::LINKED_LOAN_REPAYMENT,
+            'tax_payment' => BankTransaction::LINKED_TAX_PAYMENT,
+            'internal_transfer' => BankTransaction::LINKED_INTERNAL_TRANSFER,
+        ];
+
+        // MK Chart of Accounts GL mapping (Правилник 174/2011)
+        $glMapping = [
+            'owner_contribution' => ['debit' => '1000', 'credit' => '3010'], // Жиро-сметка / Основна главнина
+            'owner_withdrawal' => ['debit' => '3220', 'credit' => '1000'], // Повлечен капитал / Жиро-сметка
+            'loan_received' => ['debit' => '1000', 'credit' => '2900'], // Жиро-сметка / Долгорочни кредити
+            'loan_repayment' => ['debit' => '2900', 'credit' => '1000'], // Долгорочни кредити / Жиро-сметка
+            'tax_payment' => ['debit' => '2700', 'credit' => '1000'], // Обврски за даноци / Жиро-сметка
+            'internal_transfer' => ['debit' => '1001', 'credit' => '1000'], // Девизна сметка / Жиро-сметка
+        ];
+
+        // Tax sub-type GL refinement
+        if ($action === 'tax_payment' && $subType) {
+            $taxGlMap = [
+                'ддв' => '2700',         // ДДВ обврска
+                'ddv' => '2700',
+                'vat' => '2700',
+                'tvsh' => '2700',
+                'добивка' => '2710',      // Данок на добивка
+                'profit' => '2710',
+                'фпиом' => '2520',        // Фонд за ПИОМ
+                'fpiom' => '2520',
+                'pension' => '2520',
+                'фзом' => '2530',         // Фонд за здравство
+                'fzom' => '2530',
+                'health' => '2530',
+                'персонален' => '2540',   // Персонален данок
+                'personal' => '2540',
+                'pit' => '2540',
+            ];
+            $subTypeLower = mb_strtolower($subType);
+            foreach ($taxGlMap as $keyword => $account) {
+                if (str_contains($subTypeLower, $keyword)) {
+                    $glMapping['tax_payment']['debit'] = $account;
+                    break;
+                }
+            }
+        }
+
+        // Store processing notes with GL info for future IFRS posting
+        $processingNotes = json_encode([
+            'action' => $action,
+            'sub_type' => $subType,
+            'notes' => $notes,
+            'amount_cents' => $amountCents,
+            'gl_debit' => $glMapping[$action]['debit'] ?? null,
+            'gl_credit' => $glMapping[$action]['credit'] ?? null,
+            'recorded_by' => Auth::id(),
+            'recorded_at' => now()->toIso8601String(),
+        ], JSON_UNESCAPED_UNICODE);
+
+        $transaction->update(['processing_notes' => $processingNotes]);
+        $transaction->markAsReconciled($linkedTypeMap[$action]);
+
+        // Post to IFRS if adapter available
+        try {
+            $ifrs = app(\App\Domain\Accounting\IfrsAdapter::class);
+            $gl = $glMapping[$action] ?? null;
+            if ($ifrs && $gl) {
+                $narration = ($subType ? "[{$subType}] " : '').($notes ?: $action);
+                $counterparty = $transaction->creditor_name ?? $transaction->debtor_name ?? '';
+
+                // MK account names for GL codes
+                $accountNames = [
+                    '1000' => 'Жиро-сметка', '1001' => 'Девизна сметка',
+                    '2520' => 'Обврски за ФПИОМ', '2530' => 'Обврски за ФЗОМ',
+                    '2540' => 'Обврски за персонален данок', '2700' => 'Обврски за ДДВ',
+                    '2710' => 'Обврски за данок на добивка', '2900' => 'Долгорочни кредити',
+                    '3010' => 'Основна главнина', '3220' => 'Повлечен капитал',
+                ];
+
+                $ifrs->postJournalEntry($company, [
+                    'date' => $transaction->transaction_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
+                    'narration' => $narration,
+                    'reference' => "BANK-TX-{$transaction->id}",
+                    'line_items' => [
+                        [
+                            'account_code' => $gl['debit'],
+                            'account_name' => $accountNames[$gl['debit']] ?? $gl['debit'],
+                            'amount' => $amountCents,
+                            'credited' => false,
+                            'counterparty_name' => $counterparty,
+                        ],
+                        [
+                            'account_code' => $gl['credit'],
+                            'account_name' => $accountNames[$gl['credit']] ?? $gl['credit'],
+                            'amount' => $amountCents,
+                            'credited' => true,
+                            'counterparty_name' => $counterparty,
+                        ],
+                    ],
+                ]);
+            }
+        } catch (\Exception $e) {
+            // IFRS posting is non-critical — transaction is still reconciled
+            Log::warning('[Reconciliation] IFRS posting failed for financial transaction', [
+                'transaction_id' => $transaction->id,
+                'action' => $action,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        $labels = [
+            'owner_contribution' => 'owner capital contribution',
+            'owner_withdrawal' => 'owner capital withdrawal',
+            'loan_received' => 'loan received',
+            'loan_repayment' => 'loan repayment',
+            'tax_payment' => 'tax payment',
+            'internal_transfer' => 'internal transfer',
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction recorded as '.($labels[$action] ?? $action),
+            'linked_type' => $linkedTypeMap[$action],
         ]);
     }
 

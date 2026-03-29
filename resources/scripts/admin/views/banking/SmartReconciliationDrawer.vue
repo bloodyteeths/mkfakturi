@@ -197,6 +197,83 @@
                     </div>
                   </button>
 
+                  <!-- Owner Contribution (credits) -->
+                  <button
+                    v-if="isCredit"
+                    @click="manualAction = 'owner_contribution'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'owner_contribution' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="BuildingLibraryIcon" class="h-4 w-4 mr-2 text-indigo-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.owner_contribution', 'Owner Capital Contribution') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Owner Withdrawal (debits) -->
+                  <button
+                    v-if="!isCredit"
+                    @click="manualAction = 'owner_withdrawal'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'owner_withdrawal' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="BuildingLibraryIcon" class="h-4 w-4 mr-2 text-indigo-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.owner_withdrawal', 'Owner Capital Withdrawal') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Loan Received (credits) -->
+                  <button
+                    v-if="isCredit"
+                    @click="manualAction = 'loan_received'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'loan_received' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="BuildingOffice2Icon" class="h-4 w-4 mr-2 text-cyan-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.loan_received', 'Loan Received') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Loan Repayment (debits) -->
+                  <button
+                    v-if="!isCredit"
+                    @click="manualAction = 'loan_repayment'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'loan_repayment' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="BuildingOffice2Icon" class="h-4 w-4 mr-2 text-cyan-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.loan_repayment', 'Loan Repayment') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Tax Payment (debits) -->
+                  <button
+                    v-if="!isCredit"
+                    @click="manualAction = 'tax_payment'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'tax_payment' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="CalculatorIcon" class="h-4 w-4 mr-2 text-amber-600" />
+                      <span class="text-sm font-medium">{{ $t('banking.tax_payment', 'Tax Payment') }}</span>
+                    </div>
+                  </button>
+
+                  <!-- Internal Transfer (both) -->
+                  <button
+                    @click="manualAction = 'internal_transfer'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'internal_transfer' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="ArrowsRightLeftIcon" class="h-4 w-4 mr-2 text-gray-600" />
+                      <span class="text-sm font-medium">{{ $t('banking.internal_transfer', 'Internal Transfer') }}</span>
+                    </div>
+                  </button>
+
                   <!-- Mark as Reviewed -->
                   <button
                     @click="manualAction = 'reviewed'"
@@ -323,6 +400,52 @@
                       {{ $t('banking.mark_reviewed', 'Mark as Reviewed') }}
                     </button>
                   </div>
+
+                  <!-- Financial transaction sub-forms -->
+                  <div v-if="['owner_contribution', 'owner_withdrawal', 'loan_received', 'loan_repayment', 'internal_transfer'].includes(manualAction)" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                    <textarea
+                      v-model="manualNotes"
+                      :placeholder="$t('banking.financial_notes', 'Notes (e.g. reason, reference number)...')"
+                      rows="2"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <button
+                      @click="submitFinancialTransaction(manualAction)"
+                      :disabled="isAccepting"
+                      class="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                      {{ getActionLabel(manualAction) }}
+                    </button>
+                  </div>
+
+                  <div v-if="manualAction === 'tax_payment'" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                    <select
+                      v-model="taxSubType"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                      <option :value="null">{{ $t('banking.select_tax_type', 'Select tax type...') }}</option>
+                      <option value="ДДВ">{{ $t('banking.tax_vat', 'ДДВ (VAT)') }}</option>
+                      <option value="Данок на добивка">{{ $t('banking.tax_profit', 'Данок на добивка (Profit Tax)') }}</option>
+                      <option value="Персонален данок">{{ $t('banking.tax_personal', 'Персонален данок (PIT)') }}</option>
+                      <option value="ФПИОМ">{{ $t('banking.tax_pension', 'ФПИОМ (Pension Fund)') }}</option>
+                      <option value="ФЗОМ">{{ $t('banking.tax_health', 'ФЗОМ (Health Fund)') }}</option>
+                      <option value="Аконтација">{{ $t('banking.tax_advance', 'Аконтација (Advance Tax)') }}</option>
+                      <option value="Друг данок">{{ $t('banking.tax_other', 'Друг данок (Other Tax)') }}</option>
+                    </select>
+                    <textarea
+                      v-model="manualNotes"
+                      :placeholder="$t('banking.tax_notes', 'Reference number, period...')"
+                      rows="2"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <button
+                      @click="submitFinancialTransaction('tax_payment')"
+                      :disabled="isAccepting"
+                      class="w-full px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-50"
+                    >
+                      {{ $t('banking.tax_payment', 'Tax Payment') }}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -366,6 +489,7 @@ const selectedCategoryId = ref(null)
 const selectedBillId = ref(null)
 const selectedInvoiceId = ref(null)
 const selectedPayrollId = ref(null)
+const taxSubType = ref(null)
 
 // Reference data
 const expenseCategories = ref([])
@@ -396,6 +520,7 @@ const resetState = () => {
   selectedBillId.value = null
   selectedInvoiceId.value = null
   selectedPayrollId.value = null
+  taxSubType.value = null
 }
 
 const fetchSuggestion = async () => {
@@ -480,6 +605,20 @@ const acceptSuggestion = async (s) => {
         })
         break
 
+      case 'owner_contribution':
+      case 'owner_withdrawal':
+      case 'loan_received':
+      case 'loan_repayment':
+      case 'tax_payment':
+      case 'internal_transfer':
+        await axios.post('/banking/reconciliation/record-financial', {
+          transaction_id: txId,
+          action: s.action,
+          notes: s.reason,
+          sub_type: s.sub_type || null,
+        })
+        break
+
       default:
         throw new Error(`Unknown action: ${s.action}`)
     }
@@ -529,6 +668,12 @@ const submitManualReviewed = () => acceptSuggestion({
   reason: manualNotes.value || '',
 })
 
+const submitFinancialTransaction = (action) => acceptSuggestion({
+  action,
+  reason: manualNotes.value || '',
+  sub_type: action === 'tax_payment' ? taxSubType.value : null,
+})
+
 const close = () => {
   emit('update:modelValue', false)
 }
@@ -541,6 +686,12 @@ const actionLabels = {
   create_expense: 'Create Expense',
   record_income: 'Record as Income',
   mark_reviewed: 'Mark as Reviewed',
+  owner_contribution: 'Owner Capital Contribution',
+  owner_withdrawal: 'Owner Capital Withdrawal',
+  loan_received: 'Loan Received',
+  loan_repayment: 'Loan Repayment',
+  tax_payment: 'Tax Payment',
+  internal_transfer: 'Internal Transfer',
 }
 
 const getActionLabel = (action) => {
@@ -560,6 +711,12 @@ const suggestionIcon = computed(() => {
     create_expense: 'ReceiptPercentIcon',
     record_income: 'BanknotesIcon',
     mark_reviewed: 'CheckCircleIcon',
+    owner_contribution: 'BuildingLibraryIcon',
+    owner_withdrawal: 'BuildingLibraryIcon',
+    loan_received: 'BuildingOffice2Icon',
+    loan_repayment: 'BuildingOffice2Icon',
+    tax_payment: 'CalculatorIcon',
+    internal_transfer: 'ArrowsRightLeftIcon',
   }
   return icons[suggestion.value?.action] || 'SparklesIcon'
 })
@@ -579,6 +736,12 @@ const suggestionIconBgClass = computed(() => {
     create_expense: 'bg-red-500',
     record_income: 'bg-green-500',
     mark_reviewed: 'bg-gray-500',
+    owner_contribution: 'bg-indigo-500',
+    owner_withdrawal: 'bg-indigo-500',
+    loan_received: 'bg-cyan-500',
+    loan_repayment: 'bg-cyan-500',
+    tax_payment: 'bg-amber-600',
+    internal_transfer: 'bg-gray-600',
   }
   return map[suggestion.value?.action] || 'bg-gray-500'
 })

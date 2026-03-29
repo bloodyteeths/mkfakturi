@@ -23,6 +23,19 @@ class SmartSuggestion
 
     public const ACTION_MARK_REVIEWED = 'mark_reviewed';
 
+    // Equity & financing actions
+    public const ACTION_OWNER_CONTRIBUTION = 'owner_contribution';
+
+    public const ACTION_OWNER_WITHDRAWAL = 'owner_withdrawal';
+
+    public const ACTION_LOAN_RECEIVED = 'loan_received';
+
+    public const ACTION_LOAN_REPAYMENT = 'loan_repayment';
+
+    public const ACTION_TAX_PAYMENT = 'tax_payment';
+
+    public const ACTION_INTERNAL_TRANSFER = 'internal_transfer';
+
     public function __construct(
         public string $action,
         public float $confidence,

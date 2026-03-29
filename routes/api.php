@@ -1490,11 +1490,14 @@ Route::prefix('/v1')->group(function () {
                     Route::get('/unpaid-bills', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getUnpaidBills']);
                     Route::get('/payroll-runs', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getPayrollRuns']);
                     Route::post('/generate-pp30', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'generatePp30']);
+                    Route::post('/bulk-mark-reviewed', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'bulkMarkAsReviewed']);
 
                     // Smart reconciliation
                     Route::post('/smart-suggest', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'smartSuggest']);
                     Route::post('/bulk-smart-suggest', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'bulkSmartSuggest']);
                     Route::post('/record-income', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'recordIncome']);
+                    Route::post('/record-financial', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'recordFinancialTransaction']);
+                    Route::post('/undo', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'undoReconciliation']);
                 });
 
                 // Matching Rules (P0-09)

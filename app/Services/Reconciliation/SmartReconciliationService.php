@@ -508,6 +508,13 @@ class SmartReconciliationService
             BankTransaction::LINKED_BILL_PAYMENT => SmartSuggestion::ACTION_CREATE_EXPENSE, // Don't suggest old bill, suggest expense
             BankTransaction::LINKED_PAYROLL_RUN => SmartSuggestion::ACTION_LINK_PAYROLL,
             BankTransaction::LINKED_REVIEWED => SmartSuggestion::ACTION_MARK_REVIEWED,
+            BankTransaction::LINKED_INCOME => SmartSuggestion::ACTION_RECORD_INCOME,
+            BankTransaction::LINKED_OWNER_CONTRIBUTION => SmartSuggestion::ACTION_OWNER_CONTRIBUTION,
+            BankTransaction::LINKED_OWNER_WITHDRAWAL => SmartSuggestion::ACTION_OWNER_WITHDRAWAL,
+            BankTransaction::LINKED_LOAN_RECEIVED => SmartSuggestion::ACTION_LOAN_RECEIVED,
+            BankTransaction::LINKED_LOAN_REPAYMENT => SmartSuggestion::ACTION_LOAN_REPAYMENT,
+            BankTransaction::LINKED_TAX_PAYMENT => SmartSuggestion::ACTION_TAX_PAYMENT,
+            BankTransaction::LINKED_INTERNAL_TRANSFER => SmartSuggestion::ACTION_INTERNAL_TRANSFER,
             default => null,
         };
 
