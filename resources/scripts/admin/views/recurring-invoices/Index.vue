@@ -209,11 +209,6 @@
           </div>
         </template>
 
-        <!-- Starts at  -->
-        <template #cell-starts_at="{ row }">
-          {{ row.data.formatted_starts_at }}
-        </template>
-
         <!-- Next Invoice -->
         <template #cell-next_invoice_at="{ row }">
           {{ row.data.formatted_next_invoice_at || '-' }}
@@ -253,11 +248,6 @@
           >
             <BaseRecurringInvoiceStatusLabel :status="row.data.status" />
           </BaseRecurringInvoiceStatusBadge>
-        </template>
-
-        <!-- Contract Ref -->
-        <template #cell-contract_reference="{ row }">
-          {{ row.data.contract_reference || '-' }}
         </template>
 
         <!-- Amount  -->
@@ -338,25 +328,15 @@ const invoiceColumns = computed(() => {
       thClass: 'extra',
       tdClass: 'font-medium text-gray-900',
     },
-    {
-      key: 'starts_at',
-      label: t('recurring_invoices.starts_at'),
-      thClass: 'extra',
-      tdClass: 'font-medium',
-    },
+    { key: 'customer', label: t('invoices.customer') },
+    { key: 'frequency', label: t('recurring_invoices.frequency.title') },
     {
       key: 'next_invoice_at',
       label: t('recurring_invoices.next_invoice_date'),
       thClass: 'extra',
       tdClass: 'font-medium',
     },
-    { key: 'customer', label: t('invoices.customer') },
-    { key: 'frequency', label: t('recurring_invoices.frequency.title') },
     { key: 'status', label: t('invoices.status') },
-    {
-      key: 'contract_reference',
-      label: t('recurring_invoices.contract_reference'),
-    },
     { key: 'total', label: t('invoices.total') },
     {
       key: 'actions',
@@ -399,7 +379,7 @@ function getFrequencyLabel(frequencyFormat) {
     return frequency.value === frequencyFormat
   })
 
-  return frequencyObj ? frequencyObj.label : `CUSTOM: ${frequencyFormat}`
+  return frequencyObj ? frequencyObj.label : t('recurring_invoices.frequency.custom')
 }
 
 function refreshTable() {

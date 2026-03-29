@@ -1175,7 +1175,7 @@
             "type_item_description": "Type Item Description (optional)"
         },
         "frequency": {
-            "title": "Frequency (using cron format)",
+            "title": "Sıklık",
             "select_frequency": "Select Frequency",
             "minute": "Minute",
             "hour": "Hour",
@@ -4269,6 +4269,7 @@
         "place_of_issue": "Düzenlenme Yeri",
         "place_of_issue_placeholder": "Belgenin düzenlendiği şehir",
         "payment_terms": "Ödeme Koşulları",
+        "days": "gün",
         "payment_terms_days": "{days} gün",
         "payment_terms_placeholder": "Ödeme koşullarını seçin",
         "journal_entry": "Muhasebe Kaydı",
