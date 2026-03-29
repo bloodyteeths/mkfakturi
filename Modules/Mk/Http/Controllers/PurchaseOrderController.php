@@ -47,7 +47,7 @@ class PurchaseOrderController extends Controller
             ->with([
                 'supplier',
                 'items.item',
-                'createdBy:id,name',
+                'createdBy',
                 'currency:id,name,code,symbol',
                 'warehouse',
                 'costCenter:id,name,code,color',
@@ -406,7 +406,7 @@ class PurchaseOrderController extends Controller
             ->with([
                 'supplier.billingAddress',
                 'items.item',
-                'createdBy:id,name',
+                'createdBy',
                 'currency:id,name,code,symbol',
                 'warehouse',
                 'costCenter:id,name,code,color',

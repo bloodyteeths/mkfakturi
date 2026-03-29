@@ -12,7 +12,7 @@
       </BaseBreadcrumb>
 
       <template #actions>
-        <div v-if="compensation" class="flex items-center space-x-2">
+        <div v-if="compensation" class="flex flex-wrap items-center space-x-2 gap-y-2">
           <!-- Confirm button (draft only) -->
           <BaseButton
             v-if="compensation.status === 'draft'"
@@ -60,8 +60,32 @@
             <template #left="slotProps">
               <BaseIcon name="EyeIcon" :class="slotProps.class" />
             </template>
-            {{ t('download_pdf') }}
+            {{ t('preview_pdf') }}
           </BaseButton>
+
+          <!-- Print -->
+          <BaseButton
+            variant="primary-outline"
+            @click="printPdf"
+          >
+            <template #left="slotProps">
+              <BaseIcon name="PrinterIcon" :class="slotProps.class" />
+            </template>
+            {{ t('print') }}
+          </BaseButton>
+
+          <!-- Edit (draft only) -->
+          <router-link
+            v-if="compensation.status === 'draft'"
+            :to="`/admin/compensations/${compensation.id}/edit`"
+          >
+            <BaseButton variant="primary-outline">
+              <template #left="slotProps">
+                <BaseIcon name="PencilIcon" :class="slotProps.class" />
+              </template>
+              {{ t('edit') }}
+            </BaseButton>
+          </router-link>
         </div>
       </template>
     </BasePageHeader>
@@ -78,6 +102,20 @@
 
     <!-- Content -->
     <div v-else-if="compensation" class="space-y-6">
+      <!-- Workflow status bar -->
+      <div class="bg-white rounded-lg shadow px-6 py-3">
+        <div class="flex items-center space-x-3 text-sm">
+          <span class="text-gray-500">{{ t('workflow_draft') }}</span>
+          <div class="flex items-center space-x-1">
+            <span :class="['px-2 py-0.5 rounded text-xs font-medium', compensation.status === 'draft' ? 'bg-gray-200 text-gray-800 ring-2 ring-gray-400' : 'bg-gray-100 text-gray-500']">{{ t('status_draft') }}</span>
+            <span class="text-gray-300">→</span>
+            <span :class="['px-2 py-0.5 rounded text-xs font-medium', compensation.status === 'confirmed' ? 'bg-green-200 text-green-800 ring-2 ring-green-400' : 'bg-gray-100 text-gray-500']">{{ t('status_confirmed') }}</span>
+            <span class="text-gray-300">→</span>
+            <span :class="['px-2 py-0.5 rounded text-xs font-medium', compensation.status === 'cancelled' ? 'bg-red-200 text-red-800 ring-2 ring-red-400' : 'bg-gray-100 text-gray-500']">{{ t('status_cancelled') }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Header Card -->
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
@@ -152,7 +190,7 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('document_number') }}</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('document_date') }}</th>
+                <th class="hidden sm:table-cell px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('document_date') }}</th>
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('document_total') }}</th>
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('amount_to_offset') }}</th>
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('remaining_after') }}</th>
@@ -161,7 +199,7 @@
             <tbody class="divide-y divide-gray-100">
               <tr v-for="item in receivableItems" :key="item.id" class="hover:bg-gray-50">
                 <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ item.document_number }}</td>
-                <td class="px-4 py-3 text-sm text-gray-500">{{ formatDate(item.document_date) }}</td>
+                <td class="hidden sm:table-cell px-4 py-3 text-sm text-gray-500">{{ formatDate(item.document_date) }}</td>
                 <td class="px-4 py-3 text-sm text-right text-gray-500">{{ formatMoney(item.document_total) }}</td>
                 <td class="px-4 py-3 text-sm text-right font-medium text-blue-700">{{ formatMoney(item.amount_offset) }}</td>
                 <td class="px-4 py-3 text-sm text-right text-gray-500">{{ formatMoney(item.remaining_after) }}</td>
@@ -181,7 +219,7 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('document_number') }}</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('document_date') }}</th>
+                <th class="hidden sm:table-cell px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('document_date') }}</th>
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('document_total') }}</th>
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('amount_to_offset') }}</th>
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('remaining_after') }}</th>
@@ -190,7 +228,7 @@
             <tbody class="divide-y divide-gray-100">
               <tr v-for="item in payableItems" :key="item.id" class="hover:bg-gray-50">
                 <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ item.document_number }}</td>
-                <td class="px-4 py-3 text-sm text-gray-500">{{ formatDate(item.document_date) }}</td>
+                <td class="hidden sm:table-cell px-4 py-3 text-sm text-gray-500">{{ formatDate(item.document_date) }}</td>
                 <td class="px-4 py-3 text-sm text-right text-gray-500">{{ formatMoney(item.document_total) }}</td>
                 <td class="px-4 py-3 text-sm text-right font-medium text-amber-700">{{ formatMoney(item.amount_offset) }}</td>
                 <td class="px-4 py-3 text-sm text-right text-gray-500">{{ formatMoney(item.remaining_after) }}</td>
@@ -470,6 +508,25 @@ function closePdfPreview() {
   if (previewPdfUrl.value) {
     window.URL.revokeObjectURL(previewPdfUrl.value)
     previewPdfUrl.value = null
+  }
+}
+
+async function printPdf() {
+  try {
+    const response = await window.axios.get(`/compensations/${compensation.value.id}/pdf`, {
+      responseType: 'blob',
+    })
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+    const url = window.URL.createObjectURL(blob)
+    const win = window.open(url)
+    if (win) {
+      win.addEventListener('load', () => win.print())
+    }
+  } catch (error) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('error_preview_pdf') || 'Failed to print',
+    })
   }
 }
 

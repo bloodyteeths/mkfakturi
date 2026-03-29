@@ -139,7 +139,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {{ t('purchaseOrders.supplier') }}
               </th>
-              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="hidden sm:table-cell px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {{ t('purchaseOrders.items') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -148,7 +148,7 @@
               <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {{ t('purchaseOrders.status') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {{ t('purchaseOrders.expected_delivery') }}
               </th>
             </tr>
@@ -169,7 +169,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ po.supplier?.name || '-' }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+              <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
                 {{ po.items?.length || 0 }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">
@@ -183,7 +183,7 @@
                   {{ statusLabel(po.status) }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ po.expected_delivery_date ? formatDate(po.expected_delivery_date) : '-' }}
               </td>
             </tr>
@@ -198,11 +198,13 @@
         </p>
         <div class="flex space-x-1">
           <BaseButton
-            v-for="page in meta.last_page"
+            v-for="page in paginationPages"
             :key="page"
             :variant="page === meta.current_page ? 'primary' : 'primary-outline'"
             size="sm"
-            @click="goToPage(page)"
+            class="min-w-[36px] min-h-[36px]"
+            :disabled="page === '...'"
+            @click="page !== '...' && goToPage(page)"
           >
             {{ page }}
           </BaseButton>
@@ -370,6 +372,21 @@ async function fetchSuppliers() {
     suppliers.value = []
   }
 }
+
+const paginationPages = computed(() => {
+  if (!meta.value) return []
+  const current = meta.value.current_page
+  const last = meta.value.last_page
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1)
+  const pages = [1]
+  if (current > 3) pages.push('...')
+  for (let i = Math.max(2, current - 1); i <= Math.min(last - 1, current + 1); i++) {
+    pages.push(i)
+  }
+  if (current < last - 2) pages.push('...')
+  pages.push(last)
+  return pages
+})
 
 function goToPage(page) {
   fetchPurchaseOrders(page)

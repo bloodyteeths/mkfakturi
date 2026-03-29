@@ -139,6 +139,17 @@
 
     <!-- Content -->
     <div v-else-if="po" class="space-y-6">
+      <!-- Workflow status bar -->
+      <div class="bg-white rounded-lg shadow px-6 py-3">
+        <div class="flex items-center space-x-1 text-xs overflow-x-auto">
+          <span v-for="(s, i) in workflowSteps" :key="s.key" class="flex items-center">
+            <span :class="['px-2 py-0.5 rounded font-medium whitespace-nowrap', po.status === s.key ? s.activeClass : 'bg-gray-100 text-gray-500']">
+              {{ t('purchaseOrders.status_' + s.key) }}
+            </span>
+            <span v-if="i < workflowSteps.length - 1" class="mx-1 text-gray-300">&rarr;</span>
+          </span>
+        </div>
+      </div>
       <!-- Header Card -->
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
@@ -543,6 +554,17 @@ const route = useRoute()
 const router = useRouter()
 const notificationStore = useNotificationStore()
 const { t, locale } = useI18n()
+
+// Workflow steps
+const workflowSteps = [
+  { key: 'draft', activeClass: 'bg-gray-200 text-gray-800 ring-2 ring-gray-400' },
+  { key: 'sent', activeClass: 'bg-blue-200 text-blue-800 ring-2 ring-blue-400' },
+  { key: 'acknowledged', activeClass: 'bg-indigo-200 text-indigo-800 ring-2 ring-indigo-400' },
+  { key: 'partially_received', activeClass: 'bg-yellow-200 text-yellow-800 ring-2 ring-yellow-400' },
+  { key: 'fully_received', activeClass: 'bg-green-200 text-green-800 ring-2 ring-green-400' },
+  { key: 'billed', activeClass: 'bg-purple-200 text-purple-800 ring-2 ring-purple-400' },
+  { key: 'closed', activeClass: 'bg-gray-300 text-gray-900 ring-2 ring-gray-500' },
+]
 
 // Computed
 const supplierEmail = computed(() => po.value?.supplier?.email || null)

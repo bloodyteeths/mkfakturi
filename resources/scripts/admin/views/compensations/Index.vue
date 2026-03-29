@@ -164,7 +164,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {{ t('counterparty') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {{ t('type') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -173,7 +173,7 @@
               <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {{ t('status') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="hidden sm:table-cell px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {{ t('actions') }}
               </th>
             </tr>
@@ -192,9 +192,9 @@
                 {{ formatDate(comp.compensation_date) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ comp.customer?.name || comp.supplier?.name || '-' }}
+                {{ counterpartyName(comp) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ comp.type === 'bilateral' ? t('bilateral') : t('unilateral') }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">
@@ -205,10 +205,17 @@
                   {{ statusLabel(comp.status) }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+              <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-right text-sm">
                 <div class="flex items-center justify-end space-x-2" @click.stop>
+                  <router-link
+                    v-if="comp.status === 'draft'"
+                    :to="`compensations/${comp.id}/edit`"
+                  >
+                    <BaseButton variant="primary-outline" size="sm">
+                      <BaseIcon name="PencilIcon" class="h-4 w-4" />
+                    </BaseButton>
+                  </router-link>
                   <BaseButton
-                    v-if="comp.status === 'confirmed'"
                     variant="primary-outline"
                     size="sm"
                     @click="downloadPdf(comp.id)"
@@ -229,11 +236,13 @@
         </p>
         <div class="flex space-x-1">
           <BaseButton
-            v-for="page in meta.last_page"
+            v-for="page in paginationPages"
             :key="page"
             :variant="page === meta.current_page ? 'primary' : 'primary-outline'"
             size="sm"
-            @click="goToPage(page)"
+            class="min-w-[36px] min-h-[36px]"
+            :disabled="page === '...'"
+            @click="page !== '...' && goToPage(page)"
           >
             {{ page }}
           </BaseButton>
@@ -265,7 +274,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import { debounce } from 'lodash'
@@ -308,6 +317,27 @@ const statusOptions = [
 
 const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
 const formattedLocale = localeMap[locale] || 'mk-MK'
+
+// Helpers
+function counterpartyName(comp) {
+  const names = [comp.customer?.name, comp.supplier?.name].filter(Boolean)
+  return names.length > 0 ? names.join(' / ') : '-'
+}
+
+const paginationPages = computed(() => {
+  if (!meta.value) return []
+  const current = meta.value.current_page
+  const last = meta.value.last_page
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1)
+  const pages = [1]
+  if (current > 3) pages.push('...')
+  for (let i = Math.max(2, current - 1); i <= Math.min(last - 1, current + 1); i++) {
+    pages.push(i)
+  }
+  if (current < last - 2) pages.push('...')
+  pages.push(last)
+  return pages
+})
 
 // Methods
 function formatMoney(cents) {

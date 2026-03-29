@@ -33,7 +33,7 @@
                 ]"
               />
             </div>
-            <p class="mt-1 text-xs font-medium" :class="step >= index + 1 ? 'text-primary-600' : 'text-gray-500'">
+            <p class="hidden sm:block mt-1 text-xs font-medium" :class="step >= index + 1 ? 'text-primary-600' : 'text-gray-500'">
               {{ stepInfo }}
             </p>
           </li>
@@ -43,11 +43,31 @@
 
     <!-- Step 1: Select Counterparty -->
     <div v-if="step === 1" class="bg-white rounded-lg shadow p-6">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">{{ t('step1_select') }}</h3>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('step1_select') }}</h3>
+
+      <!-- Workflow help box -->
+      <div v-if="showHelp" class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+        <div class="flex items-start justify-between">
+          <div class="flex items-start gap-3">
+            <BaseIcon name="InformationCircleIcon" class="h-5 w-5 text-blue-500 mt-0.5 shrink-0" />
+            <div class="text-sm text-blue-700">
+              <p class="font-semibold text-blue-900 mb-1">{{ t('help_title') }}</p>
+              <p>{{ t('help_description') }}</p>
+              <ul class="mt-2 space-y-1 list-disc list-inside text-xs">
+                <li>{{ t('help_bilateral') }}</li>
+                <li>{{ t('help_unilateral') }}</li>
+              </ul>
+            </div>
+          </div>
+          <button class="text-blue-400 hover:text-blue-600" @click="showHelp = false">
+            <BaseIcon name="XMarkIcon" class="h-4 w-4" />
+          </button>
+        </div>
+      </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Customer (receivables from) -->
-        <BaseInputGroup :label="t('select_customer')" :help-text="t('our_receivables')">
+        <BaseInputGroup :label="t('select_customer')" :help-text="t('help_customer')">
           <BaseMultiselect
             v-model="form.customer_id"
             :options="customers"
@@ -60,7 +80,7 @@
         </BaseInputGroup>
 
         <!-- Supplier (payables to) -->
-        <BaseInputGroup :label="t('select_supplier')" :help-text="t('our_payables')">
+        <BaseInputGroup :label="t('select_supplier')" :help-text="t('help_supplier')">
           <BaseMultiselect
             v-model="form.supplier_id"
             :options="suppliers"
@@ -83,7 +103,7 @@
           />
         </BaseInputGroup>
 
-        <BaseInputGroup :label="t('type')">
+        <BaseInputGroup :label="t('type')" :help-text="form.type === 'bilateral' ? t('help_bilateral') : t('help_unilateral')">
           <BaseMultiselect
             v-model="form.type"
             :options="typeOptions"
@@ -165,7 +185,7 @@
                         min="0"
                         :max="doc.due_amount / 100"
                         step="0.01"
-                        class="w-28 text-right text-sm border-gray-300 rounded focus:ring-primary-500 focus:border-primary-500"
+                        class="w-24 sm:w-28 text-right text-sm border-gray-300 rounded focus:ring-primary-500 focus:border-primary-500"
                         @input="updateReceivableOffset(doc.id, $event)"
                       />
                     </div>
@@ -216,7 +236,7 @@
                         min="0"
                         :max="doc.due_amount / 100"
                         step="0.01"
-                        class="w-28 text-right text-sm border-gray-300 rounded focus:ring-primary-500 focus:border-primary-500"
+                        class="w-24 sm:w-28 text-right text-sm border-gray-300 rounded focus:ring-primary-500 focus:border-primary-500"
                         @input="updatePayableOffset(doc.id, $event)"
                       />
                     </div>
@@ -263,16 +283,21 @@
             </template>
             {{ t('back') }}
           </BaseButton>
-          <BaseButton
-            variant="primary"
-            :disabled="!canProceedStep2"
-            @click="step = 3"
-          >
-            {{ t('next') }}
-            <template #right="slotProps">
-              <BaseIcon name="ArrowRightIcon" :class="slotProps.class" />
-            </template>
-          </BaseButton>
+          <div class="flex items-center space-x-3">
+            <p v-if="canProceedStep2 && !isBalanced" class="text-xs text-yellow-600">
+              {{ t('not_balanced_warning') }}
+            </p>
+            <BaseButton
+              variant="primary"
+              :disabled="!canProceedStep2"
+              @click="step = 3"
+            >
+              {{ t('next') }}
+              <template #right="slotProps">
+                <BaseIcon name="ArrowRightIcon" :class="slotProps.class" />
+              </template>
+            </BaseButton>
+          </div>
         </div>
       </template>
     </div>
@@ -404,6 +429,7 @@ const isSaving = ref(false)
 const isLoadingCustomers = ref(false)
 const isLoadingSuppliers = ref(false)
 const isLoadingDocuments = ref(false)
+const showHelp = ref(true)
 
 const customers = ref([])
 const suppliers = ref([])

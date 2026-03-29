@@ -121,14 +121,17 @@
         </div>
 
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
+          <table class="min-w-[700px] w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-12">#</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.item_name') }}</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-28">{{ t('purchaseOrders.quantity') }}</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-32">{{ t('purchaseOrders.price') }}</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-28">{{ t('purchaseOrders.item_tax') }}</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-28">
+                  {{ t('purchaseOrders.item_tax') }}
+                  <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700">18% ДДВ</span>
+                </th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase w-32">{{ t('purchaseOrders.item_total') }}</th>
                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase w-16"></th>
               </tr>
@@ -143,10 +146,23 @@
                       :options="inventoryItems"
                       :searchable="true"
                       label="name"
+                      track-by="name"
                       value-prop="id"
                       :placeholder="t('purchaseOrders.select_item')"
                       @update:model-value="onItemSelect(index, $event)"
                     >
+                      <template #option="{ option }">
+                        <div>
+                          <span>{{ option.name }}</span>
+                          <span v-if="option.sku" class="ml-2 text-xs text-gray-400">({{ option.sku }})</span>
+                        </div>
+                      </template>
+                      <template #singlelabel="{ value }">
+                        <div class="flex items-center px-2">
+                          <span class="text-sm">{{ value.name }}</span>
+                          <span v-if="value.sku" class="ml-2 text-xs text-gray-400">({{ value.sku }})</span>
+                        </div>
+                      </template>
                       <template #action>
                         <BaseSelectAction @click="openItemModal(index)">
                           <BaseIcon name="PlusCircleIcon" class="h-4 mr-2 -ml-2 text-center text-primary-400" />
@@ -255,7 +271,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/scripts/stores/notification'
@@ -340,6 +356,8 @@ function onItemSelect(index, itemId) {
   if (selectedItem) {
     form.items[index].name = selectedItem.name
     form.items[index].price = selectedItem.cost || selectedItem.price || 0
+    // Auto-calculate 18% VAT
+    form.items[index].tax = Math.round((selectedItem.cost || selectedItem.price || 0) * 0.18)
   }
 }
 
@@ -453,6 +471,8 @@ async function updatePurchaseOrder() {
 
     const response = await window.axios.put(`/purchase-orders/${poId}`, payload)
 
+    isDirty.value = false
+
     notificationStore.showNotification({
       type: 'success',
       message: response.data?.message || t('purchaseOrders.updated_success'),
@@ -469,12 +489,36 @@ async function updatePurchaseOrder() {
   }
 }
 
+// Unsaved changes warning
+const isDirty = ref(false)
+
+function onBeforeUnload(e) {
+  if (isDirty.value) {
+    e.preventDefault()
+    e.returnValue = ''
+  }
+}
+
 // Lifecycle
 onMounted(() => {
-  fetchPo()
   fetchWarehouses()
   fetchItems()
   fetchCostCenters()
+
+  // Start watching for changes after PO data finishes loading
+  fetchPo().then(() => {
+    nextTick(() => {
+      watch(() => JSON.stringify(form), () => {
+        isDirty.value = true
+      }, { deep: true })
+    })
+  })
+
+  window.addEventListener('beforeunload', onBeforeUnload)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', onBeforeUnload)
 })
 </script>
 

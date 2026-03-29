@@ -25,6 +25,7 @@
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_remaining') }}</th>
                 <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_accepted') }}</th>
                 <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.quantity_rejected') }}</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('purchaseOrders.receipt_value') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -59,15 +60,21 @@
                     :disabled="item.remaining <= 0"
                   />
                 </td>
+                <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                  {{ formatMoney(item.quantity_received * item.price) }}
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <!-- Summary -->
-        <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+        <div class="mt-4 p-3 bg-gray-50 rounded-lg flex justify-between">
           <p class="text-sm text-gray-600">
             {{ t('purchaseOrders.items') }}: {{ receiveItems.filter(i => i.quantity_received > 0).length }} / {{ receiveItems.length }}
+          </p>
+          <p class="text-sm font-medium text-gray-900">
+            {{ t('purchaseOrders.total') }}: {{ formatMoney(totalReceiveValue) }}
           </p>
         </div>
       </div>
@@ -107,7 +114,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'received'])
 const notificationStore = useNotificationStore()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // State
 const isSubmitting = ref(false)
@@ -124,6 +131,7 @@ onMounted(() => {
     remaining: Math.max(0, item.quantity - item.received_quantity),
     quantity_received: Math.max(0, item.quantity - item.received_quantity),
     quantity_rejected: 0,
+    price: item.price || 0,
   }))
 })
 
@@ -131,6 +139,22 @@ onMounted(() => {
 const hasReceivableItems = computed(() => {
   return receiveItems.value.some(i => i.quantity_received > 0)
 })
+
+const totalReceiveValue = computed(() => {
+  return receiveItems.value.reduce((sum, i) => sum + (i.quantity_received * i.price), 0)
+})
+
+// Formatting
+const localeMap = { mk: 'mk-MK', en: 'en-US', tr: 'tr-TR', sq: 'sq-AL' }
+
+function formatMoney(cents) {
+  if (cents === null || cents === undefined) return '-'
+  const fmtLocale = localeMap[locale.value] || 'mk-MK'
+  return new Intl.NumberFormat(fmtLocale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(cents / 100)
+}
 
 // Methods
 async function submitReceipt() {

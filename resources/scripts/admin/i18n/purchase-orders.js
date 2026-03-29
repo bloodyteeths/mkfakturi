@@ -132,6 +132,7 @@ export default {
       error_downloading: 'Грешка при преземање на PDF',
       cost_center: 'Центар на трошок',
       select_cost_center: 'Изберете центар на трошок',
+      receipt_value: 'Вредност',
     }
   },
   en: {
@@ -267,6 +268,7 @@ export default {
       error_downloading: 'Error downloading PDF',
       cost_center: 'Cost Center',
       select_cost_center: 'Select Cost Center',
+      receipt_value: 'Value',
     }
   },
   tr: {
@@ -402,6 +404,7 @@ export default {
       error_downloading: 'PDF indirme hatası',
       cost_center: 'Maliyet Merkezi',
       select_cost_center: 'Maliyet Merkezi Seçin',
+      receipt_value: 'Değer',
     }
   },
   sq: {
@@ -537,6 +540,7 @@ export default {
       error_downloading: 'Gabim në shkarkimin e PDF',
       cost_center: 'Qendra e Kostos',
       select_cost_center: 'Zgjidhni Qendrën e Kostos',
+      receipt_value: 'Vlera',
     }
   }
 }
