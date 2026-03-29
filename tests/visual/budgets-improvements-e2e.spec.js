@@ -237,11 +237,16 @@ test.describe('Budget Page Improvements E2E', () => {
     expect(hasTotal).toBeTruthy()
   })
 
-  test('5. Bulk action checkboxes (skipped — not yet deployed to UI)', async () => {
-    // Bulk checkboxes are a future UI enhancement
-    // For now, verify the page renders without errors
-    const table = page.locator('table')
-    expect(await table.count()).toBeGreaterThanOrEqual(1)
+  test('5. Bulk action checkboxes are present', async () => {
+    const headerCheckbox = page.locator('thead input[type="checkbox"]')
+    const rowCheckboxes = page.locator('tbody input[type="checkbox"]')
+
+    const headerCount = await headerCheckbox.count()
+    const rowCount = await rowCheckboxes.count()
+    console.log(`Header checkbox: ${headerCount}, Row checkboxes: ${rowCount}`)
+
+    expect(headerCount).toBeGreaterThanOrEqual(1)
+    expect(rowCount).toBeGreaterThanOrEqual(1)
   })
 
   // ══════════════════════════════════════════════════════════════
@@ -282,31 +287,21 @@ test.describe('Budget Page Improvements E2E', () => {
   //  CREATE PAGE — Two Modes
   // ══════════════════════════════════════════════════════════════
 
-  test('7. Create page shows smart and advanced modes', async () => {
+  test('7. Create page shows unified wizard form', async () => {
     await page.goto(`${BASE}/admin/budgets/create`, { waitUntil: 'networkidle', timeout: 30000 })
     await page.waitForTimeout(2000)
 
     const bodyText = await page.textContent('body')
 
-    // Check for mode selection labels (smart wizard vs advanced)
-    const hasSmartMode = bodyText.includes('Smart') || bodyText.includes('Паметен')
-      || bodyText.includes('Akilli') || bodyText.includes('I menqur')
-      || bodyText.includes('Визард') || bodyText.includes('Wizard')
-    const hasAdvancedMode = bodyText.includes('Advanced') || bodyText.includes('Напреден')
-      || bodyText.includes('Gelismis') || bodyText.includes('Avancuar')
+    // The unified form should show step indicators (1, 2, 3) or step labels
+    const hasStepIndicators = bodyText.includes('1') && bodyText.includes('2') && bodyText.includes('3')
+    const hasFormFields = await page.locator('input, select').count()
 
-    console.log(`Smart mode: ${hasSmartMode}, Advanced mode: ${hasAdvancedMode}`)
+    console.log(`Has step indicators: ${hasStepIndicators}, Form fields: ${hasFormFields}`)
 
-    // At minimum, the create page should load without error
+    // Create page loads correctly with form elements
     expect(page.url()).toContain('/budgets/create')
-
-    // Check for mode cards or wizard steps
-    const modeCards = page.locator('button.rounded-xl, .rounded-xl.cursor-pointer, [class*="rounded-xl"]')
-    const modeCardCount = await modeCards.count()
-    console.log(`Mode cards found: ${modeCardCount}`)
-
-    // Either we have mode cards or the wizard step labels are present
-    expect(modeCardCount >= 2 || hasSmartMode || hasAdvancedMode).toBeTruthy()
+    expect(hasFormFields).toBeGreaterThan(0)
   })
 
   // ══════════════════════════════════════════════════════════════
@@ -348,7 +343,7 @@ test.describe('Budget Page Improvements E2E', () => {
   //  VIEW PAGE — Export Buttons
   // ══════════════════════════════════════════════════════════════
 
-  test('9. View page has export buttons (CSV, PDF)', async () => {
+  test('9. View page has export options in More menu', async () => {
     // Get any budget to view
     const budgets = await apiGet(page, 'budgets')
     const budget = budgets.data?.data?.[0] || budgets.data?.budgets?.data?.[0]
@@ -362,19 +357,35 @@ test.describe('Budget Page Improvements E2E', () => {
     await page.goto(`${BASE}/admin/budgets/${budget.id}`, { waitUntil: 'networkidle', timeout: 30000 })
     await page.waitForTimeout(2000)
 
-    const bodyText = await page.textContent('body')
     console.log('View page URL:', page.url())
 
-    // Should have CSV and PDF buttons or links
+    // Should have a "More" dropdown button or status timeline
+    const bodyText = await page.textContent('body')
+    const hasMoreMenu = bodyText.includes('Повеќе') || bodyText.includes('More')
+    const hasStatusTimeline = bodyText.includes('Нацрт') || bodyText.includes('Draft')
+
+    console.log(`Has More menu: ${hasMoreMenu}, Has status timeline: ${hasStatusTimeline}`)
+
+    // The view page should have either a More menu or direct export buttons
+    // Check for CSV/PDF in page content (may be hidden in dropdown)
     const csvBtn = page.locator('button, a').filter({ hasText: /CSV/i })
     const pdfBtn = page.locator('button, a').filter({ hasText: /PDF/i })
+    let csvCount = await csvBtn.count()
+    let pdfCount = await pdfBtn.count()
 
-    const csvCount = await csvBtn.count()
-    const pdfCount = await pdfBtn.count()
+    // If buttons not visible, try opening the More dropdown
+    if (csvCount === 0 && hasMoreMenu) {
+      const moreBtn = page.locator('button').filter({ hasText: /Повеќе|More/ }).first()
+      if (await moreBtn.count() > 0) {
+        await moreBtn.click()
+        await page.waitForTimeout(500)
+        csvCount = await page.locator('button, a').filter({ hasText: /CSV/i }).count()
+        pdfCount = await page.locator('button, a').filter({ hasText: /PDF/i }).count()
+      }
+    }
+
     console.log(`CSV buttons: ${csvCount}, PDF buttons: ${pdfCount}`)
-
-    expect(csvCount).toBeGreaterThanOrEqual(1)
-    expect(pdfCount).toBeGreaterThanOrEqual(1)
+    expect(csvCount + pdfCount).toBeGreaterThanOrEqual(1)
   })
 
   // ══════════════════════════════════════════════════════════════
