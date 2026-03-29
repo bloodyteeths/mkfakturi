@@ -3817,7 +3817,10 @@
             "exchange_rate_provider": "Furnizuesi i kursit të këmbimit",
             "exchange_rate_provider_help": "Zgjidhni nga ku merren kurset e këmbimit. NBRM është kursi zyrtar i Bankës Popullore.",
             "exchange_rate_nbrm": "NBRM — Banka Popullore e Maqedonisë (Zyrtare)",
-            "exchange_rate_frankfurter": "Frankfurter — BQE Banka Qendrore Europiane"
+            "exchange_rate_frankfurter": "Frankfurter — BQE Banka Qendrore Europiane",
+            "tab_formats": "Formatet",
+            "tab_features": "Funksionet",
+            "tab_links": "Lidhjet"
         },
         "update_app": {
             "title": "Përditësimi në aplikacioni",

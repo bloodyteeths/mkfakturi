@@ -2874,7 +2874,10 @@
             "exchange_rate_provider": "Döviz kuru sağlayıcısı",
             "exchange_rate_provider_help": "Döviz kurlarının nereden alınacağını seçin. NBRM, Makedonya Ulusal Bankası resmi kurudur.",
             "exchange_rate_nbrm": "NBRM — Makedonya Ulusal Bankası (Resmi)",
-            "exchange_rate_frankfurter": "Frankfurter — ECB Avrupa Merkez Bankası"
+            "exchange_rate_frankfurter": "Frankfurter — ECB Avrupa Merkez Bankası",
+            "tab_formats": "Formatlar",
+            "tab_features": "Özellikler",
+            "tab_links": "Bağlantılar"
         },
         "update_app": {
             "title": "Uygulamayı Güncelle",
@@ -6214,6 +6217,7 @@
         "commit_import": "Завршve içe aktarma",
         "commit_import_description": "Фveлен önizleme ve onay içe aktarmaот",
         "commit_import_description_detailed": "Görüntüleте özetто içe aktarmaот ve потврдете için girin altındaатоцveте сveстемот. Ој чекор е неповратен.",
+        "import_description": "Son inceleme ve içe aktarmayı onaylama",
         "drag_drop_files": "Влечете ve спуштете фајловveте тука",
         "or_click_to_browse": "veya клveкнете için прелveстувате",
         "browse_files": "Преlisteј фајловve",
@@ -6225,6 +6229,7 @@
         "source_system_hint": "Daha iyi alan eslemesi icin verilerinizin disa aktarildigi yazilimi secin.",
         "supported_sources": "Пdanдржанve veзрve",
         "generic_formats": "Општve biçimve",
+        "fields_auto_mapped": "Alanlar otomatik olarak eşleştirildi",
         "file_uploaded_successfully": "Фајлот е başarılı качен",
         "filename": "Ad фајл",
         "format": "Biçim",
@@ -6381,6 +6386,8 @@
         "import_failed_title": "İçe Aktarmaот не успеа порадve hata",
         "unknown_error": "Hayırпозта hata",
         "retry_import": "Обveдve повторama",
+        "review": "İnceleme",
+        "review_description": "İçe aktarmadan önce verileri hatalar için kontrol edin",
         "view_logs": "Прveкажve ловve",
         "ready_to_import": "Hazırо için içe aktarma",
         "final_check": "Фveл проверка",
