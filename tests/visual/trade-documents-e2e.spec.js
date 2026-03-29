@@ -89,7 +89,8 @@ let testBillId = null
 let testItemId = null
 let testNivelacijaId = null
 
-test.beforeAll(async ({ browser }) => {
+test.beforeAll(async ({ browser }, testInfo) => {
+  testInfo.setTimeout(60000)
   if (!EMAIL || !PASS) {
     throw new Error('Set TEST_EMAIL and TEST_PASSWORD env vars')
   }

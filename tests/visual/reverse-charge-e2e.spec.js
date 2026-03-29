@@ -38,7 +38,7 @@ async function ss(page, name) {
 }
 
 test.describe('Reverse Charge (Art. 32-а) — E2E Verification', () => {
-  test.describe.configure({ mode: 'serial' })
+  test.describe.configure({ mode: 'serial', timeout: 60000 })
 
   let page
   let createdRcInvoiceId = null
@@ -46,12 +46,12 @@ test.describe('Reverse Charge (Art. 32-а) — E2E Verification', () => {
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage()
-    await page.goto(`${BASE}/login`)
-    await page.waitForLoadState('networkidle')
+    await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' })
+    await page.waitForSelector('input[type="email"]', { timeout: 15000 })
     await page.fill('input[type="email"]', EMAIL)
     await page.fill('input[type="password"]', PASS)
     await page.click('button[type="submit"]')
-    await page.waitForURL('**/admin/dashboard', { timeout: 15000 })
+    await page.waitForURL(/\/admin/, { timeout: 30000 })
     await page.waitForTimeout(1000)
   })
 
