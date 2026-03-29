@@ -1598,6 +1598,8 @@
         "title": "Kullanıcılar",
         "users_list": "Kullanıcı Listesi",
         "users_used": "kullanıcı",
+        "selected": "seçili",
+        "upgrade_plan": "Planı yükselt",
         "user_limit_reached": "Kullanıcı limitine ulaşıldı. Daha fazla kullanıcı eklemek için planınızı yükseltin.",
         "name": "İsim",
         "description": "Tanım",
@@ -4419,7 +4421,10 @@
         "notes_placeholder": "Bu tedarikçi hakkında dahili notlar...",
         "added_on": "Eklenme Tarihi",
         "duplicate_warning": "Benzer bilgilere sahip bir tedarikçi zaten mevcut",
-        "company_registration_number": "Şirket Kayıt Numarası"
+        "company_registration_number": "Şirket Kayıt Numarası",
+        "tab_overview": "Genel Bakış",
+        "tab_open_items": "Açık Kalemler (IOS)",
+        "more_actions": "Daha Fazla"
     },
     "projects": {
         "title": "Projeler",
@@ -4539,7 +4544,9 @@
         "branch_revenue": "Şube Geliri",
         "all_types": "Tümü",
         "projects_only": "Projeler",
-        "branches_only": "Şubeler"
+        "branches_only": "Şubeler",
+        "optional_details": "Ek Detaylar",
+        "optional_details_hint": "sicil no, yönetici, iletişim"
     },
     "stock": {
         "title": "Stok",
@@ -6291,6 +6298,9 @@
         "mapped_fields": "Мапveранve полveња",
         "missing_required": "Hayırдостасуваат içinborçтелнve",
         "mapping_score": "Резултат dan мапveрањето",
+        "auto_mapped_success": "Tum alanlar otomatik olarak eslesti. Asagida inceleyin veya devam etmek icin Ileri'ye tiklayin.",
+        "of": "/",
+        "required_fields_mapped": "zorunlu alan eslesti",
         "mapping_saved_successfully": "Мапveрањето başarıyla kaydedildi",
         "validating_data": "Валveдveрање altındaатоцve",
         "validation_in_progress": "Валveдveрањето е devam ediyor, ве молad поbekliyorјте...",
@@ -6311,6 +6321,9 @@
         "validation_errors": "Грешкve валveдveрањето",
         "errors_must_be_fixed": "Овveе грешкve мора evet поправат önce devam etmek:",
         "warnings_can_proceed": "Можете devam etmek ile içe aktarmaот поbitiş bunlar önceуönceувања:",
+        "rows_ready": "satir ice aktarima hazir",
+        "go_back_to_fix_mappings": "Eslemeleri duzeltmek icin geri don",
+        "acknowledge_warnings_proceed": "Bu uyarilari anliyorum, ice aktarima devam et",
         "row": "Ред",
         "invalid_value": "Hayırвалveд değer",
         "current_value": "Теков değer",
@@ -6528,7 +6541,20 @@
         "field": "Alan",
         "csv_column": "CSV коло",
         "select_column": "Seçin коло",
-        "skip_column": "Прескокнve коло"
+        "skip_column": "Прескокнve коло",
+        "advanced_options": "Gelişmiş seçenekler",
+        "auto_mapped_success": "Tüm alanlar otomatik olarak eşleştirildi. Aşağıda inceleyin veya devam etmek için İleri'ye tıklayın.",
+        "auto_mapped_partial": "{mapped} / {total} zorunlu alan otomatik eşleştirildi.",
+        "required_fields_status": "{mapped} / {total} zorunlu alan eşleştirildi",
+        "rows_ready_to_import": "{count} satır içe aktarıma hazır",
+        "rows_ready_with_warnings": "{count} satır içe aktarıma hazır ({warnings} uyarı)",
+        "acknowledge_warnings": "Uyarıları anlıyorum, içe aktarıma devam et",
+        "go_back_fix": "Eşleştirmeleri düzeltmeye geri dön",
+        "step_match_columns": "Sütunları eşle",
+        "step_review": "İncele",
+        "step_import": "İçe aktar",
+        "download_template_btn": "Şablon indir",
+        "help_button": "Yardım"
     },
     "import": {
         "title": "İçe Aktarma Sihirbazı",
@@ -7055,6 +7081,13 @@
         "link_to_bill": "Faturaya Bağla",
         "link_to_payroll": "Bordoya Bağla",
         "mark_reviewed": "İncelendi İşaretle",
+        "search_transactions": "Açıklama, karşı taraf ile ara...",
+        "select_all": "Tümünü seç",
+        "mark_reviewed_count": "{count} İncelendi İşaretle",
+        "bulk_reviewed_success": "{count} işlem incelendi olarak işaretlendi",
+        "no_matching_results": "Eşleşen sonuç yok",
+        "documents": "Belgeler",
+        "match_invoices": "Faturaları Eşle",
         "expense_recorded": "Gider kaydedildi",
         "bill_linked": "İşlem faturaya bağlandı",
         "payroll_linked": "İşlem bordroya bağlandı",
@@ -8109,6 +8142,7 @@
     "partners.bulk_approve_kyc": "KYC Onayla",
     "partners.clear_selection": "Seçimi Temizle",
     "partners.export_csv": "CSV İndir",
+    "partners.network_graph": "Ağ grafiği",
     "partners.reassign": "Yeniden Ata",
     "partners.bulk_action_success": "Toplu işlem başarıyla tamamlandı",
     "partners.tabs.kyc_documents": "KYC Belgeleri",
@@ -8158,5 +8192,10 @@
     "partners.reassignment_warning": "Bu işlem varlığı yeniden atayacaktır. Komisyon geçmişi etkilenebilir.",
     "partners.confirm_reassignment": "Yeniden Atamayı Onayla",
     "partners.reassignment_successful": "Yeniden atama başarıyla tamamlandı",
-    "partners.reassignment_failed": "Yeniden atama başarısız oldu"
+    "partners.reassignment_failed": "Yeniden atama başarısız oldu",
+    "partners.payment_methods.bank_transfer": "Banka transferi",
+    "partners.payment_methods.paypal": "PayPal",
+    "partners.payment_methods.stripe": "Stripe",
+    "partners.payment_methods.wise": "Wise",
+    "partners.payment_methods.manual": "Manuel"
 }

@@ -25,6 +25,11 @@ class UsageLimitService
      */
     public function canUse(Company $company, string $feature): bool
     {
+        // Bypass limits for super admin, partner, and verified accountant companies
+        if ($this->shouldBypassLimits($company)) {
+            return true;
+        }
+
         $usage = $this->getUsage($company, $feature);
 
         // If limit is null (unlimited), return true
@@ -103,6 +108,26 @@ class UsageLimitService
             'feature' => $feature,
             'period' => $period,
         ]);
+    }
+
+    /**
+     * Check if a company should bypass usage limits entirely.
+     * Super admins, partners, and verified accountants get unlimited access.
+     */
+    protected function shouldBypassLimits(Company $company): bool
+    {
+        // Super admin's companies (user_id 2 is super admin)
+        $owner = $company->owner;
+        if ($owner && $owner->role === 'super admin') {
+            return true;
+        }
+
+        // Partner-managed companies
+        if ($company->is_portfolio_managed && $company->managing_partner_id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

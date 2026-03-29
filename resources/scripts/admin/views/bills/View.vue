@@ -9,6 +9,7 @@ import { useDialogStore } from '@/scripts/stores/dialog'
 import { useNotificationStore } from '@/scripts/stores/notification'
 
 import BillIndexDropdown from '@/scripts/admin/components/dropdowns/BillIndexDropdown.vue'
+import BaseBillStatusLabel from '@/scripts/components/base/BaseBillStatusLabel.vue'
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
 
 import abilities from '@/scripts/admin/stub/abilities'
@@ -187,21 +188,21 @@ onMounted(() => {
   <BasePage v-if="bill">
     <BasePageHeader :title="pageTitle">
       <template #actions>
-        <!-- Edit Button -->
-        <router-link
-          v-if="userStore.hasAbilities(abilities.EDIT_BILL)"
-          :to="`/admin/bills/${bill.id}/edit`"
-        >
-          <BaseButton
-            variant="primary-outline"
-            class="mr-3"
+        <div class="flex flex-wrap gap-2 items-center">
+          <!-- Edit Button -->
+          <router-link
+            v-if="userStore.hasAbilities(abilities.EDIT_BILL)"
+            :to="`/admin/bills/${bill.id}/edit`"
           >
-            {{ $t('general.edit') }}
-          </BaseButton>
-        </router-link>
+            <BaseButton variant="primary-outline">
+              <template #left="slotProps">
+                <BaseIcon name="PencilIcon" :class="[slotProps.class, 'md:hidden']" />
+              </template>
+              <span class="hidden md:inline">{{ $t('general.edit') }}</span>
+            </BaseButton>
+          </router-link>
 
-        <!-- Mark as Sent Button -->
-        <div class="text-sm mr-3">
+          <!-- Mark as Sent Button -->
           <BaseButton
             v-if="
               bill.status === 'DRAFT' &&
@@ -211,56 +212,60 @@ onMounted(() => {
             variant="primary-outline"
             @click="onMarkAsSent"
           >
-            {{ $t('bills.mark_as_sent') }}
+            <template #left="slotProps">
+              <BaseIcon name="CheckCircleIcon" :class="[slotProps.class, 'md:hidden']" />
+            </template>
+            <span class="hidden md:inline">{{ $t('bills.mark_as_sent') }}</span>
           </BaseButton>
-        </div>
 
-        <!-- Send Bill Button -->
-        <BaseButton
-          v-if="
-            bill.status === 'DRAFT' &&
-            userStore.hasAbilities(abilities.SEND_BILL)
-          "
-          variant="primary"
-          class="text-sm mr-3"
-          @click="onSendBill"
-        >
-          {{ $t('bills.send_bill') }}
-        </BaseButton>
-
-        <!-- Record Payment Button -->
-        <router-link
-          v-if="
-            userStore.hasAbilities(abilities.CREATE_PAYMENT) &&
-            (bill.status === 'SENT' || bill.status === 'VIEWED')
-          "
-          :to="`/admin/bills/${bill.id}/payments`"
-        >
+          <!-- Send Bill Button -->
           <BaseButton
+            v-if="
+              bill.status === 'DRAFT' &&
+              userStore.hasAbilities(abilities.SEND_BILL)
+            "
             variant="primary"
-            class="mr-3"
+            @click="onSendBill"
           >
-            {{ $t('bills.record_payment') }}
+            <template #left="slotProps">
+              <BaseIcon name="PaperAirplaneIcon" :class="[slotProps.class, 'md:hidden']" />
+            </template>
+            <span class="hidden md:inline">{{ $t('bills.send_bill') }}</span>
           </BaseButton>
-        </router-link>
 
-        <!-- Print PP30 Button -->
-        <BaseButton
-          v-if="bill.paid_status !== 'PAID'"
-          variant="primary-outline"
-          class="mr-3"
-          :loading="isDownloadingPp30"
-          @click="downloadPp30"
-        >
-          {{ $t('payment_orders.print_pp30', 'Print PP30') }}
-        </BaseButton>
+          <!-- Record Payment Button -->
+          <router-link
+            v-if="
+              userStore.hasAbilities(abilities.CREATE_PAYMENT) &&
+              (bill.status === 'SENT' || bill.status === 'VIEWED')
+            "
+            :to="`/admin/bills/${bill.id}/payments`"
+          >
+            <BaseButton variant="primary">
+              <template #left="slotProps">
+                <BaseIcon name="BanknotesIcon" :class="[slotProps.class, 'md:hidden']" />
+              </template>
+              <span class="hidden md:inline">{{ $t('bills.record_payment') }}</span>
+            </BaseButton>
+          </router-link>
 
-        <!-- Bill Dropdown -->
-        <BillIndexDropdown
-          class="ml-3"
-          :row="bill"
-          :load-data="refreshBill"
-        />
+          <!-- Print PP30 Button — hidden on mobile, available in dropdown -->
+          <BaseButton
+            v-if="bill.paid_status !== 'PAID'"
+            variant="primary-outline"
+            class="hidden md:inline-flex"
+            :loading="isDownloadingPp30"
+            @click="downloadPp30"
+          >
+            {{ $t('payment_orders.print_pp30', 'Print PP30') }}
+          </BaseButton>
+
+          <!-- Bill Dropdown -->
+          <BillIndexDropdown
+            :row="bill"
+            :load-data="refreshBill"
+          />
+        </div>
       </template>
     </BasePageHeader>
 
@@ -291,10 +296,10 @@ onMounted(() => {
           tab-panel-container="py-4 mt-px"
           :title="$t('bills.details')"
         >
-          <div class="grid grid-cols-1 gap-6">
+          <div class="grid grid-cols-1 gap-4 md:gap-6">
             <!-- Bill Information Section -->
             <BaseCard>
-              <div class="p-6">
+              <div class="p-4 md:p-6">
                 <h3 class="text-lg font-semibold mb-4">
                   {{ $t('bills.bill_information') }}
                 </h3>
@@ -348,29 +353,14 @@ onMounted(() => {
                     {{ bill.payment_terms_days }} {{ $t('bills.days', 'дена') }}
                   </BaseDescriptionListItem>
                   <BaseDescriptionListItem :label="$t('bills.status')">
-                    <span
-                      class="px-2 py-1 text-xs font-semibold rounded"
-                      :class="{
-                        'bg-gray-200 text-gray-800': bill.status === 'DRAFT',
-                        'bg-blue-200 text-blue-800': bill.status === 'SENT',
-                        'bg-green-200 text-green-800': bill.status === 'VIEWED',
-                        'bg-purple-200 text-purple-800': bill.status === 'COMPLETED',
-                      }"
-                    >
-                      {{ bill.status }}
-                    </span>
+                    <BaseBillStatusBadge :status="bill.status" class="px-2 py-1">
+                      <BaseBillStatusLabel :status="bill.status" />
+                    </BaseBillStatusBadge>
                   </BaseDescriptionListItem>
                   <BaseDescriptionListItem :label="$t('bills.paid_status')">
-                    <span
-                      class="px-2 py-1 text-xs font-semibold rounded"
-                      :class="{
-                        'bg-red-200 text-red-800': bill.paid_status === 'UNPAID',
-                        'bg-yellow-200 text-yellow-800': bill.paid_status === 'PARTIALLY_PAID',
-                        'bg-green-200 text-green-800': bill.paid_status === 'PAID',
-                      }"
-                    >
-                      {{ bill.paid_status }}
-                    </span>
+                    <BaseBillPaidStatusBadge :status="bill.paid_status" class="px-2 py-1">
+                      <BaseBillStatusLabel :status="bill.paid_status" />
+                    </BaseBillPaidStatusBadge>
                   </BaseDescriptionListItem>
                 </BaseDescriptionList>
               </div>
@@ -378,11 +368,42 @@ onMounted(() => {
 
             <!-- Line Items Section -->
             <BaseCard v-if="bill.items && bill.items.length > 0">
-              <div class="p-6">
+              <div class="p-4 md:p-6">
                 <h3 class="text-lg font-semibold mb-4">
                   {{ $t('bills.line_items') }}
                 </h3>
-                <div class="overflow-x-auto">
+
+                <!-- Mobile: Card layout -->
+                <div class="md:hidden space-y-3">
+                  <div
+                    v-for="(item, index) in bill.items"
+                    :key="'m-' + index"
+                    class="border border-gray-100 rounded-lg p-3"
+                  >
+                    <div class="font-medium text-sm text-gray-900">{{ item.name }}</div>
+                    <div v-if="item.description" class="text-xs text-gray-500 mt-0.5">{{ item.description }}</div>
+                    <div class="grid grid-cols-2 gap-2 mt-2 text-sm">
+                      <div>
+                        <span class="text-gray-500">{{ $t('bills.quantity') }}:</span>
+                        {{ item.quantity }}
+                      </div>
+                      <div class="text-right">
+                        <span class="text-gray-500">{{ $t('bills.price') }}:</span>
+                        <BaseFormatMoney :amount="item.price" :currency="bill.currency" />
+                      </div>
+                      <div v-if="item.tax > 0">
+                        <span class="text-gray-500">{{ $t('bills.tax') }}:</span>
+                        <BaseFormatMoney :amount="item.tax" :currency="bill.currency" />
+                      </div>
+                      <div class="text-right font-semibold">
+                        <BaseFormatMoney :amount="item.total" :currency="bill.currency" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Desktop: Table layout -->
+                <div class="hidden md:block overflow-x-auto">
                   <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                       <tr>
@@ -438,7 +459,7 @@ onMounted(() => {
 
             <!-- Tax Breakdown Section -->
             <BaseCard v-if="bill.taxes && bill.taxes.length > 0">
-              <div class="p-6">
+              <div class="p-4 md:p-6">
                 <h3 class="text-lg font-semibold mb-4">
                   {{ $t('bills.tax_breakdown') }}
                 </h3>
@@ -457,7 +478,7 @@ onMounted(() => {
 
             <!-- Totals Section -->
             <BaseCard>
-              <div class="p-6">
+              <div class="p-4 md:p-6">
                 <h3 class="text-lg font-semibold mb-4">
                   {{ $t('bills.totals') }}
                 </h3>
@@ -488,7 +509,7 @@ onMounted(() => {
 
             <!-- Notes Section -->
             <BaseCard v-if="bill.notes">
-              <div class="p-6">
+              <div class="p-4 md:p-6">
                 <h3 class="text-lg font-semibold mb-4">
                   {{ $t('bills.notes') }}
                 </h3>
@@ -507,7 +528,7 @@ onMounted(() => {
           :title="$t('bills.scanned_invoice', 'Scanned Invoice')"
         >
           <BaseCard>
-            <div class="p-6">
+            <div class="p-4 md:p-6">
               <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold">
                   {{ $t('bills.scanned_invoice', 'Scanned Invoice') }}
@@ -541,7 +562,7 @@ onMounted(() => {
           @click="loadPayments"
         >
           <BaseCard>
-            <div class="p-6">
+            <div class="p-4 md:p-6">
               <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-semibold">
                   {{ $t('bills.payment_history') }}
@@ -642,7 +663,7 @@ onMounted(() => {
           @click="loadJournalEntry"
         >
           <BaseCard>
-            <div class="p-6">
+            <div class="p-4 md:p-6">
               <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold">
                   {{ $t('bills.journal_entry', 'Книжење') }}

@@ -14,12 +14,27 @@
 
     <BaseCard>
       <form @submit.prevent="handleSubmit">
+        <!-- Section 1: Basic Info -->
+        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+          {{ $t('bills.bill_information', 'Bill Information') }}
+        </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <BaseInputGroup
             :label="$t('bills.bill_number')"
             :error="validationErrors.bill_number"
           >
             <BaseInput v-model="bill.bill_number" required />
+          </BaseInputGroup>
+
+          <BaseInputGroup
+            :label="$t('bills.supplier')"
+            :error="validationErrors.supplier_id"
+          >
+            <BaseSupplierSelectInput
+              v-model="bill.supplier_id"
+              fetch-all
+              show-action
+            />
           </BaseInputGroup>
 
           <BaseInputGroup
@@ -54,63 +69,68 @@
               :can-deselect="true"
             />
           </BaseInputGroup>
+        </div>
 
-          <BaseInputGroup
-            :label="$t('bills.supplier')"
-            :error="validationErrors.supplier_id"
-          >
-            <BaseSupplierSelectInput
-              v-model="bill.supplier_id"
-              fetch-all
-              show-action
-            />
-          </BaseInputGroup>
-
-          <BaseInputGroup :label="$t('bills.currency')">
-            <BaseMultiselect
-              v-model="bill.currency_id"
-              :options="currencies"
-              label="name"
-              value-prop="id"
-              track-by="code"
-              :placeholder="$t('customers.select_currency')"
-              :can-deselect="false"
-            />
-          </BaseInputGroup>
-
-          <BaseInputGroup :label="$t('bills.exchange_rate')">
-            <BaseInput
-              v-model.number="bill.exchange_rate"
-              type="number"
-              min="0"
-              step="0.0001"
-            />
-          </BaseInputGroup>
-
-          <BaseInputGroup :label="$t('projects.project')">
-            <BaseProjectSelectInput
-              v-model="bill.project_id"
-              :show-action="false"
-            />
-          </BaseInputGroup>
-
-          <BaseInputGroup :label="$t('bills.place_of_issue')">
-            <BaseInput
-              v-model="bill.place_of_issue"
-              :placeholder="$t('bills.place_of_issue_placeholder')"
-            />
-          </BaseInputGroup>
-
-          <BaseInputGroup :label="$t('invoices.reverse_charge')">
-            <div class="flex items-center gap-2 mt-1">
-              <BaseSwitch
-                v-model="bill.is_reverse_charge"
+        <!-- Section 2: Currency & Project -->
+        <div class="border-t border-gray-100 mt-6 pt-4">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+            {{ $t('bills.currency', 'Currency') }} & {{ $t('projects.project', 'Project') }}
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <BaseInputGroup :label="$t('bills.currency')">
+              <BaseMultiselect
+                v-model="bill.currency_id"
+                :options="currencies"
+                label="name"
+                value-prop="id"
+                track-by="code"
+                :placeholder="$t('customers.select_currency')"
+                :can-deselect="false"
               />
-              <span v-if="bill.is_reverse_charge" class="text-xs text-red-600 font-medium">
-                {{ $t('invoices.reverse_charge_notice') }}
-              </span>
-            </div>
-          </BaseInputGroup>
+            </BaseInputGroup>
+
+            <BaseInputGroup :label="$t('bills.exchange_rate')">
+              <BaseInput
+                v-model.number="bill.exchange_rate"
+                type="number"
+                min="0"
+                step="0.0001"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup :label="$t('projects.project')">
+              <BaseProjectSelectInput
+                v-model="bill.project_id"
+                :show-action="false"
+              />
+            </BaseInputGroup>
+          </div>
+        </div>
+
+        <!-- Section 3: Compliance -->
+        <div class="border-t border-gray-100 mt-6 pt-4">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+            {{ $t('bills.compliance_fields', 'Compliance') }}
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BaseInputGroup :label="$t('bills.place_of_issue')">
+              <BaseInput
+                v-model="bill.place_of_issue"
+                :placeholder="$t('bills.place_of_issue_placeholder')"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup :label="$t('invoices.reverse_charge')">
+              <div class="flex items-center gap-2 mt-1">
+                <BaseSwitch
+                  v-model="bill.is_reverse_charge"
+                />
+                <span v-if="bill.is_reverse_charge" class="text-xs text-red-600 font-medium">
+                  {{ $t('invoices.reverse_charge_notice') }}
+                </span>
+              </div>
+            </BaseInputGroup>
+          </div>
         </div>
 
         <div class="mt-6">
@@ -134,7 +154,7 @@
             <div
               v-for="(line, index) in items"
               :key="index"
-              class="relative grid grid-cols-1 md:grid-cols-6 gap-4 items-end border border-gray-100 rounded-md p-3"
+              class="relative grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4 items-end border border-gray-100 rounded-md p-3"
             >
               <BaseInputGroup :label="$t('bills.item_name')" class="col-span-2">
                 <!-- Show selected item or search field -->
@@ -148,32 +168,48 @@
                   </span>
                 </div>
                 <template v-else>
-                  <BaseMultiselect
-                    v-model="line.selectedItem"
-                    value-prop="id"
-                    track-by="name"
-                    label="name"
-                    :filter-results="false"
-                    :delay="300"
-                    searchable
-                    object
-                    :options="searchItems"
-                    :placeholder="$t('items.search_item')"
-                    @update:model-value="(val) => selectItem(index, val)"
-                  >
-                    <template #option="{ option }">
-                      <div class="flex justify-between items-center w-full">
-                        <span>{{ option.name }}</span>
-                        <span v-if="option.sku" class="text-gray-500 text-xs ml-2">({{ option.sku }})</span>
-                      </div>
-                    </template>
-                  </BaseMultiselect>
-                  <!-- Manual item name input when no item selected from dropdown -->
-                  <BaseInput
-                    v-model="line.name"
-                    class="mt-1"
-                    :placeholder="$t('bills.item_name')"
-                  />
+                  <div v-if="!line.manualEntry">
+                    <BaseMultiselect
+                      v-model="line.selectedItem"
+                      value-prop="id"
+                      track-by="name"
+                      label="name"
+                      :filter-results="false"
+                      :delay="300"
+                      searchable
+                      object
+                      :options="searchItems"
+                      :placeholder="$t('items.search_item')"
+                      @update:model-value="(val) => selectItem(index, val)"
+                    >
+                      <template #option="{ option }">
+                        <div class="flex justify-between items-center w-full">
+                          <span>{{ option.name }}</span>
+                          <span v-if="option.sku" class="text-gray-500 text-xs ml-2">({{ option.sku }})</span>
+                        </div>
+                      </template>
+                    </BaseMultiselect>
+                    <button
+                      type="button"
+                      class="text-xs text-primary-500 hover:text-primary-700 mt-1"
+                      @click="line.manualEntry = true"
+                    >
+                      {{ $t('bills.manual_entry', 'Enter manually') }}
+                    </button>
+                  </div>
+                  <div v-else>
+                    <BaseInput
+                      v-model="line.name"
+                      :placeholder="$t('bills.item_name')"
+                    />
+                    <button
+                      type="button"
+                      class="text-xs text-primary-500 hover:text-primary-700 mt-1"
+                      @click="line.manualEntry = false"
+                    >
+                      {{ $t('bills.search_catalog', 'Search catalog') }}
+                    </button>
+                  </div>
                 </template>
                 <!-- Description below item name -->
                 <BaseInput
@@ -339,6 +375,7 @@
 
 <script setup>
 import { reactive, ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useBillsStore } from '@/scripts/admin/stores/bills'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
@@ -352,6 +389,7 @@ import ScannerModeToggle from '@/scripts/admin/components/ScannerModeToggle.vue'
 import DuplicateWarningModal from '@/scripts/admin/components/modal-components/DuplicateWarningModal.vue'
 import { useBarcodeScanner } from '@/scripts/admin/composables/useBarcodeScanner'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const billsStore = useBillsStore()
@@ -428,13 +466,13 @@ const bill = reactive({
   place_of_issue: '',
 })
 
-const paymentTermsOptions = [
-  { label: '15 дена', value: 15 },
-  { label: '30 дена', value: 30 },
-  { label: '45 дена', value: 45 },
-  { label: '60 дена', value: 60 },
-  { label: '90 дена', value: 90 },
-]
+const paymentTermsOptions = computed(() => [
+  { label: `15 ${t('bills.days', 'дена')}`, value: 15 },
+  { label: `30 ${t('bills.days', 'дена')}`, value: 30 },
+  { label: `45 ${t('bills.days', 'дена')}`, value: 45 },
+  { label: `60 ${t('bills.days', 'дена')}`, value: 60 },
+  { label: `90 ${t('bills.days', 'дена')}`, value: 90 },
+])
 
 // When bill_date changes, default supply_date if not set
 watch(() => bill.bill_date, (newDate) => {
@@ -476,6 +514,7 @@ function createEmptyItem() {
     track_quantity: false,
     selectedItem: null,
     unit_name: '',
+    manualEntry: false,
   }
 }
 

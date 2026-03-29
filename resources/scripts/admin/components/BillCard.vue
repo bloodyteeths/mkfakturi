@@ -93,6 +93,9 @@
             {{ $t('general.edit') }}
           </BaseButton>
         </router-link>
+
+        <!-- More actions dropdown for mobile -->
+        <BillIndexDropdown :row="bill" />
       </div>
 
       <!-- Checkbox for selection (optional) -->
@@ -112,6 +115,7 @@
 import { computed } from 'vue'
 import { useUserStore } from '@/scripts/admin/stores/user'
 import abilities from '@/scripts/admin/stub/abilities'
+import BillIndexDropdown from '@/scripts/admin/components/dropdowns/BillIndexDropdown.vue'
 
 const props = defineProps({
   bill: {

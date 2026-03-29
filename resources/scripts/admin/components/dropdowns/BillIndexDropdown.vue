@@ -38,6 +38,8 @@
       </BaseDropdownItem>
     </router-link>
 
+    <div class="border-t border-gray-100 my-1" />
+
     <!-- Clone Bill into new bill  -->
     <BaseDropdownItem
       v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
@@ -68,6 +70,8 @@
       {{ $t('bills.send_bill') }}
     </BaseDropdownItem>
 
+    <div class="border-t border-gray-100 my-1" />
+
     <!-- Copy PDF url  -->
     <BaseDropdownItem v-if="route.name === 'bills.view'" @click="copyPdfUrl">
       <BaseIcon
@@ -97,6 +101,8 @@
       />
       {{ $t('bills.download_priemnica') }}
     </BaseDropdownItem>
+
+    <div class="border-t border-gray-100 my-1" />
 
     <!--  Delete Bill  -->
     <BaseDropdownItem

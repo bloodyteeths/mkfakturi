@@ -7,64 +7,66 @@
       </BaseBreadcrumb>
 
       <template #actions>
-        <BaseButton
-          v-show="billsStore.billTotalCount"
-          variant="primary-outline"
-          @click="toggleFilter"
-        >
-          {{ $t('general.filter') }}
-          <template #right="slotProps">
-            <BaseIcon
-              v-if="!showFilters"
-              name="FunnelIcon"
-              :class="slotProps.class"
-            />
-            <BaseIcon v-else name="XMarkIcon" :class="slotProps.class" />
-          </template>
-        </BaseButton>
-
-        <ExportButton
-          v-show="billsStore.billTotalCount"
-          type="bills"
-          :filters="filters"
-         
-        />
-
-        <router-link
-          v-if="userStore.hasAbilities(abilities.VIEW_BILL)"
-          to="/admin/bills/inbox"
-        >
-          <BaseButton variant="primary-outline">
+        <div class="flex flex-wrap gap-2 items-center">
+          <BaseButton
+            v-show="billsStore.billTotalCount"
+            variant="primary-outline"
+            @click="toggleFilter"
+          >
             <template #left="slotProps">
-              <BaseIcon name="InboxStackIcon" :class="slotProps.class" />
+              <BaseIcon
+                v-if="!showFilters"
+                name="FunnelIcon"
+                :class="slotProps.class"
+              />
+              <BaseIcon v-else name="XMarkIcon" :class="slotProps.class" />
             </template>
-            {{ $t('bills.inbox') }}
+            <span class="hidden sm:inline">{{ $t('general.filter') }}</span>
           </BaseButton>
-        </router-link>
 
-        <router-link
-          v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
-          to="/admin/receipts/scan"
-        >
-          <BaseButton variant="primary-outline">
-            <template #left="slotProps">
-              <BaseIcon name="CameraIcon" :class="slotProps.class" />
-            </template>
-            {{ $t('receipts.scan_button') }}
-          </BaseButton>
-        </router-link>
+          <ExportButton
+            v-show="billsStore.billTotalCount"
+            type="bills"
+            :filters="filters"
+            class="hidden sm:inline-flex"
+          />
 
-        <router-link
-          v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
-          to="bills/create"
-        >
-          <BaseButton variant="primary">
-            <template #left="slotProps">
-              <BaseIcon name="PlusIcon" :class="slotProps.class" />
-            </template>
-            {{ $t('bills.new_bill') }}
-          </BaseButton>
-        </router-link>
+          <router-link
+            v-if="userStore.hasAbilities(abilities.VIEW_BILL)"
+            to="/admin/bills/inbox"
+          >
+            <BaseButton variant="primary-outline">
+              <template #left="slotProps">
+                <BaseIcon name="InboxStackIcon" :class="slotProps.class" />
+              </template>
+              <span class="hidden sm:inline">{{ $t('bills.inbox') }}</span>
+            </BaseButton>
+          </router-link>
+
+          <router-link
+            v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
+            to="/admin/receipts/scan"
+          >
+            <BaseButton variant="primary-outline">
+              <template #left="slotProps">
+                <BaseIcon name="CameraIcon" :class="slotProps.class" />
+              </template>
+              <span class="hidden sm:inline">{{ $t('receipts.scan_button') }}</span>
+            </BaseButton>
+          </router-link>
+
+          <router-link
+            v-if="userStore.hasAbilities(abilities.CREATE_BILL)"
+            to="bills/create"
+          >
+            <BaseButton variant="primary">
+              <template #left="slotProps">
+                <BaseIcon name="PlusIcon" :class="slotProps.class" />
+              </template>
+              {{ $t('bills.new_bill') }}
+            </BaseButton>
+          </router-link>
+        </div>
       </template>
     </BasePageHeader>
 
