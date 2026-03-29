@@ -519,6 +519,7 @@ Route::prefix('/v1')->group(function () {
             // Fiscal Devices (P10-02)
             // ----------------------------------
 
+            Route::get('fiscal-receipts/summary', [FiscalDeviceController::class, 'summaryReceipts']);
             Route::get('fiscal-receipts/export', [FiscalDeviceController::class, 'exportReceipts']);
             Route::get('fiscal-receipts', [FiscalDeviceController::class, 'allReceipts']);
 

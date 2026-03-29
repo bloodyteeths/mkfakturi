@@ -515,6 +515,62 @@ class FiscalDeviceController extends Controller
             ])
             ->orderBy($request->get('orderByField', 'created_at'), $request->get('orderBy', 'desc'));
 
+        $this->applyReceiptFilters($query, $request);
+
+        $receipts = $query->paginate($request->get('limit', 25));
+
+        return response()->json($receipts);
+    }
+
+    /**
+     * Get aggregate summary of fiscal receipts (for dashboard card).
+     */
+    public function summaryReceipts(Request $request): JsonResponse
+    {
+        $companyId = $request->header('company');
+
+        $query = FiscalReceipt::forCompany($companyId);
+        $this->applyReceiptFilters($query, $request);
+
+        $receipts = $query->get();
+
+        $count = $receipts->count();
+        $stornoCount = $receipts->where('is_storno', true)->count();
+        $totalAmount = $receipts->where('is_storno', false)->sum('amount');
+        $totalVat = $receipts->where('is_storno', false)->sum('vat_amount');
+
+        $taxA = 0;
+        $taxB = 0;
+        $taxV = 0;
+
+        foreach ($receipts as $r) {
+            if ($r->is_storno || !$r->tax_breakdown) {
+                continue;
+            }
+            $tb = $r->tax_breakdown;
+            $taxA += $tb['A']['tax'] ?? $tb['a']['tax'] ?? 0;
+            $taxB += $tb['B']['tax'] ?? $tb['b']['tax'] ?? 0;
+            $taxV += $tb['V']['tax'] ?? $tb['v']['tax'] ?? 0;
+        }
+
+        return response()->json([
+            'data' => [
+                'count' => $count,
+                'storno_count' => $stornoCount,
+                'total_amount' => $totalAmount,
+                'total_vat' => $totalVat,
+                'tax_a' => $taxA,
+                'tax_b' => $taxB,
+                'tax_v' => $taxV,
+            ],
+        ]);
+    }
+
+    /**
+     * Apply shared receipt filters to a query builder.
+     */
+    private function applyReceiptFilters($query, Request $request): void
+    {
         if ($request->filled('fiscal_device_id')) {
             $query->where('fiscal_device_id', $request->input('fiscal_device_id'));
         }
@@ -539,9 +595,14 @@ class FiscalDeviceController extends Controller
             $query->whereDate('created_at', '<=', $request->input('to_date'));
         }
 
-        $receipts = $query->paginate($request->get('limit', 25));
-
-        return response()->json($receipts);
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('receipt_number', 'like', "%{$search}%")
+                  ->orWhere('fiscal_id', 'like', "%{$search}%")
+                  ->orWhere('unique_sale_number', 'like', "%{$search}%");
+            });
+        }
     }
     /**
      * Create a storno (reversal) receipt for an existing fiscal receipt.
@@ -640,13 +701,7 @@ class FiscalDeviceController extends Controller
     {
         $companyId = $request->header('company');
 
-        $validated = $request->validate([
-            'from_date' => 'nullable|date',
-            'to_date' => 'nullable|date',
-            'format' => 'nullable|string|in:csv,json',
-        ]);
-
-        $format = $validated['format'] ?? 'csv';
+        $format = $request->input('format', 'csv');
 
         $query = FiscalReceipt::forCompany($companyId)
             ->with([
@@ -656,13 +711,7 @@ class FiscalDeviceController extends Controller
             ])
             ->orderBy('created_at', 'asc');
 
-        if (! empty($validated['from_date'])) {
-            $query->whereDate('created_at', '>=', $validated['from_date']);
-        }
-
-        if (! empty($validated['to_date'])) {
-            $query->whereDate('created_at', '<=', $validated['to_date']);
-        }
+        $this->applyReceiptFilters($query, $request);
 
         $receipts = $query->get();
 
