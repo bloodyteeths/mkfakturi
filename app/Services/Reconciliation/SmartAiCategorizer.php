@@ -44,18 +44,22 @@ class SmartAiCategorizer
             return null;
         }
 
-        $isDebit = $tx->amount < 0;
+        $isDebit = $tx->transaction_type === 'debit' || ($tx->transaction_type === null && $tx->amount < 0);
         $langName = self::LOCALE_NAMES[$locale] ?? self::LOCALE_NAMES['mk'];
 
         $categoryList = $categories->map(fn ($c) => "{$c->id}: {$c->name}")->implode("\n");
+
+        // Use explicit field based on corrected direction (accessor uses amount sign which can be wrong)
+        $counterparty = $isDebit ? ($tx->creditor_name ?? '') : ($tx->debtor_name ?? '');
+        $counterpartyIban = $isDebit ? ($tx->creditor_iban ?? '') : ($tx->debtor_iban ?? '');
 
         $txData = json_encode([
             'amount' => (float) $tx->amount,
             'date' => $tx->transaction_date?->format('Y-m-d') ?? '',
             'description' => $tx->description ?? '',
             'remittance_info' => $tx->remittance_info ?? '',
-            'counterparty' => $tx->counterparty_name ?? '',
-            'iban' => $tx->counterparty_iban ?? '',
+            'counterparty' => $counterparty,
+            'iban' => $counterpartyIban,
             'direction' => $isDebit ? 'outgoing (debit)' : 'incoming (credit)',
         ], JSON_UNESCAPED_UNICODE);
 
@@ -101,7 +105,7 @@ PROMPT;
                 $this->trackUsage($company);
             }
 
-            return $this->parseResponse($response);
+            return $this->parseResponse($response, $isDebit);
         } catch (\Exception $e) {
             Log::warning('[SmartAiCategorizer] Failed', [
                 'transaction_id' => $tx->id,
@@ -144,7 +148,7 @@ Rules:
 INSTRUCTIONS;
     }
 
-    private function parseResponse(string $response): ?SmartSuggestion
+    private function parseResponse(string $response, bool $isDebit = true): ?SmartSuggestion
     {
         $cleaned = preg_replace('/^```(?:json)?\s*\n?/m', '', $response);
         $cleaned = preg_replace('/\n?```\s*$/m', '', $cleaned);
@@ -168,6 +172,16 @@ INSTRUCTIONS;
 
         if (! $action || ! in_array($action, $validActions)) {
             return null;
+        }
+
+        // Guard: AI must not suggest credit actions for debits or vice versa
+        $debitOnlyActions = [SmartSuggestion::ACTION_CREATE_EXPENSE, SmartSuggestion::ACTION_LINK_BILL, SmartSuggestion::ACTION_LINK_PAYROLL];
+        $creditOnlyActions = [SmartSuggestion::ACTION_RECORD_INCOME, SmartSuggestion::ACTION_LINK_INVOICE];
+
+        if ($isDebit && in_array($action, $creditOnlyActions)) {
+            $action = SmartSuggestion::ACTION_CREATE_EXPENSE; // Fallback debit action
+        } elseif (! $isDebit && in_array($action, $debitOnlyActions)) {
+            $action = SmartSuggestion::ACTION_RECORD_INCOME; // Fallback credit action
         }
 
         return new SmartSuggestion(

@@ -33,7 +33,8 @@ class SmartReconciliationService
     public function suggest(BankTransaction $tx, string $locale = 'mk'): SmartSuggestion
     {
         $companyId = $tx->company_id;
-        $isDebit = $tx->amount < 0;
+        // Use transaction_type field when available (amount sign can be inconsistent in PSD2 imports)
+        $isDebit = $tx->transaction_type === 'debit' || ($tx->transaction_type === null && $tx->amount < 0);
         $alternatives = [];
 
         // Layer 1: User-defined matching rules
@@ -165,7 +166,8 @@ class SmartReconciliationService
      */
     private function tryMatchBill(BankTransaction $tx, int $companyId): ?SmartSuggestion
     {
-        $counterparty = $tx->counterparty_name;
+        // For debits, creditor is the counterparty (who we paid)
+        $counterparty = $tx->creditor_name;
         $txAmount = (int) round(abs((float) $tx->amount) * 100); // Convert to cents
 
         if (! $counterparty && ! $txAmount) {
@@ -266,7 +268,8 @@ class SmartReconciliationService
      */
     private function tryMatchInvoice(BankTransaction $tx, int $companyId): ?SmartSuggestion
     {
-        $counterparty = $tx->counterparty_name;
+        // For credits, debtor is the counterparty (who paid us)
+        $counterparty = $tx->debtor_name;
         $txAmount = (int) round(abs((float) $tx->amount) * 100);
 
         $invoices = Invoice::where('company_id', $companyId)
@@ -450,7 +453,8 @@ class SmartReconciliationService
      */
     private function tryPastFeedback(BankTransaction $tx, int $companyId): ?SmartSuggestion
     {
-        $counterparty = $tx->counterparty_name;
+        $isDebit = $tx->transaction_type === 'debit' || ($tx->transaction_type === null && $tx->amount < 0);
+        $counterparty = $isDebit ? $tx->creditor_name : $tx->debtor_name;
         if (! $counterparty) {
             return null;
         }
