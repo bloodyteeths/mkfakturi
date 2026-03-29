@@ -400,6 +400,21 @@ class SmartReconciliationService
             ->get(['id', 'total_net', 'total_gross', 'total_employer_tax', 'total_employee_tax', 'period_year', 'period_month', 'period_start', 'period_end', 'status']);
 
         if ($payrollRuns->isEmpty()) {
+            // If keywords match payroll but no run exists — warn user to create one first
+            if ($hasPayrollKeyword) {
+                // Estimate period from transaction date (contributions due by 15th of next month)
+                $estimatedMonth = $txDate->day <= 15
+                    ? $txDate->copy()->subMonth()->format('m/Y')
+                    : $txDate->format('m/Y');
+
+                return new SmartSuggestion(
+                    action: SmartSuggestion::ACTION_MARK_REVIEWED,
+                    confidence: 0.3,
+                    reason: $this->t('smart_reconciliation.missing_payroll_run', $this->detectLocale($tx))
+                        ." ({$estimatedMonth})",
+                );
+            }
+
             return null;
         }
 
@@ -476,6 +491,20 @@ class SmartReconciliationService
         }
 
         if ($bestScore < 45 || ! $bestRun) {
+            // Keywords match but amounts don't — might be a different period
+            if ($hasPayrollKeyword) {
+                $estimatedMonth = $txDate->day <= 15
+                    ? $txDate->copy()->subMonth()->format('m/Y')
+                    : $txDate->format('m/Y');
+
+                return new SmartSuggestion(
+                    action: SmartSuggestion::ACTION_MARK_REVIEWED,
+                    confidence: 0.3,
+                    reason: $this->t('smart_reconciliation.payroll_no_match', $this->detectLocale($tx))
+                        ." ({$estimatedMonth})",
+                );
+            }
+
             return null;
         }
 
@@ -658,6 +687,17 @@ class SmartReconciliationService
     /**
      * Simple locale-aware translation helper.
      */
+    /**
+     * Detect locale from transaction context or fall back to app locale.
+     */
+    private function detectLocale(BankTransaction $tx): string
+    {
+        return app()->getLocale() ?: 'mk';
+    }
+
+    /**
+     * Simple locale-aware translation helper.
+     */
     private function t(string $key, string $locale): string
     {
         $strings = [
@@ -666,6 +706,18 @@ class SmartReconciliationService
                 'sq' => 'Nuk u gjet përputhje — rishikoni manualisht',
                 'tr' => 'Eşleşme bulunamadı — manuel olarak inceleyin',
                 'en' => 'No match found — review manually',
+            ],
+            'smart_reconciliation.missing_payroll_run' => [
+                'mk' => 'Ова личи на плата/придонес, но нема креиран платен список за овој период. Прво креирајте платен список, потоа порамнете.',
+                'sq' => 'Kjo duket si pagë/kontribut, por nuk ka listë pagash për këtë periudhë. Krijoni listën e pagave fillimisht, pastaj rakordoni.',
+                'tr' => 'Bu bir maaş/prim ödemesine benziyor ama bu dönem için bordro yok. Önce bordro oluşturun, sonra eşleştirin.',
+                'en' => 'This looks like a payroll/contribution payment, but no payroll run exists for this period. Create a payroll run first, then reconcile.',
+            ],
+            'smart_reconciliation.payroll_no_match' => [
+                'mk' => 'Ова личи на плата/придонес, но износот не се совпаѓа со ниту еден платен список. Проверете дали платниот список за овој период е креиран и пресметан.',
+                'sq' => 'Kjo duket si pagë/kontribut, por shuma nuk përputhet me asnjë listë pagash. Kontrolloni nëse lista e pagave për këtë periudhë është krijuar.',
+                'tr' => 'Bu bir maaş/prim ödemesine benziyor ama tutar hiçbir bordro ile eşleşmiyor. Bu dönemin bordrosunun oluşturulduğunu kontrol edin.',
+                'en' => 'This looks like a payroll/contribution payment, but the amount doesn\'t match any payroll run. Check if the payroll run for this period has been created and calculated.',
             ],
         ];
 

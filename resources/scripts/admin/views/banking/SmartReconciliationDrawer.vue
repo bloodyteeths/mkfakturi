@@ -85,8 +85,28 @@
                   </div>
                 </div>
 
+                <!-- Payroll warning — no matching payroll run -->
+                <div
+                  v-if="isPayrollWarning"
+                  class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg"
+                >
+                  <div class="flex items-start space-x-2">
+                    <BaseIcon name="ExclamationTriangleIcon" class="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p class="text-sm text-amber-800">{{ suggestion.reason }}</p>
+                      <a
+                        href="/admin/payroll"
+                        class="mt-2 inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-800"
+                      >
+                        {{ $t('banking.go_to_payroll', 'Go to Payroll →') }}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Accept Button -->
                 <button
+                  v-if="!isPayrollWarning"
                   @click="acceptSuggestion(suggestion)"
                   :disabled="isAccepting"
                   class="mt-3 w-full flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
@@ -500,6 +520,14 @@ const unpaidInvoices = ref([])
 const payrollRuns = ref([])
 
 const isCredit = computed(() => props.transaction?.transaction_type === 'credit')
+
+const isPayrollWarning = computed(() => {
+  if (!suggestion.value) return false
+  return suggestion.value.confidence <= 0.3 && suggestion.value.action === 'mark_reviewed' &&
+    (suggestion.value.reason?.includes('payroll') || suggestion.value.reason?.includes('плата') ||
+     suggestion.value.reason?.includes('платен') || suggestion.value.reason?.includes('pagash') ||
+     suggestion.value.reason?.includes('bordro'))
+})
 
 // Fetch smart suggestion when drawer opens
 watch(() => props.modelValue, async (isOpen) => {
