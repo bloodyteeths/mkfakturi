@@ -435,7 +435,7 @@ class PayrollGLService
                 'debit' => 0,
                 'credit' => $incomeTaxTotal,
             ],
-        ];
+        ]);
 
         return [
             'narration' => "Payroll Run #{$run->id}",
