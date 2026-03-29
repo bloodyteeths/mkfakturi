@@ -207,7 +207,7 @@
           "
         >
           <!-- Tabs -->
-          <BaseTabGroup class="-mb-5" @change="setStatusFilter">
+          <BaseTabGroup class="-mb-5 overflow-x-auto" @change="setStatusFilter">
             <BaseTab :title="$t('general.all')" filter="" />
             <BaseTab :title="$t('general.draft')" filter="DRAFT" />
             <BaseTab :title="$t('general.sent')" filter="SENT" />
@@ -509,27 +509,41 @@ const invoiceColumns = computed(() => {
     {
       key: 'invoice_date',
       label: t('invoices.date'),
-      thClass: 'extra',
+      thClass: 'extra w-[100px]',
       tdClass: 'font-medium',
     },
-    { key: 'invoice_number', label: t('invoices.number') },
-    { key: 'name', label: t('invoices.customer') },
-    { key: 'status', label: t('invoices.status') },
+    {
+      key: 'invoice_number',
+      label: t('invoices.number'),
+      thClass: 'w-[180px]',
+    },
+    {
+      key: 'name',
+      label: t('invoices.customer'),
+      thClass: 'w-[150px]',
+      tdClass: 'truncate max-w-[150px]',
+    },
+    {
+      key: 'status',
+      label: t('invoices.status'),
+      thClass: 'w-[110px]',
+    },
     {
       key: 'due_amount',
       label: t('dashboard.recent_invoices_card.amount_due'),
+      thClass: 'w-[180px]',
     },
     {
       key: 'total',
       label: t('invoices.total'),
       tdClass: 'font-medium text-gray-900',
+      thClass: 'w-[100px]',
     },
-
     {
       key: 'actions',
       label: t('invoices.action'),
       tdClass: 'text-right text-sm font-medium',
-      thClass: 'text-right',
+      thClass: 'text-right w-[80px]',
       sortable: false,
     },
   ]
