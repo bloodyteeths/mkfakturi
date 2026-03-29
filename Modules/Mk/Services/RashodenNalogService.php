@@ -24,11 +24,11 @@ class RashodenNalogService
      */
     public function generateForExpense(Expense $expense, Company $company)
     {
-        $expense->loadMissing(['category', 'currency']);
+        $expense->loadMissing(['category', 'currency', 'supplier']);
 
         $voucher = $this->buildVoucher(
             company: $company,
-            recipientName: $expense->supplier ?? $expense->category?->name ?? 'Неодредено',
+            recipientName: $expense->supplier?->name ?? $expense->category?->name ?? 'Неодредено',
             recipientAddress: '',
             recipientEdb: '',
             recipientEmbs: '',
@@ -38,7 +38,7 @@ class RashodenNalogService
             debitAccount: $expense->debit_account ?? '',
             creditAccount: $expense->credit_account ?? '1000',
             date: $expense->expense_date
-                ? $expense->expense_date->format('d.m.Y')
+                ? \Carbon\Carbon::parse($expense->expense_date)->format('d.m.Y')
                 : now()->format('d.m.Y'),
             number: $expense->expense_number ?? ('РН-' . $expense->id)
         );
@@ -74,7 +74,7 @@ class RashodenNalogService
             debitAccount: '',
             creditAccount: '1000',
             date: $billPayment->payment_date
-                ? $billPayment->payment_date->format('d.m.Y')
+                ? \Carbon\Carbon::parse($billPayment->payment_date)->format('d.m.Y')
                 : now()->format('d.m.Y'),
             number: 'РН-' . $billPayment->id
         );
