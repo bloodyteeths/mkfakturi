@@ -179,10 +179,25 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
   // ═══════════════════════════════════════════════════════════
 
   test('1. Page shows 5 summary cards including waived', async () => {
-    // Summary cards are now in a horizontal flex container
-    const summaryContainer = page.locator('.flex.gap-3.mb-4.overflow-x-auto').first()
-    const cards = summaryContainer.locator('> div')
-    await expect(cards).toHaveCount(5)
+    // Wait for page assets to load
+    await page.waitForTimeout(3000)
+
+    // Summary cards: try new layout (flex snap-x) or old layout (grid-cols-5)
+    let cardCount = 0
+
+    // New layout: horizontal flex with snap-x
+    const snapContainer = page.locator('.snap-x')
+    if (await snapContainer.count() > 0) {
+      cardCount = await snapContainer.first().locator('> div').count()
+    }
+
+    // Fallback: old grid layout
+    if (cardCount === 0) {
+      const gridContainer = page.locator('[class*="grid-cols-5"]').first()
+      cardCount = await gridContainer.locator('> div').count()
+    }
+
+    expect(cardCount).toBe(5)
 
     // 5th card should contain the waived status text
     const summaryRes = await apiGet(page, 'interest/summary')
@@ -297,7 +312,7 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
     // Check that sortable headers exist with cursor-pointer class
     const sortableHeaders = page.locator('th.cursor-pointer')
     const count = await sortableHeaders.count()
-    expect(count).toBeGreaterThanOrEqual(6) // 7 sortable columns (removed rate + calc_date)
+    expect(count).toBeGreaterThanOrEqual(6) // 7+ sortable columns
     console.log(`  ✓ ${count} clickable sort headers in table`)
 
     // Click a header and verify sort indicator appears
@@ -317,17 +332,19 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
   // ═══════════════════════════════════════════════════════════
 
   test('15. Table dates are formatted dd.mm.YYYY', async () => {
-    // Already on interest page
     await page.waitForTimeout(1000)
 
-    // Desktop table: due date = 4th column (index 3), calc_date removed from table
-    const rows = page.locator('.hidden.md\\:block tbody tr')
-    const rowCount = await rows.count()
+    // Find table rows — try desktop-only selector first, fallback to any tbody
+    let rows = page.locator('.hidden.md\\:block tbody tr')
+    let rowCount = await rows.count().catch(() => 0)
+    if (rowCount === 0) {
+      rows = page.locator('tbody tr')
+      rowCount = await rows.count()
+    }
 
     if (rowCount > 0) {
-      // Check due date column (index 3 = 4th td)
+      // Due date is in column index 3 (4th td) in both old and new layout
       const dueDate = await rows.first().locator('td').nth(3).textContent()
-
       const mkDatePattern = /^\d{2}\.\d{2}\.\d{4}$/
       const dueTrimmed = dueDate.trim()
 
@@ -345,12 +362,17 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
   // ═══════════════════════════════════════════════════════════
 
   test('12. Invoice numbers are clickable links', async () => {
-    const rows = page.locator('tbody tr')
-    const rowCount = await rows.count()
+    // Try desktop table first, fallback to any tbody
+    let firstRow = page.locator('.hidden.md\\:block tbody tr').first()
+    let count = await firstRow.count().catch(() => 0)
+    if (count === 0) {
+      firstRow = page.locator('tbody tr').first()
+    }
+    const rowCount = await firstRow.count()
 
     if (rowCount > 0) {
-      // Desktop table: Invoice number is in 3rd column (index 2)
-      const invoiceCell = page.locator('.hidden.md\\:block tbody tr').first().locator('td').nth(2)
+      // Invoice number is in 3rd column (index 2)
+      const invoiceCell = firstRow.locator('td').nth(2)
       const link = invoiceCell.locator('a')
       const linkCount = await link.count()
 
@@ -378,7 +400,11 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
 
     if (totalItems > 15) {
       // Should have prev/next navigation buttons (« ‹ › »)
-      const paginationDiv = page.locator('.px-4.py-3.border-t.border-gray-200')
+      // Try both old (px-6) and new (px-4) padding selectors
+      let paginationDiv = page.locator('.border-t.border-gray-200').filter({ hasText: '«' }).first()
+      if (await paginationDiv.count() === 0) {
+        paginationDiv = page.locator('.border-t.border-gray-200').filter({ hasText: '›' }).first()
+      }
       await expect(paginationDiv).toBeVisible()
 
       const paginationText = await paginationDiv.textContent()
@@ -776,8 +802,12 @@ test.describe('Interest v2 Audit — 15 Fixes E2E', () => {
     await page.goto(`${BASE}/admin/interest`, { waitUntil: 'networkidle' })
     await page.waitForTimeout(2000)
 
-    // Find a dropdown trigger (ellipsis icon) in desktop table
-    const dropdownTrigger = page.locator('.hidden.md\\:block tbody tr').first().locator('svg, [name="EllipsisHorizontalIcon"]').last()
+    // Find a dropdown trigger (ellipsis icon) — try desktop table, fallback to any
+    let tableRow = page.locator('.hidden.md\\:block tbody tr').first()
+    if (await tableRow.count().catch(() => 0) === 0) {
+      tableRow = page.locator('tbody tr').first()
+    }
+    const dropdownTrigger = tableRow.locator('svg, [name="EllipsisHorizontalIcon"]').last()
     const triggerVisible = await dropdownTrigger.isVisible().catch(() => false)
 
     if (triggerVisible) {
