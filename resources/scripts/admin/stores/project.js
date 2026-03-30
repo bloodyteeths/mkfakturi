@@ -18,6 +18,16 @@ const projectStub = () => ({
   start_date: '',
   end_date: '',
   notes: '',
+  type: 'project',
+  address: '',
+  city: '',
+  municipality: '',
+  registration_number: '',
+  manager_id: null,
+  phone: '',
+  email: '',
+  parent_id: null,
+  is_active: true,
 })
 
 /**
@@ -35,6 +45,8 @@ export const useProjectStore = (useWindow = false) => {
     state: () => ({
       projects: [],
       totalProjects: 0,
+      totalBranches: 0,
+      activeBranchCount: 0,
       openCount: 0,
       closedCount: 0,
       currentProject: { ...projectStub() },
@@ -125,6 +137,8 @@ export const useProjectStore = (useWindow = false) => {
 
           this.projects = response.data.data
           this.totalProjects = response.data.meta?.project_total_count || 0
+          this.totalBranches = response.data.meta?.branch_total_count || 0
+          this.activeBranchCount = response.data.meta?.active_branch_count || 0
           this.openCount = response.data.meta?.open_count || 0
           this.closedCount = response.data.meta?.closed_count || 0
 
@@ -298,6 +312,19 @@ export const useProjectStore = (useWindow = false) => {
             this.currentProjectDocuments[type] = response.data.data[type] || []
           }
 
+          return response
+        } catch (err) {
+          handleError(err)
+          throw err
+        }
+      },
+
+      /**
+       * Fetch branch comparison data
+       */
+      async fetchBranchComparison(params = {}) {
+        try {
+          const response = await axios.get('/projects/branches/comparison', { params })
           return response
         } catch (err) {
           handleError(err)

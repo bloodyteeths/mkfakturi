@@ -10,13 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Project Model
+ * Project / Branch Model
  *
- * Represents a project for tracking invoices, expenses, and payments.
- * Used for construction projects, client projects, or any work that needs
- * separate financial tracking.
- *
- * Part of Phase 1.1 - Project Dimension feature for accountants.
+ * Represents a project or branch (Подружница) for tracking invoices, expenses, and payments.
+ * Projects: construction projects, client projects, or any work needing separate financial tracking.
+ * Branches: physical locations of a company for multi-location management.
  *
  * @property int $id
  * @property int $company_id
@@ -31,6 +29,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon|null $end_date
  * @property int|null $creator_id
  * @property string|null $notes
+ * @property string $type
+ * @property string|null $address
+ * @property string|null $city
+ * @property string|null $municipality
+ * @property string|null $registration_number
+ * @property int|null $manager_id
+ * @property string|null $phone
+ * @property string|null $email
+ * @property int|null $parent_id
+ * @property bool $is_active
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon|null $deleted_at
@@ -39,6 +47,11 @@ class Project extends Model
 {
     use HasFactory;
     use SoftDeletes;
+
+    // Type constants
+    public const TYPE_PROJECT = 'project';
+
+    public const TYPE_BRANCH = 'branch';
 
     // Status constants
     public const STATUS_OPEN = 'open';
@@ -69,6 +82,16 @@ class Project extends Model
         'end_date',
         'creator_id',
         'notes',
+        'type',
+        'address',
+        'city',
+        'municipality',
+        'registration_number',
+        'manager_id',
+        'phone',
+        'email',
+        'parent_id',
+        'is_active',
     ];
 
     /**
@@ -82,6 +105,7 @@ class Project extends Model
             'budget_amount' => 'integer',
             'start_date' => 'date',
             'end_date' => 'date',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -188,6 +212,46 @@ class Project extends Model
     public function proformaInvoices(): HasMany
     {
         return $this->hasMany(ProformaInvoice::class);
+    }
+
+    /**
+     * Get the branch manager (user).
+     */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    /**
+     * Get the parent project/branch.
+     */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'parent_id');
+    }
+
+    /**
+     * Get child projects/branches.
+     */
+    public function children(): HasMany
+    {
+        return $this->hasMany(Project::class, 'parent_id');
+    }
+
+    /**
+     * Get warehouses assigned to this branch.
+     */
+    public function warehouses(): HasMany
+    {
+        return $this->hasMany(Warehouse::class, 'project_id');
+    }
+
+    /**
+     * Get fiscal devices assigned to this branch.
+     */
+    public function fiscalDevices(): HasMany
+    {
+        return $this->hasMany(FiscalDevice::class, 'project_id');
     }
 
     // ============================================
@@ -357,25 +421,81 @@ class Project extends Model
         return $query->whereNotIn('projects.status', [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
     }
 
+    /**
+     * Scope to filter by type.
+     */
+    public function scopeWhereType($query, string $type)
+    {
+        return $query->where('projects.type', $type);
+    }
+
+    /**
+     * Scope for projects only.
+     */
+    public function scopeProjects($query)
+    {
+        return $query->where('projects.type', self::TYPE_PROJECT);
+    }
+
+    /**
+     * Scope for branches only.
+     */
+    public function scopeBranches($query)
+    {
+        return $query->where('projects.type', self::TYPE_BRANCH);
+    }
+
+    /**
+     * Scope for active branches.
+     */
+    public function scopeActiveBranches($query)
+    {
+        return $query->branches()->where('projects.is_active', true);
+    }
+
     // ============================================
     // STATUS LOGIC
     // ============================================
 
     /**
-     * Check if project allows adding new documents (invoices, expenses, payments).
-     * Only open and in_progress projects can receive new documents.
+     * Check if this is a branch.
+     */
+    public function isBranch(): bool
+    {
+        return $this->type === self::TYPE_BRANCH;
+    }
+
+    /**
+     * Check if this is a project.
+     */
+    public function isProject(): bool
+    {
+        return $this->type === self::TYPE_PROJECT;
+    }
+
+    /**
+     * Check if project/branch allows adding new documents.
+     * Branches: must be active. Projects: must be open or in_progress.
      */
     public function allowsNewDocuments(): bool
     {
+        if ($this->isBranch()) {
+            return $this->is_active;
+        }
+
         return in_array($this->status, [self::STATUS_OPEN, self::STATUS_IN_PROGRESS]);
     }
 
     /**
-     * Check if project is editable.
-     * Completed and cancelled projects cannot be edited.
+     * Check if project/branch is editable.
+     * Branches are always editable. Projects: not when completed or cancelled.
      */
     public function isEditable(): bool
     {
+        if ($this->isBranch()) {
+            return true;
+        }
+
         return ! in_array($this->status, [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
     }
 
@@ -476,7 +596,9 @@ class Project extends Model
         return $query->where(function ($q) use ($search) {
             $q->where('projects.name', 'LIKE', '%'.$search.'%')
                 ->orWhere('projects.code', 'LIKE', '%'.$search.'%')
-                ->orWhere('projects.description', 'LIKE', '%'.$search.'%');
+                ->orWhere('projects.description', 'LIKE', '%'.$search.'%')
+                ->orWhere('projects.address', 'LIKE', '%'.$search.'%')
+                ->orWhere('projects.city', 'LIKE', '%'.$search.'%');
         });
     }
 
@@ -489,6 +611,8 @@ class Project extends Model
 
         return $query->when($filters['search'] ?? null, function ($query, $search) {
             $query->whereSearch($search);
+        })->when($filters['type'] ?? null, function ($query, $type) {
+            $query->whereType($type);
         })->when($filters['status'] ?? null, function ($query, $status) {
             $query->whereStatus($status);
         })->when($filters['customer_id'] ?? null, function ($query, $customerId) {

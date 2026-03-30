@@ -67,6 +67,10 @@ const props = defineProps({
     type: [String, Number],
     default: null, // Filter by customer
   },
+  type: {
+    type: String,
+    default: null, // 'project', 'branch', or null for all
+  },
 })
 
 const { t } = useI18n()
@@ -99,6 +103,10 @@ async function searchProjects(search) {
 
   if (props.customerId) {
     data.customer_id = props.customerId
+  }
+
+  if (props.type) {
+    data.type = props.type
   }
 
   let res = await projectStore.fetchProjectList(data)

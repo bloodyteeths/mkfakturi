@@ -28,7 +28,9 @@ class ProjectsController extends Controller
 
         $limit = $request->input('limit', 10);
 
-        $projects = Project::with([
+        $type = $request->input('type');
+
+        $query = Project::with([
             'customer',
             'currency',
             'company',
@@ -36,18 +38,28 @@ class ProjectsController extends Controller
         ])
             ->withCount(['invoices', 'expenses', 'payments'])
             ->whereCompany()
-            ->applyFilters($request->all())
-            ->paginateData($limit);
+            ->applyFilters($request->all());
+
+        // For branches, also load warehouse and device counts
+        if ($type === 'branch') {
+            $query->withCount(['warehouses', 'fiscalDevices']);
+            $query->with('manager');
+        }
+
+        $projects = $query->paginateData($limit);
 
         return ProjectResource::collection($projects)
             ->additional([
                 'meta' => [
-                    'project_total_count' => Project::whereCompany()->count(),
-                    'open_count' => Project::whereCompany()->open()->count(),
-                    'in_progress_count' => Project::whereCompany()->inProgress()->count(),
-                    'completed_count' => Project::whereCompany()->completed()->count(),
-                    'on_hold_count' => Project::whereCompany()->onHold()->count(),
-                    'cancelled_count' => Project::whereCompany()->cancelled()->count(),
+                    'project_total_count' => Project::whereCompany()->projects()->count(),
+                    'branch_total_count' => Project::whereCompany()->branches()->count(),
+                    'all_total_count' => Project::whereCompany()->count(),
+                    'open_count' => Project::whereCompany()->projects()->open()->count(),
+                    'in_progress_count' => Project::whereCompany()->projects()->inProgress()->count(),
+                    'completed_count' => Project::whereCompany()->projects()->completed()->count(),
+                    'on_hold_count' => Project::whereCompany()->projects()->onHold()->count(),
+                    'cancelled_count' => Project::whereCompany()->projects()->cancelled()->count(),
+                    'active_branch_count' => Project::whereCompany()->activeBranches()->count(),
                 ],
             ]);
     }
@@ -81,8 +93,18 @@ class ProjectsController extends Controller
     {
         $this->authorize('view', $project);
 
-        $project->load(['customer', 'currency', 'company', 'creator']);
-        $project->loadCount(['invoices', 'expenses', 'payments']);
+        $relations = ['customer', 'currency', 'company', 'creator'];
+        $counts = ['invoices', 'expenses', 'payments'];
+
+        if ($project->isBranch()) {
+            $relations[] = 'manager';
+            $relations[] = 'parent';
+            $counts[] = 'warehouses';
+            $counts[] = 'fiscalDevices';
+        }
+
+        $project->load($relations);
+        $project->loadCount($counts);
 
         return (new ProjectResource($project))
             ->response();
@@ -146,7 +168,10 @@ class ProjectsController extends Controller
         $this->authorize('viewAny', Project::class);
 
         $projects = Project::whereCompany()
-            ->select(['id', 'name', 'code', 'status', 'customer_id'])
+            ->select(['id', 'name', 'code', 'status', 'customer_id', 'type', 'city', 'is_active'])
+            ->when($request->input('type'), function ($query, $type) {
+                $query->whereType($type);
+            })
             ->when($request->input('status'), function ($query, $status) {
                 $query->whereStatus($status);
             })
@@ -164,12 +189,59 @@ class ProjectsController extends Controller
                     'name' => $project->name,
                     'code' => $project->code,
                     'status' => $project->status,
+                    'type' => $project->type ?? 'project',
+                    'city' => $project->city,
+                    'is_active' => $project->is_active,
                     'customer_id' => $project->customer_id,
                     'display_name' => $project->code
                         ? "[{$project->code}] {$project->name}"
                         : $project->name,
                 ];
             }),
+        ]);
+    }
+
+    /**
+     * Get side-by-side financial comparison of all branches.
+     */
+    public function branchComparison(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', Project::class);
+
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        $branches = Project::whereCompany()
+            ->branches()
+            ->where('is_active', true)
+            ->with(['currency', 'manager'])
+            ->withCount(['invoices', 'expenses', 'payments', 'warehouses', 'fiscalDevices'])
+            ->orderBy('name')
+            ->get();
+
+        $data = $branches->map(function ($branch) use ($fromDate, $toDate) {
+            $summary = $branch->getSummary($fromDate, $toDate);
+
+            return [
+                'id' => $branch->id,
+                'name' => $branch->name,
+                'code' => $branch->code,
+                'city' => $branch->city,
+                'manager' => $branch->manager ? $branch->manager->name : null,
+                'warehouse_count' => $branch->warehouses_count,
+                'fiscal_device_count' => $branch->fiscal_devices_count,
+                'total_invoiced' => $summary['total_invoiced'],
+                'total_expenses' => $summary['total_expenses'],
+                'total_payments' => $summary['total_payments'],
+                'net_result' => $summary['net_result'],
+                'invoice_count' => $summary['invoice_count'],
+                'expense_count' => $summary['expense_count'],
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
         ]);
     }
 

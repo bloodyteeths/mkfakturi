@@ -31,6 +31,7 @@ class FiscalDevice extends Model
 {
     protected $fillable = [
         'company_id',
+        'project_id',
         'device_type',
         'name',
         'serial_number',
@@ -51,6 +52,14 @@ class FiscalDevice extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Get the branch this fiscal device belongs to.
+     */
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'project_id');
     }
 
     public function receipts(): HasMany

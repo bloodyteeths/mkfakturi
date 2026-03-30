@@ -5,7 +5,7 @@
         <BaseBreadcrumbItem :title="$t('general.home')" to="dashboard" />
         <BaseBreadcrumbItem :title="$t('projects.title')" to="/admin/projects" />
         <BaseBreadcrumbItem
-          :title="project?.name || $t('projects.view_project')"
+          :title="project?.name || (isBranch ? $t('projects.view_branch') : $t('projects.view_project'))"
           to="#"
           active
         />
@@ -37,11 +37,13 @@
     </BasePageHeader>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Project Info Card -->
+      <!-- Info Card -->
       <div class="lg:col-span-2">
         <BaseCard>
           <template #header>
-            <h3 class="text-lg font-medium text-gray-900">{{ $t('projects.project_info') }}</h3>
+            <h3 class="text-lg font-medium text-gray-900">
+              {{ isBranch ? $t('projects.branch_info') : $t('projects.project_info') }}
+            </h3>
           </template>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -55,7 +57,8 @@
               <dd class="mt-1 text-sm text-gray-900">{{ project?.code || '-' }}</dd>
             </div>
 
-            <div>
+            <!-- Project-only fields -->
+            <div v-if="!isBranch">
               <dt class="text-sm font-medium text-gray-500">{{ $t('projects.customer') }}</dt>
               <dd class="mt-1 text-sm text-gray-900">
                 <router-link
@@ -73,7 +76,14 @@
               <dt class="text-sm font-medium text-gray-500">{{ $t('projects.status') }}</dt>
               <dd class="mt-1">
                 <BaseBadge
-                  v-if="project?.status"
+                  v-if="isBranch"
+                  :bg-color="project?.is_active ? '#10B981' : '#EF4444'"
+                  :content-loading="false"
+                >
+                  {{ project?.is_active ? $t('projects.is_active') : $t('general.inactive') }}
+                </BaseBadge>
+                <BaseBadge
+                  v-else-if="project?.status"
                   :bg-color="getStatusColor(project.status)"
                   :content-loading="false"
                 >
@@ -95,7 +105,8 @@
               </dd>
             </div>
 
-            <div>
+            <!-- Project dates -->
+            <div v-if="!isBranch">
               <dt class="text-sm font-medium text-gray-500">{{ $t('projects.dates') }}</dt>
               <dd class="mt-1 text-sm text-gray-900">
                 <span v-if="project?.formatted_start_date">{{ project.formatted_start_date }}</span>
@@ -104,6 +115,56 @@
                 <span v-if="!project?.formatted_start_date && !project?.formatted_end_date">-</span>
               </dd>
             </div>
+
+            <!-- Branch-specific fields -->
+            <template v-if="isBranch">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">{{ $t('projects.address') }}</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ project?.address || '-' }}</dd>
+              </div>
+
+              <div>
+                <dt class="text-sm font-medium text-gray-500">{{ $t('projects.city') }}</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ project?.city || '-' }}</dd>
+              </div>
+
+              <div v-if="project?.municipality">
+                <dt class="text-sm font-medium text-gray-500">{{ $t('projects.municipality') }}</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ project.municipality }}</dd>
+              </div>
+
+              <div v-if="project?.registration_number">
+                <dt class="text-sm font-medium text-gray-500">{{ $t('projects.registration_number') }}</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ project.registration_number }}</dd>
+              </div>
+
+              <div>
+                <dt class="text-sm font-medium text-gray-500">{{ $t('projects.manager') }}</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ project?.manager?.name || '-' }}</dd>
+              </div>
+
+              <div v-if="project?.phone">
+                <dt class="text-sm font-medium text-gray-500">{{ $t('projects.phone') }}</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ project.phone }}</dd>
+              </div>
+
+              <div v-if="project?.email">
+                <dt class="text-sm font-medium text-gray-500">{{ $t('projects.email_field') }}</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ project.email }}</dd>
+              </div>
+
+              <div v-if="project?.parent">
+                <dt class="text-sm font-medium text-gray-500">{{ $t('projects.parent_branch') }}</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <router-link
+                    :to="`/admin/projects/${project.parent.id}/view`"
+                    class="text-primary-500 hover:text-primary-700"
+                  >
+                    {{ project.parent.name }}
+                  </router-link>
+                </dd>
+              </div>
+            </template>
           </div>
 
           <div v-if="project?.description" class="mt-4">
@@ -114,6 +175,24 @@
           <div v-if="project?.notes" class="mt-4">
             <dt class="text-sm font-medium text-gray-500">{{ $t('projects.notes') }}</dt>
             <dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ project.notes }}</dd>
+          </div>
+        </BaseCard>
+
+        <!-- Branch Assets Card (only shown when assets are linked) -->
+        <BaseCard v-if="isBranch && hasBranchAssets" class="mt-6">
+          <template #header>
+            <h3 class="text-lg font-medium text-gray-900">{{ $t('projects.branch_assets') }}</h3>
+          </template>
+
+          <div class="space-y-3">
+            <div v-if="project?.warehouse_count" class="flex justify-between items-center p-2 -mx-2 rounded">
+              <span class="text-sm text-gray-600">{{ $t('projects.linked_warehouses') }}</span>
+              <span class="text-sm font-medium text-gray-900">{{ project.warehouse_count }}</span>
+            </div>
+            <div v-if="project?.fiscal_device_count" class="flex justify-between items-center p-2 -mx-2 rounded">
+              <span class="text-sm text-gray-600">{{ $t('projects.linked_fiscal_devices') }}</span>
+              <span class="text-sm font-medium text-gray-900">{{ project.fiscal_device_count }}</span>
+            </div>
           </div>
         </BaseCard>
       </div>
@@ -349,6 +428,12 @@ const summary = ref({
 
 const project = computed(() => projectStore.currentProject)
 
+const isBranch = computed(() => project.value?.type === 'branch')
+
+const hasBranchAssets = computed(() => {
+  return (project.value?.warehouse_count || 0) + (project.value?.fiscal_device_count || 0) > 0
+})
+
 const pageTitle = computed(() => {
   return project.value ? project.value.name : ''
 })
@@ -366,11 +451,11 @@ const budgetProgressColor = computed(() => {
 
 function getStatusColor(status) {
   const colors = {
-    open: '#3B82F6', // blue
-    in_progress: '#F59E0B', // amber
-    completed: '#10B981', // green
-    on_hold: '#6B7280', // gray
-    cancelled: '#EF4444', // red
+    open: '#3B82F6',
+    in_progress: '#F59E0B',
+    completed: '#10B981',
+    on_hold: '#6B7280',
+    cancelled: '#EF4444',
   }
   return colors[status] || '#6B7280'
 }
@@ -394,7 +479,6 @@ async function loadSummary(params = {}) {
   isLoadingSummary.value = true
   try {
     const summaryResponse = await projectStore.fetchProjectSummary(route.params.id, params)
-    // Response structure: { data: { success: true, data: {...summary} } }
     if (summaryResponse?.data?.data) {
       summary.value = summaryResponse.data.data
     }
@@ -425,10 +509,8 @@ function clearDateFilter() {
 }
 
 onMounted(async () => {
-  // Fetch project details
   await projectStore.fetchProject(route.params.id)
-
-  // Fetch project summary
   await loadSummary()
 })
 </script>
+<!-- CLAUDE-CHECKPOINT -->

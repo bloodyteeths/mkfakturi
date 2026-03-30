@@ -49,6 +49,14 @@ class Warehouse extends Model
     }
 
     /**
+     * Get the branch this warehouse belongs to.
+     */
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'project_id');
+    }
+
+    /**
      * Get all stock movements for this warehouse.
      */
     public function stockMovements(): HasMany

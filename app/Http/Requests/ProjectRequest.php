@@ -49,6 +49,25 @@ class ProjectRequest extends FormRequest
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'notes' => ['nullable', 'string', 'max:5000'],
+
+            // Branch fields
+            'type' => ['nullable', 'string', 'in:project,branch'],
+            'address' => ['required_if:type,branch', 'nullable', 'string', 'max:500'],
+            'city' => ['required_if:type,branch', 'nullable', 'string', 'max:100'],
+            'municipality' => ['nullable', 'string', 'max:100'],
+            'registration_number' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('projects', 'registration_number')
+                    ->where('company_id', $companyId)
+                    ->ignore($projectId),
+            ],
+            'manager_id' => ['nullable', 'integer', 'exists:users,id'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'parent_id' => ['nullable', 'integer', 'exists:projects,id'],
+            'is_active' => ['nullable', 'boolean'],
         ];
     }
 

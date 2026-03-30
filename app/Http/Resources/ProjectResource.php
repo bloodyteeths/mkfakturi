@@ -28,6 +28,7 @@ class ProjectResource extends JsonResource
             'description' => $this->description,
             'customer_id' => $this->customer_id,
             'status' => $this->status,
+            'type' => $this->type ?? 'project',
 
             // Status flags for UI
             'allows_new_documents' => $this->allowsNewDocuments(),
@@ -41,8 +42,19 @@ class ProjectResource extends JsonResource
             'end_date' => $this->end_date?->format('Y-m-d'),
             'creator_id' => $this->creator_id,
             'notes' => $this->notes,
+            'parent_id' => $this->parent_id,
+            'is_active' => $this->is_active ?? true,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+
+            // Branch-specific fields (only included for branches)
+            'address' => $this->when($this->type === 'branch', $this->address),
+            'city' => $this->when($this->type === 'branch', $this->city),
+            'municipality' => $this->when($this->type === 'branch', $this->municipality),
+            'registration_number' => $this->when($this->type === 'branch', $this->registration_number),
+            'manager_id' => $this->when($this->type === 'branch', $this->manager_id),
+            'phone' => $this->when($this->type === 'branch', $this->phone),
+            'email' => $this->when($this->type === 'branch', $this->email),
 
             // Formatted dates
             'formatted_created_at' => $this->formattedCreatedAt,
@@ -59,6 +71,8 @@ class ProjectResource extends JsonResource
             'invoice_count' => $this->whenCounted('invoices', $this->invoices_count ?? 0),
             'expense_count' => $this->whenCounted('expenses', $this->expenses_count ?? 0),
             'payment_count' => $this->whenCounted('payments', $this->payments_count ?? 0),
+            'warehouse_count' => $this->whenCounted('warehouses', $this->warehouses_count ?? 0),
+            'fiscal_device_count' => $this->whenCounted('fiscalDevices', $this->fiscal_devices_count ?? 0),
 
             // Relationships (when loaded)
             'customer' => $this->whenLoaded('customer', function () {
@@ -91,6 +105,20 @@ class ProjectResource extends JsonResource
                     'id' => $this->creator->id,
                     'name' => $this->creator->name,
                     'email' => $this->creator->email,
+                ];
+            }),
+            'manager' => $this->whenLoaded('manager', function () {
+                return [
+                    'id' => $this->manager->id,
+                    'name' => $this->manager->name,
+                    'email' => $this->manager->email,
+                ];
+            }),
+            'parent' => $this->whenLoaded('parent', function () {
+                return [
+                    'id' => $this->parent->id,
+                    'name' => $this->parent->name,
+                    'type' => $this->parent->type,
                 ];
             }),
 

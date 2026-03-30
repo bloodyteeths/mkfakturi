@@ -8,7 +8,7 @@
 
       <template #actions>
         <BaseButton
-          v-show="projectStore.totalProjects"
+          v-show="hasAnyData"
           variant="primary-outline"
           @click="toggleFilter"
         >
@@ -26,15 +26,37 @@
         <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_PROJECT)"
           variant="primary"
-          @click="$router.push('/admin/projects/create')"
+          @click="$router.push('/admin/projects/create' + (activeTab !== 'all' ? '?type=' + activeTab : ''))"
         >
           <template #left="slotProps">
             <BaseIcon name="PlusIcon" :class="slotProps.class" />
           </template>
-          {{ $t('projects.new_project') }}
+          {{ activeTab === 'branch' ? $t('projects.new_branch') : $t('projects.new_project') }}
         </BaseButton>
       </template>
     </BasePageHeader>
+
+    <!-- Type Tabs -->
+    <div class="flex border-b border-gray-200 mb-4">
+      <button
+        v-for="tab in typeTabs"
+        :key="tab.value"
+        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors"
+        :class="activeTab === tab.value
+          ? 'border-primary-500 text-primary-600'
+          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+        @click="switchTab(tab.value)"
+      >
+        {{ tab.label }}
+        <span
+          v-if="tab.count !== null"
+          class="ml-1 text-xs px-1.5 py-0.5 rounded-full"
+          :class="activeTab === tab.value ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600'"
+        >
+          {{ tab.count }}
+        </span>
+      </button>
+    </div>
 
     <BaseFilterWrapper v-show="showFilters" @clear="clearFilter">
       <BaseInputGroup :label="$t('projects.name')">
@@ -45,7 +67,7 @@
         </BaseInput>
       </BaseInputGroup>
 
-      <BaseInputGroup :label="$t('projects.status')">
+      <BaseInputGroup v-if="activeTab !== 'branch'" :label="$t('projects.status')">
         <BaseMultiselect
           v-model="filters.status"
           :options="statusOptions"
@@ -55,7 +77,7 @@
         />
       </BaseInputGroup>
 
-      <BaseInputGroup :label="$t('projects.customer')">
+      <BaseInputGroup v-if="activeTab !== 'branch'" :label="$t('projects.customer')">
         <BaseCustomerSelectInput
           v-model="filters.customer_id"
           :placeholder="$t('customers.type_or_click')"
@@ -67,8 +89,8 @@
 
     <BaseEmptyPlaceholder
       v-show="showEmptyScreen"
-      :title="$t('projects.no_projects')"
-      :description="$t('projects.empty_description')"
+      :title="activeTab === 'branch' ? $t('projects.no_branches') : $t('projects.no_projects')"
+      :description="activeTab === 'branch' ? $t('projects.empty_branches_description') : $t('projects.empty_description')"
     >
       <template
         v-if="userStore.hasAbilities(abilities.CREATE_PROJECT)"
@@ -76,12 +98,12 @@
       >
         <BaseButton
           variant="primary-outline"
-          @click="$router.push('/admin/projects/create')"
+          @click="$router.push('/admin/projects/create' + (activeTab === 'branch' ? '?type=branch' : ''))"
         >
           <template #left="slotProps">
             <BaseIcon name="PlusIcon" :class="slotProps.class" />
           </template>
-          {{ $t('projects.add_new_project') }}
+          {{ activeTab === 'branch' ? $t('projects.new_branch') : $t('projects.add_new_project') }}
         </BaseButton>
       </template>
     </BaseEmptyPlaceholder>
@@ -139,25 +161,56 @@
         </template>
 
         <template #cell-name="{ row }">
-          <router-link
-            :to="{ path: `/admin/projects/${row.data.id}/view` }"
-            class="font-medium text-primary-500"
-          >
-            {{ row.data.name }}
-          </router-link>
-          <p v-if="row.data.code" class="text-xs text-gray-500">{{ row.data.code }}</p>
+          <div class="flex items-center gap-2">
+            <BaseIcon
+              v-if="activeTab === 'all'"
+              :name="row.data.type === 'branch' ? 'BuildingOfficeIcon' : 'FolderIcon'"
+              class="h-4 w-4 flex-shrink-0"
+              :class="row.data.type === 'branch' ? 'text-blue-500' : 'text-gray-400'"
+            />
+            <div>
+              <router-link
+                :to="{ path: `/admin/projects/${row.data.id}/view` }"
+                class="font-medium text-primary-500"
+              >
+                {{ row.data.name }}
+              </router-link>
+              <p v-if="row.data.code" class="text-xs text-gray-500">{{ row.data.code }}</p>
+            </div>
+          </div>
         </template>
 
         <template #cell-customer="{ row }">
           {{ row.data.customer?.name || '-' }}
         </template>
 
+        <template #cell-city="{ row }">
+          {{ row.data.city || '-' }}
+        </template>
+
         <template #cell-status="{ row }">
           <BaseBadge
+            v-if="row.data.type === 'branch'"
+            :bg-color="row.data.is_active ? '#10B981' : '#EF4444'"
+            :content-loading="false"
+          >
+            {{ row.data.is_active ? $t('projects.is_active') : $t('general.inactive') }}
+          </BaseBadge>
+          <BaseBadge
+            v-else
             :bg-color="getStatusColor(row.data.status)"
             :content-loading="false"
           >
             {{ $t(`projects.statuses.${row.data.status}`) }}
+          </BaseBadge>
+        </template>
+
+        <template #cell-is_active="{ row }">
+          <BaseBadge
+            :bg-color="row.data.is_active ? '#10B981' : '#EF4444'"
+            :content-loading="false"
+          >
+            {{ row.data.is_active ? $t('projects.is_active') : $t('general.inactive') }}
           </BaseBadge>
         </template>
 
@@ -195,6 +248,7 @@
 import { ref, reactive, computed, onUnmounted } from 'vue'
 import { debouncedWatch } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import abilities from '@/scripts/admin/stub/abilities'
 import { useProjectStore } from '@/scripts/admin/stores/project'
 import { useUserStore } from '@/scripts/admin/stores/user'
@@ -202,6 +256,7 @@ import { useDialogStore } from '@/scripts/stores/dialog'
 import ProjectDropdown from '@/scripts/admin/components/dropdowns/ProjectIndexDropdown.vue'
 
 const { t } = useI18n()
+const route = useRoute()
 const projectStore = useProjectStore()
 const userStore = useUserStore()
 const dialogStore = useDialogStore()
@@ -212,15 +267,39 @@ const isFetchingInitialData = ref(true)
 const selectedProjectIds = ref([])
 const selectAllField = ref(false)
 
+// Initialize active tab from query param or default to 'all'
+const activeTab = ref(route.query.tab || 'all')
+
 const filters = reactive({
   search: '',
   status: null,
   customer_id: null,
 })
 
-const showEmptyScreen = computed(
-  () => !projectStore.totalProjects && !isFetchingInitialData.value
-)
+const hasAnyData = computed(() => {
+  const meta = projectStore.totalProjects + projectStore.totalBranches
+  return meta > 0 || projectStore.projects.length > 0
+})
+
+const showEmptyScreen = computed(() => {
+  if (isFetchingInitialData.value) return false
+  if (activeTab.value === 'branch') return projectStore.totalBranches === 0
+  if (activeTab.value === 'project') return projectStore.totalProjects === 0
+  return (projectStore.totalProjects + projectStore.totalBranches) === 0
+})
+
+const hasBothTypes = computed(() => projectStore.totalProjects > 0 && projectStore.totalBranches > 0)
+
+const typeTabs = computed(() => {
+  const tabs = []
+  // Only show "All" tab when both types exist
+  if (hasBothTypes.value) {
+    tabs.push({ value: 'all', label: t('projects.all_types'), count: (projectStore.totalProjects + projectStore.totalBranches) || null })
+  }
+  tabs.push({ value: 'project', label: t('projects.projects_only'), count: projectStore.totalProjects || null })
+  tabs.push({ value: 'branch', label: t('projects.branches_only'), count: projectStore.totalBranches || null })
+  return tabs
+})
 
 const selectField = computed({
   get: () => selectedProjectIds.value,
@@ -239,7 +318,7 @@ const statusOptions = computed(() => [
 ])
 
 const columns = computed(() => {
-  return [
+  const base = [
     {
       key: 'checkbox',
       thClass: 'extra w-10 pr-0',
@@ -247,18 +326,38 @@ const columns = computed(() => {
       tdClass: 'font-medium text-gray-900 pr-0',
     },
     { key: 'name', label: t('projects.name'), thClass: 'extra' },
-    { key: 'customer', label: t('projects.customer'), sortable: false },
-    { key: 'status', label: t('projects.status') },
-    { key: 'budget_amount', label: t('projects.budget') },
-    { key: 'dates', label: t('projects.dates'), sortable: false },
-    {
-      key: 'actions',
-      label: '',
-      sortable: false,
-      tdClass: 'text-right text-sm font-medium pl-0',
-      thClass: 'pl-0',
-    },
   ]
+
+  if (activeTab.value === 'branch') {
+    base.push(
+      { key: 'city', label: t('projects.city'), sortable: false },
+      { key: 'is_active', label: t('projects.is_active'), sortable: false },
+      { key: 'budget_amount', label: t('projects.budget') },
+    )
+  } else if (activeTab.value === 'project') {
+    base.push(
+      { key: 'customer', label: t('projects.customer'), sortable: false },
+      { key: 'status', label: t('projects.status') },
+      { key: 'budget_amount', label: t('projects.budget') },
+      { key: 'dates', label: t('projects.dates'), sortable: false },
+    )
+  } else {
+    // "All" tab — compact view with status that works for both types
+    base.push(
+      { key: 'status', label: t('projects.status') },
+      { key: 'budget_amount', label: t('projects.budget') },
+    )
+  }
+
+  base.push({
+    key: 'actions',
+    label: '',
+    sortable: false,
+    tdClass: 'text-right text-sm font-medium pl-0',
+    thClass: 'pl-0',
+  })
+
+  return base
 })
 
 function getStatusColor(status) {
@@ -270,6 +369,16 @@ function getStatusColor(status) {
     cancelled: '#EF4444',
   }
   return colors[status] || '#6B7280'
+}
+
+function switchTab(tab) {
+  activeTab.value = tab
+  filters.search = ''
+  filters.status = null
+  filters.customer_id = null
+  selectedProjectIds.value = []
+  selectAllField.value = false
+  refreshTable()
 }
 
 function toggleSelectAll() {
@@ -305,6 +414,11 @@ async function fetchData({ page, filter, sort }) {
     orderByField: sort.fieldName || 'created_at',
     orderBy: sort.order || 'desc',
     page,
+  }
+
+  // Apply type filter based on active tab
+  if (activeTab.value !== 'all') {
+    data.type = activeTab.value
   }
 
   isFetchingInitialData.value = true
@@ -370,3 +484,4 @@ function removeMultipleProjects() {
     })
 }
 </script>
+<!-- CLAUDE-CHECKPOINT -->
