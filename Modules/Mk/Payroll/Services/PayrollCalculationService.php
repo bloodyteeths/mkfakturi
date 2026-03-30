@@ -112,6 +112,16 @@ class PayrollCalculationService
                     $run->working_days ?? 22
                 );
 
+                // Calculate holiday overtime at 150% multiplier (Art. 106 ЗРО)
+                $holidayOvertimeHours = $employee->holiday_overtime_hours ?? 0;
+                $holidayOvertimeMultiplier = config('mk.payroll.overtime_holiday_multiplier', 1.50);
+                $holidayOvertimeResult = $this->overtimeService->calculate(
+                    $adjustedGross,
+                    $holidayOvertimeHours,
+                    $holidayOvertimeMultiplier,
+                    $run->working_days ?? 22
+                );
+
                 // Calculate night work premium (ноќна работа)
                 $nightHours = $employee->night_hours ?? 0;
                 $nightResult = $this->overtimeService->calculateNightWork(
@@ -124,6 +134,7 @@ class PayrollCalculationService
                 $grossWithPremiums = $adjustedGross
                     + $seniorityResult['seniority_bonus']
                     + $overtimeResult['overtime_amount']
+                    + $holidayOvertimeResult['overtime_amount']
                     + $nightResult['night_amount'];
 
                 // Calculate taxes on the adjusted gross (after all additions/deductions)
@@ -149,6 +160,8 @@ class PayrollCalculationService
                     'overtime_amount' => $overtimeResult['overtime_amount'],
                     'seniority_years' => $seniorityResult['seniority_years'],
                     'seniority_bonus' => $seniorityResult['seniority_bonus'],
+                    'holiday_overtime_hours' => $holidayOvertimeResult['overtime_hours'],
+                    'holiday_overtime_amount' => $holidayOvertimeResult['overtime_amount'],
                     'night_hours' => $nightResult['night_hours'],
                     'night_amount' => $nightResult['night_amount'],
                 ]);

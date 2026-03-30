@@ -152,7 +152,7 @@ class LeaveCalculationService
     /**
      * Calculate the number of business days between two dates.
      *
-     * Counts weekdays only (Monday-Friday), excluding weekends.
+     * Counts weekdays only (Monday-Friday), excluding weekends and MK public holidays.
      *
      * @param Carbon $start Start date (inclusive)
      * @param Carbon $end End date (inclusive)
@@ -168,13 +168,59 @@ class LeaveCalculationService
         $current = $start->copy();
 
         while ($current->lte($end)) {
-            if ($current->isWeekday()) {
+            if ($current->isWeekday() && !$this->isPublicHoliday($current)) {
                 $businessDays++;
             }
             $current->addDay();
         }
 
         return $businessDays;
+    }
+
+    /**
+     * Check if a given date is a Macedonian public holiday.
+     *
+     * @param Carbon $date The date to check
+     * @return bool
+     */
+    public function isPublicHoliday(Carbon $date): bool
+    {
+        $holidays = $this->getPublicHolidays($date->year);
+
+        return in_array($date->format('m-d'), $holidays);
+    }
+
+    /**
+     * Get Macedonian public holidays for a given year.
+     *
+     * Returns month-day pairs (MM-DD) for fixed holidays per
+     * Закон за празниците на Република Македонија.
+     * Easter/Ramazan Bajram are variable — not included (TODO: add Orthodox Easter calc).
+     *
+     * @param int $year
+     * @return array<string> Array of 'MM-DD' strings
+     */
+    public function getPublicHolidays(int $year): array
+    {
+        $holidays = config('mk.payroll.public_holidays', []);
+
+        if (empty($holidays)) {
+            // Fallback hardcoded list
+            $holidays = [
+                '01-01', // Нова Година
+                '01-07', // Божик (Orthodox Christmas)
+                '04-28', // Orthodox Good Friday (approximate — varies)
+                '05-01', // Ден на трудот
+                '05-24', // Св. Кирил и Методиј
+                '08-02', // Ден на Републиката (Илинден)
+                '09-08', // Ден на независноста
+                '10-11', // Ден на народното востание
+                '10-23', // Ден на македонската револуционерна борба
+                '12-08', // Св. Климент Охридски
+            ];
+        }
+
+        return $holidays;
     }
 }
 
