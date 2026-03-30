@@ -418,6 +418,8 @@ class ReconciliationController extends Controller
             'expense_category_id' => 'required|integer',
             'category_name' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:500',
+            'gl_debit_code' => 'nullable|string|max:10', // Accountant GL override
+            'gl_credit_code' => 'nullable|string|max:10', // Accountant GL override
         ]);
 
         $company = $this->getCompany();
@@ -470,8 +472,9 @@ class ReconciliationController extends Controller
         try {
             $ifrs = app(\App\Domain\Accounting\IfrsAdapter::class);
             if ($ifrs) {
-                // Default expense GL code — 4990 (Останати расходи)
-                $expenseGlCode = '4990';
+                // Default expense GL code — 4990 (Останати расходи), overridable by accountant
+                $expenseGlCode = $request->gl_debit_code ?: '4990';
+                $bankGlCode = $request->gl_credit_code ?: '1000';
                 $narration = ($request->notes ?? $transaction->description ?? 'Expense') . ' [' . ($category->name ?? '') . ']';
                 $counterparty = $transaction->creditor_name ?? '';
                 $amountCents = (int) round(abs((float) $transaction->amount) * 100);
@@ -489,7 +492,7 @@ class ReconciliationController extends Controller
                             'counterparty_name' => $counterparty,
                         ],
                         [
-                            'account_code' => '1000',
+                            'account_code' => $bankGlCode,
                             'account_name' => 'Жиро-сметка',
                             'amount' => $amountCents,
                             'credited' => true,
@@ -797,6 +800,8 @@ class ReconciliationController extends Controller
         $request->validate([
             'transaction_id' => 'required|integer|exists:bank_transactions,id',
             'notes' => 'nullable|string|max:500',
+            'gl_debit_code' => 'nullable|string|max:10', // Accountant GL override
+            'gl_credit_code' => 'nullable|string|max:10', // Accountant GL override
         ]);
 
         $company = $this->getCompany();
@@ -836,6 +841,8 @@ class ReconciliationController extends Controller
             if ($ifrs) {
                 $narration = $request->notes ?? $transaction->description ?? 'Non-invoice income';
                 $counterparty = $transaction->debtor_name ?? '';
+                $debitCode = $request->gl_debit_code ?: '1000';
+                $creditCode = $request->gl_credit_code ?: '7500';
 
                 $ifrs->postJournalEntry($company, [
                     'date' => $transaction->transaction_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
@@ -843,14 +850,14 @@ class ReconciliationController extends Controller
                     'reference' => "BANK-TX-{$transaction->id}",
                     'line_items' => [
                         [
-                            'account_code' => '1000',
+                            'account_code' => $debitCode,
                             'account_name' => 'Жиро-сметка',
                             'amount' => $amountCents,
                             'credited' => false,
                             'counterparty_name' => $counterparty,
                         ],
                         [
-                            'account_code' => '7500',
+                            'account_code' => $creditCode,
                             'account_name' => 'Останати приходи од работење',
                             'amount' => $amountCents,
                             'credited' => true,
@@ -934,6 +941,8 @@ class ReconciliationController extends Controller
             'notes' => 'nullable|string|max:500',
             'sub_type' => 'nullable|string|max:100', // e.g. "ДДВ", "данок на добивка", "ФПИОМ" for tax
             'interest_amount' => 'nullable|numeric|min:0', // For loan_repayment: interest portion
+            'gl_debit_code' => 'nullable|string|max:10', // Accountant GL override
+            'gl_credit_code' => 'nullable|string|max:10', // Accountant GL override
         ]);
 
         $company = $this->getCompany();
@@ -1041,6 +1050,14 @@ class ReconciliationController extends Controller
             }
         }
 
+        // Accountant GL override — allow custom debit/credit codes
+        if ($request->gl_debit_code) {
+            $glMapping[$action]['debit'] = $request->gl_debit_code;
+        }
+        if ($request->gl_credit_code) {
+            $glMapping[$action]['credit'] = $request->gl_credit_code;
+        }
+
         // Store processing notes with GL info for future IFRS posting
         $processingNotes = json_encode([
             'action' => $action,
@@ -1049,6 +1066,7 @@ class ReconciliationController extends Controller
             'amount_cents' => $amountCents,
             'gl_debit' => $glMapping[$action]['debit'] ?? null,
             'gl_credit' => $glMapping[$action]['credit'] ?? null,
+            'gl_override' => ($request->gl_debit_code || $request->gl_credit_code) ? true : false,
             'recorded_by' => Auth::id(),
             'recorded_at' => now()->toIso8601String(),
         ], JSON_UNESCAPED_UNICODE);
@@ -1172,6 +1190,121 @@ class ReconciliationController extends Controller
             'success' => true,
             'message' => 'Transaction recorded as '.($labels[$action] ?? $action),
             'linked_type' => $linkedTypeMap[$action],
+        ]);
+    }
+
+    /**
+     * Get GL accounts available for reconciliation.
+     *
+     * Returns commonly used GL codes from the MK chart of accounts (Правилник 174/2011),
+     * plus any company-specific accounts from the IFRS ledger.
+     */
+    public function getGlAccounts(): JsonResponse
+    {
+        $company = $this->getCompany();
+
+        // Standard MK GL accounts commonly used in reconciliation
+        $standardAccounts = [
+            // Class 1 — Assets (Средства)
+            ['code' => '1000', 'name' => 'Жиро-сметка', 'class' => '1'],
+            ['code' => '1001', 'name' => 'Девизна сметка', 'class' => '1'],
+            ['code' => '1020', 'name' => 'Каса-благајна', 'class' => '1'],
+            ['code' => '1030', 'name' => 'Хартии од вредност', 'class' => '1'],
+            ['code' => '1100', 'name' => 'Побарувања од купувачи', 'class' => '1'],
+            ['code' => '1200', 'name' => 'Краткорочни побарувања по дадени заеми', 'class' => '1'],
+            ['code' => '1210', 'name' => 'Краткорочни побарувања по кредити', 'class' => '1'],
+            ['code' => '1240', 'name' => 'Краткорочни побарувања по дадени заеми', 'class' => '1'],
+            ['code' => '1300', 'name' => 'ДДВ — претходен данок (18%)', 'class' => '1'],
+            ['code' => '1301', 'name' => 'ДДВ — претходен данок (5%)', 'class' => '1'],
+            ['code' => '1310', 'name' => 'ДДВ при увоз / Царина', 'class' => '1'],
+            ['code' => '122', 'name' => 'Побарувања за дадени аванси', 'class' => '1'],
+            // Class 0 — Long-term assets
+            ['code' => '0200', 'name' => 'Градежни објекти', 'class' => '0'],
+            ['code' => '0300', 'name' => 'Опрема и транспортни средства', 'class' => '0'],
+            ['code' => '0400', 'name' => 'Биолошки средства', 'class' => '0'],
+            ['code' => '0800', 'name' => 'Долгорочни побарувања по дадени заеми', 'class' => '0'],
+            // Class 2 — Liabilities (Обврски)
+            ['code' => '2200', 'name' => 'Обврски кон добавувачи', 'class' => '2'],
+            ['code' => '222', 'name' => 'Обврски за примени аванси', 'class' => '2'],
+            ['code' => '2300', 'name' => 'ДДВ — обврска (18%)', 'class' => '2'],
+            ['code' => '2301', 'name' => 'ДДВ — обврска (5%)', 'class' => '2'],
+            ['code' => '2520', 'name' => 'Обврски за ФПИОМ (пензиско)', 'class' => '2'],
+            ['code' => '2530', 'name' => 'Обврски за ФЗОМ (здравствено)', 'class' => '2'],
+            ['code' => '2540', 'name' => 'Обврски за персонален данок', 'class' => '2'],
+            ['code' => '2550', 'name' => 'Обврски за вработување', 'class' => '2'],
+            ['code' => '2560', 'name' => 'Обврски за професионален придонес', 'class' => '2'],
+            ['code' => '2700', 'name' => 'Обврски за ДДВ', 'class' => '2'],
+            ['code' => '2710', 'name' => 'Обврски за данок на добивка', 'class' => '2'],
+            ['code' => '2810', 'name' => 'Долгорочни кредити од банки', 'class' => '2'],
+            ['code' => '2820', 'name' => 'Долгорочни кредити од други', 'class' => '2'],
+            // Class 4 — Expenses (Расходи)
+            ['code' => '4000', 'name' => 'Трошоци за суровини и материјали', 'class' => '4'],
+            ['code' => '4020', 'name' => 'Трошоци за ситен инвентар', 'class' => '4'],
+            ['code' => '4030', 'name' => 'Трошоци за канцелариски материјал', 'class' => '4'],
+            ['code' => '4100', 'name' => 'Трошоци за услуги', 'class' => '4'],
+            ['code' => '4200', 'name' => 'Трошоци за плати', 'class' => '4'],
+            ['code' => '4210', 'name' => 'Трошоци за придонеси', 'class' => '4'],
+            ['code' => '4300', 'name' => 'Трошоци за амортизација', 'class' => '4'],
+            ['code' => '4310', 'name' => 'Акцизи', 'class' => '4'],
+            ['code' => '4400', 'name' => 'Трошоци за закупнина', 'class' => '4'],
+            ['code' => '4410', 'name' => 'Трошоци за осигурување', 'class' => '4'],
+            ['code' => '4420', 'name' => 'Трошоци за банкарски услуги', 'class' => '4'],
+            ['code' => '4430', 'name' => 'Трошоци за телекомуникации', 'class' => '4'],
+            ['code' => '4440', 'name' => 'Трошоци за комунални услуги', 'class' => '4'],
+            ['code' => '4450', 'name' => 'Трошоци за транспорт', 'class' => '4'],
+            ['code' => '4460', 'name' => 'Трошоци за реклама и маркетинг', 'class' => '4'],
+            ['code' => '4470', 'name' => 'Трошоци за репрезентација', 'class' => '4'],
+            ['code' => '4480', 'name' => 'Трошоци за одржување', 'class' => '4'],
+            ['code' => '4490', 'name' => 'Трошоци за правни и консултантски', 'class' => '4'],
+            ['code' => '4650', 'name' => 'Комунални такси', 'class' => '4'],
+            ['code' => '4720', 'name' => 'Расходи за камати', 'class' => '4'],
+            ['code' => '4990', 'name' => 'Останати расходи', 'class' => '4'],
+            // Class 7 — Revenue (Приходи)
+            ['code' => '7000', 'name' => 'Приходи од продажба на производи', 'class' => '7'],
+            ['code' => '7010', 'name' => 'Приходи од продажба на стоки', 'class' => '7'],
+            ['code' => '7020', 'name' => 'Приходи од продажба на услуги', 'class' => '7'],
+            ['code' => '7400', 'name' => 'Приходи од камати', 'class' => '7'],
+            ['code' => '7500', 'name' => 'Останати приходи од работење', 'class' => '7'],
+            ['code' => '7600', 'name' => 'Приходи од субвенции и дотации', 'class' => '7'],
+            // Class 9 — Equity (Капитал)
+            ['code' => '900', 'name' => 'Основна главнина', 'class' => '9'],
+            ['code' => '920', 'name' => 'Резерви', 'class' => '9'],
+            ['code' => '950', 'name' => 'Задржана добивка', 'class' => '9'],
+            ['code' => '960', 'name' => 'Загуба', 'class' => '9'],
+        ];
+
+        // Merge with company's actual IFRS accounts (may have custom codes)
+        try {
+            $ifrs = app(\App\Domain\Accounting\IfrsAdapter::class);
+            if ($ifrs) {
+                $entity = $ifrs->getOrCreateEntity($company);
+                $companyAccounts = \DB::table('ifrs_accounts')
+                    ->where('entity_id', $entity->id)
+                    ->select('code', 'name', 'account_type')
+                    ->orderBy('code')
+                    ->get();
+
+                $existingCodes = collect($standardAccounts)->pluck('code')->toArray();
+                foreach ($companyAccounts as $acc) {
+                    if (! in_array($acc->code, $existingCodes)) {
+                        $standardAccounts[] = [
+                            'code' => $acc->code,
+                            'name' => $acc->name,
+                            'class' => substr($acc->code, 0, 1),
+                        ];
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Non-critical — return standard accounts only
+        }
+
+        // Sort by code
+        usort($standardAccounts, fn ($a, $b) => strcmp($a['code'], $b['code']));
+
+        return response()->json([
+            'success' => true,
+            'data' => $standardAccounts,
         ]);
     }
 

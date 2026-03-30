@@ -67,6 +67,9 @@
                     <p v-if="suggestion.category_name" class="text-sm text-gray-700 mt-0.5">
                       {{ $t('banking.category', 'Category') }}: {{ suggestion.category_name }}
                     </p>
+                    <p v-if="getGlHint(suggestion.action)" class="text-xs text-indigo-600 mt-0.5 font-mono">
+                      {{ getGlHint(suggestion.action) }}
+                    </p>
                     <p class="text-xs text-gray-500 mt-1">
                       {{ suggestion.reason }}
                     </p>
@@ -391,6 +394,37 @@
                       rows="2"
                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     />
+                    <!-- GL Account Override -->
+                    <div v-if="glAccounts.length > 0">
+                      <button
+                        type="button"
+                        @click="showGlPicker = !showGlPicker"
+                        class="text-xs text-primary-600 hover:text-primary-800 flex items-center"
+                      >
+                        <BaseIcon :name="showGlPicker ? 'ChevronUpIcon' : 'ChevronDownIcon'" class="h-3 w-3 mr-1" />
+                        {{ $t('banking.gl_override', 'GL Account Override') }}
+                      </button>
+                      <div v-if="showGlPicker" class="mt-2 space-y-2">
+                        <div>
+                          <label class="text-xs font-medium text-gray-500">{{ $t('banking.gl_debit', 'Debit (DR)') }}</label>
+                          <select v-model="glDebitCode" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                            <option :value="null">{{ $t('banking.gl_default', 'Default (4990)') }}</option>
+                            <option v-for="acc in glAccounts" :key="'d-' + acc.code" :value="acc.code">
+                              {{ acc.code }} — {{ acc.name }}
+                            </option>
+                          </select>
+                        </div>
+                        <div>
+                          <label class="text-xs font-medium text-gray-500">{{ $t('banking.gl_credit', 'Credit (CR)') }}</label>
+                          <select v-model="glCreditCode" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                            <option :value="null">{{ $t('banking.gl_default_bank', 'Default (1000 Жиро-сметка)') }}</option>
+                            <option v-for="acc in glAccounts" :key="'c-' + acc.code" :value="acc.code">
+                              {{ acc.code }} — {{ acc.name }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                     <button
                       @click="submitManualExpense"
                       :disabled="!selectedCategoryId || isAccepting"
@@ -464,6 +498,37 @@
                       rows="2"
                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     />
+                    <!-- GL Account Override -->
+                    <div v-if="glAccounts.length > 0">
+                      <button
+                        type="button"
+                        @click="showGlPicker = !showGlPicker"
+                        class="text-xs text-primary-600 hover:text-primary-800 flex items-center"
+                      >
+                        <BaseIcon :name="showGlPicker ? 'ChevronUpIcon' : 'ChevronDownIcon'" class="h-3 w-3 mr-1" />
+                        {{ $t('banking.gl_override', 'GL Account Override') }}
+                      </button>
+                      <div v-if="showGlPicker" class="mt-2 space-y-2">
+                        <div>
+                          <label class="text-xs font-medium text-gray-500">{{ $t('banking.gl_debit', 'Debit (DR)') }}</label>
+                          <select v-model="glDebitCode" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                            <option :value="null">{{ $t('banking.gl_default_bank', 'Default (1000 Жиро-сметка)') }}</option>
+                            <option v-for="acc in glAccounts" :key="'d-' + acc.code" :value="acc.code">
+                              {{ acc.code }} — {{ acc.name }}
+                            </option>
+                          </select>
+                        </div>
+                        <div>
+                          <label class="text-xs font-medium text-gray-500">{{ $t('banking.gl_credit', 'Credit (CR)') }}</label>
+                          <select v-model="glCreditCode" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                            <option :value="null">{{ $t('banking.gl_default', 'Default (7500)') }}</option>
+                            <option v-for="acc in glAccounts" :key="'c-' + acc.code" :value="acc.code">
+                              {{ acc.code }} — {{ acc.name }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                     <button
                       @click="submitManualIncome"
                       :disabled="isAccepting"
@@ -510,6 +575,37 @@
                       rows="2"
                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     />
+                    <!-- GL Account Override -->
+                    <div v-if="glAccounts.length > 0">
+                      <button
+                        type="button"
+                        @click="showGlPicker = !showGlPicker"
+                        class="text-xs text-primary-600 hover:text-primary-800 flex items-center"
+                      >
+                        <BaseIcon :name="showGlPicker ? 'ChevronUpIcon' : 'ChevronDownIcon'" class="h-3 w-3 mr-1" />
+                        {{ $t('banking.gl_override', 'GL Account Override') }}
+                      </button>
+                      <div v-if="showGlPicker" class="mt-2 space-y-2">
+                        <div>
+                          <label class="text-xs font-medium text-gray-500">{{ $t('banking.gl_debit', 'Debit (DR)') }}</label>
+                          <select v-model="glDebitCode" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                            <option :value="null">{{ $t('banking.gl_auto', 'Auto (based on action type)') }}</option>
+                            <option v-for="acc in glAccounts" :key="'d-' + acc.code" :value="acc.code">
+                              {{ acc.code }} — {{ acc.name }}
+                            </option>
+                          </select>
+                        </div>
+                        <div>
+                          <label class="text-xs font-medium text-gray-500">{{ $t('banking.gl_credit', 'Credit (CR)') }}</label>
+                          <select v-model="glCreditCode" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                            <option :value="null">{{ $t('banking.gl_auto', 'Auto (based on action type)') }}</option>
+                            <option v-for="acc in glAccounts" :key="'c-' + acc.code" :value="acc.code">
+                              {{ acc.code }} — {{ acc.name }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                     <button
                       @click="submitFinancialTransaction(manualAction)"
                       :disabled="isAccepting"
@@ -544,6 +640,37 @@
                       rows="2"
                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     />
+                    <!-- GL Account Override -->
+                    <div v-if="glAccounts.length > 0">
+                      <button
+                        type="button"
+                        @click="showGlPicker = !showGlPicker"
+                        class="text-xs text-primary-600 hover:text-primary-800 flex items-center"
+                      >
+                        <BaseIcon :name="showGlPicker ? 'ChevronUpIcon' : 'ChevronDownIcon'" class="h-3 w-3 mr-1" />
+                        {{ $t('banking.gl_override', 'GL Account Override') }}
+                      </button>
+                      <div v-if="showGlPicker" class="mt-2 space-y-2">
+                        <div>
+                          <label class="text-xs font-medium text-gray-500">{{ $t('banking.gl_debit', 'Debit (DR)') }}</label>
+                          <select v-model="glDebitCode" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                            <option :value="null">{{ $t('banking.gl_auto', 'Auto (based on action type)') }}</option>
+                            <option v-for="acc in glAccounts" :key="'d-' + acc.code" :value="acc.code">
+                              {{ acc.code }} — {{ acc.name }}
+                            </option>
+                          </select>
+                        </div>
+                        <div>
+                          <label class="text-xs font-medium text-gray-500">{{ $t('banking.gl_credit', 'Credit (CR)') }}</label>
+                          <select v-model="glCreditCode" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                            <option :value="null">{{ $t('banking.gl_auto', 'Auto (based on action type)') }}</option>
+                            <option v-for="acc in glAccounts" :key="'c-' + acc.code" :value="acc.code">
+                              {{ acc.code }} — {{ acc.name }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                     <button
                       @click="submitFinancialTransaction('tax_payment')"
                       :disabled="isAccepting"
@@ -597,12 +724,16 @@ const selectedInvoiceId = ref(null)
 const selectedPayrollId = ref(null)
 const taxSubType = ref(null)
 const interestAmount = ref(null)
+const glDebitCode = ref(null)
+const glCreditCode = ref(null)
+const showGlPicker = ref(false)
 
 // Reference data
 const expenseCategories = ref([])
 const unpaidBills = ref([])
 const unpaidInvoices = ref([])
 const payrollRuns = ref([])
+const glAccounts = ref([])
 
 const isCredit = computed(() => props.transaction?.transaction_type === 'credit')
 
@@ -637,6 +768,9 @@ const resetState = () => {
   selectedPayrollId.value = null
   taxSubType.value = null
   interestAmount.value = null
+  glDebitCode.value = null
+  glCreditCode.value = null
+  showGlPicker.value = false
 }
 
 const fetchSuggestion = async () => {
@@ -659,11 +793,13 @@ const fetchReferenceData = async () => {
     axios.get('/banking/reconciliation/unpaid-bills'),
     axios.get('/banking/reconciliation/unpaid-invoices'),
     axios.get('/banking/reconciliation/payroll-runs'),
+    axios.get('/banking/reconciliation/gl-accounts'),
   ])
   expenseCategories.value = results[0].status === 'fulfilled' ? (results[0].value.data.data || []) : []
   unpaidBills.value = results[1].status === 'fulfilled' ? (results[1].value.data.data || []) : []
   unpaidInvoices.value = results[2].status === 'fulfilled' ? (results[2].value.data.data || []) : []
   payrollRuns.value = results[3].status === 'fulfilled' ? (results[3].value.data.data || []) : []
+  glAccounts.value = results[4].status === 'fulfilled' ? (results[4].value.data.data || []) : []
 }
 
 const acceptSuggestion = async (s) => {
@@ -680,6 +816,8 @@ const acceptSuggestion = async (s) => {
           expense_category_id: s.category_id,
           category_name: s.category_name || null,
           notes: s.reason,
+          gl_debit_code: s.gl_debit_code || glDebitCode.value || null,
+          gl_credit_code: s.gl_credit_code || glCreditCode.value || null,
         })
         break
 
@@ -708,6 +846,8 @@ const acceptSuggestion = async (s) => {
         await axios.post('/banking/reconciliation/record-income', {
           transaction_id: txId,
           notes: s.reason,
+          gl_debit_code: s.gl_debit_code || glDebitCode.value || null,
+          gl_credit_code: s.gl_credit_code || glCreditCode.value || null,
         })
         break
 
@@ -735,6 +875,8 @@ const acceptSuggestion = async (s) => {
           notes: s.reason,
           sub_type: s.sub_type || (s.action === 'tax_payment' ? s.category_name : null) || null,
           interest_amount: s.action === 'loan_repayment' ? (s.interest_amount || null) : null,
+          gl_debit_code: s.gl_debit_code || glDebitCode.value || null,
+          gl_credit_code: s.gl_credit_code || glCreditCode.value || null,
         })
         break
 
@@ -821,6 +963,27 @@ const actionLabels = {
 
 const getActionLabel = (action) => {
   return t(`banking.action_${action}`, actionLabels[action] || action)
+}
+
+// Default GL mappings for display hints
+const glDefaults = {
+  create_expense: 'DR 4990 / CR 1000',
+  record_income: 'DR 1000 / CR 7500',
+  owner_contribution: 'DR 1000 / CR 900',
+  owner_withdrawal: 'DR 950 / CR 1000',
+  loan_received: 'DR 1000 / CR 2810',
+  loan_repayment: 'DR 2810 / CR 1000',
+  loan_given: 'DR 1240 / CR 1000',
+  tax_payment: 'DR 2700 / CR 1000',
+  internal_transfer: 'DR 1001 / CR 1000',
+  cash_deposit: 'DR 1000 / CR 1020',
+  cash_withdrawal: 'DR 1020 / CR 1000',
+  advance_received: 'DR 1000 / CR 222',
+  advance_paid: 'DR 122 / CR 1000',
+}
+
+const getGlHint = (action) => {
+  return glDefaults[action] || null
 }
 
 const suggestionTitle = computed(() => {

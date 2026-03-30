@@ -1499,6 +1499,7 @@ Route::prefix('/v1')->group(function () {
                     Route::post('/record-income', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'recordIncome']);
                     Route::post('/record-financial', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'recordFinancialTransaction']);
                     Route::post('/undo', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'undoReconciliation']);
+                    Route::get('/gl-accounts', [\Modules\Mk\Http\Controllers\ReconciliationController::class, 'getGlAccounts']);
                 });
 
                 // Matching Rules (P0-09)
