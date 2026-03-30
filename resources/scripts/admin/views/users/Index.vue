@@ -8,11 +8,11 @@
       </BaseBreadcrumb>
 
       <template #actions>
-        <div class="flex items-center justify-end space-x-5">
+        <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
           <!-- Usage indicator (Users tab only) -->
           <div
             v-if="activeTab === 'users' && usageStats && !usageStats.is_unlimited"
-            class="flex items-center space-x-2 text-sm"
+            class="flex items-center gap-2 text-sm order-first w-full sm:w-auto sm:order-none"
           >
             <span :class="usageStats.has_reached_limit ? 'text-red-600 font-medium' : 'text-gray-500'">
               {{ usageStats.current_count }}/{{ usageStats.limit }} {{ $t('users.users_used') }}
@@ -24,6 +24,13 @@
                 :style="{ width: Math.min(usageStats.usage_percentage, 100) + '%' }"
               />
             </div>
+            <router-link
+              v-if="usageStats.has_reached_limit"
+              to="/admin/settings/subscription"
+              class="text-xs text-primary-600 hover:text-primary-800 underline whitespace-nowrap"
+            >
+              {{ $t('users.upgrade_plan') }}
+            </router-link>
           </div>
 
           <!-- Export CSV -->
@@ -31,11 +38,12 @@
             v-show="activeTab === 'users' && usersStore.totalUsers"
             variant="primary-outline"
             @click="usersStore.exportCsv()"
+            class="hidden sm:inline-flex"
           >
             <template #left="slotProps">
               <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
             </template>
-            {{ $t('general.export_csv') }}
+            <span class="hidden md:inline">{{ $t('general.export_csv') }}</span>
           </BaseButton>
 
           <BaseButton
@@ -43,7 +51,6 @@
             variant="primary-outline"
             @click="toggleFilter"
           >
-            {{ $t('general.filter') }}
             <template #right="slotProps">
               <BaseIcon
                 v-if="!showFilters"
@@ -52,6 +59,7 @@
               />
               <BaseIcon v-else name="XMarkIcon" :class="slotProps.class" />
             </template>
+            <span class="hidden sm:inline">{{ $t('general.filter') }}</span>
           </BaseButton>
 
           <!-- Activity Log filters toggle -->
@@ -60,7 +68,6 @@
             variant="primary-outline"
             @click="toggleActivityFilter"
           >
-            {{ $t('general.filter') }}
             <template #right="slotProps">
               <BaseIcon
                 v-if="!showActivityFilters"
@@ -69,6 +76,7 @@
               />
               <BaseIcon v-else name="XMarkIcon" :class="slotProps.class" />
             </template>
+            <span class="hidden sm:inline">{{ $t('general.filter') }}</span>
           </BaseButton>
 
           <BaseButton
@@ -83,7 +91,7 @@
                 aria-hidden="true"
               />
             </template>
-            {{ $t('users.add_user') }}
+            <span class="hidden sm:inline">{{ $t('users.add_user') }}</span>
           </BaseButton>
         </div>
       </template>
@@ -120,7 +128,7 @@
     <!-- ═══════════ USERS TAB ═══════════ -->
     <template v-if="activeTab === 'users'">
       <BaseFilterWrapper :show="showFilters" class="mt-3" @clear="clearFilter">
-        <BaseInputGroup :label="$t('users.name')" class="flex-1 mt-2 mr-4">
+        <BaseInputGroup :label="$t('users.name')" class="w-full sm:flex-1 mt-2 sm:mr-4">
           <BaseInput
             v-model="filters.name"
             type="text"
@@ -129,7 +137,7 @@
           />
         </BaseInputGroup>
 
-        <BaseInputGroup :label="$t('users.email')" class="flex-1 mt-2 mr-4">
+        <BaseInputGroup :label="$t('users.email')" class="w-full sm:flex-1 mt-2 sm:mr-4">
           <BaseInput
             v-model="filters.email"
             type="text"
@@ -138,7 +146,7 @@
           />
         </BaseInputGroup>
 
-        <BaseInputGroup class="flex-1 mt-2 mr-4" :label="$t('users.phone')">
+        <BaseInputGroup class="w-full sm:flex-1 mt-2 sm:mr-4" :label="$t('users.phone')">
           <BaseInput
             v-model="filters.phone"
             type="text"
@@ -147,7 +155,7 @@
           />
         </BaseInputGroup>
 
-        <BaseInputGroup class="flex-1 mt-2 mr-4" :label="$t('users.role')">
+        <BaseInputGroup class="w-full sm:flex-1 mt-2 sm:mr-4" :label="$t('users.role')">
           <BaseMultiselect
             v-model="filters.role"
             :options="roleOptions"
@@ -158,7 +166,7 @@
           />
         </BaseInputGroup>
 
-        <BaseInputGroup class="flex-1 mt-2" :label="$t('users.status')">
+        <BaseInputGroup class="w-full sm:flex-1 mt-2" :label="$t('users.status')">
           <BaseMultiselect
             v-model="filters.is_active"
             :options="statusOptions"
@@ -192,39 +200,33 @@
       </BaseEmptyPlaceholder>
 
       <div v-show="!showEmptyScreen" class="relative table-container">
-        <div
-          class="
-            relative
-            flex
-            items-center
-            justify-end
-            h-5
-            border-gray-200 border-solid
-          "
+        <!-- Bulk action bar -->
+        <transition
+          enter-active-class="transition ease-out duration-200"
+          enter-from-class="opacity-0 -translate-y-2"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition ease-in duration-150"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-2"
         >
-          <BaseDropdown v-if="usersStore.selectedUsers.length">
-            <template #activator>
-              <span
-                class="
-                  flex
-                  text-sm
-                  font-medium
-                  cursor-pointer
-                  select-none
-                  text-primary-400
-                "
-              >
-                {{ $t('general.actions') }}
-                <BaseIcon name="ChevronDownIcon" class="h-5" />
-              </span>
-            </template>
-            <BaseDropdownItem @click="removeMultipleUsers">
-              <BaseIcon name="TrashIcon" class="h-5 mr-3 text-gray-600" />
+          <div
+            v-if="usersStore.selectedUsers.length"
+            class="flex items-center justify-between px-4 py-2 mb-2 bg-primary-50 border border-primary-200 rounded-lg"
+          >
+            <span class="text-sm text-primary-700">
+              {{ usersStore.selectedUsers.length }} {{ $t('users.selected') }}
+            </span>
+            <button
+              @click="removeMultipleUsers"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-md hover:bg-red-50 transition-colors"
+            >
+              <BaseIcon name="TrashIcon" class="h-4 w-4" />
               {{ $t('general.delete') }}
-            </BaseDropdownItem>
-          </BaseDropdown>
-        </div>
+            </button>
+          </div>
+        </transition>
 
+        <div class="overflow-x-auto -mx-4 sm:mx-0">
         <BaseTable
           ref="table"
           :data="fetchData"
@@ -288,7 +290,12 @@
           </template>
 
           <template #cell-company_names="{ row }">
-            <span class="text-sm text-gray-600">{{ row.data.company_names || '-' }}</span>
+            <span
+              class="text-sm text-gray-600 block max-w-[160px] truncate"
+              :title="row.data.company_names"
+            >
+              {{ row.data.company_names || '-' }}
+            </span>
           </template>
 
           <template #cell-last_login_at="{ row }">
@@ -307,13 +314,14 @@
             />
           </template>
         </BaseTable>
+        </div>
       </div>
     </template>
 
     <!-- ═══════════ ACTIVITY LOG TAB ═══════════ -->
     <template v-if="activeTab === 'activity'">
       <BaseFilterWrapper :show="showActivityFilters" class="mt-3" @clear="clearActivityFilter">
-        <BaseInputGroup :label="$t('activity_log.user')" class="flex-1 mt-2 mr-4">
+        <BaseInputGroup :label="$t('activity_log.user')" class="w-full sm:flex-1 mt-2 sm:mr-4">
           <BaseMultiselect
             v-model="activityFilters.user_id"
             :options="usersStore.users"
@@ -326,7 +334,7 @@
           />
         </BaseInputGroup>
 
-        <BaseInputGroup :label="$t('activity_log.event')" class="flex-1 mt-2 mr-4">
+        <BaseInputGroup :label="$t('activity_log.event')" class="w-full sm:flex-1 mt-2 sm:mr-4">
           <BaseMultiselect
             v-model="activityFilters.event"
             :options="eventOptions"
@@ -337,7 +345,7 @@
           />
         </BaseInputGroup>
 
-        <BaseInputGroup :label="$t('activity_log.entity')" class="flex-1 mt-2 mr-4">
+        <BaseInputGroup :label="$t('activity_log.entity')" class="w-full sm:flex-1 mt-2 sm:mr-4">
           <BaseMultiselect
             v-model="activityFilters.auditable_type"
             :options="entityTypeOptions"
@@ -358,6 +366,7 @@
       </BaseEmptyPlaceholder>
 
       <div v-show="!showActivityEmpty" class="relative table-container">
+        <div class="overflow-x-auto -mx-4 sm:mx-0">
         <BaseTable
           ref="activityTable"
           :data="fetchActivityData"
@@ -408,6 +417,7 @@
             <span class="text-sm text-gray-500">{{ formatDate(row.data.created_at) }}</span>
           </template>
         </BaseTable>
+        </div>
       </div>
 
       <!-- Changes Detail Modal -->
@@ -433,7 +443,7 @@
               class="border rounded-md p-3"
             >
               <p class="text-sm font-medium text-gray-700 mb-1">{{ field }}</p>
-              <div class="grid grid-cols-2 gap-4 text-sm">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span class="text-gray-400">{{ $t('activity_log.old_value') }}:</span>
                   <p class="text-red-600 mt-0.5">{{ selectedLog.old_values?.[field] ?? '-' }}</p>
@@ -538,8 +548,8 @@ const userTableColumns = computed(() => {
   return [
     {
       key: 'status',
-      thClass: 'extra',
-      tdClass: 'font-medium text-gray-900',
+      thClass: 'extra hidden sm:table-cell',
+      tdClass: 'font-medium text-gray-900 hidden sm:table-cell',
       sortable: false,
     },
     {
@@ -548,10 +558,17 @@ const userTableColumns = computed(() => {
       thClass: 'extra',
       tdClass: 'font-medium text-gray-900',
     },
-    { key: 'email', label: t('users.email') },
+    {
+      key: 'email',
+      label: t('users.email'),
+      thClass: 'hidden sm:table-cell',
+      tdClass: 'hidden sm:table-cell',
+    },
     {
       key: 'phone',
       label: t('users.phone'),
+      thClass: 'hidden xl:table-cell',
+      tdClass: 'hidden xl:table-cell',
     },
     {
       key: 'role',
@@ -562,14 +579,20 @@ const userTableColumns = computed(() => {
       key: 'company_names',
       label: t('users.companies'),
       sortable: false,
+      thClass: 'hidden lg:table-cell',
+      tdClass: 'hidden lg:table-cell',
     },
     {
       key: 'last_login_at',
       label: t('users.last_login'),
+      thClass: 'hidden xl:table-cell',
+      tdClass: 'hidden xl:table-cell',
     },
     {
       key: 'created_at',
       label: t('users.added_on'),
+      thClass: 'hidden md:table-cell',
+      tdClass: 'hidden md:table-cell',
     },
     {
       key: 'actions',
@@ -593,15 +616,21 @@ const activityColumns = computed(() => [
     key: 'entity',
     label: t('activity_log.entity'),
     sortable: false,
+    thClass: 'hidden sm:table-cell',
+    tdClass: 'hidden sm:table-cell',
   },
   {
     key: 'changes',
     label: t('activity_log.changes'),
     sortable: false,
+    thClass: 'hidden md:table-cell',
+    tdClass: 'hidden md:table-cell',
   },
   {
     key: 'created_at',
     label: t('activity_log.timestamp'),
+    thClass: 'hidden sm:table-cell',
+    tdClass: 'hidden sm:table-cell',
   },
 ])
 

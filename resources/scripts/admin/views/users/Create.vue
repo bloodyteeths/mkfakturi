@@ -178,25 +178,27 @@
               <div
                 v-for="(company, i) in userStore.userData.companies"
                 :key="'legal-' + i"
-                class="flex items-center space-x-6 text-sm"
+                class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-sm p-3 bg-gray-50 rounded-lg"
               >
-                <span class="text-gray-600 w-32 truncate">{{ company.name }}</span>
-                <label class="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    v-model="userStore.userData.companies[i].is_legal_representative"
-                    class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span>{{ $t('users.legal_representative') }}</span>
-                </label>
-                <label class="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    v-model="userStore.userData.companies[i].is_signing_authority"
-                    class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span>{{ $t('users.signing_authority') }}</span>
-                </label>
+                <span class="text-gray-700 font-medium sm:w-32 truncate">{{ company.name }}</span>
+                <div class="flex flex-wrap gap-4">
+                  <label class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      v-model="userStore.userData.companies[i].is_legal_representative"
+                      class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span>{{ $t('users.legal_representative') }}</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      v-model="userStore.userData.companies[i].is_signing_authority"
+                      class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span>{{ $t('users.signing_authority') }}</span>
+                  </label>
+                </div>
               </div>
             </div>
           </BaseInputGrid>
