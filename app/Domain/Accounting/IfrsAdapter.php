@@ -1577,8 +1577,9 @@ class IfrsAdapter
             if ($specificMatch) {
                 $userAccount = $specificMatch;
             } else {
-                // Fall back to first account of this type
-                $userAccount = $userAccount->first();
+                // No specific name match — use fallback code/name, NOT first account of type
+                // (First account of type is often code "000" = R&D in MK chart)
+                $userAccount = null;
             }
         } else {
             $userAccount = $userAccount->first();
@@ -1608,15 +1609,18 @@ class IfrsAdapter
      */
     protected function getAccountsReceivableAccount(int $companyId, int $entityId): Account
     {
-        return $this->mapUserAccountToIfrs(
+        // Try MK name first (Побарувања), then English fallback
+        $mkMatch = $this->mapUserAccountToIfrs(
             companyId: $companyId,
             entityId: $entityId,
             userAccountType: \App\Models\Account::TYPE_ASSET,
             ifrsAccountType: Account::RECEIVABLE,
-            fallbackName: 'Accounts Receivable',
+            fallbackName: 'Побарувања од купувачи',
             fallbackCode: '120', // Macedonian: Побарувања од купувачи во земјата
-            specificName: 'Receivable'
+            specificName: 'Побарувањ'
         );
+
+        return $mkMatch;
     }
 
     /**
@@ -1629,9 +1633,9 @@ class IfrsAdapter
             entityId: $entityId,
             userAccountType: \App\Models\Account::TYPE_REVENUE,
             ifrsAccountType: Account::OPERATING_REVENUE,
-            fallbackName: 'Sales Revenue',
+            fallbackName: 'Приходи од продажба',
             fallbackCode: '740', // Macedonian: Приходи од продажба на добра (производи) и услуги во земјата
-            specificName: 'Sales'
+            specificName: 'Приходи од продажба'
         );
     }
 
@@ -1645,9 +1649,9 @@ class IfrsAdapter
             entityId: $entityId,
             userAccountType: \App\Models\Account::TYPE_ASSET,
             ifrsAccountType: Account::BANK,
-            fallbackName: 'Cash and Bank',
+            fallbackName: 'Готовина',
             fallbackCode: '102', // Macedonian: Готовина (Cash = code 102 after 100↔102 swap)
-            specificName: 'Cash'
+            specificName: 'Готовина'
         );
     }
 
@@ -1786,9 +1790,9 @@ class IfrsAdapter
             entityId: $entityId,
             userAccountType: \App\Models\Account::TYPE_LIABILITY,
             ifrsAccountType: Account::CONTROL,
-            fallbackName: 'Tax Payable',
+            fallbackName: 'Обврски за ДДВ',
             fallbackCode: '230',
-            specificName: 'Tax'
+            specificName: 'ДДВ'
         );
     }
 
@@ -2015,9 +2019,9 @@ class IfrsAdapter
             entityId: $entityId,
             userAccountType: \App\Models\Account::TYPE_EXPENSE,
             ifrsAccountType: Account::OPERATING_EXPENSE,
-            fallbackName: 'Payment Processing Fees',
+            fallbackName: 'Трошоци за провизии',
             fallbackCode: '445', // Macedonian: Трошоци за провизии и надоместоци
-            specificName: 'Fee'
+            specificName: 'провизии'
         );
     }
 
@@ -3408,9 +3412,9 @@ class IfrsAdapter
             entityId: $entityId,
             userAccountType: \App\Models\Account::TYPE_LIABILITY,
             ifrsAccountType: Account::PAYABLE,
-            fallbackName: 'Accounts Payable',
+            fallbackName: 'Обврски кон добавувачи',
             fallbackCode: '220', // Macedonian: Обврски кон добавувачи во земјата
-            specificName: 'Payable'
+            specificName: 'Обврски кон добавувач'
         );
     }
 
@@ -3450,9 +3454,9 @@ class IfrsAdapter
             entityId: $entityId,
             userAccountType: \App\Models\Account::TYPE_ASSET,
             ifrsAccountType: Account::CURRENT_ASSET,
-            fallbackName: 'VAT Receivable',
+            fallbackName: 'Претходен данок - ДДВ',
             fallbackCode: '130',
-            specificName: 'VAT'
+            specificName: 'Претходен данок'
         );
     }
 
@@ -3987,14 +3991,26 @@ class IfrsAdapter
         '019'  => Account::CONTRA_ASSET,
         '100'  => Account::BANK,
         '120'  => Account::RECEIVABLE,
+        '122'  => Account::RECEIVABLE,   // Побарувања за дадени аванси
         '130'  => Account::RECEIVABLE,
         '162'  => Account::RECEIVABLE,
         '220'  => Account::PAYABLE,
+        '222'  => Account::CURRENT_LIABILITY, // Обврски за примени аванси
         '230'  => Account::CURRENT_LIABILITY,
         '234'  => Account::CURRENT_LIABILITY,
         '240'  => Account::CURRENT_LIABILITY,
         '242'  => Account::CURRENT_LIABILITY,
+        '281'  => Account::NON_CURRENT_LIABILITY, // Долгорочни обврски
+        '2810' => Account::NON_CURRENT_LIABILITY, // Долгорочни кредити од банки
+        '286'  => Account::NON_CURRENT_LIABILITY, // Долгорочни заеми и кредити
         '351'  => Account::INVENTORY,  // Ситен инвентар во употреба (small inventory in use)
+        '90'   => Account::EQUITY,     // Основна главнина
+        '91'   => Account::EQUITY,     // Премии на акции
+        '92'   => Account::EQUITY,     // Ревалоризациска резерва
+        '93'   => Account::EQUITY,     // Ревалоризациони резерви
+        '94'   => Account::EQUITY,     // Законски резерви
+        '95'   => Account::EQUITY,     // Задржана добивка
+        '96'   => Account::EQUITY,     // Пренесена загуба
     ];
 
     protected function findAccountByCode(int $entityId, string $code, string $name): Account

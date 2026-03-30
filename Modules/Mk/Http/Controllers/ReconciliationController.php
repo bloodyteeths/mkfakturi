@@ -869,16 +869,16 @@ class ReconciliationController extends Controller
 
         // MK Chart of Accounts GL mapping (Правилник 174/2011)
         $glMapping = [
-            'owner_contribution' => ['debit' => '1000', 'credit' => '3010'], // Жиро-сметка / Основна главнина
-            'owner_withdrawal' => ['debit' => '3220', 'credit' => '1000'], // Повлечен капитал / Жиро-сметка
-            'loan_received' => ['debit' => '1000', 'credit' => '2900'], // Жиро-сметка / Долгорочни кредити
-            'loan_repayment' => ['debit' => '2900', 'credit' => '1000'], // Долгорочни кредити / Жиро-сметка
+            'owner_contribution' => ['debit' => '1000', 'credit' => '900'], // Жиро-сметка / Основна главнина - запишан и уплатен капитал
+            'owner_withdrawal' => ['debit' => '950', 'credit' => '1000'], // Задржана добивка / Жиро-сметка
+            'loan_received' => ['debit' => '1000', 'credit' => '2810'], // Жиро-сметка / Долгорочни кредити од банки во земјата
+            'loan_repayment' => ['debit' => '2810', 'credit' => '1000'], // Долгорочни кредити / Жиро-сметка
             'tax_payment' => ['debit' => '2700', 'credit' => '1000'], // Обврски за даноци / Жиро-сметка
             'internal_transfer' => ['debit' => '1001', 'credit' => '1000'], // Девизна сметка / Жиро-сметка
             'cash_deposit' => ['debit' => '1000', 'credit' => '1020'], // Жиро-сметка / Каса-благајна
             'cash_withdrawal' => ['debit' => '1020', 'credit' => '1000'], // Каса-благајна / Жиро-сметка
-            'advance_received' => ['debit' => '1000', 'credit' => '2410'], // Жиро-сметка / Примени аванси
-            'advance_paid' => ['debit' => '1500', 'credit' => '1000'], // Дадени аванси / Жиро-сметка
+            'advance_received' => ['debit' => '1000', 'credit' => '222'], // Жиро-сметка / Обврски за примени аванси
+            'advance_paid' => ['debit' => '122', 'credit' => '1000'], // Побарувања за дадени аванси / Жиро-сметка
         ];
 
         // Tax sub-type GL refinement
@@ -966,14 +966,14 @@ class ReconciliationController extends Controller
 
                 // MK account names for GL codes
                 $accountNames = [
+                    '122' => 'Побарувања за дадени аванси', '222' => 'Обврски за примени аванси',
+                    '900' => 'Основна главнина', '950' => 'Задржана добивка',
                     '1000' => 'Жиро-сметка', '1001' => 'Девизна сметка',
                     '1020' => 'Каса-благајна', '1310' => 'ДДВ при увоз / Царина',
-                    '1500' => 'Дадени аванси', '2410' => 'Примени аванси',
                     '2520' => 'Обврски за ФПИОМ (пензиско)', '2530' => 'Обврски за ФЗОМ (здравствено)',
                     '2540' => 'Обврски за персонален данок', '2550' => 'Обврски за вработување',
                     '2560' => 'Обврски за професионален придонес', '2700' => 'Обврски за ДДВ',
-                    '2710' => 'Обврски за данок на добивка', '2900' => 'Долгорочни кредити',
-                    '3010' => 'Основна главнина', '3220' => 'Повлечен капитал',
+                    '2710' => 'Обврски за данок на добивка', '2810' => 'Долгорочни кредити од банки',
                     '4310' => 'Акцизи', '4650' => 'Комунални такси',
                     '4720' => 'Расходи за камати',
                 ];
@@ -987,10 +987,10 @@ class ReconciliationController extends Controller
                         'narration' => $narration,
                         'reference' => "BANK-TX-{$transaction->id}",
                         'line_items' => [
-                            // Principal: DR 2900 / CR 1000
+                            // Principal: DR 2810 / CR 1000
                             [
-                                'account_code' => '2900',
-                                'account_name' => $accountNames['2900'],
+                                'account_code' => '2810',
+                                'account_name' => $accountNames['2810'],
                                 'amount' => $principalCents,
                                 'credited' => false,
                                 'counterparty_name' => $counterparty,
