@@ -665,7 +665,24 @@ class AccountingReportsController extends Controller
     }
 
     /**
-     * Download a single journal entry (налог) as PDF.
+     * MK voucher type labels (Правилник 75/2024).
+     * Maps IFRS transaction types to Macedonian accounting voucher classifications.
+     */
+    private const MK_VOUCHER_TYPES = [
+        'Invoice'       => ['code' => 'ИФ', 'label' => 'Излезна фактура'],
+        'Bill'          => ['code' => 'УКФ', 'label' => 'Улазна (книговодствена) фактура'],
+        'Credit Note'   => ['code' => 'КН', 'label' => 'Кредитно известување'],
+        'Receipt'       => ['code' => 'ПР', 'label' => 'Приход (наплата)'],
+        'Payment'       => ['code' => 'ИЗВ', 'label' => 'Извод (плаќање)'],
+        'Cash Purchase' => ['code' => 'БЛ', 'label' => 'Благајна (готовинско плаќање)'],
+        'Journal Entry' => ['code' => 'ИНТ', 'label' => 'Интерен налог (рачно книжење)'],
+    ];
+
+    /**
+     * Download a single journal entry (налог за книжење) as PDF.
+     *
+     * MK-compliant: voucher type classification, amount in words,
+     * source document reference, balance verification, 3 signatures.
      */
     public function journalEntryPdf(Request $request, int $transaction)
     {
@@ -687,9 +704,42 @@ class AccountingReportsController extends Controller
             abort(404, 'Journal entry not found');
         }
 
+        // Voucher type classification
+        $txType = $entry['transaction_type'];
+        $voucherInfo = self::MK_VOUCHER_TYPES[$txType] ?? ['code' => 'ИНТ', 'label' => 'Интерен налог'];
+        $voucherTypeCode = $voucherInfo['code'];
+        $voucherTypeLabel = $voucherInfo['label'];
+
+        // Amount in words (Macedonian)
+        $amountWords = '—';
+        try {
+            $amountToWords = app(\Modules\Mk\Services\AmountToWordsService::class);
+            $amountWords = $amountToWords->convert($entry['total_debit'], 'MKD');
+        } catch (\Throwable $e) {
+            // AmountToWordsService not available — fall back to numeric
+            $amountWords = number_format($entry['total_debit'] / 100, 2, ',', '.') . ' МКД';
+        }
+
+        // Source document reference (extract from narration if it contains invoice/bill refs)
+        $sourceDocument = $this->extractSourceDocument($entry['narration']);
+
+        // Company logo
+        $companyLogo = null;
+        if ($company->logo) {
+            $logoPath = storage_path('app/public/' . $company->logo);
+            if (file_exists($logoPath)) {
+                $companyLogo = $logoPath;
+            }
+        }
+
         view()->share([
             'company' => $company,
+            'company_logo' => $companyLogo,
             'entry' => $entry,
+            'voucher_type_code' => $voucherTypeCode,
+            'voucher_type_label' => $voucherTypeLabel,
+            'amount_words' => $amountWords,
+            'source_document' => $sourceDocument,
             'report_period' => \Carbon\Carbon::parse($entry['date'])->format('d.m.Y'),
         ]);
 
@@ -697,6 +747,28 @@ class AccountingReportsController extends Controller
         $ref = str_replace('/', '-', $entry['reference'] ?? $transaction);
 
         return $pdf->download("nalog_{$ref}.pdf");
+    }
+
+    /**
+     * Extract source document reference from narration text.
+     *
+     * Looks for patterns like: Invoice INV-00123, Bill #456, Фактура ФАК-789, etc.
+     */
+    private function extractSourceDocument(string $narration): ?string
+    {
+        // Match common document reference patterns (MK and EN)
+        $patterns = [
+            '/(?:Invoice|Фактура|Влезна фактура|Bill|Сметка)\s*#?\s*[\w\-\/]+/iu',
+            '/(?:INV|FAK|ФАК|BIL|REC|PAY|ИЗВ|ПР)[\-\s]*\d[\w\-\/]*/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $narration, $matches)) {
+                return $matches[0];
+            }
+        }
+
+        return null;
     }
 
     /**
