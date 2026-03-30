@@ -254,7 +254,7 @@
         <div class="info-section" style="margin-top: 20px;">
             <div class="info-label">{{ __('payroll.payment_details') }}:</div>
             <div class="info-value">{{ __('payroll.bank') }}: {{ $employee->bank_name }}</div>
-            <div class="info-value">{{ __('payroll.iban') }}: {{ $employee->bank_account_iban }}</div>
+            <div class="info-value">{{ __('payroll.bank_account_number') }}: {{ $employee->bank_account_iban }}</div>
         </div>
 
         <!-- Employer Cost (MK model: employer cost = gross, no add-on) -->

@@ -150,6 +150,8 @@ class BankTransaction extends Model
 
     const LINKED_ADVANCE_PAID = 'advance_paid';
 
+    const LINKED_LOAN_GIVEN = 'loan_given';
+
     /**
      * Mark this transaction as reconciled with a linked record.
      */

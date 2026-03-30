@@ -683,6 +683,17 @@ async function downloadRekapitular() {
 }
 
 async function downloadAllPP50() {
+  const confirmed = window.confirm(
+    'ВНИМАНИЕ: PP50 налозите се реални банкарски документи.\n\n' +
+    'Пред генерирање проверете дека во Профил на компанија имате точно внесено:\n' +
+    '• Платежна сметка (15-цифрен број)\n' +
+    '• ЕДБ (единствен даночен број)\n' +
+    '• Адреса на фирмата\n\n' +
+    'Погрешни податоци = погрешна уплата на УЈП.\n\n' +
+    'Дали сакате да продолжите?'
+  )
+  if (!confirmed) return
+
   try {
     const response = await axios.get(
       `payroll-reports/download-all-pp50/${run.value.id}`,
@@ -692,7 +703,18 @@ async function downloadAllPP50() {
     notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
   } catch (error) {
     console.error('Error downloading PP50:', error)
-    notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
+    if (error.response && error.response.status === 422) {
+      // Backend validation error — read JSON from blob
+      const text = await error.response.data.text()
+      try {
+        const json = JSON.parse(text)
+        notificationStore.showNotification({ type: 'error', message: json.message || t('general.something_went_wrong') })
+      } catch {
+        notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
+      }
+    } else {
+      notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
+    }
   }
 }
 

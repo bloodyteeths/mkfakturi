@@ -176,31 +176,47 @@ class Pp30PdfService
      * Format IBAN with spaces every 4 characters.
      * MK07210001234567890 → MK07 2100 0123 4567 890
      */
-    public function formatIban(string $iban): string
+    public function formatIban(string $account): string
     {
-        $iban = strtoupper(str_replace(' ', '', $iban));
+        $account = strtoupper(str_replace(' ', '', $account));
 
-        if (empty($iban)) {
+        if (empty($account)) {
             return '';
         }
 
-        return trim(chunk_split($iban, 4, ' '));
+        // Domestic 15-16 digit платежна сметка — display as-is (no chunking)
+        if (preg_match('/^\d{15,16}$/', $account)) {
+            return $account;
+        }
+
+        // IBAN format — chunk into groups of 4
+        return trim(chunk_split($account, 4, ' '));
     }
 
     /**
      * Extract bank name from Macedonian IBAN based on bank code (positions 5-7).
      */
-    public function getBankNameFromIban(string $iban): string
+    public function getBankNameFromIban(string $account): string
     {
-        $iban = strtoupper(str_replace(' ', '', $iban));
+        $account = strtoupper(str_replace(' ', '', $account));
 
-        if (! str_starts_with($iban, 'MK') || strlen($iban) < 7) {
+        if (empty($account)) {
             return '';
         }
 
-        $bankCode = substr($iban, 4, 3);
+        // MK IBAN format: MK07 + 3-digit bank code + account digits (total 19 chars)
+        if (str_starts_with($account, 'MK') && strlen($account) >= 7) {
+            $bankCode = substr($account, 4, 3);
+            return self::BANK_CODES[$bankCode] ?? '';
+        }
 
-        return self::BANK_CODES[$bankCode] ?? '';
+        // Domestic 15-digit платежна сметка: first 3 digits = bank code
+        if (preg_match('/^\d{15,16}$/', $account)) {
+            $bankCode = substr($account, 0, 3);
+            return self::BANK_CODES[$bankCode] ?? '';
+        }
+
+        return '';
     }
 
     /**

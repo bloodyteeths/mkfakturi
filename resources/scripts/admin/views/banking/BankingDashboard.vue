@@ -707,13 +707,21 @@ const clearFilters = () => {
   }
 }
 
-const downloadPdfReport = async (url, filename) => {
+const downloadPdfReport = async (url, filename, extraParams = {}) => {
   try {
-    const params = {}
+    const params = { ...extraParams }
     if (filters.value.account_id) params.account_id = filters.value.account_id
     if (filters.value.from_date) params.from = filters.value.from_date
     if (filters.value.to_date) params.to = filters.value.to_date
     const response = await axios.get(url, { params, responseType: 'blob' })
+
+    // Check if response is actually a JSON error (422/500 returned as blob)
+    if (response.data.type && response.data.type.includes('json')) {
+      const text = await response.data.text()
+      const json = JSON.parse(text)
+      throw { response: { data: json } }
+    }
+
     const blob = new Blob([response.data], { type: 'application/pdf' })
     const link = document.createElement('a')
     link.href = window.URL.createObjectURL(blob)
@@ -723,26 +731,43 @@ const downloadPdfReport = async (url, filename) => {
     link.remove()
     window.URL.revokeObjectURL(link.href)
   } catch (error) {
-    notificationStore.showNotification({
-      type: 'error',
-      message: error.response?.data?.message || 'Failed to generate report',
-    })
+    let msg = 'Failed to generate report'
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const json = JSON.parse(text)
+        msg = json.message || msg
+      } catch (_) {}
+    } else if (error.response?.data?.message) {
+      msg = error.response.data.message
+    }
+    notificationStore.showNotification({ type: 'error', message: msg })
   }
 }
 
 const downloadBankStatement = () => {
+  const accountId = filters.value.account_id || connectedAccounts.value[0]?.id
+  if (!accountId) {
+    notificationStore.showNotification({
+      type: 'error',
+      message: t('banking.no_accounts_error', 'Немате поврзани банкарски сметки. Додајте сметка во Подесувања → Банкарски сметки.'),
+    })
+    return
+  }
   const date = new Date().toISOString().split('T')[0]
-  downloadPdfReport('/banking/statement-report', 'bank-statement-' + date + '.pdf')
+  downloadPdfReport('/banking/statement-report', 'bank-statement-' + date + '.pdf', { account_id: accountId })
 }
 
 const downloadIos = () => {
-  const date = new Date().toISOString().split('T')[0]
-  downloadPdfReport('/banking/ios', 'ios-' + date + '.pdf')
+  notificationStore.showNotification({
+    type: 'info',
+    message: t('banking.ios_from_customer', 'ИОС извештајот се генерира од страницата на купувачот. Отворете Купувач → Документи → ИОС.'),
+  })
 }
 
 const downloadDailyCashReport = () => {
   const date = new Date().toISOString().split('T')[0]
-  downloadPdfReport('/banking/daily-cash-report', 'daily-cash-' + date + '.pdf')
+  downloadPdfReport('/banking/daily-cash-report', 'daily-cash-' + date + '.pdf', { date })
 }
 
 const formatMoney = (amount, currency) => {

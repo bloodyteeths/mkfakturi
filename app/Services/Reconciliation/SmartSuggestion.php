@@ -46,6 +46,9 @@ class SmartSuggestion
 
     public const ACTION_ADVANCE_PAID = 'advance_paid';
 
+    // Loan given (outgoing loan to third party)
+    public const ACTION_LOAN_GIVEN = 'loan_given';
+
     public function __construct(
         public string $action,
         public float $confidence,

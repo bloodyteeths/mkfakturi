@@ -65,6 +65,7 @@ class PayrollEmployeeRequest extends FormRequest
                 'required',
                 'string',
                 'max:34',
+                'regex:/^[0-9]{15,16}$/',
             ],
             'bank_name' => [
                 'nullable',
@@ -129,6 +130,7 @@ class PayrollEmployeeRequest extends FormRequest
             'embg.unique' => 'An employee with this EMBG already exists in your company.',
             'employee_number.unique' => 'This employee number is already in use.',
             'termination_date.after' => 'Termination date must be after employment date.',
+            'bank_account_iban.regex' => 'Платежна сметка мора да содржи 15-16 цифри (пр. 300000000000123).',
         ];
     }
 

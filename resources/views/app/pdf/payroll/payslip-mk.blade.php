@@ -360,7 +360,7 @@
                     <div class="info-value">Банка: {{ $employee->bank_name }}</div>
                     @endif
                     @if($employee->bank_account_iban)
-                    <div class="info-value">IBAN: {{ $employee->bank_account_iban }}</div>
+                    <div class="info-value">Сметка: {{ $employee->bank_account_iban }}</div>
                     @endif
                 </div>
                 @endif

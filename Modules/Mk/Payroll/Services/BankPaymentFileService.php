@@ -235,7 +235,7 @@ class BankPaymentFileService
             'Employee ID',
             'Employee Name',
             'EMBG',
-            'IBAN',
+            'Bank Account',
             'Gross Salary',
             'Net Salary',
             'Income Tax',
@@ -351,28 +351,36 @@ class BankPaymentFileService
     }
 
     /**
-     * Validate IBAN format
+     * Validate bank account format
      *
-     * Basic validation - checks if IBAN has correct format.
-     * Macedonian IBANs: MK07 followed by 15 digits
+     * Accepts both:
+     * - MK domestic платежна сметка: 15-16 digits (e.g. 300000000000123)
+     * - IBAN format: MK07 + 15 digits (for international transfers)
      */
-    private function isValidIban(string $iban): bool
+    private function isValidIban(string $account): bool
     {
-        // Remove spaces and convert to uppercase
-        $iban = strtoupper(str_replace(' ', '', $iban));
+        $account = strtoupper(str_replace(' ', '', $account));
 
-        // Must start with 2 letters (country code)
-        if (! preg_match('/^[A-Z]{2}/', $iban)) {
+        if (empty($account)) {
             return false;
         }
 
-        // For Macedonian IBANs, must be MK followed by 17 characters total
-        if (str_starts_with($iban, 'MK')) {
-            return strlen($iban) === 19;
+        // Macedonian domestic платежна сметка: 15-16 digits
+        if (preg_match('/^\d{15,16}$/', $account)) {
+            return true;
         }
 
-        // For other countries, basic length check (15-34 characters)
-        return strlen($iban) >= 15 && strlen($iban) <= 34;
+        // Macedonian IBAN: MK + 2 check digits + 15 digits = 19 chars
+        if (str_starts_with($account, 'MK')) {
+            return strlen($account) === 19;
+        }
+
+        // Other IBAN formats (15-34 chars, starts with 2 letters)
+        if (preg_match('/^[A-Z]{2}/', $account)) {
+            return strlen($account) >= 15 && strlen($account) <= 34;
+        }
+
+        return false;
     }
 
     /**
@@ -400,13 +408,16 @@ class BankPaymentFileService
     {
         $iban = strtoupper(str_replace(' ', '', $iban));
 
-        // Check if it's a Macedonian IBAN
-        if (! str_starts_with($iban, 'MK') || strlen($iban) < 7) {
+        // Domestic 15-16 digit платежна сметка: first 3 digits = bank code
+        if (preg_match('/^\d{15,16}$/', $iban)) {
+            $bankCode = substr($iban, 0, 3);
+        }
+        // Macedonian IBAN: bank code at positions 5-7
+        elseif (str_starts_with($iban, 'MK') && strlen($iban) >= 7) {
+            $bankCode = substr($iban, 4, 3);
+        } else {
             return 'NOTPROVIDED';
         }
-
-        // Extract bank code (positions 5-7 after MK + 2 check digits)
-        $bankCode = substr($iban, 4, 3);
 
         // Map bank codes to BICs
         $bankBics = [

@@ -257,7 +257,7 @@
           </h4>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <p class="text-sm text-gray-600">{{ $t('payroll.bank_account_iban') }}</p>
+              <p class="text-sm text-gray-600">{{ $t('payroll.bank_account_number') }}</p>
               <p class="text-base font-medium text-gray-900">
                 {{ payslip.employee?.bank_account_iban }}
               </p>

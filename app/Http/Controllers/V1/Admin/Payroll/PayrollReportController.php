@@ -512,8 +512,8 @@ class PayrollReportController extends Controller
             ->first();
 
         $missing = [];
-        if (! $bankAccount || ! $bankAccount->iban) {
-            $missing[] = 'IBAN на сметка (Settings → Bank Accounts)';
+        if (! $bankAccount || (! $bankAccount->iban && ! $bankAccount->account_number)) {
+            $missing[] = 'Платежна сметка (Подесувања → Банкарски сметки)';
         }
         if (empty($company->edb)) {
             $missing[] = 'ЕДБ број (Settings → Company)';
@@ -555,7 +555,7 @@ class PayrollReportController extends Controller
 
             $slips[] = $pp50Service->buildSlip(
                 debtorName: $company->name,
-                debtorIban: $bankAccount->iban,
+                debtorIban: $bankAccount->iban ?? $bankAccount->account_number,
                 debtorBank: $bankAccount->bank_name ?? '',
                 creditorName: $account['recipient_name'],
                 creditorIban: $account['recipient_account'],

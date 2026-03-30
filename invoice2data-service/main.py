@@ -755,6 +755,8 @@ def _extract_table_without_header(
             )
 
     mid_x = (debit_x + credit_x) / 2 if debit_x != credit_x else image_width * 0.5
+    # Fee column is to the right of credit — boundary between credit and fee
+    fee_boundary_x = credit_x + (credit_x - mid_x) * 0.5 if credit_x > mid_x else image_width * 0.6
 
     # Build transactions
     transactions: List[Dict[str, Any]] = []
@@ -785,14 +787,17 @@ def _extract_table_without_header(
                     if val >= 0:
                         amounts_with_x.append((w["left"], val))
 
-        # Assign to debit/credit based on X position
+        # Assign to debit/credit/fee based on X position
         debit = 0.0
         credit = 0.0
+        fee = 0.0
         for ax, av in amounts_with_x:
             if av == 0:
                 continue
             if ax < mid_x:
                 debit = max(debit, av)  # take largest if multiple
+            elif ax > fee_boundary_x:
+                fee = max(fee, av)  # fee column (пров.)
             else:
                 credit = max(credit, av)
 
@@ -855,6 +860,7 @@ def _extract_table_without_header(
             "counterparty_account": account,
             "debit": debit,
             "credit": credit,
+            "fee": fee,
             "payment_code": payment_code,
             "description": " ".join(description_parts).strip() or None,
             "reference": reference,
@@ -957,6 +963,7 @@ def _map_words_to_columns(
     account = " ".join(column_words.get("account", [])).replace(" ", "")
     debit_str = " ".join(column_words.get("debit", []))
     credit_str = " ".join(column_words.get("credit", []))
+    fee_str = " ".join(column_words.get("fee", []))
     code_str = " ".join(column_words.get("code", []))
     description = " ".join(column_words.get("description", []))
     reference = " ".join(column_words.get("reference", []))
@@ -964,6 +971,7 @@ def _map_words_to_columns(
 
     debit = _parse_amount(debit_str)
     credit = _parse_amount(credit_str)
+    fee = _parse_amount(fee_str)
 
     # Extract payment code (3-digit number)
     code_match = re.search(r"\d{3}", code_str)
@@ -974,6 +982,7 @@ def _map_words_to_columns(
         "counterparty_account": account if len(account) >= 9 else None,
         "debit": debit,
         "credit": credit,
+        "fee": fee,
         "payment_code": payment_code,
         "description": description.strip() or None,
         "reference": reference.strip() or None,
@@ -1212,11 +1221,17 @@ def _extract_transactions_from_text(plain_text: str) -> List[Dict[str, Any]]:
                 account = acct
                 break
 
-        # --- Determine debit / credit ---
+        # --- Determine debit / credit / fee ---
         debit = 0.0
         credit = 0.0
+        fee = 0.0
 
-        if len(first_amounts) >= 2:
+        if len(first_amounts) >= 3:
+            # Three amounts on first line → debit, credit, fee (пров.) columns
+            debit = first_amounts[0]
+            credit = first_amounts[1]
+            fee = first_amounts[2]
+        elif len(first_amounts) >= 2:
             # Two amounts on first line → debit column, then credit column
             debit = first_amounts[0]
             credit = first_amounts[1]
@@ -1351,6 +1366,7 @@ def _extract_transactions_from_text(plain_text: str) -> List[Dict[str, Any]]:
             "counterparty_account": account,
             "debit": debit,
             "credit": credit,
+            "fee": fee,
             "payment_code": payment_code,
             "description": description or None,
             "reference": reference,
@@ -1359,7 +1375,7 @@ def _extract_transactions_from_text(plain_text: str) -> List[Dict[str, Any]]:
         transactions.append(tx)
         logger.info(
             f"  TX {tx['row_number']}: acct={account} "
-            f"debit={debit} credit={credit} "
+            f"debit={debit} credit={credit} fee={fee} "
             f"name={name[:40]} ref={reference}"
         )
 
@@ -1385,6 +1401,7 @@ Return a single JSON object with these top-level fields:
   - counterparty_account: string (15-16 digit bank account number from "Сметка" column)
   - debit: number (amount from "должи" column, 0.00 if none)
   - credit: number (amount from "побарува" column, 0.00 if none)
+  - fee: number (amount from "пров." / "провизија" column — bank commission charged per transaction, 0.00 if none or column not present)
   - payment_code: integer (from "Шиф" column, null if not visible)
   - description: string (from "Цел на дознака" column — the human-readable purpose of payment)
   - reference: string (from "Рекламација" column — 6-7 digit reference number, null if not visible)

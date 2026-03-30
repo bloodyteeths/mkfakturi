@@ -95,7 +95,8 @@ Keyword hints:
 - "вработување", "employment", "невработеност" → payroll employment fund (tax_payment sub_type Вработување)
 - "персонален данок", "данок од плата", "ПДД" → payroll income tax (tax_payment sub_type Персонален данок)
 - "УЈП", "ДДВ", "данок на добивка", "аконтација", "tatim", "TVSH" → tax_payment
-- "кредит", "рата", "ануитет", "лизинг", "kredi", "loan", "leasing" → loan_repayment
+- "кредит", "рата", "ануитет", "лизинг", "kredi", "loan repayment", "leasing" → loan_repayment
+- "позајмица", "позајмица дадена", "loan given", "дадена позајмица", "huadhëni", "kredi dhënë" → loan_given (outgoing loan)
 - "провизија", "камата банка", "komision", "fee", "банкарска провизија" → bank fee (expense)
 - "ЕВН", "EVN", "Телеком", "водовод", "electricity", "water", "комунална" → utility (expense)
 - "кирија", "закуп", "qira", "rent" → rent (expense)
@@ -148,6 +149,7 @@ For OUTGOING (debit) transactions, choose one action:
 - "link_payroll": Salary/wage/contribution payments to employees. Set category_id to null.
 - "tax_payment": Tax payments to government (УЈП/UJP, ДДВ/VAT, данок на добивка/profit tax, персонален данок/personal income tax, придонеси за ФПИОМ/ФЗОМ pension/health, царина/customs, акциза/excise, комунална такса). Set category_id to null. Include "sub_type" field with specific tax name.
 - "loan_repayment": Loan installments, credit repayments, leasing payments to banks or financial institutions. Set category_id to null.
+- "loan_given": Loan given to third party, money lent out (позајмица дадена, дадена позајмица, позајмица). NOT a loan repayment. Set category_id to null.
 - "owner_withdrawal": Owner/shareholder withdrawing capital, dividend payout to owner, personal withdrawal by owner (повлекување капитал, дивиденда, лично подигнување). Set category_id to null.
 - "cash_withdrawal": Cash withdrawal from bank to cash register (подигнување готовина, ATM, благајна). Set category_id to null.
 - "advance_paid": Advance payment to supplier before receiving goods/invoice (аванс, предуплата, prepayment). Set category_id to null.
@@ -158,11 +160,12 @@ Rules (check in this order):
 1. Cash withdrawal keywords (подигнување готовина, ATM, благајна, cash withdrawal) → "cash_withdrawal"
 2. Salary/payroll keywords (плата, нето, придонес за вработен, paga) → "link_payroll"
 3. Tax keywords (УЈП, ДДВ, данок, ФПИОМ, ФЗОМ, tatim, TVSH, аконтација, царина, акциза, комунална такса) → "tax_payment"
-4. Loan keywords (кредит, рата, ануитет, лизинг, kredi, loan, leasing) → "loan_repayment"
-5. Owner keywords (сопственик, дивиденда, повлекување, лично подигнување, ortaku, divident) → "owner_withdrawal"
-6. Advance payment keywords (аванс, предуплата, авансно плаќање, avans, paradhëni) → "advance_paid"
-7. Internal transfer (own account name, same company IBAN) → "internal_transfer"
-8. Everything else → "create_expense" with best category
+4. Loan given keywords (позајмица, позајмица дадена, дадена позајмица, loan given, huadhëni) → "loan_given"
+5. Loan repayment keywords (кредит, рата, ануитет, лизинг, kredi, loan repayment, leasing) → "loan_repayment"
+6. Owner keywords (сопственик, дивиденда, повлекување, лично подигнување, ortaku, divident) → "owner_withdrawal"
+7. Advance payment keywords (аванс, предуплата, авансно плаќање, avans, paradhëni) → "advance_paid"
+8. Internal transfer (own account name, same company IBAN) → "internal_transfer"
+9. Everything else → "create_expense" with best category
 INSTRUCTIONS;
     }
 
@@ -221,6 +224,7 @@ INSTRUCTIONS;
             SmartSuggestion::ACTION_CASH_WITHDRAWAL,
             SmartSuggestion::ACTION_ADVANCE_RECEIVED,
             SmartSuggestion::ACTION_ADVANCE_PAID,
+            SmartSuggestion::ACTION_LOAN_GIVEN,
         ];
 
         if (! $action || ! in_array($action, $validActions)) {
@@ -233,6 +237,7 @@ INSTRUCTIONS;
             SmartSuggestion::ACTION_LINK_PAYROLL, SmartSuggestion::ACTION_OWNER_WITHDRAWAL,
             SmartSuggestion::ACTION_LOAN_REPAYMENT, SmartSuggestion::ACTION_TAX_PAYMENT,
             SmartSuggestion::ACTION_CASH_WITHDRAWAL, SmartSuggestion::ACTION_ADVANCE_PAID,
+            SmartSuggestion::ACTION_LOAN_GIVEN,
         ];
         $creditOnlyActions = [
             SmartSuggestion::ACTION_RECORD_INCOME, SmartSuggestion::ACTION_LINK_INVOICE,

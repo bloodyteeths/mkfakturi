@@ -270,6 +270,20 @@
                     </div>
                   </button>
 
+                  <!-- Loan Given (debits) -->
+                  <button
+                    v-if="!isCredit"
+                    @click="manualAction = 'loan_given'"
+                    class="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                    :class="manualAction === 'loan_given' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'"
+                  >
+                    <div class="flex items-center">
+                      <BaseIcon name="ArrowUpOnSquareIcon" class="h-4 w-4 mr-2 text-teal-500" />
+                      <span class="text-sm font-medium">{{ $t('banking.loan_given', 'Loan Given (Позајмица дадена)') }}</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-0.5 ml-6">{{ $t('banking.loan_given_hint', 'GL: DR 1240 Краткорочни побарувања по дадени заеми') }}</p>
+                  </button>
+
                   <!-- Tax Payment (debits) -->
                   <button
                     v-if="!isCredit"
@@ -357,6 +371,7 @@
                       <BaseIcon name="CheckCircleIcon" class="h-4 w-4 mr-2 text-gray-500" />
                       <span class="text-sm font-medium">{{ $t('banking.mark_reviewed', 'Mark as Reviewed') }}</span>
                     </div>
+                    <p class="text-xs text-amber-600 mt-0.5 ml-6">{{ $t('banking.reviewed_warning', '⚠ No GL entry will be created — status only') }}</p>
                   </button>
 
                   <!-- Manual Sub-Forms -->
@@ -475,7 +490,7 @@
                   </div>
 
                   <!-- Financial transaction sub-forms -->
-                  <div v-if="['owner_contribution', 'owner_withdrawal', 'loan_received', 'loan_repayment', 'internal_transfer', 'cash_deposit', 'cash_withdrawal', 'advance_received', 'advance_paid'].includes(manualAction)" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                  <div v-if="['owner_contribution', 'owner_withdrawal', 'loan_received', 'loan_repayment', 'loan_given', 'internal_transfer', 'cash_deposit', 'cash_withdrawal', 'advance_received', 'advance_paid'].includes(manualAction)" class="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
                     <!-- Interest amount for loan repayment -->
                     <div v-if="manualAction === 'loan_repayment'" class="space-y-1">
                       <label class="text-xs font-medium text-gray-600">{{ $t('banking.interest_portion', 'Interest portion (optional)') }}</label>
@@ -663,6 +678,7 @@ const acceptSuggestion = async (s) => {
         await axios.post('/banking/reconciliation/record-expense', {
           transaction_id: txId,
           expense_category_id: s.category_id,
+          category_name: s.category_name || null,
           notes: s.reason,
         })
         break
@@ -706,6 +722,7 @@ const acceptSuggestion = async (s) => {
       case 'owner_withdrawal':
       case 'loan_received':
       case 'loan_repayment':
+      case 'loan_given':
       case 'tax_payment':
       case 'internal_transfer':
       case 'cash_deposit':
@@ -799,6 +816,7 @@ const actionLabels = {
   cash_withdrawal: 'Cash Withdrawal',
   advance_received: 'Advance Payment Received',
   advance_paid: 'Advance Payment to Supplier',
+  loan_given: 'Loan Given (Позајмица дадена)',
 }
 
 const getActionLabel = (action) => {
@@ -828,6 +846,7 @@ const suggestionIcon = computed(() => {
     cash_withdrawal: 'BanknotesIcon',
     advance_received: 'ClockIcon',
     advance_paid: 'ClockIcon',
+    loan_given: 'ArrowUpOnSquareIcon',
   }
   return icons[suggestion.value?.action] || 'SparklesIcon'
 })
@@ -857,6 +876,7 @@ const suggestionIconBgClass = computed(() => {
     cash_withdrawal: 'bg-emerald-600',
     advance_received: 'bg-orange-500',
     advance_paid: 'bg-orange-500',
+    loan_given: 'bg-teal-500',
   }
   return map[suggestion.value?.action] || 'bg-gray-500'
 })
