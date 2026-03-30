@@ -56,6 +56,8 @@ class KnowledgeBaseService
         'help_consolidation' => 'consolidation',
         'help_batch_operations' => 'batch-operations',
         'help_bi_dashboard' => 'bi-dashboard',
+        'help_manufacturing' => 'manufacturing',
+        'help_pos' => 'pos',
     ];
 
     private string $knowledgePath;
@@ -167,6 +169,8 @@ class KnowledgeBaseService
             'help_reports' => 'Questions about reports: sales, expenses, P&L, tax, general ledger',
             'help_settings' => 'Questions about settings: company info, users, roles, taxes, templates, billing',
             'help_partner' => 'Questions about partner/accountant portal, managing client companies, commissions',
+            'help_manufacturing' => 'Questions about manufacturing, BOM, production orders, shop floor, work centers',
+            'help_pos' => 'Questions about POS, cash register, fiscal devices, fiscal receipts, kitchen display',
         ];
     }
 

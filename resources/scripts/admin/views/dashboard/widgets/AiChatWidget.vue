@@ -49,12 +49,26 @@
       class="flex-1 overflow-y-auto mb-4 space-y-4 min-h-[200px] max-h-[400px] pr-2"
       style="scrollbar-width: thin;"
     >
-      <!-- Empty State -->
-      <div v-if="messages.length === 0" class="flex items-center justify-center h-full text-center py-8">
-        <div>
-          <ChatBubbleLeftRightIcon class="h-12 w-12 mx-auto text-gray-300 mb-3" />
-          <p class="text-gray-500 text-sm">{{ $t('ai.chat.empty_state') }}</p>
-          <p class="text-gray-400 text-xs mt-2">{{ $t('ai.chat.example_questions') }}</p>
+      <!-- Empty State with Prompt Suggestions -->
+      <div v-if="messages.length === 0" class="flex flex-col items-center justify-center h-full py-6">
+        <ChatBubbleLeftRightIcon class="h-10 w-10 text-gray-300 mb-3" />
+        <p class="text-gray-500 text-sm mb-1">{{ $t('ai.chat.empty_state') }}</p>
+        <p class="text-gray-400 text-xs mb-4">{{ $t('ai.chat.empty_hint') }}</p>
+
+        <!-- Prompt suggestion chips -->
+        <div class="w-full space-y-2 px-2">
+          <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ $t('ai.chat.try_asking') }}</p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="(prompt, idx) in promptSuggestions"
+              :key="idx"
+              @click="usePromptSuggestion(prompt.text)"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 border border-gray-200 hover:border-indigo-200 rounded-full transition-colors cursor-pointer"
+            >
+              <component :is="prompt.icon" class="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{{ prompt.text }}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -180,7 +194,15 @@ import {
   PlusCircleIcon,
   ClipboardDocumentIcon,
   DocumentPlusIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  DocumentTextIcon,
+  BanknotesIcon,
+  ChartBarIcon,
+  CalculatorIcon,
+  CreditCardIcon,
+  ArchiveBoxIcon,
+  UserGroupIcon,
+  CogIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -194,6 +216,20 @@ const storagePrefix = computed(() => {
   return `ai_chat_${companyId}`
 })
 
+// Prompt suggestions for empty state
+const promptSuggestions = computed(() => [
+  { text: t('ai.chat.prompts.create_invoice'), icon: DocumentTextIcon },
+  { text: t('ai.chat.prompts.check_unpaid'), icon: BanknotesIcon },
+  { text: t('ai.chat.prompts.monthly_profit'), icon: ChartBarIcon },
+  { text: t('ai.chat.prompts.record_expense'), icon: CalculatorIcon },
+  { text: t('ai.chat.prompts.bank_reconcile'), icon: CreditCardIcon },
+  { text: t('ai.chat.prompts.stock_status'), icon: ArchiveBoxIcon },
+  { text: t('ai.chat.prompts.payroll_run'), icon: UserGroupIcon },
+  { text: t('ai.chat.prompts.open_reports'), icon: ChartBarIcon },
+  { text: t('ai.chat.prompts.create_estimate'), icon: DocumentTextIcon },
+  { text: t('ai.chat.prompts.navigate_settings'), icon: CogIcon },
+])
+
 // Reactive data
 const messages = ref([])
 const currentMessage = ref('')
@@ -202,6 +238,11 @@ const chatContainer = ref(null)
 const conversationId = ref(null)
 
 // Methods
+function usePromptSuggestion(text) {
+  currentMessage.value = text
+  sendMessage()
+}
+
 async function sendMessage() {
   if (!currentMessage.value.trim() || isLoading.value) return
 

@@ -36,6 +36,11 @@
         "support_tickets": "Kërkesat për Mbështetje",
         "all_support_tickets": "Të Gjitha Kërkesat",
         "payroll": "Pagat",
+        "payroll_dashboard": "Pasqyra",
+        "payroll_employees": "Punonjësit",
+        "payroll_leave": "Pushimet",
+        "payroll_reports": "Raportet tatimore",
+        "payroll_runs": "Pagesat",
         "deadlines": "Afatet",
         "documents": "Dokumente",
         "leave": "Menaxhimi i pushimeve",
@@ -262,6 +267,7 @@
         "no_records_found": "Nuk u gjetën regjistrime",
         "export_to_csv": "Eksporto në CSV",
         "export": "Eksporto",
+        "export_to_excel": "Eksporto në Excel",
         "reference": "Референца",
         "description": "Përshkrimi",
         "page": "Страnë",
@@ -1497,7 +1503,11 @@
         "bulk_enable_stock_confirm": "Aktivizo ndjekjen e stokut për {count} artikuj të zgjedhur?",
         "bulk_disable_stock_confirm": "Çaktivizo ndjekjen e stokut për {count} artikuj të zgjedhur?",
         "bulk_updated_message": "{count} artikuj u përditësuan me sukses",
-        "has_stock_movements": "Nuk mund të fshihet artikulli me lëvizje stoku"
+        "has_stock_movements": "Nuk mund të fshihet artikulli me lëvizje stoku",
+        "advanced_settings": "Cilësimet e avancuara",
+        "advanced_settings_hint": "SKU, barkod, çmimi i kostos, çmimet, llogaritë kontabël",
+        "stock_inventory": "Stoku & Inventari",
+        "stock_inventory_hint": "Ndiqni sasitë, vendosni pikat e riporosisë, menaxhoni depot"
     },
     "estimates": {
         "title": "Ofertat",
@@ -5233,17 +5243,31 @@
         },
         "chat": {
             "title": "Asistent AI",
-            "subtitle": "Bëni pyetje financiare",
-            "placeholder": "Shkruani mesazhin tuaj...",
+            "subtitle": "Krijo dokumente, bëj pyetje, navigo — të gjitha me chat",
+            "placeholder": "Krijo faturë, kontrollo bilancin, llogarit pagat...",
             "send": "Dërgo",
             "clear": "Pastro",
-            "empty_state": "Ende nuk ka mesazhe. Bëni një pyetje!",
+            "empty_state": "Asistenti juaj AI për fatura, banka, paga e më shumë",
+            "empty_hint": "Shkruani një komandë ose prekni një sugjerim më poshtë",
             "example_questions": "Pyetje shembull",
             "disclaimer": "Përgjigjet e AI janë këshilluese",
-            "no_response": "Joма përgjigje nga АDhe асdheстентот",
-            "error_response": "Gabim прdhe комунdheкацdheја me АDhe асdheстентот",
+            "no_response": "Nuk ka përgjigje nga asistenti AI",
+            "error_response": "Gabim në komunikimin me asistentin AI",
             "new_conversation": "Bisedë e re",
-            "copy": "Kopjo"
+            "copy": "Kopjo",
+            "try_asking": "Provoni",
+            "prompts": {
+                "create_invoice": "Krijo faturë për një klient",
+                "check_unpaid": "Cilat fatura janë të papaguara?",
+                "monthly_profit": "Sa është fitimi neto këtë muaj?",
+                "record_expense": "Regjistro një shpenzim",
+                "bank_reconcile": "Trego transaksionet bankare të pabarazuara",
+                "stock_status": "Cilat artikuj kanë stok të ulët?",
+                "payroll_run": "Krijo llogaritje pagash për këtë muaj",
+                "open_reports": "Hap faqen e raporteve",
+                "create_estimate": "Krijo ofertë për një klient",
+                "navigate_settings": "Shko te cilësimet e kompanisë"
+            }
         }
     },
     "tax": {
@@ -7250,6 +7274,7 @@
         "leave_type": "Lloji i pushimit",
         "new_leave_request": "Kërkesë e re për pushim",
         "no_leave_requests": "Nuk ka kërkesa për pushim",
+        "no_leave_requests_description": "Dorëzoni kërkesën tuaj të parë për pushim për të filluar",
         "ot_rate": "Norma",
         "overtime_hours": "Orë jashtë orarit",
         "overtime_pay": "Paga jashtë orarit",
