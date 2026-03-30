@@ -58,6 +58,8 @@ class SmartSuggestion
         public ?int $categoryId = null,
         public ?string $categoryName = null,
         public array $alternatives = [],
+        public ?string $glDebitCode = null,
+        public ?string $glCreditCode = null,
     ) {}
 
     public function toArray(): array
@@ -70,6 +72,8 @@ class SmartSuggestion
             'target_label' => $this->targetLabel,
             'category_id' => $this->categoryId,
             'category_name' => $this->categoryName,
+            'gl_debit_code' => $this->glDebitCode,
+            'gl_credit_code' => $this->glCreditCode,
             'alternatives' => array_map(fn ($alt) => $alt instanceof self ? $alt->toArray() : $alt, $this->alternatives),
         ];
     }

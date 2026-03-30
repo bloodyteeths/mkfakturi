@@ -782,6 +782,7 @@ class SmartReconciliationService
             BankTransaction::LINKED_CASH_WITHDRAWAL => SmartSuggestion::ACTION_CASH_WITHDRAWAL,
             BankTransaction::LINKED_ADVANCE_RECEIVED => SmartSuggestion::ACTION_ADVANCE_RECEIVED,
             BankTransaction::LINKED_ADVANCE_PAID => SmartSuggestion::ACTION_ADVANCE_PAID,
+            BankTransaction::LINKED_LOAN_GIVEN => SmartSuggestion::ACTION_LOAN_GIVEN,
             default => null,
         };
 
@@ -789,9 +790,11 @@ class SmartReconciliationService
             return null;
         }
 
-        // Try to extract the category from past processing notes
+        // Try to extract the category and GL codes from past processing notes
         $categoryId = null;
         $categoryName = null;
+        $glDebitCode = null;
+        $glCreditCode = null;
         if ($past->processing_notes) {
             $notes = is_string($past->processing_notes) ? json_decode($past->processing_notes, true) : $past->processing_notes;
             $categoryId = $notes['category_id'] ?? null;
@@ -799,14 +802,24 @@ class SmartReconciliationService
                 $cat = ExpenseCategory::find($categoryId);
                 $categoryName = $cat?->name;
             }
+            // Extract learned GL codes from past reconciliation
+            $glDebitCode = $notes['gl_debit'] ?? null;
+            $glCreditCode = $notes['gl_credit'] ?? null;
+        }
+
+        $glHint = '';
+        if ($glDebitCode || $glCreditCode) {
+            $glHint = " (GL: DR {$glDebitCode} / CR {$glCreditCode})";
         }
 
         return new SmartSuggestion(
             action: $action,
             confidence: 0.82,
-            reason: "Previously categorized for \"{$counterparty}\"",
+            reason: "Previously categorized for \"{$counterparty}\"{$glHint}",
             categoryId: $categoryId,
             categoryName: $categoryName,
+            glDebitCode: $glDebitCode,
+            glCreditCode: $glCreditCode,
         );
     }
 

@@ -780,6 +780,16 @@ const fetchSuggestion = async () => {
       transaction_id: props.transaction.id,
     })
     suggestion.value = data.suggestion
+
+    // Auto-fill GL picker from learned GL codes
+    if (data.suggestion?.gl_debit_code) {
+      glDebitCode.value = data.suggestion.gl_debit_code
+      showGlPicker.value = true
+    }
+    if (data.suggestion?.gl_credit_code) {
+      glCreditCode.value = data.suggestion.gl_credit_code
+      showGlPicker.value = true
+    }
   } catch (e) {
     error.value = e.response?.data?.message || 'Failed to analyze transaction'
   } finally {
@@ -983,6 +993,12 @@ const glDefaults = {
 }
 
 const getGlHint = (action) => {
+  // Show learned GL codes if available, otherwise show defaults
+  if (suggestion.value?.gl_debit_code || suggestion.value?.gl_credit_code) {
+    const dr = suggestion.value.gl_debit_code || '?'
+    const cr = suggestion.value.gl_credit_code || '?'
+    return `DR ${dr} / CR ${cr} (learned)`
+  }
   return glDefaults[action] || null
 }
 

@@ -466,15 +466,26 @@ class ReconciliationController extends Controller
             'notes' => $request->notes ?? $transaction->description,
         ]);
 
+        // Save processing notes with GL codes for future learning
+        $expenseGlCode = $request->gl_debit_code ?: '4990';
+        $bankGlCode = $request->gl_credit_code ?: '1000';
+        $transaction->update(['processing_notes' => json_encode([
+            'action' => 'create_expense',
+            'category_id' => $category->id,
+            'category_name' => $category->name,
+            'gl_debit' => $expenseGlCode,
+            'gl_credit' => $bankGlCode,
+            'gl_override' => ($request->gl_debit_code || $request->gl_credit_code) ? true : false,
+            'recorded_by' => Auth::id(),
+            'recorded_at' => now()->toIso8601String(),
+        ], JSON_UNESCAPED_UNICODE)]);
+
         $transaction->markAsReconciled(BankTransaction::LINKED_EXPENSE, $expense->id);
 
         // Post to IFRS GL: DR expense account / CR 1000 (Жиро-сметка)
         try {
             $ifrs = app(\App\Domain\Accounting\IfrsAdapter::class);
             if ($ifrs) {
-                // Default expense GL code — 4990 (Останати расходи), overridable by accountant
-                $expenseGlCode = $request->gl_debit_code ?: '4990';
-                $bankGlCode = $request->gl_credit_code ?: '1000';
                 $narration = ($request->notes ?? $transaction->description ?? 'Expense') . ' [' . ($category->name ?? '') . ']';
                 $counterparty = $transaction->creditor_name ?? '';
                 $amountCents = (int) round(abs((float) $transaction->amount) * 100);
@@ -833,6 +844,18 @@ class ReconciliationController extends Controller
             'notes' => $request->notes ?? $transaction->description ?? 'Non-invoice income',
         ]);
 
+        // Save processing notes with GL codes for future learning
+        $debitCode = $request->gl_debit_code ?: '1000';
+        $creditCode = $request->gl_credit_code ?: '7500';
+        $transaction->update(['processing_notes' => json_encode([
+            'action' => 'record_income',
+            'gl_debit' => $debitCode,
+            'gl_credit' => $creditCode,
+            'gl_override' => ($request->gl_debit_code || $request->gl_credit_code) ? true : false,
+            'recorded_by' => Auth::id(),
+            'recorded_at' => now()->toIso8601String(),
+        ], JSON_UNESCAPED_UNICODE)]);
+
         $transaction->markAsReconciled(BankTransaction::LINKED_INCOME, $payment->id);
 
         // Post to IFRS GL: DR 1000 (Жиро-сметка) / CR 7500 (Останати приходи од работење)
@@ -841,8 +864,6 @@ class ReconciliationController extends Controller
             if ($ifrs) {
                 $narration = $request->notes ?? $transaction->description ?? 'Non-invoice income';
                 $counterparty = $transaction->debtor_name ?? '';
-                $debitCode = $request->gl_debit_code ?: '1000';
-                $creditCode = $request->gl_credit_code ?: '7500';
 
                 $ifrs->postJournalEntry($company, [
                     'date' => $transaction->transaction_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
