@@ -3162,7 +3162,8 @@
         "documents_group": "Documents",
         "contacts": "Contacts",
         "money": "Money",
-        "favorites": "Favorites"
+        "favorites": "Favorites",
+        "journal_entries": "Journal Entries"
     },
     "navigation_hints": {
         "dashboard": "Overview of your business: revenue, expenses, and key metrics",

@@ -62,7 +62,8 @@
         "documents_group": "Dokumentet",
         "contacts": "Kontaktet",
         "money": "Paratë",
-        "favorites": "Të preferuarat"
+        "favorites": "Të preferuarat",
+        "journal_entries": "Regjistrime kontabël"
     },
     "navigation_hints": {
         "dashboard": "Përmbledhje e biznesit tuaj: të ardhura, shpenzime dhe tregues kryesorë",

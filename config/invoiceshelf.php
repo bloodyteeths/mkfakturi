@@ -776,6 +776,18 @@ return [
             'model' => '',
             'feature_flag' => 'accounting_backbone',
         ],
+        [
+            'title' => 'navigation.journal_entries',
+            'group' => 3,
+            'submenu' => 'finance',
+            'link' => '/admin/reports/journal-entries',
+            'icon' => 'ClipboardDocumentListIcon',
+            'name' => 'Journal Entries',
+            'owner_only' => false,
+            'ability' => 'view-financial-reports',
+            'model' => '',
+            'feature_flag' => 'accounting_backbone',
+        ],
         // Custom Reports — moved to partner-only (IFRS data not relevant for companies)
         [
             'title' => 'navigation.interest',
