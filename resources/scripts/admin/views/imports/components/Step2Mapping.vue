@@ -10,64 +10,40 @@
       </p>
     </div>
 
-    <!-- Auto-mapping Results -->
-    <div v-if="importStore.autoMappingConfidence > 0" class="max-w-6xl mx-auto">
+    <!-- Auto-mapped success banner -->
+    <div
+      v-if="allRequiredFieldsMappedWithHighConfidence"
+      class="max-w-6xl mx-auto"
+    >
+      <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+        <BaseIcon
+          name="CheckCircleIcon"
+          class="w-5 h-5 text-green-500 mr-3 flex-shrink-0"
+        />
+        <p class="text-sm text-green-800 font-medium">
+          {{ $t('imports.auto_mapped_success') }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Required fields inline status -->
+    <div class="max-w-6xl mx-auto">
       <div
         :class="[
-          'border rounded-lg p-4',
-          {
-            'bg-green-50 border-green-200': importStore.autoMappingConfidence >= 0.8,
-            'bg-yellow-50 border-yellow-200': importStore.autoMappingConfidence >= 0.6 && importStore.autoMappingConfidence < 0.8,
-            'bg-red-50 border-red-200': importStore.autoMappingConfidence < 0.6,
-          }
+          'flex items-center text-sm font-medium px-4 py-2 rounded-lg',
+          requiredFieldsMissing === 0
+            ? 'bg-green-50 text-green-700'
+            : 'bg-orange-50 text-orange-700',
         ]"
       >
-        <div class="flex items-start">
-          <BaseIcon 
-            :name="getConfidenceIcon(importStore.autoMappingConfidence)"
-            :class="[
-              'w-5 h-5 mt-0.5 mr-3 flex-shrink-0',
-              {
-                'text-green-400': importStore.autoMappingConfidence >= 0.8,
-                'text-yellow-400': importStore.autoMappingConfidence >= 0.6 && importStore.autoMappingConfidence < 0.8,
-                'text-red-400': importStore.autoMappingConfidence < 0.6,
-              }
-            ]"
-          />
-          <div class="flex-1">
-            <h4 class="text-sm font-medium mb-1">
-              {{ $t('imports.auto_mapping_results') }}
-            </h4>
-            <p class="text-sm mb-3">
-              {{ $t('imports.auto_mapping_confidence', { confidence: Math.round(importStore.autoMappingConfidence * 100) }) }}
-            </p>
-            <div class="flex items-center space-x-4">
-              <div class="flex-1">
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    :class="[
-                      'h-2 rounded-full transition-all duration-300',
-                      {
-                        'bg-green-500': importStore.autoMappingConfidence >= 0.8,
-                        'bg-yellow-500': importStore.autoMappingConfidence >= 0.6 && importStore.autoMappingConfidence < 0.8,
-                        'bg-red-500': importStore.autoMappingConfidence < 0.6,
-                      }
-                    ]"
-                    :style="{ width: `${importStore.autoMappingConfidence * 100}%` }"
-                  ></div>
-                </div>
-              </div>
-              <BaseButton
-                v-if="importStore.autoMappingConfidence < 0.8"
-                variant="secondary"
-                size="sm"
-                @click="resetMapping"
-              >
-                {{ $t('imports.reset_mapping') }}
-              </BaseButton>
-            </div>
-          </div>
-        </div>
+        <BaseIcon
+          :name="requiredFieldsMissing === 0 ? 'CheckCircleIcon' : 'ExclamationTriangleIcon'"
+          :class="[
+            'w-4 h-4 mr-2 flex-shrink-0',
+            requiredFieldsMissing === 0 ? 'text-green-500' : 'text-orange-500',
+          ]"
+        />
+        {{ requiredFieldsMappedCount }} {{ $t('imports.of') }} {{ totalRequiredFieldsCount }} {{ $t('imports.required_fields_mapped') }}
       </div>
     </div>
 
@@ -113,12 +89,6 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ $t('imports.target_field') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {{ $t('imports.confidence') }}
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {{ $t('general.actions') }}
-                </th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -126,22 +96,13 @@
                 v-for="field in importStore.detectedFields"
                 :key="field.name"
                 :class="{
-                  'bg-green-50': isFieldMapped(field.name) && getMappingConfidence(field.name) >= 0.8,
-                  'bg-yellow-50': isFieldMapped(field.name) && getMappingConfidence(field.name) >= 0.6 && getMappingConfidence(field.name) < 0.8,
-                  'bg-red-50': isFieldMapped(field.name) && getMappingConfidence(field.name) < 0.6,
+                  'bg-green-50': isFieldMapped(field.name),
                 }"
               >
                 <!-- Source Field -->
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div>
-                      <div class="text-sm font-medium text-gray-900">
-                        {{ field.name }}
-                      </div>
-                      <div class="text-sm text-gray-500">
-                        {{ field.type || 'string' }}
-                      </div>
-                    </div>
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ field.name }}
                   </div>
                 </td>
 
@@ -179,56 +140,6 @@
                     size="sm"
                   />
                 </td>
-
-                <!-- Confidence -->
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div v-if="isFieldMapped(field.name)">
-                    <div class="flex items-center">
-                      <div class="flex-1 mr-2">
-                        <div class="w-16 bg-gray-200 rounded-full h-2">
-                          <div
-                            :class="[
-                              'h-2 rounded-full',
-                              {
-                                'bg-green-500': getMappingConfidence(field.name) >= 0.8,
-                                'bg-yellow-500': getMappingConfidence(field.name) >= 0.6 && getMappingConfidence(field.name) < 0.8,
-                                'bg-red-500': getMappingConfidence(field.name) < 0.6,
-                              }
-                            ]"
-                            :style="{ width: `${getMappingConfidence(field.name) * 100}%` }"
-                          ></div>
-                        </div>
-                      </div>
-                      <span class="text-xs font-medium text-gray-900">
-                        {{ Math.round(getMappingConfidence(field.name) * 100) }}%
-                      </span>
-                    </div>
-                  </div>
-                  <span v-else class="text-xs text-gray-400">-</span>
-                </td>
-
-                <!-- Actions -->
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div class="flex space-x-2">
-                    <BaseButton
-                      v-if="importStore.mappingSuggestions[field.name]"
-                      variant="secondary"
-                      size="xs"
-                      @click="applySuggestion(field.name)"
-                      :disabled="importStore.fieldMappings[field.name] === importStore.mappingSuggestions[field.name]"
-                    >
-                      {{ $t('imports.use_suggestion') }}
-                    </BaseButton>
-                    <BaseButton
-                      v-if="isFieldMapped(field.name)"
-                      variant="danger"
-                      size="xs"
-                      @click="clearMapping(field.name)"
-                    >
-                      {{ $t('imports.clear') }}
-                    </BaseButton>
-                  </div>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -252,77 +163,11 @@
         </div>
       </BaseCard>
     </div>
-
-    <!-- Required Fields Guide -->
-    <div class="max-w-6xl mx-auto">
-      <BaseCard>
-        <template #header>
-          <h3 class="text-lg font-medium text-gray-900">
-            {{ $t('imports.required_fields') }}
-          </h3>
-        </template>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="category in requiredFieldsCategories" :key="category.name" class="space-y-3">
-            <h4 class="font-medium text-gray-900 flex items-center">
-              <BaseIcon :name="category.icon" class="w-4 h-4 mr-2" />
-              {{ $t(`imports.${category.name}`) }}
-            </h4>
-            <ul class="space-y-2">
-              <li
-                v-for="field in category.fields"
-                :key="field.key"
-                class="flex items-center text-sm"
-              >
-                <span
-                  :class="[
-                    'w-3 h-3 rounded-full mr-2 flex-shrink-0',
-                    {
-                      'bg-green-500': isTargetFieldMapped(field.key),
-                      'bg-red-500': field.required && !isTargetFieldMapped(field.key),
-                      'bg-gray-300': !field.required && !isTargetFieldMapped(field.key),
-                    }
-                  ]"
-                ></span>
-                <span :class="{ 'text-gray-500': !field.required }">
-                  {{ $t(`imports.field_${field.key}`) }}
-                  <span v-if="field.required" class="text-red-500">*</span>
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </BaseCard>
-    </div>
-
-    <!-- Mapping Summary -->
-    <div class="max-w-6xl mx-auto">
-      <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-          <div>
-            <div class="text-2xl font-bold text-gray-900">{{ importStore.detectedFields.length }}</div>
-            <div class="text-sm text-gray-500">{{ $t('imports.detected_fields') }}</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-green-600">{{ mappedFieldsCount }}</div>
-            <div class="text-sm text-gray-500">{{ $t('imports.mapped_fields') }}</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-red-600">{{ requiredFieldsMissing }}</div>
-            <div class="text-sm text-gray-500">{{ $t('imports.missing_required') }}</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-blue-600">{{ Math.round(overallMappingScore * 100) }}%</div>
-            <div class="text-sm text-gray-500">{{ $t('imports.mapping_score') }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, defineExpose } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 // Components
@@ -338,10 +183,12 @@ import { useImportStore } from '@/scripts/admin/stores/import'
 const { t } = useI18n()
 const importStore = useImportStore()
 
+const emit = defineEmits(['auto-advance-ready'])
+
 // Computed
 const targetFieldOptions = computed(() => [
   { label: t('imports.do_not_import'), value: '' },
-  
+
   // Customer fields
   { label: '--- ' + t('imports.customer_fields') + ' ---', value: '', disabled: true },
   { label: t('imports.field_customer_name'), value: 'customer_name' },
@@ -350,7 +197,7 @@ const targetFieldOptions = computed(() => [
   { label: t('imports.field_customer_address'), value: 'customer_address' },
   { label: t('imports.field_customer_tax_id'), value: 'customer_tax_id' },
   { label: t('imports.field_customer_website'), value: 'customer_website' },
-  
+
   // Invoice fields
   { label: '--- ' + t('imports.invoice_fields') + ' ---', value: '', disabled: true },
   { label: t('imports.field_invoice_number'), value: 'invoice_number' },
@@ -360,7 +207,7 @@ const targetFieldOptions = computed(() => [
   { label: t('imports.field_tax_amount'), value: 'tax_amount' },
   { label: t('imports.field_total_amount'), value: 'total_amount' },
   { label: t('imports.field_notes'), value: 'notes' },
-  
+
   // Item fields
   { label: '--- ' + t('imports.item_fields') + ' ---', value: '', disabled: true },
   { label: t('imports.field_item_name'), value: 'item_name' },
@@ -369,7 +216,7 @@ const targetFieldOptions = computed(() => [
   { label: t('imports.field_unit_price'), value: 'unit_price' },
   { label: t('imports.field_unit'), value: 'unit' },
   { label: t('imports.field_tax_rate'), value: 'tax_rate' },
-  
+
   // Payment fields
   { label: '--- ' + t('imports.payment_fields') + ' ---', value: '', disabled: true },
   { label: t('imports.field_payment_date'), value: 'payment_date' },
@@ -457,47 +304,60 @@ const requiredFieldsCategories = computed(() => {
   return categoriesByType[importType] || categoriesByType.customers
 })
 
+const requiredFields = computed(() => {
+  return requiredFieldsCategories.value.reduce((all, category) => {
+    return all.concat(category.fields.filter(f => f.required))
+  }, [])
+})
+
+const totalRequiredFieldsCount = computed(() => {
+  return requiredFields.value.length
+})
+
+const requiredFieldsMappedCount = computed(() => {
+  const mappedTargets = Object.values(importStore.fieldMappings)
+  return requiredFields.value.filter(f => mappedTargets.includes(f.key)).length
+})
+
+const requiredFieldsMissing = computed(() => {
+  return totalRequiredFieldsCount.value - requiredFieldsMappedCount.value
+})
+
 const mappedFieldsCount = computed(() => {
   return Object.keys(importStore.fieldMappings).filter(field => importStore.fieldMappings[field]).length
 })
 
-const requiredFieldsMissing = computed(() => {
-  const mappedTargets = Object.values(importStore.fieldMappings)
-
-  // Get import type from importJob
-  const importType = importStore.importJob?.type || 'customers'
-
-  // Define required fields for each import type (same as store validation)
-  const requiredFieldsByType = {
-    customers: ['customer_name', 'customer_email'],
-    invoices: ['invoice_number', 'customer_name', 'invoice_date', 'total_amount'],
-    items: ['item_name', 'unit_price'],
-    payments: ['payment_date', 'payment_amount'],
-    expenses: ['expense_date', 'payment_amount'],
-  }
-
-  // Get required fields for current import type
-  const requiredFields = requiredFieldsByType[importType] || []
-
-  return requiredFields.filter(field => !mappedTargets.includes(field)).length
-})
-
 const overallMappingScore = computed(() => {
   if (importStore.detectedFields.length === 0) return 0
-  
+
   const mappedCount = mappedFieldsCount.value
   const totalFields = importStore.detectedFields.length
-  const requiredMapped = requiredFieldsCategories.value.reduce((count, category) => {
-    return count + category.fields.filter(field => field.required && isTargetFieldMapped(field.key)).length
-  }, 0)
-  const totalRequired = requiredFieldsCategories.value.reduce((count, category) => {
-    return count + category.fields.filter(field => field.required).length
-  }, 0)
-  
+  const requiredMapped = requiredFieldsMappedCount.value
+  const totalRequired = totalRequiredFieldsCount.value
+
   const mappingRatio = mappedCount / totalFields
   const requiredRatio = totalRequired > 0 ? requiredMapped / totalRequired : 1
-  
+
   return (mappingRatio * 0.3) + (requiredRatio * 0.7)
+})
+
+const allRequiredFieldsMappedWithHighConfidence = computed(() => {
+  if (requiredFields.value.length === 0) return false
+
+  const mappedTargets = Object.values(importStore.fieldMappings)
+
+  // All required fields must be mapped
+  const allMapped = requiredFields.value.every(f => mappedTargets.includes(f.key))
+  if (!allMapped) return false
+
+  // Every mapped field must have confidence >= 0.7
+  for (const sourceField of Object.keys(importStore.fieldMappings)) {
+    if (!importStore.fieldMappings[sourceField]) continue
+    const confidence = getMappingConfidence(sourceField)
+    if (confidence < 0.7) return false
+  }
+
+  return true
 })
 
 // Methods
@@ -556,10 +416,24 @@ const clearAllMappings = () => {
   resetMapping()
 }
 
+// Expose for parent wizard to check auto-advance readiness
+const canAutoAdvance = () => allRequiredFieldsMappedWithHighConfidence.value
+
+defineExpose({
+  canAutoAdvance,
+  allRequiredFieldsMappedWithHighConfidence,
+})
+
 // Lifecycle
 onMounted(async () => {
   if (importStore.detectedFields.length === 0) {
     await importStore.detectFields()
   }
+
+  // Notify parent if auto-advance is possible after fields are detected
+  if (allRequiredFieldsMappedWithHighConfidence.value) {
+    emit('auto-advance-ready')
+  }
 })
+// CLAUDE-CHECKPOINT
 </script>

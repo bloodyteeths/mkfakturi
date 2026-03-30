@@ -32,51 +32,29 @@
 
     <!-- Validation Results -->
     <div v-else-if="importStore.validationResults" class="max-w-6xl mx-auto space-y-6">
-      <!-- Validation Summary -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <BaseCard>
-          <div class="text-center">
-            <div class="text-3xl font-bold text-gray-900 mb-1">
-              {{ importStore.totalRecords }}
-            </div>
-            <div class="text-sm text-gray-500">
-              {{ $t('imports.total_records') }}
-            </div>
-          </div>
-        </BaseCard>
-
-        <BaseCard>
-          <div class="text-center">
-            <div class="text-3xl font-bold text-green-600 mb-1">
-              {{ importStore.validRecords }}
-            </div>
-            <div class="text-sm text-gray-500">
-              {{ $t('imports.valid_records') }}
-            </div>
-          </div>
-        </BaseCard>
-
-        <BaseCard>
-          <div class="text-center">
-            <div class="text-3xl font-bold text-yellow-600 mb-1">
-              {{ importStore.validationWarnings.length }}
-            </div>
-            <div class="text-sm text-gray-500">
-              {{ $t('imports.warnings') }}
-            </div>
-          </div>
-        </BaseCard>
-
-        <BaseCard>
-          <div class="text-center">
-            <div class="text-3xl font-bold text-red-600 mb-1">
-              {{ importStore.validationErrors.length }}
-            </div>
-            <div class="text-sm text-gray-500">
-              {{ $t('imports.errors') }}
-            </div>
-          </div>
-        </BaseCard>
+      <!-- Validation Summary Line -->
+      <div
+        :class="[
+          'px-4 py-3 rounded-lg border text-sm font-medium',
+          {
+            'bg-green-50 border-green-200 text-green-800': !hasErrors && !hasWarnings,
+            'bg-yellow-50 border-yellow-200 text-yellow-800': hasWarnings && !hasErrors,
+            'bg-red-50 border-red-200 text-red-800': hasErrors,
+          }
+        ]"
+      >
+        <span v-if="hasErrors">
+          {{ importStore.validRecords }} {{ $t('imports.rows_ready') }}
+          <span class="text-red-600">({{ importStore.validationErrors.length }} {{ $t('imports.errors').toLowerCase() }})</span>
+          <span v-if="hasWarnings" class="text-yellow-600 ml-1">({{ importStore.validationWarnings.length }} {{ $t('imports.warnings').toLowerCase() }})</span>
+        </span>
+        <span v-else-if="hasWarnings">
+          {{ importStore.validRecords }} {{ $t('imports.rows_ready') }}
+          <span class="text-yellow-600">({{ importStore.validationWarnings.length }} {{ $t('imports.warnings').toLowerCase() }})</span>
+        </span>
+        <span v-else>
+          {{ importStore.totalRecords }} {{ $t('imports.rows_ready') }}
+        </span>
       </div>
 
       <!-- Validation Status -->
@@ -196,34 +174,6 @@
                       {{ $t('imports.invalid_value') }}: "{{ error.value }}"
                     </div>
                   </div>
-                  
-                  <!-- Error Actions -->
-                  <div class="flex space-x-2 ml-4">
-                    <BaseButton
-                      v-if="error.suggestion"
-                      variant="secondary"
-                      size="xs"
-                      @click="applySuggestion(error)"
-                    >
-                      {{ $t('imports.apply_suggestion') }}
-                    </BaseButton>
-                    <BaseButton
-                      variant="danger"
-                      size="xs"
-                      @click="ignoreError(error)"
-                    >
-                      {{ $t('imports.ignore') }}
-                    </BaseButton>
-                  </div>
-                </div>
-                
-                <!-- Suggestion -->
-                <div v-if="error.suggestion" class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
-                  <div class="flex items-center mb-1">
-                    <BaseIcon name="LightBulbIcon" class="w-4 h-4 text-blue-500 mr-2" />
-                    <span class="text-sm font-medium text-blue-800">{{ $t('imports.suggestion') }}:</span>
-                  </div>
-                  <p class="text-sm text-blue-700">{{ error.suggestion }}</p>
                 </div>
               </div>
             </div>
@@ -274,31 +224,35 @@
                       {{ $t('imports.current_value') }}: "{{ warning.value }}"
                     </div>
                   </div>
-                  
-                  <!-- Warning Actions -->
-                  <div class="flex space-x-2 ml-4">
-                    <BaseButton
-                      v-if="warning.suggestion"
-                      variant="secondary"
-                      size="xs"
-                      @click="applySuggestion(warning)"
-                    >
-                      {{ $t('imports.apply_suggestion') }}
-                    </BaseButton>
-                    <BaseButton
-                      variant="secondary"
-                      size="xs"
-                      @click="ignoreWarning(warning)"
-                    >
-                      {{ $t('imports.ignore') }}
-                    </BaseButton>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </BaseCard>
+
+      <!-- Proceed / Go Back Actions -->
+      <div v-if="hasErrors" class="flex justify-center">
+        <BaseButton
+          variant="primary"
+          @click="$emit('go-back')"
+        >
+          {{ $t('imports.go_back_to_fix_mappings') }}
+        </BaseButton>
+      </div>
+
+      <div v-else-if="hasWarnings && !hasErrors" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <label class="flex items-center cursor-pointer">
+          <input
+            v-model="importStore.acknowledgeWarnings"
+            type="checkbox"
+            class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 mr-3"
+          />
+          <span class="text-sm text-yellow-800 font-medium">
+            {{ $t('imports.acknowledge_warnings_proceed') }}
+          </span>
+        </label>
+      </div>
 
       <!-- Data Preview -->
       <BaseCard>
@@ -396,7 +350,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 // Components
@@ -413,8 +367,15 @@ import { useImportStore } from '@/scripts/admin/stores/import'
 const { t } = useI18n()
 const importStore = useImportStore()
 
+defineEmits(['go-back'])
+
 // Local state
 const showFullPreview = ref(false)
+
+// Sync store canProceed when acknowledgeWarnings changes
+watch(() => importStore.acknowledgeWarnings, () => {
+  importStore.updateCanProceed()
+})
 
 // Auto-trigger validation when entering Step 3
 onMounted(async () => {
@@ -426,7 +387,7 @@ onMounted(async () => {
 // Computed
 const hasErrors = computed(() => importStore.validationErrors.length > 0)
 const hasWarnings = computed(() => importStore.validationWarnings.length > 0)
-const canProceed = computed(() => !hasErrors.value && importStore.validationResults)
+const canProceed = computed(() => importStore.isStep3Valid)
 
 const dataQualityScore = computed(() => {
   if (!importStore.validationResults) return 0
@@ -520,24 +481,5 @@ const startValidation = async () => {
   }
 }
 
-const applySuggestion = (issue) => {
-  // This would apply the suggested fix to the data
-  console.log('Applying suggestion for:', issue)
-}
-
-const ignoreError = (error) => {
-  // Remove the error from the list (this would typically make an API call)
-  const index = importStore.validationErrors.indexOf(error)
-  if (index > -1) {
-    importStore.validationErrors.splice(index, 1)
-  }
-}
-
-const ignoreWarning = (warning) => {
-  // Remove the warning from the list
-  const index = importStore.validationWarnings.indexOf(warning)
-  if (index > -1) {
-    importStore.validationWarnings.splice(index, 1)
-  }
-}
+// CLAUDE-CHECKPOINT
 </script>

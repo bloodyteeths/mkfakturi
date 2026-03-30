@@ -7,10 +7,9 @@
           <BaseButton
             variant="secondary"
             size="sm"
-            @click="toggleHelpGuide"
+            @click="showHelp = !showHelp"
           >
-            <BaseIcon name="QuestionMarkCircleIcon" class="w-4 h-4 mr-2" />
-            {{ showHelpGuide ? $t('imports.hide_help') : $t('imports.show_help') }}
+            <BaseIcon name="QuestionMarkCircleIcon" class="w-4 h-4" />
           </BaseButton>
 
           <!-- Start Tour Button -->
@@ -99,7 +98,7 @@
             <!-- Import Statistics (if available) -->
             <div v-if="importStore.validationResults" class="pt-4 border-t border-gray-200">
               <h4 class="text-sm font-medium text-gray-900 mb-3">
-                {{ $t('imports.statistics') }}
+                {{ $t('imports.data_statistics') }}
               </h4>
               <div class="space-y-2 text-sm">
                 <div class="flex justify-between">
@@ -121,7 +120,7 @@
       </div>
 
       <!-- Main Content -->
-      <div :class="showHelpGuide ? 'col-span-5' : 'col-span-9'">
+      <div class="col-span-9">
         <BaseCard>
           <BaseWizard
             :current-step="importStore.currentStep - 1"
@@ -133,17 +132,17 @@
               <Step1Upload />
             </BaseWizardStep>
 
-            <!-- Step 2: Mapping -->
+            <!-- Step 2: Match Columns -->
             <BaseWizardStep v-show="importStore.currentStep === 2">
               <Step2Mapping />
             </BaseWizardStep>
 
-            <!-- Step 3: Validation -->
+            <!-- Step 3: Review -->
             <BaseWizardStep v-show="importStore.currentStep === 3">
-              <Step3Validation />
+              <Step3Validation @go-back="importStore.previousStep()" />
             </BaseWizardStep>
 
-            <!-- Step 4: Commit -->
+            <!-- Step 4: Import -->
             <BaseWizardStep v-show="importStore.currentStep === 4">
               <Step4Commit />
             </BaseWizardStep>
@@ -195,12 +194,33 @@
           </template>
         </BaseCard>
       </div>
-
-      <!-- Help Guide Sidebar -->
-      <div v-if="showHelpGuide" class="col-span-4">
-        <HelpGuidePanel :current-step="importStore.currentStep" @close="toggleHelpGuide" />
-      </div>
     </div>
+
+    <!-- Help Slide-Over Panel -->
+    <Teleport to="body">
+      <Transition name="help-panel">
+        <div v-if="showHelp" class="fixed inset-0 z-50 flex justify-end" @click.self="showHelp = false">
+          <!-- Backdrop -->
+          <div class="fixed inset-0 bg-black/30 transition-opacity" @click="showHelp = false"></div>
+
+          <!-- Panel -->
+          <div class="relative w-full max-w-md bg-white shadow-xl overflow-y-auto">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <h3 class="text-lg font-medium text-gray-900">{{ $t('imports.help_guide') }}</h3>
+              <button
+                class="text-gray-400 hover:text-gray-600"
+                @click="showHelp = false"
+              >
+                <BaseIcon name="XMarkIcon" class="w-5 h-5" />
+              </button>
+            </div>
+            <div class="p-4">
+              <HelpGuidePanel :current-step="importStore.currentStep" @close="showHelp = false" />
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- Interactive Tour -->
     <InteractiveTour
@@ -266,16 +286,18 @@ import InteractiveTour from './components/InteractiveTour.vue'
 
 // Store
 import { useImportStore } from '@/scripts/admin/stores/import'
+import { useNotificationStore } from '@/scripts/stores/notification'
 
 const { t } = useI18n()
 const router = useRouter()
 const importStore = useImportStore()
+const notificationStore = useNotificationStore()
 
 // Local state
 const isProcessingNext = ref(false)
 const showCancelDialog = ref(false)
 const isCancelling = ref(false)
-const showHelpGuide = ref(false)
+const showHelp = ref(false)
 const isTourActive = ref(false)
 
 // Computed
@@ -289,26 +311,46 @@ const steps = computed(() => [
   },
   {
     number: 2,
-    title: t('imports.map_fields'),
-    description: t('imports.map_fields_description'),
+    title: t('imports.match_columns') || 'Match Columns',
+    description: t('imports.match_columns_description') || t('imports.map_fields_description'),
     completed: importStore.currentStep > 2 && importStore.isStep2Valid,
     accessible: importStore.isStep1Valid,
   },
   {
     number: 3,
-    title: t('imports.validate_data'),
-    description: t('imports.validate_data_description'),
+    title: t('imports.review') || 'Review',
+    description: t('imports.review_description') || t('imports.validate_data_description'),
     completed: importStore.currentStep > 3 && importStore.isStep3Valid,
     accessible: importStore.isStep2Valid,
   },
   {
     number: 4,
-    title: t('imports.commit_import'),
-    description: t('imports.commit_import_description'),
+    title: t('imports.import') || 'Import',
+    description: t('imports.import_description') || t('imports.commit_import_description'),
     completed: importStore.isStep4Valid,
     accessible: importStore.isStep3Valid,
   },
 ])
+
+/**
+ * Check whether all required fields for the detected import type
+ * are already covered by the auto-mapping suggestions.
+ */
+const allRequiredFieldsMapped = () => {
+  const importType = importStore.importJob?.type || 'customers'
+  const requiredFieldsByType = {
+    customers: ['customer_name', 'customer_email'],
+    invoices: ['invoice_number', 'customer_name', 'invoice_date', 'total_amount'],
+    items: ['item_name', 'unit_price'],
+    payments: ['payment_date', 'payment_amount'],
+    expenses: ['expense_date', 'payment_amount'],
+  }
+
+  const requiredFields = requiredFieldsByType[importType] || []
+  const mappedTargets = Object.values(importStore.fieldMappings)
+
+  return requiredFields.every(field => mappedTargets.includes(field))
+}
 
 // Methods
 const goToStep = (stepNumber) => {
@@ -320,12 +362,27 @@ const goToStep = (stepNumber) => {
 
 const handleNext = async () => {
   isProcessingNext.value = true
-  
+
   try {
     switch (importStore.currentStep) {
       case 1:
         // Auto-detect fields when moving from upload to mapping
         await importStore.detectFields()
+
+        // Auto-skip step 2 if mapping confidence is high and all required fields are mapped
+        if (importStore.autoMappingConfidence >= 0.7 && allRequiredFieldsMapped()) {
+          // Save the auto-mapping so step 3 (validation) has data
+          await importStore.saveMapping()
+
+          notificationStore.showNotification({
+            type: 'success',
+            message: t('imports.fields_auto_mapped') || 'Fields auto-mapped successfully',
+          })
+
+          // Jump directly to step 3 (Review), skipping step 2
+          importStore.goToStep(3)
+          return
+        }
         break
 
       case 2:
@@ -333,9 +390,9 @@ const handleNext = async () => {
         await importStore.saveMapping()
         break
     }
-    
+
     importStore.nextStep()
-    
+
   } catch (error) {
     console.error('Error proceeding to next step:', error)
     // Error handling is done in the store
@@ -358,7 +415,7 @@ const confirmCancel = () => {
 
 const cancelImport = async () => {
   isCancelling.value = true
-  
+
   try {
     await importStore.cancelImport()
     router.push('/admin/dashboard')
@@ -374,11 +431,6 @@ const finishImport = () => {
   router.push('/admin/dashboard')
 }
 
-// Help methods
-const toggleHelpGuide = () => {
-  showHelpGuide.value = !showHelpGuide.value
-}
-
 const startTour = () => {
   isTourActive.value = true
 }
@@ -391,18 +443,30 @@ const handleTourComplete = () => {
 onMounted(() => {
   // Reset store state when component mounts
   importStore.resetState()
-
-  // Auto-show help guide on first visit to step 1
-  const hasSeenHelp = localStorage.getItem('migration-wizard-help-seen')
-
-  if (!hasSeenHelp && importStore.currentStep === 1) {
-    showHelpGuide.value = true
-    localStorage.setItem('migration-wizard-help-seen', 'true')
-  }
 })
 
 onUnmounted(() => {
   // Stop any active polling when component unmounts
   importStore.stopProgressPolling()
 })
+// CLAUDE-CHECKPOINT
 </script>
+
+<style scoped>
+.help-panel-enter-active,
+.help-panel-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.help-panel-enter-active > div:last-child,
+.help-panel-leave-active > div:last-child {
+  transition: transform 0.2s ease;
+}
+.help-panel-enter-from,
+.help-panel-leave-to {
+  opacity: 0;
+}
+.help-panel-enter-from > div:last-child,
+.help-panel-leave-to > div:last-child {
+  transform: translateX(100%);
+}
+</style>

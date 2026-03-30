@@ -13,23 +13,6 @@
     <!-- File Upload Area -->
     <div class="max-w-4xl mx-auto">
       <div v-if="!importStore.uploadedFile" class="space-y-6">
-        <!-- Source System Selector -->
-        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <label class="block text-sm font-medium text-gray-900 mb-2">
-            {{ $t('imports.source_system') }}
-          </label>
-          <BaseSelectInput
-            :value="importStore.sourceSystem"
-            @input="handleSourceSystemChange"
-            :options="sourceSystemOptions"
-            size="sm"
-            class="max-w-xs"
-          />
-          <p class="text-xs text-gray-500 mt-1.5">
-            {{ $t('imports.source_system_hint') }}
-          </p>
-        </div>
-
         <!-- Drag & Drop Upload Area -->
         <div
           class="upload-area"
@@ -101,56 +84,85 @@
           </div>
         </div>
 
-        <!-- Compact format + template info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Supported Formats -->
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h4 class="text-sm font-medium text-gray-900 mb-2">
-              {{ $t('imports.supported_formats') }}
-            </h4>
-            <div class="flex flex-wrap gap-2 text-xs">
-              <span class="px-2 py-1 bg-white border border-gray-200 rounded">CSV</span>
-              <span class="px-2 py-1 bg-white border border-gray-200 rounded">XLS / XLSX</span>
-              <span class="px-2 py-1 bg-white border border-gray-200 rounded">XML</span>
-            </div>
-            <p v-if="isPartnerOrAccountant" class="text-xs text-gray-500 mt-2">Onivo, Megasoft, Pantheon, {{ $t('imports.generic_formats') }}</p>
+        <!-- Formats + Template (inline under drag-drop) -->
+        <div class="flex items-center justify-between flex-wrap gap-2 text-xs text-gray-500">
+          <div class="flex items-center gap-2">
+            <span class="font-medium text-gray-700">{{ $t('imports.supported_formats') }}:</span>
+            <span class="px-2 py-0.5 bg-gray-100 border border-gray-200 rounded">CSV</span>
+            <span class="px-2 py-0.5 bg-gray-100 border border-gray-200 rounded">XLS / XLSX</span>
+            <span class="px-2 py-0.5 bg-gray-100 border border-gray-200 rounded">XML</span>
+            <span v-if="isPartnerOrAccountant" class="text-gray-400 ml-1">Onivo, Megasoft, Pantheon, {{ $t('imports.generic_formats') }}</span>
           </div>
 
-          <!-- CSV Templates -->
-          <div class="template-download-section bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h4 class="text-sm font-medium text-gray-900 mb-2">
+          <!-- Template dropdown -->
+          <div class="relative">
+            <button
+              @click="showTemplateMenu = !showTemplateMenu"
+              class="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-xs text-gray-700 font-medium"
+            >
+              <BaseIcon name="ArrowDownTrayIcon" class="w-3.5 h-3.5 mr-1.5 text-gray-400" />
               {{ $t('imports.download_csv_templates') }}
-            </h4>
-            <div class="grid grid-cols-2 gap-2">
+              <BaseIcon name="ChevronDownIcon" class="w-3 h-3 ml-1.5 text-gray-400" />
+            </button>
+            <div
+              v-if="showTemplateMenu"
+              class="absolute right-0 mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-10 py-1"
+            >
               <button
-                @click="downloadTemplate('customers')"
-                class="flex items-center px-2 py-1.5 bg-white border border-gray-200 rounded hover:bg-gray-100 transition-colors text-xs text-gray-700"
+                @click="downloadTemplate('customers'); showTemplateMenu = false"
+                class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <BaseIcon name="ArrowDownTrayIcon" class="w-3 h-3 mr-1.5 text-gray-400" />
                 {{ $t('imports.customer_template') }}
               </button>
               <button
-                @click="downloadTemplate('items')"
-                class="flex items-center px-2 py-1.5 bg-white border border-gray-200 rounded hover:bg-gray-100 transition-colors text-xs text-gray-700"
+                @click="downloadTemplate('items'); showTemplateMenu = false"
+                class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <BaseIcon name="ArrowDownTrayIcon" class="w-3 h-3 mr-1.5 text-gray-400" />
                 {{ $t('imports.items_template') }}
               </button>
               <button
-                @click="downloadTemplate('invoices')"
-                class="flex items-center px-2 py-1.5 bg-white border border-gray-200 rounded hover:bg-gray-100 transition-colors text-xs text-gray-700"
+                @click="downloadTemplate('invoices'); showTemplateMenu = false"
+                class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <BaseIcon name="ArrowDownTrayIcon" class="w-3 h-3 mr-1.5 text-gray-400" />
                 {{ $t('imports.invoice_template') }}
               </button>
               <button
-                @click="downloadTemplate('invoice_with_items')"
-                class="flex items-center px-2 py-1.5 bg-white border border-gray-200 rounded hover:bg-gray-100 transition-colors text-xs text-gray-700"
+                @click="downloadTemplate('invoice_with_items'); showTemplateMenu = false"
+                class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <BaseIcon name="ArrowDownTrayIcon" class="w-3 h-3 mr-1.5 text-gray-400" />
                 {{ $t('imports.invoice_with_items_template') }}
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- Advanced options (source system) -->
+        <div>
+          <button
+            @click="showAdvanced = !showAdvanced"
+            class="text-xs text-gray-500 hover:text-gray-700 transition-colors flex items-center"
+          >
+            <BaseIcon
+              name="ChevronRightIcon"
+              class="w-3 h-3 mr-1 transition-transform"
+              :class="{ 'rotate-90': showAdvanced }"
+            />
+            {{ $t('imports.advanced_options') || 'Advanced options' }}
+          </button>
+          <div v-if="showAdvanced" class="mt-3 bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <label class="block text-sm font-medium text-gray-900 mb-2">
+              {{ $t('imports.source_system') }}
+            </label>
+            <BaseSelectInput
+              :value="importStore.sourceSystem"
+              @input="handleSourceSystemChange"
+              :options="sourceSystemOptions"
+              size="sm"
+              class="max-w-xs"
+            />
+            <p class="text-xs text-gray-500 mt-1.5">
+              {{ $t('imports.source_system_hint') }}
+            </p>
           </div>
         </div>
       </div>
@@ -250,6 +262,8 @@ const userStore = useUserStore()
 const isDragOver = ref(false)
 const uploadError = ref(null)
 const selectedTypeOverride = ref(null)
+const showAdvanced = ref(false)
+const showTemplateMenu = ref(false)
 
 // Computed
 const isPartnerOrAccountant = computed(() => {

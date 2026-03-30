@@ -39,6 +39,7 @@ export const useImportStore = defineStore('import', {
       validationWarnings: [],
       conflictResolutions: {},
       isValidating: false,
+      acknowledgeWarnings: false,
 
       // Step 4 - Commit
       commitProgress: 0,
@@ -66,9 +67,10 @@ export const useImportStore = defineStore('import', {
       },
 
       isStep3Valid() {
-        return this.validationResults && 
-               this.validationErrors.length === 0 && 
-               !this.isValidating
+        if (!this.validationResults || this.isValidating) return false
+        if (this.validationErrors.length > 0) return false
+        if (this.validationWarnings.length > 0) return this.acknowledgeWarnings
+        return true
       },
 
       isStep4Valid() {
@@ -711,6 +713,7 @@ export const useImportStore = defineStore('import', {
         this.validationResults = null
         this.validationErrors = []
         this.validationWarnings = []
+        this.acknowledgeWarnings = false
         this.conflictResolutions = {}
         this.commitProgress = 0
         this.commitStatus = 'pending'
