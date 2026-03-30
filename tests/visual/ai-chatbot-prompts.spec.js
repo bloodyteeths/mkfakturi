@@ -66,19 +66,36 @@ test('1 — Dashboard loads with AI chat widget', async () => {
   await page.goto(`${BASE}/admin/dashboard`, { waitUntil: 'networkidle' })
   await page.waitForTimeout(2000)
 
-  // Dismiss onboarding modal if present
-  const skipBtn = page.locator('text=Прескокни').or(page.locator('text=Skip'))
-  if (await skipBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await skipBtn.click()
-    await page.waitForTimeout(500)
-  }
+  // Dismiss ALL overlays via JavaScript to avoid pointer-event interception
+  await page.evaluate(() => {
+    // Close welcome modal (z-10000) by removing its backdrop and container
+    document.querySelectorAll('[class*="fixed"][class*="z-"]').forEach(el => {
+      const style = getComputedStyle(el)
+      if (parseInt(style.zIndex) >= 9999) {
+        el.remove()
+      }
+    })
+    // Also click any visible "Прескокни" buttons
+    document.querySelectorAll('button').forEach(btn => {
+      if (btn.textContent.includes('Прескокни') || btn.textContent.includes('Skip')) {
+        btn.click()
+      }
+    })
+  })
+  await page.waitForTimeout(500)
 
-  // Dismiss tour overlay if present
-  const closeBtn = page.locator('button:has-text("×")').or(page.locator('[aria-label="Close"]'))
-  if (await closeBtn.first().isVisible({ timeout: 1000 }).catch(() => false)) {
-    await closeBtn.first().click()
-    await page.waitForTimeout(500)
-  }
+  // Dismiss tour tooltip if still present
+  await page.evaluate(() => {
+    document.querySelectorAll('button').forEach(btn => {
+      const text = btn.textContent.trim()
+      if (text === '×' || text.includes('Прескокни тура') || text.includes('Skip tour')) {
+        btn.click()
+      }
+    })
+    // Remove any remaining overlays
+    document.querySelectorAll('.fixed.inset-0').forEach(el => el.remove())
+  })
+  await page.waitForTimeout(500)
 
   // Scroll down to find the AI chat widget (it may be below the fold)
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
@@ -91,36 +108,43 @@ test('1 — Dashboard loads with AI chat widget', async () => {
 })
 
 test('2 — Prompt suggestion chips render in empty state', async () => {
-  // Scroll to the AI chat widget
-  const chatSection = page.locator('.ai-markdown').first().or(
-    page.locator('text=Пробајте').first().or(
-      page.locator('text=Try asking').first()
-    )
-  )
+  // Scroll to the AI chat widget area
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await page.waitForTimeout(500)
 
-  // Look for prompt suggestion chips
-  const promptChips = page.locator('button').filter({
+  // Look for the "ПРОБАЈТЕ" / "Try asking" label
+  const tryLabel = page.locator('text=ПРОБАЈТЕ').or(page.locator('text=TRY ASKING')).or(page.locator('text=PROVONI')).first()
+  await expect(tryLabel).toBeVisible({ timeout: 5000 })
+
+  // Count all prompt chips inside the chat widget (rounded-full buttons with SVG icon)
+  const promptChips = page.locator('button.rounded-full').filter({
     has: page.locator('svg'),
-  }).filter({
-    hasText: /(фактура|invoice|unpaid|неплатени|profit|добивка|expense|трошок)/i,
   })
 
   const chipCount = await promptChips.count()
   console.log(`Found ${chipCount} prompt suggestion chips`)
 
-  // We expect at least 5 prompt chips
-  expect(chipCount).toBeGreaterThanOrEqual(3)
+  // We expect 10 prompt chips
+  expect(chipCount).toBeGreaterThanOrEqual(5)
   await ss(page, '02-prompt-chips-visible')
 })
 
 test('3 — Click "check unpaid" prompt → AI responds', async () => {
+  // Ensure no overlays are blocking
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(300)
+
+  // Scroll to chat widget
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await page.waitForTimeout(500)
+
   // Find the unpaid invoices prompt chip
-  const unpaidChip = page.locator('button').filter({
+  const unpaidChip = page.locator('button.rounded-full').filter({
     hasText: /(unpaid|неплатени|papaguara|ödenmemiş)/i,
   }).first()
 
   if (await unpaidChip.isVisible()) {
-    await unpaidChip.click()
+    await unpaidChip.click({ force: true })
 
     // Wait for loading indicator to appear and then disappear
     await page.waitForTimeout(1000)
@@ -170,13 +194,16 @@ test('4 — Clear chat and verify chips reappear', async () => {
 })
 
 test('5 — Click "create invoice" prompt → AI creates draft or responds', async () => {
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await page.waitForTimeout(500)
+
   // Find create invoice chip
-  const invoiceChip = page.locator('button').filter({
+  const invoiceChip = page.locator('button.rounded-full').filter({
     hasText: /(create invoice|Креирај фактура|Krijo faturë|fatura oluştur)/i,
   }).first()
 
   if (await invoiceChip.isVisible()) {
-    await invoiceChip.click()
+    await invoiceChip.click({ force: true })
 
     // Wait for response
     await page.waitForTimeout(1000)
@@ -206,12 +233,15 @@ test('6 — Click "open reports" prompt → AI navigates', async () => {
     await page.waitForTimeout(500)
   }
 
-  const reportsChip = page.locator('button').filter({
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await page.waitForTimeout(500)
+
+  const reportsChip = page.locator('button.rounded-full').filter({
     hasText: /(open reports|Отвори.*извештаи|Hap.*raporteve|Raporlar.*aç)/i,
   }).first()
 
   if (await reportsChip.isVisible()) {
-    await reportsChip.click()
+    await reportsChip.click({ force: true })
 
     // Wait for response
     await page.waitForTimeout(1000)
