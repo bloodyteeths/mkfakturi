@@ -374,6 +374,7 @@ Route::prefix('/v1')->group(function () {
             Route::get('/invoices/{invoice}', [InvoicesController::class, 'show']);
             Route::put('/invoices/{invoice}', [InvoicesController::class, 'update']);
             Route::patch('/invoices/{invoice}', [InvoicesController::class, 'update']);
+            Route::post('/invoices/{invoice}/upload-document', [InvoicesController::class, 'uploadSourceDocument']);
 
             // Credit Notes
             // -------------------------------------------------
@@ -636,6 +637,7 @@ Route::prefix('/v1')->group(function () {
             Route::post('/payments/delete', [PaymentsController::class, 'delete'])->middleware('throttle:strict');
 
             Route::apiResource('payments', PaymentsController::class);
+            Route::post('/payments/{payment}/upload-document', [PaymentsController::class, 'uploadAttachment']);
 
             Route::apiResource('payment-methods', PaymentMethodsController::class);
 
@@ -813,6 +815,7 @@ Route::prefix('/v1')->group(function () {
             Route::get('/bills/{bill}/priemnica', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'priemnica']);
             Route::post('/bills/delete', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'delete']);
             Route::apiResource('bills', \App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class);
+            Route::post('/bills/{bill}/upload-document', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillsController::class, 'uploadScannedInvoice']);
 
             Route::get('/bills/{bill}/payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'index']);
             Route::post('/bills/{bill}/payments', [\App\Http\Controllers\V1\Admin\AccountsPayable\BillPaymentsController::class, 'store']);

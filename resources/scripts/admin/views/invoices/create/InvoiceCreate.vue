@@ -114,6 +114,19 @@
               type="Invoice"
             />
 
+            <!-- Source Document Upload -->
+            <BaseInputGroup
+              :label="$t('invoices.source_document', 'Source Document')"
+              class="mb-4"
+            >
+              <BaseFileUploader
+                v-model="sourceDocumentFiles"
+                accept="image/*,.pdf,.doc,.docx"
+                @change="onSourceDocumentChange"
+                @remove="onSourceDocumentRemove"
+              />
+            </BaseInputGroup>
+
             <!-- Invoice Custom Fields -->
             <InvoiceCustomFields
               type="Invoice"
@@ -212,6 +225,16 @@ let isSaving = ref(false)
 const isMarkAsDefault = ref(false)
 const showDuplicateWarning = ref(false)
 const duplicateRecords = ref([])
+const sourceDocumentFiles = ref([])
+const sourceDocumentFile = ref(null)
+
+function onSourceDocumentChange(fileName, file) {
+  sourceDocumentFile.value = file
+}
+
+function onSourceDocumentRemove() {
+  sourceDocumentFile.value = null
+}
 
 // Barcode Scanner Integration
 function handleScannedItem(item) {
@@ -529,7 +552,20 @@ async function submitForm(allowDuplicate = false) {
       return
     }
 
-    router.push(`/admin/invoices/${response.data.data.id}/view`)
+    // Upload source document if selected
+    const invoiceId = response.data.data.id
+    if (sourceDocumentFile.value) {
+      try {
+        const formData = new FormData()
+        formData.append('source_document', sourceDocumentFile.value)
+        const axios = (await import('axios')).default
+        await axios.post(`/invoices/${invoiceId}/upload-document`, formData)
+      } catch (e) {
+        console.warn('Source document upload failed:', e)
+      }
+    }
+
+    router.push(`/admin/invoices/${invoiceId}/view`)
   } catch (err) {
     // Error handled by store/notification system
   }

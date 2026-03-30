@@ -234,6 +234,13 @@
         class="flex-1 border border-gray-400 border-solid rounded-md"
       />
     </div>
+
+    <!-- Attached Document -->
+    <DocumentAttachmentPanel
+      v-if="payment.attachment_url"
+      :document-url="payment.attachment_url"
+      :label="$t('payments.attachment', 'Attachment')"
+    />
   </BasePage>
 </template>
 
@@ -253,6 +260,7 @@ import { useGlobalStore } from '@/scripts/admin/stores/global'
 import PaymentDropdown from '@/scripts/admin/components/dropdowns/PaymentIndexDropdown.vue'
 import SendPaymentModal from '@/scripts/admin/components/modal-components/SendPaymentModal.vue'
 import LoadingIcon from '@/scripts/components/icons/LoadingIcon.vue'
+import DocumentAttachmentPanel from '@/scripts/admin/components/DocumentAttachmentPanel.vue'
 
 import abilities from '@/scripts/admin/stub/abilities'
 

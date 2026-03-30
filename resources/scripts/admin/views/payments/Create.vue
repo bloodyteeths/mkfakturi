@@ -209,6 +209,18 @@
           class="mt-6"
         />
 
+        <!-- Payment Attachment Upload -->
+        <div class="mt-6">
+          <BaseInputGroup :label="$t('payments.attachment', 'Attachment')">
+            <BaseFileUploader
+              v-model="attachmentFiles"
+              accept="image/*,.pdf,.doc,.docx"
+              @change="onAttachmentChange"
+              @remove="onAttachmentRemove"
+            />
+          </BaseInputGroup>
+        </div>
+
         <!-- Payment Note field -->
         <div class="relative mt-6">
           <div
@@ -314,6 +326,16 @@ let isSaving = ref(false)
 let isLoadingInvoices = ref(false)
 let invoiceList = ref([])
 const selectedInvoice = ref(null)
+const attachmentFiles = ref([])
+const attachmentFile = ref(null)
+
+function onAttachmentChange(fileName, file) {
+  attachmentFile.value = file
+}
+
+function onAttachmentRemove() {
+  attachmentFile.value = null
+}
 
 const paymentValidationScope = 'newPayment'
 
@@ -535,7 +557,20 @@ async function submitPaymentData() {
 
     response = await action(data)
 
-    router.push(`/admin/payments/${response.data.data.id}/view`)
+    // Upload attachment if selected
+    const paymentId = response.data.data.id
+    if (attachmentFile.value) {
+      try {
+        const axios = (await import('axios')).default
+        const formData = new FormData()
+        formData.append('attachment', attachmentFile.value)
+        await axios.post(`/payments/${paymentId}/upload-document`, formData)
+      } catch (e) {
+        console.warn('Payment attachment upload failed:', e)
+      }
+    }
+
+    router.push(`/admin/payments/${paymentId}/view`)
   } catch (err) {
     isSaving.value = false
   }

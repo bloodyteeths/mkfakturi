@@ -59,7 +59,7 @@ class PaymentsController extends Controller
     {
         $this->authorize('view', $payment);
 
-        $payment->load(['currency', 'customer', 'company', 'invoice', 'paymentMethod', 'fields.customField']);
+        $payment->load(['currency', 'customer', 'company', 'invoice', 'paymentMethod', 'fields.customField', 'media']);
 
         return new PaymentResource($payment);
     }
@@ -83,5 +83,26 @@ class PaymentsController extends Controller
             'success' => true,
         ]);
     }
+
+    /**
+     * Upload an attachment document for a payment.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function uploadAttachment(Payment $payment, Request $request)
+    {
+        $this->authorize('update', $payment);
+
+        $request->validate([
+            'attachment' => 'required|file|max:20480',
+        ]);
+
+        $payment->clearMediaCollection('attachments');
+        $payment->addMediaFromRequest('attachment')
+            ->toMediaCollection('attachments');
+
+        return response()->json(['success' => true]);
+    }
+    // CLAUDE-CHECKPOINT
 }
 

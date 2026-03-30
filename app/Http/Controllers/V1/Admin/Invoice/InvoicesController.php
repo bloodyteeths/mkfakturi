@@ -55,6 +55,7 @@ class InvoicesController extends Controller
             'fields.customField',
             'fields.company',
             'emailLogs',
+            'media',
         ];
     }
 
@@ -245,6 +246,26 @@ class InvoicesController extends Controller
         }
 
         return response()->json(['success' => true, 'processed' => $processed]);
+    }
+
+    /**
+     * Upload a source document for an invoice.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function uploadSourceDocument(Invoice $invoice, Request $request)
+    {
+        $this->authorize('update', $invoice);
+
+        $request->validate([
+            'source_document' => 'required|file|max:20480',
+        ]);
+
+        $invoice->clearMediaCollection('source_document');
+        $invoice->addMediaFromRequest('source_document')
+            ->toMediaCollection('source_document');
+
+        return response()->json(['success' => true]);
     }
 
     /**

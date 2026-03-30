@@ -307,6 +307,18 @@
           </BaseInputGroup>
         </div>
 
+        <!-- Scanned Invoice Upload -->
+        <div class="mt-4">
+          <BaseInputGroup :label="$t('bills.scanned_invoice', 'Scanned Invoice')">
+            <BaseFileUploader
+              v-model="scannedInvoiceFiles"
+              accept="image/*,.pdf,.doc,.docx"
+              @change="onScannedInvoiceChange"
+              @remove="onScannedInvoiceRemove"
+            />
+          </BaseInputGroup>
+        </div>
+
         <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <BaseInputGroup :label="$t('bills.sub_total')">
             <BaseFormatMoney
@@ -404,6 +416,17 @@ const notificationStore = useNotificationStore()
 const isSaving = ref(false)
 const showDuplicateWarning = ref(false)
 const duplicateRecords = ref([])
+const scannedInvoiceFiles = ref([])
+const scannedInvoiceFile = ref(null)
+
+function onScannedInvoiceChange(fileName, file) {
+  scannedInvoiceFile.value = file
+}
+
+function onScannedInvoiceRemove() {
+  scannedInvoiceFile.value = null
+}
+
 const validationErrors = reactive({
   bill_number: '',
   bill_date: '',
@@ -798,8 +821,10 @@ async function handleSubmit(allowDuplicate = false) {
 
   try {
     const payload = buildPayload()
+    let billId = null
     if (isEdit.value) {
       await billsStore.updateBill(payload)
+      billId = payload.id
     } else {
       const response = await billsStore.createBill(payload, allowDuplicate)
 
@@ -809,7 +834,21 @@ async function handleSubmit(allowDuplicate = false) {
         showDuplicateWarning.value = true
         return
       }
+      billId = response?.data?.data?.id
     }
+
+    // Upload scanned invoice if selected
+    if (scannedInvoiceFile.value && billId) {
+      try {
+        const axios = (await import('axios')).default
+        const formData = new FormData()
+        formData.append('scanned_invoice', scannedInvoiceFile.value)
+        await axios.post(`/bills/${billId}/upload-document`, formData)
+      } catch (e) {
+        console.warn('Scanned invoice upload failed:', e)
+      }
+    }
+
     router.push('/admin/bills')
   } catch (err) {
     // Error notification handled by store's handleError

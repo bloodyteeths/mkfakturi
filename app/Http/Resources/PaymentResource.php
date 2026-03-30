@@ -55,6 +55,18 @@ class PaymentResource extends JsonResource
             'transaction' => $this->whenLoaded('transaction', function () {
                 return new TransactionResource($this->transaction);
             }),
+            'attachment_url' => $this->whenLoaded('media', function () {
+                $media = $this->getFirstMedia('attachments');
+                if (! $media) {
+                    return null;
+                }
+
+                try {
+                    return $media->getTemporaryUrl(now()->addMinutes(30));
+                } catch (\Exception $e) {
+                    return $media->getUrl();
+                }
+            }),
         ];
     }
 }

@@ -201,6 +201,25 @@ class BillsController extends Controller
     }
 
     /**
+     * Upload a scanned invoice document for a bill.
+     */
+    public function uploadScannedInvoice(Bill $bill, Request $request): JsonResponse
+    {
+        $this->authorize('update', $bill);
+
+        $request->validate([
+            'scanned_invoice' => 'required|file|max:20480',
+        ]);
+
+        $bill->clearMediaCollection('scanned_invoice');
+        $bill->addMediaFromRequest('scanned_invoice')
+            ->toMediaCollection('scanned_invoice');
+
+        return response()->json(['success' => true]);
+    }
+    // CLAUDE-CHECKPOINT
+
+    /**
      * Mark bill as sent (without emailing).
      */
     public function markAsSent(Bill $bill): JsonResponse
