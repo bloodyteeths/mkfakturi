@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Estimate;
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Models\BillPayment;
 use App\Models\Payment;
 use App\Models\PayrollRun;
 use App\Providers\CacheServiceProvider;
@@ -37,6 +38,18 @@ class DashboardMetricsService
             // Include paid/approved payroll costs (total_gross = employer cost in MK)
             $payrollByMonth = $this->aggregatePayroll($companyId, $window['start'], $window['end']);
             foreach ($payrollByMonth as $month => $amount) {
+                $expenseByMonth[$month] = ($expenseByMonth[$month] ?? 0) + $amount;
+            }
+
+            // Include bill payments (supplier costs)
+            $billPaymentByMonth = $this->aggregateMonthly(BillPayment::class, 'payment_date', 'COALESCE(base_amount, amount)', $companyId, $window['start'], $window['end']);
+            foreach ($billPaymentByMonth as $month => $amount) {
+                $expenseByMonth[$month] = ($expenseByMonth[$month] ?? 0) + $amount;
+            }
+
+            // Include tax payments from bank reconciliation (no dedicated model, stored as bank transactions)
+            $taxPaymentByMonth = $this->aggregateBankTaxPayments($companyId, $window['start'], $window['end']);
+            foreach ($taxPaymentByMonth as $month => $amount) {
                 $expenseByMonth[$month] = ($expenseByMonth[$month] ?? 0) + $amount;
             }
 
@@ -139,6 +152,29 @@ class DashboardMetricsService
             ->selectRaw($periodExpression.' as period, SUM('.$sumColumn.') as aggregate')
             ->where('company_id', $companyId)
             ->whereBetween($dateColumn, [$start->toDateString(), $end->toDateString()])
+            ->groupBy('period')
+            ->orderBy('period')
+            ->pluck('aggregate', 'period')
+            ->toArray();
+    }
+
+    private function aggregateBankTaxPayments(int $companyId, Carbon $start, Carbon $end): array
+    {
+        $driver = DB::connection()->getDriverName();
+        $periodExpression = match ($driver) {
+            'sqlite' => "strftime('%Y-%m', transaction_date)",
+            'pgsql' => "to_char(transaction_date, 'YYYY-MM')",
+            default => "DATE_FORMAT(transaction_date, '%Y-%m')",
+        };
+
+        // Tax payments reconciled via banking — stored as bank transactions with
+        // linked_type = 'tax_payment'. Amount is in MKD (not cents).
+        return DB::table('bank_transactions')
+            ->selectRaw($periodExpression.' as period, SUM(ABS(amount) * 100) as aggregate')
+            ->where('company_id', $companyId)
+            ->where('linked_type', 'tax_payment')
+            ->where('transaction_type', 'debit')
+            ->whereBetween('transaction_date', [$start->toDateString(), $end->toDateString()])
             ->groupBy('period')
             ->orderBy('period')
             ->pluck('aggregate', 'period')
