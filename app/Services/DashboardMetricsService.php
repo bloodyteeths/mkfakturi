@@ -8,6 +8,7 @@ use App\Models\Estimate;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\PayrollRun;
 use App\Providers\CacheServiceProvider;
 use Carbon\Carbon;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
@@ -30,8 +31,14 @@ class DashboardMetricsService
 
         return $this->cache->remember($cacheKey, CacheServiceProvider::CACHE_TTLS['SHORT'], function () use ($companyId, $window) {
             $invoiceByMonth = $this->aggregateMonthly(Invoice::class, 'invoice_date', 'base_total', $companyId, $window['start'], $window['end']);
-            $expenseByMonth = $this->aggregateMonthly(Expense::class, 'expense_date', 'base_amount', $companyId, $window['start'], $window['end']);
+            $expenseByMonth = $this->aggregateMonthly(Expense::class, 'expense_date', 'COALESCE(base_amount, amount)', $companyId, $window['start'], $window['end']);
             $paymentByMonth = $this->aggregateMonthly(Payment::class, 'payment_date', 'base_amount', $companyId, $window['start'], $window['end']);
+
+            // Include paid/approved payroll costs (total_gross = employer cost in MK)
+            $payrollByMonth = $this->aggregatePayroll($companyId, $window['start'], $window['end']);
+            foreach ($payrollByMonth as $month => $amount) {
+                $expenseByMonth[$month] = ($expenseByMonth[$month] ?? 0) + $amount;
+            }
 
             $months = [];
             $invoiceTotals = [];
@@ -137,6 +144,27 @@ class DashboardMetricsService
             ->pluck('aggregate', 'period')
             ->toArray();
     }
+
+    private function aggregatePayroll(int $companyId, Carbon $start, Carbon $end): array
+    {
+        $driver = DB::connection()->getDriverName();
+        $periodExpression = match ($driver) {
+            'sqlite' => "strftime('%Y-%m', period_end)",
+            'pgsql' => "to_char(period_end, 'YYYY-MM')",
+            default => "DATE_FORMAT(period_end, '%Y-%m')",
+        };
+
+        return PayrollRun::query()
+            ->selectRaw($periodExpression.' as period, SUM(total_gross) as aggregate')
+            ->where('company_id', $companyId)
+            ->whereIn('status', [PayrollRun::STATUS_APPROVED, PayrollRun::STATUS_PAID])
+            ->whereBetween('period_end', [$start->toDateString(), $end->toDateString()])
+            ->groupBy('period')
+            ->orderBy('period')
+            ->pluck('aggregate', 'period')
+            ->toArray();
+    }
+    // CLAUDE-CHECKPOINT
 
     private function determineFiscalWindow(int $companyId, bool $previousYear): array
     {
