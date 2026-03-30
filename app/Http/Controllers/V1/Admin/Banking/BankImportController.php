@@ -183,7 +183,7 @@ class BankImportController extends Controller
                     'new' => count($newTransactions) - $duplicateCount,
                     'duplicates' => $duplicateCount,
                     'detected_bank' => $parser->getBankName(),
-                    'transactions' => array_slice($newTransactions, 0, 10), // First 10 for preview
+                    'transactions' => $newTransactions,
                     'import_log_id' => $importLog?->id,
                 ],
             ]);
@@ -593,7 +593,7 @@ class BankImportController extends Controller
                     'new' => count($newTransactions) - $duplicateCount,
                     'duplicates' => $duplicateCount,
                     'detected_bank' => $detectedBank,
-                    'transactions' => array_slice($newTransactions, 0, 10),
+                    'transactions' => $newTransactions,
                     'import_log_id' => $importLog?->id,
                     'ocr_confidence' => $ocrResult['confidence'],
                 ],

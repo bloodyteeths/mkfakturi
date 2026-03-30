@@ -327,9 +327,9 @@
           </table>
         </div>
 
-        <!-- Show more link -->
-        <p v-if="previewData.total > 10" class="text-sm text-gray-500 text-center mb-6">
-          {{ $t('banking.showing_first_10', { total: previewData.total }) }}
+        <!-- Transaction count -->
+        <p v-if="previewData.total > 0" class="text-sm text-gray-500 text-center mb-6">
+          {{ previewData.total }} {{ $t('banking.total_transactions_label', 'transactions total') }}
         </p>
 
         <!-- Actions -->
