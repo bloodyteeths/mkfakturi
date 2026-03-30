@@ -494,7 +494,10 @@ class PayrollReportController extends Controller
     }
 
     /**
-     * Download unified PP50 PDF with all payroll payment slips (one page per contribution type + income tax).
+     * Download unified PP50 PDF with all payroll payment slips.
+     *
+     * Uses PaymentOrderService treasury accounts and revenue codes.
+     * Validates company data before generating — this is a real financial document.
      */
     public function downloadAllPP50(PayrollRun $payrollRun)
     {
@@ -503,42 +506,66 @@ class PayrollReportController extends Controller
         $payrollRun->load(['lines' => fn ($q) => $q->included(), 'company']);
         $company = $payrollRun->company;
 
+        // Validate company data — PP50 charges the company's bank account
         $bankAccount = \App\Models\BankAccount::where('company_id', $company->id)
             ->orderBy('id')
             ->first();
 
+        $missing = [];
+        if (! $bankAccount || ! $bankAccount->iban) {
+            $missing[] = 'IBAN на сметка (Settings → Bank Accounts)';
+        }
+        if (empty($company->edb)) {
+            $missing[] = 'ЕДБ број (Settings → Company)';
+        }
+        if (! empty($missing)) {
+            return response()->json([
+                'error' => 'missing_company_data',
+                'message' => 'Пополнете ги податоците за фирмата пред генерирање PP50: ' . implode(', ', $missing),
+                'missing_fields' => $missing,
+            ], 422);
+        }
+
         $period = sprintf('%02d/%d', $payrollRun->period_month, $payrollRun->period_year);
 
+        // MK unified model: pension + health are full rate (no EE/ER split)
         $types = [
-            ['column' => 'pension_contribution_employee', 'revenue_code' => '722315', 'label' => 'Придонес за ПИО (18.8%)'],
-            ['column' => 'health_contribution_employee', 'revenue_code' => '722313', 'label' => 'Придонес за здравство (7.5%)'],
-            ['column' => 'unemployment_contribution', 'revenue_code' => '722316', 'label' => 'Придонес за вработување (1.2%)'],
-            ['column' => 'additional_contribution', 'revenue_code' => '722317', 'label' => 'Додатен придонес (0.5%)'],
-            ['column' => 'income_tax_amount', 'revenue_code' => '713111', 'label' => 'Данок на личен доход (ДЛД 10%)'],
+            'pension_employee' => 'pension_contribution_employee',
+            'health_employee' => 'health_contribution_employee',
+            'unemployment' => 'unemployment_contribution',
+            'additional' => 'additional_contribution',
+            'income_tax' => 'income_tax_amount',
         ];
 
         $pp50Service = app(\Modules\Mk\Services\Pp50PdfService::class);
+        $paymentOrderService = app(\Modules\Mk\Payroll\Services\PaymentOrderService::class);
+        $accounts = $paymentOrderService->getContributionAccounts();
         $slips = [];
 
-        foreach ($types as $config) {
-            $totalAmount = $payrollRun->lines->sum($config['column']);
+        foreach ($types as $accountKey => $column) {
+            $totalAmount = $payrollRun->lines->sum($column);
             if ($totalAmount <= 0) {
+                continue;
+            }
+
+            $account = $accounts[$accountKey] ?? null;
+            if (! $account) {
                 continue;
             }
 
             $slips[] = $pp50Service->buildSlip(
                 debtorName: $company->name,
-                debtorIban: $bankAccount?->iban ?? $bankAccount?->account_number ?? '',
-                debtorBank: $bankAccount?->bank_name ?? '',
-                creditorName: 'Управа за јавни приходи',
-                creditorIban: '',
-                creditorBank: '',
+                debtorIban: $bankAccount->iban,
+                debtorBank: $bankAccount->bank_name ?? '',
+                creditorName: $account['recipient_name'],
+                creditorIban: $account['recipient_account'],
+                creditorBank: 'НБРСМ',
                 amountCents: $totalAmount,
                 currencyCode: 'MKD',
-                revenueCode: $config['revenue_code'],
+                revenueCode: $account['revenue_code'],
                 municipalityCode: $company->municipality_code ?? '80',
-                paymentReference: '',
-                description: $config['label'] . ' - ' . $period,
+                paymentReference: $company->edb,
+                description: $account['description'] . ' - ' . $period,
                 date: now()->format('d.m.Y'),
                 billNumber: ''
             );
@@ -558,97 +585,19 @@ class PayrollReportController extends Controller
 
     /**
      * Download PP50 payment slip PDF for a specific contribution type.
-     *
-     * In MK, ALL contributions are deducted from gross — no employer add-on.
-     * Types: pio (pension 18.8%), health (7.5%), unemployment (1.2%), additional (0.5%)
+     * Redirects to unified downloadAllPP50 — kept for backward compat.
      */
     public function downloadPP50(PayrollRun $payrollRun, string $type)
     {
-        $this->authorize('view', $payrollRun);
-
-        $payrollRun->load(['lines' => fn ($q) => $q->included(), 'company']);
-        $company = $payrollRun->company;
-
-        // Map type to contribution column and revenue code
-        $typeMap = [
-            'pio' => [
-                'column' => 'pension_contribution_employee',
-                'revenue_code' => '722315',
-                'label' => 'Придонес за ПИО (18.8%)',
-            ],
-            'health' => [
-                'column' => 'health_contribution_employee',
-                'revenue_code' => '722313',
-                'label' => 'Придонес за здравство (7.5%)',
-            ],
-            'unemployment' => [
-                'column' => 'unemployment_contribution',
-                'revenue_code' => '722316',
-                'label' => 'Придонес за вработување (1.2%)',
-            ],
-            'additional' => [
-                'column' => 'additional_contribution',
-                'revenue_code' => '722317',
-                'label' => 'Додатен придонес (0.5%)',
-            ],
-            'income_tax' => [
-                'column' => 'income_tax_amount',
-                'revenue_code' => '713111',
-                'label' => 'Данок на личен доход (ДЛД 10%)',
-            ],
-        ];
-
-        if (! isset($typeMap[$type])) {
-            return response()->json(['error' => 'Invalid PP50 type.'], 422);
-        }
-
-        $config = $typeMap[$type];
-        $column = $config['column'];
-        $totalAmount = $payrollRun->lines->sum($column);
-
-        if ($totalAmount <= 0) {
-            return response()->json(['error' => 'No amount for this contribution type.'], 422);
-        }
-
-        // Get company bank account
-        $bankAccount = \App\Models\BankAccount::where('company_id', $company->id)
-            ->orderBy('id')
-            ->first();
-
-        $period = sprintf('%02d/%d', $payrollRun->period_month, $payrollRun->period_year);
-
-        $pp50Service = app(\Modules\Mk\Services\Pp50PdfService::class);
-        $pdf = $pp50Service->generate([
-            'debtor_name' => $company->name,
-            'debtor_iban' => $bankAccount?->iban ?? $bankAccount?->account_number ?? '',
-            'debtor_bank' => $bankAccount?->bank_name ?? '',
-            'creditor_name' => 'Управа за јавни приходи',
-            'creditor_iban' => '',
-            'creditor_bank' => '',
-            'amount' => $totalAmount,
-            'currency_code' => 'MKD',
-            'revenue_code' => $config['revenue_code'],
-            'municipality_code' => $company->municipality_code ?? '80',
-            'payment_reference' => '',
-            'description' => $config['label'] . ' - ' . $period,
-            'date' => now()->format('d.m.Y'),
-        ]);
-
-        $filename = sprintf('PP50_%s_%d_%02d.pdf', $type, $payrollRun->period_year, $payrollRun->period_month);
-
-        return $pdf->download($filename);
+        return $this->downloadAllPP50($payrollRun);
     }
 
     /**
-     * Download PP30 payment slip PDF for income tax.
-     *
-     * @deprecated Use downloadPP50 with type=income_tax instead.
-     * Income tax is a budget payment (713111) → PP50, not PP30.
-     * Kept for backward compatibility with existing routes.
+     * @deprecated Use downloadAllPP50 instead.
      */
     public function downloadPP30(PayrollRun $payrollRun)
     {
-        return $this->downloadPP50($payrollRun, 'income_tax');
+        return $this->downloadAllPP50($payrollRun);
     }
 }
 
