@@ -457,9 +457,11 @@ class ReconciliationController extends Controller
             ], 422);
         }
 
+        $amountCents = (int) round(abs((float) $transaction->amount) * 100);
         $expense = Expense::create([
             'expense_date' => $transaction->transaction_date,
-            'amount' => (int) round(abs((float) $transaction->amount) * 100),
+            'amount' => $amountCents,
+            'base_amount' => $amountCents,
             'expense_category_id' => $category->id,
             'company_id' => $company->id,
             'creator_id' => Auth::id(),
@@ -482,43 +484,10 @@ class ReconciliationController extends Controller
 
         $transaction->markAsReconciled(BankTransaction::LINKED_EXPENSE, $expense->id);
 
-        // Post to IFRS GL: DR expense account / CR 1000 (Жиро-сметка)
-        try {
-            $ifrs = app(\App\Domain\Accounting\IfrsAdapter::class);
-            if ($ifrs) {
-                $narration = ($request->notes ?? $transaction->description ?? 'Expense') . ' [' . ($category->name ?? '') . ']';
-                $counterparty = $transaction->creditor_name ?? '';
-                $amountCents = (int) round(abs((float) $transaction->amount) * 100);
-
-                $ifrs->postJournalEntry($company, [
-                    'date' => $transaction->transaction_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
-                    'narration' => $narration,
-                    'reference' => "BANK-TX-{$transaction->id}",
-                    'line_items' => [
-                        [
-                            'account_code' => $expenseGlCode,
-                            'account_name' => $category->name ?? 'Останати расходи',
-                            'amount' => $amountCents,
-                            'credited' => false,
-                            'counterparty_name' => $counterparty,
-                        ],
-                        [
-                            'account_code' => $bankGlCode,
-                            'account_name' => 'Жиро-сметка',
-                            'amount' => $amountCents,
-                            'credited' => true,
-                            'counterparty_name' => $counterparty,
-                        ],
-                    ],
-                ]);
-            }
-        } catch (\Exception $e) {
-            Log::warning('[Reconciliation] IFRS posting failed for expense', [
-                'transaction_id' => $transaction->id,
-                'expense_id' => $expense->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        // IFRS GL posting is handled by ExpenseObserver::created() → IfrsAdapter::postExpense()
+        // Do NOT manually call postJournalEntry() here — it would create duplicate GL entries
+        // ExpenseObserver has idempotency via ifrs_transaction_id check
+        // CLAUDE-CHECKPOINT
 
         return response()->json([
             'success' => true,
@@ -865,7 +834,7 @@ class ReconciliationController extends Controller
                 $narration = $request->notes ?? $transaction->description ?? 'Non-invoice income';
                 $counterparty = $transaction->debtor_name ?? '';
 
-                $ifrs->postJournalEntry($company, [
+                $result = $ifrs->postJournalEntry($company, [
                     'date' => $transaction->transaction_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
                     'narration' => $narration,
                     'reference' => "BANK-TX-{$transaction->id}",
@@ -886,6 +855,16 @@ class ReconciliationController extends Controller
                         ],
                     ],
                 ]);
+
+                // Set ifrs_transaction_id to prevent PaymentObserver from double-posting
+                // if payment gateway_status later changes to COMPLETED
+                $txId = is_object($result) ? ($result->id ?? null) : (is_array($result) ? ($result['id'] ?? null) : null);
+                if ($txId) {
+                    $payment->update(['ifrs_transaction_id' => $txId]);
+                } else {
+                    // Use transaction ID as sentinel (column is unsignedBigInteger)
+                    $payment->update(['ifrs_transaction_id' => $transaction->id]);
+                }
             }
         } catch (\Exception $e) {
             Log::warning('[Reconciliation] IFRS posting failed for income', [
@@ -894,6 +873,7 @@ class ReconciliationController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
+        // CLAUDE-CHECKPOINT
 
         return response()->json([
             'success' => true,
