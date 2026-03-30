@@ -759,10 +759,7 @@ const downloadBankStatement = () => {
 }
 
 const downloadIos = () => {
-  notificationStore.showNotification({
-    type: 'info',
-    message: t('banking.ios_from_customer', 'ИОС извештајот се генерира од страницата на купувачот. Отворете Купувач → Документи → ИОС.'),
-  })
+  router.push({ name: 'collections.index' })
 }
 
 const downloadDailyCashReport = () => {

@@ -1758,4 +1758,25 @@ PROMPT;
         $balance = (float) $account->opening_balance + (float) $credits - (float) $debits;
         $account->update(['current_balance' => round($balance, 2)]);
     }
+
+    /**
+     * Get the current company from the authenticated user.
+     */
+    protected function getCompany(): Company
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $companyIdHeader = request()->header('company');
+
+        if ($companyIdHeader) {
+            $companyId = (int) $companyIdHeader;
+            if ($user->hasCompany($companyId)) {
+                $company = $user->companies()->where('companies.id', $companyId)->first();
+                if ($company) {
+                    return $company;
+                }
+            }
+        }
+
+        return $user->companies()->firstOrFail();
+    }
 }
