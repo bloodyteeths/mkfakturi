@@ -140,27 +140,10 @@ class BankStatementOcrService
                 'raw_record' => $tx,
             ];
 
-            // Extract bank fee (пров./провизија) as a separate debit transaction
-            $fee = (float) ($tx['fee'] ?? $tx['commission'] ?? $tx['prov'] ?? 0);
-            if ($fee > 0) {
-                $counterparty = $tx['counterparty_name'] ?? $tx['description'] ?? '';
-                $transactions[] = [
-                    'transaction_date' => $txDate,
-                    'booking_date' => $txDate,
-                    'value_date' => $txDate,
-                    'amount' => -$fee,
-                    'currency' => 'MKD',
-                    'description' => 'Провизија - ' . $counterparty,
-                    'reference' => ($tx['reference'] ?? null) ? $tx['reference'] . '-FEE' : null,
-                    'external_reference' => ($tx['reference'] ?? null) ? $tx['reference'] . '-FEE' : null,
-                    'external_transaction_id' => null,
-                    'counterparty_name' => $tx['bank_name'] ?? 'Банкарска провизија',
-                    'counterparty_account' => $tx['counterparty_account'] ?? null,
-                    'payment_code' => $tx['payment_code'] ?? null,
-                    'is_bank_fee' => true,
-                    'raw_record' => $tx,
-                ];
-            }
+            // NOTE: The пров. (fee) column in MK bank statements is informational —
+            // fees are charged as separate batch transactions on decade boundaries.
+            // Do NOT extract пров. as separate debit transactions — it double-counts.
+            // CLAUDE-CHECKPOINT
         }
 
         return $transactions;

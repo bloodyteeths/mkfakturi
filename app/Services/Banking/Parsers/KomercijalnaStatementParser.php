@@ -92,26 +92,12 @@ class KomercijalnaStatementParser implements BankParserInterface
                 if ($tx !== null) {
                     $transactions[] = $tx;
 
-                    // Extract bank fee (пров.) as separate debit transaction
-                    $fee = $this->parseAmount($row[11] ?? '');
-                    if ($fee > 0) {
-                        $transactions[] = [
-                            'transaction_date' => $tx['transaction_date'],
-                            'booking_date' => $tx['booking_date'],
-                            'value_date' => $tx['value_date'],
-                            'amount' => -$fee,
-                            'currency' => 'MKD',
-                            'description' => 'Провизија - ' . trim($row[2] ?? $tx['description'] ?? ''),
-                            'reference' => ($tx['reference'] ?? '') ? $tx['reference'] . '-FEE' : null,
-                            'external_reference' => ($tx['external_reference'] ?? '') ? $tx['external_reference'] . '-FEE' : null,
-                            'counterparty_name' => 'Комерцијална Банка АД Скопје',
-                            'counterparty_account' => $tx['counterparty_account'],
-                            'payment_code' => $tx['payment_code'],
-                            'fee' => 0,
-                            'raw_record' => $row,
-                            'is_bank_fee' => true,
-                        ];
-                    }
+                    // NOTE: The пров. (fee) column in Komercijalna bank statements is
+                    // informational only — fees are NOT deducted from the account balance
+                    // on the same statement. The bank charges fees as batch transactions
+                    // on decade boundaries (e.g. "Пров. ПП за втора декада").
+                    // Do NOT extract пров. as separate debit transactions — it double-counts.
+                    // CLAUDE-CHECKPOINT
                 }
                 continue;
             }
