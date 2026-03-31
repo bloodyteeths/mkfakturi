@@ -772,6 +772,98 @@ class AccountingReportsController extends Controller
     }
 
     /**
+     * Download ALL journal entries for a date range as a single multi-page PDF.
+     *
+     * Each налог за книжење gets its own page.
+     */
+    public function journalEntriesPdf(Request $request)
+    {
+        if (! $this->isFeatureEnabled()) {
+            abort(403, 'Accounting backbone feature is disabled');
+        }
+
+        $companyId = $request->header('company');
+        $company = Company::find($companyId);
+        if (! $company) {
+            abort(404, 'Company not found');
+        }
+
+        $this->authorize('view', $company);
+        $company->load('address');
+
+        $validated = $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $journalEntries = $this->ifrsAdapter->getJournalEntries(
+            $company,
+            $validated['start_date'],
+            $validated['end_date']
+        );
+
+        if (isset($journalEntries['error']) || empty($journalEntries['entries'])) {
+            abort(404, 'No journal entries found for this period');
+        }
+
+        $entries = $journalEntries['entries'];
+
+        // Prepare each entry with voucher type, amount in words, source doc
+        $amountToWords = null;
+        try {
+            $amountToWords = app(\Modules\Mk\Services\AmountToWordsService::class);
+        } catch (\Throwable $e) {
+            // fallback below
+        }
+
+        $companyLogo = null;
+        if ($company->logo) {
+            $logoPath = storage_path('app/public/' . $company->logo);
+            if (file_exists($logoPath)) {
+                $companyLogo = $logoPath;
+            }
+        }
+
+        $preparedEntries = [];
+        foreach ($entries as $entry) {
+            $txType = $entry['transaction_type'];
+            $voucherInfo = self::MK_VOUCHER_TYPES[$txType] ?? ['code' => 'ИНТ', 'label' => 'Интерен налог'];
+
+            $words = '—';
+            if ($amountToWords && $entry['total_debit'] > 0) {
+                try {
+                    $words = $amountToWords->convert($entry['total_debit'], 'MKD');
+                } catch (\Throwable $e) {
+                    $words = number_format($entry['total_debit'] / 100, 2, ',', '.') . ' МКД';
+                }
+            }
+
+            $preparedEntries[] = [
+                'entry' => $entry,
+                'voucher_type_code' => $voucherInfo['code'],
+                'voucher_type_label' => $voucherInfo['label'],
+                'amount_words' => $words,
+                'source_document' => $this->extractSourceDocument($entry['narration']),
+            ];
+        }
+
+        view()->share([
+            'company' => $company,
+            'company_logo' => $companyLogo,
+            'prepared_entries' => $preparedEntries,
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+        ]);
+
+        $pdf = \PDF::loadView('app.pdf.reports.journal-entries-bulk');
+
+        $from = str_replace('-', '', $validated['start_date']);
+        $to = str_replace('-', '', $validated['end_date']);
+
+        return $pdf->download("nalozi_{$from}_{$to}.pdf");
+    }
+
+    /**
      * Reverse (storno) a posted journal entry.
      */
     public function reverseJournalEntry(Request $request, int $transaction): JsonResponse

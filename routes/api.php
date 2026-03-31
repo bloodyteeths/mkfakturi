@@ -967,6 +967,7 @@ Route::prefix('/v1')->group(function () {
                 Route::get('/general-ledger/export', [AccountingReportsController::class, 'generalLedgerExport']);
                 Route::get('/journal-entries', [AccountingReportsController::class, 'journalEntries']);
                 Route::get('/journal-entries/export', [AccountingReportsController::class, 'journalEntriesExport']);
+                Route::get('/journal-entries/pdf', [AccountingReportsController::class, 'journalEntriesPdf']);
                 Route::get('/journal-entries/{transaction}/pdf', [AccountingReportsController::class, 'journalEntryPdf']);
                 Route::post('/journal-entries/{transaction}/reverse', [AccountingReportsController::class, 'reverseJournalEntry']);
                 Route::get('/cash-flow', [AccountingReportsController::class, 'cashFlow']);

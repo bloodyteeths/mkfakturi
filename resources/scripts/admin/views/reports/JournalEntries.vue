@@ -1,10 +1,10 @@
 <template>
-  <div class="grid gap-8 pt-10">
+  <div class="grid gap-6 pt-10">
     <!-- Filters Card -->
     <div class="p-6 bg-white rounded-lg shadow">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Account filter -->
-        <BaseInputGroup :label="$t('accounting.general_ledger.select_account', 'Filter by Account')">
+        <BaseInputGroup :label="$t('accounting.general_ledger.select_account', 'Избери сметка')">
           <BaseMultiselect
             v-model="filters.account_id"
             :options="accounts"
@@ -52,187 +52,140 @@
       </div>
     </div>
 
-    <!-- Export Button -->
-    <div v-if="entries.length > 0" class="flex justify-end">
-      <BaseButton
-        variant="primary-outline"
-        :loading="isExporting"
-        @click="exportToCsv"
-      >
-        <template #left="slotProps">
-          <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
-        </template>
-        {{ $t('general.export') }}
-      </BaseButton>
+    <!-- Action buttons -->
+    <div v-if="entries.length > 0" class="flex justify-between items-center">
+      <p class="text-sm text-gray-500">
+        {{ pagination.total }} {{ $t('accounting.journal_entries.entries_found', 'налози') }}
+        ({{ filters.start_date }} — {{ filters.end_date }})
+      </p>
+      <div class="flex gap-3">
+        <BaseButton
+          variant="primary-outline"
+          :loading="isPrintingAll"
+          @click="printAllPdf"
+        >
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="PrinterIcon" />
+          </template>
+          {{ $t('accounting.journal_entries.print_all_pdf', 'Печати сите PDF') }}
+        </BaseButton>
+
+        <BaseButton
+          variant="primary-outline"
+          :loading="isExporting"
+          @click="exportToCsv"
+        >
+          <template #left="slotProps">
+            <BaseIcon :class="slotProps.class" name="ArrowDownTrayIcon" />
+          </template>
+          {{ $t('general.export') }}
+        </BaseButton>
+      </div>
     </div>
 
-    <!-- Journal Entries List -->
-    <div v-if="entries.length > 0" class="space-y-4">
-      <div
-        v-for="entry in entries"
-        :key="entry.id"
-        class="bg-white rounded-lg shadow overflow-hidden"
-      >
-        <!-- Entry Header (Clickable) -->
-        <div
-          class="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors"
-          @click="toggleEntry(entry.id)"
-        >
-          <div class="flex justify-between items-center">
-            <div class="flex-1">
-              <div class="flex items-center gap-4">
-                <span class="text-sm font-medium text-gray-900">
-                  {{ formatDate(entry.date) }}
-                </span>
-                <span class="text-sm text-gray-600">
-                  {{ entry.narration }}
-                </span>
-                <BaseBadge
-                  v-if="entry.source_type"
-                  :bg-color="getSourceBadgeColor(entry.source_type)"
-                  :text-color="getSourceTextColor(entry.source_type)"
-                >
-                  {{ formatSourceType(entry.source_type) }}
-                </BaseBadge>
-              </div>
-              <div v-if="entry.reference" class="mt-1">
-                <span class="text-xs text-gray-500">
-                  {{ $t('general.reference') }}:
-                </span>
-                <span class="text-xs font-medium text-primary-500">
+    <!-- Unified Journal Table -->
+    <div v-if="entries.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 90px;">
+                {{ $t('accounting.journal_entries.date', 'Датум') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 100px;">
+                {{ $t('accounting.journal_entries.reference_short', 'Број') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 60px;">
+                {{ $t('accounting.journal_entries.type_short', 'Вид') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 80px;">
+                {{ $t('accounting.journal_entries.account_code', 'Конто') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                {{ $t('accounting.journal_entries.account_name_desc', 'Назив / Опис') }}
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 120px;">
+                {{ $t('accounting.journal_entries.debit', 'Должи') }}
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 120px;">
+                {{ $t('accounting.journal_entries.credit', 'Побарува') }}
+              </th>
+              <th class="px-2 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 50px;">
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <template v-for="entry in entries" :key="entry.id">
+              <!-- Entry header row (narration) -->
+              <tr class="bg-gray-50 border-t-2 border-gray-300">
+                <td class="px-4 py-2 text-xs font-medium text-gray-900">
+                  {{ formatDateShort(entry.date) }}
+                </td>
+                <td class="px-4 py-2 text-xs font-medium text-primary-600">
                   {{ entry.reference }}
-                </span>
-              </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <div class="text-right">
-                <p class="text-sm font-semibold text-gray-900">
-                  {{ formatMoney(entry.total_amount) }}
-                </p>
-                <p class="text-xs text-gray-500">
-                  {{ entry.lines_count }} {{ $t('accounting.journal_entries.lines') }}
-                </p>
-              </div>
-              <BaseIcon
-                name="ChevronDownIcon"
-                class="h-5 w-5 text-gray-400 transition-transform"
-                :class="{ 'transform rotate-180': isExpanded(entry.id) }"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Expanded Details -->
-        <div
-          v-if="isExpanded(entry.id)"
-          class="border-t border-gray-200 bg-gray-50"
-        >
-          <div class="px-6 py-4">
-            <!-- Entry Lines Table -->
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th
-                    class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                </td>
+                <td class="px-4 py-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                    :class="getTypeBadgeClass(entry.transaction_type)">
+                    {{ getTypeCode(entry.transaction_type) }}
+                  </span>
+                </td>
+                <td colspan="3" class="px-4 py-2 text-xs text-gray-600">
+                  {{ entry.narration }}
+                </td>
+                <td class="px-4 py-2 text-right text-xs font-bold text-gray-900">
+                  {{ formatAmount(entry.total_amount) }}
+                </td>
+                <td class="px-2 py-2 text-center">
+                  <button
+                    class="text-gray-400 hover:text-red-500 transition-colors"
+                    :title="$t('accounting.journal_entries.reverse', 'Сторно')"
+                    @click="confirmReverse(entry)"
                   >
-                    {{ $t('accounting.journal_entries.account') }}
-                  </th>
-                  <th
-                    class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
-                    {{ $t('accounting.journal_entries.counterparty', 'Партнер') }}
-                  </th>
-                  <th
-                    class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
-                    {{ $t('general.description') }}
-                  </th>
-                  <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
-                    {{ $t('accounting.journal_entries.debit') }}
-                  </th>
-                  <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
-                    {{ $t('accounting.journal_entries.credit') }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 bg-white">
-                <tr v-for="(line, index) in entry.lines" :key="index">
-                  <td class="px-4 py-3 text-sm">
-                    <div class="font-mono text-gray-900">{{ line.account_code }}</div>
-                    <div class="text-gray-600">{{ line.account_name }}</div>
-                  </td>
-                  <td class="px-4 py-3 text-sm text-gray-500">
-                    {{ line.counterparty_name || '-' }}
-                  </td>
-                  <td class="px-4 py-3 text-sm text-gray-500">
-                    {{ line.description || '-' }}
-                  </td>
-                  <td class="px-4 py-3 text-sm text-right font-medium">
-                    {{ line.debit > 0 ? formatMoney(line.debit) : '' }}
-                  </td>
-                  <td class="px-4 py-3 text-sm text-right font-medium">
-                    {{ line.credit > 0 ? formatMoney(line.credit) : '' }}
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot class="bg-gray-50">
-                <tr>
-                  <td colspan="3" class="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                    {{ $t('accounting.journal_entries.totals') }}
-                  </td>
-                  <td class="px-4 py-3 text-sm text-right font-bold text-gray-900">
-                    {{ formatMoney(entry.total_debit) }}
-                  </td>
-                  <td class="px-4 py-3 text-sm text-right font-bold text-gray-900">
-                    {{ formatMoney(entry.total_credit) }}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-
-            <!-- Source Document Link -->
-            <div v-if="entry.source_link" class="mt-4 pt-4 border-t border-gray-200">
-              <a
-                :href="entry.source_link"
-                class="inline-flex items-center text-sm font-medium text-primary-500 hover:text-primary-700"
-              >
-                <BaseIcon name="DocumentTextIcon" class="h-4 w-4 mr-2" />
-                {{ $t('accounting.journal_entries.view_source_document') }}
-              </a>
-            </div>
-
-            <!-- Actions: Print PDF + Reverse -->
-            <div class="mt-4 pt-4 border-t border-gray-200 flex gap-3">
-              <BaseButton
-                variant="primary-outline"
-                size="sm"
-                :loading="printingEntryId === entry.id"
-                @click.stop="printEntryPdf(entry)"
-              >
-                <template #left="slotProps">
-                  <BaseIcon :class="slotProps.class" name="PrinterIcon" />
-                </template>
-                {{ $t('accounting.journal_entries.print_pdf', 'Печати PDF') }}
-              </BaseButton>
-
-              <BaseButton
-                variant="danger-outline"
-                size="sm"
-                :loading="reversingEntryId === entry.id"
-                @click.stop="confirmReverse(entry)"
-              >
-                <template #left="slotProps">
-                  <BaseIcon :class="slotProps.class" name="ArrowUturnLeftIcon" />
-                </template>
-                {{ $t('accounting.journal_entries.reverse', 'Сторно') }}
-              </BaseButton>
-            </div>
-          </div>
-        </div>
+                    <BaseIcon name="ArrowUturnLeftIcon" class="h-4 w-4" />
+                  </button>
+                </td>
+              </tr>
+              <!-- Line item rows -->
+              <tr v-for="(line, idx) in entry.lines" :key="`${entry.id}-${idx}`">
+                <td class="px-4 py-1.5"></td>
+                <td class="px-4 py-1.5"></td>
+                <td class="px-4 py-1.5"></td>
+                <td class="px-4 py-1.5 text-sm font-mono text-gray-700">
+                  {{ line.account_code }}
+                </td>
+                <td class="px-4 py-1.5 text-sm text-gray-600">
+                  {{ line.account_name }}
+                  <span v-if="line.counterparty_name" class="text-xs text-gray-400 ml-2">
+                    ({{ line.counterparty_name }})
+                  </span>
+                </td>
+                <td class="px-4 py-1.5 text-sm text-right font-mono">
+                  {{ line.debit > 0 ? formatAmount(line.debit) : '' }}
+                </td>
+                <td class="px-4 py-1.5 text-sm text-right font-mono">
+                  {{ line.credit > 0 ? formatAmount(line.credit) : '' }}
+                </td>
+                <td class="px-2 py-1.5"></td>
+              </tr>
+            </template>
+          </tbody>
+          <!-- Grand totals -->
+          <tfoot class="bg-gray-100 border-t-2 border-gray-400">
+            <tr>
+              <td colspan="5" class="px-4 py-3 text-sm font-bold text-gray-900 text-right">
+                {{ $t('accounting.journal_entries.grand_total', 'ВКУПНО:') }}
+              </td>
+              <td class="px-4 py-3 text-sm text-right font-bold text-gray-900 font-mono">
+                {{ formatAmount(grandTotalDebit) }}
+              </td>
+              <td class="px-4 py-3 text-sm text-right font-bold text-gray-900 font-mono">
+                {{ formatAmount(grandTotalCredit) }}
+              </td>
+              <td class="px-2 py-3"></td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
     </div>
 
@@ -287,9 +240,9 @@ import moment from 'moment'
 const companyStore = useCompanyStore()
 
 const entries = ref([])
-const expandedEntries = ref(new Set())
 const isLoading = ref(false)
 const isExporting = ref(false)
+const isPrintingAll = ref(false)
 const hasSearched = ref(false)
 const accounts = ref([])
 
@@ -318,7 +271,7 @@ loadAccounts()
 const pagination = ref({
   currentPage: 1,
   totalPages: 1,
-  perPage: 20,
+  perPage: 50,
   total: 0,
 })
 
@@ -326,17 +279,14 @@ const canLoadEntries = computed(() => {
   return filters.value.start_date && filters.value.end_date
 })
 
-function toggleEntry(entryId) {
-  if (expandedEntries.value.has(entryId)) {
-    expandedEntries.value.delete(entryId)
-  } else {
-    expandedEntries.value.add(entryId)
-  }
-}
+// Grand totals across all visible entries
+const grandTotalDebit = computed(() => {
+  return entries.value.reduce((sum, e) => sum + (e.total_debit || 0), 0)
+})
 
-function isExpanded(entryId) {
-  return expandedEntries.value.has(entryId)
-}
+const grandTotalCredit = computed(() => {
+  return entries.value.reduce((sum, e) => sum + (e.total_credit || 0), 0)
+})
 
 async function loadEntries(page = 1) {
   if (!canLoadEntries.value) return
@@ -360,12 +310,9 @@ async function loadEntries(page = 1) {
     pagination.value = {
       currentPage: response.data.meta?.current_page || 1,
       totalPages: response.data.meta?.last_page || 1,
-      perPage: response.data.meta?.per_page || 20,
+      perPage: response.data.meta?.per_page || 50,
       total: response.data.meta?.total || 0,
     }
-
-    // Clear expanded entries when loading new data
-    expandedEntries.value.clear()
   } catch (error) {
     console.error('Failed to load journal entries:', error)
     entries.value = []
@@ -376,6 +323,32 @@ async function loadEntries(page = 1) {
 
 function loadPage(page) {
   loadEntries(page)
+}
+
+// ---- Print ALL as multi-page PDF ----
+async function printAllPdf() {
+  isPrintingAll.value = true
+  try {
+    const response = await window.axios.get('/accounting/journal-entries/pdf', {
+      params: {
+        start_date: filters.value.start_date,
+        end_date: filters.value.end_date,
+      },
+      responseType: 'blob',
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `nalozi_${filters.value.start_date}_${filters.value.end_date}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Failed to download bulk PDF:', error)
+  } finally {
+    isPrintingAll.value = false
+  }
 }
 
 async function exportToCsv() {
@@ -392,13 +365,10 @@ async function exportToCsv() {
       responseType: 'blob',
     })
 
-    // Create download link
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
     link.href = url
-
-    const filename = `journal_entries_${filters.value.start_date}_${filters.value.end_date}.csv`
-    link.setAttribute('download', filename)
+    link.setAttribute('download', `journal_entries_${filters.value.start_date}_${filters.value.end_date}.csv`)
     document.body.appendChild(link)
     link.click()
     link.remove()
@@ -410,98 +380,59 @@ async function exportToCsv() {
   }
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '-'
-  return moment(dateStr).format('DD MMM YYYY')
-}
-
-function formatMoney(amount) {
-  if (amount === null || amount === undefined) return '-'
-
-  const currency = companyStore.selectedCompanyCurrency
-  const absAmount = Math.abs(amount)
-  const formatted = new Intl.NumberFormat('mk-MK', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(absAmount / 100)
-
-  const sign = amount < 0 ? '-' : ''
-  return `${sign}${formatted} ${currency?.code || 'MKD'}`
-}
-
-// ---- Print PDF & Reverse ----
-const printingEntryId = ref(null)
-const reversingEntryId = ref(null)
-
-async function printEntryPdf(entry) {
-  printingEntryId.value = entry.id
-  try {
-    const response = await window.axios.get(`/accounting/journal-entries/${entry.id}/pdf`, {
-      responseType: 'blob',
-    })
-    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
-    const link = document.createElement('a')
-    link.href = url
-    const ref = (entry.reference || entry.id).toString().replace(/\//g, '-')
-    link.setAttribute('download', `nalog_${ref}.pdf`)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    window.URL.revokeObjectURL(url)
-  } catch (error) {
-    console.error('Failed to download PDF:', error)
-  } finally {
-    printingEntryId.value = null
-  }
-}
-
+// ---- Reverse ----
 async function confirmReverse(entry) {
   if (!window.confirm(`Дали сте сигурни дека сакате да го сторнирате налогот ${entry.reference || entry.narration}?`)) {
     return
   }
-  reversingEntryId.value = entry.id
   try {
     await window.axios.post(`/accounting/journal-entries/${entry.id}/reverse`)
-    // Reload entries to show the new storno entry
     await loadEntries(pagination.value.currentPage)
   } catch (error) {
     console.error('Failed to reverse entry:', error)
-  } finally {
-    reversingEntryId.value = null
   }
 }
 
-function formatSourceType(sourceType) {
-  if (!sourceType) return '-'
-
-  const typeMap = {
-    'App\\Models\\Invoice': 'Invoice',
-    'App\\Models\\Payment': 'Payment',
-    'App\\Models\\Expense': 'Expense',
-    'App\\Models\\Bill': 'Bill',
-  }
-
-  return typeMap[sourceType] || sourceType
+// ---- Formatting ----
+function formatDateShort(dateStr) {
+  if (!dateStr) return '-'
+  return moment(dateStr).format('DD.MM.YYYY')
 }
 
-function getSourceBadgeColor(sourceType) {
-  const colorMap = {
-    'App\\Models\\Invoice': 'bg-blue-100',
-    'App\\Models\\Payment': 'bg-green-100',
-    'App\\Models\\Expense': 'bg-red-100',
-    'App\\Models\\Bill': 'bg-orange-100',
-  }
-  return colorMap[sourceType] || 'bg-gray-100'
+function formatAmount(amount) {
+  if (amount === null || amount === undefined) return '-'
+  const formatted = new Intl.NumberFormat('mk-MK', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.abs(amount) / 100)
+  return formatted
 }
 
-function getSourceTextColor(sourceType) {
-  const colorMap = {
-    'App\\Models\\Invoice': 'text-blue-800',
-    'App\\Models\\Payment': 'text-green-800',
-    'App\\Models\\Expense': 'text-red-800',
-    'App\\Models\\Bill': 'text-orange-800',
-  }
-  return colorMap[sourceType] || 'text-gray-800'
+const TYPE_CODES = {
+  'Invoice': 'ИФ',
+  'Bill': 'УКФ',
+  'Credit Note': 'КН',
+  'Receipt': 'ПР',
+  'Payment': 'ИЗВ',
+  'Cash Purchase': 'БЛ',
+  'Journal Entry': 'ИНТ',
+}
+
+const TYPE_BADGE_CLASSES = {
+  'Invoice': 'bg-blue-100 text-blue-700',
+  'Bill': 'bg-orange-100 text-orange-700',
+  'Credit Note': 'bg-purple-100 text-purple-700',
+  'Receipt': 'bg-green-100 text-green-700',
+  'Payment': 'bg-emerald-100 text-emerald-700',
+  'Cash Purchase': 'bg-red-100 text-red-700',
+  'Journal Entry': 'bg-gray-100 text-gray-700',
+}
+
+function getTypeCode(type) {
+  return TYPE_CODES[type] || type
+}
+
+function getTypeBadgeClass(type) {
+  return TYPE_BADGE_CLASSES[type] || 'bg-gray-100 text-gray-700'
 }
 </script>
-
