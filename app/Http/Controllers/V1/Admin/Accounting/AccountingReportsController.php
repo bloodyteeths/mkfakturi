@@ -855,12 +855,16 @@ class AccountingReportsController extends Controller
             'end_date' => $validated['end_date'],
         ]);
 
+        set_time_limit(120);
+        ini_set('memory_limit', '512M');
+
         $pdf = \PDF::loadView('app.pdf.reports.journal-entries-bulk');
+        $pdf->setPaper('a4', 'landscape');
 
         $from = str_replace('-', '', $validated['start_date']);
         $to = str_replace('-', '', $validated['end_date']);
 
-        return $pdf->download("nalozi_{$from}_{$to}.pdf");
+        return $pdf->download("dnevnik_{$from}_{$to}.pdf");
     }
 
     /**

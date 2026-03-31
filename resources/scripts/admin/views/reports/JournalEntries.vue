@@ -95,9 +95,6 @@
               <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 100px;">
                 {{ $t('accounting.journal_entries.reference_short', 'Број') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 60px;">
-                {{ $t('accounting.journal_entries.type_short', 'Вид') }}
-              </th>
               <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 80px;">
                 {{ $t('accounting.journal_entries.account_code', 'Конто') }}
               </th>
@@ -110,7 +107,8 @@
               <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 120px;">
                 {{ $t('accounting.journal_entries.credit', 'Побарува') }}
               </th>
-              <th class="px-2 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 50px;">
+              <th class="px-2 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500" style="width: 80px;">
+                {{ $t('general.actions', 'Акции') }}
               </th>
             </tr>
           </thead>
@@ -124,12 +122,6 @@
                 <td class="px-4 py-2 text-xs font-medium text-primary-600">
                   {{ entry.reference }}
                 </td>
-                <td class="px-4 py-2">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                    :class="getTypeBadgeClass(entry.transaction_type)">
-                    {{ getTypeCode(entry.transaction_type) }}
-                  </span>
-                </td>
                 <td colspan="3" class="px-4 py-2 text-xs text-gray-600">
                   {{ entry.narration }}
                 </td>
@@ -137,18 +129,26 @@
                   {{ formatAmount(entry.total_amount) }}
                 </td>
                 <td class="px-2 py-2 text-center">
-                  <button
-                    class="text-gray-400 hover:text-red-500 transition-colors"
-                    :title="$t('accounting.journal_entries.reverse', 'Сторно')"
-                    @click="confirmReverse(entry)"
-                  >
-                    <BaseIcon name="ArrowUturnLeftIcon" class="h-4 w-4" />
-                  </button>
+                  <div class="flex items-center justify-center gap-1">
+                    <button
+                      class="text-gray-400 hover:text-primary-600 transition-colors"
+                      :title="$t('accounting.journal_entries.print_pdf', 'Печати PDF')"
+                      @click="printEntryPdf(entry)"
+                    >
+                      <BaseIcon name="PrinterIcon" class="h-4 w-4" />
+                    </button>
+                    <button
+                      class="text-gray-400 hover:text-red-500 transition-colors"
+                      :title="$t('accounting.journal_entries.reverse', 'Сторно')"
+                      @click="confirmReverse(entry)"
+                    >
+                      <BaseIcon name="ArrowUturnLeftIcon" class="h-4 w-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
               <!-- Line item rows -->
               <tr v-for="(line, idx) in entry.lines" :key="`${entry.id}-${idx}`">
-                <td class="px-4 py-1.5"></td>
                 <td class="px-4 py-1.5"></td>
                 <td class="px-4 py-1.5"></td>
                 <td class="px-4 py-1.5 text-sm font-mono text-gray-700">
@@ -173,7 +173,7 @@
           <!-- Grand totals -->
           <tfoot class="bg-gray-100 border-t-2 border-gray-400">
             <tr>
-              <td colspan="5" class="px-4 py-3 text-sm font-bold text-gray-900 text-right">
+              <td colspan="4" class="px-4 py-3 text-sm font-bold text-gray-900 text-right">
                 {{ $t('accounting.journal_entries.grand_total', 'ВКУПНО:') }}
               </td>
               <td class="px-4 py-3 text-sm text-right font-bold text-gray-900 font-mono">
@@ -325,7 +325,26 @@ function loadPage(page) {
   loadEntries(page)
 }
 
-// ---- Print ALL as multi-page PDF ----
+// ---- Print single entry PDF ----
+async function printEntryPdf(entry) {
+  try {
+    const response = await window.axios.get(`/accounting/journal-entries/${entry.id}/pdf`, {
+      responseType: 'blob',
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `nalog_${entry.reference || entry.id}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Failed to download entry PDF:', error)
+  }
+}
+
+// ---- Print ALL as journal register PDF ----
 async function printAllPdf() {
   isPrintingAll.value = true
   try {
@@ -339,7 +358,7 @@ async function printAllPdf() {
     const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `nalozi_${filters.value.start_date}_${filters.value.end_date}.pdf`)
+    link.setAttribute('download', `dnevnik_${filters.value.start_date}_${filters.value.end_date}.pdf`)
     document.body.appendChild(link)
     link.click()
     link.remove()
@@ -408,31 +427,4 @@ function formatAmount(amount) {
   return formatted
 }
 
-const TYPE_CODES = {
-  'Invoice': 'ИФ',
-  'Bill': 'УКФ',
-  'Credit Note': 'КН',
-  'Receipt': 'ПР',
-  'Payment': 'ИЗВ',
-  'Cash Purchase': 'БЛ',
-  'Journal Entry': 'ИНТ',
-}
-
-const TYPE_BADGE_CLASSES = {
-  'Invoice': 'bg-blue-100 text-blue-700',
-  'Bill': 'bg-orange-100 text-orange-700',
-  'Credit Note': 'bg-purple-100 text-purple-700',
-  'Receipt': 'bg-green-100 text-green-700',
-  'Payment': 'bg-emerald-100 text-emerald-700',
-  'Cash Purchase': 'bg-red-100 text-red-700',
-  'Journal Entry': 'bg-gray-100 text-gray-700',
-}
-
-function getTypeCode(type) {
-  return TYPE_CODES[type] || type
-}
-
-function getTypeBadgeClass(type) {
-  return TYPE_BADGE_CLASSES[type] || 'bg-gray-100 text-gray-700'
-}
 </script>
