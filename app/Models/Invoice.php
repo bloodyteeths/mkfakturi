@@ -587,25 +587,27 @@ class Invoice extends Model implements HasMedia
             ->setNextNumbers();
 
         $data = $request->getInvoicePayload();
-        $oldTotal = $this->total;
+        $isAdvance = ($data['type'] ?? $this->type) === self::TYPE_ADVANCE;
+        // For advance invoices, due_amount tracks sub_total (DDV shown but not charged)
+        $effectiveTotal = $isAdvance ? $request->sub_total : $request->total;
+        $oldEffectiveTotal = $isAdvance ? $this->sub_total : $this->total;
 
-        $total_paid_amount = $this->total - $this->due_amount;
+        $total_paid_amount = $oldEffectiveTotal - $this->due_amount;
 
         if ($total_paid_amount > 0 && $this->customer_id !== $request->customer_id) {
             return 'customer_cannot_be_changed_after_payment_is_added';
         }
 
-        if ($request->total >= 0 && $request->total < $total_paid_amount) {
+        if ($effectiveTotal >= 0 && $effectiveTotal < $total_paid_amount) {
             return 'total_invoice_amount_must_be_more_than_paid_amount';
         }
 
-        if ($oldTotal != $request->total) {
-            $oldTotal = (int) round($request->total) - (int) $oldTotal;
-        } else {
-            $oldTotal = 0;
+        $totalDiff = 0;
+        if ($oldEffectiveTotal != $effectiveTotal) {
+            $totalDiff = (int) round($effectiveTotal) - (int) $oldEffectiveTotal;
         }
 
-        $data['due_amount'] = ($this->due_amount + $oldTotal);
+        $data['due_amount'] = ($this->due_amount + $totalDiff);
         $data['base_due_amount'] = $data['due_amount'] * $data['exchange_rate'];
         $data['customer_sequence_number'] = $serial->nextCustomerSequenceNumber;
 

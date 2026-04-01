@@ -154,6 +154,13 @@
             store-prop="newInvoice"
             tax-popup-type="invoice"
           />
+
+          <div
+            v-if="invoiceStore.newInvoice.type === 'advance'"
+            class="px-4 py-2 mt-2 text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded"
+          >
+            {{ $t('invoices.advance_vat_note', 'ДДВ е пресметан но не е вклучен во износот за плаќање. Купувачот плаќа ДДВ еднаш, при финалната фактура.') }}
+          </div>
         </div>
       </BaseScrollPane>
     </form>

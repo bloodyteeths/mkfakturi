@@ -261,8 +261,19 @@
         </tr>
         <tr class="grand-total">
             <td class="total-label">ВКУПНО ЗА ПЛАЌАЊЕ:</td>
-            <td class="total-value" style="font-size:13px;">{!! format_money_pdf($invoice->total, $invoice->customer->currency) !!}</td>
+            @if($invoice->type === 'advance')
+                <td class="total-value" style="font-size:13px;">{!! format_money_pdf($invoice->sub_total, $invoice->customer->currency) !!}</td>
+            @else
+                <td class="total-value" style="font-size:13px;">{!! format_money_pdf($invoice->total, $invoice->customer->currency) !!}</td>
+            @endif
         </tr>
+        @if($invoice->type === 'advance')
+            <tr>
+                <td colspan="2" style="font-size: 8px; color: #666; text-align: right; padding-top: 2px;">
+                    ДДВ пресметан согласно чл. 14 ЗДДВ — не е вклучен во износот за плаќање
+                </td>
+            </tr>
+        @endif
         @if($invoice->due_amount > 0 && $invoice->paid_status !== App\Models\Invoice::STATUS_PAID)
             <tr>
                 <td class="total-label">Преостанато за плаќање:</td>
@@ -284,6 +295,7 @@
         <div style="margin-top: 6px; padding: 4px; border: 1px solid #e6a817; background: #fef9e7; font-size: 9px;">
             <strong>АВАНС ФАКТУРА</strong> — Издадена согласно чл. 14 од Законот за данокот на додадена вредност.
             Оваа фактура се однесува на примен аванс (предуплата) и ќе биде одбиена од финалната фактура.
+            ДДВ е пресметан и прикажан, но не е вклучен во износот за плаќање — купувачот плаќа ДДВ еднаш, при финалната фактура.
         </div>
     @endif
 
@@ -305,12 +317,12 @@
             <tbody>
                 @php $totalAdvances = 0; @endphp
                 @foreach($invoice->advanceInvoices as $advance)
-                    @php $totalAdvances += $advance->total; @endphp
+                    @php $totalAdvances += $advance->sub_total; @endphp
                     <tr>
                         <td style="padding: 3px; border: 1px solid #ccc; font-size: 9px;">{{ $advance->invoice_number }}</td>
                         <td style="padding: 3px; border: 1px solid #ccc; font-size: 9px;">{{ $advance->formattedInvoiceDate }}</td>
                         <td style="padding: 3px; border: 1px solid #ccc; font-size: 9px; text-align: right;">
-                            {!! format_money_pdf($advance->total, $invoice->customer->currency) !!}
+                            {!! format_money_pdf($advance->sub_total, $invoice->customer->currency) !!}
                         </td>
                     </tr>
                 @endforeach

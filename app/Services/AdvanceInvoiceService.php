@@ -53,23 +53,26 @@ class AdvanceInvoiceService
             return $finalInvoice;
         }
 
-        $totalAdvanceAmount = $advances->sum('total');
+        // Per Чл. 14 + Чл. 53 ЗДДВ: advance invoices charge sub_total only
+        // (DDV is shown but not included in the payable amount),
+        // so we deduct sub_total from the final invoice.
+        $totalAdvanceSubTotal = $advances->sum('sub_total');
 
-        if ($totalAdvanceAmount > $finalInvoice->total) {
+        if ($totalAdvanceSubTotal > $finalInvoice->total) {
             throw new \InvalidArgumentException(
                 'Total advance amount exceeds final invoice total.'
             );
         }
 
-        DB::transaction(function () use ($finalInvoice, $advances, $totalAdvanceAmount) {
+        DB::transaction(function () use ($finalInvoice, $advances, $totalAdvanceSubTotal) {
             // Link advances to this final invoice
             Invoice::whereIn('id', $advances->pluck('id'))
                 ->update(['parent_invoice_id' => $finalInvoice->id]);
 
-            // Mark invoice as final type
+            // Mark invoice as final type — deduct advance sub_totals (DDV excluded)
             $finalInvoice->update([
                 'type' => Invoice::TYPE_FINAL,
-                'due_amount' => $finalInvoice->total - $totalAdvanceAmount,
+                'due_amount' => $finalInvoice->total - $totalAdvanceSubTotal,
             ]);
 
             // Post GL settlement entries if IFRS is enabled
@@ -100,7 +103,6 @@ class AdvanceInvoiceService
             ->whereIn('id', $advanceInvoiceIds)
             ->get();
 
-        $totalAdvanceAmount = $advances->sum('total');
         $totalAdvanceTax = $advances->sum('tax');
         $totalAdvanceSubTotal = $advances->sum('sub_total');
 
@@ -113,11 +115,11 @@ class AdvanceInvoiceService
                 'sub_total' => $adv->sub_total,
                 'tax' => $adv->tax,
             ]),
-            'total_advance_amount' => $totalAdvanceAmount,
+            'total_advance_amount' => $totalAdvanceSubTotal,
             'total_advance_tax' => $totalAdvanceTax,
             'total_advance_sub_total' => $totalAdvanceSubTotal,
             'final_invoice_total' => $finalInvoice->total,
-            'remaining_due' => $finalInvoice->total - $totalAdvanceAmount,
+            'remaining_due' => $finalInvoice->total - $totalAdvanceSubTotal,
         ];
     }
 }
