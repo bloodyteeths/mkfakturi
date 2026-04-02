@@ -188,7 +188,7 @@
           </div>
           <div class="ml-4">
             <p class="text-sm font-medium text-gray-900 group-hover:text-red-600">
-              {{ $t('ujp.title') || 'UJP Forms' }}
+              {{ $t('ujp_forms.title') || 'UJP Forms' }}
             </p>
             <p class="text-xs text-gray-500 hidden sm:block">
               {{ $t('dashboard.ujp_forms_desc') || 'Tax declarations' }}
