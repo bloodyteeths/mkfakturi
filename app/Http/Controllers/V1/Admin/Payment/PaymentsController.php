@@ -34,7 +34,7 @@ class PaymentsController extends Controller
             ->latest()
             ->paginateData($limit);
 
-        return PaymentResource::collection($payments)
+        return \App\Http\Resources\PaymentListResource::collection($payments)
             ->additional(['meta' => [
                 'payment_total_count' => $totalCount,
             ]]);

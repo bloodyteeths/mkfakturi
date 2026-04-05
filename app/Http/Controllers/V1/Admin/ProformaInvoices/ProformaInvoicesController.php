@@ -23,6 +23,18 @@ class ProformaInvoicesController extends Controller
      *
      * @return array<int, string>
      */
+    /**
+     * Minimal relations for list view — only what's displayed in the table.
+     */
+    private function proformaListRelations(): array
+    {
+        return [
+            'customer:id,name,email',
+            'currency',
+            'company:id,name',
+        ];
+    }
+
     private function proformaInvoiceResourceRelations(): array
     {
         return [
@@ -60,11 +72,11 @@ class ProformaInvoicesController extends Controller
 
         $proformaInvoices = ProformaInvoice::whereCompany()
             ->applyFilters($request->all())
-            ->with($this->proformaInvoiceResourceRelations())
+            ->with($this->proformaListRelations())
             ->latest()
             ->paginateData($limit);
 
-        return ProformaInvoiceResource::collection($proformaInvoices)
+        return \App\Http\Resources\ProformaInvoiceListResource::collection($proformaInvoices)
             ->additional(['meta' => [
                 'proforma_invoice_total_count' => ProformaInvoice::whereCompany()->count(),
             ]])

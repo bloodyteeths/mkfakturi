@@ -23,6 +23,15 @@ class BillsController extends Controller
      *
      * @return array<int, string>
      */
+
+    private function billListRelations(): array
+    {
+        return [
+            'supplier:id,name',
+            'currency',
+            'company:id,name',
+        ];
+    }
     private function billResourceRelations(): array
     {
         return [
@@ -54,10 +63,10 @@ class BillsController extends Controller
 
         $bills = Bill::whereCompany()
             ->applyFilters($request->all())
-            ->with($this->billResourceRelations())
+            ->with($this->billListRelations())
             ->paginateData($limit);
 
-        return (new BillCollection($bills))
+        return \App\Http\Resources\BillListResource::collection($bills)
             ->response();
     }
 

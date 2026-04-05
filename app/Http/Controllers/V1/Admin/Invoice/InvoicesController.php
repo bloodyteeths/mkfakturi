@@ -93,7 +93,7 @@ class InvoicesController extends Controller
             ->with($this->invoiceListRelations())
             ->paginateData($limit);
 
-        return InvoiceResource::collection($invoices)
+        return \App\Http\Resources\InvoiceListResource::collection($invoices)
             ->additional([
                 'meta' => [
                     'invoice_total_count' => $totalCount,
