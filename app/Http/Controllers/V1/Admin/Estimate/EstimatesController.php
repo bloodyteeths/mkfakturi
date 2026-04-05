@@ -27,7 +27,7 @@ class EstimatesController extends Controller
             ->latest()
             ->paginateData($limit);
 
-        return EstimateResource::collection($estimates)
+        return \App\Http\Resources\EstimateListResource::collection($estimates)
             ->additional(['meta' => [
                 'estimate_total_count' => Estimate::whereCompany()->count(),
             ]]);

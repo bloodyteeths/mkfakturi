@@ -45,7 +45,7 @@ class ItemsController extends Controller
             return Item::whereCompany()->count();
         });
 
-        return ItemResource::collection($items)
+        return \App\Http\Resources\ItemListResource::collection($items)
             ->additional(['meta' => [
                 'tax_types' => $taxTypes,
                 'item_total_count' => $itemCount,

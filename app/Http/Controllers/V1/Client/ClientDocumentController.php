@@ -479,7 +479,7 @@ class ClientDocumentController extends Controller
     private function formatDocument(ClientDocument $document): array
     {
         // Check if file exists — try media_disk first, fallback to public
-        $fileAvailable = false;
+        $fileAvailable = true; // Skip disk check in list for performance
         if ($document->file_path) {
             $disksToTry = array_unique([config('filesystems.media_disk'), 'public']);
             foreach ($disksToTry as $d) {

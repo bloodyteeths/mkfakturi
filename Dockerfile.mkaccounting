@@ -84,7 +84,9 @@ RUN echo "[opcache]" > /usr/local/etc/php/conf.d/opcache-prod.ini && \
     echo "opcache.save_comments=1" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
     echo "opcache.enable_file_override=1" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
     echo "opcache.jit_buffer_size=128M" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
-    echo "opcache.jit=1255" >> /usr/local/etc/php/conf.d/opcache-prod.ini
+    echo "opcache.jit=1255" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.preload=/var/www/html/preload.php" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.preload_user=www" >> /usr/local/etc/php/conf.d/opcache-prod.ini
 
 WORKDIR /var/www/html
 
