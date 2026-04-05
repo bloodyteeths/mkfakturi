@@ -1,0 +1,42 @@
+name: Deploy to Hetzner
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'cypress/**'
+      - 'tests/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Hetzner VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HETZNER_VPS_IP }}
+          username: deploy
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script_stop: true
+          timeout: 600s
+          script: |
+            cd /home/deploy/facturino
+            echo "=== Pulling latest code ==="
+            git pull origin main
+
+            echo "=== Building images ==="
+            docker compose -f docker-compose.production.yml build --parallel
+
+            echo "=== Deploying ==="
+            docker compose -f docker-compose.production.yml up -d
+
+            echo "=== Waiting for health ==="
+            sleep 30
+            curl -f http://localhost:8080/health || echo "WARN: health check failed"
+
+            echo "=== Cleaning old images ==="
+            docker image prune -f
+
+            echo "=== Deployed at $(date) ==="
