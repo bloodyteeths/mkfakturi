@@ -691,7 +691,7 @@ return [
             'title' => 'navigation.payroll_reports',
             'group' => 2,
             'submenu' => 'payroll',
-            'link' => '/admin/payroll/payslips/tax-summary',
+            'link' => '/admin/payroll/reports/tax-summary',
             'icon' => 'DocumentChartBarIcon',
             'name' => 'Payroll Reports',
             'owner_only' => false,

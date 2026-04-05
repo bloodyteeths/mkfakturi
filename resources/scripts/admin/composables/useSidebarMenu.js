@@ -11,6 +11,7 @@ const submenuConfig = {
   money: { title: 'navigation.money', icon: 'CurrencyDollarIcon' },
   operations: { title: 'navigation.operations', icon: 'Cog6ToothIcon' },
   finance: { title: 'navigation.finance', icon: 'ChartPieIcon' },
+  payroll: { title: 'navigation.payroll', icon: 'BriefcaseIcon' },
   // Partner accounting submenus
   setup: { title: 'partner.accounting.submenu.setup', icon: 'WrenchScrewdriverIcon' },
   ledgers: { title: 'partner.accounting.submenu.ledgers', icon: 'BookOpenIcon' },
