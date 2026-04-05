@@ -19,7 +19,7 @@ jobs:
           host: ${{ secrets.HETZNER_VPS_IP }}
           username: deploy
           key: ${{ secrets.HETZNER_SSH_KEY }}
-          script_stop: true
+
           timeout: 600s
           script: |
             cd /home/deploy/facturino
