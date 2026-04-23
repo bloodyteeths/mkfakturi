@@ -189,6 +189,11 @@ class SignupRequest extends FormRequest
                 'exists:affiliate_links,id',
             ],
 
+            // UTM tracking (optional)
+            'utm_source' => ['nullable', 'string', 'max:100'],
+            'utm_medium' => ['nullable', 'string', 'max:100'],
+            'utm_campaign' => ['nullable', 'string', 'max:100'],
+
             // Terms acceptance (optional - implicit acceptance by registering)
             'accept_terms' => [
                 'nullable',

@@ -271,11 +271,24 @@ class SignupService
                 ]);
             }
 
+            // Attribute signup to outreach lead for funnel tracking
+            if (! empty($data['utm_source']) && $data['utm_source'] === 'outreach') {
+                try {
+                    $outreachLead = \Modules\Mk\Bitrix\Models\OutreachLead::where('email', $data['email'])->first();
+                    if ($outreachLead) {
+                        $outreachLead->update(['status' => 'partner_active']);
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('Outreach attribution failed (non-blocking)', ['email' => $data['email']]);
+                }
+            }
+
             Log::info('Company registration successful', [
                 'company_id' => $company->id,
                 'user_id' => $user->id,
                 'partner_id' => $data['partner_id'] ?? null,
                 'plan' => $plan,
+                'signup_source' => $data['utm_source'] ?? null,
             ]);
 
             return [
@@ -316,6 +329,7 @@ class SignupService
             'slug' => $slug,
             'vat_number' => $data['vat_number'] ?? $data['tax_id'] ?? null,
             'tax_id' => $data['tax_id'] ?? null,
+            'signup_source' => $data['utm_source'] ?? null,
         ]);
 
         // Link to partner if referred

@@ -86,6 +86,7 @@ class OutreachSendBatchCommand extends Command
     protected array $validTemplates = [
         'first_touch', 'followup_1', 'followup_2', 'followup_3', 'followup_4',
         'company_initial', 'company_followup_1', 'company_followup_2', 'company_followup_3', 'company_followup_4',
+        'company_clicker_reengage',
     ];
 
     /**

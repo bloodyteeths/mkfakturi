@@ -372,6 +372,7 @@ const billingPeriod = ref('monthly')
 const paymentCurrency = ref('mkd')
 const isProcessing = ref(false)
 const registrationError = ref('')
+const utmParams = ref(null)
 
 // Forms
 const companyForm = reactive({
@@ -523,6 +524,12 @@ async function completeRegistration() {
       payment_currency: paymentCurrency.value,
     }
 
+    if (utmParams.value) {
+      payload.utm_source = utmParams.value.utm_source
+      payload.utm_medium = utmParams.value.utm_medium
+      payload.utm_campaign = utmParams.value.utm_campaign
+    }
+
     // Add partner referral data if available
     if (referralData.value) {
       payload.partner_id = referralData.value.partner_id
@@ -587,6 +594,24 @@ onMounted(() => {
   if (route.query.company_ref) {
     companyReferralToken.value = route.query.company_ref
     validateCompanyReferral()
+  }
+
+  // Pre-fill email from outreach link (base64 encoded)
+  if (route.query.email) {
+    try {
+      userForm.email = atob(route.query.email)
+    } catch (e) {
+      userForm.email = route.query.email
+    }
+  }
+
+  // Capture UTM params for attribution
+  if (route.query.utm_source) {
+    utmParams.value = {
+      utm_source: route.query.utm_source || '',
+      utm_medium: route.query.utm_medium || '',
+      utm_campaign: route.query.utm_campaign || '',
+    }
   }
 })
 </script>

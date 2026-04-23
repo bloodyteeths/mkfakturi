@@ -16,6 +16,7 @@ use Modules\Mk\Bitrix\Mail\CompanyOutreachInitialMail;
 use Modules\Mk\Bitrix\Mail\CompanyFollowUp1Mail;
 use Modules\Mk\Bitrix\Mail\CompanyFollowUp2Mail;
 use Modules\Mk\Bitrix\Mail\CompanyFollowUp3Mail;
+use Modules\Mk\Bitrix\Mail\CompanyClickerReengageMail;
 use Modules\Mk\Bitrix\Mail\CompanyFollowUp4Mail;
 use Modules\Mk\Bitrix\Mail\PartnerInviteMail;
 
@@ -100,10 +101,14 @@ class PostmarkOutreachService
 
         try {
             $companyName = $data['companyName'] ?? 'Your Company';
-            $marketingUrl = rtrim(config('app.marketing_url', 'https://facturino.mk'), '/');
+            $appUrl = rtrim(config('app.url', 'https://app.facturino.mk'), '/');
 
-            // Send to marketing landing page so prospects learn about the product first
-            $ctaUrl = $marketingUrl;
+            $ctaUrl = $appUrl . '/signup?' . http_build_query([
+                'email' => base64_encode($email),
+                'utm_source' => 'outreach',
+                'utm_medium' => 'email',
+                'utm_campaign' => $templateKey,
+            ]);
 
             // Build the appropriate mailable
             $mailable = $this->buildMailable(
@@ -372,6 +377,7 @@ class PostmarkOutreachService
             'company_followup_2' => new CompanyFollowUp2Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             'company_followup_3' => new CompanyFollowUp3Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
             'company_followup_4' => new CompanyFollowUp4Mail($companyName, $email, $signupUrl, $unsubscribeUrl),
+            'company_clicker_reengage' => new CompanyClickerReengageMail($companyName, $email, $signupUrl, $unsubscribeUrl),
             default => null,
         };
     }
