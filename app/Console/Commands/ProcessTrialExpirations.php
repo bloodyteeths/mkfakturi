@@ -127,7 +127,13 @@ class ProcessTrialExpirations extends Command
                 // Downgrade to Free tier
                 $subscription->update([
                     'plan' => 'free',
-                    'status' => 'active', // Active Free tier
+                    'status' => 'active',
+                    'trial_ends_at' => null,
+                ]);
+
+                // Update company tier to match
+                $subscription->company->update([
+                    'subscription_tier' => 'free',
                     'trial_ends_at' => null,
                 ]);
 

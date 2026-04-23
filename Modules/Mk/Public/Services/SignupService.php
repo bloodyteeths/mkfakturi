@@ -220,12 +220,25 @@ class SignupService
             $checkoutUrl = null;
             $checkoutSessionId = null;
 
-            // Free plan - no checkout needed
+            // Free plan - give 14-day Standard trial, no checkout needed
             if ($plan === 'free') {
-                // Set company subscription tier to free
+                $trialDays = config('subscriptions.trial.days', 14);
+                $trialPlan = config('subscriptions.trial.plan', 'standard');
+
+                // Set company to trial tier so they experience paid features
                 $company->update([
-                    'subscription_tier' => 'free',
-                    'subscription_status' => 'active',
+                    'subscription_tier' => $trialPlan,
+                    'trial_ends_at' => now()->addDays($trialDays),
+                ]);
+
+                // Create CompanySubscription record for trial tracking
+                \App\Models\CompanySubscription::create([
+                    'company_id' => $company->id,
+                    'plan' => $trialPlan,
+                    'status' => 'trial',
+                    'started_at' => now(),
+                    'trial_ends_at' => now()->addDays($trialDays),
+                    'price_monthly' => 0,
                 ]);
 
                 // Auto-login URL for free plan (signed, expires in 5 minutes)
@@ -413,6 +426,7 @@ class SignupService
 
         $metadata = [
             'company_id' => $company->id,
+            'tier' => $plan,
         ];
 
         if (! empty($data['partner_id'])) {
@@ -427,6 +441,7 @@ class SignupService
         $sessionParams = [
             'mode' => 'subscription',
             'customer_email' => $data['email'],
+            'payment_method_collection' => 'always',
             'line_items' => [
                 [
                     'price' => $priceId,
@@ -438,7 +453,7 @@ class SignupService
             'metadata' => $metadata,
             'subscription_data' => [
                 'metadata' => $metadata,
-                'trial_period_days' => 14, // 14-day trial
+                'trial_period_days' => 14,
             ],
         ];
 
