@@ -138,9 +138,9 @@ class OutreachReengageClickersCommand extends Command
                     ->whereColumn('os2.email', 'outreach_sends.email')
                     ->where('os2.template_key', 'company_clicker_reengage');
             })
-            ->select('outreach_sends.email', 'outreach_sends.outreach_lead_id', 'outreach_sends.clicked_at', 'outreach_sends.click_count')
-            ->groupBy('outreach_sends.email', 'outreach_sends.outreach_lead_id', 'outreach_sends.clicked_at', 'outreach_sends.click_count')
-            ->orderBy('outreach_sends.clicked_at', 'desc')
+            ->select('outreach_sends.email', DB::raw('MAX(outreach_sends.outreach_lead_id) as outreach_lead_id'), DB::raw('MAX(outreach_sends.clicked_at) as clicked_at'), DB::raw('SUM(outreach_sends.click_count) as click_count'))
+            ->groupBy('outreach_sends.email')
+            ->orderBy('clicked_at', 'desc')
             ->limit($limit)
             ->get();
     }
