@@ -198,7 +198,7 @@
             <BaseButton class="mt-4" @click="loadPlans">Обиди се повторно</BaseButton>
           </div>
 
-          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             <div
               v-for="plan in plans"
               :key="plan.id"
@@ -221,17 +221,9 @@
               <!-- Popular Badge -->
               <div
                 v-if="plan.popular"
-                class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full"
+                class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full z-10"
               >
                 Популарен
-              </div>
-
-              <!-- Trial Badge for paid plans -->
-              <div
-                v-if="plan.price > 0"
-                class="absolute -top-3 right-8 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full"
-              >
-                14 дена бесплатно
               </div>
 
               <div class="text-center">
