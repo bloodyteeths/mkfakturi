@@ -27,49 +27,46 @@ return [
             'name' => 'Free',
             'price_monthly' => 0.00,
             'price_monthly_mkd' => 0,
-            'invoice_limit' => 3,
+            'invoice_limit' => 1,
             'users' => 1,
             'features' => [
                 'basic_invoicing' => true,
                 'customers' => true,
                 'items' => true,
                 'pdf_export' => true,
-                'csv_import' => true,
+                'csv_import' => false,
 
-                // Preview features with tight limits (see the feature, upgrade to use it)
-                'expenses' => true,           // Limited to 2/month
-                'custom_fields' => true,      // Limited to 1 field
-                'reports' => true,            // Basic reports only
-                'recurring_invoices' => false, // Not available on free
-                'estimates' => true,          // Limited to 1/month
+                'expenses' => false,
+                'custom_fields' => false,
+                'reports' => false,
+                'recurring_invoices' => false,
+                'estimates' => false,
 
-                // Locked features (require paid plan)
-                'efaktura_sending' => false,  // Requires Starter+
+                'efaktura_sending' => false,
                 'qes_signing' => false,
                 'bank_connections' => false,
                 'auto_reconciliation' => false,
                 'multi_currency' => false,
                 'api_access' => false,
-                'ai_suggestions' => 'preview', // Limited AI preview (2/month)
+                'ai_suggestions' => false,
             ],
-            // Usage limits — see the feature exists, upgrade to actually use it
             'limits' => [
-                'expenses_per_month' => 2,
-                'custom_fields' => 1,
+                'expenses_per_month' => 0,
+                'custom_fields' => 0,
                 'recurring_invoices_active' => 0,
-                'estimates_per_month' => 1,
-                'ai_queries_per_month' => 10,
-                'payroll_employees' => 0,     // Not available on free
-                'bills_per_month' => 1,
-                'suppliers_total' => 3,
+                'estimates_per_month' => 0,
+                'ai_queries_per_month' => 0,
+                'payroll_employees' => 0,
+                'bills_per_month' => 0,
+                'suppliers_total' => 0,
                 'credit_notes_per_month' => 0,
-                'proformas_per_month' => 1,
+                'proformas_per_month' => 0,
                 'projects_total' => 0,
                 'warehouses_total' => 0,
-                'deadlines_custom' => 1,
-                'client_documents_per_month' => 2,
-                'efaktura_per_month' => 0,    // Not available on free
-                'pos_transactions_per_month' => 30,  // ~1/day to evaluate
+                'deadlines_custom' => 0,
+                'client_documents_per_month' => 0,
+                'efaktura_per_month' => 0,
+                'pos_transactions_per_month' => 0,
             ],
         ],
 
@@ -494,19 +491,19 @@ return [
     */
     'upgrade_messages' => [
         'invoice_limit' => [
-            'free' => 'You\'ve reached your invoice limit (3/month). Upgrade to Starter for 30 invoices per month.',
+            'free' => 'You\'ve reached your invoice limit (1/month). Upgrade to Starter for 30 invoices per month.',
             'starter' => 'You\'ve reached your invoice limit (30/month). Upgrade to Standard for 60 invoices per month.',
             'standard' => 'You\'ve reached your invoice limit (60/month). Upgrade to Business for 150 invoices per month.',
             'business' => 'You\'ve reached your invoice limit (150/month). Upgrade to Max for unlimited invoices.',
         ],
         'expenses' => [
-            'free' => 'You\'ve reached your expense limit (2/month). Upgrade to Starter for 20 expenses per month.',
+            'free' => 'Expenses are not available on the Free plan. Upgrade to Starter for 20 expenses per month.',
             'starter' => 'You\'ve reached your expense limit (20/month). Upgrade to Standard for unlimited expenses.',
             'standard' => 'Unlimited expenses available.',
             'business' => 'Unlimited expenses available.',
         ],
         'estimates' => [
-            'free' => 'You\'ve reached your estimate limit (1/month). Upgrade to Starter for 10 estimates per month.',
+            'free' => 'Estimates are not available on the Free plan. Upgrade to Starter for 10 estimates per month.',
             'starter' => 'You\'ve reached your estimate limit (10/month). Upgrade to Standard for unlimited estimates.',
             'standard' => 'Unlimited estimates available.',
             'business' => 'Unlimited estimates available.',

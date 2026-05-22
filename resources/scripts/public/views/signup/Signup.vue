@@ -461,10 +461,10 @@ async function loadPlans() {
       currency: plan.currency || 'MKD',
     }))
 
-    // Auto-select free plan by default
+    // Auto-select Standard (recommended trial plan)
     if (plans.value.length > 0) {
-      const freePlan = plans.value.find((p) => p.id === 'free')
-      selectedPlan.value = freePlan || plans.value[0]
+      const standardPlan = plans.value.find((p) => p.id === 'standard')
+      selectedPlan.value = standardPlan || plans.value[0]
     }
   } catch (error) {
     console.error('Failed to load plans:', error)

@@ -81,7 +81,7 @@ class SignupService
             [
                 'id' => 'free',
                 'name' => 'Бесплатен',
-                'description' => 'Започнете бесплатно',
+                'description' => 'Ограничен преглед',
                 'price' => $pricing['free'],
                 'price_yearly' => 0,
                 'price_eur' => $pricingEur['free'],
@@ -89,9 +89,9 @@ class SignupService
                 'stripe_price_id' => null,
                 'currency' => strtoupper($currency),
                 'features' => [
-                    'До 3 фактури месечно',
+                    '1 фактура месечно',
                     'PDF извоз',
-                    '2 AI прашања/месец',
+                    'Без трошоци, сметки, понуди',
                 ],
             ],
             [
@@ -220,28 +220,19 @@ class SignupService
             $checkoutUrl = null;
             $checkoutSessionId = null;
 
-            // Free plan - give 14-day Standard trial, no checkout needed
             if ($plan === 'free') {
-                $trialDays = config('subscriptions.trial.days', 14);
-                $trialPlan = config('subscriptions.trial.plan', 'standard');
-
-                // Set company to trial tier so they experience paid features
                 $company->update([
-                    'subscription_tier' => $trialPlan,
-                    'trial_ends_at' => now()->addDays($trialDays),
+                    'subscription_tier' => 'free',
                 ]);
 
-                // Create CompanySubscription record for trial tracking
                 \App\Models\CompanySubscription::create([
                     'company_id' => $company->id,
-                    'plan' => $trialPlan,
-                    'status' => 'trial',
+                    'plan' => 'free',
+                    'status' => 'active',
                     'started_at' => now(),
-                    'trial_ends_at' => now()->addDays($trialDays),
                     'price_monthly' => 0,
                 ]);
 
-                // Auto-login URL for free plan (signed, expires in 5 minutes)
                 $checkoutUrl = URL::temporarySignedRoute(
                     'signup.auto-login',
                     now()->addMinutes(5),
