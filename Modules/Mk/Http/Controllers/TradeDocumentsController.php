@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
+use Modules\Mk\Models\ImportCalculation;
 use Modules\Mk\Models\Nivelacija;
 use Modules\Mk\Services\TradeCalculationService;
 use PDF;
@@ -750,6 +751,430 @@ class TradeDocumentsController extends Controller
                 'nivelacija' => $nivelacija,
             ],
         ]);
+    }
+
+    // ==========================================
+    // Влезна калкулација — Import Cost Calculation
+    // ==========================================
+
+    public function importCalcIndex(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $query = ImportCalculation::whereCompany($company)
+            ->with(['supplierBill' => fn ($q) => $q->without(['creator', 'company'])->with('supplier:id,name'), 'warehouse:id,name', 'creator:id,name'])
+            ->orderBy('document_date', 'desc')
+            ->orderBy('id', 'desc');
+
+        if ($request->filled('status')) {
+            $query->whereStatus($request->input('status'));
+        }
+        if ($request->filled('from_date') || $request->filled('to_date')) {
+            $query->whereDateRange($request->input('from_date'), $request->input('to_date'));
+        }
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('document_number', 'like', "%{$search}%")
+                    ->orWhere('supplier_name', 'like', "%{$search}%")
+                    ->orWhere('supplier_invoice_number', 'like', "%{$search}%");
+            });
+        }
+
+        $limit = $request->input('limit', 15);
+        $data = $limit === 'all' ? $query->get() : $query->paginate((int) $limit);
+
+        return response()->json(['success' => true, 'data' => $data]);
+    }
+
+    public function importCalcStore(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        try {
+            $validated = $request->validate([
+                'document_date' => 'required|date',
+                'supplier_bill_id' => 'nullable|integer',
+                'supplier_name' => 'nullable|string|max:255',
+                'supplier_invoice_number' => 'nullable|string|max:100',
+                'currency_code' => 'nullable|string|max:3',
+                'exchange_rate' => 'required|numeric|min:0.000001',
+                'warehouse_id' => 'required|integer',
+                'transport_amount' => 'nullable|integer|min:0',
+                'forwarding_amount' => 'nullable|integer|min:0',
+                'other_costs_amount' => 'nullable|integer|min:0',
+                'vat_rate' => 'nullable|numeric|min:0|max:100',
+                'notes' => 'nullable|string',
+                'items' => 'required|array|min:1',
+                'items.*.item_id' => 'nullable|integer',
+                'items.*.tariff_heading' => 'required|string|max:20',
+                'items.*.description' => 'required|string|max:500',
+                'items.*.quantity' => 'required|numeric|min:0.0001',
+                'items.*.unit' => 'nullable|string|max:20',
+                'items.*.unit_price_fcy' => 'required|integer|min:0',
+                'items.*.customs_duty_rate' => 'required|numeric|min:0|max:100',
+                'items.*.notes' => 'nullable|string|max:255',
+            ]);
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+
+        try {
+            $calc = ImportCalculation::create([
+                'company_id' => $company,
+                'document_date' => $validated['document_date'],
+                'status' => ImportCalculation::STATUS_DRAFT,
+                'supplier_bill_id' => $validated['supplier_bill_id'] ?? null,
+                'supplier_name' => $validated['supplier_name'] ?? null,
+                'supplier_invoice_number' => $validated['supplier_invoice_number'] ?? null,
+                'currency_code' => $validated['currency_code'] ?? 'EUR',
+                'exchange_rate' => $validated['exchange_rate'],
+                'warehouse_id' => $validated['warehouse_id'],
+                'transport_amount' => $validated['transport_amount'] ?? 0,
+                'forwarding_amount' => $validated['forwarding_amount'] ?? 0,
+                'other_costs_amount' => $validated['other_costs_amount'] ?? 0,
+                'vat_rate' => $validated['vat_rate'] ?? 18.00,
+                'notes' => $validated['notes'] ?? null,
+                'created_by' => auth()->id(),
+            ]);
+
+            foreach ($validated['items'] as $itemData) {
+                $calc->items()->create([
+                    'item_id' => $itemData['item_id'] ?? null,
+                    'tariff_heading' => $itemData['tariff_heading'],
+                    'description' => $itemData['description'],
+                    'quantity' => $itemData['quantity'],
+                    'unit' => $itemData['unit'] ?? 'ком.',
+                    'unit_price_fcy' => $itemData['unit_price_fcy'],
+                    'customs_duty_rate' => $itemData['customs_duty_rate'],
+                    'notes' => $itemData['notes'] ?? null,
+                ]);
+            }
+
+            $result = $this->calcService->calculateImportCosts($calc);
+
+            foreach ($result['items'] as $computedItem) {
+                $calc->items()->where('id', $computedItem['id'])->update([
+                    'invoice_value_fcy' => $computedItem['invoice_value_fcy'],
+                    'invoice_value_mkd' => $computedItem['invoice_value_mkd'],
+                    'transport_allocated' => $computedItem['transport_allocated'],
+                    'customs_base' => $computedItem['customs_base'],
+                    'customs_duty_amount' => $computedItem['customs_duty_amount'],
+                    'forwarding_allocated' => $computedItem['forwarding_allocated'],
+                    'other_costs_allocated' => $computedItem['other_costs_allocated'],
+                    'landed_cost_before_vat' => $computedItem['landed_cost_before_vat'],
+                    'import_vat_amount' => $computedItem['import_vat_amount'],
+                    'total_landed_cost' => $computedItem['total_landed_cost'],
+                    'unit_landed_cost' => $computedItem['unit_landed_cost'],
+                ]);
+            }
+
+            $calc->update([
+                'total_invoice_value_mkd' => $result['totals']['total_invoice_mkd'],
+                'customs_duty_total' => $result['totals']['customs_duty'],
+                'import_vat_total' => $result['totals']['import_vat'],
+                'total_landed_cost' => $result['totals']['total_landed_cost'],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $calc->fresh()->load('items.item'),
+            ], 201);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Import calculation create error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json(['error' => 'Failed to create import calculation: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function importCalcFromBill(Request $request, int $company, int $billId): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $bill = Bill::where('company_id', $company)
+            ->where('id', $billId)
+            ->without(['creator', 'company'])
+            ->with(['supplier:id,name', 'items.item.unit'])
+            ->first();
+
+        if (! $bill) {
+            return response()->json(['error' => 'Bill not found'], 404);
+        }
+
+        $items = $bill->items->map(fn ($bi) => [
+            'item_id' => $bi->item_id,
+            'description' => $bi->item?->name ?? $bi->name ?? '',
+            'quantity' => $bi->quantity ?? 1,
+            'unit' => $bi->item?->unit?->name ?? 'ком.',
+            'unit_price_fcy' => $bi->price ?? 0,
+            'tariff_heading' => '',
+            'customs_duty_rate' => 0,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'supplier_name' => $bill->supplier?->name ?? '',
+                'supplier_invoice_number' => $bill->bill_number ?? '',
+                'exchange_rate' => $bill->exchange_rate ?? 1,
+                'items' => $items,
+            ],
+        ]);
+    }
+
+    public function importCalcShow(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $calc = ImportCalculation::whereCompany($company)
+            ->with([
+                'items.item.unit',
+                'supplierBill' => fn ($q) => $q->without(['creator', 'company'])->with('supplier:id,name'),
+                'warehouse:id,name',
+                'approver:id,name',
+                'creator:id,name',
+            ])
+            ->where('id', $id)
+            ->first();
+
+        if (! $calc) {
+            return response()->json(['error' => 'Import calculation not found'], 404);
+        }
+
+        $tariffSummary = [];
+        foreach ($calc->items->groupBy('tariff_heading') as $heading => $items) {
+            $tariffSummary[] = [
+                'tariff_heading' => $heading,
+                'items_count' => $items->count(),
+                'customs_base_total' => $items->sum('customs_base'),
+                'duty_rate' => (float) $items->first()->customs_duty_rate,
+                'duty_amount' => $items->sum('customs_duty_amount'),
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $calc,
+            'tariff_summary' => $tariffSummary,
+        ]);
+    }
+
+    public function importCalcUpdate(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $calc = ImportCalculation::whereCompany($company)->where('id', $id)->first();
+        if (! $calc) {
+            return response()->json(['error' => 'Import calculation not found'], 404);
+        }
+        if (! $calc->isDraft()) {
+            return response()->json(['error' => 'Само нацрт калкулации може да се менуваат.'], 422);
+        }
+
+        try {
+            $validated = $request->validate([
+                'document_date' => 'sometimes|date',
+                'supplier_bill_id' => 'nullable|integer',
+                'supplier_name' => 'nullable|string|max:255',
+                'supplier_invoice_number' => 'nullable|string|max:100',
+                'currency_code' => 'nullable|string|max:3',
+                'exchange_rate' => 'sometimes|numeric|min:0.000001',
+                'warehouse_id' => 'sometimes|integer',
+                'transport_amount' => 'nullable|integer|min:0',
+                'forwarding_amount' => 'nullable|integer|min:0',
+                'other_costs_amount' => 'nullable|integer|min:0',
+                'vat_rate' => 'nullable|numeric|min:0|max:100',
+                'notes' => 'nullable|string',
+                'items' => 'sometimes|array|min:1',
+                'items.*.item_id' => 'nullable|integer',
+                'items.*.tariff_heading' => 'required_with:items|string|max:20',
+                'items.*.description' => 'required_with:items|string|max:500',
+                'items.*.quantity' => 'required_with:items|numeric|min:0.0001',
+                'items.*.unit' => 'nullable|string|max:20',
+                'items.*.unit_price_fcy' => 'required_with:items|integer|min:0',
+                'items.*.customs_duty_rate' => 'required_with:items|numeric|min:0|max:100',
+                'items.*.notes' => 'nullable|string|max:255',
+            ]);
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+
+        $updateData = [];
+        foreach (['document_date', 'currency_code', 'exchange_rate', 'warehouse_id', 'vat_rate'] as $field) {
+            if (isset($validated[$field])) {
+                $updateData[$field] = $validated[$field];
+            }
+        }
+        foreach (['supplier_bill_id', 'supplier_name', 'supplier_invoice_number', 'notes'] as $field) {
+            if (array_key_exists($field, $validated)) {
+                $updateData[$field] = $validated[$field];
+            }
+        }
+        foreach (['transport_amount', 'forwarding_amount', 'other_costs_amount'] as $field) {
+            if (array_key_exists($field, $validated)) {
+                $updateData[$field] = $validated[$field] ?? 0;
+            }
+        }
+
+        if (! empty($updateData)) {
+            $calc->update($updateData);
+        }
+
+        if (isset($validated['items'])) {
+            $calc->items()->delete();
+            foreach ($validated['items'] as $itemData) {
+                $calc->items()->create([
+                    'item_id' => $itemData['item_id'] ?? null,
+                    'tariff_heading' => $itemData['tariff_heading'],
+                    'description' => $itemData['description'],
+                    'quantity' => $itemData['quantity'],
+                    'unit' => $itemData['unit'] ?? 'ком.',
+                    'unit_price_fcy' => $itemData['unit_price_fcy'],
+                    'customs_duty_rate' => $itemData['customs_duty_rate'],
+                    'notes' => $itemData['notes'] ?? null,
+                ]);
+            }
+
+            $calc = $calc->fresh();
+            $result = $this->calcService->calculateImportCosts($calc);
+            foreach ($result['items'] as $computedItem) {
+                $calc->items()->where('id', $computedItem['id'])->update([
+                    'invoice_value_fcy' => $computedItem['invoice_value_fcy'],
+                    'invoice_value_mkd' => $computedItem['invoice_value_mkd'],
+                    'transport_allocated' => $computedItem['transport_allocated'],
+                    'customs_base' => $computedItem['customs_base'],
+                    'customs_duty_amount' => $computedItem['customs_duty_amount'],
+                    'forwarding_allocated' => $computedItem['forwarding_allocated'],
+                    'other_costs_allocated' => $computedItem['other_costs_allocated'],
+                    'landed_cost_before_vat' => $computedItem['landed_cost_before_vat'],
+                    'import_vat_amount' => $computedItem['import_vat_amount'],
+                    'total_landed_cost' => $computedItem['total_landed_cost'],
+                    'unit_landed_cost' => $computedItem['unit_landed_cost'],
+                ]);
+            }
+            $calc->update([
+                'total_invoice_value_mkd' => $result['totals']['total_invoice_mkd'],
+                'customs_duty_total' => $result['totals']['customs_duty'],
+                'import_vat_total' => $result['totals']['import_vat'],
+                'total_landed_cost' => $result['totals']['total_landed_cost'],
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $calc->fresh()->load('items.item'),
+        ]);
+    }
+
+    public function importCalcApprove(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $calc = ImportCalculation::whereCompany($company)->where('id', $id)->first();
+        if (! $calc) {
+            return response()->json(['error' => 'Import calculation not found'], 404);
+        }
+
+        try {
+            $this->calcService->approveImportCalculation($calc);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Влезната калкулација е одобрена. Залихата е евидентирана.',
+                'data' => $calc->fresh()->load('items.item'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    public function importCalcVoid(Request $request, int $company, int $id): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $calc = ImportCalculation::whereCompany($company)->where('id', $id)->first();
+        if (! $calc) {
+            return response()->json(['error' => 'Import calculation not found'], 404);
+        }
+
+        try {
+            $this->calcService->voidImportCalculation($calc);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Влезната калкулација е поништена. Залихата е сторнирана.',
+                'data' => $calc->fresh()->load('items.item'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    public function importCalcExport(Request $request, int $company, int $id): Response
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            abort(403);
+        }
+
+        $calc = ImportCalculation::whereCompany($company)
+            ->with(['items.item.unit', 'supplierBill.supplier', 'warehouse', 'creator'])
+            ->where('id', $id)
+            ->first();
+
+        if (! $calc) {
+            abort(404);
+        }
+
+        $companyModel = Company::find($company);
+        $currency = Currency::where('code', 'MKD')->first();
+
+        $tariffSummary = [];
+        foreach ($calc->items->groupBy('tariff_heading') as $heading => $items) {
+            $tariffSummary[] = [
+                'tariff_heading' => $heading,
+                'items_count' => $items->count(),
+                'customs_base_total' => $items->sum('customs_base'),
+                'duty_rate' => (float) $items->first()->customs_duty_rate,
+                'duty_amount' => $items->sum('customs_duty_amount'),
+            ];
+        }
+
+        $pdf = PDF::loadView('app.pdf.reports.trade-import-calculation', [
+            'company' => $companyModel,
+            'calc' => $calc,
+            'currency' => $currency,
+            'tariff_summary' => $tariffSummary,
+        ]);
+
+        $pdf->setPaper('a4', 'landscape');
+
+        $filename = "vlezna_kalkulacija_{$calc->document_number}_{$calc->document_date->format('Ymd')}.pdf";
+
+        return $pdf->stream($filename);
     }
 
     // ==========================================

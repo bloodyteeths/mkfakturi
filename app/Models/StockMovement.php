@@ -74,6 +74,8 @@ class StockMovement extends Model
 
     public const SOURCE_RETURN = 'return';
 
+    public const SOURCE_IMPORT_CALCULATION = 'import_calculation';
+
     protected static function booted(): void
     {
         static::updating(function (StockMovement $movement) {
@@ -252,6 +254,7 @@ class StockMovement extends Model
             self::SOURCE_PRODUCTION_WASTAGE => 'Production Wastage',
             self::SOURCE_WAC_CORRECTION => 'WAC Correction',
             self::SOURCE_RETURN => 'POS Return',
+            self::SOURCE_IMPORT_CALCULATION => 'Import Calculation',
         ];
 
         return $labels[$this->source_type] ?? $this->source_type;

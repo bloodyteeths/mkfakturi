@@ -6,6 +6,9 @@ use App\Models\Bill;
 use App\Models\Item;
 use App\Services\StockService;
 use Illuminate\Support\Facades\DB;
+use App\Models\StockMovement;
+use Modules\Mk\Models\ImportCalculation;
+use Modules\Mk\Models\ImportCalculationItem;
 use Modules\Mk\Models\Nivelacija;
 use Modules\Mk\Models\NivelacijaItem;
 
@@ -382,6 +385,252 @@ class TradeCalculationService
         }
 
         return ['violations' => $violations, 'cap_percent' => $cap];
+    }
+
+    /**
+     * Calculate import costs for all items in an import calculation.
+     *
+     * Formula (from accountant):
+     * 1. invoice_mkd = qty × price_fcy × exchange_rate
+     * 2. transport allocated proportionally by invoice value
+     * 3. customs_base = invoice_mkd + transport
+     * 4. customs_duty = customs_base × duty_rate (grouped by tariff heading)
+     * 5. forwarding + other costs allocated proportionally
+     * 6. landed_cost = all above summed
+     * 7. import_vat = landed_cost × vat_rate
+     */
+    public function calculateImportCosts(ImportCalculation $calc): array
+    {
+        $calc->loadMissing('items');
+
+        $exchangeRate = (float) $calc->exchange_rate;
+        $transportAmount = (int) $calc->transport_amount;
+        $forwardingAmount = (int) $calc->forwarding_amount;
+        $otherCostsAmount = (int) $calc->other_costs_amount;
+        $vatRate = (float) $calc->vat_rate;
+
+        $items = $calc->items->toArray();
+
+        // Step 1: Calculate invoice values in MKD for each item
+        $totalInvoiceMkd = 0;
+        foreach ($items as &$item) {
+            $qty = (float) $item['quantity'];
+            $unitPriceFcy = (int) $item['unit_price_fcy'];
+            $item['invoice_value_fcy'] = (int) round($unitPriceFcy * $qty);
+            // FCY is in cents, convert to major units, multiply by rate, back to MKD cents
+            $item['invoice_value_mkd'] = (int) round($unitPriceFcy * $qty * $exchangeRate / 100);
+            $totalInvoiceMkd += $item['invoice_value_mkd'];
+        }
+        unset($item);
+
+        // Step 2: Allocate transport proportionally with remainder handling
+        $transportRemaining = $transportAmount;
+        $lastIdx = count($items) - 1;
+        foreach ($items as $i => &$item) {
+            if ($i === $lastIdx) {
+                $item['transport_allocated'] = $transportRemaining;
+            } elseif ($totalInvoiceMkd > 0) {
+                $item['transport_allocated'] = (int) round($transportAmount * $item['invoice_value_mkd'] / $totalInvoiceMkd);
+                $transportRemaining -= $item['transport_allocated'];
+            } else {
+                $item['transport_allocated'] = 0;
+            }
+            $item['customs_base'] = $item['invoice_value_mkd'] + $item['transport_allocated'];
+        }
+        unset($item);
+
+        // Step 3: Calculate customs duty grouped by tariff heading
+        $headingGroups = [];
+        foreach ($items as $i => $item) {
+            $heading = $item['tariff_heading'];
+            if (! isset($headingGroups[$heading])) {
+                $headingGroups[$heading] = [
+                    'items' => [],
+                    'customs_base_total' => 0,
+                    'duty_rate' => (float) $item['customs_duty_rate'],
+                ];
+            }
+            $headingGroups[$heading]['items'][] = $i;
+            $headingGroups[$heading]['customs_base_total'] += $item['customs_base'];
+        }
+
+        $totalCustomsDuty = 0;
+        foreach ($headingGroups as $heading => &$group) {
+            $headingDuty = (int) round($group['customs_base_total'] * $group['duty_rate'] / 100);
+            $group['duty_amount'] = $headingDuty;
+
+            // Allocate duty within heading proportionally
+            $dutyRemaining = $headingDuty;
+            $lastInGroup = count($group['items']) - 1;
+            foreach ($group['items'] as $gi => $itemIdx) {
+                if ($gi === $lastInGroup) {
+                    $items[$itemIdx]['customs_duty_amount'] = $dutyRemaining;
+                } elseif ($group['customs_base_total'] > 0) {
+                    $allocated = (int) round($headingDuty * $items[$itemIdx]['customs_base'] / $group['customs_base_total']);
+                    $items[$itemIdx]['customs_duty_amount'] = $allocated;
+                    $dutyRemaining -= $allocated;
+                } else {
+                    $items[$itemIdx]['customs_duty_amount'] = 0;
+                }
+            }
+
+            $totalCustomsDuty += $headingDuty;
+        }
+        unset($group);
+
+        // Step 4: Allocate forwarding and other costs proportionally
+        $fwdRemaining = $forwardingAmount;
+        $otherRemaining = $otherCostsAmount;
+        foreach ($items as $i => &$item) {
+            if ($i === $lastIdx) {
+                $item['forwarding_allocated'] = $fwdRemaining;
+                $item['other_costs_allocated'] = $otherRemaining;
+            } elseif ($totalInvoiceMkd > 0) {
+                $item['forwarding_allocated'] = (int) round($forwardingAmount * $item['invoice_value_mkd'] / $totalInvoiceMkd);
+                $item['other_costs_allocated'] = (int) round($otherCostsAmount * $item['invoice_value_mkd'] / $totalInvoiceMkd);
+                $fwdRemaining -= $item['forwarding_allocated'];
+                $otherRemaining -= $item['other_costs_allocated'];
+            } else {
+                $item['forwarding_allocated'] = 0;
+                $item['other_costs_allocated'] = 0;
+            }
+
+            // Step 5: Landed cost
+            $item['landed_cost_before_vat'] = $item['invoice_value_mkd']
+                + $item['transport_allocated']
+                + $item['customs_duty_amount']
+                + $item['forwarding_allocated']
+                + $item['other_costs_allocated'];
+
+            $item['import_vat_amount'] = (int) round($item['landed_cost_before_vat'] * $vatRate / 100);
+            $item['total_landed_cost'] = $item['landed_cost_before_vat'] + $item['import_vat_amount'];
+
+            $qty = (float) $item['quantity'];
+            $item['unit_landed_cost'] = $qty > 0
+                ? (int) round($item['landed_cost_before_vat'] / $qty)
+                : 0;
+        }
+        unset($item);
+
+        // Build totals
+        $totals = [
+            'total_invoice_fcy' => array_sum(array_column($items, 'invoice_value_fcy')),
+            'total_invoice_mkd' => $totalInvoiceMkd,
+            'transport' => $transportAmount,
+            'forwarding' => $forwardingAmount,
+            'other_costs' => $otherCostsAmount,
+            'customs_duty' => $totalCustomsDuty,
+            'total_before_vat' => array_sum(array_column($items, 'landed_cost_before_vat')),
+            'import_vat' => array_sum(array_column($items, 'import_vat_amount')),
+            'total_landed_cost' => array_sum(array_column($items, 'total_landed_cost')),
+        ];
+
+        // Build tariff heading summary
+        $headingSummary = [];
+        foreach ($headingGroups as $heading => $group) {
+            $headingSummary[] = [
+                'tariff_heading' => $heading,
+                'items_count' => count($group['items']),
+                'customs_base_total' => $group['customs_base_total'],
+                'duty_rate' => $group['duty_rate'],
+                'duty_amount' => $group['duty_amount'],
+            ];
+        }
+
+        return [
+            'items' => $items,
+            'totals' => $totals,
+            'tariff_summary' => $headingSummary,
+        ];
+    }
+
+    /**
+     * Approve an import calculation — records stock-in movements.
+     * Unit cost for stock = landed_cost_before_vat / qty (VAT is deductible input tax).
+     */
+    public function approveImportCalculation(ImportCalculation $calc): void
+    {
+        if (! $calc->isDraft()) {
+            throw new \Exception('Само нацрт калкулации може да се одобрат.');
+        }
+
+        DB::transaction(function () use ($calc) {
+            $calc->loadMissing('items');
+
+            foreach ($calc->items as $calcItem) {
+                if (! $calcItem->item_id || $calcItem->quantity <= 0) {
+                    continue;
+                }
+
+                $unitCost = $calcItem->quantity > 0
+                    ? (int) round($calcItem->landed_cost_before_vat / $calcItem->quantity)
+                    : 0;
+
+                $this->stockService->recordStockIn(
+                    companyId: $calc->company_id,
+                    warehouseId: $calc->warehouse_id,
+                    itemId: $calcItem->item_id,
+                    quantity: (float) $calcItem->quantity,
+                    unitCost: $unitCost,
+                    sourceType: StockMovement::SOURCE_IMPORT_CALCULATION,
+                    sourceId: $calc->id,
+                    movementDate: $calc->document_date->format('Y-m-d'),
+                    notes: "Влезна калкулација {$calc->document_number}",
+                    meta: [
+                        'import_calculation_id' => $calc->id,
+                        'tariff_heading' => $calcItem->tariff_heading,
+                        'exchange_rate' => (float) $calc->exchange_rate,
+                        'currency_code' => $calc->currency_code,
+                    ],
+                );
+            }
+
+            $calc->update([
+                'status' => ImportCalculation::STATUS_APPROVED,
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
+        });
+    }
+
+    /**
+     * Void an import calculation — reverses stock movements.
+     */
+    public function voidImportCalculation(ImportCalculation $calc): void
+    {
+        if (! $calc->isApproved()) {
+            throw new \Exception('Само одобрени калкулации може да се поништат.');
+        }
+
+        DB::transaction(function () use ($calc) {
+            $calc->loadMissing('items');
+
+            foreach ($calc->items as $calcItem) {
+                if (! $calcItem->item_id || $calcItem->quantity <= 0) {
+                    continue;
+                }
+
+                $unitCost = $calcItem->quantity > 0
+                    ? (int) round($calcItem->landed_cost_before_vat / $calcItem->quantity)
+                    : 0;
+
+                $this->stockService->recordStockOut(
+                    companyId: $calc->company_id,
+                    warehouseId: $calc->warehouse_id,
+                    itemId: $calcItem->item_id,
+                    quantity: (float) $calcItem->quantity,
+                    unitCost: $unitCost,
+                    sourceType: StockMovement::SOURCE_IMPORT_CALCULATION,
+                    sourceId: $calc->id,
+                    movementDate: now()->format('Y-m-d'),
+                    notes: "Поништена влезна калкулација {$calc->document_number}",
+                );
+            }
+
+            $calc->update([
+                'status' => ImportCalculation::STATUS_VOIDED,
+            ]);
+        });
     }
 }
 

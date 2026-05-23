@@ -2197,6 +2197,18 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::get('/{id}/export', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiExport']);
         });
 
+        // Влезна калкулација — Import Cost Calculation CRUD
+        Route::prefix('import-calculations')->group(function () {
+            Route::get('/', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'importCalcIndex']);
+            Route::post('/', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'importCalcStore']);
+            Route::get('/from-bill/{bill}', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'importCalcFromBill']);
+            Route::get('/{id}', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'importCalcShow']);
+            Route::put('/{id}', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'importCalcUpdate']);
+            Route::post('/{id}/approve', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'importCalcApprove']);
+            Route::post('/{id}/void', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'importCalcVoid']);
+            Route::get('/{id}/export', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'importCalcExport']);
+        });
+
         // Преносница PDF (uses existing InventoryDocument)
         Route::get('/prenosnica/{document}/export', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'prenosnicaExport']);
 

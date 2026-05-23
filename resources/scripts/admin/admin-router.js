@@ -151,6 +151,11 @@ const NivelacijaView = () => import('@/scripts/admin/views/stock/trade/Nivelacij
 const KapView = () => import('@/scripts/admin/views/stock/trade/KapView.vue')
 const PltView = () => import('@/scripts/admin/views/stock/trade/PltView.vue')
 
+// Import Cost Calculation (Влезна калкулација)
+const ImportCalcIndex = () => import('@/scripts/admin/views/stock/trade/ImportCalcIndex.vue')
+const ImportCalcCreate = () => import('@/scripts/admin/views/stock/trade/ImportCalcCreate.vue')
+const ImportCalcView = () => import('@/scripts/admin/views/stock/trade/ImportCalcView.vue')
+
 // Client Documents (P8-01) + AI Document Hub
 const ClientDocuments = () => import('@/scripts/admin/views/documents/ClientDocuments.vue')
 const DocumentReview = () => import('@/scripts/admin/views/documents/DocumentReview.vue')
@@ -631,6 +636,32 @@ export default [
         name: 'stock.trade.plt',
         meta: { requiresAuth: true, ability: abilities.VIEW_ITEM },
         component: PltView,
+      },
+
+      // Import Cost Calculation (Влезна калкулација)
+      {
+        path: 'stock/trade/import-calculations',
+        name: 'stock.trade.import-calculations',
+        meta: { requiresAuth: true, ability: abilities.VIEW_ITEM },
+        component: ImportCalcIndex,
+      },
+      {
+        path: 'stock/trade/import-calculations/create',
+        name: 'stock.trade.import-calculation.create',
+        meta: { requiresAuth: true, ability: abilities.CREATE_ITEM },
+        component: ImportCalcCreate,
+      },
+      {
+        path: 'stock/trade/import-calculations/:id',
+        name: 'stock.trade.import-calculation.view',
+        meta: { requiresAuth: true, ability: abilities.VIEW_ITEM },
+        component: ImportCalcView,
+      },
+      {
+        path: 'stock/trade/import-calculations/:id/edit',
+        name: 'stock.trade.import-calculation.edit',
+        meta: { requiresAuth: true, ability: abilities.EDIT_ITEM },
+        component: ImportCalcCreate,
       },
 
       // Client Documents (P8-01) + AI Document Hub

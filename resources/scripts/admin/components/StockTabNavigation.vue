@@ -163,6 +163,15 @@
               <div class="text-sm font-medium">ПЛТ — Малопродажба</div>
               <div class="text-xs text-gray-400">Пресметка на малопродажна цена</div>
             </router-link>
+            <router-link
+              to="/admin/stock/trade/import-calculations"
+              class="block px-4 py-2.5 hover:bg-gray-50"
+              :class="dropdownItemClass('/admin/stock/trade/import-calculations')"
+              @click="openMenu = null"
+            >
+              <div class="text-sm font-medium">Влезна калкулација</div>
+              <div class="text-xs text-gray-400">Калкулација на увозна цена</div>
+            </router-link>
           </div>
         </transition>
       </div>
@@ -357,6 +366,13 @@
           + Расходување
         </router-link>
         <router-link
+          to="/admin/stock/trade/import-calculations/create"
+          class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
+          @click="showFabMenu = false"
+        >
+          + Влезна калкулација
+        </router-link>
+        <router-link
           to="/admin/stock/counts?create=true"
           class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
           @click="showFabMenu = false"
@@ -422,6 +438,7 @@ const mobileMenuItems = computed(() => {
       { to: '/admin/stock/trade/nivelacii', label: 'Нивелации', desc: 'Промена на малопродажна цена' },
       { to: '/admin/stock/trade/kap', label: 'КАП — Калкулација', desc: 'Калкулација на набавна цена' },
       { to: '/admin/stock/trade/plt', label: 'ПЛТ — Малопродажба', desc: 'Пресметка на малопродажна цена' },
+      { to: '/admin/stock/trade/import-calculations', label: 'Влезна калкулација', desc: 'Калкулација на увозна цена' },
     ],
     analysis: [
       { to: '/admin/stock/low-stock', label: 'Ниска залиха', desc: 'Критични нивоа на залиха' },
