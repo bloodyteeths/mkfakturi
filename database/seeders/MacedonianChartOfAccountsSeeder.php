@@ -190,6 +190,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
 
             // 05 - ОДЛОЖЕНИ ДАНОЧНИ СРЕДСТВА
             ['code' => '050', 'name' => 'Одложени даночни средства', 'type' => Account::TYPE_ASSET],
+            ['code' => '051', 'name' => 'Загуба од тековно работење', 'type' => Account::TYPE_ASSET],
         ];
 
         $this->createAccounts($companyId, $accounts, $existingCodes);
@@ -278,6 +279,9 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             // 19 - ПЛАТЕНИ ТРОШОЦИ ЗА ИДНИ ПЕРИОДИ И ПРЕСМЕТАНИ ПРИХОДИ (АВР)
             ['code' => '190', 'name' => 'Однапред платени трошоци', 'type' => Account::TYPE_ASSET],
             ['code' => '191', 'name' => 'Однапред платени зависни трошоци за набавка', 'type' => Account::TYPE_ASSET],
+            ['code' => '192', 'name' => 'Однапред платени надоместоци за концесија', 'type' => Account::TYPE_ASSET],
+            ['code' => '193', 'name' => 'Однапред платени франшизи, трговски знаци и слични права', 'type' => Account::TYPE_ASSET],
+            ['code' => '194', 'name' => 'Однапред платени патенти и лиценци', 'type' => Account::TYPE_ASSET],
             ['code' => '195', 'name' => 'Пресметани приходи што не можеле да бидат фактурирани', 'type' => Account::TYPE_ASSET],
             ['code' => '198', 'name' => 'Останати однапред платени трошоци и пресметани приходи', 'type' => Account::TYPE_ASSET],
         ];
@@ -345,6 +349,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '264', 'name' => 'Обврски врз основа на издадени хартии од вредност', 'type' => Account::TYPE_LIABILITY],
             ['code' => '265', 'name' => 'Обврски врз основа на есконтни работи', 'type' => Account::TYPE_LIABILITY],
             ['code' => '266', 'name' => 'Обврски врз основа на откуп на побарувања', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '267', 'name' => 'Обврски врз основа на нетековни средства кои се чуваат за продажба', 'type' => Account::TYPE_LIABILITY],
             ['code' => '269', 'name' => 'Обврски врз основа на останати краткорочни финансиски средства', 'type' => Account::TYPE_LIABILITY],
 
             // 27 - ДОЛГОРОЧНИ РЕЗЕРВИРАЊА
@@ -369,9 +374,11 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             // 29 - ОДЛОЖЕНИ ПЛАЌАЊА НА ТРОШОЦИ И ПРИХОДИ НА ИДНИ ПЕРИОДИ (ПВР)
             ['code' => '290', 'name' => 'Однапред пресметани трошоци', 'type' => Account::TYPE_LIABILITY],
             ['code' => '291', 'name' => 'Пресметани трошоци за набавка на добра', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '292', 'name' => 'Пресметани трошоци за користење на права', 'type' => Account::TYPE_LIABILITY],
             ['code' => '293', 'name' => 'Пресметани приходи за идни периоди', 'type' => Account::TYPE_LIABILITY],
             ['code' => '294', 'name' => 'Одложено признавање на приходи врз основа на државни поддршки', 'type' => Account::TYPE_LIABILITY],
             ['code' => '295', 'name' => 'Одложено признавање на приходи', 'type' => Account::TYPE_LIABILITY],
+            ['code' => '296', 'name' => 'Дел од вишок пренесени средства (непрофитни организации)', 'type' => Account::TYPE_LIABILITY],
             ['code' => '299', 'name' => 'Останати пасивни временски разграничувања', 'type' => Account::TYPE_LIABILITY],
         ];
 
@@ -402,6 +409,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             // 32 - ЗАЛИХА НА РЕЗЕРВНИ ДЕЛОВИ
             ['code' => '320', 'name' => 'Залиха на резервни делови', 'type' => Account::TYPE_ASSET],
             ['code' => '328', 'name' => 'Вредносно усогласување на залиха на резервни делови', 'type' => Account::TYPE_ASSET],
+            ['code' => '329', 'name' => 'Отстапување од стандардните (плански) цени на резервните делови', 'type' => Account::TYPE_ASSET],
 
             // 35 - ЗАЛИХА НА СИТЕН ИНВЕНТАР, АМБАЛАЖА И АВТОГУМИ
             ['code' => '350', 'name' => 'Ситен инвентар на залиха', 'type' => Account::TYPE_ASSET],
@@ -411,6 +419,11 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '354', 'name' => 'Залиха на автогуми', 'type' => Account::TYPE_ASSET],
             ['code' => '355', 'name' => 'Автогуми во употреба', 'type' => Account::TYPE_ASSET],
             ['code' => '358', 'name' => 'Вредносно усогласување на залихи на ситен инвентар, амбалажа и автогуми', 'type' => Account::TYPE_ASSET],
+            ['code' => '359', 'name' => 'Отстапување од стандардните (плански) цени на ситен инвентар, амбалажа и автогуми', 'type' => Account::TYPE_ASSET],
+
+            // 36 - ОТПИС НА СИТЕН ИНВЕНТАР
+            ['code' => '360', 'name' => 'Ситен инвентар на залиха', 'type' => Account::TYPE_ASSET],
+            ['code' => '361', 'name' => 'Ситен инвентар во употреба', 'type' => Account::TYPE_ASSET],
         ];
 
         $this->createAccounts($companyId, $accounts, $existingCodes);
@@ -443,6 +456,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '415', 'name' => 'Комунални услуги', 'type' => Account::TYPE_EXPENSE],
             ['code' => '416', 'name' => 'Трошоци за истражување и развој', 'type' => Account::TYPE_EXPENSE],
             ['code' => '417', 'name' => 'Трошоци за реклама, пропаганда, промоција и саеми', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '418', 'name' => 'Останати други расходи', 'type' => Account::TYPE_EXPENSE],
             ['code' => '419', 'name' => 'Останати услуги', 'type' => Account::TYPE_EXPENSE],
 
             // 42 - ПЛАТА, НАДОМЕСТОЦИ НА ПЛАТА И ОСТАНАТИ ТРОШОЦИ ЗА ВРАБОТЕНИТЕ
@@ -477,15 +491,20 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '450', 'name' => 'Вредносно усогласување (обезвреднување) на нематеријални средства', 'type' => Account::TYPE_EXPENSE],
             ['code' => '451', 'name' => 'Вредносно усогласување (обезвреднување) на материјални средства', 'type' => Account::TYPE_EXPENSE],
             ['code' => '452', 'name' => 'Вредносно усогласување (обезвреднување) на вложувања во недвижности', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '453', 'name' => 'Вредносно усогласување (обезвреднување) на останати материјални средства', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '454', 'name' => 'Вредносно усогласување (обезвреднување) на долгорочни побарувања', 'type' => Account::TYPE_EXPENSE],
             ['code' => '455', 'name' => 'Вредносно усогласување (обезвреднување) на краткорочни побарувања', 'type' => Account::TYPE_EXPENSE],
             ['code' => '456', 'name' => 'Вредносно усогласување (обезвреднување) на залихи', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '457', 'name' => 'Вредносно усогласување (обезвреднување) на нетековни средства кои се чуваат за продажба', 'type' => Account::TYPE_EXPENSE],
             ['code' => '459', 'name' => 'Вредносно усогласување (обезвреднување) на останати средства', 'type' => Account::TYPE_EXPENSE],
 
             // 46 - ОСТАНАТИ РАСХОДИ
             ['code' => '460', 'name' => 'Загуби врз основа на расходување и загуби од продажба на средства', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '461', 'name' => 'Загуби врз основа на расходување и загуба од продажба на биолошки средства', 'type' => Account::TYPE_EXPENSE],
             ['code' => '462', 'name' => 'Загуби врз основа на продажба на учество во капитал и хартии од вредност', 'type' => Account::TYPE_EXPENSE],
             ['code' => '463', 'name' => 'Загуба од продажба на материјали', 'type' => Account::TYPE_EXPENSE],
             ['code' => '464', 'name' => 'Кусоци, кало, растур, расипување и кршење', 'type' => Account::TYPE_EXPENSE],
+            ['code' => '465', 'name' => 'Расходи врз основа на ефекти од договорени заштити од ризик', 'type' => Account::TYPE_EXPENSE],
             ['code' => '466', 'name' => 'Расходи врз основа на директен отпис на побарувања', 'type' => Account::TYPE_EXPENSE],
             ['code' => '467', 'name' => 'Расходи за дополнително одобрени попусти, рабат, рекламации', 'type' => Account::TYPE_EXPENSE],
             ['code' => '468', 'name' => 'Казни, пенали, надоместоци за штети и друго', 'type' => Account::TYPE_EXPENSE],
@@ -524,7 +543,9 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '600', 'name' => 'Производство (изградба) во тек', 'type' => Account::TYPE_ASSET],
             ['code' => '601', 'name' => 'Залиха на полупроизводи', 'type' => Account::TYPE_ASSET],
             ['code' => '602', 'name' => 'Залиха на застарени недовршени производи, полупроизводи и делови', 'type' => Account::TYPE_ASSET],
+            ['code' => '606', 'name' => 'Производство во доработка, обработка и манипулација', 'type' => Account::TYPE_ASSET],
             ['code' => '608', 'name' => 'Вредносно усогласување на недовршени производи', 'type' => Account::TYPE_ASSET],
+            ['code' => '609', 'name' => 'Отстапување од стандардните (плански) цени на производството', 'type' => Account::TYPE_ASSET],
 
             // 61 - БИОЛОШКИ СРЕДСТВА
             ['code' => '610', 'name' => 'Недовршено производство на биолошки средства', 'type' => Account::TYPE_ASSET],
@@ -536,13 +557,17 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '631', 'name' => 'Производи во туѓ склад', 'type' => Account::TYPE_ASSET],
             ['code' => '633', 'name' => 'Производи во продавница', 'type' => Account::TYPE_ASSET],
             ['code' => '634', 'name' => 'Вкалкулиран данок на додадена вредност', 'type' => Account::TYPE_ASSET],
+            ['code' => '635', 'name' => 'Вкалкулирани акцизи', 'type' => Account::TYPE_ASSET],
+            ['code' => '636', 'name' => 'Производи во доработка, обработка и манипулација', 'type' => Account::TYPE_ASSET],
             ['code' => '637', 'name' => 'Залихи на некурентни производи и отпадоци', 'type' => Account::TYPE_ASSET],
             ['code' => '638', 'name' => 'Вредносно усогласување на залихите на готовите производи', 'type' => Account::TYPE_ASSET],
+            ['code' => '639', 'name' => 'Отстапување од стандардните (плански) цени на производите', 'type' => Account::TYPE_ASSET],
 
             // 65 - ПРЕСМЕТКА НА НАБАВКАТА НА СТОКИ
             ['code' => '650', 'name' => 'Вредност на стоките по пресметка на добавувачот', 'type' => Account::TYPE_ASSET],
             ['code' => '651', 'name' => 'Зависни трошоци за набавка на стоки', 'type' => Account::TYPE_ASSET],
             ['code' => '652', 'name' => 'Царини и други увозни давачки за стоките', 'type' => Account::TYPE_ASSET],
+            ['code' => '653', 'name' => 'Данок на додадена вредност, акцизи и други давачки за стоки (без право на одбивка)', 'type' => Account::TYPE_ASSET],
             ['code' => '659', 'name' => 'Пресметка на набавката', 'type' => Account::TYPE_ASSET],
 
             // 66 - СТОКИ
@@ -551,12 +576,19 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '662', 'name' => 'Стоки на пат', 'type' => Account::TYPE_ASSET],
             ['code' => '663', 'name' => 'Стоки во продавница', 'type' => Account::TYPE_ASSET],
             ['code' => '664', 'name' => 'Вкалкулиран данок на додадена вредност', 'type' => Account::TYPE_ASSET],
+            ['code' => '665', 'name' => 'Вкалкулирани акцизи', 'type' => Account::TYPE_ASSET],
+            ['code' => '666', 'name' => 'Стоки во доработка, обработка и манипулација', 'type' => Account::TYPE_ASSET],
             ['code' => '668', 'name' => 'Вредносно усогласување на залихата на стоките', 'type' => Account::TYPE_ASSET],
             ['code' => '669', 'name' => 'Разлика во цени на стоките', 'type' => Account::TYPE_ASSET],
 
-            // 67 - НЕТЕКОВНИ СРЕДСТВА КОИ СЕ ЧУВААТ ЗА ПРОДАЖБА
+            // 67 - НЕТЕКОВНИ СРЕДСТВА КОИ СЕ ЧУВААТ ЗА ПРОДАЖБА И ПРЕКИНАТО РАБОТЕЊЕ
             ['code' => '670', 'name' => 'Нематеријални средства кои се чуваат за продажба', 'type' => Account::TYPE_ASSET],
+            ['code' => '671', 'name' => 'Земјиште кое се чува за продажба', 'type' => Account::TYPE_ASSET],
+            ['code' => '672', 'name' => 'Градежни објекти кои се чуваат за продажба', 'type' => Account::TYPE_ASSET],
+            ['code' => '673', 'name' => 'Вложувања во недвижности кои се чуваат за продажба', 'type' => Account::TYPE_ASSET],
             ['code' => '674', 'name' => 'Останати нетековни средства кои се чуваат за продажба', 'type' => Account::TYPE_ASSET],
+            ['code' => '675', 'name' => 'Биолошки средства кои се чуваат за продажба', 'type' => Account::TYPE_ASSET],
+            ['code' => '676', 'name' => 'Средства чие работење е прекинато', 'type' => Account::TYPE_ASSET],
             ['code' => '678', 'name' => 'Вредносно усогласување на нетековни средства за продажба', 'type' => Account::TYPE_ASSET],
         ];
 
@@ -579,6 +611,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '730', 'name' => 'Приходи од продажба на добра и услуги на поврзани друштва во земјата', 'type' => Account::TYPE_REVENUE],
             ['code' => '731', 'name' => 'Приходи од продажба на добра и услуги на поврзани друштва од странство', 'type' => Account::TYPE_REVENUE],
             ['code' => '732', 'name' => 'Приходи од специфично работење на поврзани друштва', 'type' => Account::TYPE_REVENUE],
+            ['code' => '733', 'name' => 'Приходи од продажба на добра и услуги на поврзани друштва во странство', 'type' => Account::TYPE_REVENUE],
 
             // 74 - ПРИХОДИ ОД ПРОДАЖБА НА НЕПОВРЗАНИ ДРУШТВА
             ['code' => '740', 'name' => 'Приходи од продажба на добра (производи) и услуги во земјата', 'type' => Account::TYPE_REVENUE],
@@ -587,21 +620,30 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '743', 'name' => 'Приходи од продажба на материјали, резервни делови и отпадоци', 'type' => Account::TYPE_REVENUE],
             ['code' => '744', 'name' => 'Приходи од продажба на нетековни средства за продажба', 'type' => Account::TYPE_REVENUE],
             ['code' => '745', 'name' => 'Приходи врз основа на употреба на сопствени добра и услуги', 'type' => Account::TYPE_REVENUE],
+            ['code' => '746', 'name' => 'Приходи од специфично работење на неповрзани друштва', 'type' => Account::TYPE_REVENUE],
             ['code' => '747', 'name' => 'Приходи од наемнини', 'type' => Account::TYPE_REVENUE],
+            ['code' => '748', 'name' => 'Приходи од продажба на добра врз основа на финансиски наем', 'type' => Account::TYPE_REVENUE],
             ['code' => '749', 'name' => 'Останати приходи од продажба на неповрзани друштва', 'type' => Account::TYPE_REVENUE],
 
             // 75 - ПРИХОДИ ОД ВРЕДНОСНО УСОГЛАСУВАЊЕ
             ['code' => '750', 'name' => 'Приходи од вредносно усогласување на нематеријални средства', 'type' => Account::TYPE_REVENUE],
             ['code' => '751', 'name' => 'Приходи од вредносно усогласување на материјални средства', 'type' => Account::TYPE_REVENUE],
+            ['code' => '752', 'name' => 'Приходи од вредносно усогласување на вложувања во недвижности', 'type' => Account::TYPE_REVENUE],
+            ['code' => '753', 'name' => 'Приходи од вредносно усогласување на останати материјални средства', 'type' => Account::TYPE_REVENUE],
+            ['code' => '754', 'name' => 'Приходи од вредносно усогласување на долгорочни побарувања', 'type' => Account::TYPE_REVENUE],
             ['code' => '755', 'name' => 'Приходи од вредносно усогласување на краткорочни побарувања', 'type' => Account::TYPE_REVENUE],
             ['code' => '756', 'name' => 'Приходи од вредносно усогласување на залихи', 'type' => Account::TYPE_REVENUE],
+            ['code' => '757', 'name' => 'Приходи од вредносно усогласување на нетековни средства кои се чуваат за продажба', 'type' => Account::TYPE_REVENUE],
             ['code' => '759', 'name' => 'Приходи од вредносно усогласување на останати средства', 'type' => Account::TYPE_REVENUE],
 
             // 76 - ОСТАНАТИ ПРИХОДИ
             ['code' => '760', 'name' => 'Добивки од продажба на нематеријални и материјални средства', 'type' => Account::TYPE_REVENUE],
+            ['code' => '761', 'name' => 'Добивки од продажба на биолошки средства', 'type' => Account::TYPE_REVENUE],
             ['code' => '762', 'name' => 'Добивки од продажба на учество во капитал и хартии од вредност', 'type' => Account::TYPE_REVENUE],
+            ['code' => '763', 'name' => 'Добивки од продажба на материјали и отпадоци', 'type' => Account::TYPE_REVENUE],
             ['code' => '764', 'name' => 'Вишоци', 'type' => Account::TYPE_REVENUE],
             ['code' => '765', 'name' => 'Приходи од наплатени отпишани побарувања и приходи од отпис на обврските', 'type' => Account::TYPE_REVENUE],
+            ['code' => '766', 'name' => 'Приходи врз основа на ефекти од договорена заштита од ризик', 'type' => Account::TYPE_REVENUE],
             ['code' => '767', 'name' => 'Приходи од премии, субвенции, дотации и донации', 'type' => Account::TYPE_REVENUE],
             ['code' => '768', 'name' => 'Приходи од укинување на долгорочни резервирања', 'type' => Account::TYPE_REVENUE],
             ['code' => '769', 'name' => 'Останати приходи од работењето', 'type' => Account::TYPE_REVENUE],
@@ -609,6 +651,7 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             // 77 - ФИНАНСИСКИ ПРИХОДИ
             ['code' => '770', 'name' => 'Приходи врз основа на камати од работењето со поврзани друштва', 'type' => Account::TYPE_REVENUE],
             ['code' => '771', 'name' => 'Приходи врз основа на позитивни курсни разлики со поврзани друштва', 'type' => Account::TYPE_REVENUE],
+            ['code' => '772', 'name' => 'Останати финансиски приходи од поврзани друштва', 'type' => Account::TYPE_REVENUE],
             ['code' => '773', 'name' => 'Приходи од вложувања во поврзани друштва', 'type' => Account::TYPE_REVENUE],
             ['code' => '774', 'name' => 'Приходи врз основа на камати од работењето со неповрзани друштва', 'type' => Account::TYPE_REVENUE],
             ['code' => '775', 'name' => 'Приходи врз основа на позитивни курсни разлики со неповрзани друштва', 'type' => Account::TYPE_REVENUE],
@@ -653,6 +696,37 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             ['code' => '832', 'name' => 'Загуба која припаѓа на сопствениците на матичното друштво', 'type' => Account::TYPE_EQUITY],
             ['code' => '833', 'name' => 'Загуба која припаѓа на учество кое нема контрола', 'type' => Account::TYPE_EQUITY],
 
+            // 84 - ОСТАЛА СЕОПФАТНА ДОБИВКА/ЗАГУБА
+            ['code' => '840', 'name' => 'Добивка која произлегува од преведување на странско работење', 'type' => Account::TYPE_EQUITY],
+            ['code' => '841', 'name' => 'Загуба која произлегува од преведување на странско работење', 'type' => Account::TYPE_EQUITY],
+            ['code' => '842', 'name' => 'Добивка од повторно мерење на финансиски средства расположиви за продажба', 'type' => Account::TYPE_EQUITY],
+            ['code' => '843', 'name' => 'Загуба од повторно мерење на финансиски средства расположиви за продажба', 'type' => Account::TYPE_EQUITY],
+            ['code' => '844', 'name' => 'Добивка од ефектот од хеџинг инструменти за хеџирање на парични текови', 'type' => Account::TYPE_EQUITY],
+            ['code' => '845', 'name' => 'Загуба од ефектот од хеџинг инструменти за хеџирање на парични текови', 'type' => Account::TYPE_EQUITY],
+            ['code' => '846', 'name' => 'Позитивни ефекти од ревалоризација на нематеријалните и материјалните средства', 'type' => Account::TYPE_EQUITY],
+            ['code' => '847', 'name' => 'Негативни ефекти од ревалоризација на нематеријалните и материјалните средства', 'type' => Account::TYPE_EQUITY],
+            ['code' => '848', 'name' => 'Актуарски добивки на дефинирани планови за користи на вработените', 'type' => Account::TYPE_EQUITY],
+            ['code' => '849', 'name' => 'Актуарски загуби на дефинирани планови за користи на вработените', 'type' => Account::TYPE_EQUITY],
+
+            // 85 - УДЕЛ ВО ОСТАЛА СЕОПФАТНА ДОБИВКА/ЗАГУБА НА ПРИДРУЖНИ ДРУШТВА
+            ['code' => '850', 'name' => 'Удел во останатата сеопфатна добивка на придружни друштва', 'type' => Account::TYPE_EQUITY],
+            ['code' => '851', 'name' => 'Удел во останатата сеопфатна загуба на придружни друштва', 'type' => Account::TYPE_EQUITY],
+
+            // 86 - ДАНОК НА ДОБИВКА НА КОМПОНЕНТИ НА ОСТАЛА СЕОПФАТНА ДОБИВКА
+            ['code' => '860', 'name' => 'Данок на добивка на компоненти на останатата сеопфатна добивка/загуба', 'type' => Account::TYPE_EQUITY],
+
+            // 87 - НЕТО ОСТАЛА СЕОПФАТНА ДОБИВКА/ЗАГУБА
+            ['code' => '870', 'name' => 'Нето остала сеопфатна добивка', 'type' => Account::TYPE_EQUITY],
+            ['code' => '871', 'name' => 'Нето остала сеопфатна загуба', 'type' => Account::TYPE_EQUITY],
+
+            // 88 - ВКУПНА СЕОПФАТНА ДОБИВКА/ЗАГУБА ЗА ПЕРИОДОТ
+            ['code' => '880', 'name' => 'Сеопфатна добивка која им припаѓа на сопствениците на матичното друштво', 'type' => Account::TYPE_EQUITY],
+            ['code' => '881', 'name' => 'Сеопфатна добивка која им припаѓа на учество кое нема контрола', 'type' => Account::TYPE_EQUITY],
+            ['code' => '882', 'name' => 'Сеопфатна загуба која им припаѓа на сопствениците на матичното друштво', 'type' => Account::TYPE_EQUITY],
+            ['code' => '883', 'name' => 'Сеопфатна загуба која им припаѓа на учество кое нема контрола', 'type' => Account::TYPE_EQUITY],
+            ['code' => '884', 'name' => 'Законски резерви', 'type' => Account::TYPE_EQUITY],
+            ['code' => '889', 'name' => 'Нераспределена добивка', 'type' => Account::TYPE_EQUITY],
+
             // 89 - РАСПОРЕДУВАЊЕ НА ДОБИВКАТА
             ['code' => '890', 'name' => 'Покривање на загубата од претходни години', 'type' => Account::TYPE_EQUITY],
             ['code' => '891', 'name' => 'Зголемување на капиталот (капитал на сопствениците)', 'type' => Account::TYPE_EQUITY],
@@ -678,11 +752,14 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             // 91 - ПРЕМИИ НА ЕМИТИРАНИ АКЦИИ
             ['code' => '910', 'name' => 'Премии врз основа на продажба на обични акции', 'type' => Account::TYPE_EQUITY],
             ['code' => '911', 'name' => 'Премии врз основа на продажба на приоритетни акции', 'type' => Account::TYPE_EQUITY],
+            ['code' => '912', 'name' => 'Премии врз основа на конверзија на приоритетни акции во обични', 'type' => Account::TYPE_EQUITY],
 
             // 93 - РЕВАЛОРИЗАЦИОНИ РЕЗЕРВИ
             ['code' => '930', 'name' => 'Ревалоризациони резерви на нематеријални и материјални средства', 'type' => Account::TYPE_EQUITY],
             ['code' => '931', 'name' => 'Ревалоризациони резерви врз основа на преведување на странско работење', 'type' => Account::TYPE_EQUITY],
             ['code' => '932', 'name' => 'Ревалоризациони резерви врз основа на финансиски средства расположиви за продажба', 'type' => Account::TYPE_EQUITY],
+            ['code' => '933', 'name' => 'Добивки/загуби од заштита на паричниот тек до рекласификација', 'type' => Account::TYPE_EQUITY],
+            ['code' => '934', 'name' => 'Добивки/загуби на дефинирани планови за користи на вработените', 'type' => Account::TYPE_EQUITY],
             ['code' => '935', 'name' => 'Останати ревалоризациони резерви', 'type' => Account::TYPE_EQUITY],
 
             // 94 - РЕЗЕРВИ
@@ -697,6 +774,9 @@ class MacedonianChartOfAccountsSeeder extends Seeder
             // 96 - ПРЕНЕСЕНА ЗАГУБА
             ['code' => '960', 'name' => 'Пренесена загуба од претходни години', 'type' => Account::TYPE_EQUITY],
             ['code' => '961', 'name' => 'Загуба за тековната година', 'type' => Account::TYPE_EQUITY],
+
+            // 97 - УЧЕСТВО ВО КАПИТАЛОТ КОЕ НЕМА КОНТРОЛА
+            ['code' => '970', 'name' => 'Учество во капиталот кое нема контрола', 'type' => Account::TYPE_EQUITY],
 
             // 99 - ВОНБИЛАНСНА ЕВИДЕНЦИЈА
             ['code' => '990', 'name' => 'Примени туѓи недвижности, постројки и опрема', 'type' => Account::TYPE_EQUITY],

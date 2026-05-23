@@ -671,20 +671,31 @@ class IfrsAdapter
                 'updated_at' => now(),
             ]);
 
-            // If there's tax, create a line to reduce tax payable
+            // VAT line items — rate-specific with reversal (DR to reduce output VAT liability)
             if ($creditNote->tax > 0) {
-                $taxPayableAccount = $this->getTaxPayableAccount($creditNote->company_id, $entity->id);
-                DB::table('ifrs_line_items')->insert([
-                    'transaction_id' => $transaction->id,
-                    'account_id' => $taxPayableAccount->id,
-                    'amount' => $creditNote->tax / 100,
-                    'quantity' => 1,
-                    'credited' => false, // Debit to reduce liability
-    
-                    'entity_id' => $entity->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                $isReverseCharge = $creditNote->invoice
+                    && $creditNote->invoice->isReverseCharge();
+
+                if ($isReverseCharge) {
+                    $this->postReverseChargeVat(
+                        $creditNote->taxes()->get(),
+                        $creditNote->tax,
+                        $transaction->id,
+                        $entity->id,
+                        $creditNote->company_id,
+                        true
+                    );
+                } else {
+                    $this->postVatLineItems(
+                        $creditNote->taxes()->get(),
+                        $creditNote->tax,
+                        $transaction->id,
+                        $entity->id,
+                        $creditNote->company_id,
+                        'output',
+                        true
+                    );
+                }
             }
 
             // Reload line items so post() sees them (Transaction::create caches empty lineItems)
@@ -1909,7 +1920,8 @@ class IfrsAdapter
         int $totalTaxCents,
         int $transactionId,
         int $entityId,
-        int $companyId
+        int $companyId,
+        bool $reversal = false
     ): void {
         $amount = $totalTaxCents;
 
@@ -1929,7 +1941,7 @@ class IfrsAdapter
             'account_id' => $rcInputAccount->id,
             'amount' => $amount / 100,
             'quantity' => 1,
-            'credited' => false, // Debit
+            'credited' => $reversal, // Normal: Debit; Reversal (credit note): Credit
             'entity_id' => $entityId,
             'created_at' => now(),
             'updated_at' => now(),
@@ -1942,7 +1954,7 @@ class IfrsAdapter
             'account_id' => $rcOutputAccount->id,
             'amount' => $amount / 100,
             'quantity' => 1,
-            'credited' => true, // Credit
+            'credited' => ! $reversal, // Normal: Credit; Reversal (credit note): Debit
             'entity_id' => $entityId,
             'created_at' => now(),
             'updated_at' => now(),
@@ -3184,16 +3196,61 @@ class IfrsAdapter
                 throw new \Exception('Failed to get or create IFRS Entity for company');
             }
 
+            $bill->load(['items.item']);
+
             // Get or create accounts
             $apAccount = $this->getAccountsPayableAccount($bill->company_id, $entity->id);
             $expenseAccount = $this->getExpenseAccount($bill->company_id, $entity->id);
+
+            // Classify bill items: inventory → Purchase Calculation (303), service/freeform → Expense (4xx)
+            $debitsByAccount = [];
+
+            foreach ($bill->items as $billItem) {
+                $netAmount = $billItem->total - ($billItem->tax ?? 0);
+                if ($netAmount <= 0) {
+                    continue;
+                }
+
+                $item = $billItem->item;
+                if ($billItem->item_id && $item && $item->track_quantity) {
+                    $account = $this->getPurchaseCalculationAccount($bill->company_id, $entity->id, $item);
+                } else {
+                    $account = $expenseAccount;
+                }
+
+                $key = $account->id;
+                if (! isset($debitsByAccount[$key])) {
+                    $debitsByAccount[$key] = ['account' => $account, 'amount' => 0];
+                }
+                $debitsByAccount[$key]['amount'] += $netAmount;
+            }
+
+            if (empty($debitsByAccount)) {
+                $debitsByAccount[$expenseAccount->id] = [
+                    'account' => $expenseAccount,
+                    'amount' => $bill->sub_total,
+                ];
+            }
+
+            // Rounding: ensure sum matches $bill->sub_total exactly
+            $totalDebits = array_sum(array_column($debitsByAccount, 'amount'));
+            $diff = $bill->sub_total - $totalDebits;
+            if ($diff !== 0) {
+                $lastKey = array_key_last($debitsByAccount);
+                $debitsByAccount[$lastKey]['amount'] += $diff;
+            }
+
+            // Use the first debit account as transaction header if single-account
+            $headerAccount = count($debitsByAccount) === 1
+                ? reset($debitsByAccount)['account']
+                : $expenseAccount;
 
             // Build narration
             $narration = "Bill #{$bill->bill_number} - {$bill->supplier->name}";
 
             // Create IFRS Transaction (Supplier Bill)
             $transaction = Transaction::create([
-                'account_id' => $expenseAccount->id,
+                'account_id' => $headerAccount->id,
                 'transaction_date' => $bill->bill_date ?? Carbon::now(),
                 'narration' => $narration,
                 'transaction_type' => Transaction::BL, // Supplier Bill
@@ -3201,21 +3258,24 @@ class IfrsAdapter
                 'entity_id' => $entity->id,
             ]);
 
+            // Debit line items — per-account groups
+            foreach ($debitsByAccount as $entry) {
+                if ($entry['amount'] <= 0) {
+                    continue;
+                }
+                DB::table('ifrs_line_items')->insert([
+                    'transaction_id' => $transaction->id,
+                    'account_id' => $entry['account']->id,
+                    'amount' => $entry['amount'] / 100,
+                    'quantity' => 1,
+                    'credited' => false,
+                    'entity_id' => $entity->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
 
-
-            // Line Item: Debit Expense Account
-            // Use DB::table to bypass Eloquent scopes and avoid stale relationship cache
-            DB::table('ifrs_line_items')->insert([
-                'transaction_id' => $transaction->id,
-                'account_id' => $expenseAccount->id,
-                'amount' => $bill->sub_total / 100, // Convert cents to dollars
-                'quantity' => 1,
-                'credited' => false, // Debit entry
-
-                'entity_id' => $entity->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // CLAUDE-CHECKPOINT: Per-item account routing for postBill
 
             // VAT posting — different logic for reverse charge bills (Art. 32-а ЗДДВ)
             if ($bill->isReverseCharge() && $bill->tax > 0) {
