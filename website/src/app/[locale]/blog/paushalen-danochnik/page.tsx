@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {

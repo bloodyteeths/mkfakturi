@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -95,6 +95,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура: Чекор-по-чекор водич' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура во Македонија' },
       { slug: 'recurring-invoices-mk', title: 'Повторувачки фактури: Автоматизирајте ја наплатата' },
+      { slug: 'faktura-primer-mk', title: 'Фактура пример: Македонски образец' },
+      { slug: 'e-faktura-obvrska-2026', title: 'Е-фактура 2026: Кој мора и како да се подготвите' },
     ],
     cta: {
       title: 'Фактури и профактури — сe на едно место',
@@ -167,6 +169,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice: Step-by-Step Guide' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
       { slug: 'recurring-invoices-mk', title: 'Recurring Invoices: Automate Your Billing' },
+      { slug: 'faktura-primer-mk', title: 'Invoice Example: Macedonian Template' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Invoice Mandate 2026: Who Must Comply & How to Prepare' },
     ],
     cta: {
       title: 'Invoices and proformas — all in one place',
@@ -239,6 +243,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni një faturë: Udhëzues hap pas hapi' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës në Maqedoni' },
       { slug: 'recurring-invoices-mk', title: 'Faturat e përsëritura: Automatizoni arkëtimin' },
+      { slug: 'faktura-primer-mk', title: 'Shembull fature: Modeli maqedonas' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-fatura 2026: Kush duhet dhe si të përgatiteni' },
     ],
     cta: {
       title: 'Fatura dhe profatura — të gjitha në një vend',
@@ -311,6 +317,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Fatura nasıl oluşturulur: Adım adım rehber' },
       { slug: 'zadolzitelni-elementi-faktura', title: "Makedonya'da faturanın zorunlu unsurları" },
       { slug: 'recurring-invoices-mk', title: 'Tekrarlayan faturalar: Tahsilatı otomatikleştirin' },
+      { slug: 'faktura-primer-mk', title: 'Fatura Örneği: Makedonya Şablonu' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Fatura 2026: Kim Uymalı ve Nasıl Hazırlanmalı' },
     ],
     cta: {
       title: 'Faturalar ve proformalar — hepsi tek yerde',
@@ -354,6 +362,11 @@ export default async function FakturaVsProformaPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Дали профактура е правно обврзувачка?', answer: 'Не, профактурата не е правно обврзувачка. Таа е само информативен документ — понуда за плаќање без законска сила.' },
+        { question: 'Кога се користи профактура?', answer: 'Профактурата се користи за авансно плаќање, царински формалности, буџетско одобрение и информирање на купувачот за цената пред испорака.' },
+        { question: 'Разлика?', answer: 'Фактурата е даночен документ кој влегува во ДДВ евиденцијата и создава обврска за плаќање. Профактурата е само понуда без даночни последици.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         {/* Background blobs */}

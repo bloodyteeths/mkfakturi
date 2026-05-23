@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -116,6 +116,8 @@ const copy = {
       { slug: 'sto-e-e-faktura', title: 'Што е е-фактура и зошто е задолжителна?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура' },
       { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура: Чекор-по-чекор' },
+      { slug: 'najdobar-e-faktura-softver', title: 'Најдобар софтвер за е-Фактура 2026' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Фактурирање за јавни набавки' },
     ],
     bottomCta: {
       title: 'Подготвени за е-фактура?',
@@ -213,6 +215,8 @@ const copy = {
       { slug: 'sto-e-e-faktura', title: 'What Is E-Invoice and Why Is It Mandatory?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
       { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice: Step-by-Step' },
+      { slug: 'najdobar-e-faktura-softver', title: 'Best E-Invoice Software 2026' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Invoicing for Government Procurement' },
     ],
     bottomCta: {
       title: 'Ready for e-invoicing?',
@@ -310,6 +314,8 @@ const copy = {
       { slug: 'sto-e-e-faktura', title: 'Çfarë është e-fatura dhe pse është e detyrueshme?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës' },
       { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni faturë: Hap pas hapi' },
+      { slug: 'najdobar-e-faktura-softver', title: 'Softueri më i mirë për e-Faturë 2026' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Faturimi për prokurime publike' },
     ],
     bottomCta: {
       title: 'Gati për e-faturën?',
@@ -407,6 +413,8 @@ const copy = {
       { slug: 'sto-e-e-faktura', title: 'E-fatura nedir ve neden zorunludur?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Makedonya\'da faturanın zorunlu unsurları' },
       { slug: 'kako-da-napravite-faktura', title: 'Fatura nasıl oluşturulur: Adım adım' },
+      { slug: 'najdobar-e-faktura-softver', title: 'En İyi e-Fatura Yazılımı 2026' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Kamu İhaleleri İçin Faturalama' },
     ],
     bottomCta: {
       title: 'E-faturaya hazır mısınız?',
@@ -446,6 +454,11 @@ export default async function EFakturaObvrskaPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кога е задолжителна е-Фактура?', answer: 'Е-фактурата е задолжителна за B2G трансакции од октомври 2026, а за сите ДДВ обврзници фазно од јануари 2027.' },
+        { question: 'Што е UBL 2.1?', answer: 'UBL 2.1 (Universal Business Language) е меѓународен XML стандард за структурирани фактури кој Македонија го усвои за е-фактурирање.' },
+        { question: 'Треба ли QES потпис?', answer: 'Да, квалификуван електронски потпис (QES) е задолжителен за секоја е-фактура. Може да се набави од Кибритон или КИБС.' },
+      ])) }} />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6">

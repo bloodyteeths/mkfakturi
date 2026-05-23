@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -116,6 +116,8 @@ const copy = {
       { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
       { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Годишно затворање на книги: 6 чекори со Facturino' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Најдобар сметководствен софтвер 2026 за Македонија' },
+      { slug: 'ifrs-izvesti-mk', title: 'МСФИ/IFRS извештаи во Македонија: кој мора и како' },
     ],
     cta: {
       title: 'Трансформирајте го вашето сметководствено биро',
@@ -212,6 +214,8 @@ const copy = {
       { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
       { slug: 'zosto-facturino', title: '10 Reasons Macedonian Businesses Choose Facturino' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Year-End Closing: 6 Steps with Facturino' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Best Accounting Software 2026 for Macedonia' },
+      { slug: 'ifrs-izvesti-mk', title: 'IFRS Reporting in North Macedonia: Who Must and How' },
     ],
     cta: {
       title: 'Transform Your Accounting Practice',
@@ -308,6 +312,8 @@ const copy = {
       { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
       { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Mbyllja e vitit: 6 hapa me Facturino' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Softueri me i mire i kontabilitetit 2026 per Maqedoni' },
+      { slug: 'ifrs-izvesti-mk', title: 'Raportet SNRF/IFRS ne Maqedoni: kush duhet dhe si' },
     ],
     cta: {
       title: 'Transformoni zyrën tuaj të kontabilitetit',
@@ -404,6 +410,8 @@ const copy = {
       { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
       { slug: 'zosto-facturino', title: 'Makedon işletmelerin Facturino\'yu seçmesinin 10 nedeni' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Yıl sonu kapanışı: Facturino ile 6 adım' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Makedonya icin en iyi muhasebe yazilimi 2026' },
+      { slug: 'ifrs-izvesti-mk', title: 'Makedonya\'da UFRS/IFRS raporlari: kim zorunlu ve nasil' },
     ],
     cta: {
       title: 'Muhasebe büronuzu dönüştürün',
@@ -444,6 +452,11 @@ export default async function ZaSmetkovoditeliPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Дали Facturino е наменет за сметководители?', answer: 'Да, Facturino е изграден специјално за сметководствени бироа. Партнерската конзола овозможува управување со сите клиенти од едно место, увоз на банкарски изводи, е-Фактура подготвеност, автоматско годишно затворање и МПИН/ДДВ извештаи.' },
+        { question: 'Што е партнерската програма на Facturino?', answer: 'Партнерската програма нуди 20% месечна провизија (22% за годишни претплати) од секоја претплата на вашите клиенти. Членството е бесплатно, без минимум клиенти, со посветен тим за поддршка и бесплатна обука.' },
+        { question: 'Дали Facturino е бесплатен за сметководители?', answer: 'Партнерите добиваат бесплатен пристап до партнерската конзола. Клиентите плаќаат претплата според избраниот план, а вие заработувате 20% провизија од секоја претплата — пасивен приход кој расте со секој нов клиент.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -114,6 +114,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Cash Flow: Зошто е позначаен од профитот' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Сметководство за почетници: Основи што секој бизнис ги знае' },
       { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Буџетирање за мали фирми: Контролирај ги трошоците' },
+      { slug: 'nabavki-i-narachki', title: 'Дигитални нарачки за набавка' },
     ],
     cta: {
       title: 'Преземете ја контролата врз вашите расходи',
@@ -205,6 +207,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Cash Flow: Why It Matters More Than Profit' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Accounting for Beginners: Basics Every Business Should Know' },
       { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Budgeting for Small Businesses: Control Your Costs' },
+      { slug: 'nabavki-i-narachki', title: 'Digital Purchase Orders' },
     ],
     cta: {
       title: 'Take control of your expenses',
@@ -296,6 +300,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Cash Flow: Pse është më i rëndësishëm se fitimi' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Kontabiliteti për fillestarë: Bazat që çdo biznes i njeh' },
       { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Buxhetimi për biznese të vogla: Kontrollo shpenzimet' },
+      { slug: 'nabavki-i-narachki', title: 'Porositë dixhitale te blerjes' },
     ],
     cta: {
       title: 'Merrni kontrollin e shpenzimeve tuaja',
@@ -387,6 +393,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Nakit akışı: Neden kârdan daha önemli' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Yeni başlayanlar için muhasebe: Her işletmenin bilmesi gerekenler' },
       { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Küçük işletmeler için bütçeleme: Masrafları kontrol edin' },
+      { slug: 'nabavki-i-narachki', title: 'Dijital satın alma siparişleri' },
     ],
     cta: {
       title: 'Giderlerinizin kontrolünü elinize alın',
@@ -430,6 +438,11 @@ export default async function UpravuvanjeSoRashodiPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Како да ги контролирам деловните трошоци?', answer: 'Категоризирајте ги сите расходи (закупнина, плати, маркетинг), чувајте ги сите фактури дигитално, одвојте ги личните од деловните трошоци, следете ги расходите во реално време и правете месечен преглед. Со Facturino добивате автоматска категоризација и извештаи.' },
+        { question: 'Зошто е важна категоризацијата на расходите?', answer: 'Категоризацијата ви помага да видите точно каде одат парите и каде може да заштедите. Со конзистентни категории секој месец можете да ги споредувате трендовите и да идентификувате области на прекумерно трошење.' },
+        { question: 'Какви извештаи за расходи нуди Facturino?', answer: 'Facturino генерира извештаи за расходи по категорија, период и проект. Вклучува автоматска категоризација по македонски контен план, OCR скенирање на фактури, пресметка на одбитливи расходи за даночен биланс и мобилен пристап за следење од секаде.' },
+      ])) }} />
       {/* ============================================================ */}
       {/*  ARTICLE HEADER                                              */}
       {/* ============================================================ */}

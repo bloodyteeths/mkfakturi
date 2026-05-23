@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -145,6 +145,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'МПИН образец: Водич за месечна пресметка' },
       { slug: 'trudovo-pravo-osnovi', title: 'Трудово право: 10 работи што секој работодавач мора да ги знае' },
       { slug: 'personalen-danok-na-dohod', title: 'Персонален данок на доход во Македонија' },
+      { slug: 'bruto-neto-kalkulator-2026', title: 'Бруто нето калкулатор 2026' },
+      { slug: 'rok-za-plata-makedonija', title: 'Рок за исплата на плата во Македонија' },
     ],
     cta: {
       title: 'Автоматизирајте ги платите со Facturino',
@@ -267,6 +269,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'MPIN Form: Monthly Payroll Filing Guide' },
       { slug: 'trudovo-pravo-osnovi', title: 'Labor Law: 10 Things Every Employer Must Know' },
       { slug: 'personalen-danok-na-dohod', title: 'Personal Income Tax in Macedonia' },
+      { slug: 'bruto-neto-kalkulator-2026', title: 'Gross to Net Salary Calculator 2026' },
+      { slug: 'rok-za-plata-makedonija', title: 'Salary Payment Deadline in Macedonia' },
     ],
     cta: {
       title: 'Automate payroll with Facturino',
@@ -389,6 +393,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'Formulari MPIN: Udhëzues për llogaritjen mujore' },
       { slug: 'trudovo-pravo-osnovi', title: "E drejta e punës: 10 gjëra që çdo punëdhënës duhet t'i dijë" },
       { slug: 'personalen-danok-na-dohod', title: 'Tatimi personal mbi të ardhurat në Maqedoni' },
+      { slug: 'bruto-neto-kalkulator-2026', title: 'Llogaritësi bruto neto 2026' },
+      { slug: 'rok-za-plata-makedonija', title: 'Afati i pagesës së pagës në Maqedoni' },
     ],
     cta: {
       title: 'Automatizoni pagat me Facturino',
@@ -511,6 +517,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'MPIN formu: Aylık hesaplama rehberi' },
       { slug: 'trudovo-pravo-osnovi', title: 'İş hukuku: Her işverenin bilmesi gereken 10 şey' },
       { slug: 'personalen-danok-na-dohod', title: "Makedonya'da kişisel gelir vergisi" },
+      { slug: 'bruto-neto-kalkulator-2026', title: 'Brüt net maaş hesaplayıcı 2026' },
+      { slug: 'rok-za-plata-makedonija', title: 'Makedonya\'da maaş ödeme tarihi' },
     ],
     cta: {
       title: 'Facturino ile bordroyu otomatikleştirin',
@@ -554,6 +562,11 @@ export default async function PresmetkaNaPlataMkPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Како се пресметува нето платата во Македонија?', answer: 'Нето платата се добива со одземање на придонесите (пензиско 18,8%, здравствено 7,5%, вработување 1,2% = вкупно 27,5%) и данокот на личен доход (10% на основицата) од бруто платата. Пример: од 40.000 МКД бруто, нето платата е 26.100 МКД.' },
+        { question: 'Колку се придонесите од плата во Македонија 2026?', answer: 'Вкупните социјални придонеси изнесуваат 27,5% од бруто платата: пензиско и инвалидско осигурување 18,8%, здравствено осигурување 7,5% и придонес за вработување 1,2%. Сите придонеси се одземаат од бруто платата на вработениот.' },
+        { question: 'Колку е минималната плата во Македонија за 2026?', answer: 'Минималната нето плата за 2026 година изнесува приближно 20.175 МКД (околу 328 EUR). Секој работодавач е должен да исплати најмалку минимална плата за полно работно време од 40 часа неделно.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

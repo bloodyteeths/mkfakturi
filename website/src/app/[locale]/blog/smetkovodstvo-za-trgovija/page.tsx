@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -141,6 +141,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'POS софтвер за Македонија: Споредба' },
       { slug: 'ddv-vodich-mk', title: 'ДДВ водич за Македонија' },
       { slug: 'nabavki-i-narachki', title: 'Набавки и нарачки: Водич' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Најдобар POS софтвер 2026' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Фискален печатач: Chrome интеграција' },
     ],
     bottomCta: {
       title: 'Залихи, маржа и фискален печатач — сè во Facturino.',
@@ -263,6 +265,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'POS Software for North Macedonia: Comparison' },
       { slug: 'ddv-vodich-mk', title: 'VAT Guide for North Macedonia' },
       { slug: 'nabavki-i-narachki', title: 'Procurement and Orders: Guide' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Best POS Software 2026' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Fiscal Printer: Chrome Integration' },
     ],
     bottomCta: {
       title: 'Inventory, margins & fiscal printer — all in Facturino.',
@@ -385,6 +389,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Softuer POS per Maqedonine: Krahasim' },
       { slug: 'ddv-vodich-mk', title: 'Udhezues TVSH per Maqedonine' },
       { slug: 'nabavki-i-narachki', title: 'Prokurime dhe porosi: Udhezues' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Softueri me i mire POS 2026' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Printeri fiskal: Integrimi Chrome' },
     ],
     bottomCta: {
       title: 'Stoqe, marzhe dhe printer fiskal — te gjitha ne Facturino.',
@@ -507,6 +513,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Makedonya POS Yazilimi: Karsilastirma' },
       { slug: 'ddv-vodich-mk', title: 'Makedonya KDV Rehberi' },
       { slug: 'nabavki-i-narachki', title: 'Tedarik ve Siparisler: Rehber' },
+      { slug: 'najdobar-pos-softver-2026', title: 'En Iyi POS Yazilimi 2026' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Fiskal Yazici: Chrome Entegrasyonu' },
     ],
     bottomCta: {
       title: 'Stok, marj ve fiskal yazici — hepsi Facturino\'da.',
@@ -546,6 +554,11 @@ export default async function SmetkovodstvoZaTrgovijaPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Дали треба фискален уред за трговија?', answer: 'Да, секој трговец кој продава на физички лица (B2C) е обврзан да користи фискален уред. Казните за работа без фискален уред се од 2.000 до 5.000 EUR за правно лице.' },
+        { question: 'Како да водам залиха во трговија?', answer: 'Најчесто се користат WAC (пондериран просечен трошок) и FIFO методи. WAC ја пресметува просечната цена по секоја набавка, додека FIFO ја продава најстарата залиха прва. Задолжителна е годишна физичка инвентура.' },
+        { question: 'Како се пресметува маржа во трговија?', answer: 'Маржа = (Продажна цена − Набавна цена) / Продажна цена × 100. Наценка = (Продажна цена − Набавна цена) / Набавна цена × 100. Важно: 40% маржа не е исто што и 40% наценка.' },
+      ])) }} />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6">

@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -141,6 +141,8 @@ const copy = {
       { slug: 'dooel-vodich-2026', title: 'ДООЕЛ во Македонија 2026: Даноци, обврски и годишна сметка' },
       { slug: 'ddv-registracija-prag-2026', title: 'ДДВ регистрација: Праг, постапка и рокови 2026' },
       { slug: 'mpin-registracija-2026', title: 'МПИН регистрација и поднесување 2026' },
+      { slug: 'drzavni-institucii-za-firmi', title: 'Државни институции: УЈП, ЦРСМ, Инспекторат' },
+      { slug: 'paket-za-nova-firma', title: 'Нова фирма: 15 работи во првите 30 дена' },
     ],
     bottomCta: {
       title: 'Отворивте фирма? Следен чекор — Facturino.',
@@ -263,6 +265,8 @@ const copy = {
       { slug: 'dooel-vodich-2026', title: 'Single-Member LLC (DOOEL) in North Macedonia 2026' },
       { slug: 'ddv-registracija-prag-2026', title: 'VAT Registration: Threshold, Process & Deadlines 2026' },
       { slug: 'mpin-registracija-2026', title: 'MPIN Registration & Filing 2026' },
+      { slug: 'drzavni-institucii-za-firmi', title: 'Government Agencies: UJP, CRMS, Inspectorate' },
+      { slug: 'paket-za-nova-firma', title: 'New Company: 15 Things in Your First 30 Days' },
     ],
     bottomCta: {
       title: 'Just registered your company? Next step — Facturino.',
@@ -385,6 +389,8 @@ const copy = {
       { slug: 'dooel-vodich-2026', title: 'SHPKNJP në Maqedoni 2026: Tatimet, detyrimet dhe llogaria vjetore' },
       { slug: 'ddv-registracija-prag-2026', title: 'Regjistrimi TVSH: Pragu, procesi dhe afatet 2026' },
       { slug: 'mpin-registracija-2026', title: 'Regjistrimi dhe dorëzimi MPIN 2026' },
+      { slug: 'drzavni-institucii-za-firmi', title: 'Institucionet shtetërore: UJP, QRMV, Inspektorati' },
+      { slug: 'paket-za-nova-firma', title: 'Kompani e re: 15 gjëra për 30 ditët e para' },
     ],
     bottomCta: {
       title: 'Hapët firmën? Hapi tjetër — Facturino.',
@@ -507,6 +513,8 @@ const copy = {
       { slug: 'dooel-vodich-2026', title: 'Kuzey Makedonya DOOEL 2026: Vergiler, Yükümlülükler ve Yıllık Hesaplar' },
       { slug: 'ddv-registracija-prag-2026', title: 'KDV Kaydı: Eşik, Süreç ve Tarihler 2026' },
       { slug: 'mpin-registracija-2026', title: 'MPIN Kaydı ve Dosyalama 2026' },
+      { slug: 'drzavni-institucii-za-firmi', title: 'Devlet Kurumları: UJP, CRMS, Müfettişlik' },
+      { slug: 'paket-za-nova-firma', title: 'Yeni Şirket: İlk 30 Günde Yapılacak 15 Şey' },
     ],
     bottomCta: {
       title: 'Firma mı kurdunuz? Sonraki adım — Facturino.',
@@ -546,6 +554,11 @@ export default async function RegistracijaFirmaPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Колку чини регистрација на фирма во Македонија?', answer: 'Регистрацијата во ЦРСМ чини 2.300 МКД електронски или 3.400 МКД физички. Со нотарска заверка и печат, вкупните трошоци се околу 5.000-8.000 МКД.' },
+        { question: 'ДООЕЛ или ДОО — која правна форма да изберам?', answer: 'ДООЕЛ е за 1 основач со 5.000 МКД капитал и ограничена одговорност. ДОО е за 2+ основачи. Ако сте сами, ДООЕЛ е најдобар избор за мали бизниси.' },
+        { question: 'Колку трае процесот на регистрација?', answer: 'Електронската регистрација во ЦРСМ се обработува за 4 часа, а физичката за 1-2 работни дена. Целата постапка (регистрација + банка + УЈП) трае 5-7 работни дена.' },
+      ])) }} />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6">

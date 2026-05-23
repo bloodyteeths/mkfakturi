@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -137,6 +137,8 @@ const copy = {
       { slug: 'godishna-smetka-2025', title: 'Годишна сметка 2025: Целосен водич' },
       { slug: 'drzavni-institucii-za-firmi', title: 'Државни институции за фирми во Македонија' },
       { slug: 'ifrs-izvesti-mk', title: 'МСФИ извештаи во Македонија' },
+      { slug: 'danok-na-dobivka', title: 'Данок на добивка: Водич' },
+      { slug: 'ddv-vodich-mk', title: 'ДДВ водич за Македонија' },
     ],
     cta: {
       title: 'НВО? Facturino ви помага со проектно следење.',
@@ -251,6 +253,8 @@ const copy = {
       { slug: 'godishna-smetka-2025', title: 'Annual Accounts 2025: Complete Filing Guide' },
       { slug: 'drzavni-institucii-za-firmi', title: 'Government Institutions for Businesses in Macedonia' },
       { slug: 'ifrs-izvesti-mk', title: 'IFRS Reporting in North Macedonia' },
+      { slug: 'danok-na-dobivka', title: 'Corporate Tax Guide' },
+      { slug: 'ddv-vodich-mk', title: 'VAT Guide for North Macedonia' },
     ],
     cta: {
       title: 'NGO? Facturino helps with project tracking.',
@@ -365,6 +369,8 @@ const copy = {
       { slug: 'godishna-smetka-2025', title: 'Llogaritë vjetore 2025: Udhëzues i plotë' },
       { slug: 'drzavni-institucii-za-firmi', title: 'Institucionet shtetërore për biznese në Maqedoni' },
       { slug: 'ifrs-izvesti-mk', title: 'Raportimi sipas SNRF në Maqedoni' },
+      { slug: 'danok-na-dobivka', title: 'Udhëzues për tatimin mbi fitimin' },
+      { slug: 'ddv-vodich-mk', title: 'Udhëzues TVSH për Maqedoninë' },
     ],
     cta: {
       title: 'OJQ? Facturino ju ndihmon me ndjekjen e projekteve.',
@@ -479,6 +485,8 @@ const copy = {
       { slug: 'godishna-smetka-2025', title: 'Yıllık Hesaplar 2025: Eksiksiz Dosyalama Rehberi' },
       { slug: 'drzavni-institucii-za-firmi', title: 'Makedonya\'da İşletmeler İçin Devlet Kurumları' },
       { slug: 'ifrs-izvesti-mk', title: 'Kuzey Makedonya\'da UFRS Raporlama' },
+      { slug: 'danok-na-dobivka', title: 'Kurumlar Vergisi Rehberi' },
+      { slug: 'ddv-vodich-mk', title: 'Makedonya KDV Rehberi' },
     ],
     cta: {
       title: 'STK mısınız? Facturino proje takibinde yardımcı olur.',
@@ -522,6 +530,11 @@ export default async function SmetkovodstvoZaNevladini({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Дали НВО плаќа данок на добивка?', answer: 'Грант-приходите НЕ се оданочуваат. Но ако НВО има приходи од комерцијална дејност (продажба на услуги, обуки, издавање) и тие надминат 1.000.000 МКД годишно, се плаќа 10% данок на добивка на тој дел. Обврски за плати и придонеси се исти како за профитни организации.' },
+        { question: 'Како се води сметководство за грантови?', answer: 'Секој грант мора да има посебен трошковен центар. Средствата се евидентираат по буџетски линии дефинирани во грант-договорот. Многу донатори бараат дедицирана банкарска сметка. Набавки над EUR 5.000 бараат минимум 3 понуди. Документацијата се чува 7 години.' },
+        { question: 'Кои годишни извештаи поднесува НВО?', answer: 'НВО мора да поднесе годишна сметка до ЦРСМ (исто како фирма), наративен и финансиски извештај до собранието на членови, и извештаи до донаторите по формат дефиниран во грант-договорот. Организации со статус на јавен интерес имаат дополнителни обврски за транспарентност.' },
+      ])) }} />
 
       {/* ============================================================ */}
       {/*  ARTICLE HEADER                                              */}

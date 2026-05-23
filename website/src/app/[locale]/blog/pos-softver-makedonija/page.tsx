@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -130,6 +130,8 @@ const copy = {
       { slug: 'fiskalen-pecatac-chrome', title: '\u041a\u0430\u043a\u043e \u0434\u0430 \u043f\u043e\u0432\u0440\u0437\u0435\u0442\u0435 \u0444\u0438\u0441\u043a\u0430\u043b\u0435\u043d \u043f\u0435\u0447\u0430\u0442\u0430\u0447 \u0432\u043e Chrome \u0431\u0435\u0437 \u0434\u0440\u0430\u0458\u0432\u0435\u0440\u0438' },
       { slug: 'vector-alternativa-pos', title: '\u041f\u0440\u0435\u043c\u0438\u043d \u043e\u0434 Vector \u043d\u0430 Facturino POS: \u0432\u043e\u0434\u0438\u0447 \u0447\u0435\u043a\u043e\u0440 \u043f\u043e \u0447\u0435\u043a\u043e\u0440' },
       { slug: 'sto-e-e-faktura', title: '\u0428\u0442\u043e \u0435 \u0435-\u0424\u0430\u043a\u0442\u0443\u0440\u0430 \u0438 \u0437\u043e\u0448\u0442\u043e \u0435 \u0437\u0430\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u043d\u0430 \u043e\u0434 2026?' },
+      { slug: 'najdobar-pos-softver-2026', title: '\u041d\u0430\u0458\u0434\u043e\u0431\u0430\u0440 POS \u0441\u043e\u0444\u0442\u0432\u0435\u0440 \u0437\u0430 \u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0438\u0458\u0430 2026' },
+      { slug: 'smetkovodstvo-za-trgovija', title: '\u0421\u043c\u0435\u0442\u043a\u043e\u0432\u043e\u0434\u0441\u0442\u0432\u043e \u0437\u0430 \u0442\u0440\u0433\u043e\u0432\u0438\u0458\u0430' },
     ],
     cta: {
       title: '\u041f\u0440\u043e\u0431\u0430\u0458\u0442\u0435 \u0433\u043e Facturino POS \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e',
@@ -239,6 +241,8 @@ const copy = {
       { slug: 'fiskalen-pecatac-chrome', title: 'How to connect a fiscal printer in Chrome without drivers' },
       { slug: 'vector-alternativa-pos', title: 'Switching from Vector to Facturino POS: step by step guide' },
       { slug: 'sto-e-e-faktura', title: 'What is e-Invoice and why is it mandatory from 2026?' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Best POS Software for North Macedonia 2026' },
+      { slug: 'smetkovodstvo-za-trgovija', title: 'Accounting for Retail' },
     ],
     cta: {
       title: 'Try Facturino POS for free',
@@ -267,6 +271,8 @@ const copy = {
       { slug: 'fiskalen-pecatac-chrome', title: 'Si te lidhni printer fiskal ne Chrome pa driver' },
       { slug: 'vector-alternativa-pos', title: 'Kalimi nga Vector ne Facturino POS: hap pas hapi' },
       { slug: 'sto-e-e-faktura', title: 'Cfare eshte e-Fatura dhe pse eshte e detyrueshme nga 2026?' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Softueri me i mire POS per Maqedonine 2026' },
+      { slug: 'smetkovodstvo-za-trgovija', title: 'Kontabiliteti per tregtine' },
     ],
     cta: { title: 'Provoni Facturino POS falas', desc: '30 shitje ne muaj, pa kartele krediti, pa kontrate.', button: 'Fillo falas' },
   },
@@ -291,6 +297,8 @@ const copy = {
       { slug: 'fiskalen-pecatac-chrome', title: 'Chrome\'da surucusuz fiskal yazici nasil baglanir' },
       { slug: 'vector-alternativa-pos', title: 'Vector\'den Facturino POS\'a gecis: adim adim rehber' },
       { slug: 'sto-e-e-faktura', title: 'e-Fatura nedir ve neden 2026\'dan itibaren zorunlu?' },
+      { slug: 'najdobar-pos-softver-2026', title: '2026 Makedonya En Iyi POS Yazilimi' },
+      { slug: 'smetkovodstvo-za-trgovija', title: 'Perakende icin muhasebe' },
     ],
     cta: { title: 'Facturino POS\'u ucretsiz deneyin', desc: 'Ayda 30 satis, kredi karti yok, sozlesme yok.', button: 'Ucretsiz basla' },
   },
@@ -327,6 +335,11 @@ export default async function PosSoftverMakedonija({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кој POS софтвер е најдобар за малопродажба во Македонија?', answer: 'За мали бизниси, Facturino POS е најдобар избор — бесплатен план, cloud, автоматско IFRS книжење, залиха и фискален печатач преку WebSerial. За големи компании со ERP буџет, PANTHEON е алтернатива.' },
+        { question: 'Дали е задолжителен фискален уред за малопродажба?', answer: 'Да, од 2019 фискалните уреди се задолжителни за сите B2C продажби во Македонија (Закон за фискализација). Facturino поддржува 9 одобрени фискални печатачи.' },
+        { question: 'Дали постои бесплатен POS за малопродажба?', answer: 'Да, Facturino POS нуди бесплатен план со до 30 продажби месечно. Работи во Chrome на било кој уред, без инсталација. Платените планови започнуваат од 12 EUR/месечно.' },
+      ])) }} />
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
           <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob" />

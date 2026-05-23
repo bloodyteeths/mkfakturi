@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -162,6 +162,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'МПИН образец: Водич за месечна пресметка' },
       { slug: 'rokovi-ujp-2026', title: 'Даночен календар 2026: Сите рокови за УЈП' },
       { slug: 'otvoranje-firma-mk', title: 'Како да отворите фирма во Македонија' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Регистрација на фирма: Чекор по чекор водич' },
+      { slug: 'kazni-ujp-2026', title: 'Казни од УЈП: Прекршоци и глоби 2026' },
     ],
     cta: {
       title: 'Сите институции, еден софтвер',
@@ -304,6 +306,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'MPIN Form: Monthly Payroll Filing Guide' },
       { slug: 'rokovi-ujp-2026', title: 'Tax Calendar 2026: All UJP Deadlines' },
       { slug: 'otvoranje-firma-mk', title: 'How to Open a Company in North Macedonia' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Company Registration: Step-by-Step Checklist' },
+      { slug: 'kazni-ujp-2026', title: 'UJP Penalties: Violations & Fines 2026' },
     ],
     cta: {
       title: 'All agencies, one software',
@@ -446,6 +450,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'Formulari MPIN: Udhëzues për llogaritjen mujore' },
       { slug: 'rokovi-ujp-2026', title: 'Kalendari tatimor 2026: Të gjitha afatet për UJP' },
       { slug: 'otvoranje-firma-mk', title: 'Si të hapni kompani në Maqedoninë e Veriut' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Regjistrimi i firmës: Udhëzues hap pas hapi' },
+      { slug: 'kazni-ujp-2026', title: 'Gjobat e UJP: Shkeljet dhe gjobat 2026' },
     ],
     cta: {
       title: 'Të gjitha institucionet, një softuer',
@@ -588,6 +594,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'MPIN Formu: Aylık Bordro Beyanname Rehberi' },
       { slug: 'rokovi-ujp-2026', title: 'Vergi Takvimi 2026: Tüm UJP Tarihleri' },
       { slug: 'otvoranje-firma-mk', title: 'Kuzey Makedonya\'da Şirket Nasıl Kurulur' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Firma Kaydı: Adım Adım Kontrol Listesi' },
+      { slug: 'kazni-ujp-2026', title: 'UJP Cezaları: İhlaller ve Para Cezaları 2026' },
     ],
     cta: {
       title: 'Tüm kurumlar, tek yazılım',
@@ -628,6 +636,11 @@ export default async function DrzavniInstituciiPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Што е ЦРСМ?', answer: 'ЦРСМ (Централен регистар на Република Северна Македонија) е институцијата каде се регистрираат сите правни лица, се запишуваат промени во сопственоста и се поднесуваат годишни сметки.' },
+        { question: 'Што е УЈП?', answer: 'УЈП (Управа за јавни приходи) е даночната администрација на Македонија. Управува со данок на добивка, ДДВ, персонален данок на доход и МПИН системот за плати и придонеси.' },
+        { question: 'Каде се регистрира МПИН?', answer: 'МПИН се регистрира електронски на порталот mpinform.ujp.gov.mk или лично во регионална канцеларија на УЈП. Потребен е МПИН-1 образец за регистрација на обврзник.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

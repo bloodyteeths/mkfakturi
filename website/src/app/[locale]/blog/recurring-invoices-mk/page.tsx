@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -90,6 +90,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура: Чекор-по-чекор водич' },
       { slug: 'cash-flow-mk', title: 'Cash Flow: Зошто е позначаен од профитот' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Зошто табели не се доволни' },
+      { slug: 'faktura-vs-proforma', title: 'Фактура vs профактура: Клучни разлики' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура' },
     ],
     cta: {
       title: 'Автоматизирајте го фактурирањето денес',
@@ -160,6 +162,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice: Step-by-Step Guide' },
       { slug: 'cash-flow-mk', title: 'Cash Flow: Why It Matters More Than Profit' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Why Spreadsheets Are Not Enough' },
+      { slug: 'faktura-vs-proforma', title: 'Invoice vs Proforma: Key Differences' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
     ],
     cta: {
       title: 'Automate your invoicing today',
@@ -230,6 +234,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni një faturë: Udhëzues hap pas hapi' },
       { slug: 'cash-flow-mk', title: 'Cash Flow: Pse është më i rëndësishëm se fitimi' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Pse tabelat nuk mjaftojnë' },
+      { slug: 'faktura-vs-proforma', title: 'Fatura vs profatura: Dallimet kryesore' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës' },
     ],
     cta: {
       title: 'Automatizoni faturimin sot',
@@ -300,6 +306,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Fatura nasıl oluşturulur: Adım adım rehber' },
       { slug: 'cash-flow-mk', title: 'Nakit akışı: Neden kârdan daha önemli' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Neden tablolar yetmez' },
+      { slug: 'faktura-vs-proforma', title: 'Fatura ve Proforma: Temel Farklar' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Makedonya\'da Zorunlu Fatura Unsurları' },
     ],
     cta: {
       title: 'Faturalandırmayı bugün otomatikleştirin',
@@ -340,6 +348,11 @@ export default async function RecurringInvoicesMkPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Што е повторувачка фактура?', answer: 'Повторувачка фактура е фактура која автоматски се генерира на одреден временски интервал — неделно, месечно, квартално или годишно.' },
+        { question: 'Кога да ја користам?', answer: 'Користете ја за претплати, месечни закупнини, ретејнер договори, SaaS лиценци и сите услуги со предвидливо повторувачко плаќање.' },
+        { question: 'Автоматско испраќање?', answer: 'Да, Facturino автоматски ги генерира и испраќа фактурите на поставениот интервал, вклучувајќи потсетници за неплатени фактури.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

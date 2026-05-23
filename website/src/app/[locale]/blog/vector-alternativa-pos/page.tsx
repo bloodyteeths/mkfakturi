@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -119,6 +119,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Најдобар POS софтвер за Македонија 2026' },
       { slug: 'fiskalen-pecatac-chrome', title: 'Како да поврзете фискален печатач во Chrome' },
       { slug: 'sto-e-e-faktura', title: 'Што е е-Фактура и зошто е задолжителна?' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Најдобар POS софтвер за Македонија 2026: споредба' },
+      { slug: 'smetkovodstvo-za-trgovija', title: 'Сметководство за трговија' },
     ],
     cta: {
       title: 'Преминете од Vector за 30 минути',
@@ -148,6 +150,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Best POS Software for Macedonia 2026' },
       { slug: 'fiskalen-pecatac-chrome', title: 'How to connect fiscal printer in Chrome' },
       { slug: 'sto-e-e-faktura', title: 'What is e-Invoice and why is it mandatory?' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Best POS Software for North Macedonia 2026: Comparison' },
+      { slug: 'smetkovodstvo-za-trgovija', title: 'Accounting for Retail' },
     ],
     cta: { title: 'Switch from Vector in 30 minutes', desc: 'Free, no technician, no item loss. Open Chrome and start.', button: 'Start free' },
   },
@@ -172,6 +176,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Softueri me i mire POS per Maqedoni 2026' },
       { slug: 'fiskalen-pecatac-chrome', title: 'Si te lidhni printer fiskal ne Chrome' },
       { slug: 'sto-e-e-faktura', title: 'Cfare eshte e-Fatura dhe pse eshte e detyrueshme?' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Softueri me i mire POS per Maqedonine 2026: Krahasim' },
+      { slug: 'smetkovodstvo-za-trgovija', title: 'Kontabiliteti per tregtine' },
     ],
     cta: { title: 'Kaloni nga Vector per 30 minuta', desc: 'Falas, pa teknik, pa humbje artikujsh.', button: 'Fillo falas' },
   },
@@ -196,6 +202,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Makedonya\'da en iyi POS yazilimi 2026' },
       { slug: 'fiskalen-pecatac-chrome', title: 'Chrome\'da fiskal yazici nasil baglanir' },
       { slug: 'sto-e-e-faktura', title: 'e-Fatura nedir ve neden zorunlu?' },
+      { slug: 'najdobar-pos-softver-2026', title: '2026 Makedonya En Iyi POS Yazilimi: Karsilastirma' },
+      { slug: 'smetkovodstvo-za-trgovija', title: 'Perakende icin muhasebe' },
     ],
     cta: { title: 'Vector\'den 30 dakikada gecin', desc: 'Ucretsiz, teknisyen yok, urun kaybi yok.', button: 'Ucretsiz basla' },
   },
@@ -232,6 +240,11 @@ export default async function VectorAlternativaPos({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Која е најдобра алтернатива за Vector POS?', answer: 'Facturino POS е модерна cloud алтернатива на Vector. Работи во Chrome на било кој уред, нуди автоматско IFRS книжење, залиха и фискален печатач без драјвери. Преминот трае 30 минути.' },
+        { question: 'Facturino vs Vector — кој е подобар?', answer: 'Facturino е подобар за бизниси кои сакаат cloud пристап, автоматско книжење, е-Фактура подготвеност и работа на таблет. Vector е подобар за корисници кои претпочитаат десктоп и офлајн работење.' },
+        { question: 'Дали Facturino POS е cloud базиран?', answer: 'Да, Facturino POS е 100% cloud базиран. Работи во Chrome на компјутер, таблет или телефон, без инсталација. Податоците се безбедно зачувани во облак со автоматски бекапи.' },
+      ])) }} />
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
           <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob" />

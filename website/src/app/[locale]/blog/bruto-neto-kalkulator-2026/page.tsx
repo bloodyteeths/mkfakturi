@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -124,6 +124,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата: Комплетен водич' },
       { slug: 'mpin-obrazec', title: 'МПИН образец: Водич за месечна пресметка' },
       { slug: 'personalen-danok-na-dohod', title: 'Персонален данок на доход во Македонија' },
+      { slug: 'trudovo-pravo-osnovi', title: 'Трудово право: 10 работи за работодавачи' },
+      { slug: 'mpin-registracija-2026', title: 'МПИН регистрација 2026' },
     ],
     cta: {
       title: 'Пресметајте ја платата веднаш',
@@ -225,6 +227,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Payroll Calculation: Complete Guide' },
       { slug: 'mpin-obrazec', title: 'MPIN Form: Monthly Payroll Filing Guide' },
       { slug: 'personalen-danok-na-dohod', title: 'Personal Income Tax in Macedonia' },
+      { slug: 'trudovo-pravo-osnovi', title: 'Labor Law: 10 Things Every Employer Must Know' },
+      { slug: 'mpin-registracija-2026', title: 'MPIN Registration 2026' },
     ],
     cta: {
       title: 'Calculate your salary now',
@@ -326,6 +330,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagave: Udhezues i plote' },
       { slug: 'mpin-obrazec', title: 'Formulari MPIN: Udhezues per llogaritjen mujore' },
       { slug: 'personalen-danok-na-dohod', title: 'Tatimi personal mbi te ardhurat ne Maqedoni' },
+      { slug: 'trudovo-pravo-osnovi', title: 'E drejta e punes: 10 gjera qe cdo punedhenes duhet t\'i dije' },
+      { slug: 'mpin-registracija-2026', title: 'Regjistrimi MPIN 2026' },
     ],
     cta: {
       title: 'Llogaritni pagen tuaj tani',
@@ -427,6 +433,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Maas hesaplama: Tam rehber' },
       { slug: 'mpin-obrazec', title: 'MPIN formu: Aylik hesaplama rehberi' },
       { slug: 'personalen-danok-na-dohod', title: 'Makedonya\'da kisisel gelir vergisi' },
+      { slug: 'trudovo-pravo-osnovi', title: 'Is hukuku: Her isverenin bilmesi gereken 10 sey' },
+      { slug: 'mpin-registracija-2026', title: 'MPIN kaydı 2026' },
     ],
     cta: {
       title: 'Maasinizi simdi hesaplayin',
@@ -470,6 +478,11 @@ export default async function BrutoNetoKalkulatorPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Колку е нето платата од 40.000 МКД бруто?', answer: 'Од 40.000 МКД бруто, нето платата изнесува 26.100 МКД. Одбитоците се: пензиско 7.520 МКД (18,8%), здравствено 3.000 МКД (7,5%), вработување 480 МКД (1,2%) и данок 2.900 МКД (10% на основицата).' },
+        { question: 'Колку се стапките на придонеси во Македонија за 2026?', answer: 'Вкупните придонеси изнесуваат 27,5% од бруто платата: пензиско осигурување 18,8%, здравствено осигурување 7,5% и придонес за вработување 1,2%. Дополнително, данокот на личен доход е 10% на основицата (бруто минус придонеси).' },
+        { question: 'Колку е личното ослободување од данок?', answer: 'Во Македонија нема класично лично ослободување. Данокот на личен доход од 10% се пресметува на даночната основица (бруто минус 27,5% придонеси). За вработени со минимална плата, целата пресметка е автоматски усогласена со законските минимуми.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

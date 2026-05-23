@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -168,6 +168,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата: Придонеси и даноци' },
       { slug: 'mpin-obrazec', title: 'МПИН образец: Водич за месечна пресметка' },
       { slug: 'trudovo-pravo-osnovi', title: 'Трудово право: 10 работи за секој работодавач' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Неисплатена плата: Како да пријавите до Инспекторат' },
+      { slug: 'kazni-ujp-2026', title: 'Казни од УЈП: Што ве чека ако задоцните' },
     ],
     cta: {
       title: 'Никогаш не задоцнете со плати',
@@ -313,6 +315,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Payroll Calculation: Contributions and Taxes' },
       { slug: 'mpin-obrazec', title: 'MPIN Form: Monthly Payroll Filing Guide' },
       { slug: 'trudovo-pravo-osnovi', title: 'Labor Law: 10 Things Every Employer Must Know' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Unpaid Wages: How to Report to Labor Inspectorate' },
+      { slug: 'kazni-ujp-2026', title: 'UJP Penalties: What Happens If You File Late' },
     ],
     cta: {
       title: 'Never miss a payroll deadline',
@@ -457,7 +461,9 @@ const copy = {
     related: [
       { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagës: Kontributet dhe tatimet' },
       { slug: 'mpin-obrazec', title: 'Formulari MPIN: Udhëzues për llogaritjen mujore' },
-      { slug: 'trudovo-pravo-osnovi', title: "E drejta e punës: 10 gjëra për çdo punëdhënës" },
+      { slug: 'trudovo-pravo-osnovi', title: 'E drejta e punës: 10 gjëra për çdo punëdhënës' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Paga e papaguar: Si të raportoni tek Inspektorati' },
+      { slug: 'kazni-ujp-2026', title: 'Gjobat e DAP: Çfarë ndodh nëse vononi' },
     ],
     cta: {
       title: 'Mos vononi kurrë me pagat',
@@ -603,6 +609,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Bordro Hesaplama: Katkılar ve Vergiler' },
       { slug: 'mpin-obrazec', title: 'MPIN Formu: Aylık Hesaplama Rehberi' },
       { slug: 'trudovo-pravo-osnovi', title: 'İş Hukuku: Her İşverenin Bilmesi Gereken 10 Şey' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Ödenmemiş Maaş: İş Müfettişliğine Nasıl Şikayet Edilir' },
+      { slug: 'kazni-ujp-2026', title: 'UJP Cezaları: Geç Beyan Ederseniz Ne Olur' },
     ],
     cta: {
       title: 'Bordro süresini asla kaçırmayın',
@@ -646,6 +654,11 @@ export default async function RokZaPlataMakedonijaPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кога мора да се исплати платата во Македонија?', answer: 'Според член 106 од Законот за работни односи, платата мора да се исплати најдоцна до 15-ти во наредниот месец за претходниот месец.' },
+        { question: 'Колку е минималната плата во Македонија 2026?', answer: 'Минималната бруто плата во 2026 изнесува 20.175 МКД месечно.' },
+        { question: 'Колку е додатокот за прекувремена работа?', answer: 'Прекувремената работа се плаќа со 40% додаток на основната плата, ноќна работа со 35% додаток.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

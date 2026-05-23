@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -157,6 +157,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'ДДВ водич за Македонија: Регистрација, стапки и обврски' },
       { slug: 'dooel-vodich-2026', title: 'Како да отворите ДООЕЛ во 2026: Чекор по чекор' },
       { slug: 'faktura-primer-mk', title: 'Пример за фактура: Задолжителни елементи во Македонија' },
+      { slug: 'ddv-registracija-prag-2026', title: 'ДДВ регистрација: Кога е задолжителна?' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Најдобар сметководствен софтвер 2026' },
     ],
     cta: {
       title: 'Фактурирајте професионално, од ден еден',
@@ -291,6 +293,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'VAT Guide for Macedonia: Registration, Rates and Obligations' },
       { slug: 'dooel-vodich-2026', title: 'How to Open a DOOEL in 2026: Step by Step' },
       { slug: 'faktura-primer-mk', title: 'Invoice Example: Mandatory Elements in Macedonia' },
+      { slug: 'ddv-registracija-prag-2026', title: 'VAT Registration: When Is It Mandatory?' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Best Accounting Software 2026' },
     ],
     cta: {
       title: 'Invoice professionally, from day one',
@@ -425,6 +429,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'Udhezues TVSH per Maqedonine: Regjistrimi, normat dhe detyrimet' },
       { slug: 'dooel-vodich-2026', title: 'Si te hapni DOOEL ne 2026: Hap pas hapi' },
       { slug: 'faktura-primer-mk', title: 'Shembull fature: Elementet e detyrueshme ne Maqedoni' },
+      { slug: 'ddv-registracija-prag-2026', title: 'Regjistrimi TVSH: Kur eshte i detyrueshem?' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Softueri me i mire i kontabilitetit 2026' },
     ],
     cta: {
       title: 'Faturoni profesionalisht, qe nga dita e pare',
@@ -559,6 +565,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'Makedonya KDV Rehberi: Kayit, Oranlar ve Yukumlulukler' },
       { slug: 'dooel-vodich-2026', title: '2026\'da DOOEL Nasil Acilir: Adim Adim' },
       { slug: 'faktura-primer-mk', title: 'Fatura Ornegi: Makedonya\'da Zorunlu Unsurlar' },
+      { slug: 'ddv-registracija-prag-2026', title: 'KDV Kaydi: Ne Zaman Zorunlu?' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'En Iyi Muhasebe Yazilimi 2026' },
     ],
     cta: {
       title: 'Ilk gunden profesyonel faturalayin',
@@ -602,6 +610,11 @@ export default async function SmetkovodstvoZaItFreelancerPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Дали ИТ услуги за странство подлежат на ДДВ?', answer: 'ИТ услуги за странски B2B клиенти се ослободени од ДДВ (0%) според Чл. 30 ЗДДВ — местото на прометот е каде примателот има седиште (reverse charge). Сепак, мора да се регистрирате за ДДВ ако годишниот промет надмине 2.000.000 МКД (~32.500 EUR).' },
+        { question: 'ДООЕЛ или паушалец за фрилансер?', answer: 'Паушалец е подобар за почетници со приход до 3.000.000 МКД годишно — фиксен месечен данок, без книговодство. ДООЕЛ (10% данок на добивка) е подобар за повисоки приходи или кога имате значајни трошоци (опрема, софтвер) кои го намалуваат данокот.' },
+        { question: 'Како се декларира приход од Upwork или Fiverr?', answer: 'Приходот од Upwork/Fiverr се конвертира во МКД по средниот курс на НБРСМ на денот на уплата. Се евидентира како приход од услуги. Провизијата на платформата (20%) е признат расход. PayPal/Wise трансферите создаваат курсни разлики кои се финансиски приход/расход.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

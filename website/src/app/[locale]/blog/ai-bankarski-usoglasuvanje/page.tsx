@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -105,6 +105,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Управување со парични текови во Македонија' },
       { slug: 'upravljanje-so-rashodi', title: 'Управување со расходи: целосен водич' },
       { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
+      { slug: 'ai-skener-dokumenti', title: 'AI скенирање на фактури: книжење за 10 секунди' },
+      { slug: 'za-smetkovoditeli', title: 'Зошто сметководителите преминуваат на Facturino' },
     ],
     cta: {
       title: 'Автоматизирајте го банкарското усогласување',
@@ -189,6 +191,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Cash Flow Management in Macedonia' },
       { slug: 'upravljanje-so-rashodi', title: 'Expense Management: Complete Guide' },
       { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
+      { slug: 'ai-skener-dokumenti', title: 'AI Invoice Scanner: Bookkeeping in 10 Seconds' },
+      { slug: 'za-smetkovoditeli', title: 'Why Accountants Are Switching to Facturino' },
     ],
     cta: {
       title: 'Automate Your Bank Reconciliation',
@@ -273,6 +277,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Menaxhimi i rrjedhes se parave ne Maqedoni' },
       { slug: 'upravljanje-so-rashodi', title: 'Menaxhimi i shpenzimeve: Udherrëfyes i plote' },
       { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
+      { slug: 'ai-skener-dokumenti', title: 'Skanimi AI i dokumenteve: kontabilizim në 10 sekonda' },
+      { slug: 'za-smetkovoditeli', title: 'Pse kontabilistët po kalojnë në Facturino' },
     ],
     cta: {
       title: 'Automatizoni rakordimin tuaj bankar',
@@ -357,6 +363,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Makedonya\'da Nakit Akisi Yonetimi' },
       { slug: 'upravljanje-so-rashodi', title: 'Gider Yonetimi: Eksiksiz Rehber' },
       { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs Geleneksel Muhasebe' },
+      { slug: 'ai-skener-dokumenti', title: 'AI belge tarayici: 10 saniyede muhasebe kaydi' },
+      { slug: 'za-smetkovoditeli', title: 'Muhasebeciler neden Facturino\'ya geciyor' },
     ],
     cta: {
       title: 'Banka Mutabakatinizi Otomatiklestirin',
@@ -397,6 +405,11 @@ export default async function AiBankarskiUsoglasuvanjePage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Како работи AI банковно порамнување?', answer: 'Facturino користи 4-слојна AI pipeline: правила за егзактно совпаѓање, детерминистичко совпаѓање по износ/датум, AI fuzzy matching за нејасни случаи и AI категоризација за нови трансакции. Стапката на автоматско усогласување е над 95%.' },
+        { question: 'Кои банки се поддржани?', answer: 'Facturino поддржува увоз на банковни изводи од сите 9 активни комерцијални банки во Македонија: НЛБ, Стопанска, Комерцијална, Халкбанк, Шпаркасе, ПроКредит, Силк Роуд, ТТК и Охридска Банка. Поддржани формати: CSV, MT940 и PDF.' },
+        { question: 'Дали AI автоматски книжи трансакции?', answer: 'Да, AI автоматски ги категоризира и предлага книжење за секоја трансакција. Вие ги прегледувате предлозите и потврдувате со еден клик. Системот учи од вашите претходни одлуки и со време станува попрецизен.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

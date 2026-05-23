@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -138,6 +138,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата во Македонија: Придонеси и даноци' },
       { slug: 'mpin-obrazec', title: 'МПИН образец: Водич за месечна пресметка' },
       { slug: 'personalen-danok-na-dohod', title: 'Персонален данок на доход во Македонија' },
+      { slug: 'rok-za-plata-makedonija', title: 'Рок за исплата на плата во Македонија' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Неисплатена плата: Како да пријавите' },
     ],
     cta: {
       title: 'Бидете усогласени со трудовото право',
@@ -256,6 +258,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Payroll Calculation in Macedonia: Contributions and Taxes' },
       { slug: 'mpin-obrazec', title: 'MPIN Form: Monthly Payroll Filing Guide' },
       { slug: 'personalen-danok-na-dohod', title: 'Personal Income Tax in Macedonia' },
+      { slug: 'rok-za-plata-makedonija', title: 'Salary Payment Deadline in Macedonia' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Unpaid Wages: How to Report' },
     ],
     cta: {
       title: 'Stay Compliant With Labor Law',
@@ -374,6 +378,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagës në Maqedoni: Kontributet dhe tatimet' },
       { slug: 'mpin-obrazec', title: 'Formulari MPIN: Udhëzues për llogaritjen mujore' },
       { slug: 'personalen-danok-na-dohod', title: 'Tatimi personal mbi të ardhurat në Maqedoni' },
+      { slug: 'rok-za-plata-makedonija', title: 'Afati i pagesës së pagës në Maqedoni' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Paga e papaguar: Si ta raportoni' },
     ],
     cta: {
       title: 'Qëndroni në përputhje me ligjin e punës',
@@ -492,6 +498,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: "Makedonya'da maaş hesaplama: Primler ve vergiler" },
       { slug: 'mpin-obrazec', title: 'MPIN formu: Aylık hesaplama rehberi' },
       { slug: 'personalen-danok-na-dohod', title: "Makedonya'da kişisel gelir vergisi" },
+      { slug: 'rok-za-plata-makedonija', title: 'Makedonya\'da maaş ödeme tarihi' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Ödenmemiş maaş: Nasıl bildirilir' },
     ],
     cta: {
       title: 'İş Hukukuyla Uyumlu Kalın',
@@ -532,6 +540,11 @@ export default async function TrudovoPravoOsnoviPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Колку работни часови неделно се дозволени во Македонија?', answer: 'Полното работно време во Македонија изнесува 40 часа неделно (8 часа дневно). Прекувремената работа е дозволена до максимум 8 часа неделно и 190 часа годишно, со задолжителен додаток од минимум 35% над основната плата.' },
+        { question: 'Колку денови годишен одмор има вработен во Македонија?', answer: 'Секој вработен има право на минимум 20 работни дена платен годишен одмор, со можност за зголемување до 26 дена врз основа на работен стаж. Најмалку 10 последователни дена мора да се искористат одеднаш. Неискористениот одмор се пренесува до 30 јуни следната година.' },
+        { question: 'Колку е отказниот рок во Македонија?', answer: 'Минималниот отказен рок е 1 месец и може да биде до 3 месеци во зависност од работниот стаж. За време на пробниот период (до 6 месеци), отказниот рок е 7 дена. При отказ, вработениот има право на отпремнина од минимум 1 нето плата за секои 2 години стаж.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -133,6 +133,8 @@ const copy = {
       { slug: 'trudovo-pravo-osnovi', title: 'Трудово право: 10 работи што секој работодавач мора да ги знае' },
       { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата во Македонија: Придонеси и даноци' },
       { slug: 'mpin-obrazec', title: 'МПИН образец: Водич за месечна пресметка' },
+      { slug: 'rok-za-plata-makedonija', title: 'Рок за исплата на плата: Што вели законот' },
+      { slug: 'mpin-registracija-2026', title: 'МПИН регистрација и поднесување 2026: Комплетен водич' },
     ],
     cta: {
       title: 'Платите навреме, без стрес',
@@ -243,6 +245,8 @@ const copy = {
       { slug: 'trudovo-pravo-osnovi', title: 'Labor Law: 10 Things Every Employer Must Know' },
       { slug: 'presmetka-na-plata-mk', title: 'Payroll Calculation in Macedonia: Contributions and Taxes' },
       { slug: 'mpin-obrazec', title: 'MPIN Form: Monthly Payroll Filing Guide' },
+      { slug: 'rok-za-plata-makedonija', title: 'Salary Payment Deadline: What the Law Says' },
+      { slug: 'mpin-registracija-2026', title: 'MPIN Registration & Filing 2026: Complete Guide' },
     ],
     cta: {
       title: 'Pay salaries on time, stress-free',
@@ -353,6 +357,8 @@ const copy = {
       { slug: 'trudovo-pravo-osnovi', title: "E drejta e punës: 10 gjëra që çdo punëdhënës duhet t'i dijë" },
       { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagës në Maqedoni: Kontributet dhe tatimet' },
       { slug: 'mpin-obrazec', title: 'Formulari MPIN: Udhëzues për llogaritjen mujore' },
+      { slug: 'rok-za-plata-makedonija', title: 'Afati i pagesës së pagës: Çfarë thotë ligji' },
+      { slug: 'mpin-registracija-2026', title: 'Regjistrimi dhe dorëzimi MPIN 2026: Udhëzues i plotë' },
     ],
     cta: {
       title: 'Paguani pagat në kohë, pa stres',
@@ -463,6 +469,8 @@ const copy = {
       { slug: 'trudovo-pravo-osnovi', title: 'İş hukuku: Her işverenin bilmesi gereken 10 şey' },
       { slug: 'presmetka-na-plata-mk', title: "Makedonya'da bordro hesaplama: Katkılar ve vergiler" },
       { slug: 'mpin-obrazec', title: 'MPIN formu: Aylık hesaplama rehberi' },
+      { slug: 'rok-za-plata-makedonija', title: 'Maaş Ödeme Süresi: Kanun Ne Diyor' },
+      { slug: 'mpin-registracija-2026', title: 'MPIN Kaydı ve Dosyalama 2026: Eksiksiz Rehber' },
     ],
     cta: {
       title: 'Maaşları zamanında, stressiz ödeyin',
@@ -506,6 +514,11 @@ export default async function NeisplatenaPlataPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Каде да пријавам неисплатена плата?', answer: 'Пријавата се поднесува до Државниот инспекторат за труд — онлајн на dit.gov.mk, по е-пошта или лично во регионалната канцеларија. Постапката е бесплатна.' },
+        { question: 'Кој е рокот за пријава на неисплатена плата?', answer: 'Пред пријава, испратете писмено барање до работодавачот со рок од 8 дена. Потоа може веднаш да пријавите до Инспекторатот. Рокот за тужба е 3 години.' },
+        { question: 'Која е казната за работодавач кој не исплатува плата?', answer: 'Глоба од EUR 2.000-5.000 за правно лице и EUR 500-1.000 за одговорното лице. При систематско неисплаќање — кривична одговорност по чл. 353 од Кривичниот законик.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

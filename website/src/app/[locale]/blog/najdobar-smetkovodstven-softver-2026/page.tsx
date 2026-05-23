@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -138,6 +138,8 @@ const copy = {
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Зошто табели не се доволни' },
       { slug: 'e-faktura-obvrska-2026', title: 'е-Фактура обврска 2026: Што треба да знаете' },
       { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Што е подобро за мали фирми?' },
+      { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
     ],
     cta: {
       title: 'Пробајте го Facturino бесплатно',
@@ -256,6 +258,8 @@ const copy = {
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Why Spreadsheets Aren\'t Enough' },
       { slug: 'e-faktura-obvrska-2026', title: 'e-Invoice Obligation 2026: What You Need to Know' },
       { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Which Is Better for Small Businesses?' },
+      { slug: 'zosto-facturino', title: '10 Reasons Why Macedonian Businesses Choose Facturino' },
     ],
     cta: {
       title: 'Try Facturino Free',
@@ -374,6 +378,8 @@ const copy = {
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Pse tabelat nuk mjaftojne' },
       { slug: 'e-faktura-obvrska-2026', title: 'Detyrimi per e-Fature 2026: Çfare duhet te dini' },
       { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Cili eshte me i mire per bizneset e vogla?' },
+      { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
     ],
     cta: {
       title: 'Provoni Facturino falas',
@@ -492,6 +498,8 @@ const copy = {
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Neden tablolar yeterli degil' },
       { slug: 'e-faktura-obvrska-2026', title: 'e-Fatura Zorunlulugu 2026: Bilmeniz Gerekenler' },
       { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Kucuk Isletmeler Icin Hangisi Daha Iyi?' },
+      { slug: 'zosto-facturino', title: 'Makedon isletmelerin Facturino\'yu tercih etmesinin 10 nedeni' },
     ],
     cta: {
       title: 'Facturino\'yu Ucretsiz Deneyin',
@@ -532,6 +540,11 @@ export default async function NajdobarSmetkovodstvenSoftverPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кој е најдобар сметководствен софтвер во Македонија?', answer: 'Зависи од потребите. За мали бизниси и фрилансери, Facturino е оптимален — облак, бесплатен план, е-Фактура. За големи производствени компании, PANTHEON нуди подлабок ERP.' },
+        { question: 'PANTHEON или Facturino — кој да го изберам?', answer: 'Изберете PANTHEON ако имате 50+ вработени, производство и буџет за 500+ EUR/годишно. Изберете Facturino ако сте мал бизнис, сакате облак пристап и бесплатен почеток.' },
+        { question: 'Дали има бесплатен сметководствен софтвер во Македонија?', answer: 'Да, Facturino нуди бесплатен план со до 3 фактури месечно. Идеален за нови бизниси и фрилансери. Платените планови започнуваат од 12 EUR/месечно.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

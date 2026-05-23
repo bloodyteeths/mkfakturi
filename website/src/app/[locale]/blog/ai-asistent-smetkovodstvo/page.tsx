@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -94,6 +94,8 @@ const copy = {
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Сметководство за почетници: Од каде да почнете' },
       { slug: 'ddv-vodich-mk', title: 'ДДВ водич за македонски бизниси' },
       { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
+      { slug: 'ai-skener-dokumenti', title: 'AI скенирање на фактури: книжење за 10 секунди' },
+      { slug: 'ai-bankarski-usoglasuvanje', title: 'AI банкарско усогласување: од 3 часа на 3 минути' },
     ],
     cta: {
       title: 'Прашајте го AI — одговорот е на 30 секунди',
@@ -168,6 +170,8 @@ const copy = {
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Accounting for Beginners: Where to Start' },
       { slug: 'ddv-vodich-mk', title: 'VAT Guide for Macedonian Businesses' },
       { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
+      { slug: 'ai-skener-dokumenti', title: 'AI Invoice Scanner: Bookkeeping in 10 Seconds' },
+      { slug: 'ai-bankarski-usoglasuvanje', title: 'AI Bank Reconciliation: From 3 Hours to 3 Minutes' },
     ],
     cta: {
       title: 'Ask AI — The Answer Is 30 Seconds Away',
@@ -242,6 +246,8 @@ const copy = {
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Kontabiliteti për fillestarë: Ku të filloni' },
       { slug: 'ddv-vodich-mk', title: 'Udhëzues TVSH për bizneset maqedonase' },
       { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
+      { slug: 'ai-skener-dokumenti', title: 'Skanimi AI i dokumenteve: kontabilizim në 10 sekonda' },
+      { slug: 'ai-bankarski-usoglasuvanje', title: 'Rakordimi bankar me AI: nga 3 orë në 3 minuta' },
     ],
     cta: {
       title: 'Pyetni AI — Përgjigja është 30 sekonda larg',
@@ -316,6 +322,8 @@ const copy = {
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Yeni başlayanlar için muhasebe: Nereden başlamalı' },
       { slug: 'ddv-vodich-mk', title: 'Makedon işletmeler için KDV rehberi' },
       { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
+      { slug: 'ai-skener-dokumenti', title: 'AI belge tarayici: 10 saniyede muhasebe kaydi' },
+      { slug: 'ai-bankarski-usoglasuvanje', title: 'AI banka mutabakati: 3 saatten 3 dakikaya' },
     ],
     cta: {
       title: 'AI\'ya sorun — Yanıt 30 saniye uzakta',
@@ -356,6 +364,11 @@ export default async function AiAsistentSmetkovodstvoPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Што е AI асистент за сметководство?', answer: 'AI асистентот на Facturino е вграден чет-бот кој одговара на финансиски прашања на обичен македонски јазик. Можете да прашате кој ви должи, дали сте профитабилни, колку ДДВ имате, и дури да креирате фактури со текстуална команда.' },
+        { question: 'Дали е точен AI асистентот?', answer: 'AI асистентот ги пребарува вашите реални финансиски податоци — фактури, трошоци, клиенти, плаќања — и ги анализира за да даде точен одговор. За креирање документи, AI прави нацрт (AiDraft) кој вие го прегледувате и потврдувате пред да стане реален документ.' },
+        { question: 'Колку чини AI асистентот?', answer: 'AI асистентот е вклучен во Standard планот (€39/месечно) и погоре. Можете да го тестирате бесплатно со 14-дневен пробен период на Standard планот, без обврзување и без кредитна картичка.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

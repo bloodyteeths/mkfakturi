@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -140,6 +140,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'ДДВ водич за Македонија' },
       { slug: 'danok-na-dobivka', title: 'Данок на добивка: Водич' },
       { slug: 'upravljanje-so-rashodi', title: 'Управување со расходи' },
+      { slug: 'paushalen-danochnik', title: 'Паушален даночник: Водич за почетници' },
+      { slug: 'godishna-smetka-2025', title: 'Годишна сметка 2025: Целосен водич' },
     ],
     bottomCta: {
       title: 'Сметководство за фарма? Facturino е бесплатен.',
@@ -261,6 +263,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'VAT Guide for North Macedonia' },
       { slug: 'danok-na-dobivka', title: 'Corporate Tax Guide' },
       { slug: 'upravljanje-so-rashodi', title: 'Expense Management Guide' },
+      { slug: 'paushalen-danochnik', title: 'Flat-Rate Taxpayer: Beginner\'s Guide' },
+      { slug: 'godishna-smetka-2025', title: 'Annual Accounts 2025: Complete Guide' },
     ],
     bottomCta: {
       title: 'Farm accounting? Facturino is free.',
@@ -382,6 +386,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'Udhëzues TVSH për Maqedoninë' },
       { slug: 'danok-na-dobivka', title: 'Udhëzues për tatimin mbi fitimin' },
       { slug: 'upravljanje-so-rashodi', title: 'Menaxhimi i shpenzimeve' },
+      { slug: 'paushalen-danochnik', title: 'Tatimpaguesi i sheshtë: Udhëzues për fillestarë' },
+      { slug: 'godishna-smetka-2025', title: 'Llogaritë vjetore 2025: Udhëzues i plotë' },
     ],
     bottomCta: {
       title: 'Kontabilitet për fermë? Facturino është falas.',
@@ -503,6 +509,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'Makedonya KDV Rehberi' },
       { slug: 'danok-na-dobivka', title: 'Kurumlar Vergisi Rehberi' },
       { slug: 'upravljanje-so-rashodi', title: 'Gider Yönetimi Rehberi' },
+      { slug: 'paushalen-danochnik', title: 'Götürü Vergi Mükellefi: Başlangıç Rehberi' },
+      { slug: 'godishna-smetka-2025', title: 'Yıllık Hesaplar 2025: Eksiksiz Rehber' },
     ],
     bottomCta: {
       title: 'Çiftlik muhasebesi? Facturino ücretsiz.',
@@ -542,6 +550,11 @@ export default async function SmetkovodstvoZaZemjodelstvoPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Дали земјоделски производи имаат намален ДДВ?', answer: 'Да. Свежи земјоделски производи (овошје, зеленчук, житарици, млеко, јајца, мед) продадени директно од примарен производител се оданочуваат со 5% ДДВ. Преработени производи (сирење, сокови, конзерви) се 18%, дури и од истиот земјоделец. Мора да сте во Регистарот на земјоделски стопанства при МЗШВ.' },
+        { question: 'Како се книжат ИПАРД грантови?', answer: 'ИПАРД грантот се признава како приход пропорционално со амортизацијата на средството — ако опрема чини EUR 100.000 и се амортизира 10 години, годишно се признава EUR 10.000 грант-приход. Секој проект мора да има посебен трошковен центар. Опремата мора да се задржи минимум 5 години.' },
+        { question: 'Дали субвенциите од државата се оданочиви?', answer: 'Субвенциите за земјоделство од МЗШВ (за гориво, семе, ѓубрива, осигурување) се приход и влегуваат во данок на добивка (10%). Се признаваат кога ќе се исполнат условите за добивање. ИПАРД грантовите имаат посебен третман — се признаваат пропорционално со амортизацијата.' },
+      ])) }} />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6">

@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -141,6 +141,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'POS софтвер за Македонија: Споредба' },
       { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата во Македонија' },
       { slug: 'ddv-registracija-prag-2026', title: 'ДДВ регистрација: Кога е задолжителна?' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Најдобар POS софтвер 2026' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Фискален печатач: Поврзување и употреба' },
     ],
     bottomCta: {
       title: 'POS за салон? Facturino е бесплатен.',
@@ -263,6 +265,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'POS Software for North Macedonia: Comparison' },
       { slug: 'presmetka-na-plata-mk', title: 'Salary Calculation in North Macedonia' },
       { slug: 'ddv-registracija-prag-2026', title: 'VAT Registration: When Is It Mandatory?' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Best POS Software 2026' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Fiscal Printer: Setup and Usage' },
     ],
     bottomCta: {
       title: 'POS for your salon? Facturino is free.',
@@ -385,6 +389,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Softuer POS per Maqedonine: Krahasim' },
       { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pages ne Maqedoni' },
       { slug: 'ddv-registracija-prag-2026', title: 'Regjistrimi TVSH: Kur eshte i detyrueshem?' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Softueri me i mire POS 2026' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Printeri fiskal: Lidhja dhe perdorimi' },
     ],
     bottomCta: {
       title: 'POS per sallonin tuaj? Facturino eshte falas.',
@@ -507,6 +513,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Makedonya POS Yazilimi: Karsilastirma' },
       { slug: 'presmetka-na-plata-mk', title: 'Makedonya\'da Maas Hesaplama' },
       { slug: 'ddv-registracija-prag-2026', title: 'KDV Kaydi: Ne Zaman Zorunlu?' },
+      { slug: 'najdobar-pos-softver-2026', title: 'En Iyi POS Yazilimi 2026' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Fiskal Yazici: Kurulum ve Kullanim' },
     ],
     bottomCta: {
       title: 'Salonunuz icin POS? Facturino ucretsiz.',
@@ -546,6 +554,11 @@ export default async function SmetkovodstvoZaSaloniPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Дали салон за убавина плаќа ДДВ?', answer: 'Ако годишниот промет надмине 2.000.000 МКД (~32.500 EUR), задолжителна е ДДВ регистрација. И услугите (шишање, маникир) и производите (шампон, крема) се оданочуваат со 18%. Ако сте паушалец под прагот — нема ДДВ обврска, но мора да издавате фискална сметка.' },
+        { question: 'Како функционираат провизии за вработени во салон?', answer: 'Најчест модел е фиксна плата + провизија (10-30% од остварен промет). Целата провизија е дел од бруто платата — придонеси 28% и ПДД 10% се пресметуваат на целиот износ. Минимална бруто плата 2026 е 20.175 МКД — не можете да платите помалку.' },
+        { question: 'Дали фризерски салон треба фискален уред?', answer: 'Да, секој салон кој продава услуги или производи на физички лица (B2C) е обврзан да користи фискален уред и да издава фискални сметки. Казните за работа без фискален уред се од 2.000 до 5.000 EUR за правно лице. Фискалниот уред мора да биде поврзан со УЈП.' },
+      ])) }} />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6">

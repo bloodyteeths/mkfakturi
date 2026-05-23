@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -94,6 +94,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура: Чекор-по-чекор водич' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура во Македонија' },
       { slug: 'ddv-vodich-mk', title: 'ДДВ во Македонија: Целосен водич за 2026' },
+      { slug: 'e-faktura-obvrska-2026', title: 'Е-фактура 2026: Кој мора, кога почнува и како да се подготвите' },
+      { slug: 'najdobar-e-faktura-softver', title: 'Најдобар софтвер за е-Фактура 2026' },
     ],
     cta: {
       title: 'Преминете на е-фактура со Facturino',
@@ -165,6 +167,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice: Step-by-Step Guide' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
       { slug: 'ddv-vodich-mk', title: 'VAT in Macedonia: Complete Guide for 2026' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Invoice Mandate 2026: Who Must Comply & How to Prepare' },
+      { slug: 'najdobar-e-faktura-softver', title: 'Best E-Invoice Software 2026' },
     ],
     cta: {
       title: 'Switch to e-invoicing with Facturino',
@@ -236,6 +240,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni një faturë: Udhëzues hap pas hapi' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës në Maqedoni' },
       { slug: 'ddv-vodich-mk', title: 'TVSH në Maqedoni: Udhëzues i plotë për 2026' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-fatura 2026: Kush duhet, kur fillon dhe si të përgatiteni' },
+      { slug: 'najdobar-e-faktura-softver', title: 'Softueri më i mirë për e-Faturë 2026' },
     ],
     cta: {
       title: 'Kaloni në e-faturim me Facturino',
@@ -307,6 +313,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Fatura nasıl oluşturulur: Adım adım rehber' },
       { slug: 'zadolzitelni-elementi-faktura', title: "Makedonya'da faturanın zorunlu unsurları" },
       { slug: 'ddv-vodich-mk', title: "Makedonya'da KDV: 2026 için eksiksiz rehber" },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Fatura Zorunluluğu 2026: Kim Uymalı ve Nasıl Hazırlanmalı' },
+      { slug: 'najdobar-e-faktura-softver', title: 'En İyi e-Fatura Yazılımı 2026' },
     ],
     cta: {
       title: 'Facturino ile e-faturaya geçin',
@@ -350,6 +358,11 @@ export default async function StoEEFakturaPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Што е е-Фактура?', answer: 'Е-фактура е фактура во структуриран дигитален формат (UBL 2.1 XML) со машински читливи податоци, потпишана со квалификуван електронски потпис (QES).' },
+        { question: 'Дали е задолжителна?', answer: 'Да, е-фактурата е задолжителна за B2G трансакции од октомври 2026, а за B2B фазно од 2027.' },
+        { question: 'Како да почнам?', answer: 'Регистрирајте се на efaktura.ujp.gov.mk, набавете QES сертификат и користете софтвер како Facturino кој поддржува UBL 2.1.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         {/* Background blobs */}

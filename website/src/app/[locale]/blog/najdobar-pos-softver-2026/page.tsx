@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -129,6 +129,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'POS софтвер за малопродажба во Македонија 2026' },
       { slug: 'vector-alternativa-pos', title: 'Премин од Vector на Facturino POS' },
       { slug: 'smetkovodstvo-za-restorani', title: 'Сметководство за ресторани' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Како да поврзете фискален печатач во Chrome без драјвери' },
+      { slug: 'sto-e-e-faktura', title: 'Што е е-Фактура и зошто е задолжителна?' },
     ],
     cta: {
       title: 'Пробајте Facturino POS бесплатно',
@@ -238,6 +240,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'POS Software for Retail in Macedonia 2026' },
       { slug: 'vector-alternativa-pos', title: 'Switching from Vector to Facturino POS' },
       { slug: 'smetkovodstvo-za-restorani', title: 'Accounting for Restaurants' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'How to Connect a Fiscal Printer in Chrome Without Drivers' },
+      { slug: 'sto-e-e-faktura', title: 'What Is e-Invoice and Why Is It Mandatory?' },
     ],
     cta: {
       title: 'Try Facturino POS free',
@@ -347,6 +351,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Softuer POS per shitje me pakice ne Maqedoni 2026' },
       { slug: 'vector-alternativa-pos', title: 'Kalimi nga Vector ne Facturino POS' },
       { slug: 'smetkovodstvo-za-restorani', title: 'Kontabiliteti per restorante' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Si te lidhni printer fiskal ne Chrome pa driver' },
+      { slug: 'sto-e-e-faktura', title: 'Cfare eshte e-Fatura dhe pse eshte e detyrueshme?' },
     ],
     cta: {
       title: 'Provoni Facturino POS falas',
@@ -456,6 +462,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Makedonya\'da perakende POS yazilimi 2026' },
       { slug: 'vector-alternativa-pos', title: 'Vector\'den Facturino POS\'a gecis' },
       { slug: 'smetkovodstvo-za-restorani', title: 'Restoranlar icin muhasebe' },
+      { slug: 'fiskalen-pecatac-chrome', title: 'Chrome\'da surucusuz fiskal yazici nasil baglanir' },
+      { slug: 'sto-e-e-faktura', title: 'e-Fatura nedir ve neden zorunlu?' },
     ],
     cta: {
       title: 'Facturino POS\'u ucretsiz deneyin',
@@ -496,6 +504,11 @@ export default async function NajdobarPosSoftver2026({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кој POS софтвер е најдобар за Македонија?', answer: 'За мали бизниси, ресторани и кафулиња, Facturino POS е најдобар избор — бесплатен план, cloud, работи на било кој уред преку Chrome, автоматско книжење и поддршка за 9 фискални уреди.' },
+        { question: 'Дали ми треба фискален печатач за POS?', answer: 'Да, од 2019 фискалните уреди се задолжителни за сите B2C продажби во Македонија (Закон за фискализација). Facturino поддржува 9 одобрени фискални печатачи преку WebSerial без драјвери.' },
+        { question: 'Дали постои бесплатен POS софтвер во Македонија?', answer: 'Да, Facturino POS нуди бесплатен план со основен POS. Работи во Chrome на било кој уред, без инсталација и без кредитна картичка.' },
+      ])) }} />
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
           <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob" />

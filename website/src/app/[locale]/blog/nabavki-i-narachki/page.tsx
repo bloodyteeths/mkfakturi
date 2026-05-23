@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -97,6 +97,8 @@ const copy = {
       { slug: 'upravljanje-so-rashodi', title: 'Управување со расходи во Facturino' },
       { slug: 'cash-flow-mk', title: 'Како да го следите готовинскиот тек' },
       { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
+      { slug: 'smetkovodstvo-za-proizvodstvo', title: 'Сметководство за производство' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Буџетирање за мали фирми' },
     ],
     cta: {
       title: 'Дигитализирајте ги вашите набавки',
@@ -174,6 +176,8 @@ const copy = {
       { slug: 'upravljanje-so-rashodi', title: 'Expense Management in Facturino' },
       { slug: 'cash-flow-mk', title: 'How to Track Your Cash Flow' },
       { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
+      { slug: 'smetkovodstvo-za-proizvodstvo', title: 'Accounting for Manufacturing' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Budgeting for Small Businesses' },
     ],
     cta: {
       title: 'Digitize Your Procurement',
@@ -251,6 +255,8 @@ const copy = {
       { slug: 'upravljanje-so-rashodi', title: 'Menaxhimi i shpenzimeve në Facturino' },
       { slug: 'cash-flow-mk', title: 'Si ta ndiqni rrjedhën e parave' },
       { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
+      { slug: 'smetkovodstvo-za-proizvodstvo', title: 'Kontabiliteti për prodhimin' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Buxhetimi për biznese të vogla' },
     ],
     cta: {
       title: 'Dixhitalizoni blerjet tuaja',
@@ -328,6 +334,8 @@ const copy = {
       { slug: 'upravljanje-so-rashodi', title: 'Facturino\'da gider yönetimi' },
       { slug: 'cash-flow-mk', title: 'Nakit akışınızı nasıl takip edersiniz' },
       { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
+      { slug: 'smetkovodstvo-za-proizvodstvo', title: 'Üretim muhasebesi' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Küçük işletmeler için bütçeleme' },
     ],
     cta: {
       title: 'Tedarik Sürecinizi Dijitalleştirin',
@@ -368,6 +376,11 @@ export default async function NabavkiINarachkiPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Што е нарачка за набавка (Purchase Order)?', answer: 'Нарачката за набавка е формален документ кој го испраќате до добавувачот со листа на артикли, количини и цени. Претставува документиран договор за набавка и обезбедува правна заштита, контрола на буџет и ревизорска трага.' },
+        { question: 'Како функционира процесот на набавка во Facturino?', answer: 'Процесот поминува низ 6 чекори: нацрт, поднесување на одобрување, одобрување, испраќање до добавувач по е-пошта, прием на стока (со заштита од прекумерен прием) и автоматско креирање фактура со еден клик.' },
+        { question: 'Како се води евиденција на набавки?', answer: 'Facturino автоматски ја следи секоја нарачка од креирање до плаќање. Системот евидентира секоја промена на статус, одобрување и испраќање со датум, време и корисник. Можете да креирате добавувачи и артикли директно од нарачката.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

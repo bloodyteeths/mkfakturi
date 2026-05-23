@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -85,6 +85,8 @@ const copy = {
       { slug: 'danok-na-dobivka', title: 'Данок на добивка: Стапки, рокови и пресметка' },
       { slug: 'rokovi-ujp-2026', title: 'Даночен календар 2026: Сите рокови за УЈП' },
       { slug: 'godishna-smetka-2025', title: 'Годишна сметка 2025: Целосен водич за поднесување до ЦРСМ' },
+      { slug: 'ddv-registracija-prag-2026', title: 'ДДВ регистрација во Македонија 2026: Праг, постапка и обврски' },
+      { slug: 'kazni-ujp-2026', title: 'Казни УЈП 2026: Што се случува ако задоцните со пријавата' },
     ],
     cta: {
       title: 'Поедноставете го ДДВ пријавувањето',
@@ -150,6 +152,8 @@ const copy = {
       { slug: 'danok-na-dobivka', title: 'Corporate Income Tax: Rates, Deadlines and Calculation' },
       { slug: 'rokovi-ujp-2026', title: 'Tax Calendar 2026: All UJP Deadlines' },
       { slug: 'godishna-smetka-2025', title: 'Annual Accounts 2025: Complete Filing Guide for CRMS' },
+      { slug: 'ddv-registracija-prag-2026', title: 'VAT Registration in North Macedonia 2026: Threshold, Process & Obligations' },
+      { slug: 'kazni-ujp-2026', title: 'UJP Penalties 2026: What Happens If You File Late' },
     ],
     cta: {
       title: 'Simplify your VAT filing',
@@ -215,6 +219,8 @@ const copy = {
       { slug: 'danok-na-dobivka', title: 'Tatimi mbi fitimin: Normat, afatet dhe llogaritja' },
       { slug: 'rokovi-ujp-2026', title: 'Kalendari tatimor 2026: Të gjitha afatet për DAP' },
       { slug: 'godishna-smetka-2025', title: 'Llogaritë vjetore 2025: Udhëzues i plotë për dorëzim në QRMK' },
+      { slug: 'ddv-registracija-prag-2026', title: 'Regjistrimi për TVSH në Maqedoninë e Veriut 2026: Pragu, procesi dhe detyrimet' },
+      { slug: 'kazni-ujp-2026', title: 'Gjobat e UJP 2026: Çfarë ndodh nëse dorëzoni me vonesë' },
     ],
     cta: {
       title: 'Thjeshtoni deklarimin e TVSH-së',
@@ -280,6 +286,8 @@ const copy = {
       { slug: 'danok-na-dobivka', title: 'Kurumlar vergisi: Oranlar, tarihler ve hesaplama' },
       { slug: 'rokovi-ujp-2026', title: 'Vergi takvimi 2026: Tüm UJP tarihleri' },
       { slug: 'godishna-smetka-2025', title: 'Yıllık hesaplar 2025: CRMS dosyalama rehberi' },
+      { slug: 'ddv-registracija-prag-2026', title: 'Kuzey Makedonya KDV Kaydı 2026: Eşik, Süreç ve Yükümlülükler' },
+      { slug: 'kazni-ujp-2026', title: 'UJP Cezaları 2026: Geç Başvuru Yaparsanız Ne Olur' },
     ],
     cta: {
       title: 'KDV beyannamelerinizi basitleştirin',
@@ -320,6 +328,11 @@ export default async function DdvVodichMkPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Колку е стапката на ДДВ во Македонија?', answer: 'Стандардната стапка на ДДВ е 18%, намалената стапка е 5% за основни прехранбени производи, лекови и книги, а нулта стапка (0%) важи за извоз.' },
+        { question: 'Кога е задолжителна ДДВ регистрацијата?', answer: 'ДДВ регистрацијата е задолжителна кога годишниот промет надминува 8.000.000 МКД (приближно 130.000 EUR). Доброволна регистрација е можна и под овој праг.' },
+        { question: 'Како се поднесува ДДВ-04 пријавата?', answer: 'ДДВ-04 пријавата се поднесува електронски преку системот е-Даноци на УЈП, до 25-ти во месецот за претходниот период. Facturino автоматски ги генерира потребните податоци.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

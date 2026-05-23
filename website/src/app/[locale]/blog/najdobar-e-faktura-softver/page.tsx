@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -136,6 +136,8 @@ const copy = {
       { slug: 'e-faktura-obvrska-2026', title: 'Е-фактура 2026: Кој мора, кога почнува и како да се подготвите' },
       { slug: 'sto-e-e-faktura', title: 'Што е е-фактура и зошто е задолжителна?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Фактурирање за јавни набавки' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Споредба на софтвер' },
     ],
     cta: {
       title: 'Подготвени за е-Фактура?',
@@ -252,6 +254,8 @@ const copy = {
       { slug: 'e-faktura-obvrska-2026', title: 'E-Invoice Mandate 2026: Who Must Comply & How to Prepare' },
       { slug: 'sto-e-e-faktura', title: 'What Is E-Invoice and Why Is It Mandatory?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Invoicing for Government Procurement' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Software Comparison' },
     ],
     cta: {
       title: 'Get E-Invoice Ready',
@@ -368,6 +372,8 @@ const copy = {
       { slug: 'e-faktura-obvrska-2026', title: 'E-fatura 2026: Kush duhet, kur fillon dhe si te pergatiteni' },
       { slug: 'sto-e-e-faktura', title: 'Cfare eshte e-fatura dhe pse eshte e detyrueshme?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme te fatures' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Faturimi per prokurime publike' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Krahasim softueresh' },
     ],
     cta: {
       title: 'Behuni gati per e-Faturen',
@@ -484,6 +490,8 @@ const copy = {
       { slug: 'e-faktura-obvrska-2026', title: 'E-fatura zorunlulugu 2026: Kim uymali ve nasil hazirlanmali' },
       { slug: 'sto-e-e-faktura', title: 'E-fatura nedir ve neden zorunludur?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Makedonya\'da faturanin zorunlu unsurlari' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Kamu ihaleleri icin faturalama' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Yazilim karsilastirmasi' },
     ],
     cta: {
       title: 'E-Faturaya Hazir Olun',
@@ -524,6 +532,11 @@ export default async function NajdobarEFakturaSoftverPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кој е најдобар софтвер за е-Фактура?', answer: 'Facturino е единственото македонско решение со полно вградена UBL 2.1 и QES поддршка, облак пристап и бесплатен план.' },
+        { question: 'Бесплатна опција?', answer: 'Да, УЈП нуди бесплатен портал за рачно поднесување, а Facturino има бесплатен план со вклучена е-фактура поддршка.' },
+        { question: 'Кога е рокот?', answer: 'B2G е-фактура е задолжителна од октомври 2026. B2B задолжителност се очекува фазно од 2027.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -107,6 +107,8 @@ const copy = {
     relatedTitle: 'Поврзани статии',
     related: [
       { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура во Македонија' },
+      { slug: 'faktura-primer-mk', title: 'Фактура пример: Како изгледа правилна фактура' },
+      { slug: 'e-faktura-obvrska-2026', title: 'Е-фактура 2026: Кој мора и како да се подготвите' },
       { slug: 'faktura-vs-proforma', title: 'Фактура vs профактура: Клучни разлики' },
       { slug: 'recurring-invoices-mk', title: 'Повторувачки фактури: Автоматизирајте ја наплатата' },
     ],
@@ -193,6 +195,8 @@ const copy = {
     relatedTitle: 'Related articles',
     related: [
       { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
+      { slug: 'faktura-primer-mk', title: 'Invoice Example: What a Proper Invoice Looks Like' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Invoice Mandate 2026: Who Must Comply & How to Prepare' },
       { slug: 'faktura-vs-proforma', title: 'Invoice vs Proforma: Key Differences' },
       { slug: 'recurring-invoices-mk', title: 'Recurring Invoices: Automate Your Billing' },
     ],
@@ -279,6 +283,8 @@ const copy = {
     relatedTitle: 'Artikuj të ngjashëm',
     related: [
       { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës në Maqedoni' },
+      { slug: 'faktura-primer-mk', title: 'Shembull fature: Si duket një faturë e saktë' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-fatura 2026: Kush duhet dhe si të përgatiteni' },
       { slug: 'faktura-vs-proforma', title: 'Fatura vs profatura: Dallimet kryesore' },
       { slug: 'recurring-invoices-mk', title: 'Faturat e përsëritura: Automatizoni arkëtimin' },
     ],
@@ -365,6 +371,8 @@ const copy = {
     relatedTitle: 'İlgili makaleler',
     related: [
       { slug: 'zadolzitelni-elementi-faktura', title: "Makedonya'da faturanın zorunlu unsurları" },
+      { slug: 'faktura-primer-mk', title: "Fatura örneği: Doğru fatura nasıl görünür" },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Fatura zorunluluğu 2026: Kim uymalı ve nasıl hazırlanmalı' },
       { slug: 'faktura-vs-proforma', title: 'Fatura vs proforma: Temel farklar' },
       { slug: 'recurring-invoices-mk', title: 'Tekrarlayan faturalar: Tahsilatı otomatikleştirin' },
     ],
@@ -410,6 +418,11 @@ export default async function KakoDaNapraviteFakturaPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кои полиња се задолжителни на фактура во Македонија?', answer: 'Секоја фактура мора да содржи 15 задолжителни полиња: ЕДБ и ЕМБС на продавачот и купувачот, секвенцијален број, датум на издавање и промет, опис на ставките, количина, единечна цена, ДДВ стапка и износ, вкупен износ и банкарска сметка.' },
+        { question: 'Дали е задолжителна е-фактура во Македонија?', answer: 'Од октомври 2026 е-фактурата е задолжителна за B2G трансакции (кон државни институции). За B2B трансакции задолжителноста се очекува од 2027. Facturino поддржува UBL 2.1 формат и QES потпис.' },
+        { question: 'Како да испратам фактура преку Facturino?', answer: 'Креирајте ја фактурата со автоматски пополнети задолжителни полиња, прегледајте ја ДДВ рекапитулацијата и испратете ја директно по е-пошта или генерирајте PDF/UBL XML — сe од една платформа.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         {/* Background blobs */}

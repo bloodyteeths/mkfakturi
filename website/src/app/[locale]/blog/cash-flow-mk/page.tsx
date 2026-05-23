@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -112,6 +112,8 @@ const copy = {
       { slug: 'upravljanje-so-rashodi', title: 'Управување со расходи: 7 совети за мали бизниси' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Сметководство за почетници: Основи што секој бизнис ги знае' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Зошто табели не се доволни' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Буџетирање за мали фирми: Контролирај ги трошоците' },
+      { slug: 'recurring-invoices-mk', title: 'Рекурентни фактури: Автоматизирајте го фактурирањето' },
     ],
     cta: {
       title: 'Никогаш повеќе без готовина',
@@ -201,6 +203,8 @@ const copy = {
       { slug: 'upravljanje-so-rashodi', title: 'Expense Management: 7 Tips for Small Businesses' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Accounting for Beginners: Basics Every Business Should Know' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Why Spreadsheets Are Not Enough' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Budgeting for Small Businesses: Control Your Costs' },
+      { slug: 'recurring-invoices-mk', title: 'Recurring Invoices: Automate Your Billing' },
     ],
     cta: {
       title: 'Never run out of cash again',
@@ -290,6 +294,8 @@ const copy = {
       { slug: 'upravljanje-so-rashodi', title: 'Menaxhimi i shpenzimeve: 7 këshilla për bizneset e vogla' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Kontabiliteti për fillestarë: Bazat që çdo biznes i njeh' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Pse tabelat nuk mjaftojnë' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Buxhetimi për biznese të vogla: Kontrollo shpenzimet' },
+      { slug: 'recurring-invoices-mk', title: 'Faturat rikurrente: Automatizoni faturimin' },
     ],
     cta: {
       title: 'Mos mbetni kurrë pa para',
@@ -379,6 +385,8 @@ const copy = {
       { slug: 'upravljanje-so-rashodi', title: 'Gider yönetimi: Küçük işletmeler için 7 ipucu' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Yeni başlayanlar için muhasebe: Her işletmenin bilmesi gerekenler' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Neden tablolar yetmez' },
+      { slug: 'budzet-i-kontrola-troshoci', title: 'Küçük işletmeler için bütçeleme: Masrafları kontrol edin' },
+      { slug: 'recurring-invoices-mk', title: 'Tekrarlayan faturalar: Faturalamayı otomatikleştirin' },
     ],
     cta: {
       title: 'Bir daha asla nakitsiz kalmayın',
@@ -422,6 +430,11 @@ export default async function CashFlowMkPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Што е парични текови (cash flow)?', answer: 'Паричните текови (cash flow) претставуваат реалното движење на парите во и од вашиот бизнис — колку пари влегуваат и излегуваат од вашата сметка во одреден период. За разлика од профитот кој е сметководствена мерка, cash flow покажува дали имате доволно готовина за да ги покриете тековните обврски.' },
+        { question: 'Како да го подобрам готовинскиот тек на мојата фирма?', answer: 'Скратете ги роковите за плаќање (15-30 дена наместо 60), фактурирајте веднаш по завршување на работата, барајте аванс за поголеми проекти (30-50%), поставете автоматски потсетувања за доспеани фактури и направете месечна проекција на готовинскиот тек за следните 3-6 месеци.' },
+        { question: 'Зошто е важен готовинскиот тек за мали бизниси?', answer: '82% од бизнисите кои пропаѓаат имаат проблеми со готовинскиот тек. Бизнис може да биде профитабилен на хартија, но без доволно готовина не може да ги плати платите, киријата и добавувачите. Во Македонија, каде доцните плаќања се норма, следењето на cash flow е критично за преживување.' },
+      ])) }} />
       {/* ============================================================ */}
       {/*  ARTICLE HEADER                                              */}
       {/* ============================================================ */}

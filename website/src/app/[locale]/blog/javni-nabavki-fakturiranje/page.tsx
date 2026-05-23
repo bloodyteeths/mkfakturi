@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -135,6 +135,8 @@ const copy = {
       { slug: 'e-faktura-obvrska-2026', title: 'Е-фактура 2026: Кој мора и како да се подготвите' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура' },
       { slug: 'faktura-primer-mk', title: 'Фактура пример: Македонски образец' },
+      { slug: 'najdobar-e-faktura-softver', title: 'Најдобар софтвер за е-Фактура 2026' },
+      { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура: Чекор-по-чекор' },
     ],
     cta: {
       title: 'Facturino генерира усогласени е-фактури за државата',
@@ -247,6 +249,8 @@ const copy = {
       { slug: 'e-faktura-obvrska-2026', title: 'E-Invoice 2026: Who Must Comply & How to Prepare' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
       { slug: 'faktura-primer-mk', title: 'Invoice Example: Macedonian Template' },
+      { slug: 'najdobar-e-faktura-softver', title: 'Best E-Invoice Software 2026' },
+      { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice: Step-by-Step' },
     ],
     cta: {
       title: 'Facturino generates compliant e-Invoices for government',
@@ -359,6 +363,8 @@ const copy = {
       { slug: 'e-faktura-obvrska-2026', title: 'E-fatura 2026: Kush duhet dhe si të përgatiteni' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës' },
       { slug: 'faktura-primer-mk', title: 'Shembull fature: Modeli maqedonas' },
+      { slug: 'najdobar-e-faktura-softver', title: 'Softueri më i mirë për e-Faturë 2026' },
+      { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni faturë: Hap pas hapi' },
     ],
     cta: {
       title: 'Facturino gjeneron e-fatura në përputhje për shtetin',
@@ -471,6 +477,8 @@ const copy = {
       { slug: 'e-faktura-obvrska-2026', title: 'E-Fatura 2026: Kim Uymalı ve Nasıl Hazırlanmalı' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Makedonya\'da Zorunlu Fatura Unsurları' },
       { slug: 'faktura-primer-mk', title: 'Fatura Örneği: Makedonya Şablonu' },
+      { slug: 'najdobar-e-faktura-softver', title: 'En İyi e-Fatura Yazılımı 2026' },
+      { slug: 'kako-da-napravite-faktura', title: 'Fatura Nasıl Oluşturulur: Adım Adım' },
     ],
     cta: {
       title: 'Facturino devlet için uyumlu e-faturalar üretir',
@@ -514,6 +522,11 @@ export default async function JavniNabavkiFakturiranjePage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Треба ли е-Фактура за државата?', answer: 'Да, од октомври 2026 е-фактура е задолжителна за сите B2G трансакции кон државни институции во UBL 2.1 формат со QES потпис.' },
+        { question: 'Рок на плаќање?', answer: 'Државните институции плаќаат во рок од 30-60 дена од прием на фактурата, преку трезорска сметка (Трезор).' },
+        { question: 'Што е ЕСЈН?', answer: 'ЕСЈН (Електронски систем за јавни набавки) е платформата на e-nabavki.gov.mk каде се објавуваат и спроведуваат сите јавни набавки.' },
+      ])) }} />
       {/* ============================================================ */}
       {/*  ARTICLE HEADER                                              */}
       {/* ============================================================ */}

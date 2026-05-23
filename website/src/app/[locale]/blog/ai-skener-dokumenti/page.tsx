@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -101,6 +101,8 @@ const copy = {
       { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
       { slug: 'facturino-vs-excel', title: 'Facturino наспроти Excel: зошто да преминете' },
       { slug: 'upravljanje-so-rashodi', title: 'Управување со расходи: водич за бизниси' },
+      { slug: 'ai-asistent-smetkovodstvo', title: 'AI асистент за сметководство: прашајте на македонски' },
+      { slug: 'ai-bankarski-usoglasuvanje', title: 'AI банкарско усогласување: од 3 часа на 3 минути' },
     ],
     cta: {
       title: 'Скенирајте ја првата фактура за 10 секунди',
@@ -181,6 +183,8 @@ const copy = {
       { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Why You Should Switch' },
       { slug: 'upravljanje-so-rashodi', title: 'Expense Management: A Guide for Businesses' },
+      { slug: 'ai-asistent-smetkovodstvo', title: 'AI Accounting Assistant: Ask in Plain Language' },
+      { slug: 'ai-bankarski-usoglasuvanje', title: 'AI Bank Reconciliation: From 3 Hours to 3 Minutes' },
     ],
     cta: {
       title: 'Scan Your First Invoice in 10 Seconds',
@@ -261,6 +265,8 @@ const copy = {
       { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
       { slug: 'facturino-vs-excel', title: 'Facturino kundrejt Excel: pse të kaloni' },
       { slug: 'upravljanje-so-rashodi', title: 'Menaxhimi i shpenzimeve: udhëzues për bizneset' },
+      { slug: 'ai-asistent-smetkovodstvo', title: 'Asistenti AI për kontabilitet: pyetni në gjuhën tuaj' },
+      { slug: 'ai-bankarski-usoglasuvanje', title: 'Rakordimi bankar me AI: nga 3 orë në 3 minuta' },
     ],
     cta: {
       title: 'Skanoni faturën tuaj të parë në 10 sekonda',
@@ -341,6 +347,8 @@ const copy = {
       { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
       { slug: 'facturino-vs-excel', title: 'Facturino ve Excel: neden gecmelisiniz' },
       { slug: 'upravljanje-so-rashodi', title: 'Gider yonetimi: isletmeler icin rehber' },
+      { slug: 'ai-asistent-smetkovodstvo', title: 'AI muhasebe asistani: duz dilde sorun' },
+      { slug: 'ai-bankarski-usoglasuvanje', title: 'AI banka mutabakati: 3 saatten 3 dakikaya' },
     ],
     cta: {
       title: 'Ilk Faturanizi 10 Saniyede Tarayin',
@@ -381,6 +389,11 @@ export default async function AiSkenerDokumentiPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Како работи AI скенерот за документи?', answer: 'AI скенерот во Facturino користи вештачка интелигенција за автоматско препознавање, класификација и екстракција на податоци од фактури, сметки и други деловни документи. Целиот процес трае околу 10 секунди од прикачување до готово книжење.' },
+        { question: 'Колку е точен AI скенерот?', answer: 'Точноста на класификацијата на типот документ е над 95%. Извлечените податоци се прикажуваат за човечка верификација — полињата со висока сигурност се означени зелено, а оние со пониска сигурност жолто.' },
+        { question: 'Кои документи ги препознава AI скенерот?', answer: 'Системот препознава 7 типа документи: влезни фактури, излезни фактури, фискални сметки, банкови изводи, даночни образци, договори и други деловни документи. Работи со кирилични и латинични документи.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

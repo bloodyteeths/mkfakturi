@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -128,6 +128,8 @@ const copy = {
       { slug: 'najdobar-smetkovodstven-softver-2026', title: '7 сметководствени софтвери за Македонија 2026' },
       { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Што е подобро за мали фирми?' },
       { slug: 'e-faktura-obvrska-2026', title: 'е-Фактура 2026: Кој мора и како да се подготвите' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Најдобар POS софтвер за Македонија 2026' },
+      { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
     ],
     cta: {
       title: 'Преминете од Excel кон Facturino',

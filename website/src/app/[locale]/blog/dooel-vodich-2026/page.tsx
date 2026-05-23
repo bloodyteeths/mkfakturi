@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -122,6 +122,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'Како да отворите фирма во Македонија' },
       { slug: 'danok-na-dobivka', title: 'Данок на добивка: Стапки, рокови и пријава' },
       { slug: 'godishna-danocna-prijava-2026', title: 'Годишна даночна пријава 2026' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Регистрација на фирма: Чекор по чекор водич' },
+      { slug: 'paushalen-danochnik', title: 'Паушален даночник: Водич за 2026' },
     ],
     bottomCta: {
       title: 'ДООЕЛ? Facturino е за вас.',
@@ -225,6 +227,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'How to Register a Company in North Macedonia' },
       { slug: 'danok-na-dobivka', title: 'Corporate Tax: Rates, Deadlines & Filing' },
       { slug: 'godishna-danocna-prijava-2026', title: 'Annual Tax Return North Macedonia 2026' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Company Registration: Step-by-Step Checklist' },
+      { slug: 'paushalen-danochnik', title: 'Sole Trader (Flat-Rate Taxpayer): 2026 Guide' },
     ],
     bottomCta: {
       title: 'Running a DOOEL? Facturino is built for you.',
@@ -328,6 +332,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'Si të regjistroni firmë në Maqedoni' },
       { slug: 'danok-na-dobivka', title: 'Tatimi mbi fitimin: Normat, afatet dhe deklarimi' },
       { slug: 'godishna-danocna-prijava-2026', title: 'Deklarata vjetore tatimore 2026' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Regjistrimi i firmës: Udhëzues hap pas hapi' },
+      { slug: 'paushalen-danochnik', title: 'Paushalist (Tatimpagues me normë fikse): Udhëzues 2026' },
     ],
     bottomCta: {
       title: 'Keni SHPKNJP? Facturino është për ju.',
@@ -431,6 +437,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'Kuzey Makedonya\'da Şirket Nasıl Kurulur' },
       { slug: 'danok-na-dobivka', title: 'Kurumlar Vergisi: Oranlar, Tarihler ve Beyanname' },
       { slug: 'godishna-danocna-prijava-2026', title: 'Yıllık Vergi Beyannamesi 2026' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Firma Kaydı: Adım Adım Kontrol Listesi' },
+      { slug: 'paushalen-danochnik', title: 'Düz Oranlı Vergi Mükellefi: 2026 Rehberi' },
     ],
     bottomCta: {
       title: 'DOOEL\'iniz mi var? Facturino tam size göre.',
@@ -470,6 +478,11 @@ export default async function DooelVodichPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Што е ДООЕЛ?', answer: 'ДООЕЛ (Друштво со ограничена одговорност основано од едно лице) е трговско друштво со еден основач и ограничена одговорност — основачот одговара само до висината на вложениот капитал од 5.000 МКД.' },
+        { question: 'Колку е основниот капитал за ДООЕЛ?', answer: 'Минималниот основен капитал за ДООЕЛ во Македонија е 5.000 МКД (околу 80 евра). Се уплаќа при регистрација во Централниот регистар.' },
+        { question: 'Која е разликата меѓу ДООЕЛ и паушалец?', answer: 'ДООЕЛ има ограничена одговорност, полно книговодство и данок на добивка 10%. Паушалец има неограничена одговорност, фиксен месечен данок и е наменет за фриленсери со промет до 3М МКД годишно.' },
+      ])) }} />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6">

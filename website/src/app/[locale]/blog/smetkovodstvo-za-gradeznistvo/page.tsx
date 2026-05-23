@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -138,6 +138,8 @@ const copy = {
       { slug: 'nabavki-i-narachki', title: 'Набавки и нарачки во Facturino' },
       { slug: 'ddv-vodich-mk', title: 'ДДВ водич за Македонија' },
       { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата во Македонија' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Јавни набавки и фактурирање' },
+      { slug: 'nabavki-i-narachki', title: 'Набавки и нарачки: Водич' },
     ],
     bottomCta: {
       title: 'Градежна компанија? Facturino ви помага.',
@@ -257,6 +259,8 @@ const copy = {
       { slug: 'nabavki-i-narachki', title: 'Purchase Orders & Procurement in Facturino' },
       { slug: 'ddv-vodich-mk', title: 'VAT Guide for North Macedonia' },
       { slug: 'presmetka-na-plata-mk', title: 'Salary Calculation in North Macedonia' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Public Procurement and Invoicing' },
+      { slug: 'nabavki-i-narachki', title: 'Procurement and Orders: Guide' },
     ],
     bottomCta: {
       title: 'Construction company? Facturino helps.',
@@ -376,6 +380,8 @@ const copy = {
       { slug: 'nabavki-i-narachki', title: 'Porosi blerjeje dhe furnizime në Facturino' },
       { slug: 'ddv-vodich-mk', title: 'Udhëzues TVSH për Maqedoninë' },
       { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagës në Maqedoni' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Prokurimi publik dhe faturimi' },
+      { slug: 'nabavki-i-narachki', title: 'Prokurime dhe porosi: Udhëzues' },
     ],
     bottomCta: {
       title: 'Kompani ndërtimore? Facturino ju ndihmon.',
@@ -495,6 +501,8 @@ const copy = {
       { slug: 'nabavki-i-narachki', title: 'Facturino\'da Satın Alma Siparişleri ve Tedarik' },
       { slug: 'ddv-vodich-mk', title: 'Makedonya KDV Rehberi' },
       { slug: 'presmetka-na-plata-mk', title: 'Makedonya\'da Maaş Hesaplama' },
+      { slug: 'javni-nabavki-fakturiranje', title: 'Kamu Alımları ve Faturalama' },
+      { slug: 'nabavki-i-narachki', title: 'Tedarik ve Siparişler: Rehber' },
     ],
     bottomCta: {
       title: 'İnşaat şirketi? Facturino yardımcı olur.',
@@ -534,6 +542,11 @@ export default async function SmetkovodstvoZaGradeznistvo({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Дали ДДВ за градежништво е секогаш 18%?', answer: 'Не. Градежни работи за станбени објекти до 150 м² се оданочуваат со 5% ДДВ (Чл. 30 ЗДДВ). Комерцијални објекти, инфраструктура и реновирање се 18%. Подизведувачите секогаш фактурираат со 18% кон главниот изведувач.' },
+        { question: 'Како се фактурираат ситуации во градежништвото?', answer: 'Привремената ситуација ја подготвува изведувачот, ја потврдува надзорниот инженер и ја одобрува инвеститорот. По потврда, изведувачот издава фактура за одобрениот износ. Задршка од 5-10% се евидентира на посебна сметка за гаранции.' },
+        { question: 'Како се евидентираат подизведувачи?', answer: 'Секој подизведувач мора да издаде фактура што ја прати привремената ситуација. Проверете дали е ДДВ обврзник. Задржете 5-10% гаранција и правете квартален ИОС (Извод на отворени ставки). Ако ангажирате физичко лице — вие плаќате придонеси.' },
+      ])) }} />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6">

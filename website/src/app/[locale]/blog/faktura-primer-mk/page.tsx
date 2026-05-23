@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -109,6 +109,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура: Чекор-по-чекор водич' },
       { slug: 'faktura-vs-proforma', title: 'Фактура vs профактура: Клучни разлики' },
       { slug: 'ddv-vodich-mk', title: 'ДДВ водич за Македонија' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура' },
+      { slug: 'e-faktura-obvrska-2026', title: 'Е-фактура 2026: Кој мора и како да се подготвите' },
     ],
     bottomCta: {
       title: 'Креирајте фактура за 30 секунди',
@@ -196,6 +198,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice: Step-by-Step Guide' },
       { slug: 'faktura-vs-proforma', title: 'Invoice vs Proforma: Key Differences' },
       { slug: 'ddv-vodich-mk', title: 'VAT Guide for North Macedonia' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Invoice Mandate 2026: Who Must Comply & How to Prepare' },
     ],
     bottomCta: {
       title: 'Create an Invoice in 30 Seconds',
@@ -283,6 +287,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni faturë: Udhëzues hap pas hapi' },
       { slug: 'faktura-vs-proforma', title: 'Fatura vs profatura: Dallimet kryesore' },
       { slug: 'ddv-vodich-mk', title: 'Udhëzues për TVSH-në në Maqedoni' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-fatura 2026: Kush duhet dhe si të përgatiteni' },
     ],
     bottomCta: {
       title: 'Krijoni faturë për 30 sekonda',
@@ -370,6 +376,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Fatura Nasıl Oluşturulur: Adım Adım Rehber' },
       { slug: 'faktura-vs-proforma', title: 'Fatura vs Proforma: Temel Farklar' },
       { slug: 'ddv-vodich-mk', title: 'Kuzey Makedonya KDV Rehberi' },
+      { slug: 'zadolzitelni-elementi-faktura', title: 'Makedonya\'da Zorunlu Fatura Unsurları' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Fatura 2026: Kim Uymalı ve Nasıl Hazırlanmalı' },
     ],
     bottomCta: {
       title: '30 Saniyede Fatura Oluşturun',
@@ -414,6 +422,11 @@ export default async function FakturaPrimerPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Како изгледа правилна фактура?', answer: 'Правилна фактура содржи 15 задолжителни полиња: ЕДБ, ЕМБС, банкарска сметка, секвенцијален број, датум на промет, ставки со ДДВ рекапитулација и вкупен износ.' },
+        { question: 'Колку задолжителни полиња?', answer: 'Според Законот за ДДВ (член 53) секоја фактура во Македонија мора да содржи 15 задолжителни елементи.' },
+        { question: 'ЕДБ каде?', answer: 'ЕДБ (единствен даночен број) мора да биде наведен и за издавачот и за купувачот. Без ЕДБ фактурата не е даночно валидна.' },
+      ])) }} />
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6">
           <Link href={`/${locale}/blog`} className="text-blue-600 hover:text-blue-800 text-sm font-medium mb-8 inline-block">{t.backLink}</Link>

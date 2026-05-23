@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -125,6 +125,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: '\u041d\u0430\u0458\u0434\u043e\u0431\u0430\u0440 POS \u0441\u043e\u0444\u0442\u0432\u0435\u0440 \u0437\u0430 \u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0438\u0458\u0430 2026' },
       { slug: 'vector-alternativa-pos', title: '\u041f\u0440\u0435\u043c\u0438\u043d \u043e\u0434 Vector \u043d\u0430 Facturino POS' },
       { slug: 'ddv-vodich-mk', title: '\u0412\u043e\u0434\u0438\u0447 \u0437\u0430 \u0414\u0414\u0412 \u0432\u043e \u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0438\u0458\u0430' },
+      { slug: 'najdobar-pos-softver-2026', title: '\u041d\u0430\u0458\u0434\u043e\u0431\u0430\u0440 POS \u0441\u043e\u0444\u0442\u0432\u0435\u0440 \u0437\u0430 \u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0438\u0458\u0430 2026: \u0441\u043f\u043e\u0440\u0435\u0434\u0431\u0430' },
+      { slug: 'smetkovodstvo-za-trgovija', title: '\u0421\u043c\u0435\u0442\u043a\u043e\u0432\u043e\u0434\u0441\u0442\u0432\u043e \u0437\u0430 \u0442\u0440\u0433\u043e\u0432\u0438\u0458\u0430' },
     ],
     cta: {
       title: '\u041f\u043e\u0432\u0440\u0437\u0435\u0442\u0435 \u0433\u043e \u043f\u0435\u0447\u0430\u0442\u0430\u0447\u043e\u0442 \u0437\u0430 2 \u043c\u0438\u043d\u0443\u0442\u0438',
@@ -153,6 +155,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Best POS Software for Macedonia 2026' },
       { slug: 'vector-alternativa-pos', title: 'Switching from Vector to Facturino POS' },
       { slug: 'ddv-vodich-mk', title: 'VAT Guide for Macedonia' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Best POS Software for North Macedonia 2026: Comparison' },
+      { slug: 'smetkovodstvo-za-trgovija', title: 'Accounting for Retail' },
     ],
     cta: { title: 'Connect your printer in 2 minutes', desc: 'Sign up free, plug USB and print a fiscal receipt from Chrome.', button: 'Start free' },
   },
@@ -176,6 +180,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Softueri me i mire POS per Maqedoni 2026' },
       { slug: 'vector-alternativa-pos', title: 'Kalimi nga Vector ne Facturino POS' },
       { slug: 'ddv-vodich-mk', title: 'Udhezues per TVSH ne Maqedoni' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Softueri me i mire POS per Maqedonine 2026: Krahasim' },
+      { slug: 'smetkovodstvo-za-trgovija', title: 'Kontabiliteti per tregtine' },
     ],
     cta: { title: 'Lidhni printerin per 2 minuta', desc: 'Regjistrohuni falas, futni USB dhe printoni kupon fiskal nga Chrome.', button: 'Fillo falas' },
   },
@@ -199,6 +205,8 @@ const copy = {
       { slug: 'pos-softver-makedonija', title: 'Makedonya\'da en iyi POS yazilimi 2026' },
       { slug: 'vector-alternativa-pos', title: 'Vector\'den Facturino POS\'a gecis' },
       { slug: 'ddv-vodich-mk', title: 'Makedonya KDV rehberi' },
+      { slug: 'najdobar-pos-softver-2026', title: '2026 Makedonya En Iyi POS Yazilimi: Karsilastirma' },
+      { slug: 'smetkovodstvo-za-trgovija', title: 'Perakende icin muhasebe' },
     ],
     cta: { title: 'Yaziciyi 2 dakikada baglayin', desc: 'Ucretsiz kaydolun, USB takin ve Chrome\'dan fiskal fis yazdirin.', button: 'Ucretsiz basla' },
   },
@@ -235,6 +243,11 @@ export default async function FiskalenPecatacChrome({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кои фискални уреди се поддржани во Facturino?', answer: 'Facturino поддржува 9 фискални печатачи преку ISL протокол: Datecs FP-700, FP-700X, FP-2000, FP-800, Tremol FP01-KL, S25, M20, Daisy Compact-S, Expert и други ISL-компатибилни уреди.' },
+        { question: 'Дали Chrome го поддржува фискалниот печатач?', answer: 'Да, преку WebSerial API. Chrome комуницира директно со фискалниот печатач преку USB, без драјвери, без DLL библиотеки, без инсталација. Работи на Windows, Mac и ChromeOS.' },
+        { question: 'Што вели Законот за фискализација во Македонија?', answer: 'Од 2019, фискалните уреди се задолжителни за сите B2C продажби. Потребен е фискален бон за секоја продажба, дневен Z-извештај и електронско чување на журналот. Facturino ги исполнува сите барања.' },
+      ])) }} />
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
           <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob" />

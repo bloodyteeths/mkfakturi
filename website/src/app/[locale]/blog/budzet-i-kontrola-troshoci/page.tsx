@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -106,6 +106,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Како да го подобрите готовинскиот тек на вашата фирма' },
       { slug: 'danok-na-dobivka', title: 'Данок на добивка: Водич за мали претпријатија' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Годишно затворање на книги: 6 чекори со Facturino' },
+      { slug: 'upravljanje-so-rashodi', title: 'Управување со расходи: 7 совети за мали бизниси' },
+      { slug: 'nabavki-i-narachki', title: 'Дигитални нарачки за набавка' },
     ],
     cta: {
       title: 'Ставете ги трошоците под контрола',
@@ -192,6 +194,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'How to Improve Your Business Cash Flow' },
       { slug: 'danok-na-dobivka', title: 'Corporate Tax: A Guide for Small Businesses' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Year-End Closing: 6 Steps with Facturino' },
+      { slug: 'upravljanje-so-rashodi', title: 'Expense Management: 7 Tips for Small Businesses' },
+      { slug: 'nabavki-i-narachki', title: 'Digital Purchase Orders' },
     ],
     cta: {
       title: 'Put Your Costs Under Control',
@@ -278,6 +282,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Si ta permiresoni rrjedhen e parase te biznesit tuaj' },
       { slug: 'danok-na-dobivka', title: 'Tatimi mbi fitimin: Udherrëfyes per biznese te vogla' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Mbyllja e vitit: 6 hapa me Facturino' },
+      { slug: 'upravljanje-so-rashodi', title: 'Menaxhimi i shpenzimeve: 7 këshilla për bizneset e vogla' },
+      { slug: 'nabavki-i-narachki', title: 'Porositë dixhitale te blerjes' },
     ],
     cta: {
       title: 'Vendosni shpenzimet nen kontroll',
@@ -364,6 +370,8 @@ const copy = {
       { slug: 'cash-flow-mk', title: 'Isletmenizin nakit akisini nasil iyilestirirsiniz' },
       { slug: 'danok-na-dobivka', title: 'Kurumlar vergisi: Kucuk isletmeler icin rehber' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Yil sonu kapanisi: Facturino ile 6 adim' },
+      { slug: 'upravljanje-so-rashodi', title: 'Gider yonetimi: Kucuk isletmeler icin 7 ipucu' },
+      { slug: 'nabavki-i-narachki', title: 'Dijital satin alma siparisleri' },
     ],
     cta: {
       title: 'Masraflarinizi kontrol altina alin',
@@ -404,6 +412,11 @@ export default async function BudzetKontrolaTroshociPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Зошто е важен буџетот за мала фирма?', answer: 'Буџетот е вашиот финансиски компас. Без него, одлуките се носат „на око" и грешките се откриваат кога е предоцна. Буџетот обезбедува видливост во трошењето, рано предупредување за прекумерно трошење и подобро даночно планирање.' },
+        { question: 'Како да ги контролирам трошоците на мојата фирма?', answer: 'Дефинирајте категории на трошоци (кирија, плати, маркетинг), поставете месечни лимити, следете ги актуелните трошоци во реално време и користете центри на трошоци за алоцирање по оддели или проекти. Со Facturino добивате визуелни графикони и известувања при приближување до лимитите.' },
+        { question: 'Кои алатки за буџетирање ги нуди Facturino?', answer: 'Facturino нуди месечни/квартални/годишни буџети, центри на трошоци по оддели и проекти, BI Dashboard со интерактивни графикони, автоматско споредување на реални vs планирани трошоци и известувања при приближување до буџетските лимити.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

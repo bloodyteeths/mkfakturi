@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -101,6 +101,8 @@ const copy = {
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Зошто табели не се доволни' },
       { slug: 'za-smetkovoditeli', title: 'Зошто сметководителите преминуваат на Facturino' },
       { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Најдобар сметководствен софтвер 2026' },
+      { slug: 'ai-skener-dokumenti', title: 'AI скенер на документи' },
     ],
     cta: {
       title: 'Преминете на дигитално сметководство денес',
@@ -179,6 +181,8 @@ const copy = {
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Why Spreadsheets Are Not Enough' },
       { slug: 'za-smetkovoditeli', title: 'Why Accountants Are Switching to Facturino' },
       { slug: 'zosto-facturino', title: '10 Reasons Macedonian Businesses Choose Facturino' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Best Accounting Software 2026' },
+      { slug: 'ai-skener-dokumenti', title: 'AI Document Scanner' },
     ],
     cta: {
       title: 'Switch to digital accounting today',
@@ -257,6 +261,8 @@ const copy = {
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Pse tabelat nuk mjaftojnë' },
       { slug: 'za-smetkovoditeli', title: 'Pse kontabilistët po kalojnë në Facturino' },
       { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Softueri më i mirë i kontabilitetit 2026' },
+      { slug: 'ai-skener-dokumenti', title: 'Skanues AI dokumentesh' },
     ],
     cta: {
       title: 'Kaloni në kontabilitet dixhital sot',
@@ -335,6 +341,8 @@ const copy = {
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Neden tablolar yetmez' },
       { slug: 'za-smetkovoditeli', title: 'Muhasebeciler neden Facturino\'ya geçiyor' },
       { slug: 'zosto-facturino', title: "Makedon işletmelerin Facturino'yu seçmesinin 10 nedeni" },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'En Iyi Muhasebe Yazilimi 2026' },
+      { slug: 'ai-skener-dokumenti', title: 'AI Belge Tarayici' },
     ],
     cta: {
       title: 'Bugün dijital muhasebeye geçin',
@@ -378,6 +386,11 @@ export default async function DigitalnoSmetkovodstvoPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Дали дигиталното сметководство е подобро од традиционалното?', answer: 'Да, дигиталното сметководство нуди автоматизација, точност, пристап во реално време и ревизорска трага. Заштедува 5-10 часа месечно на административна работа и елиминира рачни грешки.' },
+        { question: 'Колку чини дигитално сметководство во Македонија?', answer: 'Facturino нуди бесплатен план за до 3 фактури месечно. Платените планови започнуваат од 12 EUR/месечно — значително поевтино од скриените трошоци на хартиено сметководство.' },
+        { question: 'Дали се безбедни податоците во облак сметководство?', answer: 'Да, облак системите како Facturino користат автоматски бекапи, шифрирање и безбедни сервери. Хартиените документи се изложени на поголем ризик од пожар, поплава или губење.' },
+      ])) }} />
       {/* ============================================================ */}
       {/*  ARTICLE HEADER                                              */}
       {/* ============================================================ */}

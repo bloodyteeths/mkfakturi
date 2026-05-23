@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -98,6 +98,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'Како да отворите фирма во Македонија' },
       { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура — чекор по чекор' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура во Македонија' },
+      { slug: 'paket-za-nova-firma', title: 'Пакет за нова фирма: Сe што ви треба' },
+      { slug: 'recurring-invoices-mk', title: 'Рекурентни фактури: Автоматизирајте го фактурирањето' },
     ],
     cta: {
       title: 'Подготвени сте за вашата прва фактура',
@@ -175,6 +177,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'How to Register a Company in Macedonia' },
       { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice — Step by Step' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements in Macedonia' },
+      { slug: 'paket-za-nova-firma', title: 'New Company Package: Everything You Need' },
+      { slug: 'recurring-invoices-mk', title: 'Recurring Invoices: Automate Your Billing' },
     ],
     cta: {
       title: 'You Are Ready for Your First Invoice',
@@ -252,6 +256,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'Si të hapni firmë në Maqedoni' },
       { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni faturë — hap pas hapi' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Elementet e detyrueshme të faturës në Maqedoni' },
+      { slug: 'paket-za-nova-firma', title: 'Paketa për firmë të re: Gjithçka që ju nevojitet' },
+      { slug: 'recurring-invoices-mk', title: 'Faturat rikurrente: Automatizoni faturimin' },
     ],
     cta: {
       title: 'Jeni gati për faturën tuaj të parë',
@@ -329,6 +335,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'Makedonya\'da nasıl şirket kurulur' },
       { slug: 'kako-da-napravite-faktura', title: 'Fatura nasıl oluşturulur — adım adım' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Makedonya\'da zorunlu fatura unsurları' },
+      { slug: 'paket-za-nova-firma', title: 'Yeni şirket paketi: İhtiyacınız olan her şey' },
+      { slug: 'recurring-invoices-mk', title: 'Tekrarlayan faturalar: Faturalamayı otomatikleştirin' },
     ],
     cta: {
       title: 'İlk faturanız için hazırsınız',
@@ -369,6 +377,11 @@ export default async function KakoDaOtvoriteFirmaPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Може ли веднаш да фактурирам по отворање на фирма?', answer: 'Да, штом ја регистрирате фирмата во ЦРРСМ и добиете ЕДБ (единствен даночен број), можете веднаш да издавате фактури. Со Facturino, регистрацијата трае 2 минути и првата фактура може да биде готова за помалку од 1 ден.' },
+        { question: 'Треба ли ДДВ регистрација за да фактурирам?', answer: 'Не задолжително. ДДВ регистрација е задолжителна само кога годишниот промет надмине 2.000.000 МКД. До тогаш можете да фактурирате без ДДВ. Ако се регистрирате доброволно, Facturino автоматски го пресметува ДДВ по стапката од 18% или 5%.' },
+        { question: 'Кој софтвер е најдобар за нова фирма во Македонија?', answer: 'Facturino е дизајниран за македонски бизниси — поддржува ЕДБ, ЕМБС, македонски контен план, ДДВ пресметка и МПИН. Бесплатниот план вклучува до 3 фактури месечно, AI онбординг на македонски и Dashboard листа за проверка.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

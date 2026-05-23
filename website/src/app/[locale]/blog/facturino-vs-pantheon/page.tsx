@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -126,6 +126,8 @@ const copy = {
       { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Најдобар сметководствен софтвер 2026' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Зошто табели не се доволни' },
       { slug: 'sto-e-e-faktura', title: 'Што е е-Фактура и како функционира?' },
+      { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Најдобар POS софтвер за Македонија 2026' },
     ],
     cta: {
       title: 'Пробајте го Facturino бесплатно',
@@ -232,6 +234,8 @@ const copy = {
       { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Best Accounting Software 2026' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Why Spreadsheets Aren\'t Enough' },
       { slug: 'sto-e-e-faktura', title: 'What Is e-Invoice and How Does It Work?' },
+      { slug: 'zosto-facturino', title: '10 Reasons Why Macedonian Businesses Choose Facturino' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Best POS Software for North Macedonia 2026' },
     ],
     cta: {
       title: 'Try Facturino for Free',
@@ -338,6 +342,8 @@ const copy = {
       { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Softueri më i mirë i kontabilitetit 2026' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Pse tabelat nuk mjaftojnë' },
       { slug: 'sto-e-e-faktura', title: 'Çfarë është e-Fatura dhe si funksionon?' },
+      { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
+      { slug: 'najdobar-pos-softver-2026', title: 'Softueri me i mire POS per Maqedonine 2026' },
     ],
     cta: {
       title: 'Provoni Facturino falas',
@@ -444,6 +450,8 @@ const copy = {
       { slug: 'najdobar-smetkovodstven-softver-2026', title: 'En İyi Muhasebe Yazılımı 2026' },
       { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Neden Tablolar Yeterli Değil' },
       { slug: 'sto-e-e-faktura', title: 'e-Fatura Nedir ve Nasıl Çalışır?' },
+      { slug: 'zosto-facturino', title: 'Makedon işletmelerin Facturino\'yu tercih etmesinin 10 nedeni' },
+      { slug: 'najdobar-pos-softver-2026', title: '2026 Makedonya En Iyi POS Yazilimi' },
     ],
     cta: {
       title: 'Facturino\'yu Ücretsiz Deneyin',
@@ -484,6 +492,11 @@ export default async function FacturinoVsPantheonPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кој е поевтин Facturino или PANTHEON?', answer: 'Facturino нуди бесплатен план и платени планови од 12 EUR/месечно. PANTHEON чини 500+ EUR/годишно за лиценца и поддршка. За мали бизниси, Facturino е значително поевтин.' },
+        { question: 'Дали е подобро Cloud или Desktop решение?', answer: 'Cloud решенијата како Facturino нудат пристап од секаде, автоматски ажурирања и бекапи. Desktop решенијата како PANTHEON бараат ИТ инфраструктура, но работат офлајн. За мали бизниси, cloud е поефикасно.' },
+        { question: 'Кој е подобар за мали фирми — Facturino или PANTHEON?', answer: 'За мали и средни претпријатија под 50 вработени, Facturino е подобар избор — облак пристап, бесплатен план, модерен интерфејс и е-Фактура вградена. PANTHEON е подобар за производствени компании со 50+ вработени.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

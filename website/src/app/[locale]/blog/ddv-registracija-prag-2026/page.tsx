@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -134,6 +134,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'ДДВ водич за Македонија: Сe што треба да знаете' },
       { slug: 'e-faktura-obvrska-2026', title: 'Е-фактура обврска 2026: Кој мора да издава?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Задолжителни елементи на фактура' },
+      { slug: 'kazni-ujp-2026', title: 'Казни УЈП 2026: Што се случува ако задоцните со пријавата' },
+      { slug: 'danok-na-dobivka', title: 'Данок на добивка: Стапки, рокови и пресметка' },
     ],
     cta: {
       title: 'ДДВ книги и пријави, автоматски',
@@ -248,6 +250,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'VAT Guide for Macedonia: Everything You Need to Know' },
       { slug: 'e-faktura-obvrska-2026', title: 'E-Invoice Obligation 2026: Who Must Issue?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Mandatory Invoice Elements' },
+      { slug: 'kazni-ujp-2026', title: 'UJP Penalties 2026: What Happens If You File Late' },
+      { slug: 'danok-na-dobivka', title: 'Corporate Income Tax: Rates, Deadlines and Calculation' },
     ],
     cta: {
       title: 'VAT books and returns, automated',
@@ -362,6 +366,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'Udhëzues TVSH për Maqedoninë: Gjithçka që duhet të dini' },
       { slug: 'e-faktura-obvrska-2026', title: 'Detyrimi i E-faturës 2026: Kush duhet të lëshojë?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Elementët e detyrueshëm të faturës' },
+      { slug: 'kazni-ujp-2026', title: 'Gjobat e UJP 2026: Çfarë ndodh nëse dorëzoni me vonesë' },
+      { slug: 'danok-na-dobivka', title: 'Tatimi mbi fitimin: Normat, afatet dhe llogaritja' },
     ],
     cta: {
       title: 'Librat e TVSH dhe deklaratat, automatikisht',
@@ -476,6 +482,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'Makedonya için KDV Rehberi: Bilmeniz Gereken Her Şey' },
       { slug: 'e-faktura-obvrska-2026', title: 'E-Fatura Zorunluluğu 2026: Kim Düzenlemeli?' },
       { slug: 'zadolzitelni-elementi-faktura', title: 'Zorunlu Fatura Unsurları' },
+      { slug: 'kazni-ujp-2026', title: 'UJP Cezaları 2026: Geç Başvuru Yaparsanız Ne Olur' },
+      { slug: 'danok-na-dobivka', title: 'Kurumlar vergisi: Oranlar, son tarihler ve hesaplama' },
     ],
     cta: {
       title: 'KDV defterleri ve beyannameler, otomatik',
@@ -516,6 +524,11 @@ export default async function DdvRegistracijaPrag2026Page({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кој е прагот за задолжителна ДДВ регистрација во Македонија?', answer: 'Прагот за задолжителна ДДВ регистрација е 2.000.000 МКД годишен промет (приближно 32.500 EUR). Ако го надминете овој праг, мора да се регистрирате во рок од 15 дена.' },
+        { question: 'Дали е можна доброволна ДДВ регистрација?', answer: 'Да, доброволна ДДВ регистрација е можна за секој бизнис без оглед на прометот. Предностите вклучуваат одбивање на влезен ДДВ, кредибилитет и подобност за државни тендери.' },
+        { question: 'Кои се придобивките од ДДВ регистрација?', answer: 'Главните придобивки се: одбивање на влезен ДДВ на набавки и опрема, зголемен кредибилитет кај деловни партнери, подобност за B2G тендери и право на поврат ако влезниот ДДВ го надминува излезниот.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

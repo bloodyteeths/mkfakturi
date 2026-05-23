@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -141,6 +141,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'ДДВ водич за Македонија' },
       { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата во Македонија' },
       { slug: 'upravljanje-so-rashodi', title: 'Управување со расходи' },
+      { slug: 'trudovo-pravo-osnovi', title: 'Трудово право: Основи за работодавци' },
+      { slug: 'nabavki-i-narachki', title: 'Набавки и нарачки во Facturino' },
     ],
     bottomCta: {
       title: 'Транспортна фирма? Facturino ве покрива.',
@@ -263,6 +265,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'VAT Guide for North Macedonia' },
       { slug: 'presmetka-na-plata-mk', title: 'Salary Calculation in North Macedonia' },
       { slug: 'upravljanje-so-rashodi', title: 'Expense Management' },
+      { slug: 'trudovo-pravo-osnovi', title: 'Labor Law: Basics for Employers' },
+      { slug: 'nabavki-i-narachki', title: 'Purchase Orders & Procurement in Facturino' },
     ],
     bottomCta: {
       title: 'Transport company? Facturino has you covered.',
@@ -385,6 +389,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'Udhëzues TVSH për Maqedoninë' },
       { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagës në Maqedoni' },
       { slug: 'upravljanje-so-rashodi', title: 'Menaxhimi i shpenzimeve' },
+      { slug: 'trudovo-pravo-osnovi', title: 'E drejta e punës: Bazat për punëdhënësit' },
+      { slug: 'nabavki-i-narachki', title: 'Porosi blerjeje dhe furnizime në Facturino' },
     ],
     bottomCta: {
       title: 'Kompani transporti? Facturino ju mbulon.',
@@ -507,6 +513,8 @@ const copy = {
       { slug: 'ddv-vodich-mk', title: 'Makedonya KDV Rehberi' },
       { slug: 'presmetka-na-plata-mk', title: 'Makedonya\'da Maaş Hesaplama' },
       { slug: 'upravljanje-so-rashodi', title: 'Gider Yönetimi' },
+      { slug: 'trudovo-pravo-osnovi', title: 'İş Hukuku: İşverenler İçin Temel Bilgiler' },
+      { slug: 'nabavki-i-narachki', title: 'Facturino\'da Satın Alma Siparişleri ve Tedarik' },
     ],
     bottomCta: {
       title: 'Taşımacılık şirketi? Facturino yanınızda.',
@@ -546,6 +554,11 @@ export default async function SmetkovodstvoZaTransportPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Дали ДДВ за меѓународен транспорт е 0%?', answer: 'Да. Транспорт на стока кој почнува или завршува надвор од Македонија се оданочува со 0% ДДВ (Чл. 24 ЗДДВ). Мора да имате CMR товарница како доказ. Домашен транспорт е 18%. Важно: 0% стапка НЕ значи ослободување — имате право на одбивен влезен ДДВ.' },
+        { question: 'Што е патен налог и зошто е задолжителен?', answer: 'Патниот налог е документ за секое возење (домашно или меѓународно) кој содржи: возач, возило, релација, датум/час и цел. Без патен налог, трошоците за гориво и дневници НЕ се признат расход при даночна контрола. Рок за поднесување: 5 работни дена по завршување.' },
+        { question: 'Колку изнесуваат дневниците за возачи?', answer: 'Домашни дневници: 1.700 МКД по ден (за патување над 8 часа). Меѓународни: различни по земја — Германија EUR 50, Србија EUR 35, Турција EUR 40, Грција EUR 45. До утврдениот лимит се неоданочиви. Над лимитот се третираат како плата (10% ПДД + придонеси 28%).' },
+      ])) }} />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6">

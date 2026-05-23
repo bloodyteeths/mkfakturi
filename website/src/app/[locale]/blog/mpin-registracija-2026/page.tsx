@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -111,6 +111,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'МПИН образец: Водич за месечна пресметка' },
       { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата во Македонија: Придонеси и даноци' },
       { slug: 'trudovo-pravo-osnovi', title: 'Трудово право: 10 работи што секој работодавач мора да ги знае' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Неисплатена плата: Како да пријавите до Инспекторат за труд' },
+      { slug: 'rok-za-plata-makedonija', title: 'Рок за исплата на плата: Што вели законот' },
     ],
     cta: {
       title: 'МПИН автоматски, без грешки',
@@ -202,6 +204,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'MPIN Form: Monthly Payroll Filing Guide' },
       { slug: 'presmetka-na-plata-mk', title: 'Payroll Calculation in Macedonia: Contributions and Taxes' },
       { slug: 'trudovo-pravo-osnovi', title: 'Labor Law: 10 Things Every Employer Must Know' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Unpaid Wages: How to Report to the Labor Inspectorate' },
+      { slug: 'rok-za-plata-makedonija', title: 'Salary Payment Deadline: What the Law Says' },
     ],
     cta: {
       title: 'MPIN filing, automated',
@@ -293,6 +297,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'Formulari MPIN: Udhëzues për llogaritjen mujore' },
       { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagës në Maqedoni: Kontributet dhe tatimet' },
       { slug: 'trudovo-pravo-osnovi', title: "E drejta e punës: 10 gjëra që çdo punëdhënës duhet t'i dijë" },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Paga e papaguar: Si të raportoni tek Inspektorati i Punës' },
+      { slug: 'rok-za-plata-makedonija', title: 'Afati i pagesës së pagës: Çfarë thotë ligji' },
     ],
     cta: {
       title: 'MPIN automatik, pa gabime',
@@ -384,6 +390,8 @@ const copy = {
       { slug: 'mpin-obrazec', title: 'MPIN Formu: Aylık Bordro Beyanname Rehberi' },
       { slug: 'presmetka-na-plata-mk', title: "Makedonya'da Maaş Hesaplama: Primler ve Vergiler" },
       { slug: 'trudovo-pravo-osnovi', title: 'İş Hukuku: Her İşverenin Bilmesi Gereken 10 Şey' },
+      { slug: 'neisplatena-plata-prijavuvanje', title: 'Ödenmemiş Maaş: Çalışma Müfettişliğine Nasıl Şikayet Edilir' },
+      { slug: 'rok-za-plata-makedonija', title: 'Maaş Ödeme Süresi: Kanun Ne Diyor' },
     ],
     cta: {
       title: 'MPIN otomatik, hatasız',
@@ -424,6 +432,11 @@ export default async function MpinRegistracija2026Page({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кој мора да се регистрира за МПИН?', answer: 'Секој работодавач со барем 1 вработен, самовработени кои си исплаќаат плата, субјекти со авторски договори и странски работодавачи со вработени во Македонија.' },
+        { question: 'Како се регистрира МПИН?', answer: 'Регистрацијата се врши на etax.ujp.gov.mk со дигитален сертификат и поднесување на МПИН-1 образец во регионалната канцеларија на УЈП.' },
+        { question: 'Кој е месечниот рок за МПИН?', answer: 'МПИН мора да се поднесе до 15-ти во наредниот месец. На пример, за јануарските плати рокот е 15 февруари. Задоцнувањето носи казни од 1.000-3.000 евра.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

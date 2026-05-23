@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -138,6 +138,8 @@ const copy = {
       { slug: 'nabavki-i-narachki', title: 'Дигитални нарачки за набавка' },
       { slug: 'upravljanje-so-rashodi', title: 'Управување со расходи во Facturino' },
       { slug: 'bilans-na-sostojba', title: 'Биланс на состојба: водич' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Најдобар сметководствен софтвер 2026' },
+      { slug: 'ddv-vodich-mk', title: 'ДДВ водич за Македонија' },
     ],
     bottomCta: {
       title: 'Производство? Facturino го поедноставува.',
@@ -257,6 +259,8 @@ const copy = {
       { slug: 'nabavki-i-narachki', title: 'Digital Purchase Orders' },
       { slug: 'upravljanje-so-rashodi', title: 'Expense Management in Facturino' },
       { slug: 'bilans-na-sostojba', title: 'Balance Sheet: A Guide' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Best Accounting Software 2026' },
+      { slug: 'ddv-vodich-mk', title: 'VAT Guide for North Macedonia' },
     ],
     bottomCta: {
       title: 'Manufacturing? Facturino simplifies it.',
@@ -376,6 +380,8 @@ const copy = {
       { slug: 'nabavki-i-narachki', title: 'Porosi dixhitale blerje' },
       { slug: 'upravljanje-so-rashodi', title: 'Menaxhimi i shpenzimeve ne Facturino' },
       { slug: 'bilans-na-sostojba', title: 'Bilanci: udhezues' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Softueri me i mire i kontabilitetit 2026' },
+      { slug: 'ddv-vodich-mk', title: 'Udhezues TVSH per Maqedonine' },
     ],
     bottomCta: {
       title: 'Prodhim? Facturino e thjeshton.',
@@ -495,6 +501,8 @@ const copy = {
       { slug: 'nabavki-i-narachki', title: 'Dijital Satin Alma Siparisleri' },
       { slug: 'upravljanje-so-rashodi', title: 'Facturino\'da Gider Yonetimi' },
       { slug: 'bilans-na-sostojba', title: 'Bilanco: Rehber' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'En Iyi Muhasebe Yazilimi 2026' },
+      { slug: 'ddv-vodich-mk', title: 'Makedonya KDV Rehberi' },
     ],
     bottomCta: {
       title: 'Uretim? Facturino kolaylastirir.',
@@ -534,6 +542,11 @@ export default async function SmetkovodstvoZaProizvodstvoPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Што е BOM (Bill of Materials) и зошто е важен?', answer: 'BOM е листа на сите суровини, полупроизводи и компоненти потребни за производство на еден готов производ. Без точна рецептура, невозможна е правилна калкулација на цена, контрола на залихи и планирање на набавки. Може да биде еднонивовски (леб: брашно+квасец) или повеќенивовски (тесто→пица→замрзната пица).' },
+        { question: 'Како се пресметува WAC за производство?', answer: 'WAC (пондериран просечен трошок) се пресметува по секоја нова набавка: (постоечка вредност на залиха + вредност на нова набавка) / вкупна количина = нова просечна цена. Ова е задолжителен метод во Македонија за вреднување на залихи по МСС 2.' },
+        { question: 'Како се книжи загубен материјал во производство?', answer: 'Нормативен кало (во рамки на утврдени норми) е признат расход — се книжи на сметка 493 (Кало и растур). Кало над нормативот е непризнат расход и подлежи на данок. Расипан материјал се отпишува со записник од комисија и се книжи како вонреден расход.' },
+      ])) }} />
 
       <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6">

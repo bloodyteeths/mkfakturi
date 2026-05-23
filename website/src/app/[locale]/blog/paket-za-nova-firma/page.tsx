@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -111,6 +111,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'Како да отворите фирма во Македонија: Комплетен водич' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Сметководство за почетници: Основи што секој бизнис ги знае' },
       { slug: 'mpin-registracija-2026', title: 'МПИН регистрација 2026: Чекор по чекор водич' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Регистрација на фирма: Чекор по чекор водич' },
+      { slug: 'mpin-obrazec', title: 'МПИН образец: Водич за месечна пресметка' },
     ],
     cta: {
       title: 'Започнете правилно од ден 1',
@@ -202,6 +204,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'How to Register a Company in Macedonia: Complete Guide' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Accounting for Beginners: Basics Every Business Should Know' },
       { slug: 'mpin-registracija-2026', title: 'MPIN Registration 2026: Step-by-Step Guide' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Company Registration: Step-by-Step Checklist' },
+      { slug: 'mpin-obrazec', title: 'MPIN Form: Monthly Payroll Filing Guide' },
     ],
     cta: {
       title: 'Start right from day 1',
@@ -293,6 +297,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'Si të hapni kompani në Maqedoni: Udhëzues i plotë' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Kontabiliteti për fillestarë: Bazat që çdo biznes i njeh' },
       { slug: 'mpin-registracija-2026', title: 'Regjistrimi MPIN 2026: Udhëzues hap pas hapi' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Regjistrimi i firmës: Udhëzues hap pas hapi' },
+      { slug: 'mpin-obrazec', title: 'Formulari MPIN: Udhëzues për llogaritjen mujore' },
     ],
     cta: {
       title: 'Filloni si duhet nga dita 1',
@@ -384,6 +390,8 @@ const copy = {
       { slug: 'otvoranje-firma-mk', title: 'Makedonya\'da şirket nasıl kurulur: Kapsamlı rehber' },
       { slug: 'smetkovodstvo-za-pocetnici', title: 'Yeni başlayanlar için muhasebe: Her işletmenin bilmesi gerekenler' },
       { slug: 'mpin-registracija-2026', title: 'MPIN Kaydı 2026: Adım Adım Rehber' },
+      { slug: 'registracija-firma-cekor-po-cekor', title: 'Firma Kaydı: Adım Adım Kontrol Listesi' },
+      { slug: 'mpin-obrazec', title: 'MPIN Formu: Aylık Bordro Beyanname Rehberi' },
     ],
     cta: {
       title: '1. günden doğru başlayın',
@@ -424,6 +432,11 @@ export default async function PaketZaNovaFirmaPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Што прво по регистрација на фирма?', answer: 'Првите чекори по регистрација се: отворање деловна банкарска сметка, регистрација во УЈП за даночен број, набавка на печат и поставување сметководствен софтвер.' },
+        { question: 'Кога да регистрирам МПИН?', answer: 'МПИН мора да се регистрира пред првото вработување — вклучувајќи и себеси како управител со плата. Поднесете МПИН-1 образец во УЈП.' },
+        { question: 'Кога мора да се регистрирам за ДДВ?', answer: 'Задолжителна ДДВ регистрација е кога годишниот промет надмине 2.000.000 МКД. Рокот е 15 дена од денот на надминување. Доброволна регистрација е можна и под тој праг.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

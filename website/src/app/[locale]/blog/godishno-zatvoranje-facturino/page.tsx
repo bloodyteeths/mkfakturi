@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -148,6 +148,8 @@ const copy = {
       { slug: 'godishna-smetka-2025', title: 'Годишна сметка 2025: Целосен водич за поднесување до ЦРСМ' },
       { slug: 'za-smetkovoditeli', title: 'Зошто сметководителите преминуваат на Facturino' },
       { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
+      { slug: 'bilans-na-sostojba', title: 'Биланс на состојба и биланс на успех: AOP ознаки' },
+      { slug: 'ifrs-izvesti-mk', title: 'МСФИ/IFRS извештаи во Македонија: кој мора и како' },
     ],
     ctaSection: {
       title: 'Годишна сметка за 30 минути, не за 3 дена',
@@ -274,6 +276,8 @@ const copy = {
       { slug: 'godishna-smetka-2025', title: 'Annual Accounts 2025: Complete Filing Guide for CRMS' },
       { slug: 'za-smetkovoditeli', title: 'Why Accountants Are Switching to Facturino' },
       { slug: 'zosto-facturino', title: '10 Reasons Macedonian Businesses Choose Facturino' },
+      { slug: 'bilans-na-sostojba', title: 'Balance Sheet & Income Statement: AOP Codes' },
+      { slug: 'ifrs-izvesti-mk', title: 'IFRS Reporting in North Macedonia: Who Must and How' },
     ],
     ctaSection: {
       title: 'Annual accounts in 30 minutes, not 3 days',
@@ -400,6 +404,8 @@ const copy = {
       { slug: 'godishna-smetka-2025', title: 'Llogarit\u00eb vjetore 2025: Udh\u00ebzues i plot\u00eb p\u00ebr dor\u00ebzim n\u00eb QRMK' },
       { slug: 'za-smetkovoditeli', title: 'Pse kontabilistët po kalojnë në Facturino' },
       { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
+      { slug: 'bilans-na-sostojba', title: 'Bilanci dhe pasqyra e të ardhurave: Kodet AOP' },
+      { slug: 'ifrs-izvesti-mk', title: 'Raportet SNRF/IFRS në Maqedoni: kush duhet dhe si' },
     ],
     ctaSection: {
       title: 'Llogarit\u00eb vjetore n\u00eb 30 minuta, jo n\u00eb 3 dit\u00eb',
@@ -526,6 +532,8 @@ const copy = {
       { slug: 'godishna-smetka-2025', title: 'Y\u0131ll\u0131k hesaplar 2025: CRMS dosyalama rehberi' },
       { slug: 'za-smetkovoditeli', title: 'Muhasebeciler neden Facturino\'ya geçiyor' },
       { slug: 'zosto-facturino', title: "Makedon i\u015fletmelerin Facturino'yu se\u00e7mesinin 10 nedeni" },
+      { slug: 'bilans-na-sostojba', title: 'Bilan\u00e7o ve gelir tablosu: AOP kodlar\u0131' },
+      { slug: 'ifrs-izvesti-mk', title: "Makedonya'da UFRS/IFRS raporlar\u0131: kim zorunlu ve nas\u0131l" },
     ],
     ctaSection: {
       title: 'Y\u0131ll\u0131k hesaplar 30 dakikada, 3 g\u00fcnde de\u011fil',
@@ -634,6 +642,11 @@ export default async function YearEndClosingPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Како се прави годишно затворање на книги?', answer: 'Facturino го автоматизира годишното затворање во 6 чекори: предпроверка, преглед на финансии, корекции (опционално), затворање со автоматски книжења, генерирање на UJP извештаи (Образец 36, 37, ДБ-ВП) и заклучување на фискалната година.' },
+        { question: 'Кога се прави годишно затворање?', answer: 'Фискалната година во Македонија се поклопува со календарската (31 декември). Нацрт-извештаите се подготвуваат до крајот на јануари, годишната сметка се поднесува до ЦРСМ до 28 февруари, а даночниот биланс ДБ-ВП до УЈП до 15 март.' },
+        { question: 'Кои чекори се вклучени во годишното затворање?', answer: 'Шест чекори: 1) Предпроверка на готовност, 2) Преглед на финансиска состојба, 3) Корекции ако е потребно, 4) Затворање — дебитирање приходи, кредитирање расходи, книжење на задржана добивка, 5) Генерирање на UJP извештаи, 6) Заклучување на фискалната година.' },
+      ])) }} />
       {/* BACK LINK */}
       <section className="pt-24 md:pt-28 pb-0">
         <div className="container px-4 sm:px-6 max-w-4xl mx-auto">

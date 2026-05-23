@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -113,6 +113,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Пресметка на плата во Македонија: Придонеси и даноци' },
       { slug: 'trudovo-pravo-osnovi', title: 'Трудово право: 10 работи што секој работодавач мора да ги знае' },
       { slug: 'rokovi-ujp-2026', title: 'Даночен календар 2026: Сите рокови за УЈП' },
+      { slug: 'mpin-registracija-2026', title: 'МПИН регистрација и поднесување 2026' },
+      { slug: 'rok-za-plata-makedonija', title: 'Рок за исплата на плата: Што вели законот' },
     ],
     cta: {
       title: 'Автоматизирајте го МПИН процесот',
@@ -206,6 +208,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Payroll Calculation in Macedonia: Contributions and Taxes' },
       { slug: 'trudovo-pravo-osnovi', title: 'Labor Law: 10 Things Every Employer Must Know' },
       { slug: 'rokovi-ujp-2026', title: 'Tax Calendar 2026: All UJP Deadlines' },
+      { slug: 'mpin-registracija-2026', title: 'MPIN Registration & Filing 2026' },
+      { slug: 'rok-za-plata-makedonija', title: 'Salary Payment Deadline: What the Law Says' },
     ],
     cta: {
       title: 'Automate Your MPIN Process',
@@ -299,6 +303,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: 'Llogaritja e pagës në Maqedoni: Kontributet dhe tatimet' },
       { slug: 'trudovo-pravo-osnovi', title: "E drejta e punës: 10 gjëra që çdo punëdhënës duhet t'i dijë" },
       { slug: 'rokovi-ujp-2026', title: 'Kalendari tatimor 2026: Të gjitha afatet për DAP' },
+      { slug: 'mpin-registracija-2026', title: 'Regjistrimi dhe dorëzimi MPIN 2026' },
+      { slug: 'rok-za-plata-makedonija', title: 'Afati i pagesës së pagës: Çfarë thotë ligji' },
     ],
     cta: {
       title: 'Automatizoni procesin tuaj MPIN',
@@ -392,6 +398,8 @@ const copy = {
       { slug: 'presmetka-na-plata-mk', title: "Makedonya'da maaş hesaplama: Primler ve vergiler" },
       { slug: 'trudovo-pravo-osnovi', title: 'İş hukuku: Her işverenin bilmesi gereken 10 şey' },
       { slug: 'rokovi-ujp-2026', title: 'Vergi takvimi 2026: Tüm UJP tarihleri' },
+      { slug: 'mpin-registracija-2026', title: 'MPIN Kaydı ve Dosyalama 2026' },
+      { slug: 'rok-za-plata-makedonija', title: 'Maaş Ödeme Süresi: Kanun Ne Diyor' },
     ],
     cta: {
       title: 'MPIN Sürecinizi Otomatikleştirin',
@@ -432,6 +440,11 @@ export default async function MpinObrazecPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Што е МПИН образец?', answer: 'МПИН (Месечна Пресметка за Интегрирана Наплата) е задолжителен месечен образец кој работодавачите го поднесуваат до УЈП со информации за плати, придонеси и персонален данок на доход за сите вработени.' },
+        { question: 'Кога се поднесува МПИН?', answer: 'МПИН образецот се поднесува до 15-ти во наредниот месец за претходниот работен месец. На пример, МПИН за јануари се поднесува до 15 февруари.' },
+        { question: 'Која е казната за задоцнето поднесување на МПИН?', answer: 'Казната за задоцнето поднесување е од 500 до 1.000 евра за правни лица, плус камата од 0,03% дневно на неплатени придонеси. Повторни прекршувања носат двојни казни.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -124,6 +124,8 @@ const copy = {
       { slug: 'bilans-na-sostojba', title: 'Биланс на состојба и биланс на успех: AOP ознаки' },
       { slug: 'godishna-smetka-2025', title: 'Годишна сметка 2025: Целосен водич за поднесување' },
       { slug: 'danok-na-dobivka', title: 'Данок на добивка: Стапки, рокови и пресметка' },
+      { slug: 'godishno-zatvoranje-facturino', title: 'Годишно затворање на книги: 6 чекори со Facturino' },
+      { slug: 'smetkovodstvo-za-nevladini', title: 'Сметководство за невладини организации во Македонија' },
     ],
     cta: {
       title: 'Facturino поддржува IFRS контен план и известување',
@@ -228,6 +230,8 @@ const copy = {
       { slug: 'bilans-na-sostojba', title: 'Balance Sheet & Income Statement: AOP Codes' },
       { slug: 'godishna-smetka-2025', title: 'Annual Accounts 2025: Complete Filing Guide' },
       { slug: 'danok-na-dobivka', title: 'Corporate Income Tax: Rates, Deadlines and Calculation' },
+      { slug: 'godishno-zatvoranje-facturino', title: 'Year-End Closing: 6 Steps with Facturino' },
+      { slug: 'smetkovodstvo-za-nevladini', title: 'Accounting for NGOs in North Macedonia' },
     ],
     cta: {
       title: 'Facturino supports IFRS chart of accounts and reporting',
@@ -332,6 +336,8 @@ const copy = {
       { slug: 'bilans-na-sostojba', title: 'Bilanci dhe pasqyra e të ardhurave: Kodet AOP' },
       { slug: 'godishna-smetka-2025', title: 'Llogaritë vjetore 2025: Udhëzues i plotë për dorëzim' },
       { slug: 'danok-na-dobivka', title: 'Tatimi mbi fitimin: Normat, afatet dhe llogaritja' },
+      { slug: 'godishno-zatvoranje-facturino', title: 'Mbyllja e vitit: 6 hapa me Facturino' },
+      { slug: 'smetkovodstvo-za-nevladini', title: 'Kontabiliteti per OJQ ne Maqedoni' },
     ],
     cta: {
       title: 'Facturino mbështet planin kontabël IFRS dhe raportimin',
@@ -436,6 +442,8 @@ const copy = {
       { slug: 'bilans-na-sostojba', title: 'Bilanço ve gelir tablosu: AOP kodları' },
       { slug: 'godishna-smetka-2025', title: 'Yıllık hesaplar 2025: Tam dosyalama rehberi' },
       { slug: 'danok-na-dobivka', title: 'Kurumlar vergisi: Oranlar, son tarihler ve hesaplama' },
+      { slug: 'godishno-zatvoranje-facturino', title: 'Yıl sonu kapanışı: Facturino ile 6 adım' },
+      { slug: 'smetkovodstvo-za-nevladini', title: 'Makedonya\'da STK\'lar için muhasebe' },
     ],
     cta: {
       title: 'Facturino UFRS hesap planını ve raporlamayı destekler',
@@ -476,6 +484,11 @@ export default async function IfrsIzvestiMkPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Кој мора да користи МСФИ/IFRS во Македонија?', answer: 'Котирани компании на Македонска берза, банки, осигурителни компании, инвестициски и пензиски фондови, и големи компании кои исполнуваат 2 од 3 критериуми: вкупна актива >2М евра, приход >4М евра, >50 вработени. Останатите користат МСС.' },
+        { question: 'Која е разликата меѓу МСС и МСФИ?', answer: 'МСС (Македонски сметководствени стандарди) се поедноставени и бараат само биланс на состојба, биланс на успех и белешки. IFRS бара полн комплет: биланс, извештај за парични текови, промени во капитал и опсежни обелоденувања. IFRS користи фер вредност пошироко и има посложени правила за лизинг (IFRS 16), приходи (IFRS 15) и обезвреднување (IFRS 9).' },
+        { question: 'Кога е задолжителна ревизија во Македонија?', answer: 'Ревизијата е задолжителна за сите IFRS приготвувачи, компании со приход >4М евра, >50 вработени, вкупна актива >2М евра, субјекти од јавен интерес и НВО со статус на јавна корист кои примаат >100.000 евра. Ревизорот мора да биде лиценциран од ИСОС.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

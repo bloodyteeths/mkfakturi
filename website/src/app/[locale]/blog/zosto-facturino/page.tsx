@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -76,6 +76,8 @@ const copy = {
       { slug: 'za-smetkovoditeli', title: 'Зошто сметководителите преминуваат на Facturino' },
       { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Годишно затворање на книги: 6 чекори со Facturino' },
+      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Зошто табели не се доволни' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Најдобар сметководствен софтвер 2026' },
     ],
     cta: {
       title: 'Придружете се на илјадници македонски бизниси',
@@ -132,6 +134,8 @@ const copy = {
       { slug: 'za-smetkovoditeli', title: 'Why Accountants Are Switching to Facturino' },
       { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Year-End Closing: 6 Steps with Facturino' },
+      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Why Spreadsheets Aren\'t Enough' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Best Accounting Software 2026' },
     ],
     cta: {
       title: 'Join Thousands of Macedonian Businesses',
@@ -188,6 +192,8 @@ const copy = {
       { slug: 'za-smetkovoditeli', title: 'Pse kontabilistët po kalojnë në Facturino' },
       { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Mbyllja e vitit: 6 hapa me Facturino' },
+      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Pse tabelat nuk mjaftojnë' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'Softueri më i mirë i kontabilitetit 2026' },
     ],
     cta: {
       title: 'Bashkohuni me mijëra biznese maqedonase',
@@ -244,6 +250,8 @@ const copy = {
       { slug: 'za-smetkovoditeli', title: 'Muhasebeciler neden Facturino\'ya geçiyor' },
       { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
       { slug: 'godishno-zatvoranje-facturino', title: 'Yıl sonu kapanışı: Facturino ile 6 adım' },
+      { slug: 'facturino-vs-excel', title: 'Facturino vs Excel: Neden Tablolar Yeterli Değil' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: 'En İyi Muhasebe Yazılımı 2026' },
     ],
     cta: {
       title: 'Binlerce Makedon İşletmeye Katılın',
@@ -284,6 +292,11 @@ export default async function ZostoFacturinoPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Зошто да го изберам Facturino?', answer: 'Facturino е создаден специјално за македонскиот пазар — е-Фактура UBL, ДДВ пресметка, МПИН образци, банкарски увоз со AI порамнување, POS со фискален печатач и 4-јазичен интерфејс (МК/SQ/TR/EN).' },
+        { question: 'Дали Facturino има бесплатен план?', answer: 'Да, Facturino нуди бесплатен план со до 3 фактури месечно. Идеален за фрилансери и нови бизниси. Надградете кога сте подготвени, без притисок.' },
+        { question: 'Дали Facturino е подготвен за е-Фактура?', answer: 'Да, Facturino има вградена поддршка за е-Фактура UBL 2.1 формат од првиот ден. Подготвен за задолжителната е-Фактура обврска од октомври 2026.' },
+      ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

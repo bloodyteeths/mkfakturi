@@ -1,6 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
+import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -109,6 +109,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Како да направите фактура: Чекор-по-чекор водич' },
       { slug: 'sto-e-e-faktura', title: 'Што е е-фактура и зошто е задолжителна?' },
       { slug: 'ddv-vodich-mk', title: 'ДДВ во Македонија: Целосен водич за 2026' },
+      { slug: 'faktura-primer-mk', title: 'Фактура пример: Македонски образец' },
+      { slug: 'e-faktura-obvrska-2026', title: 'Е-фактура 2026: Кој мора и како да се подготвите' },
     ],
     cta: {
       title: 'Facturino гарантира комплетна фактура',
@@ -195,6 +197,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'How to Create an Invoice: Step-by-Step Guide' },
       { slug: 'sto-e-e-faktura', title: 'What Is E-Invoice and Why Is It Mandatory?' },
       { slug: 'ddv-vodich-mk', title: 'VAT in Macedonia: Complete Guide for 2026' },
+      { slug: 'faktura-primer-mk', title: 'Invoice Example: Macedonian Template' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Invoice Mandate 2026: Who Must Comply & How to Prepare' },
     ],
     cta: {
       title: 'Facturino guarantees a complete invoice',
@@ -281,6 +285,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Si të krijoni një faturë: Udhëzues hap pas hapi' },
       { slug: 'sto-e-e-faktura', title: 'Çfarë është e-fatura dhe pse është e detyrueshme?' },
       { slug: 'ddv-vodich-mk', title: 'TVSH në Maqedoni: Udhëzues i plotë për 2026' },
+      { slug: 'faktura-primer-mk', title: 'Shembull fature: Modeli maqedonas' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-fatura 2026: Kush duhet dhe si të përgatiteni' },
     ],
     cta: {
       title: 'Facturino garanton faturë të plotë',
@@ -367,6 +373,8 @@ const copy = {
       { slug: 'kako-da-napravite-faktura', title: 'Fatura nasıl oluşturulur: Adım adım rehber' },
       { slug: 'sto-e-e-faktura', title: 'E-fatura nedir ve neden zorunludur?' },
       { slug: 'ddv-vodich-mk', title: "Makedonya'da KDV: 2026 için eksiksiz rehber" },
+      { slug: 'faktura-primer-mk', title: 'Fatura Örneği: Makedonya Şablonu' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Fatura 2026: Kim Uymalı ve Nasıl Hazırlanmalı' },
     ],
     cta: {
       title: 'Facturino eksiksiz fatura garantisi verir',
@@ -410,6 +418,11 @@ export default async function ZadolzitelniElementiFakturaPage({
     <main id="main-content">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
+        { question: 'Колку задолжителни полиња на фактура?', answer: 'Според Законот за ДДВ (член 53) секоја фактура во Македонија мора да содржи 15 задолжителни елементи.' },
+        { question: 'Што ако недостига поле?', answer: 'Фактура без задолжителен елемент е даночно невалидна. Купувачот не може да одбие ДДВ, а УЈП може да изрече казна од 500 до 3.000 EUR.' },
+        { question: 'ЕДБ задолжителен?', answer: 'Да, ЕДБ (единствен даночен број) е задолжителен и за издавачот и за купувачот при Б2Б фактури. Без ЕДБ фактурата не е валидна.' },
+      ])) }} />
       {/* ============================================================ */}
       {/*  ARTICLE HEADER                                              */}
       {/* ============================================================ */}
