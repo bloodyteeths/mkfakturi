@@ -237,12 +237,12 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
-import Ls from '@/scripts/admin/helpers/ls.js'
+import { useCompanyStore } from '@/scripts/admin/stores/company'
 import StockTabNavigation from '@/scripts/admin/components/StockTabNavigation.vue'
 
 const route = useRoute()
 const router = useRouter()
+const companyStore = useCompanyStore()
 
 const isEditing = computed(() => !!route.params.id)
 const isLoadingEdit = ref(false)
@@ -252,8 +252,8 @@ const bills = ref([])
 const warehouses = ref([])
 
 const apiBase = computed(() => {
-  const companyId = Ls.get('selectedCompany')
-  return `/api/v1/partner/companies/${companyId}/accounting`
+  const companyId = companyStore.selectedCompany?.id
+  return `/partner/companies/${companyId}/accounting`
 })
 
 const emptyItem = () => ({
@@ -354,7 +354,7 @@ function syncTariffRateFromItem(idx) {
 async function onBillSelected(billId) {
   if (!billId) return
   try {
-    const { data } = await axios.get(`${apiBase.value}/import-calculations/from-bill/${billId}`)
+    const { data } = await window.axios.get(`${apiBase.value}/import-calculations/from-bill/${billId}`)
     if (data.success && data.data) {
       const d = data.data
       form.supplier_name = d.supplier_name || ''
@@ -383,7 +383,7 @@ async function onBillSelected(billId) {
 async function loadEditData() {
   isLoadingEdit.value = true
   try {
-    const { data } = await axios.get(`${apiBase.value}/import-calculations/${route.params.id}`)
+    const { data } = await window.axios.get(`${apiBase.value}/import-calculations/${route.params.id}`)
     if (data.success && data.data) {
       const d = data.data
       form.document_date = d.document_date?.split('T')[0] || ''
@@ -448,9 +448,9 @@ async function onSubmit() {
 
     let response
     if (isEditing.value) {
-      response = await axios.put(`${apiBase.value}/import-calculations/${route.params.id}`, payload)
+      response = await window.axios.put(`${apiBase.value}/import-calculations/${route.params.id}`, payload)
     } else {
-      response = await axios.post(`${apiBase.value}/import-calculations`, payload)
+      response = await window.axios.post(`${apiBase.value}/import-calculations`, payload)
     }
 
     if (response.data.success) {
@@ -469,8 +469,8 @@ async function onSubmit() {
 
 async function loadBills() {
   try {
-    const companyId = Ls.get('selectedCompany')
-    const { data } = await axios.get('/api/v1/bills', {
+    const companyId = companyStore.selectedCompany?.id
+    const { data } = await window.axios.get('/bills', {
       headers: { company: companyId },
       params: { limit: 'all' },
     })
@@ -482,8 +482,8 @@ async function loadBills() {
 
 async function loadWarehouses() {
   try {
-    const companyId = Ls.get('selectedCompany')
-    const { data } = await axios.get('/api/v1/warehouses', {
+    const companyId = companyStore.selectedCompany?.id
+    const { data } = await window.axios.get('/warehouses', {
       headers: { company: companyId },
     })
     warehouses.value = data.data || data.warehouses || []

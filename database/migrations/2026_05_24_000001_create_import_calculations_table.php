@@ -11,11 +11,11 @@ return new class extends Migration
         if (! Schema::hasTable('import_calculations')) {
             Schema::create('import_calculations', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('company_id');
+                $table->unsignedInteger('company_id');
                 $table->string('document_number', 30);
                 $table->date('document_date');
                 $table->string('status', 20)->default('draft');
-                $table->unsignedBigInteger('supplier_bill_id')->nullable();
+                $table->unsignedInteger('supplier_bill_id')->nullable();
                 $table->string('supplier_name', 255)->nullable();
                 $table->string('supplier_invoice_number', 100)->nullable();
                 $table->string('currency_code', 3)->default('EUR');
@@ -30,9 +30,9 @@ return new class extends Migration
                 $table->bigInteger('total_invoice_value_mkd')->default(0);
                 $table->decimal('vat_rate', 5, 2)->default(18.00);
                 $table->text('notes')->nullable();
-                $table->unsignedBigInteger('approved_by')->nullable();
+                $table->unsignedInteger('approved_by')->nullable();
                 $table->timestamp('approved_at')->nullable();
-                $table->unsignedBigInteger('created_by')->nullable();
+                $table->unsignedInteger('created_by')->nullable();
                 $table->json('meta')->nullable();
                 $table->timestamps();
                 $table->softDeletes();
@@ -55,7 +55,7 @@ return new class extends Migration
             Schema::create('import_calculation_items', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('import_calculation_id');
-                $table->unsignedBigInteger('item_id')->nullable();
+                $table->unsignedInteger('item_id')->nullable();
                 $table->string('tariff_heading', 20);
                 $table->string('description', 500);
                 $table->decimal('quantity', 12, 4);
@@ -82,8 +82,8 @@ return new class extends Migration
                 $table->foreign('import_calculation_id')->references('id')->on('import_calculations')->onDelete('cascade');
                 $table->foreign('item_id')->references('id')->on('items')->onDelete('set null');
 
-                $table->index(['import_calculation_id', 'item_id']);
-                $table->index(['import_calculation_id', 'tariff_heading']);
+                $table->index(['import_calculation_id', 'item_id'], 'ic_items_calc_item_idx');
+                $table->index(['import_calculation_id', 'tariff_heading'], 'ic_items_calc_tariff_idx');
             });
         }
     }
