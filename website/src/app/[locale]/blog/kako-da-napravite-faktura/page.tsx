@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/kako-da-napravite-faktura', {
+  return buildArticleMetadata(locale, '/blog/kako-da-napravite-faktura', {
     title: {
-      mk: 'Како да направите фактура: Чекор-по-чекор водич — Facturino',
-      en: 'How to Create an Invoice: Step-by-Step Guide — Facturino',
-      sq: 'Si të krijoni një faturë: Udhëzues hap pas hapi — Facturino',
-      tr: 'Fatura nasıl oluşturulur: Adım adım rehber — Facturino',
+      mk: 'Како да направите фактура Македонија: ЕДБ, ДДВ и задолжителни полиња',
+      en: 'How to Create an Invoice in North Macedonia: Required Fields & VAT Guide',
+      sq: 'Si të krijoni faturë në Maqedoni: Fushat e detyrueshme dhe TVSH',
+      tr: 'Kuzey Makedonya\'da Fatura Nasıl Oluşturulur: Gerekli Alanlar ve KDV',
     },
     description: {
-      mk: 'Научете како правилно да креирате фактура во Македонија — задолжителни полиња, ЕДБ, ЕМБС, ДДВ, чести грешки и како Facturino го олеснува процесот.',
-      en: 'Learn how to properly create an invoice in Macedonia — required fields, EDB, EMBS, VAT, common mistakes, and how Facturino simplifies the process.',
-      sq: 'Mësoni si të krijoni saktë një faturë në Maqedoni — fushat e detyrueshme, EDB, EMBS, TVSH, gabime të zakonshme dhe si ndihmon Facturino.',
-      tr: 'Makedonya\'da nasıl doğru fatura oluşturulacağını öğrenin — zorunlu alanlar, EDB, EMBS, KDV, yaygın hatalar ve Facturino nasıl kolaylaştırır.',
+      mk: 'Чекор-по-чекор водич за креирање фактура во Македонија: задолжителни полиња (ЕДБ, ЕМБС, ДДВ), чести грешки, профактура и како Facturino ги автоматизира.',
+      en: 'Step-by-step guide to creating invoices in North Macedonia: required fields (EDB tax number, EMBS, VAT), common mistakes, proforma invoices, and how Facturino automates it.',
+      sq: 'Udhëzues hap pas hapi për krijimin e faturës në Maqedoni: fushat e detyrueshme (EDB, EMBS, TVSH), gabimet e zakonshme dhe si i automatizon Facturino.',
+      tr: 'Kuzey Makedonya\'da fatura oluşturma rehberi: zorunlu alanlar (EDB vergi no, EMBS, KDV), yaygın hatalar ve Facturino ile otomasyon.',
     },
+    datePublished: '2026-02-10',
   })
 }
 
@@ -386,11 +388,29 @@ export default async function KakoDaNapraviteFakturaPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'kako-da-napravite-faktura',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-10',
+    tags: ['invoice', 'how to', 'north macedonia', 'EDB', 'VAT', 'фактура'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/kako-da-napravite-faktura` },
+  ])
+
   return (
     <main id="main-content">
-      {/* ============================================================ */}
-      {/*  ARTICLE HEADER                                              */}
-      {/* ============================================================ */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         {/* Background blobs */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

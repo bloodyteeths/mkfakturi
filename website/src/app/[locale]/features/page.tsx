@@ -1041,11 +1041,42 @@ export default async function FeaturesPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const softwareAppLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Facturino',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    url: 'https://www.facturino.mk',
+    description: t.hero.subtitle,
+    featureList: t.sections.map((s) => s.title).join(', '),
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'MKD',
+      description: 'Free plan available, paid plans from 2,400 MKD/month',
+    },
+    author: {
+      '@type': 'Organization',
+      name: 'Facturino DOOEL',
+      url: 'https://www.facturino.mk',
+    },
+  }
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Facturino', item: `https://www.facturino.mk/${locale}` },
+      { '@type': 'ListItem', position: 2, name: t.hero.title, item: `https://www.facturino.mk/${locale}/features` },
+    ],
+  }
+
   return (
     <main id="main-content">
-      {/* ============================================================ */}
-      {/*  HERO                                                        */}
-      {/* ============================================================ */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {/* HERO */}
       <PageHero
         image="/assets/images/hero_features.png"
         alt="Modern office workspace with team collaborating on financial software"

@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/zadolzitelni-elementi-faktura', {
+  return buildArticleMetadata(locale, '/blog/zadolzitelni-elementi-faktura', {
     title: {
       mk: 'Задолжителни елементи на фактура во Македонија — Facturino',
       en: 'Mandatory Invoice Elements in Macedonia — Facturino',
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Lista e plotë e elementeve të detyrueshme të faturës sipas Ligjit për TVSH — EDB, EMBS, zërat, rekapitulimi i TVSH-së dhe gjobat.',
       tr: 'KDV Yasası kapsamında zorunlu fatura unsurlarının tam listesi — EDB, EMBS, kalemler, KDV rekapitülasyonu ve uyumsuzluk cezaları.',
     },
+    datePublished: '2026-02-05',
   })
 }
 
@@ -386,8 +388,28 @@ export default async function ZadolzitelniElementiFakturaPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'zadolzitelni-elementi-faktura',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-05',
+    tags: ['invoice elements', 'legal requirements', 'invoice format'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/zadolzitelni-elementi-faktura` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ============================================================ */}
       {/*  ARTICLE HEADER                                              */}
       {/* ============================================================ */}

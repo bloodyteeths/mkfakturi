@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -9,7 +10,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/ai-skener-dokumenti', {
+  return buildArticleMetadata(locale, '/blog/ai-skener-dokumenti', {
     title: {
       mk: 'AI скенирање фактури — автоматско книжење за 10 секунди | Facturino',
       en: 'AI Invoice Scanner — Automatic Bookkeeping in 10 Seconds | Facturino',
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Skanoni fatura, fatura dhe dokumente me AI. Klasifikim automatik, nxjerrje e dhënave dhe kontabilizim në 10 sekonda në vend të 15 minutave manualisht.',
       tr: 'Faturaları, fişleri ve belgeleri AI ile tarayın. Otomatik sınıflandırma, veri çıkarma ve 15 dakika yerine 10 saniyede muhasebe kaydı.',
     },
+    datePublished: '2026-03-15',
   })
 }
 
@@ -357,8 +359,28 @@ export default async function AiSkenerDokumentiPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'ai-skener-dokumenti',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-03-15',
+    tags: ['AI', 'document scanner', 'OCR', 'invoice scanning', 'Facturino'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/ai-skener-dokumenti` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

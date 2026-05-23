@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/cash-flow-mk', {
+  return buildArticleMetadata(locale, '/blog/cash-flow-mk', {
     title: {
       mk: 'Cash Flow: Зошто е позначаен од профитот — Facturino',
       en: 'Cash Flow: Why It Matters More Than Profit — Facturino',
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Mësoni pse rrjedha e parasë ka më shumë rëndësi se fitimi, si dështojnë bizneset fitimprurëse nga rrjedha e dobët dhe si ta parashikoni e përmirësoni.',
       tr: 'Nakit akışının kârdan neden daha önemli olduğunu, kârlı işletmelerin neden kötü nakit akışından başarısız olduğunu ve nasıl tahmin edip iyileştireceğinizi öğrenin.',
     },
+    datePublished: '2026-02-14',
   })
 }
 
@@ -398,8 +400,28 @@ export default async function CashFlowMkPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'cash-flow-mk',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-14',
+    tags: ['cash flow', 'financial management', 'profit', 'liquidity'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/cash-flow-mk` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ============================================================ */}
       {/*  ARTICLE HEADER                                              */}
       {/* ============================================================ */}

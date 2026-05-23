@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/presmetka-na-plata-mk', {
+  return buildArticleMetadata(locale, '/blog/presmetka-na-plata-mk', {
     title: {
-      mk: 'Пресметка на плата во Македонија: Придонеси и даноци — Facturino',
-      en: 'Payroll Calculation in Macedonia: Contributions and Taxes — Facturino',
-      sq: 'Llogaritja e pagës në Maqedoni: Kontributet dhe tatimet — Facturino',
-      tr: 'Makedonya\'da bordro hesaplama: Katkılar ve vergiler — Facturino',
+      mk: 'Бруто нето калкулатор 2026: Пресметка на плата Македонија',
+      en: 'North Macedonia Payroll 2026: Gross to Net Salary Calculator & Guide',
+      sq: 'Llogaritësi bruto neto 2026: Paga në Maqedoni — kontributet dhe tatimet',
+      tr: 'Kuzey Makedonya Bordro 2026: Brüt-Net Maaş Hesaplama Rehberi',
     },
     description: {
-      mk: 'Целосен водич за пресметка на плата во Македонија — пензиски придонес (18.8%), здравствено (7.5%), вработување (1.2%), данок на доход (10%), МПИН и минимална плата.',
-      en: 'Complete guide to payroll calculation in Macedonia — pension (18.8%), health insurance (7.5%), employment fund (1.2%), income tax (10%), MPIN filing, and minimum wage.',
-      sq: 'Udhëzues i plotë për llogaritjen e pagës në Maqedoni — pension (18.8%), sigurim shëndetësor (7.5%), fondi i punësimit (1.2%), tatimi mbi të ardhurat (10%) dhe paga minimale.',
-      tr: 'Makedonya\'da bordro hesaplama rehberi — emeklilik (%18,8), sağlık sigortası (%7,5), istihdam fonu (%1,2), gelir vergisi (%10) ve asgari ücret.',
+      mk: 'Бесплатен водич за бруто-нето пресметка на плата 2026: пензиско 18.8%, здравствено 7.5%, данок 10%, минимална плата 20.175 МКД, МПИН образец и пример со 40.000 МКД бруто.',
+      en: 'Free 2026 gross-to-net salary guide for North Macedonia: pension 18.8%, health 7.5%, income tax 10%, minimum wage 20,175 MKD, MPIN filing. Includes step-by-step calculation example.',
+      sq: 'Udhëzues falas bruto-neto 2026 për pagën në Maqedoni: pension 18.8%, shëndetësi 7.5%, tatim 10%, paga minimale 20.175 MKD, formulari MPIN dhe shembull llogaritjeje.',
+      tr: 'Kuzey Makedonya 2026 brüt-net maaş rehberi: emeklilik %18,8, sağlık %7,5, gelir vergisi %10, asgari ücret 20.175 MKD, MPIN formu ve hesaplama örneği.',
     },
+    datePublished: '2026-02-16',
   })
 }
 
@@ -530,11 +532,29 @@ export default async function PresmetkaNaPlataMkPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'presmetka-na-plata-mk',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-16',
+    tags: ['payroll', 'gross to net', 'north macedonia', 'salary calculator', 'MPIN', 'бруто нето'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/presmetka-na-plata-mk` },
+  ])
+
   return (
     <main id="main-content">
-      {/* ============================================================ */}
-      {/*  ARTICLE HEADER                                              */}
-      {/* ============================================================ */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
           <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob" />

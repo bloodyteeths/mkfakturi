@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/paushalen-danochnik', {
+  return buildArticleMetadata(locale, '/blog/paushalen-danochnik', {
     title: {
       mk: 'Паушалец во Македонија: Услови, ограничувања и обврски | Facturino',
       en: 'Lump-Sum Taxation in Macedonia: Requirements and Limits | Facturino',
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Gjithçka që duhet të dini për tatimin e përgjithshëm në Maqedoni: kriteret, pragu 3M MKD, aktivitetet e përjashtuara dhe detyrimet ndaj UJP.',
       tr: 'Makedonya\'da götürü vergilendirme hakkında bilmeniz gereken her şey: uygunluk, 3M MKD eşiği, hariç tutulan faaliyetler ve UJP yükümlülükleri.',
     },
+    datePublished: '2026-02-10',
   })
 }
 
@@ -336,8 +338,28 @@ export default async function PaushalenDanochnikPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'paushalen-danochnik',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-10',
+    tags: ['lump-sum tax', 'freelancers', 'small business tax'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/paushalen-danochnik` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

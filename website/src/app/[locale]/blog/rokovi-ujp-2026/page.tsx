@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/rokovi-ujp-2026', {
+  return buildArticleMetadata(locale, '/blog/rokovi-ujp-2026', {
     title: {
-      mk: 'Даночен календар 2026: Сите рокови за УЈП | Facturino',
-      en: 'Tax Calendar 2026: All UJP Deadlines | Facturino',
-      sq: 'Kalendari tatimor 2026: Të gjitha afatet e UJP | Facturino',
-      tr: 'Vergi takvimi 2026: Tüm UJP son tarihleri | Facturino',
+      mk: 'Рокови УЈП 2026: Даночен календар — ДДВ, МПИН, завршна сметка',
+      en: 'North Macedonia Tax Calendar 2026: All UJP Deadlines (VAT, MPIN, Annual)',
+      sq: 'Afatet UJP 2026: Kalendari tatimor — TVSH, MPIN, llogaria vjetore',
+      tr: 'Kuzey Makedonya Vergi Takvimi 2026: Tüm UJP Tarihleri (KDV, MPIN)',
     },
     description: {
-      mk: 'Комплетен даночен календар за 2026 со сите рокови за ДДВ, МПИН, аконтации на данок на добивка и годишни даночни пријави кон УЈП.',
-      en: 'Complete 2026 tax calendar with all deadlines for VAT returns, MPIN payroll, corporate income tax advances, and annual returns to UJP.',
-      sq: 'Kalendari i plotë tatimor 2026 me të gjitha afatet për TVSH, MPIN, parapagimet e tatimit mbi fitimin dhe deklaratat vjetore për UJP.',
-      tr: '2026 vergi takvimi: KDV beyannameleri, MPIN bordro, kurumlar vergisi avansları ve UJP yıllık beyannameleri için tüm son tarihler.',
+      mk: 'Сите даночни рокови за 2026: ДДВ-04 до 25-ти месечно, МПИН до 15-ти, аконтации данок на добивка, завршна сметка до 15 март. Зачувајте го календарот.',
+      en: 'All North Macedonia tax deadlines 2026: VAT returns by 25th monthly, MPIN payroll by 15th, corporate tax advances, annual return (DB-VP) by March 15. Save this calendar.',
+      sq: 'Të gjitha afatet tatimore 2026: TVSH deri 25-të mujore, MPIN deri 15-të, parapagimet e tatimit mbi fitimin, llogaria vjetore deri 15 mars. Ruajeni këtë kalendar.',
+      tr: '2026 tüm vergi tarihleri: KDV 25\'ine kadar aylık, MPIN 15\'ine kadar, kurumlar vergisi avansları, yıllık beyanname 15 Mart\'a kadar. Bu takvimi kaydedin.',
     },
+    datePublished: '2026-02-08',
   })
 }
 
@@ -352,8 +354,28 @@ export default async function RokoviUjp2026Page({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'rokovi-ujp-2026',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-08',
+    tags: ['tax calendar', 'UJP', 'deadlines', 'VAT', 'MPIN', 'рокови УЈП', 'завршна сметка'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/rokovi-ujp-2026` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

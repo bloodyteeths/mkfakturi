@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -9,7 +10,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/fiskalen-pecatac-chrome', {
+  return buildArticleMetadata(locale, '/blog/fiskalen-pecatac-chrome', {
     title: {
       mk: '\u041a\u0430\u043a\u043e \u0434\u0430 \u043f\u043e\u0432\u0440\u0437\u0435\u0442\u0435 \u0444\u0438\u0441\u043a\u0430\u043b\u0435\u043d \u043f\u0435\u0447\u0430\u0442\u0430\u0447 \u0432\u043e Chrome \u0431\u0435\u0437 \u0434\u0440\u0430\u0458\u0432\u0435\u0440\u0438 (WebSerial) | Facturino',
       sq: 'Si te lidhni printer fiskal ne Chrome pa driver (WebSerial) | Facturino',
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       tr: 'Rehber: Datecs, Tremol veya Daisy fiskal yaziciyi Chrome\'da WebSerial ile baglayin \u2014 COM port yok, surucu yok, teknisyen yok.',
       en: 'Guide: connect Datecs, Tremol or Daisy fiscal printer in Chrome via WebSerial \u2014 no COM port, no drivers, no technician. ISL protocol, VAT groups A/B/V/G.',
     },
+    datePublished: '2026-03-28',
   })
 }
 
@@ -211,8 +213,28 @@ export default async function FiskalenPecatacChrome({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'fiskalen-pecatac-chrome',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-03-28',
+    tags: ['fiscal printer', 'POS', 'Chrome', 'fiscal receipt'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/fiskalen-pecatac-chrome` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
           <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob" />

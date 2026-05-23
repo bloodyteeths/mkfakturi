@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/mpin-obrazec', {
+  return buildArticleMetadata(locale, '/blog/mpin-obrazec', {
     title: {
-      mk: 'МПИН образец: Водич за месечна пресметка — Facturino',
-      en: 'MPIN Form: Monthly Payroll Filing Guide — Facturino',
-      sq: 'Formulari MPIN: Udhëzues për llogaritjen mujore — Facturino',
-      tr: 'MPIN formu: Aylık bordro beyanname rehberi — Facturino',
+      mk: 'МПИН образец 2026: Водич за пополнување и поднесување до УЈП',
+      en: 'MPIN Form 2026: North Macedonia Monthly Payroll Filing Guide',
+      sq: 'Formulari MPIN 2026: Udhëzues për dorëzimin mujor në UJP',
+      tr: 'MPIN Formu 2026: Kuzey Makedonya Aylık Bordro Beyanname Rehberi',
     },
     description: {
-      mk: 'Научете како правилно да го пополните МПИН образецот за месечна пресметка на плати и придонеси. Рокови, потребни податоци и електронско поднесување.',
-      en: 'Learn how to correctly fill out the MPIN form for monthly payroll contributions. Deadlines, required data, and electronic filing guide.',
-      sq: 'Mësoni si ta plotësoni saktë formularin MPIN për kontributet mujore të pagave. Afatet, të dhënat e nevojshme dhe dorëzimi elektronik.',
-      tr: 'MPIN formunu aylık bordro katkıları için doğru şekilde nasıl dolduracağınızı öğrenin. Son tarihler, gerekli veriler ve elektronik beyanname rehberi.',
+      mk: 'Комплетен водич за МПИН образец 2026: како да го пополните, рок до 15-ти, електронско поднесување преку e-Tax, потребни податоци за секој вработен и казни за задоцнување.',
+      en: 'Complete 2026 MPIN form guide for North Macedonia: how to fill it out, deadline by 15th monthly, e-Tax electronic filing, required employee data, and late-filing penalties.',
+      sq: 'Udhëzues i plotë MPIN 2026: si ta plotësoni, afati deri 15-të mujore, dorëzimi elektronik e-Tax, të dhënat për çdo punonjës dhe gjobat për vonesë.',
+      tr: '2026 MPIN formu rehberi: nasıl doldurulur, her ayın 15\'ine kadar son tarih, e-Tax elektronik beyanname, çalışan verileri ve gecikme cezaları.',
     },
+    datePublished: '2026-02-17',
   })
 }
 
@@ -408,8 +410,28 @@ export default async function MpinObrazecPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'mpin-obrazec',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-17',
+    tags: ['MPIN', 'payroll', 'UJP', 'north macedonia', 'МПИН', 'месечна пресметка'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/mpin-obrazec` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

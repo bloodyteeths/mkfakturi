@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/upravljanje-so-rashodi', {
+  return buildArticleMetadata(locale, '/blog/upravljanje-so-rashodi', {
     title: {
       mk: 'Управување со расходи: 7 совети за мали бизниси — Facturino',
       en: 'Expense Management: 7 Tips for Small Businesses — Facturino',
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Mësoni si t\'i menaxhoni shpenzimet e biznesit me 7 këshilla praktike — kategorizimi, gjurmimi në kohë reale, ndarja e shpenzimeve personale/biznesore dhe përgatitja tatimore.',
       tr: 'İş giderlerini 7 pratik ipucuyla nasıl verimli yönetebileceğinizi öğrenin — sınıflandırma, gerçek zamanlı takip, kişisel/iş giderlerini ayırma ve vergi hazırlığı.',
     },
+    datePublished: '2026-02-13',
   })
 }
 
@@ -406,8 +408,28 @@ export default async function UpravuvanjeSoRashodiPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'upravljanje-so-rashodi',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-13',
+    tags: ['expense management', 'cost tracking', 'business expenses'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/upravljanje-so-rashodi` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ============================================================ */}
       {/*  ARTICLE HEADER                                              */}
       {/* ============================================================ */}

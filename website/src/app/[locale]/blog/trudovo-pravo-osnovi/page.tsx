@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/trudovo-pravo-osnovi', {
+  return buildArticleMetadata(locale, '/blog/trudovo-pravo-osnovi', {
     title: {
-      mk: 'Трудово право: 10 работи што секој работодавач мора да ги знае — Facturino',
-      en: 'Labor Law: 10 Things Every Employer Must Know — Facturino',
-      sq: 'E drejta e punës: 10 gjëra që çdo punëdhënës duhet t\'i dijë — Facturino',
-      tr: 'İş hukuku: Her işverenin bilmesi gereken 10 şey — Facturino',
+      mk: 'Трудово право Македонија 2026: Плата до 15-ти, прекувремена, инспекција',
+      en: 'North Macedonia Labor Law 2026: Salary Deadlines, Overtime & Penalties',
+      sq: 'Ligji i punës Maqedoni 2026: Paga deri 15-të, jashtë orarit dhe gjobat',
+      tr: 'Kuzey Makedonya İş Hukuku 2026: Maaş Tarihleri, Fazla Mesai ve Cezalar',
     },
     description: {
-      mk: 'Дознајте ги 10-те најважни правила од трудовото право во Македонија: договори, работно време, одмори, отказни рокови и казни.',
-      en: 'Learn the 10 most important labor law rules in Macedonia: contracts, working hours, leave, notice periods and penalties.',
-      sq: 'Mësoni 10 rregullat më të rëndësishme të së drejtës së punës në Maqedoni: kontrata, orari, pushimet, afatet e njoftimit dhe gjobat.',
-      tr: 'Makedonya\'da en önemli 10 iş hukuku kuralını öğrenin: sözleşmeler, çalışma saatleri, izinler, ihbar süreleri ve cezalar.',
+      mk: 'Комплетен водич за трудово право во Македонија 2026: плата до 15-ти наредниот месец, прекувремена работа (max 190ч), минимална плата 20.175 МКД, одмори, боледување, породилно и казни од инспекторат.',
+      en: 'Complete North Macedonia labor law guide 2026: salary payment by 15th of month, overtime limits (190h/year), minimum wage 20,175 MKD, annual leave, sick leave, maternity, and labor inspection fines up to EUR 5,000.',
+      sq: 'Udhëzues i plotë i ligjit të punës Maqedoni 2026: paga deri datë 15, puna jashtë orarit (max 190h), paga minimale 20.175 MKD, pushimet, lindja dhe gjobat e inspeksionit.',
+      tr: 'Kuzey Makedonya iş hukuku rehberi 2026: maaş 15\'ine kadar, fazla mesai limitleri (190s/yıl), asgari ücret 20.175 MKD, izinler, doğum izni ve müfettişlik cezaları.',
     },
+    datePublished: '2026-02-18',
   })
 }
 
@@ -508,8 +510,28 @@ export default async function TrudovoPravoOsnoviPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'trudovo-pravo-osnovi',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-18',
+    tags: ['labor law', 'north macedonia', 'employment', 'overtime', 'minimum wage', 'трудово право'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/trudovo-pravo-osnovi` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

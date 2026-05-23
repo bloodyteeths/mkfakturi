@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/sto-e-e-faktura', {
+  return buildArticleMetadata(locale, '/blog/sto-e-e-faktura', {
     title: {
-      mk: 'Што е е-фактура и зошто е задолжителна? — Facturino',
-      en: 'What is e-Invoice and Why is it Mandatory? — Facturino',
-      sq: 'Çfarë është e-fatura dhe pse është e detyrueshme? — Facturino',
-      tr: 'E-fatura nedir ve neden zorunludur? — Facturino',
+      mk: 'Е-фактура Македонија 2026: Што е, кој мора и UBL формат',
+      en: 'E-Invoice in North Macedonia 2026: What It Is, Who Must Use It & UBL',
+      sq: 'E-fatura Maqedoni 2026: Çfarë është, kush duhet dhe formati UBL',
+      tr: 'Kuzey Makedonya E-Fatura 2026: Nedir, Kim Kullanmalı ve UBL Formatı',
     },
     description: {
-      mk: 'Дознајте што е е-фактура во Македонија, кој е задолжен да ја користи, UBL форматот, предностите и како Facturino помага со усогласеност.',
-      en: 'Learn what e-invoice is in Macedonia, who must use it, the UBL format, benefits, and how Facturino helps with compliance.',
-      sq: 'Mësoni çfarë është e-fatura në Maqedoni, kush duhet ta përdorë, formati UBL, përfitimet dhe si ndihmon Facturino.',
-      tr: 'Makedonya\'da e-fatura nedir, kimler kullanmalı, UBL formatı, avantajları ve Facturino nasıl yardımcı olur öğrenin.',
+      mk: 'Комплетен водич за е-фактура во Македонија 2026: задолжителност, UBL 2.1 формат, XML структура, предности за бизнисот и како Facturino обезбедува автоматска усогласеност.',
+      en: 'Complete guide to e-invoicing in North Macedonia 2026: who must comply, UBL 2.1 format, XML structure, business benefits, and how Facturino ensures automatic compliance.',
+      sq: 'Udhëzues i plotë për e-faturën në Maqedoni 2026: kush duhet të përputhet, formati UBL 2.1, struktura XML, përfitimet dhe si siguron Facturino përputhshmëri automatike.',
+      tr: 'Kuzey Makedonya e-fatura rehberi 2026: kim uygulamalı, UBL 2.1 formatı, XML yapısı, işletme avantajları ve Facturino ile otomatik uyumluluk.',
     },
+    datePublished: '2026-02-05',
   })
 }
 
@@ -326,11 +328,29 @@ export default async function StoEEFakturaPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'sto-e-e-faktura',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-05',
+    tags: ['e-invoice', 'e-faktura', 'UBL', 'north macedonia', 'electronic invoice', 'е-фактура'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/sto-e-e-faktura` },
+  ])
+
   return (
     <main id="main-content">
-      {/* ============================================================ */}
-      {/*  ARTICLE HEADER                                              */}
-      {/* ============================================================ */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         {/* Background blobs */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

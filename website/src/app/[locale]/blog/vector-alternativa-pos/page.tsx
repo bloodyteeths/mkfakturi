@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -9,7 +10,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/vector-alternativa-pos', {
+  return buildArticleMetadata(locale, '/blog/vector-alternativa-pos', {
     title: {
       mk: 'Премин од Vector на Facturino POS: водич чекор по чекор | Facturino',
       sq: 'Kalimi nga Vector ne Facturino POS: hap pas hapi | Facturino',
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       tr: 'Vector POS\'tan Facturino\'ya 30 dakikada nasil gecerilir. Urun aktarimi, fiskal yazici baglantisi ve otomatik muhasebe \u2014 teknisyen ve veri kaybi olmadan.',
       en: 'How to switch from Vector POS to Facturino in 30 minutes. Import items, connect fiscal printer and auto-post accounting \u2014 no technician, no data loss.',
     },
+    datePublished: '2026-03-28',
   })
 }
 
@@ -208,8 +210,28 @@ export default async function VectorAlternativaPos({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'vector-alternativa-pos',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-03-28',
+    tags: ['POS alternative', 'Vector', 'retail software'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/vector-alternativa-pos` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
           <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob" />

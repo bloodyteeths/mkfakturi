@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -9,7 +10,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/pos-softver-makedonija', {
+  return buildArticleMetadata(locale, '/blog/pos-softver-makedonija', {
     title: {
       mk: 'Најдобар POS софтвер за малопродажба во Македонија 2026 \u2014 споредба | Facturino',
       sq: 'Softueri me i mire POS per shitje me pakice ne Maqedoni 2026 \u2014 krahasim | Facturino',
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       tr: 'Makedonya POS yazilimi karsilastirmasi: Vector, Accent, Jongis, PANTHEON ve Facturino. Fiyat, fiskal yazici, stok, muhasebe ve e-Fatura.',
       en: 'POS software comparison for Macedonia: Vector, Accent, Jongis, PANTHEON and Facturino. Pricing, fiscal printer, inventory, accounting and e-Invoice.',
     },
+    datePublished: '2026-03-28',
   })
 }
 
@@ -303,8 +305,28 @@ export default async function PosSoftverMakedonija({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'pos-softver-makedonija',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-03-28',
+    tags: ['POS software', 'point of sale', 'retail'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/pos-softver-makedonija` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
           <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob" />

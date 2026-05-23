@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/otvoranje-firma-mk', {
+  return buildArticleMetadata(locale, '/blog/otvoranje-firma-mk', {
     title: {
-      mk: 'Како да отворите фирма во Македонија: Комплетен водич | Facturino',
-      en: 'How to Register a Company in Macedonia: Complete Guide | Facturino',
-      sq: 'Si të hapni një kompani në Maqedoni: Udhëzues i plotë | Facturino',
-      tr: 'Makedonya\'da şirket nasıl kurulur: Kapsamlı rehber | Facturino',
+      mk: 'Отворање фирма Македонија 2026: ДООЕЛ, ЦРСМ, ЕДБ — чекор по чекор',
+      en: 'Register a Company in North Macedonia 2026: Step-by-Step Guide',
+      sq: 'Hapni kompani në Maqedoni 2026: SHPKNJP, RQRM — hap pas hapi',
+      tr: 'Kuzey Makedonya\'da Şirket Kurma 2026: Adım Adım Rehber',
     },
     description: {
-      mk: 'Детален водич за отворање фирма во Македонија: типови на друштва, регистрација во ЦРСМ, документи, ЕДБ, банкарска сметка и ДДВ регистрација.',
-      en: 'Detailed guide to registering a company in Macedonia: company types, Central Registry registration, documents, tax number, bank account, and VAT registration.',
-      sq: 'Udhëzues i detajuar për hapjen e kompanisë në Maqedoni: llojet e kompanive, regjistrimi në RQRM, dokumentet, numri tatimor, llogaria bankare dhe regjistrimi për TVSH.',
-      tr: 'Makedonya\'da şirket kurma rehberi: şirket türleri, Merkez Sicil kaydı, belgeler, vergi numarası, banka hesabı ve KDV kaydı.',
+      mk: 'Комплетен водич 2026 за отворање фирма во Македонија: ДООЕЛ vs ДОО, регистрација во ЦРСМ, ЕДБ број, банкарска сметка, ДДВ регистрација. Цена, рокови и потребни документи.',
+      en: 'Complete 2026 guide to registering a company in North Macedonia: LLC types (DOOEL vs DOO), Central Registry, tax number (EDB), bank account, VAT registration. Costs, timelines, and required documents.',
+      sq: 'Udhëzues i plotë 2026 për hapjen e kompanisë në Maqedoni: llojet e SHPK, regjistrimi RQRM, numri tatimor, llogaria bankare, regjistrimi TVSH. Kostot, afatet dhe dokumentet.',
+      tr: '2026 Kuzey Makedonya\'da şirket kurma rehberi: LLC türleri (DOOEL/DOO), Merkez Sicil, vergi numarası, banka hesabı, KDV kaydı. Maliyetler ve gerekli belgeler.',
     },
+    datePublished: '2026-02-11',
   })
 }
 
@@ -368,8 +370,28 @@ export default async function OtvoranjeFirmaMkPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'otvoranje-firma-mk',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-11',
+    tags: ['company registration', 'north macedonia', 'DOOEL', 'LLC', 'ЦРСМ', 'отворање фирма'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/otvoranje-firma-mk` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

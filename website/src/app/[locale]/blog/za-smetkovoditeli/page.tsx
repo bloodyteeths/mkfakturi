@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/za-smetkovoditeli', {
+  return buildArticleMetadata(locale, '/blog/za-smetkovoditeli', {
     title: {
       mk: 'Зошто сметководителите преминуваат на Facturino — Facturino',
       en: 'Why Accountants Are Switching to Facturino — Facturino',
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Udhëzues për zyrat e kontabilitetit: më shumë klientë, më pak punë manuale. Import bankar, e-Faturë, mbyllje vjetore dhe 20% komision partneriteti.',
       tr: 'Muhasebe büroları için rehber: daha fazla müşteri, daha az manuel iş. Banka ekstresi içe aktarma, e-Fatura, yıl sonu kapanışı ve %20 ortaklık komisyonu.',
     },
+    datePublished: '2026-02-21',
   })
 }
 
@@ -420,8 +422,28 @@ export default async function ZaSmetkovoditeliPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'za-smetkovoditeli',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-21',
+    tags: ['accountants', 'partner program', 'accounting firm', 'Facturino'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/za-smetkovoditeli` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

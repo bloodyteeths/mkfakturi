@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/ai-asistent-smetkovodstvo', {
+  return buildArticleMetadata(locale, '/blog/ai-asistent-smetkovodstvo', {
     title: {
       mk: 'Прашај го AI: Кој ми должи? Дали сум профитабилен? — Facturino',
       en: 'Ask AI: Who Owes Me? Am I Profitable? — Facturino',
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Zbuloni si asistenti AI i Facturino u përgjigjet pyetjeve financiare në gjuhën tuaj, krijon fatura dhe analizon fitimprurësinë — pa njohuri kontabiliteti.',
       tr: 'Facturino\'nun AI asistanının finansal sorulara nasıl yanıt verdiğini, fatura oluşturduğunu ve kârlılığı analiz ettiğini keşfedin — muhasebe bilgisi gerekmez.',
     },
+    datePublished: '2026-03-15',
   })
 }
 
@@ -332,8 +334,28 @@ export default async function AiAsistentSmetkovodstvoPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'ai-asistent-smetkovodstvo',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-03-15',
+    tags: ['AI', 'accounting assistant', 'NLP', 'automation', 'Facturino'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/ai-asistent-smetkovodstvo` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/nabavki-i-narachki', {
+  return buildArticleMetadata(locale, '/blog/nabavki-i-narachki', {
     title: {
       mk: 'Дигитални нарачки за набавка: од барање до прием на стока — Facturino',
       en: 'Digital Purchase Orders: From Request to Goods Receipt — Facturino',
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Mësoni si Facturino i dixhitalizon porositë e blerjes: cikli i plotë jetësor, email te furnizuesi, mbrojtje nga pranimi i tepërt dhe krijim automatik i faturës.',
       tr: 'Facturino\'nun satın alma siparişlerini nasıl dijitalleştirdiğini öğrenin: tam yaşam döngüsü, tedarikçiye e-posta, fazla kabul koruması ve otomatik fatura oluşturma.',
     },
+    datePublished: '2026-03-15',
   })
 }
 
@@ -344,8 +346,28 @@ export default async function NabavkiINarachkiPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'nabavki-i-narachki',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-03-15',
+    tags: ['procurement', 'purchase orders', 'inventory'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/nabavki-i-narachki` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

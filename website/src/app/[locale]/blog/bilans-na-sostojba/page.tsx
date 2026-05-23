@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/bilans-na-sostojba', {
+  return buildArticleMetadata(locale, '/blog/bilans-na-sostojba', {
     title: {
       mk: 'Биланс на состојба и биланс на успех: AOP ознаки — Facturino',
       en: 'Balance Sheet & Income Statement: AOP Codes — Facturino',
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Udh\u00ebzues i detajuar p\u00ebr Formularin 36 dhe 37 — aktivet, detyrimet, t\u00eb ardhurat, shpenzimet dhe kodet AOP.',
       tr: 'Form 36 ve 37 detayl\u0131 rehber — varl\u0131klar, y\u00fck\u00fcml\u00fcl\u00fckler, gelirler, giderler ve AOP kodlar\u0131.',
     },
+    datePublished: '2026-01-20',
   })
 }
 
@@ -561,8 +563,28 @@ export default async function BilansNaSostojbaPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'bilans-na-sostojba',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-01-20',
+    tags: ['balance sheet', 'income statement', 'AOP codes', 'annual accounts'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/bilans-na-sostojba` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ============================================================ */}
       {/*  BACK LINK                                                   */}
       {/* ============================================================ */}

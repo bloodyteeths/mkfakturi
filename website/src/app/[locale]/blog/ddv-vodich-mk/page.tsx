@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/ddv-vodich-mk', {
+  return buildArticleMetadata(locale, '/blog/ddv-vodich-mk', {
     title: {
-      mk: 'ДДВ во Македонија: Целосен водич за 2026 | Facturino',
-      en: 'VAT in Macedonia: Complete Guide for 2026 | Facturino',
-      sq: 'TVSH në Maqedoni: Udhëzues i plotë për 2026 | Facturino',
-      tr: 'Makedonya\'da KDV: 2026 için kapsamlı rehber | Facturino',
+      mk: 'ДДВ Македонија 2026: Стапки 18% и 5%, регистрација, пријавување',
+      en: 'VAT in North Macedonia 2026: Rates (18% & 5%), Registration & Filing',
+      sq: 'TVSH Maqedoni 2026: Normat 18% dhe 5%, regjistrimi dhe deklarimi',
+      tr: 'Kuzey Makedonya KDV 2026: Oranlar (%18 ve %5), Kayıt ve Beyanname',
     },
     description: {
-      mk: 'Целосен водич за ДДВ во Македонија: стапки (18% и 5%), праг за регистрација, периоди на пријавување, ослободувања и казни. Ажурирано за 2026.',
-      en: 'Complete VAT guide for Macedonia: rates (18% and 5%), registration threshold, filing periods, exemptions, and penalties. Updated for 2026.',
-      sq: 'Udhëzues i plotë për TVSH-në në Maqedoni: normat (18% dhe 5%), pragu i regjistrimit, periudhat e deklarimit, përjashtimet dhe gjobat. Përditësuar për 2026.',
-      tr: 'Makedonya için kapsamlı KDV rehberi: oranlar (%18 ve %5), kayıt eşiği, beyanname dönemleri, muafiyetler ve cezalar. 2026 için güncellenmiştir.',
+      mk: 'Целосен водич за ДДВ Македонија 2026: стандардна стапка 18%, намалена 5%, праг за регистрација 8.000.000 МКД, месечно/квартално пријавување, влезен/излезен ДДВ, ослободувања и казни до 10.000€.',
+      en: 'Complete North Macedonia VAT guide 2026: standard rate 18%, reduced 5%, registration threshold 8M MKD (~€130K), monthly/quarterly filing, input/output VAT, exemptions, and penalties up to €10,000.',
+      sq: 'Udhëzues i plotë TVSH Maqedoni 2026: norma standarde 18%, e ulët 5%, pragu 8.000.000 MKD, deklarimi mujor/tremujor, TVSH hyrëse/dalëse, përjashtimet dhe gjobat deri 10.000€.',
+      tr: 'Kuzey Makedonya KDV rehberi 2026: standart oran %18, indirimli %5, kayıt eşiği 8M MKD (~130K€), aylık/üç aylık beyanname, giriş/çıkış KDV ve 10.000€\'ya kadar cezalar.',
     },
+    datePublished: '2026-02-02',
   })
 }
 
@@ -296,8 +298,28 @@ export default async function DdvVodichMkPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'ddv-vodich-mk',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-02',
+    tags: ['VAT', 'DDV', 'north macedonia', 'tax', 'registration', 'ДДВ'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/ddv-vodich-mk` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

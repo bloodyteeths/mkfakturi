@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -9,7 +10,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje', {
+  return buildArticleMetadata(locale, '/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje', {
     title: {
       mk: 'Отворивте фирма? Еве како да почнете со фактурирање за 1 ден — Facturino',
       en: 'Just Registered a Company? Here\'s How to Start Invoicing in 1 Day — Facturino',
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Udhëzues i plotë për firma të reja në Maqedoni: nga regjistrimi në Facturino deri te fatura e parë për më pak se 1 ditë. AI onboarding, listë kontrolli Dashboard dhe më shumë.',
       tr: 'Makedonya\'daki yeni şirketler için eksiksiz rehber: Facturino kaydından ilk faturaya 1 günden kısa sürede. AI onboarding, Dashboard kontrol listesi ve daha fazlası.',
     },
+    datePublished: '2026-03-15',
   })
 }
 
@@ -345,8 +347,28 @@ export default async function KakoDaOtvoriteFirmaPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'kako-da-otvorite-firma-i-pocnete-so-fakturiranje',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-03-15',
+    tags: ['business setup', 'invoicing', 'new company', 'Facturino'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/kako-da-otvorite-firma-i-pocnete-so-fakturiranje` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

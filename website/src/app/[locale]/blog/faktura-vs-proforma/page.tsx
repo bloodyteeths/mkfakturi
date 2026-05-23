@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/faktura-vs-proforma', {
+  return buildArticleMetadata(locale, '/blog/faktura-vs-proforma', {
     title: {
-      mk: 'Фактура vs профактура: Клучни разлики — Facturino',
-      en: 'Invoice vs Proforma: Key Differences — Facturino',
-      sq: 'Fatura vs profatura: Dallimet kryesore — Facturino',
-      tr: 'Fatura ve proforma: Temel farklar — Facturino',
+      mk: 'Фактура vs профактура: Разлики, ДДВ и кога да ги користите',
+      en: 'Invoice vs Proforma Invoice: Differences, VAT & When to Use Each',
+      sq: 'Fatura vs profatura: Dallimet, TVSH dhe kur t\'i përdorni',
+      tr: 'Fatura ve Proforma Fatura: Farklar, KDV ve Ne Zaman Kullanılır',
     },
     description: {
-      mk: 'Дознајте ги разликите меѓу фактура и профактура — правен статус, ДДВ импликации, кога да ги користите и најдобри практики за македонски бизниси.',
-      en: 'Learn the differences between an invoice and proforma — legal status, VAT implications, when to use each, and best practices for Macedonian businesses.',
-      sq: 'Mësoni dallimet ndërmjet faturës dhe profaturës — statusi ligjor, implikimet e TVSH-së, kur t\'i përdorni dhe praktikat më të mira.',
-      tr: 'Fatura ve proforma arasındaki farkları öğrenin — yasal statü, KDV etkileri, ne zaman kullanılır ve en iyi uygulamalar.',
+      mk: 'Разлики меѓу фактура и профактура: правен статус, ДДВ третман, аванс фактура. Кога да користите фактура и кога профактура во Македонија — практични примери.',
+      en: 'Invoice vs proforma invoice explained: legal status, VAT treatment, advance invoices. When to use each in North Macedonia with practical examples and best practices.',
+      sq: 'Fatura vs profatura: statusi ligjor, trajtimi i TVSH-së, fatura paraprake. Kur t\'i përdorni në Maqedoni me shembuj praktikë.',
+      tr: 'Fatura ve proforma fatura karşılaştırması: yasal statü, KDV uygulaması, avans fatura. Kuzey Makedonya\'da ne zaman kullanılır, pratik örnekler.',
     },
+    datePublished: '2026-02-07',
   })
 }
 
@@ -330,11 +332,29 @@ export default async function FakturaVsProformaPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'faktura-vs-proforma',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-07',
+    tags: ['invoice', 'proforma', 'VAT', 'фактура', 'профактура', 'north macedonia'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/faktura-vs-proforma` },
+  ])
+
   return (
     <main id="main-content">
-      {/* ============================================================ */}
-      {/*  ARTICLE HEADER                                              */}
-      {/* ============================================================ */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         {/* Background blobs */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/smetkovodstvo-za-pocetnici', {
+  return buildArticleMetadata(locale, '/blog/smetkovodstvo-za-pocetnici', {
     title: {
-      mk: 'Сметководство за почетници: Основи што секој бизнис ги знае | Facturino',
-      en: 'Accounting for Beginners: Basics Every Business Should Know | Facturino',
-      sq: 'Kontabiliteti për fillestarë: Bazat që çdo biznes duhet t\'i dijë | Facturino',
-      tr: 'Yeni başlayanlar için muhasebe: Her işletmenin bilmesi gerekenler | Facturino',
+      mk: 'Сметководство за почетници 2026: Основи, контен план и биланс',
+      en: 'Accounting Basics for Small Business in North Macedonia (2026 Guide)',
+      sq: 'Bazat e kontabilitetit 2026: Udhëzues për bizneset e vogla në Maqedoni',
+      tr: 'Kuzey Makedonya\'da Küçük İşletmeler İçin Muhasebe Temelleri (2026)',
     },
     description: {
-      mk: 'Научете ги основите на сметководството: двојно книговодство, контен план, фактурирање, расходи, биланс на успех и биланс на состојба за мали бизниси.',
-      en: 'Learn accounting basics: double-entry bookkeeping, chart of accounts, invoicing, expenses, profit and loss, and balance sheet concepts for small businesses.',
-      sq: 'Mësoni bazat e kontabilitetit: regjistrimi i dyfishtë, plani kontabël, faturimi, shpenzimet, fitimi dhe humbja, dhe bilanci për bizneset e vogla.',
-      tr: 'Muhasebe temellerini öğrenin: çift taraflı kayıt, hesap planı, faturalama, giderler, kar-zarar ve küçük işletmeler için bilanço kavramları.',
+      mk: 'Научете ги основите на сметководството за мали бизниси: двојно книговодство, контен план, фактури, расходи, биланс на успех и состојба. Водич на македонски.',
+      en: 'Learn accounting basics for small businesses in North Macedonia: double-entry bookkeeping, chart of accounts, invoicing, expenses, P&L, and balance sheet. Beginner-friendly guide.',
+      sq: 'Mësoni bazat e kontabilitetit për bizneset e vogla: regjistrimi i dyfishtë, plani kontabël, faturimi, shpenzimet, fitimi dhe humbja, bilanci. Udhëzues për fillestarë.',
+      tr: 'Küçük işletmeler için muhasebe temelleri: çift taraflı kayıt, hesap planı, faturalama, giderler, kar-zarar ve bilanço. Başlangıç rehberi.',
     },
+    datePublished: '2026-02-12',
   })
 }
 
@@ -380,8 +382,28 @@ export default async function SmetkovodstvoZaPocetniciPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'smetkovodstvo-za-pocetnici',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-02-12',
+    tags: ['accounting basics', 'bookkeeping', 'small business', 'сметководство', 'контен план'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/smetkovodstvo-za-pocetnici` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">

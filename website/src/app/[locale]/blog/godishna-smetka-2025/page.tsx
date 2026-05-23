@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/godishna-smetka-2025', {
+  return buildArticleMetadata(locale, '/blog/godishna-smetka-2025', {
     title: {
       mk: 'Годишна сметка 2025: Целосен водич — Facturino',
       en: 'Annual Accounts 2025: Complete Filing Guide — Facturino',
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Udhëzues i plotë për dorëzimin e llogarive vjetore në QRMK — afatet, dokumentet e nevojshme dhe procesi hap pas hapi.',
       tr: 'CRMS ile yıllık hesap dosyalama rehberi — son tarihler, gerekli belgeler ve adım adım süreç.',
     },
+    datePublished: '2026-01-15',
   })
 }
 
@@ -430,8 +432,28 @@ export default async function GodishnaSmetka2025Page({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'godishna-smetka-2025',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-01-15',
+    tags: ['annual accounts', 'CRSM', 'financial statements'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/godishna-smetka-2025` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ============================================================ */}
       {/*  ARTICLE HEADER                                              */}
       {/* ============================================================ */}

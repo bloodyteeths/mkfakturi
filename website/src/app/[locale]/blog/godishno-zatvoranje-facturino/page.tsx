@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/godishno-zatvoranje-facturino', {
+  return buildArticleMetadata(locale, '/blog/godishno-zatvoranje-facturino', {
     title: {
       mk: 'Годишно затворање на книги: 6 чекори со Facturino',
       en: 'Year-End Closing: 6 Steps with Facturino',
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       sq: 'Si Facturino e automatizon mbylljen e vitit — nga rishikimi deri te kyçja, me raporte në format UJP.',
       tr: 'Facturino yıl sonu kapanışını nasıl otomatikleştirir — incelemeden kilitlemeye, UJP formatında raporlar.',
     },
+    datePublished: '2026-01-25',
   })
 }
 
@@ -610,11 +612,29 @@ export default async function YearEndClosingPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: 'Блог', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: 'Почетна', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'godishno-zatvoranje-facturino',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-01-25',
+    tags: ['year-end closing', 'bookkeeping', 'annual closing', 'Facturino'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/godishno-zatvoranje-facturino` },
+  ])
+
   return (
     <main id="main-content">
-      {/* ============================================================ */}
-      {/*  BACK LINK                                                   */}
-      {/* ============================================================ */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {/* BACK LINK */}
       <section className="pt-24 md:pt-28 pb-0">
         <div className="container px-4 sm:px-6 max-w-4xl mx-auto">
           <Link

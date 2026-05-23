@@ -1,5 +1,6 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
-import { buildPageMetadata } from '@/lib/metadata'
+import { buildArticleMetadata } from '@/lib/metadata'
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
 
 export function generateStaticParams() {
@@ -8,19 +9,20 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  return buildPageMetadata(locale, '/blog/facturino-vs-excel', {
+  return buildArticleMetadata(locale, '/blog/facturino-vs-excel', {
     title: {
-      mk: 'Facturino vs Excel: Зошто табели не се доволни — Facturino',
-      en: 'Facturino vs Excel: Why Spreadsheets Aren\'t Enough — Facturino',
-      sq: 'Facturino vs Excel: Pse tabelat nuk mjaftojnë — Facturino',
-      tr: 'Facturino vs Excel: Neden tablolar yeterli değil — Facturino',
+      mk: 'Facturino vs Excel 2026: Зошто табели не се доволни (е-Фактура обврска)',
+      en: 'Facturino vs Excel 2026: Why Spreadsheets Aren\'t Enough (E-Invoice Mandate)',
+      sq: 'Facturino vs Excel 2026: Pse tabelat nuk mjaftojnë (Detyrimi e-Faturë)',
+      tr: 'Facturino vs Excel 2026: Neden tablolar yeterli değil (e-Fatura zorunluluğu)',
     },
     description: {
-      mk: 'Споредба на Facturino и Excel за фактурирање и сметководство. Дознајте зошто табелите не се доволни за модерен бизнис.',
-      en: 'Compare Facturino and Excel for invoicing and accounting. Learn why spreadsheets are not enough for modern business.',
-      sq: 'Krahasoni Facturino dhe Excel për faturim dhe kontabilitet. Mësoni pse tabelat nuk mjaftojnë për biznesin modern.',
-      tr: 'Faturalama ve muhasebe için Facturino ve Excel karşılaştırması. Tabloların modern iş için neden yeterli olmadığını öğrenin.',
+      mk: 'Споредба на Facturino и Excel за 2026: е-Фактура обврска од октомври, ДДВ автоматизација, банковно порамнување. Зошто Excel не е доволен за модерен бизнис.',
+      en: 'Facturino vs Excel comparison for 2026: e-Invoice mandate from October, VAT automation, bank reconciliation. Why spreadsheets aren\'t enough for modern business.',
+      sq: 'Krahasim Facturino vs Excel 2026: detyrimi e-Faturë nga tetori, automatizim TVSH, pajtim bankar. Pse tabelat nuk mjaftojnë për biznesin modern.',
+      tr: 'Facturino vs Excel 2026 karşılaştırması: Ekim e-Fatura zorunluluğu, KDV otomasyonu, banka mutabakatı. Tablolar neden yeterli değil.',
     },
+    datePublished: '2026-05-23',
   })
 }
 
@@ -29,8 +31,8 @@ const copy = {
     backLink: '← Назад кон блог',
     tag: 'Производ',
     title: 'Facturino vs Excel: Зошто табели не се доволни',
-    publishDate: '19 февруари 2026',
-    readTime: '6 мин читање',
+    publishDate: '23 мај 2026',
+    readTime: '8 мин читање',
     intro: 'Многу мали и средни бизниси во Македонија сеуште ги водат фактурите и финансиите преку Excel табели. Иако Excel е моќна алатка за пресметки, тој едноставно не е создаден за фактурирање, сметководствена усогласеност и деловно управување. Во оваа статија го споредуваме Excel со Facturino и објаснуваме зошто преминот кон специјализиран софтвер е неопходен за растечки бизнис.',
     sections: [
       {
@@ -77,8 +79,34 @@ const copy = {
         ],
       },
       {
+        title: 'е-Фактура обврска 2026: Зошто Excel повеќе не е опција',
+        content: 'Од октомври 2026, е-Фактура (UBL 2.1 XML формат) е задолжителна за сите B2G трансакции — фактури кон државни институции, општини, болници и училишта. B2B е-Фактура се очекува да стане задолжителна во 2027-2028. Excel едноставно не може да генерира UBL XML, да потпише со QES (квалификуван електронски потпис) или да поднесе фактура преку порталот на УЈП.',
+        items: [
+          'UBL 2.1 XML формат — Excel не може да го генерира, потребен е специјализиран софтвер',
+          'QES потпис задолжителен — секоја е-Фактура мора да биде потпишана со квалификуван електронски потпис',
+          'Автоматска валидација — УЈП порталот ги отфрла фактурите со грешки, нема рачна поправка',
+          'Рок: октомври 2026 за B2G — ако работите со државата, мора да сте подготвени',
+          'B2B очекувано 2027-2028 — подготовката денес штеди главоболки утре',
+          'Facturino генерира е-Фактура со еден клик — UBL XML + QES + поднесување',
+        ],
+        steps: null,
+      },
+      {
+        title: 'Нови функции во 2026: AI и банковна интеграција',
+        content: 'Освен е-Фактура, модерниот бизнис бара алатки кои Excel никогаш нема да ги понуди. Facturino во 2026 додава вештачка интелигенција и банковно порамнување кои ја трансформираат сметководствената ефикасност.',
+        items: [
+          'AI скенирање на документи — фотографирај фактура, автоматски се внесува во системот за 10 секунди',
+          'Банковно порамнување — увоз на банковни изводи (CSV/MT940/PDF) и автоматско поврзување со фактури',
+          'AI категоризација — трансакциите автоматски се класифицираат по сметки од контниот план',
+          'Платен список — автоматска пресметка на плата со МПИН образец за УЈП',
+          'POS со фискален печатач — за малопродажба и угостителство, бесплатен план',
+          'Даночен календар — автоматски потсетници за рокови кон УЈП',
+        ],
+        steps: null,
+      },
+      {
         title: 'Кога Excel е навистина доволен?',
-        content: 'Да бидеме фер — Excel може да биде адекватен за фрилансери со 1-2 фактури месечно кои немаат потреба од е-Фактура. Но штом бизнисот достигне 5+ фактури месечно, има вработени или работи со ДДВ, табелите стануваат повеќе пречка отколку помош. Преминот кон Facturino не е само надградба — тоа е инвестиција во точност, ефикасност и спокојство.',
+        content: 'Да бидеме фер — Excel може да биде адекватен за фрилансери со 1-2 фактури месечно кои немаат потреба од е-Фактура и не работат со државни институции. Но штом бизнисот достигне 5+ фактури месечно, има вработени или работи со ДДВ, табелите стануваат повеќе пречка отколку помош. А со задолжителната е-Фактура од октомври 2026, дури и малите бизниси ќе мора да преминат на специјализиран софтвер.',
         items: null,
         steps: null,
       },
@@ -97,9 +125,9 @@ const copy = {
     ],
     relatedTitle: 'Поврзани статии',
     related: [
-      { slug: 'zosto-facturino', title: '10 причини зошто македонски бизниси го избираат Facturino' },
-      { slug: 'digitalno-smetkovodstvo', title: 'Дигитално vs традиционално сметководство' },
-      { slug: 'recurring-invoices-mk', title: 'Повторувачки фактури: Автоматизирајте ја наплатата' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: '7 сметководствени софтвери за Македонија 2026' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Што е подобро за мали фирми?' },
+      { slug: 'e-faktura-obvrska-2026', title: 'е-Фактура 2026: Кој мора и како да се подготвите' },
     ],
     cta: {
       title: 'Преминете од Excel кон Facturino',
@@ -111,8 +139,8 @@ const copy = {
     backLink: '← Back to blog',
     tag: 'Product',
     title: 'Facturino vs Excel: Why Spreadsheets Aren\'t Enough',
-    publishDate: 'February 19, 2026',
-    readTime: '6 min read',
+    publishDate: 'May 23, 2026',
+    readTime: '8 min read',
     intro: 'Many small and medium businesses in Macedonia still manage their invoices and finances through Excel spreadsheets. While Excel is a powerful calculation tool, it simply was not designed for invoicing, accounting compliance, and business management. In this article, we compare Excel with Facturino and explain why switching to specialized software is essential for a growing business.',
     sections: [
       {
@@ -159,8 +187,34 @@ const copy = {
         ],
       },
       {
+        title: 'E-Invoice Mandate 2026: Why Excel Is No Longer an Option',
+        content: 'Starting October 2026, e-Invoice (UBL 2.1 XML format) is mandatory for all B2G transactions — invoices to government institutions, municipalities, hospitals, and schools. B2B e-Invoice is expected to become mandatory in 2027-2028. Excel simply cannot generate UBL XML, sign with QES (Qualified Electronic Signature), or submit invoices through the UJP portal.',
+        items: [
+          'UBL 2.1 XML format — Excel cannot generate it, specialized software required',
+          'QES signature mandatory — every e-Invoice must be signed with a qualified electronic signature',
+          'Automatic validation — UJP portal rejects invoices with errors, no manual correction possible',
+          'Deadline: October 2026 for B2G — if you work with government, you must be ready',
+          'B2B expected 2027-2028 — preparing today saves headaches tomorrow',
+          'Facturino generates e-Invoice with one click — UBL XML + QES + submission',
+        ],
+        steps: null,
+      },
+      {
+        title: 'New Features in 2026: AI and Bank Integration',
+        content: 'Beyond e-Invoice, modern business requires tools that Excel will never offer. Facturino in 2026 adds artificial intelligence and bank reconciliation that transform accounting efficiency.',
+        items: [
+          'AI document scanning — photograph an invoice, it is automatically entered into the system in 10 seconds',
+          'Bank reconciliation — import bank statements (CSV/MT940/PDF) and automatically match with invoices',
+          'AI categorization — transactions are automatically classified by chart of accounts',
+          'Payroll — automatic salary calculation with MPIN form for UJP',
+          'POS with fiscal printer — for retail and hospitality, free tier available',
+          'Tax calendar — automatic reminders for UJP filing deadlines',
+        ],
+        steps: null,
+      },
+      {
         title: 'When Is Excel Actually Enough?',
-        content: 'To be fair, Excel can be adequate for freelancers with 1-2 invoices per month who do not need e-Invoice. But as soon as a business reaches 5+ invoices per month, has employees, or deals with VAT, spreadsheets become more of an obstacle than a help. Switching to Facturino is not just an upgrade — it is an investment in accuracy, efficiency, and peace of mind.',
+        content: 'To be fair, Excel can be adequate for freelancers with 1-2 invoices per month who do not need e-Invoice and do not work with government institutions. But as soon as a business reaches 5+ invoices per month, has employees, or deals with VAT, spreadsheets become more of an obstacle than a help. With mandatory e-Invoice from October 2026, even small businesses will need to switch to specialized software.',
         items: null,
         steps: null,
       },
@@ -179,9 +233,9 @@ const copy = {
     ],
     relatedTitle: 'Related articles',
     related: [
-      { slug: 'zosto-facturino', title: '10 Reasons Macedonian Businesses Choose Facturino' },
-      { slug: 'digitalno-smetkovodstvo', title: 'Digital vs Traditional Accounting' },
-      { slug: 'recurring-invoices-mk', title: 'Recurring Invoices: Automate Your Billing' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: '7 Accounting Software for North Macedonia 2026' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Which Is Better for Small Businesses?' },
+      { slug: 'e-faktura-obvrska-2026', title: 'E-Invoice 2026: Who Must Comply and How to Prepare' },
     ],
     cta: {
       title: 'Switch From Excel to Facturino',
@@ -193,8 +247,8 @@ const copy = {
     backLink: '← Kthehu te blogu',
     tag: 'Produkt',
     title: 'Facturino vs Excel: Pse tabelat nuk mjaftojnë',
-    publishDate: '19 shkurt 2026',
-    readTime: '6 min lexim',
+    publishDate: '23 maj 2026',
+    readTime: '8 min lexim',
     intro: 'Shumë biznese të vogla dhe të mesme në Maqedoni ende i menaxhojnë faturat dhe financat përmes tabelave Excel. Edhe pse Excel është mjet i fuqishëm llogaritjeje, ai thjesht nuk është krijuar për faturim, përputhshmëri kontabël dhe menaxhim biznesi. Në këtë artikull, krahasojmë Excel me Facturino dhe shpjegojmë pse kalimi në softuer të specializuar është thelbësor për një biznes në rritje.',
     sections: [
       {
@@ -241,8 +295,34 @@ const copy = {
         ],
       },
       {
+        title: 'Detyrimi e-Faturë 2026: Pse Excel nuk është më opsion',
+        content: 'Nga tetori 2026, e-Fatura (formati UBL 2.1 XML) është e detyrueshme për të gjitha transaksionet B2G — fatura ndaj institucioneve shtetërore, komunave, spitaleve dhe shkollave. e-Fatura B2B pritet të bëhet e detyrueshme në 2027-2028. Excel thjesht nuk mund të gjenerojë UBL XML, të nënshkruajë me QES ose të dorëzojë fatura përmes portalit të DAP.',
+        items: [
+          'Formati UBL 2.1 XML — Excel nuk mund ta gjenerojë, nevojitet softuer i specializuar',
+          'Nënshkrimi QES i detyrueshëm — çdo e-Faturë duhet nënshkruar me nënshkrim elektronik të kualifikuar',
+          'Validim automatik — portali DAP refuzon faturat me gabime, asnjë korrigjim manual i mundur',
+          'Afati: tetor 2026 për B2G — nëse punoni me shtetin, duhet të jeni gati',
+          'B2B pritet 2027-2028 — përgatitja sot kursen dhimbje koke nesër',
+          'Facturino gjeneron e-Faturë me një klik — UBL XML + QES + dorëzim',
+        ],
+        steps: null,
+      },
+      {
+        title: 'Veçori të reja në 2026: AI dhe integrim bankar',
+        content: 'Përtej e-Faturës, biznesi modern kërkon mjete që Excel kurrë nuk do t\'i ofrojë. Facturino në 2026 shton inteligjencë artificiale dhe pajtim bankar që transformojnë efiçencën kontabël.',
+        items: [
+          'Skenim AI dokumentesh — fotografoni faturën, futet automatikisht në sistem për 10 sekonda',
+          'Pajtim bankar — importoni ekstraktet bankare (CSV/MT940/PDF) dhe përputhni automatikisht me faturat',
+          'Kategorizim AI — transaksionet klasifikohen automatikisht sipas planit kontabël',
+          'Lista e pagave — llogaritje automatike e pagës me formularin MPIN për DAP',
+          'POS me printer fiskal — për shitje me pakicë dhe hoteleri, plan falas',
+          'Kalendar tatimor — kujtesa automatike për afatet e dorëzimit në DAP',
+        ],
+        steps: null,
+      },
+      {
         title: 'Kur është Excel vërtet i mjaftueshëm?',
-        content: 'Për të qenë të drejtë, Excel mund të jetë adekuat për freelancer-ë me 1-2 fatura në muaj që nuk kanë nevojë për e-Faturë. Por sapo biznesi arrin 5+ fatura në muaj, ka punonjës ose merret me TVSH, tabelat bëhen më shumë pengesë sesa ndihmë. Kalimi në Facturino nuk është vetëm përmirësim — është investim në saktësi, efiçencë dhe qetësi mendore.',
+        content: 'Për të qenë të drejtë, Excel mund të jetë adekuat për freelancer-ë me 1-2 fatura në muaj që nuk kanë nevojë për e-Faturë dhe nuk punojnë me institucione shtetërore. Por sapo biznesi arrin 5+ fatura në muaj, ka punonjës ose merret me TVSH, tabelat bëhen më shumë pengesë sesa ndihmë. Me e-Faturën e detyrueshme nga tetori 2026, edhe bizneset e vogla do të duhet të kalojnë në softuer të specializuar.',
         items: null,
         steps: null,
       },
@@ -261,9 +341,9 @@ const copy = {
     ],
     relatedTitle: 'Artikuj të ngjashëm',
     related: [
-      { slug: 'zosto-facturino', title: '10 arsye pse bizneset maqedonase zgjedhin Facturino' },
-      { slug: 'digitalno-smetkovodstvo', title: 'Kontabiliteti dixhital vs tradicional' },
-      { slug: 'recurring-invoices-mk', title: 'Faturat e përsëritura: Automatizoni arkëtimin' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: '7 softuerë kontabiliteti për Maqedoninë 2026' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Cili është më i mirë për bizneset e vogla?' },
+      { slug: 'e-faktura-obvrska-2026', title: 'e-Faturë 2026: Kush duhet dhe si të përgatiteni' },
     ],
     cta: {
       title: 'Kaloni nga Excel në Facturino',
@@ -275,8 +355,8 @@ const copy = {
     backLink: '← Bloga dön',
     tag: 'Ürün',
     title: 'Facturino vs Excel: Neden tablolar yeterli değil',
-    publishDate: '19 Şubat 2026',
-    readTime: '6 dk okuma',
+    publishDate: '23 Mayıs 2026',
+    readTime: '8 dk okuma',
     intro: 'Makedonya\'daki birçok küçük ve orta ölçekli işletme hala faturalarını ve finanslarını Excel tabloları aracılığıyla yönetmektedir. Excel güçlü bir hesaplama aracı olsa da, faturalama, muhasebe uyumluluğu ve iş yönetimi için tasarlanmamıştır. Bu makalede Excel\'i Facturino ile karşılaştırıyor ve büyüyen bir işletme için uzmanlaşmış yazılıma geçmenin neden gerekli olduğunu açıklıyoruz.',
     sections: [
       {
@@ -323,8 +403,34 @@ const copy = {
         ],
       },
       {
+        title: 'e-Fatura Zorunluluğu 2026: Excel Artık Bir Seçenek Değil',
+        content: 'Ekim 2026\'dan itibaren e-Fatura (UBL 2.1 XML formatı) tüm B2G işlemleri için zorunludur — devlet kurumlarına, belediyelere, hastanelere ve okullara kesilen faturalar. B2B e-Fatura 2027-2028\'de zorunlu olması beklenmektedir. Excel UBL XML oluşturamaz, QES ile imzalayamaz veya UJP portalı üzerinden fatura sunamaz.',
+        items: [
+          'UBL 2.1 XML formatı — Excel oluşturamaz, uzmanlaşmış yazılım gereklidir',
+          'QES imzası zorunlu — her e-Fatura nitelikli elektronik imza ile imzalanmalıdır',
+          'Otomatik doğrulama — UJP portalı hatalı faturaları reddeder, manuel düzeltme mümkün değildir',
+          'Son tarih: Ekim 2026 B2G — devletle çalışıyorsanız hazır olmalısınız',
+          'B2B 2027-2028 bekleniyor — bugün hazırlanmak yarının baş ağrılarını önler',
+          'Facturino tek tıkla e-Fatura oluşturur — UBL XML + QES + gönderim',
+        ],
+        steps: null,
+      },
+      {
+        title: '2026\'daki Yeni Özellikler: AI ve Banka Entegrasyonu',
+        content: 'e-Faturanın ötesinde, modern iş Excel\'in asla sunamayacağı araçlar gerektirir. 2026\'da Facturino yapay zeka ve banka mutabakatı ekleyerek muhasebe verimliliğini dönüştürür.',
+        items: [
+          'AI belge taraması — faturayı fotoğrafla, 10 saniyede otomatik olarak sisteme girilir',
+          'Banka mutabakatı — banka ekstrelerini içe aktar (CSV/MT940/PDF) ve faturalarla otomatik eşleştir',
+          'AI kategorizasyonu — işlemler hesap planına göre otomatik sınıflandırılır',
+          'Bordro — UJP için MPIN formu ile otomatik maaş hesaplaması',
+          'Fişkal yazıcılı POS — perakende ve konaklama için, ücretsiz plan mevcut',
+          'Vergi takvimi — UJP beyan tarihleri için otomatik hatırlatmalar',
+        ],
+        steps: null,
+      },
+      {
         title: 'Excel Gerçekten Ne Zaman Yeterli?',
-        content: 'Dürüst olmak gerekirse, Excel ayda 1-2 fatura kesen ve e-Fatura ihtiyacı olmayan serbest çalışanlar için yeterli olabilir. Ancak bir işletme ayda 5+ faturaya ulaştığında, çalışanları olduğunda veya KDV ile uğraştığında, tablolar yardımdan çok engel haline gelir. Facturino\'ya geçiş sadece bir yükseltme değildir — doğruluk, verimlilik ve huzur için bir yatırımdır.',
+        content: 'Dürüst olmak gerekirse, Excel ayda 1-2 fatura kesen, e-Fatura ihtiyacı olmayan ve devlet kurumlarıyla çalışmayan serbest çalışanlar için yeterli olabilir. Ancak bir işletme ayda 5+ faturaya ulaştığında, çalışanları olduğunda veya KDV ile uğraştığında, tablolar yardımdan çok engel haline gelir. Ekim 2026\'dan itibaren zorunlu e-Fatura ile küçük işletmeler bile uzmanlaşmış yazılıma geçmek zorunda kalacak.',
         items: null,
         steps: null,
       },
@@ -343,9 +449,9 @@ const copy = {
     ],
     relatedTitle: 'İlgili makaleler',
     related: [
-      { slug: 'zosto-facturino', title: "Makedon işletmelerin Facturino'yu seçmesinin 10 nedeni" },
-      { slug: 'digitalno-smetkovodstvo', title: 'Dijital vs geleneksel muhasebe' },
-      { slug: 'recurring-invoices-mk', title: 'Tekrarlayan faturalar: Tahsilatı otomatikleştirin' },
+      { slug: 'najdobar-smetkovodstven-softver-2026', title: '2026 Makedonya için 7 Muhasebe Yazılımı' },
+      { slug: 'facturino-vs-pantheon', title: 'Facturino vs PANTHEON: Küçük İşletmeler İçin Hangisi Daha İyi?' },
+      { slug: 'e-faktura-obvrska-2026', title: 'e-Fatura 2026: Kim Zorunlu ve Nasıl Hazırlanmalı' },
     ],
     cta: {
       title: 'Excel\'den Facturino\'ya Geçin',
@@ -364,8 +470,28 @@ export default async function FacturinoVsExcelPage({
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const blogLabel = { mk: '\u0411\u043b\u043e\u0433', en: 'Blog', sq: 'Blog', tr: 'Blog' }[locale]
+  const homeLabel = { mk: '\u041f\u043e\u0447\u0435\u0442\u043d\u0430', en: 'Home', sq: 'Kryefaqja', tr: 'Ana Sayfa' }[locale]
+
+  const articleLd = articleJsonLd({
+    locale,
+    slug: 'facturino-vs-excel',
+    title: t.title,
+    description: t.intro.slice(0, 200),
+    datePublished: '2026-05-23',
+    tags: ['Facturino', 'Excel', 'invoicing software', 'comparison', 'e-invoice', '2026'],
+  })
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: blogLabel, href: `/${locale}/blog` },
+    { name: t.title, href: `/${locale}/blog/facturino-vs-excel` },
+  ])
+
   return (
     <main id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
