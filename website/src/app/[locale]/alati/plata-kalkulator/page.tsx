@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       en: 'North Macedonia Salary Calculator 2026 — Free Gross to Net',
     },
     description: {
-      mk: 'Бесплатен бруто-нето калкулатор 2026. Пресметајте нето плата од бруто: пензиско 18.8%, здравствено 7.5%, данок 10%. Минимална плата 20.175 МКД. Без регистрација.',
-      sq: 'Llogaritësi falas bruto-neto 2026. Llogaritni pagën: pension 18.8%, shëndetësi 7.5%, tatim 10%. Paga minimale 20.175 MKD. Pa regjistrim.',
-      tr: 'Ücretsiz 2026 brüt-net hesaplayıcı. Emeklilik %18,8, sağlık %7,5, gelir vergisi %10. Asgari ücret 20.175 MKD. Kayıt gerekmez.',
-      en: 'Free 2026 gross-to-net salary calculator for North Macedonia. Pension 18.8%, health 7.5%, income tax 10%. Minimum wage 20,175 MKD. No registration required.',
+      mk: 'Бесплатен бруто-нето калкулатор 2026. Пресметајте нето плата: придонеси 28%, данок 10%, лично ослободување 10.932 МКД. Минимална бруто плата 38.507 МКД. Без регистрација.',
+      sq: 'Llogaritësi falas bruto-neto 2026. Llogaritni pagën: kontribute 28%, tatim 10%, zbritje personale 10.932 MKD. Paga minimale bruto 38.507 MKD. Pa regjistrim.',
+      tr: 'Ücretsiz 2026 brüt-net hesaplayıcı. Katkı payları %28, gelir vergisi %10, kişisel indirim 10.932 MKD. Asgari brüt ücret 38.507 MKD. Kayıt gerekmez.',
+      en: 'Free 2026 gross-to-net salary calculator for North Macedonia. Contributions 28%, income tax 10%, personal deduction 10,932 MKD. Minimum gross wage 38,507 MKD. No registration required.',
     },
   })
 }

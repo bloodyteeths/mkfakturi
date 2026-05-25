@@ -477,15 +477,15 @@ return [
         'overtime_regular_multiplier' => 1.35,   // Regular overtime: 135%
         'overtime_holiday_multiplier' => 1.50,   // Holiday/night overtime: 150%
 
-        // Contribution base limits (2024 rates)
-        // Minimum: 50% of national average salary (MKD 63,154 / 2 = 31,577)
+        // Contribution base limits (2026 rates, per UJP soopstenie 1187)
+        // Minimum: 50% of national average salary (MKD 69,141 / 2 = 34,570)
         // Maximum: 16x national average salary
-        'min_contribution_base' => 3157700,      // MKD 31,577 in cents
-        'max_contribution_base' => 101046400,    // MKD 1,010,464 in cents
-        'national_avg_salary' => 6315400,        // MKD 63,154 in cents
+        'min_contribution_base' => 3457000,      // MKD 34,570 in cents
+        'max_contribution_base' => 110625600,    // MKD 1,106,256 in cents
+        'national_avg_salary' => 6914100,        // MKD 69,141 in cents
 
         // Personal deduction (лично ослободување) — Закон за данокот на личен доход
-        'personal_deduction' => 1039000,            // MKD 10,390 in cents per month (2026, per UJP МПІН)
+        'personal_deduction' => 1093200,            // MKD 10,932 in cents per month (2026, per UJP)
 
         // Seniority bonus (минат труд) — Колективен договор / Закон за работни односи
         'seniority_rate_per_year' => 0.005,         // 0.5% of gross per year of service

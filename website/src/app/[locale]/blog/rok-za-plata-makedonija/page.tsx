@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       tr: 'Kuzey Makedonya\'da Maaş Ödeme Süresi: Kanun Ne Diyor (2026)',
     },
     description: {
-      mk: 'Законски рок за исплата на плата во Македонија: чл. 106 ЗРО, до 15-ти наредниот месец. Прекувремена 40%, ноќна 35%, празници 50%. Минимална плата 20.175 МКД. Казни EUR 1.000-3.000.',
-      en: 'Legal salary payment deadline in North Macedonia: Art. 106 Labor Law, by the 15th of the following month. Overtime 40%, night shift 35%, holidays 50%. Minimum wage 20,175 MKD. Penalties EUR 1,000-3,000.',
-      sq: 'Afati ligjor i pagesës së pagës në Maqedoni: neni 106 i Ligjit të Punës, deri më 15 të muajit pasardhës. Jashtë orarit 40%, nata 35%, festat 50%. Paga minimale 20.175 MKD. Gjobat EUR 1.000-3.000.',
-      tr: 'Kuzey Makedonya\'da yasal maaş ödeme süresi: md. 106 İş Kanunu, takip eden ayın 15\'ine kadar. Fazla mesai %40, gece vardiyası %35, tatiller %50. Asgari ücret 20.175 MKD. Cezalar EUR 1.000-3.000.',
+      mk: 'Законски рок за исплата на плата во Македонија: чл. 106 ЗРО, до 15-ти наредниот месец. Прекувремена 40%, ноќна 35%, празници 50%. Минимална плата 38.507 МКД. Казни EUR 1.000-3.000.',
+      en: 'Legal salary payment deadline in North Macedonia: Art. 106 Labor Law, by the 15th of the following month. Overtime 40%, night shift 35%, holidays 50%. Minimum wage 38,507 MKD. Penalties EUR 1,000-3,000.',
+      sq: 'Afati ligjor i pagesës së pagës në Maqedoni: neni 106 i Ligjit të Punës, deri më 15 të muajit pasardhës. Jashtë orarit 40%, nata 35%, festat 50%. Paga minimale 38.507 MKD. Gjobat EUR 1.000-3.000.',
+      tr: 'Kuzey Makedonya\'da yasal maaş ödeme süresi: md. 106 İş Kanunu, takip eden ayın 15\'ine kadar. Fazla mesai %40, gece vardiyası %35, tatiller %50. Asgari ücret 38.507 MKD. Cezalar EUR 1.000-3.000.',
     },
     datePublished: '2026-05-23',
   })
@@ -84,10 +84,10 @@ const copy = {
       {
         title: 'Минимална плата за 2026 година',
         content:
-          'Минималната бруто плата во Македонија за 2026 година изнесува 20.175 МКД месечно за полно работно време (40 часа неделно). Секој работодавач е должен да исплати најмалку минимална плата — исплата под овој износ е прекршок.',
+          'Минималната бруто плата во Македонија за 2026 година изнесува 38.507 МКД месечно за полно работно време (40 часа неделно). Секој работодавач е должен да исплати најмалку минимална плата — исплата под овој износ е прекршок.',
         items: [
-          'Минимална бруто плата 2026: 20.175 МКД месечно',
-          'Минимална нето плата: приближно 14.600 МКД (по одбиток на придонеси 27,5% и данок 10%)',
+          'Минимална бруто плата 2026: 38.507 МКД месечно',
+          'Минимална нето плата: приближно 26.046 МКД (по одбиток на придонеси 28% и данок 10%)',
           'Минималната плата се усогласува секоја година со раст на просечната плата и животните трошоци',
           'Важи за сите дејности — нема посебна минимална плата по сектор',
           'За скратено работно време, минималната плата се пресметува пропорционално',
@@ -231,10 +231,10 @@ const copy = {
       {
         title: 'Minimum wage for 2026',
         content:
-          'The minimum gross salary in North Macedonia for 2026 is 20,175 MKD per month for full-time employment (40 hours per week). Every employer is obligated to pay at least the minimum wage — payment below this amount constitutes a violation.',
+          'The minimum gross salary in North Macedonia for 2026 is 38,507 MKD per month for full-time employment (40 hours per week). Every employer is obligated to pay at least the minimum wage — payment below this amount constitutes a violation.',
         items: [
-          'Minimum gross wage 2026: 20,175 MKD per month',
-          'Minimum net wage: approximately 14,600 MKD (after 27.5% contributions and 10% tax deduction)',
+          'Minimum gross wage 2026: 38,507 MKD per month',
+          'Minimum net wage: approximately 26,046 MKD (after 28% contributions and 10% tax deduction)',
           'The minimum wage is adjusted annually in line with average salary growth and cost of living',
           'Applies to all industries — there is no sector-specific minimum wage',
           'For part-time work, the minimum wage is calculated proportionally',
@@ -378,10 +378,10 @@ const copy = {
       {
         title: 'Paga minimale për 2026',
         content:
-          'Paga minimale bruto në Maqedoni për 2026 është 20.175 MKD në muaj për punësim me kohë të plotë (40 orë në javë). Çdo punëdhënës duhet të paguajë të paktën pagën minimale — pagesa nën këtë shumë është kundërvajtje.',
+          'Paga minimale bruto në Maqedoni për 2026 është 38.507 MKD në muaj për punësim me kohë të plotë (40 orë në javë). Çdo punëdhënës duhet të paguajë të paktën pagën minimale — pagesa nën këtë shumë është kundërvajtje.',
         items: [
-          'Paga minimale bruto 2026: 20.175 MKD në muaj',
-          'Paga minimale neto: përafërsisht 14.600 MKD (pas zbritjes së kontributeve 27,5% dhe tatimit 10%)',
+          'Paga minimale bruto 2026: 38.507 MKD në muaj',
+          'Paga minimale neto: përafërsisht 26.046 MKD (pas zbritjes së kontributeve 28% dhe tatimit 10%)',
           'Paga minimale përshtatet çdo vit sipas rritjes së pagës mesatare dhe kostos së jetesës',
           'Vlen për të gjitha industritë — nuk ka pagë minimale sektoriale',
           'Për punë me kohë të pjesshme, paga minimale llogaritet proporcionalisht',
@@ -525,10 +525,10 @@ const copy = {
       {
         title: '2026 asgari ücret',
         content:
-          'Kuzey Makedonya\'da 2026 yılı için brüt asgari ücret, tam zamanlı çalışma (haftada 40 saat) için aylık 20.175 MKD\'dir. Her işveren en az asgari ücreti ödemek zorundadır — bu tutarın altında ödeme bir ihlaldir.',
+          'Kuzey Makedonya\'da 2026 yılı için brüt asgari ücret, tam zamanlı çalışma (haftada 40 saat) için aylık 38.507 MKD\'dir. Her işveren en az asgari ücreti ödemek zorundadır — bu tutarın altında ödeme bir ihlaldir.',
         items: [
-          '2026 brüt asgari ücret: aylık 20.175 MKD',
-          'Net asgari ücret: yaklaşık 14.600 MKD (%27,5 katkı ve %10 vergi kesintisi sonrası)',
+          '2026 brüt asgari ücret: aylık 38.507 MKD',
+          'Net asgari ücret: yaklaşık 26.046 MKD (%28 katkı ve %10 vergi kesintisi sonrası)',
           'Asgari ücret, ortalama maaş artışı ve yaşam maliyetine göre yıllık olarak ayarlanır',
           'Tüm sektörler için geçerlidir — sektöre özel asgari ücret yoktur',
           'Yarı zamanlı çalışma için asgari ücret orantılı olarak hesaplanır',
@@ -656,7 +656,7 @@ export default async function RokZaPlataMakedonijaPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
         { question: 'Кога мора да се исплати платата во Македонија?', answer: 'Според член 106 од Законот за работни односи, платата мора да се исплати најдоцна до 15-ти во наредниот месец за претходниот месец.' },
-        { question: 'Колку е минималната плата во Македонија 2026?', answer: 'Минималната бруто плата во 2026 изнесува 20.175 МКД месечно.' },
+        { question: 'Колку е минималната плата во Македонија 2026?', answer: 'Минималната бруто плата во 2026 изнесува 38.507 МКД месечно (приближно 626 EUR).' },
         { question: 'Колку е додатокот за прекувремена работа?', answer: 'Прекувремената работа се плаќа со 40% додаток на основната плата, ноќна работа со 35% додаток.' },
       ])) }} />
       {/* ARTICLE HEADER */}

@@ -71,7 +71,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Фиксна плата + провизија', desc: 'Најчест модел. Основна бруто плата (пр. 25.000 МКД) + процент од остварен промет (10-30%). Целата провизија е дел од бруто платата — придонеси 28% и ПДД 10% се пресметуваат на целиот износ.' },
-          { step: 'Само провизија (100% комисија)', desc: 'Ризичен модел. Ако вработениот е пријавен, минималната бруто плата е 20.175 МКД (2026) — не можете да платите помалку, дури и ако промет нема. Провизијата над минималната се додава.' },
+          { step: 'Само провизија (100% комисија)', desc: 'Ризичен модел. Ако вработениот е пријавен, минималната бруто плата е 38.507 МКД (2026) — не можете да платите помалку, дури и ако промет нема. Провизијата над минималната се додава.' },
           { step: 'Закуп на стол (chair rental)', desc: 'Фризерот плаќа месечен закуп за користење на стол/работна станица. Тој е самостоен вршител на дејност (СВД) или ДООЕЛ, не вработен. ВИЕ не плаќате придонеси за него — тој сам си поднесува МПИН.' },
           { step: 'Закуп на кабина (booth rental)', desc: 'Исто како закуп на стол, но за козметичари/масери кои користат одделна просторија. Договор за закуп + фактура за закупнина од закупецот.' },
           { step: 'ВНИМАНИЕ: Прикриен работен однос', desc: 'Ако „закупецот" работи по ваш распоред, со ваши клиенти и ваши материјали — УЈП може да го квалификува како прикриен работен однос. Казна: ретроактивни придонеси + 30% пенал.' },
@@ -195,7 +195,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Fixed salary + commission', desc: 'Most common model. Base gross salary (e.g. MKD 25,000) + percentage of generated turnover (10-30%). The entire commission is part of gross salary — contributions at 28% and PIT at 10% are calculated on the full amount.' },
-          { step: 'Commission only (100% commission)', desc: 'Risky model. If the employee is registered, the minimum gross salary is MKD 20,175 (2026) — you cannot pay less even if there is no turnover. Commission above minimum is added on top.' },
+          { step: 'Commission only (100% commission)', desc: 'Risky model. If the employee is registered, the minimum gross salary is MKD 38,507 (2026) — you cannot pay less even if there is no turnover. Commission above minimum is added on top.' },
           { step: 'Chair rental', desc: 'The hairdresser pays monthly rent to use a chair/workstation. They are a sole proprietor (SVD) or LLC, not an employee. YOU do not pay contributions for them — they file their own MPIN.' },
           { step: 'Booth rental', desc: 'Same as chair rental, but for beauticians/masseuses who use a separate room. Requires a rental agreement + the tenant issues an invoice for rent.' },
           { step: 'WARNING: Disguised employment', desc: 'If the "tenant" works on your schedule, with your clients and your materials — UJP may classify this as disguised employment. Penalty: retroactive contributions + 30% surcharge.' },
@@ -319,7 +319,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Page fikse + provizion', desc: 'Modeli me i zakonshem. Paga baze bruto (p.sh. 25.000 MKD) + perqindje e qarkullimit te realizuar (10-30%). I gjithe provizioni eshte pjese e pages bruto — kontributet 28% dhe TAP 10% llogariten mbi shumen totale.' },
-          { step: 'Vetem provizion (100% komision)', desc: 'Model i rrezikshem. Nese punonjesi eshte i regjistruar, paga minimale bruto eshte 20.175 MKD (2026) — nuk mund te paguani me pak. Provizioni mbi minimalen shtohet.' },
+          { step: 'Vetem provizion (100% komision)', desc: 'Model i rrezikshem. Nese punonjesi eshte i regjistruar, paga minimale bruto eshte 38.507 MKD (2026) — nuk mund te paguani me pak. Provizioni mbi minimalen shtohet.' },
           { step: 'Qira karrige (chair rental)', desc: 'Parukieri paguan qira mujore per perdorimin e karriges/stacionit te punes. Ai eshte ushtrues i pavarur i veprimtarise, jo punonjes. JU nuk paguani kontribute per te — ai vete dorzon MPIN.' },
           { step: 'Qira kabine (booth rental)', desc: 'Njejte si qira karrige, por per kozmetiste/masoze qe perdorin dhome te ndare. Kontrate qiraje + fature per qirane nga qiramarresi.' },
           { step: 'KUJDES: Marredhenie e fshehur pune', desc: 'Nese "qiramarresi" punon sipas orarit tuaj, me klientet tuaj dhe materialet tuaja — DAP mund ta kualifikoje si marredhenie te fshehur pune. Gjobe: kontribute retroaktive + 30% shtese.' },
@@ -443,7 +443,7 @@ const copy = {
         items: null,
         steps: [
           { step: 'Sabit maas + komisyon', desc: 'En yaygin model. Temel brut maas (orn. 25.000 MKD) + elde edilen cironun yuzdesi (%10-30). Tum komisyon brut maasin parcasidir — %28 primler ve %10 GV toplam tutar uzerinden hesaplanir.' },
-          { step: 'Sadece komisyon (%100 komisyon)', desc: 'Riskli model. Calisan kayitliysa, asgari brut ucret 20.175 MKD\'dir (2026) — ciro olmasa bile daha az odeyemezsiniz. Asgari ustiundeki komisyon eklenir.' },
+          { step: 'Sadece komisyon (%100 komisyon)', desc: 'Riskli model. Calisan kayitliysa, asgari brut ucret 38.507 MKD\'dir (2026) — ciro olmasa bile daha az odeyemezsiniz. Asgari ustiundeki komisyon eklenir.' },
           { step: 'Koltuk kirasi (chair rental)', desc: 'Kuafor, koltuk/is istasyonu kullanimi icin aylik kira oder. Serbest meslek erbabi veya LLC\'dir, calisan degil. SIZ onun icin prim odemezsiniz — kendi MPIN\'ini kendisi dosyalar.' },
           { step: 'Kabin kirasi (booth rental)', desc: 'Koltuk kirasiyla ayni, ancak ayri oda kullanan guzellik uzmanlari/masozler icindir. Kira sozlesmesi + kiracidan kira faturasi gerekir.' },
           { step: 'UYARI: Gizli istihdam', desc: '"Kiraci" sizin programinizda, sizin musterilerinizle ve sizin malzemelerinizle calisiyorsa — UJP bunu gizli istihdam olarak nitelendirebilir. Ceza: geriye donuk primler + %30 ek ucret.' },
@@ -556,7 +556,7 @@ export default async function SmetkovodstvoZaSaloniPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
         { question: 'Дали салон за убавина плаќа ДДВ?', answer: 'Ако годишниот промет надмине 2.000.000 МКД (~32.500 EUR), задолжителна е ДДВ регистрација. И услугите (шишање, маникир) и производите (шампон, крема) се оданочуваат со 18%. Ако сте паушалец под прагот — нема ДДВ обврска, но мора да издавате фискална сметка.' },
-        { question: 'Како функционираат провизии за вработени во салон?', answer: 'Најчест модел е фиксна плата + провизија (10-30% од остварен промет). Целата провизија е дел од бруто платата — придонеси 28% и ПДД 10% се пресметуваат на целиот износ. Минимална бруто плата 2026 е 20.175 МКД — не можете да платите помалку.' },
+        { question: 'Како функционираат провизии за вработени во салон?', answer: 'Најчест модел е фиксна плата + провизија (10-30% од остварен промет). Целата провизија е дел од бруто платата — придонеси 28% и ПДД 10% се пресметуваат на целиот износ. Минимална бруто плата 2026 е 38.507 МКД — не можете да платите помалку.' },
         { question: 'Дали фризерски салон треба фискален уред?', answer: 'Да, секој салон кој продава услуги или производи на физички лица (B2C) е обврзан да користи фискален уред и да издава фискални сметки. Казните за работа без фискален уред се од 2.000 до 5.000 EUR за правно лице. Фискалниот уред мора да биде поврзан со УЈП.' },
       ])) }} />
 

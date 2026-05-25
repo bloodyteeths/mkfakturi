@@ -83,7 +83,7 @@ const copy = {
         items: [
           'Лични податоци на вработениот (ЕМБГ, име, адреса)',
           'Бруто плата',
-          'Основица за придонеси (ограничена: мин. 31.577 / макс. 1.010.464 МКД)',
+          'Основица за придонеси (ограничена: мин. 34.570 / макс. 1.106.256 МКД)',
           'Придонес за пензиско осигурување (18,8% од основицата)',
           'Придонес за здравствено осигурување (7,5% од основицата)',
           'Придонес за осигурување од невработеност (1,2% од основицата)',
@@ -176,7 +176,7 @@ const copy = {
         items: [
           'Employee personal data (EMBG, name, address)',
           'Gross salary amount',
-          'Contribution base (capped at min 31,577 / max 1,010,464 MKD)',
+          'Contribution base (capped at min 34,570 / max 1,106,256 MKD)',
           'Pension contribution (18.8% of base)',
           'Health contribution (7.5% of base)',
           'Unemployment contribution (1.2% of base)',
@@ -269,7 +269,7 @@ const copy = {
         items: [
           'Të dhënat personale të punonjësit (EMBG, emri, adresa)',
           'Shuma e pagës bruto',
-          'Baza e kontributeve (e kufizuar: min 31.577 / maks 1.010.464 MKD)',
+          'Baza e kontributeve (e kufizuar: min 34.570 / maks 1.106.256 MKD)',
           'Kontributi pensional (18,8% e bazës)',
           'Kontributi shëndetësor (7,5% e bazës)',
           'Kontributi i papunësisë (1,2% e bazës)',
@@ -362,7 +362,7 @@ const copy = {
         items: [
           'Çalışan kişisel verileri (EMBG, ad, adres)',
           'Brüt maaş tutarı',
-          'Katkı payı matrahı (sınırlı: min 31.577 / maks 1.010.464 MKD)',
+          'Katkı payı matrahı (sınırlı: min 34.570 / maks 1.106.256 MKD)',
           'Emeklilik katkısı (matrahın %18,8\'i)',
           'Sağlık katkısı (matrahın %7,5\'i)',
           'İşsizlik katkısı (matrahın %1,2\'si)',

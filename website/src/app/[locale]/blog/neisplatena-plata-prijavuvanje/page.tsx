@@ -50,7 +50,7 @@ const copy = {
         items: [
           'Платата не е исплатена 1 или повеќе месеци по законскиот рок (15-ти во наредниот месец)',
           'Придонесите од задолжително социјално осигурување не се уплатени (можете да проверите на moj.ujp.gov.mk)',
-          'Исплатената плата е пониска од минималната плата (20.175 МКД нето за 2026 година)',
+          'Исплатената плата е пониска од минималната плата (26.046 МКД нето за 2026 година)',
           'Платата е исплатена но без платна листа (пејслип) со детална разбивка',
           'Работодавачот исплатил нето плата без претходно да ги уплати придонесите',
           'Работодавачот одбива да издаде потврда за плата или М1/М2 образец',
@@ -162,7 +162,7 @@ const copy = {
         items: [
           'Salary has not been paid for 1 or more months past the legal deadline (15th of the following month)',
           'Mandatory social insurance contributions have not been paid (you can check at moj.ujp.gov.mk)',
-          'The paid salary is below the minimum wage (20,175 MKD net for 2026)',
+          'The paid salary is below the minimum wage (26,046 MKD net for 2026)',
           'Salary was paid but without a payslip with a detailed breakdown',
           'Employer paid net salary without first remitting the contributions',
           'Employer refuses to issue salary confirmation or M1/M2 form',
@@ -274,7 +274,7 @@ const copy = {
         items: [
           'Paga nuk është paguar 1 ose më shumë muaj pas afatit ligjor (data 15 e muajit pasues)',
           'Kontributet e detyrueshme të sigurimit social nuk janë paguar (mund ta kontrolloni në moj.ujp.gov.mk)',
-          'Paga e paguar është nën pagën minimale (20.175 MKD neto për 2026)',
+          'Paga e paguar është nën pagën minimale (26.046 MKD neto për 2026)',
           'Paga u pagua por pa fletëpagesë me ndarje të detajuar',
           'Punëdhënësi pagoi pagën neto pa dërguar më parë kontributet',
           'Punëdhënësi refuzon të lëshojë konfirmim page ose formular M1/M2',
@@ -386,7 +386,7 @@ const copy = {
         items: [
           'Maaş yasal süreden (takip eden ayın 15\'i) 1 veya daha fazla ay sonra hala ödenmemiş',
           'Zorunlu sosyal sigorta primleri ödenmemiş (moj.ujp.gov.mk üzerinden kontrol edilebilir)',
-          'Ödenen maaş asgari ücretin altında (2026 için net 20.175 MKD)',
+          'Ödenen maaş asgari ücretin altında (2026 için net 26.046 MKD)',
           'Maaş ödendi ancak ayrıntılı dökümü içeren bordro belgesi verilmedi',
           'İşveren önce primleri ödemeden net maaşı ödedi',
           'İşveren maaş onay belgesi veya M1/M2 formu vermeyi reddediyor',

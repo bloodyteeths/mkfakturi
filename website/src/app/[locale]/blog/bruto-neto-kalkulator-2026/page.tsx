@@ -90,7 +90,7 @@ const copy = {
       {
         title: 'Минимална плата 2026',
         content:
-          'Минималната нето плата за 2026 година во Македонија изнесува 20.175 МКД (приближно 328 EUR). Секој работодавач е должен да исплати најмалку минимална плата за полно работно време (40 часа неделно). Минималната плата се ажурира еднаш годишно, обично во март.',
+          'Минималната нето плата за 2026 година во Македонија изнесува 26.046 МКД (приближно 423 EUR). Секој работодавач е должен да исплати најмалку минимална плата за полно работно време (40 часа неделно). Минималната плата се ажурира еднаш годишно, обично во март.',
         items: null,
         steps: null,
       },
@@ -193,7 +193,7 @@ const copy = {
       {
         title: 'Minimum wage 2026',
         content:
-          'The minimum net wage for 2026 in North Macedonia is 20,175 MKD (approximately 328 EUR). Every employer must pay at least the minimum wage for full-time employment (40 hours per week). The minimum wage is updated annually, usually in March.',
+          'The minimum net wage for 2026 in North Macedonia is 26,046 MKD (approximately 423 EUR). Every employer must pay at least the minimum wage for full-time employment (40 hours per week). The minimum wage is updated annually, usually in March.',
         items: null,
         steps: null,
       },
@@ -296,7 +296,7 @@ const copy = {
       {
         title: 'Paga minimale 2026',
         content:
-          'Paga minimale neto për vitin 2026 në Maqedoni është 20.175 MKD (përafërsisht 328 EUR). Çdo punëdhënës duhet të paguajë të paktën pagën minimale për punësim me kohë të plotë (40 orë në javë). Paga minimale përditësohet çdo vit, zakonisht në mars.',
+          'Paga minimale neto për vitin 2026 në Maqedoni është 26.046 MKD (përafërsisht 423 EUR). Çdo punëdhënës duhet të paguajë të paktën pagën minimale për punësim me kohë të plotë (40 orë në javë). Paga minimale përditësohet çdo vit, zakonisht në mars.',
         items: null,
         steps: null,
       },
@@ -399,7 +399,7 @@ const copy = {
       {
         title: 'Asgari ucret 2026',
         content:
-          'Kuzey Makedonya\'da 2026 yili icin asgari net ucret 20.175 MKD\'dir (yaklasik 328 EUR). Her isveren tam zamanli istihdam (haftada 40 saat) icin en az asgari ucreti odemek zorundadir. Asgari ucret yillik olarak, genellikle mart ayinda guncellenir.',
+          'Kuzey Makedonya\'da 2026 yili icin asgari net ucret 26.046 MKD\'dir (yaklasik 423 EUR). Her isveren tam zamanli istihdam (haftada 40 saat) icin en az asgari ucreti odemek zorundadir. Asgari ucret yillik olarak, genellikle mart ayinda guncellenir.',
         items: null,
         steps: null,
       },

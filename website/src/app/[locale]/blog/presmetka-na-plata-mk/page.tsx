@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       tr: 'Kuzey Makedonya Bordro 2026: Brüt-Net Maaş Hesaplama Rehberi',
     },
     description: {
-      mk: 'Бесплатен водич за бруто-нето пресметка на плата 2026: пензиско 18.8%, здравствено 7.5%, данок 10%, минимална плата 20.175 МКД, МПИН образец и пример со 40.000 МКД бруто.',
-      en: 'Free 2026 gross-to-net salary guide for North Macedonia: pension 18.8%, health 7.5%, income tax 10%, minimum wage 20,175 MKD, MPIN filing. Includes step-by-step calculation example.',
-      sq: 'Udhëzues falas bruto-neto 2026 për pagën në Maqedoni: pension 18.8%, shëndetësi 7.5%, tatim 10%, paga minimale 20.175 MKD, formulari MPIN dhe shembull llogaritjeje.',
-      tr: 'Kuzey Makedonya 2026 brüt-net maaş rehberi: emeklilik %18,8, sağlık %7,5, gelir vergisi %10, asgari ücret 20.175 MKD, MPIN formu ve hesaplama örneği.',
+      mk: 'Бесплатен водич за бруто-нето пресметка на плата 2026: пензиско 18.8%, здравствено 7.5%, данок 10%, минимална бруто плата 38.507 МКД, МПИН образец и пример со 40.000 МКД бруто.',
+      en: 'Free 2026 gross-to-net salary guide for North Macedonia: pension 18.8%, health 7.5%, income tax 10%, gross minimum wage 38,507 MKD, MPIN filing. Includes step-by-step calculation example.',
+      sq: 'Udhëzues falas bruto-neto 2026 për pagën në Maqedoni: pension 18.8%, shëndetësi 7.5%, tatim 10%, paga minimale bruto 38.507 MKD, formulari MPIN dhe shembull llogaritjeje.',
+      tr: 'Kuzey Makedonya 2026 brüt-net maaş rehberi: emeklilik %18,8, sağlık %7,5, gelir vergisi %10, brüt asgari ücret 38.507 MKD, MPIN formu ve hesaplama örneği.',
     },
     datePublished: '2026-02-16',
   })
@@ -90,7 +90,7 @@ const copy = {
         title: 'Минимална плата и МПИН',
         content: null,
         items: [
-          'Минимална нето плата за 2026: 18.000 МКД (приближно 292 EUR). Секој работодавач е должен да исплати најмалку минимална плата за полно работно време.',
+          'Минимална нето плата за 2026: 26.046 МКД (приближно 423 EUR). Секој работодавач е должен да исплати најмалку минимална плата за полно работно време.',
           'МПИН (Месечна пресметка на индивидуални наоди) — електронски образец кој се поднесува до УЈП секој месец. Содржи податоци за секој вработен: бруто плата, придонеси, данок и нето плата.',
           'Рок за поднесување на МПИН: најдоцна до 15-ти во месецот за претходниот месец. Казните за задоцнето поднесување се од 500 до 2.000 EUR.',
           'Уплата на придонеси и данок: мора да се изврши пред или истовремено со исплатата на нето платата. Не смеете да исплатите плата без претходна уплата на придонесите.',
@@ -214,7 +214,7 @@ const copy = {
         title: 'Minimum wage and MPIN',
         content: null,
         items: [
-          'Minimum net wage for 2026: 18,000 MKD (approximately 292 EUR). Every employer must pay at least the minimum wage for full-time employment.',
+          'Minimum net wage for 2026: 26,046 MKD (approximately 423 EUR). Every employer must pay at least the minimum wage for full-time employment.',
           'MPIN (Monthly Calculation of Individual Findings) — an electronic form submitted to UJP every month. Contains data for each employee: gross salary, contributions, tax, and net salary.',
           'MPIN filing deadline: no later than the 15th of the month for the previous month. Late filing penalties range from 500 to 2,000 EUR.',
           'Contribution and tax payment: must be made before or simultaneously with the net salary payment. You may not pay salaries without prior contribution payment.',
@@ -338,7 +338,7 @@ const copy = {
         title: 'Paga minimale dhe MPIN',
         content: null,
         items: [
-          'Paga minimale neto për 2026: 18.000 MKD (përafërsisht 292 EUR). Çdo punëdhënës duhet të paguajë të paktën pagën minimale për punësim me kohë të plotë.',
+          'Paga minimale neto për 2026: 26.046 MKD (përafërsisht 423 EUR). Çdo punëdhënës duhet të paguajë të paktën pagën minimale për punësim me kohë të plotë.',
           'MPIN (Llogaritja Mujore e Gjetjeve Individuale) — formular elektronik i dorëzuar në UJP çdo muaj. Përmban të dhëna për çdo punonjës: pagë bruto, kontribute, tatim dhe pagë neto.',
           'Afati i dorëzimit të MPIN: jo më vonë se data 15 e muajit për muajin e kaluar. Gjobat për dorëzim të vonuar janë nga 500 deri 2.000 EUR.',
           'Pagesa e kontributeve dhe tatimit: duhet bërë para ose njëkohësisht me pagesën e pagës neto. Nuk lejohet pagesa e pagave pa paguar kontributet paraprakisht.',
@@ -462,7 +462,7 @@ const copy = {
         title: 'Asgari ücret ve MPIN',
         content: null,
         items: [
-          '2026 asgari net ücret: 18.000 MKD (yaklaşık 292 EUR). Her işveren tam zamanlı istihdam için en az asgari ücreti ödemek zorundadır.',
+          '2026 asgari net ücret: 26.046 MKD (yaklaşık 423 EUR). Her işveren tam zamanlı istihdam için en az asgari ücreti ödemek zorundadır.',
           'MPIN (Bireysel Bulguların Aylık Hesaplaması) — her ay UJP\'ye sunulan elektronik form. Her çalışan için veri içerir: brüt maaş, katkılar, vergi ve net maaş.',
           'MPIN dosyalama son tarihi: önceki ay için ayın en geç 15\'ine kadar. Geç dosyalama cezaları 500 ile 2.000 EUR arasındadır.',
           'Katkı ve vergi ödemesi: net maaş ödemesinden önce veya eş zamanlı yapılmalıdır. Katkıları ödemeden maaş ödeyemezsiniz.',
@@ -565,7 +565,7 @@ export default async function PresmetkaNaPlataMkPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd([
         { question: 'Како се пресметува нето платата во Македонија?', answer: 'Нето платата се добива со одземање на придонесите (пензиско 18,8%, здравствено 7,5%, вработување 1,2% = вкупно 27,5%) и данокот на личен доход (10% на основицата) од бруто платата. Пример: од 40.000 МКД бруто, нето платата е 26.100 МКД.' },
         { question: 'Колку се придонесите од плата во Македонија 2026?', answer: 'Вкупните социјални придонеси изнесуваат 27,5% од бруто платата: пензиско и инвалидско осигурување 18,8%, здравствено осигурување 7,5% и придонес за вработување 1,2%. Сите придонеси се одземаат од бруто платата на вработениот.' },
-        { question: 'Колку е минималната плата во Македонија за 2026?', answer: 'Минималната нето плата за 2026 година изнесува приближно 20.175 МКД (околу 328 EUR). Секој работодавач е должен да исплати најмалку минимална плата за полно работно време од 40 часа неделно.' },
+        { question: 'Колку е минималната плата во Македонија за 2026?', answer: 'Минималната нето плата за 2026 година изнесува приближно 26.046 МКД (околу 423 EUR). Секој работодавач е должен да исплати најмалку минимална плата за полно работно време од 40 часа неделно.' },
       ])) }} />
       {/* ARTICLE HEADER */}
       <section className="section relative overflow-hidden pt-24 md:pt-32 pb-12 md:pb-16">

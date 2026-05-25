@@ -12,13 +12,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return buildArticleMetadata(locale, '/blog/ddv-vodich-mk', {
     title: {
       mk: 'ДДВ Македонија 2026: Стапки 18% и 5%, регистрација, пријавување',
-      en: 'VAT in North Macedonia 2026: Rates (18% & 5%), Registration & Filing',
+      en: 'VAT in North Macedonia 2026: Registration Threshold, Rates & Filing Guide',
       sq: 'TVSH Maqedoni 2026: Normat 18% dhe 5%, regjistrimi dhe deklarimi',
       tr: 'Kuzey Makedonya KDV 2026: Oranlar (%18 ve %5), Kayıt ve Beyanname',
     },
     description: {
       mk: 'Целосен водич за ДДВ Македонија 2026: стандардна стапка 18%, намалена 5%, праг за регистрација 8.000.000 МКД, месечно/квартално пријавување, влезен/излезен ДДВ, ослободувања и казни до 10.000€.',
-      en: 'Complete North Macedonia VAT guide 2026: standard rate 18%, reduced 5%, registration threshold 8M MKD (~€130K), monthly/quarterly filing, input/output VAT, exemptions, and penalties up to €10,000.',
+      en: 'North Macedonia VAT registration threshold 2026 is 8,000,000 MKD (~EUR 130K). Standard rate 18%, reduced 5%. Monthly or quarterly filing via e-Tax. Input/output VAT rules, exemptions, and penalties up to EUR 10,000.',
       sq: 'Udhëzues i plotë TVSH Maqedoni 2026: norma standarde 18%, e ulët 5%, pragu 8.000.000 MKD, deklarimi mujor/tremujor, TVSH hyrëse/dalëse, përjashtimet dhe gjobat deri 10.000€.',
       tr: 'Kuzey Makedonya KDV rehberi 2026: standart oran %18, indirimli %5, kayıt eşiği 8M MKD (~130K€), aylık/üç aylık beyanname, giriş/çıkış KDV ve 10.000€\'ya kadar cezalar.',
     },

@@ -12,13 +12,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return buildArticleMetadata(locale, '/blog/otvoranje-firma-mk', {
     title: {
       mk: 'Отворање фирма Македонија 2026: ДООЕЛ, ЦРСМ, ЕДБ — чекор по чекор',
-      en: 'Register a Company in North Macedonia 2026: Step-by-Step Guide',
+      en: 'How to Register a Company in North Macedonia 2026: Complete Guide',
       sq: 'Hapni kompani në Maqedoni 2026: SHPKNJP, RQRM — hap pas hapi',
       tr: 'Kuzey Makedonya\'da Şirket Kurma 2026: Adım Adım Rehber',
     },
     description: {
       mk: 'Комплетен водич 2026 за отворање фирма во Македонија: ДООЕЛ vs ДОО, регистрација во ЦРСМ, ЕДБ број, банкарска сметка, ДДВ регистрација. Цена, рокови и потребни документи.',
-      en: 'Complete 2026 guide to registering a company in North Macedonia: LLC types (DOOEL vs DOO), Central Registry, tax number (EDB), bank account, VAT registration. Costs, timelines, and required documents.',
+      en: 'Step-by-step guide to registering a company in North Macedonia 2026: choose LLC type (DOOEL vs DOO), register at the Central Registry, get a tax number (EDB), open a bank account, and register for VAT. Costs from EUR 80.',
       sq: 'Udhëzues i plotë 2026 për hapjen e kompanisë në Maqedoni: llojet e SHPK, regjistrimi RQRM, numri tatimor, llogaria bankare, regjistrimi TVSH. Kostot, afatet dhe dokumentet.',
       tr: '2026 Kuzey Makedonya\'da şirket kurma rehberi: LLC türleri (DOOEL/DOO), Merkez Sicil, vergi numarası, banka hesabı, KDV kaydı. Maliyetler ve gerekli belgeler.',
     },

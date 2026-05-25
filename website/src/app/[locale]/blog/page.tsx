@@ -59,7 +59,7 @@ const copy = {
       {
         slug: 'rok-za-plata-makedonija',
         title: 'Рок за исплата на плата во Македонија: Што вели законот',
-        excerpt: 'Чл. 106 ЗРО: рок до 15-ти, прекувремена 40%, ноќна 35%, минимална плата 20.175 МКД и казни.',
+        excerpt: 'Чл. 106 ЗРО: рок до 15-ти, прекувремена 40%, ноќна 35%, минимална плата 38.507 МКД и казни.',
         date: '23 мај 2026',
         tag: 'Водич',
       },
@@ -500,7 +500,7 @@ const copy = {
       {
         slug: 'rok-za-plata-makedonija',
         title: 'Afati i pagës në Maqedoni: Çfarë thotë ligji',
-        excerpt: 'Neni 106 LMP: afati deri më 15, orar shtesë 40%, natë 35%, paga minimale 20.175 MKD dhe gjobat.',
+        excerpt: 'Neni 106 LMP: afati deri më 15, orar shtesë 40%, natë 35%, paga minimale 38.507 MKD dhe gjobat.',
         date: '23 maj 2026',
         tag: 'Udhëzues',
       },
@@ -913,7 +913,7 @@ const copy = {
       {
         slug: 'rok-za-plata-makedonija',
         title: 'Makedonya\'da maaş ödeme tarihi: Kanun ne diyor',
-        excerpt: 'Md. 106 İİK: 15\'ine kadar ödeme, fazla mesai %40, gece %35, asgari ücret 20.175 MKD ve cezalar.',
+        excerpt: 'Md. 106 İİK: 15\'ine kadar ödeme, fazla mesai %40, gece %35, asgari ücret 38.507 MKD ve cezalar.',
         date: '23 Mayıs 2026',
         tag: 'Rehber',
       },
@@ -1340,7 +1340,7 @@ const copy = {
       {
         slug: 'rok-za-plata-makedonija',
         title: 'Salary Payment Deadline North Macedonia: What the Law Says',
-        excerpt: 'Art. 106 LRA: deadline by 15th, overtime 40%, night shift 35%, minimum wage 20,175 MKD and penalties.',
+        excerpt: 'Art. 106 LRA: deadline by 15th, overtime 40%, night shift 35%, minimum wage 38,507 MKD and penalties.',
         date: 'May 23, 2026',
         tag: 'Guide',
       },

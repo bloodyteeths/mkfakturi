@@ -97,7 +97,7 @@ const copy = {
         items: [
           'Договор на определено време — максимум 5 години вкупно (Чл. 46 ЗРО). За сезонска работа може да биде и пократок',
           'МПИН се поднесува за СЕКОЈ вработен, без разлика дали е на определено или неопределено време',
-          'Минимална плата важи и за сезонски работници — 20.175 МКД бруто (2026)',
+          'Минимална плата важи и за сезонски работници — 38.507 МКД бруто (2026)',
           'Прекувремена работа: максимум 8 часа неделно, 190 часа годишно. Додаток 40% на основна плата',
           'Ноќна работа (22:00-06:00): додаток 35%. Ресторани работат до доцна — ова е чест трошок',
           'Пробен период: максимум 6 месеци. За време на проба — полни придонеси и МПИН обврски',
@@ -204,7 +204,7 @@ const copy = {
         items: [
           'Fixed-term contract — maximum 5 years total (Art. 46 LRA). For seasonal work it can be shorter',
           'MPIN must be filed for EVERY employee, regardless of fixed or permanent term',
-          'Minimum wage applies to seasonal workers too — 20,175 MKD gross (2026)',
+          'Minimum wage applies to seasonal workers too — 38,507 MKD gross (2026)',
           'Overtime: maximum 8 hours per week, 190 hours per year. Premium 40% on base salary',
           'Night work (22:00-06:00): premium 35%. Restaurants operate late — this is a common cost',
           'Probation period: maximum 6 months. During probation — full contributions and MPIN obligations',
@@ -311,7 +311,7 @@ const copy = {
         items: [
           'Kontratë me afat — maksimumi 5 vjet gjithsej (Neni 46 LMP). Për punë sezonale mund të jetë më e shkurtër',
           'MPIN duhet të dorëzohet për ÇDO punëtor, pavarësisht afatit',
-          'Paga minimale vlen edhe për punëtorë sezonal — 20.175 MKD bruto (2026)',
+          'Paga minimale vlen edhe për punëtorë sezonal — 38.507 MKD bruto (2026)',
           'Orar shtesë: maksimumi 8 orë në javë, 190 orë në vit. Shtesë 40% mbi pagën bazë',
           'Punë natën (22:00-06:00): shtesë 35%. Restorantet punojnë vonë — ky është shpenzim i shpeshtë',
           'Periudhë prove: maksimumi 6 muaj. Gjatë provës — kontribute dhe detyrime MPIN të plota',
@@ -418,7 +418,7 @@ const copy = {
         items: [
           'Belirli süreli sözleşme — toplam maksimum 5 yıl (İİK Md. 46). Mevsimlik iş için daha kısa olabilir',
           'MPIN her çalışan için dosyalanmalıdır, belirli veya süresiz sözleşme fark etmez',
-          'Asgari ücret mevsimlik çalışanlar için de geçerlidir — 20.175 MKD brüt (2026)',
+          'Asgari ücret mevsimlik çalışanlar için de geçerlidir — 38.507 MKD brüt (2026)',
           'Fazla mesai: haftada maksimum 8 saat, yılda 190 saat. Temel maaş üzerine %40 prim',
           'Gece çalışması (22:00-06:00): %35 prim. Restoranlar geç saatlere kadar çalışır — bu yaygın bir maliyet',
           'Deneme süresi: maksimum 6 ay. Deneme süresinde — tam primler ve MPIN yükümlülükleri',

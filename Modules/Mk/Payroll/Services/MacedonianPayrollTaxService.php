@@ -39,13 +39,13 @@ class MacedonianPayrollTaxService
     private const UNEMPLOYMENT_RATE = 0.012; // 1.2%
     private const ADDITIONAL_CONTRIBUTION_RATE = 0.005; // 0.5%
 
-    // Contribution base limits (P7-05)
-    private const DEFAULT_MIN_CONTRIBUTION_BASE = 3157700;  // MKD 31,577 in cents
-    private const DEFAULT_MAX_CONTRIBUTION_BASE = 101046400; // MKD 1,010,464 in cents
+    // Contribution base limits (2026, per UJP soopstenie 1187)
+    private const DEFAULT_MIN_CONTRIBUTION_BASE = 3457000;  // MKD 34,570 in cents
+    private const DEFAULT_MAX_CONTRIBUTION_BASE = 110625600; // MKD 1,106,256 in cents
 
     // Personal deduction (лично ослободување) — Закон за данокот на личен доход
-    // Updated for 2026: verified against UJP МПІН Образец 20848268 (02/2026)
-    private const DEFAULT_PERSONAL_DEDUCTION = 1039000; // MKD 10,390 in cents
+    // Updated for 2026: 10,932 MKD/month per Konsalting Pekovic + MSFI Konsalting
+    private const DEFAULT_PERSONAL_DEDUCTION = 1093200; // MKD 10,932 in cents
 
     /**
      * Calculate payroll from gross salary.

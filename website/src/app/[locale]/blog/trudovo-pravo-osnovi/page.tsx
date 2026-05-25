@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       tr: 'Kuzey Makedonya İş Hukuku 2026: Maaş Tarihleri, Fazla Mesai ve Cezalar',
     },
     description: {
-      mk: 'Комплетен водич за трудово право во Македонија 2026: плата до 15-ти наредниот месец, прекувремена работа (max 190ч), минимална плата 20.175 МКД, одмори, боледување, породилно и казни од инспекторат.',
-      en: 'Complete North Macedonia labor law guide 2026: salary payment by 15th of month, overtime limits (190h/year), minimum wage 20,175 MKD, annual leave, sick leave, maternity, and labor inspection fines up to EUR 5,000.',
-      sq: 'Udhëzues i plotë i ligjit të punës Maqedoni 2026: paga deri datë 15, puna jashtë orarit (max 190h), paga minimale 20.175 MKD, pushimet, lindja dhe gjobat e inspeksionit.',
-      tr: 'Kuzey Makedonya iş hukuku rehberi 2026: maaş 15\'ine kadar, fazla mesai limitleri (190s/yıl), asgari ücret 20.175 MKD, izinler, doğum izni ve müfettişlik cezaları.',
+      mk: 'Комплетен водич за трудово право во Македонија 2026: плата до 15-ти наредниот месец, прекувремена работа (max 190ч), минимална плата 26.046 МКД, одмори, боледување, породилно и казни од инспекторат.',
+      en: 'Complete North Macedonia labor law guide 2026: salary payment by 15th of month, overtime limits (190h/year), minimum wage 26,046 MKD, annual leave, sick leave, maternity, and labor inspection fines up to EUR 5,000.',
+      sq: 'Udhëzues i plotë i ligjit të punës Maqedoni 2026: paga deri datë 15, puna jashtë orarit (max 190h), paga minimale 26.046 MKD, pushimet, lindja dhe gjobat e inspeksionit.',
+      tr: 'Kuzey Makedonya iş hukuku rehberi 2026: maaş 15\'ine kadar, fazla mesai limitleri (190s/yıl), asgari ücret 26.046 MKD, izinler, doğum izni ve müfettişlik cezaları.',
     },
     datePublished: '2026-02-18',
   })
@@ -59,7 +59,7 @@ const copy = {
       },
       {
         title: '4. Минимална плата',
-        content: 'Минималната плата во Македонија се утврдува со закон и се ажурира периодично. Ниту еден работодавач не смее да исплати плата пониска од утврдениот минимум. Минималната нето плата за 2026 година изнесува приближно 20.175 денари. Платата мора да се исплати најдоцна до 15-ти во наредниот месец. Работодавачот е должен да издаде платен лист (пејслип) со детална разбивка на бруто плата, придонеси и нето плата.',
+        content: 'Минималната плата во Македонија се утврдува со закон и се ажурира периодично. Ниту еден работодавач не смее да исплати плата пониска од утврдениот минимум. Минималната нето плата за 2026 година изнесува приближно 26.046 денари. Платата мора да се исплати најдоцна до 15-ти во наредниот месец. Работодавачот е должен да издаде платен лист (пејслип) со детална разбивка на бруто плата, придонеси и нето плата.',
         items: null,
       },
       {
@@ -179,7 +179,7 @@ const copy = {
       },
       {
         title: '4. Minimum Wage',
-        content: 'The minimum wage in Macedonia is determined by law and updated periodically. No employer may pay a salary below the established minimum. The net minimum wage for 2026 is approximately 20,175 denars. Salaries must be paid by the 15th of the following month. The employer is required to issue a payslip with a detailed breakdown of gross salary, contributions, and net salary.',
+        content: 'The minimum wage in Macedonia is determined by law and updated periodically. No employer may pay a salary below the established minimum. The net minimum wage for 2026 is approximately 26,046 denars. Salaries must be paid by the 15th of the following month. The employer is required to issue a payslip with a detailed breakdown of gross salary, contributions, and net salary.',
         items: null,
       },
       {
@@ -299,7 +299,7 @@ const copy = {
       },
       {
         title: '4. Paga minimale',
-        content: 'Paga minimale në Maqedoni përcaktohet me ligj dhe përditësohet periodikisht. Asnjë punëdhënës nuk mund të paguajë pagë më të ulët se minimumi i përcaktuar. Paga minimale neto për vitin 2026 është afërsisht 20.175 denarë. Paga duhet të paguhet deri më datën 15 të muajit pasues. Punëdhënësi duhet të lëshojë fletëpagesë me ndarje të detajuar të pagës bruto, kontributeve dhe pagës neto.',
+        content: 'Paga minimale në Maqedoni përcaktohet me ligj dhe përditësohet periodikisht. Asnjë punëdhënës nuk mund të paguajë pagë më të ulët se minimumi i përcaktuar. Paga minimale neto për vitin 2026 është afërsisht 26.046 denarë. Paga duhet të paguhet deri më datën 15 të muajit pasues. Punëdhënësi duhet të lëshojë fletëpagesë me ndarje të detajuar të pagës bruto, kontributeve dhe pagës neto.',
         items: null,
       },
       {
@@ -419,7 +419,7 @@ const copy = {
       },
       {
         title: '4. Asgari Ücret',
-        content: 'Makedonya\'da asgari ücret yasayla belirlenir ve periyodik olarak güncellenir. Hiçbir işveren belirlenen asgari ücretten düşük maaş ödeyemez. 2026 yılı için net asgari ücret yaklaşık 20.175 denardır. Maaşlar takip eden ayın 15\'ine kadar ödenmelidir. İşveren, brüt maaş, katkı payları ve net maaşın ayrıntılı dökümünü içeren bir bordro düzenlemelidir.',
+        content: 'Makedonya\'da asgari ücret yasayla belirlenir ve periyodik olarak güncellenir. Hiçbir işveren belirlenen asgari ücretten düşük maaş ödeyemez. 2026 yılı için net asgari ücret yaklaşık 26.046 denardır. Maaşlar takip eden ayın 15\'ine kadar ödenmelidir. İşveren, brüt maaş, katkı payları ve net maaşın ayrıntılı dökümünü içeren bir bordro düzenlemelidir.',
         items: null,
       },
       {

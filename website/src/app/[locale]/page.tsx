@@ -43,11 +43,35 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Facturino',
+    legalName: 'Facturino DOOEL',
     url: 'https://www.facturino.mk',
     logo: 'https://www.facturino.mk/brand/facturino_logo.png',
-    description: 'AI-powered accounting platform for Macedonia',
-    address: { '@type': 'PostalAddress', addressLocality: 'Skopje', addressCountry: 'MK' },
     sameAs: [],
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Skopje',
+      addressCountry: 'MK',
+    },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: 'info@facturino.mk',
+      contactType: 'customer service',
+    },
+  }
+
+  const softwareAppLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Facturino',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'EUR',
+      description: 'Free plan available',
+    },
+    aggregateRating: null,
   }
 
   const faqLd = faqItems.length > 0 ? {
@@ -68,6 +92,10 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
       />
       {faqLd && (
         <script
