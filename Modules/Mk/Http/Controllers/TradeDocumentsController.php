@@ -1181,6 +1181,47 @@ class TradeDocumentsController extends Controller
     // Partner Access Helpers
     // ==========================================
 
+    public function listBillsForCompany(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $query = Bill::where('company_id', $company)
+            ->without(['supplier', 'currency', 'company'])
+            ->with('supplier:id,name')
+            ->orderBy('bill_date', 'desc');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('bill_number', 'like', "%{$search}%")
+                    ->orWhereHas('supplier', fn ($sq) => $sq->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        $limit = $request->input('limit', 50);
+        $data = $limit === 'all' ? $query->get() : $query->paginate((int) $limit);
+
+        return response()->json(['success' => true, 'data' => $data]);
+    }
+
+    public function listSuppliersForCompany(Request $request, int $company): JsonResponse
+    {
+        $partner = $this->getPartnerFromRequest($request);
+        if (! $partner || ! $this->hasCompanyAccess($partner, $company)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        $suppliers = \App\Models\Supplier::where('company_id', $company)
+            ->select(['id', 'name'])
+            ->orderBy('name')
+            ->get();
+
+        return response()->json(['success' => true, 'data' => $suppliers]);
+    }
+
     protected function getPartnerFromRequest(Request $request): ?Partner
     {
         $user = $request->user();

@@ -2197,6 +2197,10 @@ Route::middleware(['auth:sanctum', 'partner-scope', 'throttle:api'])->prefix('v1
             Route::get('/{id}/export', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'nivelaciiExport']);
         });
 
+        // Bills & Suppliers listing for partner trade documents
+        Route::get('/bills', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'listBillsForCompany']);
+        Route::get('/suppliers', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'listSuppliersForCompany']);
+
         // Влезна калкулација — Import Cost Calculation CRUD
         Route::prefix('import-calculations')->group(function () {
             Route::get('/', [\Modules\Mk\Http\Controllers\TradeDocumentsController::class, 'importCalcIndex']);

@@ -304,12 +304,20 @@ function onBillChange() {
 
 async function loadBills() {
   try {
-    const response = await window.axios.get('/bills', {
+    const response = await window.axios.get(`/partner/companies/${companyId.value}/accounting/bills`, {
       params: { limit: 100 },
     })
-    bills.value = response.data.data || response.data?.bills?.data || []
-  } catch (error) {
-    console.error('Failed to load bills:', error)
+    bills.value = response.data.data || []
+  } catch (e1) {
+    // Fallback to standard endpoint for non-partner users
+    try {
+      const response = await window.axios.get('/bills', {
+        params: { limit: 100 },
+      })
+      bills.value = response.data.data || response.data?.bills?.data || []
+    } catch (e2) {
+      console.error('Failed to load bills:', e2)
+    }
   }
 }
 

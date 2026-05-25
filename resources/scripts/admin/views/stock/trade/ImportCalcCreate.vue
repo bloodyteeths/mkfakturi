@@ -38,23 +38,37 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">{{ $t('trade.warehouse') }}</label>
+            <label class="block text-sm font-medium text-gray-600 mb-1">{{ $t('trade.warehouse') }} *</label>
             <BaseMultiselect
               v-model="form.warehouse_id"
               :options="warehouses"
               value-prop="id"
               label="name"
-              placeholder="..."
+              :placeholder="$t('trade.select_warehouse_placeholder') || '...'"
               :searchable="true"
               required
             />
+            <p v-if="!warehouses.length && !isLoadingData" class="mt-1 text-xs text-amber-600">
+              {{ $t('trade.no_warehouses_hint') || 'Нема магацини. Креирајте магацин во Залиха → Магацини.' }}
+            </p>
           </div>
         </div>
 
-        <div v-if="!form.supplier_bill_id" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">{{ $t('trade.supplier_name') }}</label>
-            <BaseInput v-model="form.supplier_name" type="text" />
+            <BaseMultiselect
+              v-if="suppliers.length"
+              v-model="selectedSupplierId"
+              :options="suppliers"
+              value-prop="id"
+              label="name"
+              :placeholder="$t('trade.select_supplier_placeholder') || 'Изберете добавувач...'"
+              :searchable="true"
+              :canClear="true"
+              @change="onSupplierSelected"
+            />
+            <BaseInput v-else v-model="form.supplier_name" type="text" :placeholder="$t('trade.supplier_name')" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">{{ $t('trade.supplier_invoice_number') }}</label>
@@ -246,10 +260,13 @@ const companyStore = useCompanyStore()
 
 const isEditing = computed(() => !!route.params.id)
 const isLoadingEdit = ref(false)
+const isLoadingData = ref(false)
 const isSaving = ref(false)
 
 const bills = ref([])
 const warehouses = ref([])
+const suppliers = ref([])
+const selectedSupplierId = ref(null)
 
 const apiBase = computed(() => {
   const companyId = companyStore.selectedCompany?.id
@@ -359,6 +376,10 @@ async function onBillSelected(billId) {
       const d = data.data
       form.supplier_name = d.supplier_name || ''
       form.supplier_invoice_number = d.supplier_invoice_number || ''
+      if (form.supplier_name && suppliers.value.length) {
+        const match = suppliers.value.find(s => s.name === form.supplier_name)
+        if (match) selectedSupplierId.value = match.id
+      }
       if (d.exchange_rate && d.exchange_rate > 1) {
         form.exchange_rate = d.exchange_rate
       }
@@ -390,6 +411,11 @@ async function loadEditData() {
       form.supplier_bill_id = d.supplier_bill_id
       form.supplier_name = d.supplier_name || ''
       form.supplier_invoice_number = d.supplier_invoice_number || ''
+      // Match supplier name to supplier dropdown
+      if (form.supplier_name && suppliers.value.length) {
+        const match = suppliers.value.find(s => s.name === form.supplier_name)
+        if (match) selectedSupplierId.value = match.id
+      }
       form.currency_code = d.currency_code || 'EUR'
       form.exchange_rate = parseFloat(d.exchange_rate) || 61.5
       form.warehouse_id = d.warehouse_id
@@ -467,14 +493,24 @@ async function onSubmit() {
   }
 }
 
+function onSupplierSelected(supplierId) {
+  if (!supplierId) {
+    form.supplier_name = ''
+    return
+  }
+  const supplier = suppliers.value.find(s => s.id === supplierId)
+  if (supplier) {
+    form.supplier_name = supplier.name
+  }
+}
+
 async function loadBills() {
   try {
     const companyId = companyStore.selectedCompany?.id
-    const { data } = await window.axios.get('/bills', {
-      headers: { company: companyId },
+    const { data } = await window.axios.get(`/partner/companies/${companyId}/accounting/bills`, {
       params: { limit: 'all' },
     })
-    bills.value = (data.data || data.bills?.data || [])
+    bills.value = data.data || []
   } catch (e) {
     console.error('Failed to load bills:', e)
   }
@@ -483,17 +519,27 @@ async function loadBills() {
 async function loadWarehouses() {
   try {
     const companyId = companyStore.selectedCompany?.id
-    const { data } = await window.axios.get('/warehouses', {
-      headers: { company: companyId },
-    })
-    warehouses.value = data.data || data.warehouses || []
+    const { data } = await window.axios.get(`/partner/companies/${companyId}/stock/warehouses`)
+    warehouses.value = data.data || []
   } catch (e) {
     console.error('Failed to load warehouses:', e)
   }
 }
 
+async function loadSuppliers() {
+  try {
+    const companyId = companyStore.selectedCompany?.id
+    const { data } = await window.axios.get(`/partner/companies/${companyId}/accounting/suppliers`)
+    suppliers.value = data.data || []
+  } catch (e) {
+    console.error('Failed to load suppliers:', e)
+  }
+}
+
 onMounted(async () => {
-  await Promise.all([loadBills(), loadWarehouses()])
+  isLoadingData.value = true
+  await Promise.all([loadBills(), loadWarehouses(), loadSuppliers()])
+  isLoadingData.value = false
   if (isEditing.value) {
     await loadEditData()
   }

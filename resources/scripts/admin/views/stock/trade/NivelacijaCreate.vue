@@ -334,21 +334,33 @@ async function loadItems() {
 
 async function loadBills() {
   try {
-    const response = await window.axios.get('/bills', {
-      params: { limit: 50, status: 'COMPLETED' },
+    const response = await window.axios.get(`/partner/companies/${companyId.value}/accounting/bills`, {
+      params: { limit: 50 },
     })
-    bills.value = response.data.data || response.data?.bills?.data || []
-  } catch (error) {
-    console.error('Failed to load bills:', error)
+    bills.value = response.data.data || []
+  } catch (e1) {
+    try {
+      const response = await window.axios.get('/bills', {
+        params: { limit: 50, status: 'COMPLETED' },
+      })
+      bills.value = response.data.data || response.data?.bills?.data || []
+    } catch (e2) {
+      console.error('Failed to load bills:', e2)
+    }
   }
 }
 
 async function loadWarehouses() {
   try {
-    await stockStore.fetchWarehouses()
-    warehouses.value = stockStore.warehouses || []
-  } catch (error) {
-    console.error('Failed to load warehouses:', error)
+    const response = await window.axios.get(`/partner/companies/${companyId.value}/stock/warehouses`)
+    warehouses.value = response.data.data || []
+  } catch (e1) {
+    try {
+      await stockStore.fetchWarehouses()
+      warehouses.value = stockStore.warehouses || []
+    } catch (e2) {
+      console.error('Failed to load warehouses:', e2)
+    }
   }
 }
 

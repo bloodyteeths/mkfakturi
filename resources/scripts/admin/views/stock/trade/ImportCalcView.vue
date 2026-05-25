@@ -93,7 +93,7 @@
           <div class="text-right">
             <p class="text-sm text-gray-500">{{ $t('trade.grand_total_landed_cost') }}</p>
             <p class="text-2xl font-bold font-mono text-gray-900">
-              {{ formatMoney(data.grand_total_landed_cost) }} MKD
+              {{ formatMoney(data.total_landed_cost) }} MKD
             </p>
           </div>
         </div>
@@ -106,15 +106,15 @@
           </div>
           <div>
             <dt class="text-sm font-medium text-gray-500">{{ $t('trade.supplier') }}</dt>
-            <dd class="mt-1 text-sm text-gray-900">{{ data.supplier?.name || '-' }}</dd>
+            <dd class="mt-1 text-sm text-gray-900">{{ data.supplier_name || '-' }}</dd>
           </div>
           <div>
             <dt class="text-sm font-medium text-gray-500">{{ $t('trade.invoice_number') }}</dt>
-            <dd class="mt-1 text-sm text-gray-900">{{ data.invoice_number || '-' }}</dd>
+            <dd class="mt-1 text-sm text-gray-900">{{ data.supplier_invoice_number || '-' }}</dd>
           </div>
           <div>
             <dt class="text-sm font-medium text-gray-500">{{ $t('trade.currency') }}</dt>
-            <dd class="mt-1 text-sm text-gray-900">{{ data.currency?.code || '-' }}</dd>
+            <dd class="mt-1 text-sm text-gray-900">{{ data.currency_code || '-' }}</dd>
           </div>
           <div>
             <dt class="text-sm font-medium text-gray-500">{{ $t('trade.exchange_rate') }}</dt>
@@ -154,15 +154,15 @@
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
           <div class="text-center p-4 bg-gray-50 rounded-lg">
             <dt class="text-xs font-medium text-gray-500 uppercase">{{ $t('trade.transport') }}</dt>
-            <dd class="mt-2 text-lg font-bold font-mono text-gray-900">{{ formatMoney(data.transport_cost) }}</dd>
+            <dd class="mt-2 text-lg font-bold font-mono text-gray-900">{{ formatMoney(data.transport_amount) }}</dd>
           </div>
           <div class="text-center p-4 bg-gray-50 rounded-lg">
             <dt class="text-xs font-medium text-gray-500 uppercase">{{ $t('trade.forwarding') }}</dt>
-            <dd class="mt-2 text-lg font-bold font-mono text-gray-900">{{ formatMoney(data.forwarding_cost) }}</dd>
+            <dd class="mt-2 text-lg font-bold font-mono text-gray-900">{{ formatMoney(data.forwarding_amount) }}</dd>
           </div>
           <div class="text-center p-4 bg-gray-50 rounded-lg">
             <dt class="text-xs font-medium text-gray-500 uppercase">{{ $t('trade.other_costs') }}</dt>
-            <dd class="mt-2 text-lg font-bold font-mono text-gray-900">{{ formatMoney(data.other_costs) }}</dd>
+            <dd class="mt-2 text-lg font-bold font-mono text-gray-900">{{ formatMoney(data.other_costs_amount) }}</dd>
           </div>
           <div class="text-center p-4 bg-blue-50 rounded-lg">
             <dt class="text-xs font-medium text-blue-600 uppercase">{{ $t('trade.customs_duty_total') }}</dt>
@@ -174,7 +174,7 @@
           </div>
           <div class="text-center p-4 bg-green-50 rounded-lg">
             <dt class="text-xs font-medium text-green-600 uppercase">{{ $t('trade.grand_total_landed_cost') }}</dt>
-            <dd class="mt-2 text-lg font-bold font-mono text-green-900">{{ formatMoney(data.grand_total_landed_cost) }}</dd>
+            <dd class="mt-2 text-lg font-bold font-mono text-green-900">{{ formatMoney(data.total_landed_cost) }}</dd>
           </div>
         </div>
       </BaseCard>
@@ -198,10 +198,10 @@
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="(row, index) in tariffSummary" :key="index">
               <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ row.tariff_heading }}</td>
-              <td class="px-4 py-3 text-sm text-right text-gray-900">{{ row.item_count }}</td>
-              <td class="px-4 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(row.customs_base) }}</td>
-              <td class="px-4 py-3 text-sm text-right text-gray-900 font-mono">{{ row.rate_pct }}%</td>
-              <td class="px-4 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(row.customs_duty) }}</td>
+              <td class="px-4 py-3 text-sm text-right text-gray-900">{{ row.items_count }}</td>
+              <td class="px-4 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(row.customs_base_total) }}</td>
+              <td class="px-4 py-3 text-sm text-right text-gray-900 font-mono">{{ row.duty_rate }}%</td>
+              <td class="px-4 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(row.duty_amount) }}</td>
             </tr>
           </tbody>
         </table>
@@ -243,20 +243,20 @@
               <tr v-for="(item, index) in data.items" :key="item.id">
                 <td class="px-3 py-3 text-sm text-gray-500">{{ index + 1 }}</td>
                 <td class="px-3 py-3 text-sm text-gray-900 font-medium">
-                  {{ item.item?.name || `#${item.item_id}` }}
+                  {{ item.description || item.item?.name || '-' }}
                 </td>
                 <td class="px-3 py-3 text-sm text-gray-500">{{ item.tariff_heading || '-' }}</td>
                 <td class="px-3 py-3 text-sm text-right text-gray-900">{{ item.quantity }}</td>
                 <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.unit_price_fcy) }}</td>
-                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.invoice_amount_mkd) }}</td>
-                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.transport_amount) }}</td>
+                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.invoice_value_mkd) }}</td>
+                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.transport_allocated) }}</td>
                 <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.customs_duty_amount) }}</td>
-                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.forwarding_amount) }}</td>
-                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.other_costs_amount) }}</td>
-                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.total_before_vat) }}</td>
-                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.vat_amount) }}</td>
-                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono font-semibold">{{ formatMoney(item.total_with_vat) }}</td>
-                <td class="px-3 py-3 text-sm text-right text-green-700 font-mono font-semibold">{{ formatMoney(item.landed_unit_price) }}</td>
+                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.forwarding_allocated) }}</td>
+                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.other_costs_allocated) }}</td>
+                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.landed_cost_before_vat) }}</td>
+                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono">{{ formatMoney(item.import_vat_amount) }}</td>
+                <td class="px-3 py-3 text-sm text-right text-gray-900 font-mono font-semibold">{{ formatMoney(item.total_landed_cost) }}</td>
+                <td class="px-3 py-3 text-sm text-right text-green-700 font-mono font-semibold">{{ formatMoney(item.unit_landed_cost) }}</td>
               </tr>
             </tbody>
             <tfoot class="bg-gray-50">
@@ -326,14 +326,14 @@ const totals = computed(() => {
   }
   return data.value.items.reduce(
     (acc, item) => {
-      acc.invoice_mkd += Number(item.invoice_amount_mkd) || 0
-      acc.transport += Number(item.transport_amount) || 0
+      acc.invoice_mkd += Number(item.invoice_value_mkd) || 0
+      acc.transport += Number(item.transport_allocated) || 0
       acc.customs_duty += Number(item.customs_duty_amount) || 0
-      acc.forwarding += Number(item.forwarding_amount) || 0
-      acc.other_costs += Number(item.other_costs_amount) || 0
-      acc.total_before_vat += Number(item.total_before_vat) || 0
-      acc.vat += Number(item.vat_amount) || 0
-      acc.total_with_vat += Number(item.total_with_vat) || 0
+      acc.forwarding += Number(item.forwarding_allocated) || 0
+      acc.other_costs += Number(item.other_costs_allocated) || 0
+      acc.total_before_vat += Number(item.landed_cost_before_vat) || 0
+      acc.vat += Number(item.import_vat_amount) || 0
+      acc.total_with_vat += Number(item.total_landed_cost) || 0
       return acc
     },
     {

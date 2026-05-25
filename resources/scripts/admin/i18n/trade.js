@@ -92,6 +92,9 @@ export default {
       no_pending: 'Нема артикли со променети цени',
 
       // Влезна калкулација
+      select_warehouse_placeholder: 'Изберете магацин...',
+      no_warehouses_hint: 'Нема магацини. Креирајте магацин во Залиха → Магацини.',
+      select_supplier_placeholder: 'Изберете добавувач...',
       import_calc_title: 'Влезни калкулации',
       new_import_calc: 'Нова влезна калкулација',
       edit_import_calc: 'Измени влезна калкулација',
@@ -259,6 +262,9 @@ export default {
       pending_changes: 'Pending revaluation',
       no_pending: 'No items with price changes',
 
+      select_warehouse_placeholder: 'Select warehouse...',
+      no_warehouses_hint: 'No warehouses found. Create one in Stock → Warehouses.',
+      select_supplier_placeholder: 'Select supplier...',
       import_calc_title: 'Import Calculations',
       new_import_calc: 'New Import Calculation',
       edit_import_calc: 'Edit Import Calculation',
@@ -426,6 +432,9 @@ export default {
       pending_changes: 'Ne pritje rivleresimi',
       no_pending: 'Nuk ka artikuj me ndryshime cmimesh',
 
+      select_warehouse_placeholder: 'Zgjidhni magazinën...',
+      no_warehouses_hint: 'Nuk ka magazina. Krijoni në Stoku → Magazinat.',
+      select_supplier_placeholder: 'Zgjidhni furnizuesin...',
       import_calc_title: 'Llogaritjet e importit',
       new_import_calc: 'Llogaritje e re importi',
       edit_import_calc: 'Ndrysho llogaritjen',
@@ -593,6 +602,9 @@ export default {
       pending_changes: 'Degerlendirme bekliyor',
       no_pending: 'Fiyat degisikligi olan urun yok',
 
+      select_warehouse_placeholder: 'Depo secin...',
+      no_warehouses_hint: 'Depo bulunamadi. Stok → Depolar bolumunden olusturun.',
+      select_supplier_placeholder: 'Tedarikci secin...',
       import_calc_title: 'Ithalat Hesaplamalari',
       new_import_calc: 'Yeni Ithalat Hesaplamasi',
       edit_import_calc: 'Hesaplamayi Duzenle',
