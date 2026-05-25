@@ -417,8 +417,8 @@ class TradeCalculationService
             $qty = (float) $item['quantity'];
             $unitPriceFcy = (int) $item['unit_price_fcy'];
             $item['invoice_value_fcy'] = (int) round($unitPriceFcy * $qty);
-            // FCY is in cents, convert to major units, multiply by rate, back to MKD cents
-            $item['invoice_value_mkd'] = (int) round($unitPriceFcy * $qty * $exchangeRate / 100);
+            // FCY cents × qty × rate = MKD cents (÷100 and ×100 cancel out)
+            $item['invoice_value_mkd'] = (int) round($unitPriceFcy * $qty * $exchangeRate);
             $totalInvoiceMkd += $item['invoice_value_mkd'];
         }
         unset($item);

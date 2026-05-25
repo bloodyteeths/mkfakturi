@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-6">
+  <div v-if="isLoading || items.length > 0" class="mt-6">
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-lg font-semibold text-gray-800">
         {{ $t('suppliers.ios_title') }}
@@ -33,9 +33,6 @@
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-if="isLoading">
             <td colspan="8" class="px-4 py-8 text-center text-gray-400">{{ $t('general.loading') }}...</td>
-          </tr>
-          <tr v-else-if="items.length === 0">
-            <td colspan="8" class="px-4 py-8 text-center text-gray-400">{{ $t('suppliers.no_open_items') }}</td>
           </tr>
           <tr v-for="(item, index) in items" :key="index">
             <td class="px-4 py-2 text-sm text-gray-500">{{ index + 1 }}</td>

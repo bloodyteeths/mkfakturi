@@ -422,8 +422,8 @@ async function loadRun() {
 }
 
 function formatPeriod(year, month) {
-  const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' })
-  return `${monthName} ${year}`
+  const monthName = new Date(year, month - 1).toLocaleString('mk-MK', { month: 'long' })
+  return `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`
 }
 
 function statusClass(status) {

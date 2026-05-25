@@ -6,54 +6,59 @@
     <style type="text/css">
         body {
             font-family: "DejaVu Sans";
-            font-size: 8px;
+            font-size: 7.5px;
             color: #333;
-            margin: 15px;
+            margin: 10px 15px;
         }
 
         table {
             border-collapse: collapse;
         }
 
+        p {
+            margin: 0;
+            padding: 0;
+        }
+
         .report-header {
             width: 100%;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
 
         .company-name {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
         }
 
         .company-detail {
-            font-size: 8px;
+            font-size: 7.5px;
             color: #555;
         }
 
         .heading-text {
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
             color: #1a1a1a;
             text-align: center;
-            margin: 8px 0 2px 0;
+            margin: 4px 0 1px 0;
         }
 
         .sub-heading {
-            font-size: 10px;
+            font-size: 9px;
             color: #555;
             text-align: center;
-            margin: 0 0 10px 0;
+            margin: 0 0 4px 0;
         }
 
         .doc-info {
             width: 100%;
-            margin: 8px 0;
+            margin: 4px 0;
             border: 1px solid #ccc;
         }
 
         .doc-info td {
-            padding: 4px 8px;
-            font-size: 8.5px;
+            padding: 2px 6px;
+            font-size: 8px;
             border-bottom: 1px solid #eee;
         }
 
@@ -70,13 +75,13 @@
 
         .costs-table {
             width: 100%;
-            margin: 8px 0;
+            margin: 4px 0;
             border: 1px solid #ccc;
         }
 
         .costs-table td {
-            padding: 4px 8px;
-            font-size: 8.5px;
+            padding: 2px 6px;
+            font-size: 8px;
             border-bottom: 1px solid #eee;
         }
 
@@ -94,23 +99,23 @@
 
         .section-title {
             font-weight: bold;
-            font-size: 9px;
+            font-size: 8.5px;
             color: #1a1a1a;
-            margin: 10px 0 3px 0;
+            margin: 5px 0 2px 0;
             border-bottom: 1px solid #ccc;
-            padding-bottom: 2px;
+            padding-bottom: 1px;
         }
 
         .data-table {
             width: 100%;
             border: 1px solid #888;
-            margin-top: 5px;
+            margin-top: 2px;
         }
 
         .data-table th {
             background: #2d2040;
             color: #ffffff;
-            padding: 5px 3px;
+            padding: 3px 2px;
             font-size: 6.5px;
             font-weight: bold;
             text-align: center;
@@ -123,14 +128,14 @@
         }
 
         .col-header-sub {
-            font-size: 6px;
+            font-size: 5.5px;
             font-weight: normal;
             color: #ccc;
             display: block;
         }
 
         .data-table td {
-            padding: 3px 3px;
+            padding: 2px 2px;
             font-size: 7px;
             color: #333;
             border-right: 1px solid #eee;
@@ -154,9 +159,9 @@
         }
 
         .total-row td {
-            padding: 5px 3px;
+            padding: 3px 2px;
             font-weight: bold;
-            font-size: 7.5px;
+            font-size: 7px;
             color: #ffffff;
             border-right: 1px solid #444;
         }
@@ -172,14 +177,14 @@
         .tariff-summary {
             width: 100%;
             border: 1px solid #888;
-            margin-top: 5px;
+            margin-top: 2px;
         }
 
         .tariff-summary th {
             background: #3d5a80;
             color: #ffffff;
-            padding: 4px 6px;
-            font-size: 7px;
+            padding: 3px 4px;
+            font-size: 6.5px;
             font-weight: bold;
             text-align: center;
             border-right: 1px solid #4a6a90;
@@ -190,8 +195,8 @@
         }
 
         .tariff-summary td {
-            padding: 3px 6px;
-            font-size: 7.5px;
+            padding: 2px 4px;
+            font-size: 7px;
             border-right: 1px solid #eee;
             border-bottom: 1px solid #ddd;
         }
@@ -222,24 +227,24 @@
         }
 
         .signature-section {
-            margin-top: 30px;
+            margin-top: 15px;
             width: 100%;
         }
 
         .signature-label {
-            font-size: 9px;
+            font-size: 8px;
             color: #666;
             border-top: 1px solid #999;
-            padding-top: 3px;
-            width: 180px;
+            padding-top: 2px;
+            width: 160px;
             text-align: center;
         }
 
         .form-ref {
-            font-size: 7px;
+            font-size: 6.5px;
             color: #999;
             text-align: right;
-            margin-top: 5px;
+            margin-top: 3px;
         }
     </style>
 </head>
@@ -249,7 +254,7 @@
     <table class="report-header">
         <tr>
             <td style="width: 70%;">
-                <p class="company-detail" style="font-size: 8px; color: #888;">Увозник:</p>
+                <p class="company-detail" style="font-size: 7.5px; color: #888;">Увозник:</p>
                 <p class="company-name">{{ $company->name ?? '' }}</p>
                 <p class="company-detail">
                     @if($company->address)
@@ -264,7 +269,7 @@
             <td style="width: 30%; text-align: right; vertical-align: top;">
                 <p class="company-detail" style="font-weight: bold;">ВЛЕЗНА КАЛКУЛАЦИЈА</p>
                 <p class="company-detail">Калкулација на увозна цена</p>
-                <p style="margin-top: 4px;">
+                <p style="margin-top: 3px;">
                     @php
                         $statusClass = match($calculation->status) {
                             'draft' => 'status-draft',
@@ -328,7 +333,7 @@
     <p class="section-title">Преглед на трошоци</p>
     <table class="costs-table">
         <tr>
-            <td class="label">Фактурна вредност ({{ $calculation->currency_code ?? 'EUR' }}):</td>
+            <td class="label">Фактурна вредност (МКД):</td>
             <td class="value">{!! format_money_pdf($calculation->total_invoice_value_mkd ?? 0, $currency) !!}</td>
             <td class="label">Транспорт:</td>
             <td class="value">{!! format_money_pdf($calculation->transport_amount ?? 0, $currency) !!}</td>
@@ -346,8 +351,8 @@
             <td class="value">{!! format_money_pdf($calculation->import_vat_total ?? 0, $currency) !!}</td>
         </tr>
         <tr>
-            <td class="label" style="font-size: 9px;">Вкупна набавна цена:</td>
-            <td class="value" style="font-size: 9px; font-weight: bold;">{!! format_money_pdf($calculation->total_landed_cost ?? 0, $currency) !!}</td>
+            <td class="label" style="font-size: 8.5px;">Вкупна набавна цена:</td>
+            <td class="value" style="font-size: 8.5px; font-weight: bold;">{!! format_money_pdf($calculation->total_landed_cost ?? 0, $currency) !!}</td>
             <td class="label"></td>
             <td class="value"></td>
         </tr>
@@ -390,54 +395,18 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 3%;">
-                    Р.б.
-                    <span class="col-header-sub">1</span>
-                </th>
-                <th style="width: 16%;">
-                    Назив
-                    <span class="col-header-sub">2</span>
-                </th>
-                <th style="width: 7%;">
-                    Тарифа
-                    <span class="col-header-sub">3</span>
-                </th>
-                <th style="width: 6%;">
-                    Кол.
-                    <span class="col-header-sub">4</span>
-                </th>
-                <th style="width: 8%;">
-                    Цена FCY
-                    <span class="col-header-sub">5</span>
-                </th>
-                <th style="width: 9%;">
-                    Факт. МКД
-                    <span class="col-header-sub">6</span>
-                </th>
-                <th style="width: 8%;">
-                    Транспорт
-                    <span class="col-header-sub">7</span>
-                </th>
-                <th style="width: 8%;">
-                    Цар. осн.
-                    <span class="col-header-sub">8</span>
-                </th>
-                <th style="width: 5%;">
-                    Ц.%
-                    <span class="col-header-sub">9</span>
-                </th>
-                <th style="width: 8%;">
-                    Царина
-                    <span class="col-header-sub">10</span>
-                </th>
-                <th style="width: 10%;">
-                    Набавна
-                    <span class="col-header-sub">11</span>
-                </th>
-                <th style="width: 10%;">
-                    Ед. цена
-                    <span class="col-header-sub">12</span>
-                </th>
+                <th style="width: 3%;">Р.б.<span class="col-header-sub">1</span></th>
+                <th style="width: 16%;">Назив<span class="col-header-sub">2</span></th>
+                <th style="width: 7%;">Тарифа<span class="col-header-sub">3</span></th>
+                <th style="width: 6%;">Кол.<span class="col-header-sub">4</span></th>
+                <th style="width: 8%;">Цена FCY<span class="col-header-sub">5</span></th>
+                <th style="width: 9%;">Факт. МКД<span class="col-header-sub">6</span></th>
+                <th style="width: 8%;">Транспорт<span class="col-header-sub">7</span></th>
+                <th style="width: 8%;">Цар. осн.<span class="col-header-sub">8</span></th>
+                <th style="width: 5%;">Ц.%<span class="col-header-sub">9</span></th>
+                <th style="width: 8%;">Царина<span class="col-header-sub">10</span></th>
+                <th style="width: 10%;">Набавна<span class="col-header-sub">11</span></th>
+                <th style="width: 10%;">Ед. цена<span class="col-header-sub">12</span></th>
             </tr>
         </thead>
         <tbody>
@@ -447,7 +416,7 @@
                 <td>{{ $item->description ?? ($item->item?->name ?? '') }}</td>
                 <td class="cell-center">{{ $item->tariff_heading ?? '—' }}</td>
                 <td class="cell-number">{{ number_format($item->quantity ?? 0, ($item->quantity == floor($item->quantity)) ? 0 : 2, ',', '.') }}</td>
-                <td class="cell-number">{!! format_money_pdf($item->unit_price_fcy ?? 0, $currency) !!}</td>
+                <td class="cell-number">{{ $calculation->currency_code }}{{ number_format(($item->unit_price_fcy ?? 0) / 100, 2, ',', '.') }}</td>
                 <td class="cell-number">{!! format_money_pdf($item->invoice_value_mkd ?? 0, $currency) !!}</td>
                 <td class="cell-number">{!! format_money_pdf($item->transport_allocated ?? 0, $currency) !!}</td>
                 <td class="cell-number">{!! format_money_pdf($item->customs_base ?? 0, $currency) !!}</td>
@@ -466,32 +435,32 @@
                 <td class="cell-number">{!! format_money_pdf(($calculation->total_invoice_value_mkd ?? 0) + ($calculation->transport_amount ?? 0), $currency) !!}</td>
                 <td></td>
                 <td class="cell-number">{!! format_money_pdf($calculation->customs_duty_total ?? 0, $currency) !!}</td>
-                <td class="cell-number">{!! format_money_pdf($calculation->total_landed_cost ?? 0, $currency) !!}</td>
+                <td class="cell-number">{!! format_money_pdf($calculation->items->sum('landed_cost_before_vat'), $currency) !!}</td>
                 <td></td>
             </tr>
         </tfoot>
     </table>
 
     @if($calculation->notes)
-    <p style="margin-top: 8px; font-size: 8px; color: #555;"><strong>Забелешки:</strong> {{ $calculation->notes }}</p>
+    <p style="margin-top: 4px; font-size: 7.5px; color: #555;"><strong>Забелешки:</strong> {{ $calculation->notes }}</p>
     @endif
-
-    <p class="form-ref">Влезна калкулација — Калкулација на набавна цена за увезена стока</p>
 
     {{-- Signatures --}}
     <table class="signature-section">
         <tr>
-            <td style="width: 33%; text-align: center; padding-top: 40px;">
+            <td style="width: 33%; text-align: center; padding-top: 25px;">
                 <p class="signature-label">Изготвил</p>
             </td>
-            <td style="width: 33%; text-align: center; padding-top: 40px;">
+            <td style="width: 33%; text-align: center; padding-top: 25px;">
                 <p class="signature-label">Печат</p>
             </td>
-            <td style="width: 33%; text-align: center; padding-top: 40px;">
+            <td style="width: 33%; text-align: center; padding-top: 25px;">
                 <p class="signature-label">Одобрил</p>
             </td>
         </tr>
     </table>
+
+    <p class="form-ref">Влезна калкулација — Калкулација на набавна цена за увезена стока</p>
 </body>
 
 </html>

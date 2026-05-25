@@ -30,14 +30,16 @@ Macedonian-localised fork of InvoiceShelf: bank-feed, QES e-Invoice, Paddle bill
 - **Code**: PSR-12 PHP, Vue 3 Composition API, existing Tailwind/UI components
 - **AGPL**: Keep upstream headers, link fork in footer, `/LEGAL_NOTES.md`
 
-## Deployment (Railway)
-- Push to `main` → auto-deploy at `app.facturino.mk`
+## Deployment (Hetzner VPS)
+- Push to `main` → GitHub Actions `deploy-hetzner.yml` → SSH deploy → `docker compose up -d` at `app.facturino.mk`
+- **SSH**: `ssh deploy@178.104.111.189`, app at `/home/deploy/facturino`
+- **Docker Compose**: `docker-compose.production.yml` — 6 containers: app, mysql, redis, mcp-server, invoice2data, website
 - Entrypoint: `docker-entrypoint.sh` (NOT `railway-start.sh`)
 - Migrations + seeders run automatically on deploy
 - Supervisor runs: nginx, php-fpm, scheduler, **queue worker** (2 processes: default,high,banking,einvoice,background)
-- Railway SSH: `railway ssh --project=68289408-e121-49d3-b4ee-c24529e57641 --environment=04d5e439-c700-4502-987f-812546b2c3c1 --service=8c6e11da-cc83-4f27-bcec-99325a203892`
-- SSH env sourcing: `export $(cat /proc/1/environ | tr "\0" "\n" | grep -v "^$" | grep "=" | grep -v "+" | grep -v "(" | grep -v " " | head -100) 2>/dev/null; export DB_CONNECTION=mysql DB_HOST=$MYSQLHOST DB_PORT=${MYSQLPORT:-3306} DB_DATABASE=$MYSQLDATABASE DB_USERNAME=${MYSQLUSER:-root} DB_PASSWORD=$MYSQLPASSWORD;`
-- Railway gotchas: use `${PORT:-8000}`, private networking `*.railway.internal`, wrap startCommand in `sh -c`
+- **Common commands**:
+  - `docker compose -f docker-compose.production.yml exec app php artisan tinker`
+  - `docker compose -f docker-compose.production.yml logs -f app`
 
 ## Email (Postmark)
 - **CRITICAL**: Default `outbound` stream silently drops messages. Always use `broadcast` or `outreach` stream.

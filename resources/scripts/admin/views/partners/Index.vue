@@ -9,6 +9,13 @@
 
       <template #actions>
         <div class="flex items-center justify-end space-x-5">
+          <BaseButton variant="primary-outline" @click="$router.push('/admin/partners/network')">
+            <template #left="slotProps">
+              <BaseIcon name="ShareIcon" :class="slotProps.class" />
+            </template>
+            {{ $t('partners.network_graph') }}
+          </BaseButton>
+
           <BaseButton variant="primary-outline" @click="exportCsv">
             <template #left="slotProps">
               <BaseIcon name="ArrowDownTrayIcon" :class="slotProps.class" />
@@ -347,10 +354,6 @@ const showEmptyScreen = computed(() => {
   // Only show empty screen if we've loaded data and have zero partners
   // null means we haven't loaded yet, so don't show empty state
   const isEmpty = totalPartners.value === 0
-  console.log('[Partners Index] showEmptyScreen computed:', {
-    totalPartners: totalPartners.value,
-    isEmpty,
-  })
   return isEmpty
 })
 
@@ -367,14 +370,7 @@ async function fetchData({ page, filter, sort }) {
     sort_order: sort.order || 'desc',
   }
 
-  console.log('[Partners Index] Fetching data with params:', params)
   const response = await axios.get('/partners', { params })
-  console.log('[Partners Index] Response received:', {
-    total: response.data.total,
-    dataLength: response.data.data?.length,
-    currentPage: response.data.current_page,
-    lastPage: response.data.last_page,
-  })
 
   totalPartners.value = response.data.total
   visiblePartnerIds.value = (response.data.data || []).map(p => p.id)
@@ -505,8 +501,6 @@ function onReassigned() {
 }
 
 onMounted(() => {
-  console.log('[Partners Index] Component mounted')
-  console.log('[Partners Index] totalPartners initial value:', totalPartners.value)
   fetchStats()
 })
 </script>

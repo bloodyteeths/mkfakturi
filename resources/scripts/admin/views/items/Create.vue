@@ -61,56 +61,6 @@
           </BaseInputGroup>
 
           <BaseInputGroup
-            :label="$t('items.sku')"
-            :content-loading="isFetchingInitialData"
-            :error="
-              v$.currentItem.sku.$error &&
-              v$.currentItem.sku.$errors[0].$message
-            "
-          >
-            <BaseInput
-              v-model="itemStore.currentItem.sku"
-              :content-loading="isFetchingInitialData"
-              :invalid="v$.currentItem.sku.$error"
-              @input="v$.currentItem.sku.$touch()"
-            />
-          </BaseInputGroup>
-
-          <BaseInputGroup
-            :label="$t('items.barcode')"
-            :content-loading="isFetchingInitialData"
-            :error="
-              v$.currentItem.barcode.$error &&
-              v$.currentItem.barcode.$errors[0].$message
-            "
-          >
-            <BaseInput
-              v-model="itemStore.currentItem.barcode"
-              :content-loading="isFetchingInitialData"
-              :invalid="v$.currentItem.barcode.$error"
-              @input="v$.currentItem.barcode.$touch()"
-            />
-          </BaseInputGroup>
-
-          <BaseInputGroup
-            :label="$t('items.currency')"
-            :content-loading="isFetchingInitialData"
-          >
-            <BaseMultiselect
-              v-model="itemStore.currentItem.currency_id"
-              value-prop="id"
-              label="name"
-              track-by="name"
-              :content-loading="isFetchingInitialData"
-              :options="globalStore.currencies"
-              searchable
-              :can-deselect="false"
-              :placeholder="$t('customers.select_currency')"
-              class="w-full"
-            />
-          </BaseInputGroup>
-
-          <BaseInputGroup
             :label="$t('items.price')"
             :content-loading="isFetchingInitialData"
           >
@@ -119,76 +69,6 @@
               :content-loading="isFetchingInitialData"
               :currency="selectedCurrency"
             />
-          </BaseInputGroup>
-
-          <BaseInputGroup
-            :label="$t('items.cost_price')"
-            :content-loading="isFetchingInitialData"
-          >
-            <BaseMoney
-              v-model="costPrice"
-              :content-loading="isFetchingInitialData"
-              :currency="selectedCurrency"
-            />
-            <p class="mt-1 text-xs text-gray-400">
-              {{ $t('items.cost_price_hint') }}
-            </p>
-          </BaseInputGroup>
-
-          <!-- Pricing Section -->
-          <div class="col-span-1 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {{ $t('items.pricing_section', 'Pricing') }}
-            </h4>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              {{ $t('items.pricing_section_hint', 'Set retail, wholesale prices and markup for trade documents.') }}
-            </p>
-          </div>
-
-          <BaseInputGroup
-            :label="$t('items.retail_price', 'Retail Price')"
-            :content-loading="isFetchingInitialData"
-          >
-            <BaseMoney
-              v-model="retailPrice"
-              :content-loading="isFetchingInitialData"
-              :currency="selectedCurrency"
-            />
-            <p class="mt-1 text-xs text-gray-400">
-              {{ $t('items.retail_price_hint', 'Price for end consumers (incl. markup)') }}
-            </p>
-          </BaseInputGroup>
-
-          <BaseInputGroup
-            :label="$t('items.wholesale_price', 'Wholesale Price')"
-            :content-loading="isFetchingInitialData"
-          >
-            <BaseMoney
-              v-model="wholesalePrice"
-              :content-loading="isFetchingInitialData"
-              :currency="selectedCurrency"
-            />
-            <p class="mt-1 text-xs text-gray-400">
-              {{ $t('items.wholesale_price_hint', 'Discounted price for bulk/wholesale buyers') }}
-            </p>
-          </BaseInputGroup>
-
-          <BaseInputGroup
-            :label="$t('items.markup_percent', 'Markup %')"
-            :content-loading="isFetchingInitialData"
-          >
-            <BaseInput
-              v-model="itemStore.currentItem.markup_percent"
-              :content-loading="isFetchingInitialData"
-              type="number"
-              step="0.01"
-              min="0"
-              max="999.99"
-              :placeholder="$t('items.markup_percent_placeholder', 'e.g. 25.00')"
-            />
-            <p class="mt-1 text-xs text-gray-400">
-              {{ $t('items.markup_percent_hint', 'Profit margin percentage over cost price') }}
-            </p>
           </BaseInputGroup>
 
           <BaseInputGroup
@@ -266,286 +146,453 @@
             />
           </BaseInputGroup>
 
-          <!-- GL Account Mapping (for accounting integration) -->
-          <template v-if="accountingEnabled && accounts.length > 0">
-            <div class="col-span-1 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
-              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ $t('items.gl_accounts', 'GL Account Mapping') }}
-              </h4>
-              <p class="text-xs text-gray-500 dark:text-gray-400">
-                {{ $t('items.gl_accounts_hint', 'Link this product to specific accounts for automatic journal entries.') }}
-              </p>
-            </div>
-
-            <BaseInputGroup
-              :label="$t('items.inventory_account', 'Inventory Account')"
-              :content-loading="isFetchingInitialData"
+          <!-- Advanced Settings Accordion -->
+          <div class="col-span-1 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <button
+              type="button"
+              class="flex items-center justify-between w-full text-left group"
+              @click="showAdvanced = !showAdvanced"
             >
-              <BaseMultiselect
-                v-model="itemStore.currentItem.inventory_account_id"
-                :content-loading="isFetchingInitialData"
-                :options="accounts"
-                :custom-label="formatAccountLabel"
-                label="name"
-                value-prop="id"
-                :placeholder="$t('items.select_account', 'Select account (optional)')"
-                searchable
-                :can-deselect="true"
+              <div>
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary-600">
+                  {{ $t('items.advanced_settings', 'Advanced Settings') }}
+                </h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ $t('items.advanced_settings_hint', 'SKU, barcode, cost price, pricing, stock tracking, GL accounts') }}
+                </p>
+              </div>
+              <BaseIcon
+                :name="showAdvanced ? 'ChevronUpIcon' : 'ChevronDownIcon'"
+                class="h-5 w-5 text-gray-400 group-hover:text-primary-600 transition-transform"
               />
-              <p class="mt-1 text-xs text-gray-400">
-                {{ $t('items.inventory_account_hint', 'Account for stock in warehouse (default: 630)') }}
-              </p>
-            </BaseInputGroup>
-
-            <BaseInputGroup
-              :label="$t('items.cogs_account', 'COGS Account')"
-              :content-loading="isFetchingInitialData"
-            >
-              <BaseMultiselect
-                v-model="itemStore.currentItem.cogs_account_id"
-                :content-loading="isFetchingInitialData"
-                :options="accounts"
-                :custom-label="formatAccountLabel"
-                label="name"
-                value-prop="id"
-                :placeholder="$t('items.select_account', 'Select account (optional)')"
-                searchable
-                :can-deselect="true"
-              />
-              <p class="mt-1 text-xs text-gray-400">
-                {{ $t('items.cogs_account_hint', 'Cost of goods sold account (default: 702)') }}
-              </p>
-            </BaseInputGroup>
-
-            <BaseInputGroup
-              :label="$t('items.purchase_account', 'Purchase Account')"
-              :content-loading="isFetchingInitialData"
-            >
-              <BaseMultiselect
-                v-model="itemStore.currentItem.purchase_account_id"
-                :content-loading="isFetchingInitialData"
-                :options="accounts"
-                :custom-label="formatAccountLabel"
-                label="name"
-                value-prop="id"
-                :placeholder="$t('items.select_account', 'Select account (optional)')"
-                searchable
-                :can-deselect="true"
-              />
-              <p class="mt-1 text-xs text-gray-400">
-                {{ $t('items.purchase_account_hint', 'Purchase calculation account (default: 303)') }}
-              </p>
-            </BaseInputGroup>
-          </template>
-
-          <!-- Stock Tracking Toggle (only shows when stock module is enabled) -->
-          <BaseInputGroup
-            v-if="stockEnabled"
-            :label="$t('items.track_quantity')"
-            :content-loading="isFetchingInitialData"
-          >
-            <div class="flex items-center space-x-3">
-              <BaseSwitch
-                v-model="itemStore.currentItem.track_quantity"
-                :content-loading="isFetchingInitialData"
-              />
-              <span class="text-sm text-gray-500">
-                {{ itemStore.currentItem.track_quantity ? $t('items.track_quantity_enabled') : $t('items.track_quantity_disabled') }}
-              </span>
-            </div>
-            <p class="mt-1 text-xs text-gray-400">
-              {{ $t('items.track_quantity_hint') }}
-            </p>
-          </BaseInputGroup>
-
-          <!-- Minimum Quantity (only shows when track_quantity is enabled) -->
-          <BaseInputGroup
-            v-if="stockEnabled && itemStore.currentItem.track_quantity"
-            :label="$t('items.minimum_quantity')"
-            :content-loading="isFetchingInitialData"
-          >
-            <BaseInput
-              v-model="itemStore.currentItem.minimum_quantity"
-              :content-loading="isFetchingInitialData"
-              type="number"
-              step="1"
-              min="0"
-              :placeholder="$t('items.minimum_quantity_placeholder')"
-            />
-            <p class="mt-1 text-xs text-gray-400">
-              {{ $t('items.minimum_quantity_hint') }}
-            </p>
-          </BaseInputGroup>
-
-          <!-- Preferred Supplier (for smart reorder) -->
-          <BaseInputGroup
-            v-if="stockEnabled && itemStore.currentItem.track_quantity"
-            :label="$t('items.preferred_supplier')"
-            :content-loading="isFetchingInitialData"
-          >
-            <BaseMultiselect
-              v-model="itemStore.currentItem.preferred_supplier_id"
-              :content-loading="isFetchingInitialData"
-              label="name"
-              :options="supplierStore.suppliers"
-              value-prop="id"
-              :placeholder="$t('items.preferred_supplier_placeholder')"
-              searchable
-              track-by="name"
-            />
-            <p class="mt-1 text-xs text-gray-400">
-              {{ $t('items.preferred_supplier_hint') }}
-            </p>
-          </BaseInputGroup>
-
-          <!-- Reorder Quantity -->
-          <BaseInputGroup
-            v-if="stockEnabled && itemStore.currentItem.track_quantity"
-            :label="$t('items.reorder_quantity')"
-            :content-loading="isFetchingInitialData"
-          >
-            <BaseInput
-              v-model="itemStore.currentItem.reorder_quantity"
-              :content-loading="isFetchingInitialData"
-              type="number"
-              step="1"
-              min="1"
-              :placeholder="$t('items.reorder_quantity_placeholder')"
-            />
-          </BaseInputGroup>
-
-          <!-- Lead Time (days) -->
-          <BaseInputGroup
-            v-if="stockEnabled && itemStore.currentItem.track_quantity"
-            :label="$t('items.lead_time_days')"
-            :content-loading="isFetchingInitialData"
-          >
-            <BaseInput
-              v-model="itemStore.currentItem.lead_time_days"
-              :content-loading="isFetchingInitialData"
-              type="number"
-              step="1"
-              min="0"
-              :placeholder="$t('items.lead_time_days_placeholder')"
-            />
-          </BaseInputGroup>
-
-          <!-- Allow Negative Stock (only shows when track_quantity is enabled) -->
-          <BaseInputGroup
-            v-if="stockEnabled && itemStore.currentItem.track_quantity"
-            :label="$t('items.allow_negative_stock')"
-            :content-loading="isFetchingInitialData"
-          >
-            <div class="flex items-center space-x-3">
-              <BaseSwitch
-                v-model="itemStore.currentItem.allow_negative_stock"
-                :content-loading="isFetchingInitialData"
-              />
-              <span class="text-sm text-gray-500">
-                {{ itemStore.currentItem.allow_negative_stock ? $t('items.allow_negative_stock_enabled') : $t('items.allow_negative_stock_disabled') }}
-              </span>
-            </div>
-            <p class="mt-1 text-xs text-gray-400">
-              {{ $t('items.allow_negative_stock_hint') }}
-            </p>
-          </BaseInputGroup>
-
-          <!-- Category (optional - for grouping items) -->
-          <BaseInputGroup
-            v-if="stockEnabled && itemStore.currentItem.track_quantity"
-            :label="$t('items.category')"
-            :content-loading="isFetchingInitialData"
-          >
-            <BaseMultiselect
-              v-model="itemStore.currentItem.category_id"
-              :content-loading="isFetchingInitialData"
-              label="name"
-              :options="itemStore.itemCategories"
-              value-prop="id"
-              :placeholder="$t('items.category_placeholder')"
-              searchable
-              track-by="name"
-            >
-              <template #action>
-                <BaseSelectAction @click="addItemCategory">
-                  <BaseIcon
-                    name="PlusIcon"
-                    class="h-4 mr-2 -ml-2 text-center text-primary-400"
-                  />
-                  {{ $t('items.add_category') }}
-                </BaseSelectAction>
-              </template>
-            </BaseMultiselect>
-          </BaseInputGroup>
-
-          <!-- Link to Stock Management (only in edit mode with track_quantity) -->
-          <div v-if="isEdit && stockEnabled && itemStore.currentItem.track_quantity" class="col-span-1 pt-2">
-            <router-link
-              :to="`/admin/stock/item-card/${route.params.id}`"
-              class="inline-flex items-center text-sm text-primary-600 hover:text-primary-700"
-            >
-              <BaseIcon name="ArchiveBoxIcon" class="h-4 w-4 mr-1" />
-              {{ $t('items.view_stock') }}
-            </router-link>
-            <p class="mt-1 text-xs text-gray-400">
-              {{ $t('items.view_stock_hint') }}
-            </p>
+            </button>
           </div>
 
-          <!-- Initial Stock Entry (only for new items with track_quantity enabled) -->
-          <template v-if="showInitialStock">
-            <div class="col-span-1 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
-              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ $t('items.initial_stock_title') }}
-              </h4>
-              <p class="text-xs text-gray-500 dark:text-gray-400">
-                {{ $t('items.initial_stock_hint') }}
-              </p>
-            </div>
+          <template v-if="showAdvanced">
+            <BaseInputGroup
+              :label="$t('items.sku')"
+              :content-loading="isFetchingInitialData"
+              :error="
+                v$.currentItem.sku.$error &&
+                v$.currentItem.sku.$errors[0].$message
+              "
+            >
+              <BaseInput
+                v-model="itemStore.currentItem.sku"
+                :content-loading="isFetchingInitialData"
+                :invalid="v$.currentItem.sku.$error"
+                @input="v$.currentItem.sku.$touch()"
+              />
+            </BaseInputGroup>
 
             <BaseInputGroup
-              :label="$t('items.warehouse')"
+              :label="$t('items.barcode')"
+              :content-loading="isFetchingInitialData"
+              :error="
+                v$.currentItem.barcode.$error &&
+                v$.currentItem.barcode.$errors[0].$message
+              "
+            >
+              <BaseInput
+                v-model="itemStore.currentItem.barcode"
+                :content-loading="isFetchingInitialData"
+                :invalid="v$.currentItem.barcode.$error"
+                @input="v$.currentItem.barcode.$touch()"
+              />
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('items.currency')"
               :content-loading="isFetchingInitialData"
             >
               <BaseMultiselect
-                v-model="initialStock.warehouse_id"
-                :content-loading="isFetchingInitialData"
-                label="name"
-                :options="warehouseStore.activeWarehouses"
+                v-model="itemStore.currentItem.currency_id"
                 value-prop="id"
-                :placeholder="$t('items.select_warehouse')"
-                searchable
+                label="name"
                 track-by="name"
-              />
-            </BaseInputGroup>
-
-            <BaseInputGroup
-              :label="$t('items.initial_quantity')"
-              :content-loading="isFetchingInitialData"
-            >
-              <BaseInput
-                v-model="initialStock.quantity"
                 :content-loading="isFetchingInitialData"
-                type="number"
-                step="0.01"
-                min="0"
-                :placeholder="$t('items.initial_quantity_placeholder')"
+                :options="globalStore.currencies"
+                searchable
+                :can-deselect="false"
+                :placeholder="$t('customers.select_currency')"
+                class="w-full"
               />
             </BaseInputGroup>
 
             <BaseInputGroup
-              :label="$t('items.unit_cost')"
+              :label="$t('items.cost_price')"
               :content-loading="isFetchingInitialData"
             >
               <BaseMoney
-                v-model="initialStock.unit_cost"
+                v-model="costPrice"
                 :content-loading="isFetchingInitialData"
                 :currency="selectedCurrency"
               />
               <p class="mt-1 text-xs text-gray-400">
-                {{ $t('items.unit_cost_hint') }}
+                {{ $t('items.cost_price_hint') }}
               </p>
             </BaseInputGroup>
+
+            <!-- Pricing Section -->
+            <div class="col-span-1 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ $t('items.pricing_section', 'Pricing') }}
+              </h4>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ $t('items.pricing_section_hint', 'Set retail, wholesale prices and markup for trade documents.') }}
+              </p>
+            </div>
+
+            <BaseInputGroup
+              :label="$t('items.retail_price', 'Retail Price')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseMoney
+                v-model="retailPrice"
+                :content-loading="isFetchingInitialData"
+                :currency="selectedCurrency"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.retail_price_hint', 'Price for end consumers (incl. markup)') }}
+              </p>
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('items.wholesale_price', 'Wholesale Price')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseMoney
+                v-model="wholesalePrice"
+                :content-loading="isFetchingInitialData"
+                :currency="selectedCurrency"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.wholesale_price_hint', 'Discounted price for bulk/wholesale buyers') }}
+              </p>
+            </BaseInputGroup>
+
+            <BaseInputGroup
+              :label="$t('items.markup_percent', 'Markup %')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseInput
+                v-model="itemStore.currentItem.markup_percent"
+                :content-loading="isFetchingInitialData"
+                type="number"
+                step="0.01"
+                min="0"
+                max="999.99"
+                :placeholder="$t('items.markup_percent_placeholder', 'e.g. 25.00')"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.markup_percent_hint', 'Profit margin percentage over cost price') }}
+              </p>
+            </BaseInputGroup>
+
+            <!-- GL Account Mapping (for accounting integration) -->
+            <template v-if="accountingEnabled && accounts.length > 0">
+              <div class="col-span-1 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ $t('items.gl_accounts', 'GL Account Mapping') }}
+                </h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ $t('items.gl_accounts_hint', 'Link this product to specific accounts for automatic journal entries.') }}
+                </p>
+              </div>
+
+              <BaseInputGroup
+                :label="$t('items.inventory_account', 'Inventory Account')"
+                :content-loading="isFetchingInitialData"
+              >
+                <BaseMultiselect
+                  v-model="itemStore.currentItem.inventory_account_id"
+                  :content-loading="isFetchingInitialData"
+                  :options="accounts"
+                  :custom-label="formatAccountLabel"
+                  label="name"
+                  value-prop="id"
+                  :placeholder="$t('items.select_account', 'Select account (optional)')"
+                  searchable
+                  :can-deselect="true"
+                />
+                <p class="mt-1 text-xs text-gray-400">
+                  {{ $t('items.inventory_account_hint', 'Account for stock in warehouse (default: 630)') }}
+                </p>
+              </BaseInputGroup>
+
+              <BaseInputGroup
+                :label="$t('items.cogs_account', 'COGS Account')"
+                :content-loading="isFetchingInitialData"
+              >
+                <BaseMultiselect
+                  v-model="itemStore.currentItem.cogs_account_id"
+                  :content-loading="isFetchingInitialData"
+                  :options="accounts"
+                  :custom-label="formatAccountLabel"
+                  label="name"
+                  value-prop="id"
+                  :placeholder="$t('items.select_account', 'Select account (optional)')"
+                  searchable
+                  :can-deselect="true"
+                />
+                <p class="mt-1 text-xs text-gray-400">
+                  {{ $t('items.cogs_account_hint', 'Cost of goods sold account (default: 702)') }}
+                </p>
+              </BaseInputGroup>
+
+              <BaseInputGroup
+                :label="$t('items.purchase_account', 'Purchase Account')"
+                :content-loading="isFetchingInitialData"
+              >
+                <BaseMultiselect
+                  v-model="itemStore.currentItem.purchase_account_id"
+                  :content-loading="isFetchingInitialData"
+                  :options="accounts"
+                  :custom-label="formatAccountLabel"
+                  label="name"
+                  value-prop="id"
+                  :placeholder="$t('items.select_account', 'Select account (optional)')"
+                  searchable
+                  :can-deselect="true"
+                />
+                <p class="mt-1 text-xs text-gray-400">
+                  {{ $t('items.purchase_account_hint', 'Purchase calculation account (default: 303)') }}
+                </p>
+              </BaseInputGroup>
+            </template>
+
+          </template>
+
+          <!-- Stock & Inventory Accordion -->
+          <div v-if="stockEnabled" class="col-span-1 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <button
+              type="button"
+              class="flex items-center justify-between w-full text-left group"
+              @click="showStock = !showStock"
+            >
+              <div>
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary-600">
+                  {{ $t('items.stock_inventory', 'Stock & Inventory') }}
+                </h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ $t('items.stock_inventory_hint', 'Track quantities, set reorder points, manage warehouses') }}
+                </p>
+              </div>
+              <BaseIcon
+                :name="showStock ? 'ChevronUpIcon' : 'ChevronDownIcon'"
+                class="h-5 w-5 text-gray-400 group-hover:text-primary-600 transition-transform"
+              />
+            </button>
+          </div>
+
+          <template v-if="showStock && stockEnabled">
+            <BaseInputGroup
+              :label="$t('items.track_quantity')"
+              :content-loading="isFetchingInitialData"
+            >
+              <div class="flex items-center space-x-3">
+                <BaseSwitch
+                  v-model="itemStore.currentItem.track_quantity"
+                  :content-loading="isFetchingInitialData"
+                />
+                <span class="text-sm text-gray-500">
+                  {{ itemStore.currentItem.track_quantity ? $t('items.track_quantity_enabled') : $t('items.track_quantity_disabled') }}
+                </span>
+              </div>
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.track_quantity_hint') }}
+              </p>
+            </BaseInputGroup>
+
+            <!-- Minimum Quantity (only shows when track_quantity is enabled) -->
+            <BaseInputGroup
+              v-if="itemStore.currentItem.track_quantity"
+              :label="$t('items.minimum_quantity')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseInput
+                v-model="itemStore.currentItem.minimum_quantity"
+                :content-loading="isFetchingInitialData"
+                type="number"
+                step="1"
+                min="0"
+                :placeholder="$t('items.minimum_quantity_placeholder')"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.minimum_quantity_hint') }}
+              </p>
+            </BaseInputGroup>
+
+            <!-- Preferred Supplier (for smart reorder) -->
+            <BaseInputGroup
+              v-if="itemStore.currentItem.track_quantity"
+              :label="$t('items.preferred_supplier')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseMultiselect
+                v-model="itemStore.currentItem.preferred_supplier_id"
+                :content-loading="isFetchingInitialData"
+                label="name"
+                :options="supplierStore.suppliers"
+                value-prop="id"
+                :placeholder="$t('items.preferred_supplier_placeholder')"
+                searchable
+                track-by="name"
+              />
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.preferred_supplier_hint') }}
+              </p>
+            </BaseInputGroup>
+
+            <!-- Reorder Quantity -->
+            <BaseInputGroup
+              v-if="itemStore.currentItem.track_quantity"
+              :label="$t('items.reorder_quantity')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseInput
+                v-model="itemStore.currentItem.reorder_quantity"
+                :content-loading="isFetchingInitialData"
+                type="number"
+                step="1"
+                min="1"
+                :placeholder="$t('items.reorder_quantity_placeholder')"
+              />
+            </BaseInputGroup>
+
+            <!-- Lead Time (days) -->
+            <BaseInputGroup
+              v-if="itemStore.currentItem.track_quantity"
+              :label="$t('items.lead_time_days')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseInput
+                v-model="itemStore.currentItem.lead_time_days"
+                :content-loading="isFetchingInitialData"
+                type="number"
+                step="1"
+                min="0"
+                :placeholder="$t('items.lead_time_days_placeholder')"
+              />
+            </BaseInputGroup>
+
+            <!-- Allow Negative Stock (only shows when track_quantity is enabled) -->
+            <BaseInputGroup
+              v-if="itemStore.currentItem.track_quantity"
+              :label="$t('items.allow_negative_stock')"
+              :content-loading="isFetchingInitialData"
+            >
+              <div class="flex items-center space-x-3">
+                <BaseSwitch
+                  v-model="itemStore.currentItem.allow_negative_stock"
+                  :content-loading="isFetchingInitialData"
+                />
+                <span class="text-sm text-gray-500">
+                  {{ itemStore.currentItem.allow_negative_stock ? $t('items.allow_negative_stock_enabled') : $t('items.allow_negative_stock_disabled') }}
+                </span>
+              </div>
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.allow_negative_stock_hint') }}
+              </p>
+            </BaseInputGroup>
+
+            <!-- Category (optional - for grouping items) -->
+            <BaseInputGroup
+              v-if="itemStore.currentItem.track_quantity"
+              :label="$t('items.category')"
+              :content-loading="isFetchingInitialData"
+            >
+              <BaseMultiselect
+                v-model="itemStore.currentItem.category_id"
+                :content-loading="isFetchingInitialData"
+                label="name"
+                :options="itemStore.itemCategories"
+                value-prop="id"
+                :placeholder="$t('items.category_placeholder')"
+                searchable
+                track-by="name"
+              >
+                <template #action>
+                  <BaseSelectAction @click="addItemCategory">
+                    <BaseIcon
+                      name="PlusIcon"
+                      class="h-4 mr-2 -ml-2 text-center text-primary-400"
+                    />
+                    {{ $t('items.add_category') }}
+                  </BaseSelectAction>
+                </template>
+              </BaseMultiselect>
+            </BaseInputGroup>
+
+            <!-- Link to Stock Management (only in edit mode with track_quantity) -->
+            <div v-if="isEdit && itemStore.currentItem.track_quantity" class="col-span-1 pt-2">
+              <router-link
+                :to="`/admin/stock/item-card/${route.params.id}`"
+                class="inline-flex items-center text-sm text-primary-600 hover:text-primary-700"
+              >
+                <BaseIcon name="ArchiveBoxIcon" class="h-4 w-4 mr-1" />
+                {{ $t('items.view_stock') }}
+              </router-link>
+              <p class="mt-1 text-xs text-gray-400">
+                {{ $t('items.view_stock_hint') }}
+              </p>
+            </div>
+
+            <!-- Initial Stock Entry (only for new items with track_quantity enabled) -->
+            <template v-if="showInitialStock">
+              <div class="col-span-1 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ $t('items.initial_stock_title') }}
+                </h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ $t('items.initial_stock_hint') }}
+                </p>
+              </div>
+
+              <BaseInputGroup
+                :label="$t('items.warehouse')"
+                :content-loading="isFetchingInitialData"
+              >
+                <BaseMultiselect
+                  v-model="initialStock.warehouse_id"
+                  :content-loading="isFetchingInitialData"
+                  label="name"
+                  :options="warehouseStore.activeWarehouses"
+                  value-prop="id"
+                  :placeholder="$t('items.select_warehouse')"
+                  searchable
+                  track-by="name"
+                />
+              </BaseInputGroup>
+
+              <BaseInputGroup
+                :label="$t('items.initial_quantity')"
+                :content-loading="isFetchingInitialData"
+              >
+                <BaseInput
+                  v-model="initialStock.quantity"
+                  :content-loading="isFetchingInitialData"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  :placeholder="$t('items.initial_quantity_placeholder')"
+                />
+              </BaseInputGroup>
+
+              <BaseInputGroup
+                :label="$t('items.unit_cost')"
+                :content-loading="isFetchingInitialData"
+              >
+                <BaseMoney
+                  v-model="initialStock.unit_cost"
+                  :content-loading="isFetchingInitialData"
+                  :currency="selectedCurrency"
+                />
+                <p class="mt-1 text-xs text-gray-400">
+                  {{ $t('items.unit_cost_hint') }}
+                </p>
+              </BaseInputGroup>
+            </template>
           </template>
 
           <div>
@@ -621,6 +668,8 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
+const showAdvanced = ref(false)
+const showStock = ref(false)
 const isSaving = ref(false)
 const taxPerItem = ref(companyStore.selectedCompanySettings.tax_per_item)
 const isFetchingInitialData = ref(false)
@@ -908,6 +957,9 @@ async function loadData() {
     itemStore.currentItem.tax_per_item === 1
       ? (taxPerItem.value = 'YES')
       : (taxPerItem.value = 'NO')
+    // Auto-expand accordions in edit mode
+    showAdvanced.value = true
+    showStock.value = true
   } else {
     // For new items, set default currency to company currency
     if (companyStore.selectedCompanyCurrency) {

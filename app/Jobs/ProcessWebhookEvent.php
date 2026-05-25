@@ -396,11 +396,37 @@ class ProcessWebhookEvent implements ShouldQueue
         $tier = $metadata['tier'] ?? null;
         $subscriptionId = $session['subscription'] ?? null;
 
+        // Fallback: derive tier from line item price ID when metadata is incomplete
+        if (! $tier) {
+            $priceId = $session['line_items']['data'][0]['price']['id']
+                ?? $session['display_items'][0]['plan']['id']
+                ?? null;
+
+            // If line_items not expanded in session, try to resolve from subscription event
+            if (! $priceId && $subscriptionId) {
+                $subEvent = GatewayWebhookEvent::where('provider', 'stripe')
+                    ->where('event_type', 'customer.subscription.created')
+                    ->whereJsonContains('payload->data->object->id', $subscriptionId)
+                    ->first();
+
+                if ($subEvent) {
+                    $priceId = $subEvent->payload['data']['object']['items']['data'][0]['price']['id'] ?? null;
+                }
+            }
+
+            if ($priceId) {
+                $tier = $this->tierFromStripePriceId($priceId);
+            }
+        }
+
         if ($companyId && $tier) {
             $company = Company::find($companyId);
             if ($company) {
-                // Determine status: if subscription has a trial, mark as trial
-                $status = ! empty($session['subscription_data']['trial_period_days']) ? 'trial' : 'active';
+                // Determine status from Stripe subscription status if available
+                $stripeStatus = $session['subscription_status'] ?? null;
+                $status = ($stripeStatus === 'trialing' || ! empty($session['subscription_data']['trial_period_days']))
+                    ? 'trial'
+                    : 'active';
 
                 // Extract actual amount from checkout session
                 $checkoutAmountCents = $session['amount_total'] ?? null;
@@ -419,8 +445,11 @@ class ProcessWebhookEvent implements ShouldQueue
                     ]
                 );
 
-                // Update company tier
-                $company->update(['subscription_tier' => $tier]);
+                // Update company stripe_id and tier
+                $company->update([
+                    'stripe_id' => $session['customer'] ?? $company->stripe_id,
+                    'subscription_tier' => $tier,
+                ]);
 
                 Log::info('Stripe subscription activated', [
                     'company_id' => $companyId,
@@ -429,6 +458,13 @@ class ProcessWebhookEvent implements ShouldQueue
                     'status' => $status,
                 ]);
             }
+        } else {
+            Log::warning('Stripe checkout completed but could not determine tier', [
+                'company_id' => $companyId,
+                'tier' => $tier,
+                'subscription_id' => $subscriptionId,
+                'metadata' => $metadata,
+            ]);
         }
     }
 

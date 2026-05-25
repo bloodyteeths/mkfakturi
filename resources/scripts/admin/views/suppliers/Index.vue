@@ -23,37 +23,40 @@
           </template>
         </BaseButton>
 
-        <ExportButton
-          v-show="suppliersStore.supplierTotalCount"
-          type="suppliers"
-          :filters="filters"
-        />
+        <!-- More Actions dropdown (Export, Aging, Import) -->
+        <BaseDropdown v-show="suppliersStore.supplierTotalCount">
+          <template #activator>
+            <BaseButton variant="primary-outline">
+              <template #right="slotProps">
+                <BaseIcon name="EllipsisVerticalIcon" :class="slotProps.class" />
+              </template>
+              {{ $t('suppliers.more_actions') }}
+            </BaseButton>
+          </template>
 
-        <BaseButton
-          v-show="suppliersStore.supplierTotalCount"
-          variant="primary-outline"
-          @click="showAgingReport"
-        >
-          {{ $t('suppliers.aging_report') }}
-        </BaseButton>
+          <BaseDropdownItem @click="showAgingReport">
+            <BaseIcon name="ChartBarIcon" class="w-5 h-5 mr-3 text-gray-400" />
+            {{ $t('suppliers.aging_report') }}
+          </BaseDropdownItem>
 
-        <label
-          v-if="userStore.hasAbilities(abilities.CREATE_SUPPLIER)"
-          class="cursor-pointer"
-        >
-          <BaseButton
-            variant="primary-outline"
-            tag="span"
-          >
+          <BaseDropdownItem @click="triggerExport">
+            <BaseIcon name="ArrowDownTrayIcon" class="w-5 h-5 mr-3 text-gray-400" />
+            {{ $t('general.export') }}
+          </BaseDropdownItem>
+
+          <BaseDropdownItem v-if="userStore.hasAbilities(abilities.CREATE_SUPPLIER)" @click="triggerImport">
+            <BaseIcon name="ArrowUpTrayIcon" class="w-5 h-5 mr-3 text-gray-400" />
             {{ $t('suppliers.import') }}
-          </BaseButton>
-          <input
-            type="file"
-            accept=".csv,.txt"
-            class="hidden"
-            @change="handleImport"
-          />
-        </label>
+          </BaseDropdownItem>
+        </BaseDropdown>
+
+        <input
+          ref="importInput"
+          type="file"
+          accept=".csv,.txt"
+          class="hidden"
+          @change="handleImport"
+        />
 
         <BaseButton
           v-if="userStore.hasAbilities(abilities.CREATE_SUPPLIER)"
@@ -244,7 +247,6 @@ import { useUserStore } from '@/scripts/admin/stores/user'
 import { useDialogStore } from '@/scripts/stores/dialog'
 import { useNotificationStore } from '@/scripts/stores/notification'
 import SupplierDropdown from '@/scripts/admin/components/dropdowns/SupplierIndexDropdown.vue'
-import ExportButton from '@/scripts/admin/components/ExportButton.vue'
 import axios from 'axios'
 
 const { t } = useI18n()
@@ -254,6 +256,7 @@ const dialogStore = useDialogStore()
 
 const showFilters = ref(false)
 const tableComponent = ref(null)
+const importInput = ref(null)
 let isFetchingInitialData = ref(true)
 
 const filters = reactive({
@@ -384,6 +387,20 @@ function hasAtLeastOneAbility() {
     abilities.EDIT_SUPPLIER,
     abilities.VIEW_SUPPLIER,
   ])
+}
+
+function triggerImport() {
+  importInput.value?.click()
+}
+
+function triggerExport() {
+  const params = new URLSearchParams({
+    name: filters.name || '',
+    contact_name: filters.contact_name || '',
+    phone: filters.phone || '',
+  })
+  if (filters.has_outstanding) params.set('has_outstanding', '1')
+  window.open(`/api/v1/suppliers?${params.toString()}&format=csv`, '_blank')
 }
 
 function showAgingReport() {

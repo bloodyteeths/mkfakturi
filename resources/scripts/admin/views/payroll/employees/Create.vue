@@ -210,9 +210,9 @@
             />
           </BaseInputGroup>
 
-          <!-- Bank Account IBAN -->
+          <!-- Bank Account (Платежна сметка) -->
           <BaseInputGroup
-            :label="$t('payroll.bank_account_iban')"
+            :label="$t('payroll.bank_account_number')"
             :error="v$.currentEmployee.bank_account_iban.$error && v$.currentEmployee.bank_account_iban.$errors[0].$message"
             :content-loading="isFetchingInitialData"
             required
@@ -221,7 +221,7 @@
               v-model="currentEmployee.bank_account_iban"
               :content-loading="isFetchingInitialData"
               :invalid="v$.currentEmployee.bank_account_iban.$error"
-              placeholder="MK07..."
+              placeholder="300000000000000"
               @input="v$.currentEmployee.bank_account_iban.$touch()"
             />
           </BaseInputGroup>

@@ -164,6 +164,24 @@
               {{ $t('payroll.reactivate') }}
             </BaseDropdownItem>
 
+            <BaseDropdownItem @click="downloadM1(row.data.id)">
+              <BaseIcon name="DocumentArrowDownIcon" class="h-5 mr-3 text-gray-600" />
+              M1
+            </BaseDropdownItem>
+
+            <BaseDropdownItem
+              v-if="!row.data.is_active"
+              @click="downloadM2(row.data.id)"
+            >
+              <BaseIcon name="DocumentArrowDownIcon" class="h-5 mr-3 text-gray-600" />
+              M2
+            </BaseDropdownItem>
+
+            <BaseDropdownItem @click="downloadSalaryCertificate(row.data.id)">
+              <BaseIcon name="DocumentArrowDownIcon" class="h-5 mr-3 text-gray-600" />
+              {{ $t('payroll.salary_certificate') }}
+            </BaseDropdownItem>
+
             <BaseDropdownItem @click="deleteEmployee(row.data.id)">
               <BaseIcon name="TrashIcon" class="h-5 mr-3 text-gray-600" />
               {{ $t('general.delete') }}
@@ -448,6 +466,59 @@ function deleteEmployee(id) {
         }
       }
     })
+}
+
+function downloadBlob(data, filename) {
+  const url = window.URL.createObjectURL(new Blob([data]))
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', filename)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+async function downloadM1(id) {
+  try {
+    const response = await axios.get(
+      `payroll-employees/${id}/m1`,
+      { responseType: 'blob' }
+    )
+    downloadBlob(response.data, `M1_${id}.pdf`)
+    notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
+  } catch (error) {
+    console.error('Error downloading M1:', error)
+    notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
+  }
+}
+
+async function downloadM2(id) {
+  try {
+    const response = await axios.get(
+      `payroll-employees/${id}/m2`,
+      { responseType: 'blob' }
+    )
+    downloadBlob(response.data, `M2_${id}.pdf`)
+    notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
+  } catch (error) {
+    console.error('Error downloading M2:', error)
+    notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
+  }
+}
+
+async function downloadSalaryCertificate(id) {
+  try {
+    const response = await axios.get(
+      `payroll-employees/${id}/salary-certificate`,
+      { responseType: 'blob' }
+    )
+    downloadBlob(response.data, `salary_certificate_${id}.pdf`)
+    notificationStore.showNotification({ type: 'success', message: t('payroll.document_downloaded') })
+  } catch (error) {
+    console.error('Error downloading salary certificate:', error)
+    notificationStore.showNotification({ type: 'error', message: t('general.something_went_wrong') })
+  }
 }
 </script>
 

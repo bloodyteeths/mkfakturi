@@ -7,29 +7,21 @@
     <div class="space-y-6">
       <!-- Reassignment Type -->
       <BaseInputGroup :label="$t('partners.reassignment_type')" required>
-        <select
-          v-model="formData.type"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          @change="resetForm"
-        >
+        <BaseSelect v-model="formData.type" @change="resetForm">
           <option value="company_partner">{{ $t('partners.reassign_company_partner') }}</option>
           <option value="partner_upline">{{ $t('partners.reassign_partner_upline') }}</option>
-        </select>
+        </BaseSelect>
       </BaseInputGroup>
 
       <!-- Company→Partner Reassignment -->
       <div v-if="formData.type === 'company_partner'" class="space-y-4">
         <BaseInputGroup :label="$t('general.company')" required>
-          <select
-            v-model="formData.company_id"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            @change="loadCurrentPartner"
-          >
+          <BaseSelect v-model="formData.company_id" @change="loadCurrentPartner">
             <option value="">{{ $t('general.select_company') }}</option>
             <option v-for="company in companies" :key="company.id" :value="company.id">
               {{ company.name }}
             </option>
-          </select>
+          </BaseSelect>
         </BaseInputGroup>
 
         <div v-if="currentPartner" class="p-3 bg-gray-50 rounded border border-gray-200">
@@ -38,31 +30,24 @@
         </div>
 
         <BaseInputGroup :label="$t('partners.new_partner')" required>
-          <select
-            v-model="formData.new_partner_id"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
+          <BaseSelect v-model="formData.new_partner_id">
             <option value="">{{ $t('partners.select_new_partner') }}</option>
             <option v-for="partner in availablePartners" :key="partner.id" :value="partner.id">
               {{ partner.name }} ({{ partner.email }})
             </option>
-          </select>
+          </BaseSelect>
         </BaseInputGroup>
       </div>
 
       <!-- Partner→Upline Reassignment -->
       <div v-else-if="formData.type === 'partner_upline'" class="space-y-4">
         <BaseInputGroup :label="$t('partners.partner')" required>
-          <select
-            v-model="formData.partner_id"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            @change="loadCurrentUpline"
-          >
+          <BaseSelect v-model="formData.partner_id" @change="loadCurrentUpline">
             <option value="">{{ $t('partners.select_partner') }}</option>
             <option v-for="partner in partners" :key="partner.id" :value="partner.id">
               {{ partner.name }}
             </option>
-          </select>
+          </BaseSelect>
         </BaseInputGroup>
 
         <div v-if="currentUpline" class="p-3 bg-gray-50 rounded border border-gray-200">
@@ -71,15 +56,12 @@
         </div>
 
         <BaseInputGroup :label="$t('partners.new_upline')" required>
-          <select
-            v-model="formData.new_upline_id"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
+          <BaseSelect v-model="formData.new_upline_id">
             <option value="">{{ $t('partners.select_new_upline') }}</option>
             <option v-for="partner in availableUplines" :key="partner.id" :value="partner.id">
               {{ partner.name }} ({{ partner.email }})
             </option>
-          </select>
+          </BaseSelect>
         </BaseInputGroup>
       </div>
 
@@ -98,12 +80,7 @@
 
       <!-- Reason -->
       <BaseInputGroup :label="$t('partners.reassignment_reason')">
-        <textarea
-          v-model="formData.reason"
-          rows="3"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          :placeholder="$t('partners.reassignment_reason_placeholder')"
-        ></textarea>
+        <BaseTextarea v-model="formData.reason" rows="3" :placeholder="$t('partners.reassignment_reason_placeholder')" />
       </BaseInputGroup>
 
       <!-- Warning -->

@@ -259,11 +259,11 @@
                 </BaseInputGroup>
                 <BaseInputGroup :label="$t('partners.payment_method')">
                   <BaseSelect v-model="payoutForm.payment_method">
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="paypal">PayPal</option>
-                    <option value="stripe">Stripe</option>
-                    <option value="wise">Wise</option>
-                    <option value="manual">Manual</option>
+                    <option value="bank_transfer">{{ $t('partners.payment_methods.bank_transfer') }}</option>
+                    <option value="paypal">{{ $t('partners.payment_methods.paypal') }}</option>
+                    <option value="stripe">{{ $t('partners.payment_methods.stripe') }}</option>
+                    <option value="wise">{{ $t('partners.payment_methods.wise') }}</option>
+                    <option value="manual">{{ $t('partners.payment_methods.manual') }}</option>
                   </BaseSelect>
                 </BaseInputGroup>
                 <BaseInputGroup :label="$t('partners.payment_reference')">
@@ -359,7 +359,7 @@
           </div>
         </BaseTab>
 
-        <BaseTab :title="$t('partners.tabs.kyc_documents')" @click="loadKycDocuments">
+        <BaseTab :title="$t('partners.tabs.kyc_documents')">
           <div class="bg-white rounded-lg shadow">
             <div v-if="kycDocuments.length > 0" class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
@@ -410,7 +410,7 @@
                         v-if="doc.file_url"
                         size="sm"
                         variant="primary-outline"
-                        @click="window.open(doc.file_url, '_blank')"
+                        @click="openDocument(doc.file_url)"
                       >
                         {{ $t('partners.view_document') }}
                       </BaseButton>
@@ -586,6 +586,10 @@ async function loadKycDocuments() {
   }
 }
 
+function openDocument(url) {
+  window.open(url, '_blank')
+}
+
 async function updateDocumentStatus(docId, status) {
   try {
     await axios.put(`/partners/${partner.value.id}/kyc-documents/${docId}`, { status })
@@ -603,6 +607,7 @@ function formatDocumentType(type) {
 
 onMounted(() => {
   fetchPartner()
+  loadKycDocuments()
 })
 </script>
 
