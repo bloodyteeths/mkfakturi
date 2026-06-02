@@ -19,6 +19,7 @@ use Modules\Mk\Bitrix\Commands\HubSpotGeneratePartnerLinksCommand;
 use Modules\Mk\Bitrix\Commands\HubSpotSyncPartnerActivityCommand;
 use Modules\Mk\Bitrix\Commands\OutreachReengageClickersCommand;
 use Modules\Mk\Bitrix\Commands\OutreachSendBatchCommand;
+use Modules\Mk\Bitrix\Commands\OutreachSuppressCommand;
 use Modules\Mk\Bitrix\Commands\DirectoryOutreachCommand;
 use Modules\Mk\Bitrix\Commands\ImportPostmarkContactsCommand;
 use Modules\Mk\Bitrix\Commands\ImportCsvLeadsCommand;
@@ -72,6 +73,7 @@ class BitrixServiceProvider extends ServiceProvider
 
                 // Outreach commands
                 OutreachSendBatchCommand::class,
+                OutreachSuppressCommand::class,
                 OutreachReengageClickersCommand::class,
                 DirectoryOutreachCommand::class,
                 ImportPostmarkContactsCommand::class,
