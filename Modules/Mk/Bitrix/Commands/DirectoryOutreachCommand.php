@@ -113,6 +113,12 @@ class DirectoryOutreachCommand extends Command
      */
     public function handle(PostmarkOutreachService $postmarkService): int
     {
+        // Master kill-switch: cold outreach is disabled by default.
+        if (! config('bitrix.outreach.enabled', false)) {
+            $this->warn('Cold outreach is disabled (config bitrix.outreach.enabled=false). No emails sent.');
+            return self::SUCCESS;
+        }
+
         $limit = (int) $this->option('limit');
         $dryRun = $this->option('dry-run');
 

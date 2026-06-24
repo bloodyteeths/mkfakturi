@@ -145,46 +145,36 @@ if (InstallUtils::isDbCreated()) {
         ->name('process-data-exports')
         ->withoutOverlapping();
 
-    // MX verification for outreach leads - runs before send window
-    // Verifies DNS MX records to prevent bounces from dead mailboxes
-    Schedule::command('outreach:verify-mx --limit=2000')
-        ->dailyAt('07:00')
-        ->timezone('Europe/Skopje')
-        ->runInBackground()
-        ->name('outreach-verify-mx')
-        ->withoutOverlapping();
-
-    // SMTP RCPT TO verification - runs after MX, before send window
-    // Catches dead mailboxes on valid domains, auto-suppresses invalid
-    Schedule::command('outreach:verify-smtp --limit=500')
-        ->dailyAt('07:30')
-        ->timezone('Europe/Skopje')
-        ->runInBackground()
-        ->name('outreach-verify-smtp')
-        ->withoutOverlapping();
-
-    // Outreach email batch send - accountant leads
-    // Runs every 15 minutes during business hours 09:00-17:00 Skopje
-    // 3000/day target: ~83 per batch, 350/hour, 2-5s jitter
-    Schedule::command('outreach:send-batch --limit=100 --type=accountant')
-        ->everyFifteenMinutes()
-        ->between('09:00', '17:00')
-        ->weekdays()
-        ->timezone('Europe/Skopje')
-        ->runInBackground()
-        ->name('outreach-batch-accountant')
-        ->withoutOverlapping();
-
-    // Outreach email batch send - company leads (broadcast stream, separate limits)
-    // 5000/day target: ~139 per batch, 600/hour, runs parallel with accountant batch
-    Schedule::command('outreach:send-batch --limit=150 --type=company')
-        ->everyFifteenMinutes()
-        ->between('08:00', '17:00')
-        ->weekdays()
-        ->timezone('Europe/Skopje')
-        ->runInBackground()
-        ->name('outreach-batch-company')
-        ->withoutOverlapping();
+    // ---------------------------------------------------------------------
+    // COLD OUTREACH — DISABLED (2026-06-24)
+    // Cold prospect/lead emailing is intentionally turned OFF. The follow-up
+    // sequencer was re-blasting leads first contacted months ago (timing was
+    // anchored to the initial send, which was already months old), generating
+    // spam complaints. We have no cold campaign to run. Only user-facing email
+    // (welcome drip, collections, deadlines) remains active.
+    // These schedules are commented out; the commands themselves are also
+    // hard-guarded by config('bitrix.outreach.enabled') which defaults to false.
+    // To re-enable a future campaign: fix the per-step spacing in
+    // OutreachSendBatchCommand, set OUTREACH_ENABLED=true, and uncomment below.
+    //
+    // Schedule::command('outreach:verify-mx --limit=2000')
+    //     ->dailyAt('07:00')->timezone('Europe/Skopje')->runInBackground()
+    //     ->name('outreach-verify-mx')->withoutOverlapping();
+    //
+    // Schedule::command('outreach:verify-smtp --limit=500')
+    //     ->dailyAt('07:30')->timezone('Europe/Skopje')->runInBackground()
+    //     ->name('outreach-verify-smtp')->withoutOverlapping();
+    //
+    // Schedule::command('outreach:send-batch --limit=100 --type=accountant')
+    //     ->everyFifteenMinutes()->between('09:00', '17:00')->weekdays()
+    //     ->timezone('Europe/Skopje')->runInBackground()
+    //     ->name('outreach-batch-accountant')->withoutOverlapping();
+    //
+    // Schedule::command('outreach:send-batch --limit=150 --type=company')
+    //     ->everyFifteenMinutes()->between('08:00', '17:00')->weekdays()
+    //     ->timezone('Europe/Skopje')->runInBackground()
+    //     ->name('outreach-batch-company')->withoutOverlapping();
+    // ---------------------------------------------------------------------
 
     // Poll HubSpot for deals in "interested" stage and create partner accounts
     // Runs every 10 minutes to detect stage changes

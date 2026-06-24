@@ -109,6 +109,14 @@ class OutreachSendBatchCommand extends Command
     ): int {
         $this->hubSpotService = $hubSpotService;
 
+        // Master kill-switch: cold outreach is disabled by default.
+        // No prospect/lead emails go out unless OUTREACH_ENABLED=true.
+        if (! config('bitrix.outreach.enabled', false)) {
+            $this->warn('Cold outreach is disabled (config bitrix.outreach.enabled=false). No emails sent.');
+            Log::info('outreach:send-batch skipped — cold outreach disabled');
+            return self::SUCCESS;
+        }
+
         $limit = (int) $this->option('limit');
         $dryRun = $this->option('dry-run');
         $forcedTemplate = $this->option('template');

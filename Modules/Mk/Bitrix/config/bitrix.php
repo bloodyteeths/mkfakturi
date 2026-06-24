@@ -31,6 +31,11 @@ return [
     |
     */
     'outreach' => [
+        // Master kill-switch for COLD outreach (prospect/lead emails).
+        // Disabled by default — cold outreach is intentionally OFF. Only
+        // user-facing email (welcome drip, collections, deadlines) still sends.
+        // Set OUTREACH_ENABLED=true to re-enable a cold campaign in future.
+        'enabled' => filter_var(env('OUTREACH_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
         'daily_limit' => (int) env('OUTREACH_DAILY_LIMIT', 100),
         'hourly_limit' => (int) env('OUTREACH_HOURLY_LIMIT', 20),
         'company_daily_limit' => (int) env('OUTREACH_COMPANY_DAILY_LIMIT', 5000),

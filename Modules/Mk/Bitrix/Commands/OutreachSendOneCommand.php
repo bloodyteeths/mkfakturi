@@ -38,6 +38,12 @@ class OutreachSendOneCommand extends Command
 
     public function handle(): int
     {
+        // Master kill-switch: cold outreach is disabled by default.
+        if (! config('bitrix.outreach.enabled', false)) {
+            $this->warn('Cold outreach is disabled (config bitrix.outreach.enabled=false). No email sent.');
+            return Command::SUCCESS;
+        }
+
         $dealId = $this->option('deal');
         $templateName = $this->option('template');
         $force = $this->option('force');
