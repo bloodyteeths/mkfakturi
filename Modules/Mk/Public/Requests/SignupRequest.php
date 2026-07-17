@@ -4,6 +4,7 @@ namespace Modules\Mk\Public\Requests;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -44,9 +45,19 @@ class SignupRequest extends FormRequest
             return;
         }
 
-        // Only clean up if user never used the account and it's >1 hour old
-        $hasTokens = $existingUser->tokens()->exists();
-        if ($hasTokens) {
+        // Only clean up genuinely abandoned signups: the account must have NEVER
+        // been logged into. Facturino authenticates via Sanctum SPA cookies, which
+        // do NOT create personal_access_tokens rows — so tokens()->exists() is
+        // always false even for active daily users. Relying on it flagged live
+        // customers as "abandoned" and destructively detached/deleted their
+        // company (data-loss bug). last_login_at is set on every login and is the
+        // correct "account was used" signal.
+        if ($existingUser->last_login_at !== null) {
+            return;
+        }
+
+        // Belt-and-suspenders: personal access tokens still count as usage.
+        if ($existingUser->tokens()->exists()) {
             return;
         }
 
@@ -60,22 +71,35 @@ class SignupRequest extends FormRequest
             'created_at' => $existingUser->created_at,
         ]);
 
-        // Delete orphaned company (if user owns one with no invoices)
-        $companies = $existingUser->companies;
-        foreach ($companies as $company) {
-            if ($company->owner_id === $existingUser->id) {
-                // Only delete if company has no real data (no invoices)
-                $hasInvoices = $company->invoices()->exists();
-                if (! $hasInvoices) {
-                    $company->delete();
+        // Perform the destructive cleanup atomically so a mid-way failure (e.g. an
+        // FK RESTRICT on user/company delete) can't leave the account half-deleted
+        // with its user_company pivot detached but the user/company still present.
+        try {
+            DB::transaction(function () use ($existingUser) {
+                // Delete orphaned company (if user owns one with no invoices)
+                foreach ($existingUser->companies as $company) {
+                    if ((int) $company->owner_id === (int) $existingUser->id) {
+                        // Only delete if company has no real data (no invoices)
+                        if (! $company->invoices()->exists()) {
+                            $company->delete();
+                        }
+                    }
                 }
-            }
-        }
 
-        // Detach from companies and delete user
-        $existingUser->companies()->detach();
-        $existingUser->tokens()->delete();
-        $existingUser->delete();
+                // Detach from companies and delete user
+                $existingUser->companies()->detach();
+                $existingUser->tokens()->delete();
+                $existingUser->delete();
+            });
+        } catch (\Throwable $e) {
+            // If cleanup can't complete cleanly, leave the account untouched rather
+            // than orphaning it. The unique:email rule will surface a clear error.
+            Log::warning('Abandoned signup cleanup aborted (left intact)', [
+                'email' => $email,
+                'user_id' => $existingUser->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
