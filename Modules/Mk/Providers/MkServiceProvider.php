@@ -5,6 +5,7 @@ namespace Modules\Mk\Providers;
 use Illuminate\Support\ServiceProvider;
 use Modules\Mk\Services\BarcodeService;
 use Modules\Mk\Services\QrCodeService;
+use Modules\Mk\Partner\Commands\ExpirePartnerTrials;
 
 /**
  * Macedonian Module Service Provider
@@ -39,7 +40,15 @@ class MkServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register Mk sub-module console commands that lack their own provider.
+        // Without this, `partner:expire-trials` is "not defined" and its daily
+        // cron fails every run (module commands are not auto-discovered).
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ExpirePartnerTrials::class,
+            ]);
+        }
+        // CLAUDE-CHECKPOINT
     }
 }
 

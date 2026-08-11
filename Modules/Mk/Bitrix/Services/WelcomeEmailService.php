@@ -51,6 +51,14 @@ class WelcomeEmailService
     ];
 
     /**
+     * Grace window (days) after a drip email becomes due within which it may
+     * still be sent. Beyond this it is considered stale and expired instead of
+     * sent — a "Day N" welcome email that is weeks/months late is spam, not
+     * onboarding. This also prevents a backlog flush if the cron was ever down.
+     */
+    protected int $staleAfterDays = 3;
+
+    /**
      * Template key → Mailable class mapping.
      */
     protected array $mailableMap = [
@@ -185,6 +193,23 @@ class WelcomeEmailService
 
                 if (now()->lt($dueDate)) {
                     continue; // Not yet due
+                }
+
+                // Staleness guard: never send a drip email that is long overdue
+                // (e.g. a backlog that accumulated while the cron was down).
+                // Expire it silently instead of blasting stale mail.
+                if (now()->gt($dueDate->copy()->addDays($this->staleAfterDays))) {
+                    if (! $dryRun) {
+                        WelcomeSend::where('id', $send->id)->update(['status' => 'expired']);
+                    } else {
+                        Log::info('[DRY RUN] Welcome drip EXPIRED (too stale)', [
+                            'template_key' => $templateKey,
+                            'email' => $send->email,
+                            'due_date' => $dueDate->toDateTimeString(),
+                        ]);
+                    }
+
+                    continue;
                 }
 
                 if ($dryRun) {

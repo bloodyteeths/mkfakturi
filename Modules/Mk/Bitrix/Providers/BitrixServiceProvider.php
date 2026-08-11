@@ -25,6 +25,7 @@ use Modules\Mk\Bitrix\Commands\ImportPostmarkContactsCommand;
 use Modules\Mk\Bitrix\Commands\ImportCsvLeadsCommand;
 use Modules\Mk\Bitrix\Commands\OutreachVerifyMxCommand;
 use Modules\Mk\Bitrix\Commands\OutreachVerifySmtpCommand;
+use Modules\Mk\Bitrix\Commands\WelcomeSendDripCommand;
 use Modules\Mk\Bitrix\Middleware\BitrixAuthMiddleware;
 use Modules\Mk\Bitrix\Services\PartnerMetricsService;
 
@@ -80,8 +81,12 @@ class BitrixServiceProvider extends ServiceProvider
                 ImportCsvLeadsCommand::class,
                 OutreachVerifyMxCommand::class,
                 OutreachVerifySmtpCommand::class,
+
+                // Welcome drip series (Day 0/2/5/10/14 onboarding emails)
+                WelcomeSendDripCommand::class,
             ]);
         }
+        // CLAUDE-CHECKPOINT
 
         // Register middleware
         $this->app['router']->aliasMiddleware('bitrix.auth', BitrixAuthMiddleware::class);
