@@ -185,21 +185,19 @@ function formatMoney(amount) {
 async function fetchPendingDocuments() {
   isLoading.value = true
   try {
-    const [stockRes, nivelRes] = await Promise.allSettled([
-      window.axios.get('/stock/documents', {
-        params: { status: 'draft', limit: 5 },
-      }),
-      window.axios.get('/trade/nivelacii', {
-        params: { status: 'draft', limit: 5 },
-      }),
-    ])
+    // NOTE: "Нивелација" (nivelacija) is a partner/accountant-only document,
+    // exposed ONLY under /partner/companies/{company}/accounting/nivelacii.
+    // The former '/trade/nivelacii' path is not a registered route, so it
+    // returned 404 on EVERY dashboard load for EVERY user and tripped the
+    // global axios error toast — which is what made the app feel like it was
+    // "erroring on every activity". Regular company users have no nivelacii
+    // endpoint, so this widget now loads stock documents only.
+    const stockRes = await window.axios.get('/stock/documents', {
+      params: { status: 'draft', limit: 5 },
+    })
 
-    if (stockRes.status === 'fulfilled' && stockRes.value?.data) {
-      stockDocuments.value = stockRes.value.data.data || stockRes.value.data || []
-    }
-
-    if (nivelRes.status === 'fulfilled' && nivelRes.value?.data) {
-      nivelacii.value = nivelRes.value.data.data || nivelRes.value.data || []
+    if (stockRes?.data) {
+      stockDocuments.value = stockRes.data.data || stockRes.data || []
     }
   } catch (error) {
     console.error('Failed to fetch pending documents:', error)
