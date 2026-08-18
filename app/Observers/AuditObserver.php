@@ -157,18 +157,48 @@ class AuditObserver
 
     /**
      * Get company_id from model or request.
+     *
+     * Resolves in order: the model's own company_id → the Company model's own
+     * key → the request "company" header → the authenticated user's company.
+     * May still return null for genuinely company-less events (e.g. signup
+     * before a company exists, gateway webhooks); audit_logs.company_id is
+     * nullable so those are still recorded.
      */
     protected function getCompanyId(Model $model): ?int
     {
-        // Try to get from model's company_id attribute
-        if (isset($model->company_id)) {
-            return $model->company_id;
+        // Direct company_id attribute on the model.
+        if (! empty($model->company_id)) {
+            return (int) $model->company_id;
         }
 
-        // Try to get from request header
-        $companyId = request()->header('company');
+        // The Company model itself: its own primary key IS the company id.
+        if ($model instanceof \App\Models\Company) {
+            return (int) $model->getKey();
+        }
 
-        return $companyId ? (int) $companyId : null;
+        // Request header (the SPA sends the selected company).
+        $header = request()?->header('company');
+        if (! empty($header)) {
+            return (int) $header;
+        }
+
+        // Fall back to the authenticated user's company (covers login/profile
+        // updates, where the acting user is known but the model has no company).
+        $user = Auth::user();
+        if ($user) {
+            if (! empty($user->company_id)) {
+                return (int) $user->company_id;
+            }
+
+            if (method_exists($user, 'companies')) {
+                $company = $user->companies()->first();
+                if ($company) {
+                    return (int) $company->getKey();
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -333,3 +363,5 @@ class AuditObserver
     }
 }
 
+
+// CLAUDE-CHECKPOINT
