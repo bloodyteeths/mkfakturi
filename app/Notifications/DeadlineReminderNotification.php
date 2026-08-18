@@ -38,7 +38,13 @@ class DeadlineReminderNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        // Deadline reminder EMAILS are suppressed unless explicitly enabled.
+        // In-app (database) notifications always remain. See config/facturino.php.
+        if (config('facturino.features.deadline_reminder_emails', false)) {
+            return ['mail', 'database'];
+        }
+
+        return ['database'];
     }
 
     /**

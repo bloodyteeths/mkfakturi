@@ -43,6 +43,16 @@ return [
          * Enables bank feed imports
          */
         'psd2' => env('FACTURINO_PSD2_ENABLED', false),
+
+        /*
+         * Deadline Reminder Emails
+         *
+         * When false, automated tax/filing deadline reminder EMAILS
+         * (deadlines:send-reminders cron) are suppressed. In-app database
+         * notifications still work. Disabled by default while the product is
+         * dormant — set FACTURINO_DEADLINE_REMINDER_EMAILS=true to re-enable.
+         */
+        'deadline_reminder_emails' => filter_var(env('FACTURINO_DEADLINE_REMINDER_EMAILS', false), FILTER_VALIDATE_BOOLEAN),
     ],
 
     /*
