@@ -203,10 +203,16 @@ const dateRangeUrl = computed(() => {
   )}&to_date=${moment(formData.to_date).format('YYYY-MM-DD')}`
 })
 
-onMounted(() => {
-  siteURL.value = `/reports/expenses/${getSelectedCompany.value.unique_hash}`
+function initReport() {
+  // Guard against a not-yet-hydrated company (avoids /reports/.../null 404).
+  const hash = getSelectedCompany.value?.unique_hash
+  if (!hash) return
+  siteURL.value = `/reports/expenses/${hash}`
   url.value = dateRangeUrl.value
-})
+}
+
+onMounted(initReport)
+watch(() => getSelectedCompany.value?.unique_hash, (h) => { if (h) initReport() })
 
 watch(range, (newRange) => {
   formData.from_date = moment(newRange).startOf('year').format('YYYY-MM-DD')

@@ -121,7 +121,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue'
+import { ref, computed, onMounted, watch, reactive } from 'vue'
 import moment from 'moment'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useI18n } from 'vue-i18n'
@@ -201,10 +201,16 @@ const dateRangeUrl = computed(() => {
   )}&to_date=${moment(formData.to_date).format('YYYY-MM-DD')}`
 })
 
-onMounted(() => {
-  siteURL.value = `/reports/income-statement/${getSelectedCompany.value.unique_hash}`
+function initReport() {
+  // Guard against a not-yet-hydrated company (avoids /reports/.../null 404).
+  const hash = getSelectedCompany.value?.unique_hash
+  if (!hash) return
+  siteURL.value = `/reports/income-statement/${hash}`
   url.value = dateRangeUrl.value
-})
+}
+
+onMounted(initReport)
+watch(() => getSelectedCompany.value?.unique_hash, (h) => { if (h) initReport() })
 
 function getThisDate(type, time) {
   return moment()[type](time).format('YYYY-MM-DD')

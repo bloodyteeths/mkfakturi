@@ -195,10 +195,16 @@ const getSelectedCompany = computed(() => {
 
 let siteURL = ref(null)
 
-onMounted(() => {
-  siteURL.value = `/reports/tax-summary/${getSelectedCompany.value.unique_hash}`
+function initReport() {
+  // Guard against a not-yet-hydrated company (avoids /reports/.../null 404).
+  const hash = getSelectedCompany.value?.unique_hash
+  if (!hash) return
+  siteURL.value = `/reports/tax-summary/${hash}`
   url.value = dateRangeUrl.value
-})
+}
+
+onMounted(initReport)
+watch(() => getSelectedCompany.value?.unique_hash, (h) => { if (h) initReport() })
 
 const dateRangeUrl = computed(() => {
   return `${siteURL.value}?from_date=${moment(formData.from_date).format(

@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue'
+import { ref, computed, onMounted, watch, reactive } from 'vue'
 import moment from 'moment'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
@@ -123,10 +123,16 @@ const dateUrl = computed(() => {
   )}`
 })
 
-onMounted(() => {
-  siteURL.value = `/reports/balance-sheet/${getSelectedCompany.value.unique_hash}`
+function initReport() {
+  // Guard against a not-yet-hydrated company (avoids /reports/.../null 404).
+  const hash = getSelectedCompany.value?.unique_hash
+  if (!hash) return
+  siteURL.value = `/reports/balance-sheet/${hash}`
   url.value = dateUrl.value
-})
+}
+
+onMounted(initReport)
+watch(() => getSelectedCompany.value?.unique_hash, (h) => { if (h) initReport() })
 
 async function viewReportsPDF() {
   let data = await getReports()
