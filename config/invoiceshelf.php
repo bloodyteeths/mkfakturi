@@ -551,6 +551,7 @@ return [
             'ability' => '',
             'model' => '',
             'feature_flag' => 'accounting_backbone',
+            'minimum_tier' => 'business',
         ],
         [
             'title' => 'navigation.purchase_orders',
@@ -563,6 +564,7 @@ return [
             'ability' => '',
             'model' => '',
             'feature_flag' => 'accounting_backbone',
+            'minimum_tier' => 'standard',
         ],
         [
             'title' => 'navigation.compensations',
@@ -575,6 +577,7 @@ return [
             'ability' => '',
             'model' => '',
             'feature_flag' => 'accounting_backbone',
+            'minimum_tier' => 'standard',
         ],
         [
             'title' => 'navigation.payment_orders',
@@ -587,6 +590,7 @@ return [
             'ability' => '',
             'model' => '',
             'feature_flag' => 'accounting_backbone',
+            'minimum_tier' => 'standard',
         ],
         [
             'title' => 'navigation.travel_orders',
@@ -599,6 +603,7 @@ return [
             'ability' => '',
             'model' => '',
             'feature_flag' => 'accounting_backbone',
+            'minimum_tier' => 'standard',
         ],
         [
             'title' => 'navigation.cost_centers',
@@ -611,6 +616,7 @@ return [
             'ability' => '',
             'model' => '',
             'feature_flag' => 'accounting_backbone',
+            'minimum_tier' => 'standard',
         ],
         [
             'title' => 'navigation.projects',

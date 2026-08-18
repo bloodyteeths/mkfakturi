@@ -71,6 +71,19 @@ trait GeneratesMenuTrait
                     }
                 }
 
+                // Per-item tier requirement (independent of feature_flag). Hides
+                // tier-gated modules (purchase orders, manufacturing, etc.) from
+                // lower-tier sidebars so users never click into a page whose API
+                // then returns 402 and shows a red error toast. Super admins bypass.
+                $minimumTierItem = $data->data['minimum_tier'] ?? null;
+                if ($minimumTierItem && !$isSuperAdmin && $company) {
+                    $currentLevel = $hierarchy[$currentTier] ?? 0;
+                    $requiredLevel = $hierarchy[$minimumTierItem] ?? 0;
+                    if ($currentLevel < $requiredLevel) {
+                        continue;
+                    }
+                }
+
                 // Fiscal device check — hide fiscal menu items if company has no devices
                 $requiresFiscalDevice = $data->data['requires_fiscal_device'] ?? false;
                 if ($requiresFiscalDevice && !$isSuperAdmin) {

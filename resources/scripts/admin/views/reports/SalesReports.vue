@@ -206,10 +206,21 @@ watch(range, (newRange) => {
   formData.to_date = moment(newRange).endOf('year').toString()
 })
 
-onMounted(() => {
-  customerSiteURL.value = `/reports/sales/customers/${getSelectedCompany.value.unique_hash}`
-  itemsSiteURL.value = `/reports/sales/items/${getSelectedCompany.value.unique_hash}`
+function buildReportUrls() {
+  // Guard against a not-yet-hydrated company — otherwise the URL becomes
+  // /reports/sales/customers/null and the report iframe 404s (broken pane).
+  const hash = getSelectedCompany.value?.unique_hash
+  if (!hash) return
+  customerSiteURL.value = `/reports/sales/customers/${hash}`
+  itemsSiteURL.value = `/reports/sales/items/${hash}`
   getInitialReport()
+}
+
+onMounted(buildReportUrls)
+
+// If the company resolves after mount, build the URLs once it's available.
+watch(() => getSelectedCompany.value?.unique_hash, (hash) => {
+  if (hash) buildReportUrls()
 })
 
 function getThisDate(type, time) {

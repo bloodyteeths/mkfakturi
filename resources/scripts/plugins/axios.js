@@ -81,6 +81,25 @@ axios.interceptors.response.use(
       }
     }
 
+    // Tier-gated feature (402 Payment Required) — show a friendly upgrade prompt
+    // instead of letting each view render a red "error" toast. The gated modules
+    // are already hidden from lower-tier sidebars/routers; this is a safety net
+    // so any stray gated call never surfaces as an error.
+    if (error.response && error.response.status === 402 && error.response.data) {
+      const data = error.response.data
+      if (data.error === 'upgrade_required') {
+        import('@/scripts/stores/upgrade.js').then(({ useUpgradeStore }) => {
+          const upgradeStore = useUpgradeStore()
+          upgradeStore.showLimitExceeded({
+            ...data,
+            current_tier: data.current_plan,
+            required_tier: data.required_plan,
+          })
+        })
+        return Promise.reject(error)
+      }
+    }
+
     // For all other errors, just pass them through
     return Promise.reject(error)
   }

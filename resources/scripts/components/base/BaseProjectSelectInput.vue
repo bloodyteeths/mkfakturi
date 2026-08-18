@@ -89,6 +89,13 @@ const selectedProject = computed({
 })
 
 async function searchProjects(search) {
+  // Users without the projects ability get 403 from /projects/list — which,
+  // with resolve-on-load, fires on mount and shows a phantom "unauthorized"
+  // error toast on screens like invoice-create. Skip the call for them.
+  if (!userStore.hasAbilities(abilities.VIEW_PROJECT)) {
+    return []
+  }
+
   let data = {
     search,
   }
