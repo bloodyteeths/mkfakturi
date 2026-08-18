@@ -191,23 +191,26 @@ class SendOnboardingNudge extends Command
      */
     private function resolveContact(object $c): array
     {
-        $user = null;
+        // Primary: the user_company pivot links users to companies. Prefer the
+        // legal representative, then the lowest user id.
+        $user = DB::table('user_company')
+            ->join('users', 'users.id', '=', 'user_company.user_id')
+            ->where('user_company.company_id', $c->id)
+            ->orderByDesc('user_company.is_legal_representative')
+            ->orderBy('users.id')
+            ->select('users.email', 'users.name', 'users.role')
+            ->first();
 
-        if (! empty($c->owner_id)) {
-            $user = DB::table('users')->where('id', $c->owner_id)->first();
-        }
-        if (! $user && ! empty($c->ifrs_entity_id)) {
-            $user = DB::table('users')->where('entity_id', $c->ifrs_entity_id)->orderBy('id')->first();
-        }
-        if (! $user && ! empty($c->name)) {
-            $user = DB::table('users')->whereRaw('LOWER(company_name) = ?', [mb_strtolower($c->name)])->first();
+        // Fallback: explicit owner.
+        if (! $user && ! empty($c->owner_id)) {
+            $user = DB::table('users')->where('id', $c->owner_id)->select('email', 'name', 'role')->first();
         }
 
         if (! $user) {
             return [null, null, false];
         }
 
-        // Never nudge partners/accountants through this channel
+        // Never nudge partners/accountants/super-admins through this channel.
         $isPartner = in_array($user->role ?? '', ['partner', 'super admin'], true);
 
         return [$user->email ?? null, $user->name ?? null, $isPartner];
