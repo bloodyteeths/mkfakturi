@@ -21,20 +21,71 @@ jobs:
           key: ${{ secrets.HETZNER_SSH_KEY }}
 
           timeout: 600s
+          command_timeout: 20m
           script: |
+            set -u
             cd /home/deploy/facturino
+
             echo "=== Pulling latest code ==="
             git pull origin main
 
-            echo "=== Building images ==="
-            docker compose -f docker-compose.production.yml build --parallel
+            # Build the current-code app image (multi-stage 'production' target).
+            # NOTE: the live app runs as the hand-started container 'facturino_app'
+            # (MySQL, port 8080), NOT via docker compose. The compose file only
+            # builds the image; we recreate the real container from it below.
+            echo "=== Building app image (mkaccounting:install-ready) ==="
+            docker compose -f docker-compose.production.yml build app
 
-            echo "=== Deploying ==="
-            docker compose -f docker-compose.production.yml up -d
+            # Preserve the live container's env. The production secrets (APP_KEY,
+            # DB creds, API keys) exist ONLY in the running container's env / this
+            # file — they are not in the repo. Capture them before recreating.
+            echo "=== Capturing live env ==="
+            if docker inspect facturino_app >/dev/null 2>&1; then
+              docker inspect facturino_app --format '{{range .Config.Env}}{{println .}}{{end}}' > /home/deploy/facturino_app.env
+              chmod 600 /home/deploy/facturino_app.env
+            else
+              echo "facturino_app not running; using existing /home/deploy/facturino_app.env"
+            fi
 
-            echo "=== Waiting for health ==="
-            sleep 30
-            curl -f http://localhost:8080/health || echo "WARN: health check failed"
+            # Recreate the app container onto the fresh image, preserving env /
+            # network / port / storage mount, keeping the old one for rollback.
+            echo "=== Recreating facturino_app ==="
+            docker rm -f facturino_app_prev 2>/dev/null || true
+            docker rename facturino_app facturino_app_prev 2>/dev/null || true
+            docker stop facturino_app_prev 2>/dev/null || true
+
+            if docker run -d --name facturino_app --restart unless-stopped \
+                 --network facturino_facturino -p 8080:80 \
+                 -v /home/deploy/facturino-storage/app:/var/www/html/storage/app \
+                 --env-file /home/deploy/facturino_app.env \
+                 mkaccounting:install-ready; then
+
+              echo "=== Waiting for health (up to 150s) ==="
+              for i in $(seq 1 30); do
+                [ "$(docker inspect -f '{{.State.Health.Status}}' facturino_app 2>/dev/null)" = "healthy" ] && break
+                sleep 5
+              done
+
+              if [ "$(docker inspect -f '{{.State.Health.Status}}' facturino_app 2>/dev/null)" = "healthy" ]; then
+                curl -fsS http://localhost:8080/health >/dev/null \
+                  && echo "=== Deploy OK: healthy ===" \
+                  || echo "WARN: /health endpoint check failed (container reports healthy)"
+                docker rm -f facturino_app_prev 2>/dev/null || true
+              else
+                echo "!!! App did not become healthy — ROLLING BACK"
+                docker logs --tail 40 facturino_app 2>&1 || true
+                docker rm -f facturino_app
+                docker rename facturino_app_prev facturino_app
+                docker start facturino_app
+                exit 1
+              fi
+            else
+              echo "!!! docker run failed — ROLLING BACK"
+              docker rm -f facturino_app 2>/dev/null || true
+              docker rename facturino_app_prev facturino_app
+              docker start facturino_app
+              exit 1
+            fi
 
             echo "=== Cleaning old images ==="
             docker image prune -f
