@@ -505,7 +505,7 @@ class PayrollGLService
     {
         // Delegate to IfrsAdapter if available
         if (class_exists('App\Domain\Accounting\IfrsAdapter')) {
-            $adapter = new \App\Domain\Accounting\IfrsAdapter();
+            $adapter = app(\App\Domain\Accounting\IfrsAdapter::class);
             $reflection = new \ReflectionClass($adapter);
             $method = $reflection->getMethod('getOrCreateEntityForCompany');
             $method->setAccessible(true);
@@ -523,7 +523,7 @@ class PayrollGLService
     {
         // Delegate to IfrsAdapter if available
         if (class_exists('App\Domain\Accounting\IfrsAdapter')) {
-            $adapter = new \App\Domain\Accounting\IfrsAdapter();
+            $adapter = app(\App\Domain\Accounting\IfrsAdapter::class);
             $reflection = new \ReflectionClass($adapter);
             $method = $reflection->getMethod('getCurrencyId');
             $method->setAccessible(true);

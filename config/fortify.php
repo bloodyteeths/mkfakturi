@@ -9,7 +9,10 @@ return [
     'passwords' => 'users',
     'username' => 'email',
     'email' => 'email',
-    'views' => true,
+    // SPA uses Vue-driven /signup + /login (see resources/scripts). Fortify's
+    // blade view routes are unused and GET /register 500s because
+    // RegisterViewResponse is never bound. POST action routes are unaffected.
+    'views' => false,
     'home' => '/home',
     'prefix' => '',
     'domain' => null,

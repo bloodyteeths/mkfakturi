@@ -270,7 +270,7 @@ class DepreciationGLService
     private function getOrCreateEntity(Company $company): ?Entity
     {
         if (class_exists('App\Domain\Accounting\IfrsAdapter')) {
-            $adapter = new \App\Domain\Accounting\IfrsAdapter();
+            $adapter = app(\App\Domain\Accounting\IfrsAdapter::class);
             $reflection = new \ReflectionClass($adapter);
             $method = $reflection->getMethod('getOrCreateEntityForCompany');
             $method->setAccessible(true);
@@ -284,7 +284,7 @@ class DepreciationGLService
     private function getCurrencyId(int $companyId): int
     {
         if (class_exists('App\Domain\Accounting\IfrsAdapter')) {
-            $adapter = new \App\Domain\Accounting\IfrsAdapter();
+            $adapter = app(\App\Domain\Accounting\IfrsAdapter::class);
             $reflection = new \ReflectionClass($adapter);
             $method = $reflection->getMethod('getCurrencyId');
             $method->setAccessible(true);

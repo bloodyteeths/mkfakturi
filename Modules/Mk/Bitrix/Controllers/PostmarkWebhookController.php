@@ -69,28 +69,27 @@ class PostmarkWebhookController extends Controller
             'event_id' => $eventId,
         ]);
 
-        // Idempotency check using model
-        if (OutreachEvent::where('provider', 'postmark')
-            ->where('event_id', $eventId)
-            ->exists()
-        ) {
-            Log::info('Postmark webhook already processed (idempotent)', [
-                'event_id' => $eventId,
-            ]);
-
-            return response()->json(['status' => 'duplicate']);
-        }
-
         try {
-            // Store event using model
-            $event = OutreachEvent::create([
-                'provider' => 'postmark',
-                'event_id' => $eventId,
-                'event_type' => $eventType,
-                'postmark_message_id' => $messageId,
-                'recipient_email' => $email,
-                'payload' => $request->all(),
-            ]);
+            // Idempotent insert — atomic against concurrent/retried deliveries.
+            // firstOrCreate + unique(provider,event_id) avoids the check-then-insert
+            // race that caused 1062 duplicate-key errors under Postmark retries.
+            $event = OutreachEvent::firstOrCreate(
+                ['provider' => 'postmark', 'event_id' => $eventId],
+                [
+                    'event_type' => $eventType,
+                    'postmark_message_id' => $messageId,
+                    'recipient_email' => $email,
+                    'payload' => $request->all(),
+                ]
+            );
+
+            if (! $event->wasRecentlyCreated) {
+                Log::info('Postmark webhook already processed (idempotent)', [
+                    'event_id' => $eventId,
+                ]);
+
+                return response()->json(['status' => 'duplicate']);
+            }
 
             // Find the send record by Postmark message ID
             $send = OutreachSend::findByPostmarkId($messageId);
@@ -112,6 +111,24 @@ class PostmarkWebhookController extends Controller
             $event->update(['processed_at' => now()]);
 
             return response()->json(['status' => 'received', 'event_id' => $event->id]);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            // A concurrent delivery won the race on unique(provider, event_id) — benign.
+            if ((int) ($e->errorInfo[1] ?? 0) === 1062) {
+                Log::info('Postmark webhook duplicate (race, idempotent)', [
+                    'event_id' => $eventId,
+                ]);
+
+                return response()->json(['status' => 'duplicate']);
+            }
+
+            Log::error('Postmark webhook processing failed', [
+                'error' => $e->getMessage(),
+                'message_id' => $messageId,
+                'event_type' => $eventType,
+            ]);
+
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
 
         } catch (\Exception $e) {
             Log::error('Postmark webhook processing failed', [
