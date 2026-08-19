@@ -1,6 +1,22 @@
 import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildPageMetadata } from '@/lib/metadata'
+import { breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import PageHero from '@/components/PageHero'
+import Link from 'next/link'
+
+const HUB_LINKS = [
+  { slug: 'vodic', mk: 'Целосен водич за е-фактура 2026', en: 'Complete e-invoicing guide 2026', sq: 'Udhëzues i plotë për e-faturën 2026', tr: 'Kapsamlı e-fatura rehberi 2026' },
+  { slug: 'kako-da-izdadete', mk: 'Како да издадете е-фактура', en: 'How to issue an e-invoice', sq: 'Si të lëshoni një e-faturë', tr: 'E-fatura nasıl düzenlenir' },
+  { slug: 'rokovi-2026', mk: 'Рокови за е-фактура 2026/2027', en: 'E-invoice deadlines 2026/2027', sq: 'Afatet e e-faturës 2026/2027', tr: 'E-fatura son tarihleri 2026/2027' },
+  { slug: 'ubl-format', mk: 'UBL 2.1 формат — технички водич', en: 'UBL 2.1 format — technical guide', sq: 'Formati UBL 2.1 — udhëzues teknik', tr: 'UBL 2.1 formatı — teknik rehber' },
+  { slug: 'za-javni-nabavki', mk: 'Е-фактура за јавни набавки (B2G)', en: 'E-invoicing for public procurement (B2G)', sq: 'E-fatura për prokurime publike (B2G)', tr: 'Kamu ihaleleri için e-fatura (B2G)' },
+  { slug: 'casuvanje-i-arhiva', mk: 'Чување и е-архива на е-фактури', en: 'Storage & e-archiving of e-invoices', sq: 'Ruajtja dhe e-arkivimi i e-faturave', tr: 'E-faturaların saklanması ve e-arşivi' },
+  { slug: 'qes-potpis', mk: 'QES: квалификуван електронски потпис', en: 'QES: qualified electronic signature', sq: 'QES: nënshkrimi elektronik i kualifikuar', tr: 'QES: nitelikli elektronik imza' },
+  { slug: 'casti-prasanja', mk: 'Често поставувани прашања', en: 'Frequently asked questions', sq: 'Pyetje të bëra shpesh', tr: 'Sık sorulan sorular' },
+]
+
+const HUB_HEADING = { mk: 'Дознајте сè за е-фактурата', en: 'Learn everything about e-invoicing', sq: 'Mësoni gjithçka për e-faturën', tr: 'E-fatura hakkında her şeyi öğrenin' }
+const HUB_SUB = { mk: 'Практични водичи за подготовка пред задолжителното е-фактурирање.', en: 'Practical guides to prepare for mandatory e-invoicing.', sq: 'Udhëzues praktikë për t\'u përgatitur për e-faturimin e detyrueshëm.', tr: 'Zorunlu e-faturaya hazırlanmak için pratik rehberler.' }
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -497,8 +513,22 @@ export default async function EFakturaPage({ params }: { params: Promise<{ local
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
   const t = copy[locale]
 
+  const homeLabel = locale === 'mk' ? 'Почетна' : locale === 'sq' ? 'Ballina' : locale === 'tr' ? 'Ana Sayfa' : 'Home'
+  const efLabel = locale === 'mk' ? 'Е-фактура' : locale === 'sq' ? 'E-fatura' : locale === 'tr' ? 'E-Fatura' : 'E-Invoice'
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: homeLabel, href: `/${locale}` },
+    { name: efLabel, href: `/${locale}/e-faktura` },
+  ])
+  const faqLd = faqJsonLd([
+    { question: 'Кога станува задолжителна е-Фактурата во Македонија?', answer: 'Е-фактурата е задолжителна за B2G (кон државни институции) од октомври 2026, а за сите ДДВ обврзници фазно во текот на 2027 година.' },
+    { question: 'Дали PDF испратен по email е е-фактура?', answer: 'Не. Вистинската е-фактура е структуриран UBL 2.1 XML документ потпишан со квалификуван електронски потпис (QES) — не PDF или скенирана слика.' },
+    { question: 'Дали Facturino поддржува е-фактура?', answer: 'Да. Facturino нативно генерира UBL 2.1 и поддржува QES потпис, така што сте подготвени пред рокот.' },
+  ])
+
   return (
     <main id="main-content" className="overflow-x-hidden">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
       <PageHero
         image="/assets/images/hero_efaktura.png"
@@ -642,6 +672,32 @@ export default async function EFakturaPage({ params }: { params: Promise<{ local
                 {t.promise.body}
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── E-FAKTURA KNOWLEDGE HUB ──────────────────────────── */}
+      <section className="section bg-white">
+        <div className="container px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto mb-6 md:mb-12">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-gray-900">{HUB_HEADING[locale]}</h2>
+            <p className="text-gray-600 text-lg">{HUB_SUB[locale]}</p>
+            <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-cyan-500 mx-auto rounded-full mt-4"></div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+            {HUB_LINKS.map((link) => (
+              <Link
+                key={link.slug}
+                href={`/${locale}/e-faktura/${link.slug}`}
+                className="card group hover:border-indigo-200 flex items-center justify-between gap-3"
+              >
+                <span className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">{link[locale]}</span>
+                <svg className="w-5 h-5 text-indigo-400 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

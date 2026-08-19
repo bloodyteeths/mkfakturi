@@ -19,6 +19,17 @@ const MARKETING_PAGES = [
   { path: '/security', priority: 0.3, changeFrequency: 'yearly' as const },
 ]
 
+const EFAKTURA_HUB_PAGES = [
+  { path: '/e-faktura/vodic', priority: 0.9, changeFrequency: 'monthly' as const },
+  { path: '/e-faktura/kako-da-izdadete', priority: 0.8, changeFrequency: 'monthly' as const },
+  { path: '/e-faktura/rokovi-2026', priority: 0.9, changeFrequency: 'weekly' as const },
+  { path: '/e-faktura/ubl-format', priority: 0.7, changeFrequency: 'monthly' as const },
+  { path: '/e-faktura/za-javni-nabavki', priority: 0.8, changeFrequency: 'monthly' as const },
+  { path: '/e-faktura/casuvanje-i-arhiva', priority: 0.7, changeFrequency: 'monthly' as const },
+  { path: '/e-faktura/qes-potpis', priority: 0.7, changeFrequency: 'monthly' as const },
+  { path: '/e-faktura/casti-prasanja', priority: 0.8, changeFrequency: 'monthly' as const },
+]
+
 const TOOL_PAGES = [
   { path: '/alati', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/alati/plata-kalkulator', priority: 0.9, changeFrequency: 'monthly' as const },
@@ -107,6 +118,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = []
 
   for (const page of MARKETING_PAGES) {
+    for (const locale of LOCALES) {
+      entries.push({
+        url: `${BASE}/${locale}${page.path}`,
+        lastModified: new Date(),
+        changeFrequency: page.changeFrequency,
+        priority: page.priority,
+        alternates: makeAlternates(page.path),
+      })
+    }
+  }
+
+  for (const page of EFAKTURA_HUB_PAGES) {
     for (const locale of LOCALES) {
       entries.push({
         url: `${BASE}/${locale}${page.path}`,

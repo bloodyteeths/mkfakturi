@@ -8,6 +8,8 @@ type ArticleJsonLdProps = {
   datePublished: string
   dateModified?: string
   tags?: string[]
+  /** URL segment the article lives under. Defaults to 'blog'. Use e.g. 'e-faktura' for hub pages. */
+  pathPrefix?: string
 }
 
 export function articleJsonLd(props: ArticleJsonLdProps) {
@@ -33,7 +35,7 @@ export function articleJsonLd(props: ArticleJsonLdProps) {
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${BASE_URL}/${props.locale}/blog/${props.slug}`,
+      '@id': `${BASE_URL}/${props.locale}/${props.pathPrefix ?? 'blog'}/${props.slug}`,
     },
     inLanguage: props.locale,
     ...(props.tags ? { keywords: props.tags.join(', ') } : {}),
