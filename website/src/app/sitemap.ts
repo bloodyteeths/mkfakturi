@@ -6,6 +6,7 @@ const LOCALES = ['mk', 'sq', 'tr', 'en'] as const
 const MARKETING_PAGES = [
   { path: '', priority: 1.0, changeFrequency: 'weekly' as const },
   { path: '/features', priority: 0.9, changeFrequency: 'monthly' as const },
+  { path: '/resursi', priority: 0.8, changeFrequency: 'weekly' as const },
   { path: '/pricing', priority: 0.9, changeFrequency: 'weekly' as const },
   { path: '/how-it-works', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/for-accountants', priority: 0.8, changeFrequency: 'monthly' as const },
