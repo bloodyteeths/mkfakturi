@@ -591,32 +591,6 @@ export default async function EFakturaFaqPage({
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">{s.title}</h2>
                   <p className="text-gray-700 leading-relaxed mb-4">{s.content}</p>
 
-                  {s.items && (
-                    <ul className="space-y-2 mb-4">
-                      {s.items.map((item, j) => (
-                        <li key={j} className="flex items-start gap-2">
-                          <span className="text-blue-500 mt-1.5 text-xs">●</span>
-                          <span className="text-gray-700">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {s.steps && (
-                    <div className="space-y-4 mb-4">
-                      {s.steps.map((step, j) => (
-                        <div key={j} className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-7 h-7 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-bold">
-                            {j + 1}
-                          </span>
-                          <div>
-                            <p className="font-semibold text-gray-900">{step.step}</p>
-                            <p className="text-gray-600 text-sm mt-1">{step.desc}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </section>
               ))}
             </div>
