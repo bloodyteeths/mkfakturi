@@ -87,6 +87,53 @@ jobs:
               exit 1
             fi
 
+            # --- Website (Next.js) deploy ---------------------------------
+            # The marketing site runs as container 'facturino_website' (compose
+            # project 'facturino', port 127.0.0.1:3000). It is NOT covered by the
+            # app deploy above, so rebuild + swap it here. Any failure keeps the
+            # currently-running website (no downtime, no impact on the app).
+            echo "=== Rebuilding website (Next.js) ==="
+            if docker build -t facturino-website:new website/ 2>&1 | tail -6; then
+              docker rm -f facturino_website_test 2>/dev/null || true
+              docker run -d --name facturino_website_test --network facturino_facturino \
+                -p 127.0.0.1:3001:3000 -e NODE_ENV=production -e HOSTNAME=0.0.0.0 \
+                facturino-website:new >/dev/null
+              sleep 8
+              WT=$(curl -s -o /dev/null -w '%{http_code}' -m 10 http://127.0.0.1:3001/mk || echo 000)
+              docker rm -f facturino_website_test >/dev/null 2>&1 || true
+              if [ "$WT" = "200" ]; then
+                echo "=== Website smoke test OK — swapping ==="
+                docker tag facturino-website:latest facturino-website:backup 2>/dev/null || true
+                docker tag facturino-website:new facturino-website:latest
+                docker rename facturino_website facturino_website_prev 2>/dev/null || true
+                docker stop facturino_website_prev >/dev/null 2>&1 || true
+                if docker run -d --name facturino_website --restart unless-stopped \
+                     --network facturino_facturino -p 127.0.0.1:3000:3000 \
+                     -e NODE_ENV=production -e HOSTNAME=0.0.0.0 facturino-website:latest >/dev/null; then
+                  sleep 8
+                  WC=$(curl -s -o /dev/null -w '%{http_code}' -m 10 http://127.0.0.1:3000/mk || echo 000)
+                  if [ "$WC" = "200" ]; then
+                    echo "=== Website deploy OK ==="
+                    docker rm -f facturino_website_prev >/dev/null 2>&1 || true
+                  else
+                    echo "!!! Website unhealthy (HTTP $WC) — ROLLING BACK"
+                    docker rm -f facturino_website
+                    docker rename facturino_website_prev facturino_website
+                    docker start facturino_website
+                  fi
+                else
+                  echo "!!! Website run failed — ROLLING BACK"
+                  docker rm -f facturino_website 2>/dev/null || true
+                  docker rename facturino_website_prev facturino_website
+                  docker start facturino_website
+                fi
+              else
+                echo "!!! Website smoke test failed (HTTP $WT) — keeping current website"
+              fi
+            else
+              echo "!!! Website build failed — keeping current website"
+            fi
+
             echo "=== Cleaning old images ==="
             docker image prune -f
 
