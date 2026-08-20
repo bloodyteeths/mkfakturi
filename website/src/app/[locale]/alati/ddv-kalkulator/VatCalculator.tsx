@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { type Locale } from '@/i18n/locales'
+import EFakturaHubLinks from '@/components/EFakturaHubLinks'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.facturino.mk'
 
@@ -464,6 +465,13 @@ export default function VatCalculator({ locale }: { locale: Locale }) {
               </details>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* E-faktura hub links */}
+      <section className="pb-4 md:pb-8">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <EFakturaHubLinks locale={locale} />
         </div>
       </section>
 

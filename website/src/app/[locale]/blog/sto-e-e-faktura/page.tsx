@@ -2,6 +2,7 @@ import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
+import EFakturaHubLinks from '@/components/EFakturaHubLinks'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -464,6 +465,13 @@ export default async function StoEEFakturaPage({
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* E-FAKTURA HUB LINKS */}
+      <section className="pt-10 md:pt-14 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <EFakturaHubLinks locale={locale} />
         </div>
       </section>
 
