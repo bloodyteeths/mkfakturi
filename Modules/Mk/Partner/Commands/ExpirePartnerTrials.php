@@ -18,6 +18,14 @@ class ExpirePartnerTrials extends Command
 
     protected $description = 'Expire partner trials that have ended without a subscription';
 
+    /**
+     * Only send the "trial ended" email if the trial lapsed within this many
+     * days. A trial that ended weeks/months ago (e.g. a backlog that built up
+     * while this cron was down) is downgraded silently — sending a stale "your
+     * trial just ended" notice months late only confuses partners.
+     */
+    private const EMAIL_IF_EXPIRED_WITHIN_DAYS = 3;
+
     public function handle(): int
     {
         $expiredUsers = User::where('role', 'partner')
@@ -42,6 +50,17 @@ class ExpirePartnerTrials extends Command
                 'email' => $user->email,
                 'trial_ended_at' => $user->partner_trial_ends_at,
             ]);
+
+            // Staleness guard: only notify if the trial lapsed recently.
+            $endedAt = \Illuminate\Support\Carbon::parse($user->partner_trial_ends_at);
+            if ($endedAt->lt(now()->subDays(self::EMAIL_IF_EXPIRED_WITHIN_DAYS))) {
+                Log::info('Skipped stale trial-expired email', [
+                    'user_id' => $user->id,
+                    'trial_ended_at' => $user->partner_trial_ends_at,
+                ]);
+
+                continue;
+            }
 
             // Send notification email
             try {
@@ -74,7 +93,12 @@ class ExpirePartnerTrials extends Command
                 $message->to($user->email)
                     ->subject('Вашиот пробен период заврши — Facturino')
                     ->from('partners@facturino.mk', 'Facturino');
-                $message->getHeaders()->addTextHeader('X-PM-Message-Stream', 'broadcast');
+                $headers = $message->getHeaders();
+                $headers->addTextHeader('X-PM-Message-Stream', 'broadcast');
+                // Keep the billing link clean — don't rewrite it through
+                // track.pstmrk.it (looks phishy to recipients).
+                $headers->addTextHeader('X-PM-TrackLinks', 'None');
+                $headers->addTextHeader('X-PM-TrackOpens', 'false');
             }
         );
     }

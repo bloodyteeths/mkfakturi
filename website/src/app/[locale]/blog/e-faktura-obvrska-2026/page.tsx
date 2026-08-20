@@ -2,6 +2,7 @@ import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
+import EFakturaHubLinks from '@/components/EFakturaHubLinks'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -516,6 +517,8 @@ export default async function EFakturaObvrskaPage({
                 </section>
               ))}
             </div>
+
+            <EFakturaHubLinks locale={locale} />
 
             <aside className="mt-12 pt-8 border-t border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-4">{t.relatedTitle}</h3>

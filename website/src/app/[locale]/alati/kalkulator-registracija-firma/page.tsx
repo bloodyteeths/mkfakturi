@@ -1,6 +1,7 @@
 import { isLocale, defaultLocale, Locale } from '@/i18n/locales'
 import { buildPageMetadata } from '@/lib/metadata'
 import RegistrationCalculator from './RegistrationCalculator'
+import CompanyFormationHubLinks from '@/components/CompanyFormationHubLinks'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -27,5 +28,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function RegistrationCalcPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: localeParam } = await params
   const locale: Locale = isLocale(localeParam) ? (localeParam as Locale) : defaultLocale
-  return <RegistrationCalculator locale={locale} />
+  return (
+    <>
+      <RegistrationCalculator locale={locale} />
+      <section className="pb-12 md:pb-16">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <CompanyFormationHubLinks locale={locale} />
+        </div>
+      </section>
+    </>
+  )
 }
