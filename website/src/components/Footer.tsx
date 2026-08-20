@@ -24,6 +24,7 @@ const footerCopy = {
     showcase: 'Преглед',
     tools: 'Алатки',
     resources: 'Ресурси',
+    chartOfAccounts: 'Контен план',
   },
   sq: {
     companyInfo: 'Facturino by Facturino DOOEL, Shkup, Maqedonia e Veriut',
@@ -44,6 +45,7 @@ const footerCopy = {
     showcase: 'Permbledhje',
     tools: 'Mjete',
     resources: 'Burime',
+    chartOfAccounts: 'Plani kontabël',
   },
   tr: {
     companyInfo: 'Facturino by Facturino DOOEL, Üsküp, Kuzey Makedonya',
@@ -64,6 +66,7 @@ const footerCopy = {
     showcase: 'Onizleme',
     tools: 'Araçlar',
     resources: 'Kaynaklar',
+    chartOfAccounts: 'Hesap planı',
   },
   en: {
     companyInfo: 'Facturino by Facturino DOOEL, Skopje, North Macedonia',
@@ -84,6 +87,7 @@ const footerCopy = {
     showcase: 'Preview',
     tools: 'Tools',
     resources: 'Resources',
+    chartOfAccounts: 'Chart of accounts',
   },
 } as const
 
@@ -168,6 +172,14 @@ export default function Footer({ t, locale }: { t: Dictionary; locale: Locale })
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {f.resources}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/kontni-plan`}
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {f.chartOfAccounts}
                 </Link>
               </li>
             </ul>

@@ -39,6 +39,12 @@ const OTVORI_FIRMA_HUB_PAGES = [
   { path: '/otvori-firma/trgovec-poedinec', priority: 0.7, changeFrequency: 'monthly' as const },
 ]
 
+const CHART_CLASS_DIGITS = ['0', '1', '2', '3', '4', '6', '7', '8', '9']
+const REFERENCE_PAGES = [
+  { path: '/kontni-plan', priority: 0.9, changeFrequency: 'monthly' as const },
+  ...CHART_CLASS_DIGITS.map((d) => ({ path: `/kontni-plan/klasa-${d}`, priority: 0.7, changeFrequency: 'yearly' as const })),
+]
+
 const TOOL_PAGES = [
   { path: '/alati', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/alati/plata-kalkulator', priority: 0.9, changeFrequency: 'monthly' as const },
@@ -151,6 +157,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   for (const page of OTVORI_FIRMA_HUB_PAGES) {
+    for (const locale of LOCALES) {
+      entries.push({
+        url: `${BASE}/${locale}${page.path}`,
+        lastModified: new Date(),
+        changeFrequency: page.changeFrequency,
+        priority: page.priority,
+        alternates: makeAlternates(page.path),
+      })
+    }
+  }
+
+  for (const page of REFERENCE_PAGES) {
     for (const locale of LOCALES) {
       entries.push({
         url: `${BASE}/${locale}${page.path}`,
