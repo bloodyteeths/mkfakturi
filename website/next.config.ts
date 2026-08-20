@@ -9,6 +9,10 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // Emit a standalone server bundle (.next/standalone/server.js) for the
+  // Docker image (website/Dockerfile runs `node server.js`). Without this the
+  // image build fails at `COPY --from=builder /app/.next/standalone`.
+  output: 'standalone',
   async headers() {
     return [
       {
