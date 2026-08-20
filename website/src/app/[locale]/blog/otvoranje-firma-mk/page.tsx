@@ -2,6 +2,7 @@ import { defaultLocale, isLocale, Locale } from '@/i18n/locales'
 import { buildArticleMetadata } from '@/lib/metadata'
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '@/lib/jsonld'
 import Link from 'next/link'
+import CompanyFormationHubLinks from '@/components/CompanyFormationHubLinks'
 
 export function generateStaticParams() {
   return [{ locale: 'mk' }, { locale: 'sq' }, { locale: 'tr' }, { locale: 'en' }]
@@ -441,6 +442,13 @@ export default async function OtvoranjeFirmaMkPage({
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* COMPANY FORMATION HUB LINKS */}
+      <section className="pt-10 md:pt-14 bg-gray-50">
+        <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+          <CompanyFormationHubLinks locale={locale} />
         </div>
       </section>
 

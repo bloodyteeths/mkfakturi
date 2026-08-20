@@ -30,6 +30,14 @@ const EFAKTURA_HUB_PAGES = [
   { path: '/e-faktura/casti-prasanja', priority: 0.8, changeFrequency: 'monthly' as const },
 ]
 
+const OTVORI_FIRMA_HUB_PAGES = [
+  { path: '/otvori-firma', priority: 0.9, changeFrequency: 'monthly' as const },
+  { path: '/otvori-firma/dooel-ili-doo', priority: 0.8, changeFrequency: 'monthly' as const },
+  { path: '/otvori-firma/paushal-ili-ddv', priority: 0.8, changeFrequency: 'monthly' as const },
+  { path: '/otvori-firma/za-stranci', priority: 0.7, changeFrequency: 'monthly' as const },
+  { path: '/otvori-firma/trgovec-poedinec', priority: 0.7, changeFrequency: 'monthly' as const },
+]
+
 const TOOL_PAGES = [
   { path: '/alati', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/alati/plata-kalkulator', priority: 0.9, changeFrequency: 'monthly' as const },
@@ -130,6 +138,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   for (const page of EFAKTURA_HUB_PAGES) {
+    for (const locale of LOCALES) {
+      entries.push({
+        url: `${BASE}/${locale}${page.path}`,
+        lastModified: new Date(),
+        changeFrequency: page.changeFrequency,
+        priority: page.priority,
+        alternates: makeAlternates(page.path),
+      })
+    }
+  }
+
+  for (const page of OTVORI_FIRMA_HUB_PAGES) {
     for (const locale of LOCALES) {
       entries.push({
         url: `${BASE}/${locale}${page.path}`,
