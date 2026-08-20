@@ -23,6 +23,7 @@ const footerCopy = {
     followUs: 'Следете не',
     showcase: 'Преглед',
     tools: 'Алатки',
+    resources: 'Ресурси',
   },
   sq: {
     companyInfo: 'Facturino by Facturino DOOEL, Shkup, Maqedonia e Veriut',
@@ -42,6 +43,7 @@ const footerCopy = {
     followUs: 'Na ndiqni',
     showcase: 'Permbledhje',
     tools: 'Mjete',
+    resources: 'Burime',
   },
   tr: {
     companyInfo: 'Facturino by Facturino DOOEL, Üsküp, Kuzey Makedonya',
@@ -61,6 +63,7 @@ const footerCopy = {
     followUs: 'Bizi Takip Edin',
     showcase: 'Onizleme',
     tools: 'Araçlar',
+    resources: 'Kaynaklar',
   },
   en: {
     companyInfo: 'Facturino by Facturino DOOEL, Skopje, North Macedonia',
@@ -80,6 +83,7 @@ const footerCopy = {
     followUs: 'Follow Us',
     showcase: 'Preview',
     tools: 'Tools',
+    resources: 'Resources',
   },
 } as const
 
@@ -156,6 +160,14 @@ export default function Footer({ t, locale }: { t: Dictionary; locale: Locale })
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {f.tools}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/resursi`}
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {f.resources}
                 </Link>
               </li>
             </ul>
