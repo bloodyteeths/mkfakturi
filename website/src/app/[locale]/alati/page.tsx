@@ -31,6 +31,13 @@ const copy = {
     subtitle: 'Онлајн калкулатори и алатки направени за македонски бизниси. Користете ги веднаш — без регистрација, без чекање.',
     tools: [
       {
+        icon: 'xml',
+        title: 'Генератор на фактури',
+        desc: 'Направете професионална фактура со ДДВ и испечатете или зачувајте PDF — бесплатно, без регистрација.',
+        href: '/alati/faktura-generator',
+        cta: 'Направи фактура',
+      },
+      {
         icon: 'calculator',
         title: 'ДДВ Калкулатор',
         desc: 'Пресметајте ДДВ за сите стапки во Македонија — 18%, 5% и 10%. Вклучен и обратен пресмет.',
@@ -90,6 +97,13 @@ const copy = {
     h1: 'Mjete falas për kontabilitet',
     subtitle: 'Llogaritës dhe mjete online të krijuara për bizneset maqedonase. Përdorini menjëherë — pa regjistrim, pa pritje.',
     tools: [
+      {
+        icon: 'xml',
+        title: 'Gjenerator faturash',
+        desc: 'Krijoni faturë profesionale me TVSH dhe printoni ose ruani PDF — falas, pa regjistrim.',
+        href: '/alati/faktura-generator',
+        cta: 'Krijo faturë',
+      },
       {
         icon: 'calculator',
         title: 'Llogaritësi i TVSH-së',
@@ -151,6 +165,13 @@ const copy = {
     subtitle: 'Makedon işletmeleri için tasarlanmış çevrimiçi hesaplayıcılar ve araçlar. Hemen kullanın — kayıt yok, bekleme yok.',
     tools: [
       {
+        icon: 'xml',
+        title: 'Fatura oluşturucu',
+        desc: 'KDV ile profesyonel fatura oluşturun, yazdırın veya PDF kaydedin — ücretsiz, kayıt yok.',
+        href: '/alati/faktura-generator',
+        cta: 'Fatura oluştur',
+      },
+      {
         icon: 'calculator',
         title: 'KDV Hesaplayıcı',
         desc: 'Makedonya\'daki tüm oranlar için KDV hesaplayın — %18, %5 ve %10. Ters hesaplama dahil.',
@@ -210,6 +231,13 @@ const copy = {
     h1: 'Free Accounting Tools',
     subtitle: 'Online calculators and tools built for Macedonian businesses. Use them instantly — no registration, no waiting.',
     tools: [
+      {
+        icon: 'xml',
+        title: 'Invoice generator',
+        desc: 'Create a professional invoice with VAT and print or save as PDF — free, no registration.',
+        href: '/alati/faktura-generator',
+        cta: 'Create invoice',
+      },
       {
         icon: 'calculator',
         title: 'VAT Calculator',
