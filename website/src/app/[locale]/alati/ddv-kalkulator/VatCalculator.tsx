@@ -222,8 +222,13 @@ const copy = {
   },
 } as const
 
+// Deterministic Macedonian formatting (period thousands, comma decimals).
+// 'mk-MK' locale data is missing in many runtimes and falls back to en-US.
 function formatNumber(n: number): string {
-  return n.toLocaleString('mk-MK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const neg = (n || 0) < 0
+  const [int, dec] = Math.abs(n || 0).toFixed(2).split('.')
+  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return (neg ? '-' : '') + grouped + ',' + dec
 }
 
 export default function VatCalculator({ locale }: { locale: Locale }) {

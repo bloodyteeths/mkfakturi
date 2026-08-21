@@ -52,8 +52,12 @@ function calcNetToGross(targetNet: number): ReturnType<typeof calcGrossToNet> {
   return calcGrossToNet((lo + hi) / 2)
 }
 
+// Deterministic Macedonian formatting (period thousands separator).
+// 'mk-MK' locale data is missing in many runtimes and falls back to en-US.
 function fmt(n: number): string {
-  return Math.round(n).toLocaleString('mk-MK')
+  const s = Math.round(Math.abs(n || 0)).toString()
+  const grouped = s.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return ((n || 0) < 0 ? '-' : '') + grouped
 }
 
 const copy = {

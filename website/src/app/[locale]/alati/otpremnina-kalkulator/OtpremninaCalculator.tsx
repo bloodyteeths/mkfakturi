@@ -21,8 +21,13 @@ function redundancyMultiplier(years: number): number {
 
 const RETIREMENT_MULTIPLIER = 2
 
+// Deterministic Macedonian formatting (period thousands, comma decimals).
+// NOT Intl — 'mk-MK' locale data is missing in many runtimes and falls back to
+// en-US (90,000 instead of 90.000).
 function fmt(n: number): string {
-  return new Intl.NumberFormat('mk-MK', { maximumFractionDigits: 0 }).format(Math.round(n || 0))
+  const s = Math.round(Math.abs(n || 0)).toString()
+  const grouped = s.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return ((n || 0) < 0 ? '-' : '') + grouped
 }
 
 const UI: Record<Locale, {
