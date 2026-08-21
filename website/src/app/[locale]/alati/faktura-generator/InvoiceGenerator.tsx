@@ -65,8 +65,14 @@ const UI: Record<Locale, {
   },
 }
 
+// Deterministic Macedonian formatting (period thousands, comma decimals).
+// NOT Intl — 'mk-MK' locale data is missing in many runtimes and falls back to
+// en-US (2,360.00 instead of 2.360,00).
 function fmt(n: number): string {
-  return new Intl.NumberFormat('mk-MK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0)
+  const neg = (n || 0) < 0
+  const [int, dec] = Math.abs(n || 0).toFixed(2).split('.')
+  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return (neg ? '-' : '') + grouped + ',' + dec
 }
 
 type Party = { company: string; address: string; edb: string; embs: string; bank: string; account: string }
