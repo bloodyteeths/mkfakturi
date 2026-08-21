@@ -46,6 +46,13 @@ const copy = {
       },
       {
         icon: 'salary',
+        title: 'Калкулатор за отпремнина',
+        desc: 'Пресметајте отпремнина при технолошки вишок или пензионирање според ЗРО — по нето плата и стаж.',
+        href: '/alati/otpremnina-kalkulator',
+        cta: 'Пресметај отпремнина',
+      },
+      {
+        icon: 'salary',
         title: 'Калкулатор за плата',
         desc: 'Пресметка на нето плата од бруто и обратно. Точни стапки за придонеси и данок за 2026.',
         href: '/alati/plata-kalkulator',
@@ -110,6 +117,13 @@ const copy = {
         desc: 'Llogaritni TVSH-në për të gjitha normat në Maqedoni — 18%, 5% dhe 10%. Përfshirë llogaritjen e kundërt.',
         href: '/alati/ddv-kalkulator',
         cta: 'Hap llogaritësin',
+      },
+      {
+        icon: 'salary',
+        title: 'Kalkulator i kompensimit',
+        desc: 'Llogaritni kompensimin për tepricë teknologjike ose pensionim sipas Ligjit të Punës.',
+        href: '/alati/otpremnina-kalkulator',
+        cta: 'Llogarit kompensimin',
       },
       {
         icon: 'salary',
@@ -180,6 +194,13 @@ const copy = {
       },
       {
         icon: 'salary',
+        title: 'Kıdem tazminatı hesaplayıcı',
+        desc: 'İş Kanununa göre işten çıkarma veya emeklilik kıdem tazminatını hesaplayın.',
+        href: '/alati/otpremnina-kalkulator',
+        cta: 'Tazminatı hesapla',
+      },
+      {
+        icon: 'salary',
         title: 'Maaş hesaplayıcı',
         desc: 'Brütten net maaş hesaplama ve tersi. 2026 için doğru katkı payı ve vergi oranları.',
         href: '/alati/plata-kalkulator',
@@ -244,6 +265,13 @@ const copy = {
         desc: 'Calculate VAT for all Macedonian rates — 18%, 5%, and 10%. Reverse calculation included.',
         href: '/alati/ddv-kalkulator',
         cta: 'Open calculator',
+      },
+      {
+        icon: 'salary',
+        title: 'Severance Calculator',
+        desc: 'Calculate severance for redundancy or retirement under the Macedonian Labour Law — by net salary and years of service.',
+        href: '/alati/otpremnina-kalkulator',
+        cta: 'Calculate severance',
       },
       {
         icon: 'salary',

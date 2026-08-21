@@ -55,6 +55,7 @@ const TOOL_PAGES = [
   { path: '/alati', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/alati/plata-kalkulator', priority: 0.9, changeFrequency: 'monthly' as const },
   { path: '/alati/faktura-generator', priority: 0.9, changeFrequency: 'monthly' as const },
+  { path: '/alati/otpremnina-kalkulator', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/alati/ddv-kalkulator', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/alati/efaktura-proverka', priority: 0.7, changeFrequency: 'monthly' as const },
   { path: '/alati/kamaten-kalkulator', priority: 0.8, changeFrequency: 'monthly' as const },
