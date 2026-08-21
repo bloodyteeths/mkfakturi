@@ -11,6 +11,8 @@ const MARKETING_PAGES = [
   { path: '/minimalna-plata', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/prosecna-plata', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/danocni-stapki', priority: 0.8, changeFrequency: 'monthly' as const },
+  { path: '/recnik', priority: 0.7, changeFrequency: 'monthly' as const },
+  { path: '/prashanja-i-odgovori', priority: 0.7, changeFrequency: 'monthly' as const },
   { path: '/pricing', priority: 0.9, changeFrequency: 'weekly' as const },
   { path: '/how-it-works', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/for-accountants', priority: 0.8, changeFrequency: 'monthly' as const },

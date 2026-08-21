@@ -26,6 +26,8 @@ const footerCopy = {
     resources: 'Ресурси',
     chartOfAccounts: 'Контен план',
     taxForms: 'Даночни обрасци',
+    glossary: 'Речник',
+    faq: 'Прашања и одговори',
   },
   sq: {
     companyInfo: 'Facturino by Facturino DOOEL, Shkup, Maqedonia e Veriut',
@@ -48,6 +50,8 @@ const footerCopy = {
     resources: 'Burime',
     chartOfAccounts: 'Plani kontabël',
     taxForms: 'Formularët tatimorë',
+    glossary: 'Fjalor',
+    faq: 'Pyetje dhe përgjigje',
   },
   tr: {
     companyInfo: 'Facturino by Facturino DOOEL, Üsküp, Kuzey Makedonya',
@@ -70,6 +74,8 @@ const footerCopy = {
     resources: 'Kaynaklar',
     chartOfAccounts: 'Hesap planı',
     taxForms: 'Vergi formları',
+    glossary: 'Sözlük',
+    faq: 'Soru ve cevaplar',
   },
   en: {
     companyInfo: 'Facturino by Facturino DOOEL, Skopje, North Macedonia',
@@ -92,6 +98,8 @@ const footerCopy = {
     resources: 'Resources',
     chartOfAccounts: 'Chart of accounts',
     taxForms: 'Tax forms',
+    glossary: 'Glossary',
+    faq: 'Q&A',
   },
 } as const
 
@@ -192,6 +200,22 @@ export default function Footer({ t, locale }: { t: Dictionary; locale: Locale })
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {f.taxForms}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/recnik`}
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {f.glossary}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/prashanja-i-odgovori`}
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {f.faq}
                 </Link>
               </li>
             </ul>
