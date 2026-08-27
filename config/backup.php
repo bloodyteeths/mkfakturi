@@ -174,17 +174,24 @@ return [
         /*
          * The password to be used for archive encryption.
          * Set to `null` to disable encryption.
+         *
+         * NOTE: `?: null` coerces an empty string to null. Spatie only skips
+         * encryption when the password is strictly `=== null`; an empty string
+         * ('') slips past that guard and makes it attempt AES encryption with a
+         * blank password → ZipArchive::close() fails with EINVAL and every
+         * backup silently fails. This kept DB backups broken for months.
          */
-        'password' => env('BACKUP_ARCHIVE_PASSWORD'),
+        'password' => env('BACKUP_ARCHIVE_PASSWORD') ?: null,
 
         /*
          * The encryption algorithm to be used for archive encryption.
          * You can set it to `null` or `false` to disable encryption.
          *
-         * When set to 'default', we'll use ZipArchive::EM_AES_256 if it is
-         * available on your system.
+         * Only encrypt when a real password is configured; otherwise disable it
+         * so backups complete as plain zips (R2 bucket is private + encrypted
+         * at rest). Set BACKUP_ARCHIVE_PASSWORD to turn encryption back on.
          */
-        'encryption' => 'default',
+        'encryption' => env('BACKUP_ARCHIVE_PASSWORD') ? 'default' : false,
 
         /*
          * The number of attempts, in case the backup command encounters an exception
